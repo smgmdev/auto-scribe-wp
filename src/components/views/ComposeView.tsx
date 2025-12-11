@@ -1072,26 +1072,6 @@ export function ComposeView() {
               {imagePreview && (
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="img-title" className="text-xs">Image Title</Label>
-                    <Input
-                      id="img-title"
-                      placeholder="Image title"
-                      value={featuredImage.title}
-                      onChange={(e) => setFeaturedImage({ ...featuredImage, title: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="img-alt" className="text-xs">Alt Text</Label>
-                    <Input
-                      id="img-alt"
-                      placeholder="Alt text for accessibility"
-                      value={featuredImage.altText}
-                      onChange={(e) => setFeaturedImage({ ...featuredImage, altText: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1">
                     <Label htmlFor="img-caption" className="text-xs">Caption</Label>
                     <Input
                       id="img-caption"
@@ -1099,16 +1079,6 @@ export function ComposeView() {
                       value={featuredImage.caption}
                       onChange={(e) => setFeaturedImage({ ...featuredImage, caption: e.target.value })}
                       className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="img-desc" className="text-xs">Description</Label>
-                    <Textarea
-                      id="img-desc"
-                      placeholder="Image description"
-                      value={featuredImage.description}
-                      onChange={(e) => setFeaturedImage({ ...featuredImage, description: e.target.value })}
-                      className="min-h-[60px] text-sm"
                     />
                   </div>
                 </div>
