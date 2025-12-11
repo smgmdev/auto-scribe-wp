@@ -31,6 +31,7 @@ export function SettingsView() {
   const { toast } = useToast();
   
   const [localSettings, setLocalSettings] = useState(settings);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync local settings when settings load from DB
   useEffect(() => {
@@ -60,11 +61,16 @@ export function SettingsView() {
   };
 
   const handleSave = async () => {
-    await updateSettings(localSettings);
-    toast({
-      title: "Settings saved",
-      description: "Your AI publishing settings have been updated"
-    });
+    setIsSaving(true);
+    try {
+      await updateSettings(localSettings);
+      toast({
+        title: "Settings saved",
+        description: "Your AI publishing settings have been updated"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {
@@ -87,9 +93,18 @@ export function SettingsView() {
             Configure AI article generation and publishing preferences
           </p>
         </div>
-        <Button variant="accent" onClick={handleSave}>
-          <Save className="mr-2 h-4 w-4" />
-          Save Settings
+        <Button variant="accent" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? (
+            <>
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              Save Settings
+            </>
+          )}
         </Button>
       </div>
 
