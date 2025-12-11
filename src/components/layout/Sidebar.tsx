@@ -112,7 +112,7 @@ export function Sidebar() {
               onClick={() => setCurrentView('account')}
             >
               <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-sidebar-primary")} />
-              Account
+              Account Settings
             </Button>
             <Button
               variant="ghost"
