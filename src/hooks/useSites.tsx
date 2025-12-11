@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import type { WordPressSite, SEOPlugin } from '@/types';
 
+// Full site data for admins (includes credentials)
 interface DbSite {
   id: string;
   name: string;
@@ -15,6 +17,16 @@ interface DbSite {
   updated_at: string;
 }
 
+// Public site data from RPC function (no credentials)
+interface PublicSite {
+  id: string;
+  name: string;
+  url: string;
+  seo_plugin: string;
+  favicon: string | null;
+  connected: boolean;
+}
+
 const mapDbSiteToSite = (dbSite: DbSite): WordPressSite => ({
   id: dbSite.id,
   name: dbSite.name,
@@ -26,29 +38,56 @@ const mapDbSiteToSite = (dbSite: DbSite): WordPressSite => ({
   connected: dbSite.connected,
 });
 
+const mapPublicSiteToSite = (site: PublicSite): WordPressSite => ({
+  id: site.id,
+  name: site.name,
+  url: site.url,
+  username: '', // Not exposed to regular users
+  applicationPassword: '', // Not exposed to regular users
+  seoPlugin: site.seo_plugin as SEOPlugin,
+  favicon: site.favicon || undefined,
+  connected: site.connected,
+});
+
 export function useSites() {
   const [sites, setSites] = useState<WordPressSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAdmin } = useAuth();
 
   const fetchSites = useCallback(async () => {
     setLoading(true);
     setError(null);
     
-    const { data, error: fetchError } = await supabase
-      .from('wordpress_sites')
-      .select('*')
-      .order('created_at', { ascending: true });
+    if (isAdmin) {
+      // Admins get full access to credentials via direct table query
+      const { data, error: fetchError } = await supabase
+        .from('wordpress_sites')
+        .select('*')
+        .order('created_at', { ascending: true });
 
-    if (fetchError) {
-      console.error('Error fetching sites:', fetchError);
-      setError(fetchError.message);
-      setSites([]);
+      if (fetchError) {
+        console.error('Error fetching sites:', fetchError);
+        setError(fetchError.message);
+        setSites([]);
+      } else {
+        setSites((data as DbSite[]).map(mapDbSiteToSite));
+      }
     } else {
-      setSites((data as DbSite[]).map(mapDbSiteToSite));
+      // Regular users get public site data only via secure RPC function
+      const { data, error: fetchError } = await supabase
+        .rpc('get_public_sites');
+
+      if (fetchError) {
+        console.error('Error fetching sites:', fetchError);
+        setError(fetchError.message);
+        setSites([]);
+      } else {
+        setSites((data as PublicSite[]).map(mapPublicSiteToSite));
+      }
     }
     setLoading(false);
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     fetchSites();
