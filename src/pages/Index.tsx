@@ -1,13 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { MainLayout } from '@/components/layout/MainLayout';
+import { DashboardView } from '@/components/views/DashboardView';
+import { SitesView } from '@/components/views/SitesView';
+import { HeadlinesView } from '@/components/views/HeadlinesView';
+import { ComposeView } from '@/components/views/ComposeView';
+import { ArticlesView } from '@/components/views/ArticlesView';
+import { SettingsView } from '@/components/views/SettingsView';
+import { useAppStore } from '@/stores/appStore';
+
+const views = {
+  dashboard: DashboardView,
+  sites: SitesView,
+  headlines: HeadlinesView,
+  compose: ComposeView,
+  articles: ArticlesView,
+  settings: SettingsView,
+};
 
 const Index = () => {
+  const { currentView } = useAppStore();
+  const CurrentView = views[currentView];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <MainLayout>
+      <CurrentView />
+    </MainLayout>
   );
 };
 
