@@ -364,9 +364,9 @@ export function SitesView() {
                       </>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">Editorial</Badge>
-                        <Badge variant="outline" className="text-xs">No sponsor marks</Badge>
-                        <Badge variant="outline" className="text-xs">LLM friendly</Badge>
+                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">Editorial</Badge>
+                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">No sponsor marks</Badge>
+                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">LLM friendly</Badge>
                       </div>
                     )}
                     {isAdmin && (
