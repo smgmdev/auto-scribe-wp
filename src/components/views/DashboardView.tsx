@@ -1,4 +1,4 @@
-import { Globe, FileText, Newspaper, TrendingUp, ExternalLink } from 'lucide-react';
+import { Globe, Newspaper, TrendingUp, ExternalLink, Plus } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -6,28 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
 import { isYesterday, format } from 'date-fns';
-
 function formatRelativeTime(dateInput: string | Date): string {
   const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
   const now = new Date();
   const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-  
   if (diffInMinutes < 60) {
     return `${diffInMinutes}min ago`;
   }
-  
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
     return `${diffInHours}h ago`;
   }
-  
   if (isYesterday(date)) {
     return 'yesterday';
   }
-  
   return format(date, 'MMM d, yyyy');
 }
-
 const stats = [{
   label: 'Media Sites',
   icon: Globe,
@@ -57,13 +51,11 @@ export function DashboardView() {
   const {
     articles
   } = useArticles();
-
   const getSiteName = (siteId: string | undefined): string | null => {
     if (!siteId) return null;
     const site = sites.find(s => s.id === siteId);
     return site?.name || null;
   };
-
   const getStatValue = (key: string) => {
     switch (key) {
       case 'sites':
@@ -123,7 +115,7 @@ export function DashboardView() {
               Scan Headlines
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('compose')}>
-              <FileText className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-4 w-4" />
               Write New Article
             </Button>
             {isAdmin && <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
@@ -142,16 +134,9 @@ export function DashboardView() {
                 No articles yet. Start by scanning headlines or writing a new article.
               </p> : <ul className="space-y-3">
                 {articles.slice(0, 3).map(article => {
-                  const siteName = getSiteName(article.publishedTo);
-                  return (
-                    <li key={article.id}>
-                      {article.wpLink ? (
-                        <a 
-                          href={article.wpLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group"
-                        >
+              const siteName = getSiteName(article.publishedTo);
+              return <li key={article.id}>
+                      {article.wpLink ? <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                             <p className="text-xs text-muted-foreground">
@@ -160,9 +145,7 @@ export function DashboardView() {
                             </p>
                           </div>
                           <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
-                        </a>
-                      ) : (
-                        <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
+                        </a> : <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                             <p className="text-xs text-muted-foreground">
@@ -170,11 +153,9 @@ export function DashboardView() {
                               {siteName && <span> • {siteName}</span>}
                             </p>
                           </div>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
+                        </div>}
+                    </li>;
+            })}
               </ul>}
           </CardContent>
         </Card>
