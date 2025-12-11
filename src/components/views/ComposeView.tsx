@@ -690,7 +690,7 @@ export function ComposeView() {
         <p className="mt-2 text-muted-foreground">
           {editingArticle 
             ? 'Make changes to your article and save or publish'
-            : 'Write or generate AI-powered articles for your WordPress sites'
+            : 'Write or generate AI-powered articles'
           }
         </p>
       </div>
