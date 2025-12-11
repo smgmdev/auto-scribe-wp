@@ -65,9 +65,7 @@ export function SitesView() {
           <h1 className="font-display text-4xl font-bold text-foreground">
             Media Network  
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            Connect and manage your WordPress sites
-          </p>
+          <p className="mt-2 text-muted-foreground">Connect and manage media sites</p>
         </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
