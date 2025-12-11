@@ -7,12 +7,40 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-// Simple hash function for PIN (in production, use a proper hashing library)
-async function hashPin(pin: string): Promise<string> {
+// Generate a cryptographically secure random salt
+function generateSalt(): string {
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(saltBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Hash PIN using PBKDF2 with salt for secure storage
+async function hashPinWithSalt(pin: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(pin);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const pinData = encoder.encode(pin);
+  const saltData = encoder.encode(salt);
+  
+  // Import the PIN as a key for PBKDF2
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    pinData,
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  
+  // Derive a 256-bit key using PBKDF2 with 100,000 iterations
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: saltData,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    256
+  );
+  
+  const hashArray = Array.from(new Uint8Array(derivedBits));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -72,12 +100,15 @@ export function PinSettings() {
 
     setSaving(true);
 
-    const pinHash = await hashPin(newPin);
+    // Generate a unique salt for this user
+    const salt = generateSalt();
+    const pinHash = await hashPinWithSalt(newPin, salt);
 
     const { error } = await supabase
       .from('profiles')
       .update({ 
         pin_hash: pinHash, 
+        pin_salt: salt,
         pin_enabled: true 
       })
       .eq('id', user.id);

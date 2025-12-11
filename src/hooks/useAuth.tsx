@@ -23,12 +23,34 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Simple hash function for PIN verification
-async function hashPin(pin: string): Promise<string> {
+// Hash PIN using PBKDF2 with salt for secure verification
+async function hashPinWithSalt(pin: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(pin);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const pinData = encoder.encode(pin);
+  const saltData = encoder.encode(salt);
+  
+  // Import the PIN as a key for PBKDF2
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    pinData,
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  
+  // Derive a 256-bit key using PBKDF2 with 100,000 iterations
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: saltData,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    256
+  );
+  
+  const hashArray = Array.from(new Uint8Array(derivedBits));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -96,16 +118,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyPin = async (pin: string): Promise<boolean> => {
     if (!user) return false;
-
-    const pinHash = await hashPin(pin);
     
     const { data } = await supabase
       .from('profiles')
-      .select('pin_hash')
+      .select('pin_hash, pin_salt')
       .eq('id', user.id)
       .maybeSingle();
 
-    if (data?.pin_hash === pinHash) {
+    if (!data?.pin_hash || !data?.pin_salt) return false;
+
+    const pinHash = await hashPinWithSalt(pin, data.pin_salt);
+
+    if (data.pin_hash === pinHash) {
       setPinVerified(true);
       return true;
     }
