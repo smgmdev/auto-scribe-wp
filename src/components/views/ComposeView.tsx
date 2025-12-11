@@ -3,6 +3,7 @@ import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, 
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useAuth } from '@/hooks/useAuth';
+import { useSites } from '@/hooks/useSites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,10 +58,10 @@ export function ComposeView() {
   const {
     selectedHeadline,
     setSelectedHeadline,
-    sites,
     editingArticle,
     setEditingArticle
   } = useAppStore();
+  const { sites } = useSites();
   const { addArticle, updateArticle } = useArticles();
   const { user, credits, isAdmin, refreshCredits } = useAuth();
   const {

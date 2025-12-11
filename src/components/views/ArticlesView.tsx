@@ -1,6 +1,7 @@
 import { FileText, Edit, Trash2, ExternalLink, Loader2 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
+import { useSites } from '@/hooks/useSites';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,8 @@ const statusColors: Record<string, string> = {
 };
 
 export function ArticlesView() {
-  const { sites, setEditingArticle, setCurrentView } = useAppStore();
+  const { setEditingArticle, setCurrentView } = useAppStore();
+  const { sites } = useSites();
   const { articles, loading, deleteArticle } = useArticles();
   const { toast } = useToast();
 

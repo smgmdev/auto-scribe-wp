@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { WordPressSite, Headline, Article, AISettings } from '@/types';
+import type { Headline, Article, AISettings } from '@/types';
 
 type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
 
@@ -8,12 +8,6 @@ type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' 
 const validSources: SourceType[] = ['euronews', 'bloomberg', 'fortune', 'bloomberg-middleeast', 'bloomberg-asia', 'bloomberg-latest', 'fortune-latest', 'euronews-latest', 'euronews-economy', 'nikkei-asia', 'cnn-middleeast'];
 
 interface AppState {
-  // WordPress Sites
-  sites: WordPressSite[];
-  addSite: (site: Omit<WordPressSite, 'id' | 'connected'>) => void;
-  removeSite: (id: string) => void;
-  updateSite: (id: string, updates: Partial<WordPressSite>) => void;
-  
   // Headlines
   headlines: Headline[];
   setHeadlines: (headlines: Headline[]) => void;
@@ -37,30 +31,6 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      // WordPress Sites
-      sites: [],
-      addSite: (site) =>
-        set((state) => {
-          // Generate favicon URL using Google's favicon service
-          const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
-          return {
-            sites: [
-              ...state.sites,
-              { ...site, id: crypto.randomUUID(), connected: true, favicon: faviconUrl },
-            ],
-          };
-        }),
-      removeSite: (id) =>
-        set((state) => ({
-          sites: state.sites.filter((s) => s.id !== id),
-        })),
-      updateSite: (id, updates) =>
-        set((state) => ({
-          sites: state.sites.map((s) =>
-            s.id === id ? { ...s, ...updates } : s
-          ),
-        })),
-
       // Headlines
       headlines: [],
       setHeadlines: (headlines) => set({ headlines }),
@@ -100,7 +70,6 @@ export const useAppStore = create<AppState>()(
     {
       name: 'wp-publisher-storage',
       partialize: (state) => ({
-        sites: state.sites,
         aiSettings: state.aiSettings,
       }),
       // Clean up removed sources from persisted state
