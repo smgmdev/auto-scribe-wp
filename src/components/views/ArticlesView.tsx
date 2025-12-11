@@ -109,11 +109,11 @@ export function ArticlesView() {
                               rel="noopener noreferrer"
                               className="flex items-center gap-1 text-accent hover:underline"
                             >
-                              Published to: {getSiteName(article.publishedTo)}
+                              Published on: {getSiteName(article.publishedTo)}
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           ) : (
-                            <span>Published to: {getSiteName(article.publishedTo)}</span>
+                            <span>Published on: {getSiteName(article.publishedTo)}</span>
                           )}
                         </>
                       )}
