@@ -667,14 +667,19 @@ async function scrapeNikkeiAsia(): Promise<Headline[]> {
         const href = link.getAttribute('href') || '';
         let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
         
-        // NIKKEI Asia articles are typically under specific paths
-        if (!href.includes('/Economy/') && 
-            !href.includes('/Business/') && 
-            !href.includes('/Politics/') &&
-            !href.includes('/Tech/') &&
-            !href.includes('/Markets/') &&
-            !href.includes('/Spotlight/') &&
-            !href.includes('/Opinion/')) {
+        // NIKKEI Asia uses lowercase paths in URLs
+        const hrefLower = href.toLowerCase();
+        const isArticlePath = hrefLower.includes('/economy/') || 
+            hrefLower.includes('/business/') || 
+            hrefLower.includes('/politics/') ||
+            hrefLower.includes('/tech/') ||
+            hrefLower.includes('/markets/') ||
+            hrefLower.includes('/spotlight/') ||
+            hrefLower.includes('/opinion/') ||
+            hrefLower.includes('/asia300/') ||
+            hrefLower.includes('/editor-picks/');
+        
+        if (!isArticlePath) {
           return;
         }
         
@@ -683,20 +688,14 @@ async function scrapeNikkeiAsia(): Promise<Headline[]> {
         
         const fullUrl = href.startsWith('http') ? href : `https://asia.nikkei.com${href}`;
         
-        // NIKKEI doesn't always have dates in URLs, so we'll assume recent articles are valid
-        // We'll use current time as a fallback for articles without clear date patterns
-        const articleDate = extractDateFromUrl(fullUrl);
-        const publishDate = articleDate && isTodayOrYesterday(articleDate) 
-          ? articleDate 
-          : new Date(); // Fallback to now for fresh content
-        
+        // NIKKEI doesn't have dates in URLs, so we use current time for fresh homepage content
         seen.add(title.toLowerCase());
         headlines.push({
           id: `nikkei-asia-${Date.now()}-${headlines.length}`,
           title: title,
           source: 'nikkei-asia',
           url: fullUrl,
-          publishedAt: publishDate.toISOString(),
+          publishedAt: new Date().toISOString(),
         });
         console.log(`Added NIKKEI Asia headline: ${title.substring(0, 50)}...`);
       });
