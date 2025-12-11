@@ -71,7 +71,7 @@ export function ComposeView() {
   };
 
   const handleGenerate = async () => {
-    if (!title) {
+    if (!title && !selectedHeadline) {
       toast({
         title: "Title required",
         description: "Please enter or select a headline first",
@@ -84,25 +84,90 @@ export function ComposeView() {
     
     // Simulate AI generation
     await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Generate rewritten headline based on original
+    const rewrittenTitles: Record<string, Record<string, string>> = {
+      political: {
+        default: "Strategic Policy Shifts Reshape Global Economic Landscape",
+        ecb: "Central Banking Decisions Set to Transform European Monetary Policy",
+        tech: "Technology Sector Faces New Regulatory Scrutiny Amid Political Pressure",
+        crypto: "Cryptocurrency Regulation Emerges as Key Political Battleground",
+        realestate: "Housing Policy Reforms Signal Major Shift in Government Priorities",
+      },
+      business: {
+        default: "Market Leaders Navigate Unprecedented Industry Transformation",
+        ecb: "Banking Sector Braces for Impact as Rate Decisions Loom",
+        tech: "Technology Giants Redefine Corporate Strategy in Challenging Climate",
+        crypto: "Digital Asset Companies Pivot Strategies Amid Market Evolution",
+        realestate: "Commercial Real Estate Sector Adapts to Shifting Market Dynamics",
+      },
+      financial: {
+        default: "Investment Strategies Evolve as Market Conditions Shift",
+        ecb: "Rate Expectations Drive Significant Portfolio Rebalancing",
+        tech: "Technology Valuations Face Renewed Scrutiny from Institutional Investors",
+        crypto: "Digital Asset Allocations Gain Traction Among Traditional Fund Managers",
+        realestate: "Property Market Fundamentals Signal Turning Point for Investors",
+      },
+      crypto: {
+        default: "Blockchain Adoption Accelerates Across Traditional Finance",
+        ecb: "Central Bank Digital Currency Developments Reshape Crypto Landscape",
+        tech: "Web3 Infrastructure Investments Surge Amid Institutional Interest",
+        crypto: "Decentralized Finance Protocols See Record Growth in User Adoption",
+        realestate: "Tokenized Real Estate Emerges as Bridge Between Traditional and Digital Assets",
+      },
+      realestate: {
+        default: "Property Markets Enter New Phase of Cyclical Adjustment",
+        ecb: "Interest Rate Trajectory Crucial for Housing Market Recovery",
+        tech: "PropTech Innovation Transforms Commercial Leasing Landscape",
+        crypto: "Blockchain-Based Property Transactions Gain Regulatory Approval",
+        realestate: "Residential Market Stabilization Signals New Investment Opportunities",
+      },
+    };
+
+    const titleKey = selectedHeadline?.title.toLowerCase().includes('rate') ? 'ecb' 
+      : selectedHeadline?.title.toLowerCase().includes('tech') ? 'tech'
+      : selectedHeadline?.title.toLowerCase().includes('crypto') ? 'crypto'
+      : selectedHeadline?.title.toLowerCase().includes('real estate') ? 'realestate'
+      : 'default';
+
+    const newTitle = rewrittenTitles[tone]?.[titleKey] || rewrittenTitles[tone]?.default || title;
+    setTitle(newTitle);
     
-    const generatedContent = `The landscape of ${tone} news continues to evolve rapidly as stakeholders navigate an increasingly complex environment. Recent developments have underscored the importance of strategic positioning and informed decision-making in this dynamic sector.
+    // Generate ~700 word article
+    const generatedContent = `The current state of affairs in the ${tone} sector presents a fascinating study in adaptation and resilience. As market participants grapple with shifting fundamentals and evolving consumer expectations, the contours of a new landscape are beginning to emerge with increasing clarity.
 
-Industry observers note that current trends reflect broader shifts in market sentiment and regulatory frameworks. The interplay between technological innovation and traditional approaches has created new opportunities while presenting fresh challenges for established players.
+Industry veterans point to several factors driving these changes. The acceleration of digital transformation, coupled with evolving regulatory frameworks, has created an environment where traditional playbooks no longer guarantee success. Organizations that once dominated their respective niches now find themselves competing against nimble challengers armed with innovative approaches and unburdened by legacy constraints.
 
-Market participants have responded to these changes with a mixture of caution and optimism. While some have adopted a wait-and-see approach, others have moved decisively to capitalize on emerging opportunities. This divergence in strategy reflects the uncertainty that characterizes the current moment.
+The data tells a compelling story. Recent quarters have witnessed significant realignment across key metrics, with leaders emerging in unexpected places. While established players continue to command substantial market presence, their grip has loosened perceptibly. This democratization of opportunity has injected fresh dynamism into sectors that had grown accustomed to predictable patterns.
 
-Looking ahead, experts anticipate continued evolution in this space. The factors driving current trends show no signs of abating, suggesting that adaptability will remain a key determinant of success. Organizations that can effectively balance risk management with strategic growth initiatives are likely to emerge stronger from this period of transition.
+Analysts tracking these developments emphasize the importance of strategic flexibility. The companies thriving in this environment share common characteristics: a willingness to question established assumptions, investments in capabilities that may not yield immediate returns, and an organizational culture that embraces calculated risk-taking. These attributes, while difficult to cultivate, have proven essential for navigating current conditions.
 
-The implications of these developments extend beyond immediate market considerations. Policymakers and regulators are closely monitoring the situation, recognizing that their decisions will shape the trajectory of the sector for years to come. This regulatory dimension adds another layer of complexity to an already multifaceted landscape.
+The human element remains central to this transformation. Behind the statistics and trend lines are decisions made by individuals responding to pressures both professional and personal. Understanding these motivations provides crucial context for interpreting market movements that might otherwise appear random or contradictory.
 
-As the situation continues to unfold, stakeholders across the spectrum remain focused on positioning themselves for success. The coming months will likely prove decisive in determining which approaches prove most effective in navigating this challenging environment.`;
+Looking at specific developments, several themes deserve attention. The intersection of technology and traditional business models continues to generate friction and opportunity in equal measure. Companies that successfully bridge these worlds have discovered significant competitive advantages, while those struggling to adapt face mounting pressure from multiple directions.
+
+Geographic considerations add another layer of complexity. Regional variations in regulatory approach, consumer behavior, and competitive intensity mean that strategies effective in one market may falter elsewhere. This reality demands a nuanced understanding of local conditions alongside awareness of global trends.
+
+The role of capital allocation cannot be overstated. Investment decisions made today will shape competitive dynamics for years to come. Organizations with access to patient capital find themselves better positioned to weather short-term disruptions while building foundations for long-term success. This advantage compounds over time, creating durable moats that prove difficult for less well-resourced competitors to breach.
+
+Sustainability considerations have moved from peripheral concern to central strategic imperative. Stakeholders across the spectrum now demand credible commitments to environmental and social responsibility. Companies that view these expectations as mere compliance burdens risk alienating customers, employees, and investors who increasingly factor such considerations into their decisions.
+
+The regulatory landscape deserves particular attention. Policymakers worldwide are grappling with questions that technological advancement has rendered newly urgent. Their conclusions will establish parameters within which businesses must operate for the foreseeable future. Proactive engagement with these processes represents both opportunity and necessity.
+
+Looking forward, several scenarios merit consideration. The base case envisions continued gradual evolution, with current trends extending in broadly predictable fashion. Alternative paths might see acceleration or reversal of key dynamics, depending on developments that remain uncertain. Prudent planning requires preparation for multiple contingencies.
+
+Market participants seeking to position themselves advantageously would do well to focus on fundamentals. While tactical considerations matter, sustainable success ultimately derives from delivering genuine value to stakeholders. Organizations that lose sight of this principle in pursuit of short-term gains often find themselves struggling when conditions shift.
+
+The coming period promises continued evolution and occasional disruption. Those who approach it with clear eyes, flexible strategies, and genuine commitment to excellence stand the best chance of emerging stronger. The challenges are substantial, but so too are the opportunities for those prepared to seize them.
+
+As stakeholders across the ecosystem assess their positions and chart paths forward, the importance of informed perspective becomes increasingly apparent. The complexity of current conditions rewards those who invest in understanding before acting. Patience, while perhaps unfashionable, remains a virtue worth cultivating.`;
 
     setContent(generatedContent);
     setIsGenerating(false);
     
     toast({
       title: "Article generated",
-      description: "Your AI-written article is ready for review",
+      description: "700-word article with rewritten headline ready for review",
     });
   };
 
