@@ -11,13 +11,26 @@ interface AuthContextType {
   role: AppRole | null;
   credits: number;
   isAdmin: boolean;
+  pinRequired: boolean;
+  pinVerified: boolean;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
+  verifyPin: (pin: string) => Promise<boolean>;
+  setPinVerified: (verified: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Simple hash function for PIN verification
+async function hashPin(pin: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -25,6 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<AppRole | null>(null);
   const [credits, setCredits] = useState(0);
+  const [pinRequired, setPinRequired] = useState(false);
+  const [pinVerified, setPinVerified] = useState(false);
 
   const fetchUserData = async (userId: string) => {
     // Fetch role
@@ -48,6 +63,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (creditsData) {
       setCredits(creditsData.credits);
     }
+
+    // Check if PIN is required
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('pin_enabled, pin_hash')
+      .eq('id', userId)
+      .maybeSingle();
+    
+    if (profileData?.pin_enabled && profileData?.pin_hash) {
+      setPinRequired(true);
+      setPinVerified(false);
+    } else {
+      setPinRequired(false);
+      setPinVerified(true);
+    }
   };
 
   const refreshCredits = async () => {
@@ -62,6 +92,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data) {
       setCredits(data.credits);
     }
+  };
+
+  const verifyPin = async (pin: string): Promise<boolean> => {
+    if (!user) return false;
+
+    const pinHash = await hashPin(pin);
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('pin_hash')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (data?.pin_hash === pinHash) {
+      setPinVerified(true);
+      return true;
+    }
+    return false;
   };
 
   useEffect(() => {
@@ -79,6 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setRole(null);
           setCredits(0);
+          setPinRequired(false);
+          setPinVerified(false);
         }
         
         setLoading(false);
@@ -124,6 +174,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    setPinVerified(false);
+    setPinRequired(false);
     await supabase.auth.signOut();
   };
 
@@ -136,10 +188,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role,
         credits,
         isAdmin: role === 'admin',
+        pinRequired,
+        pinVerified,
         signUp,
         signIn,
         signOut,
-        refreshCredits
+        refreshCredits,
+        verifyPin,
+        setPinVerified
       }}
     >
       {children}
