@@ -67,8 +67,44 @@ export function Sidebar() {
           })}
         </nav>
 
+        {/* Connected Sites */}
+        {sites.length > 0 && (
+          <div className="border-t border-sidebar-border px-3 py-4">
+            <p className="px-3 text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider mb-2">
+              Connected Sites
+            </p>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {sites.map((site) => (
+                <div
+                  key={site.id}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground/70"
+                >
+                  <div className="flex h-5 w-5 items-center justify-center flex-shrink-0">
+                    {site.favicon ? (
+                      <img 
+                        src={site.favicon} 
+                        alt={`${site.name} favicon`}
+                        className="h-4 w-4 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <Globe className={`h-4 w-4 text-sidebar-foreground/50 ${site.favicon ? 'hidden' : ''}`} />
+                  </div>
+                  <span className="truncate">{site.name}</span>
+                  {site.connected && (
+                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-success flex-shrink-0" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
-        <div className="border-t border-sidebar-border p-4">
+        <div className="border-t border-sidebar-border p-4 mt-auto">
           <div className="rounded-lg bg-sidebar-accent/50 p-3">
             <p className="text-xs text-sidebar-foreground/60">
               Connected Sites
