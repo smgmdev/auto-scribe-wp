@@ -28,26 +28,59 @@ serve(async (req) => {
     console.log('Generating article for headline:', headline);
     console.log('Tone:', tone);
 
-    const systemPrompt = `You are a professional journalist and content writer. Write articles that are:
-- Approximately 700 words in length
-- Written in a professional, engaging style
-- Without numbered lists or excessive subheadings
-- Natural and human-like, not AI-sounding
-- Well-structured with smooth transitions between paragraphs
-- Informative and insightful
+    // Tone-specific writing guidance
+    const toneGuidance: Record<string, string> = {
+      neutral: 'Write in a balanced, objective tone. Present facts without emotional bias. Use clear, straightforward language that informs without persuading.',
+      professional: 'Write in a polished corporate tone. Use sophisticated vocabulary and authoritative language. Sound like a seasoned industry analyst or business correspondent.',
+      journalist: 'Write like a veteran news reporter. Lead with the most newsworthy angle. Use punchy sentences, active voice, and quote-worthy phrasing. Channel the style of Reuters or AP News.',
+      inspiring: 'Write with warmth and optimism. Highlight positive implications and human achievement. Use vivid language that motivates and uplifts while remaining credible.',
+      aggressive: 'Write with urgency and conviction. Use bold statements and direct language. Challenge assumptions and provoke thought. Sound like an op-ed columnist with strong opinions.',
+      powerful: 'Write with commanding authority. Use strong, decisive language. Every sentence should carry weight and impact. Sound like a thought leader making a definitive statement.',
+      important: 'Write with gravitas and significance. Emphasize the stakes and implications. Make readers understand why this matters now. Sound like breaking news from a major publication.',
+    };
 
-The article tone should be: ${tone || 'business'}
+    const selectedTone = tone || 'neutral';
+    const toneInstruction = toneGuidance[selectedTone] || toneGuidance.neutral;
 
-IMPORTANT: Start your response with a NEW, compelling headline on the first line, then a blank line, then the article content. Do not include any prefixes like "Headline:" or "Title:" - just write the headline directly.`;
+    const systemPrompt = `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
 
-    const userPrompt = `Write an extensive article and make a new title based on this headline: "${headline}"
+WRITING STYLE RULES (CRITICAL):
+- NEVER use numbered lists or bullet points
+- NEVER use more than 1-2 subheadings in the entire article (and only if truly necessary)
+- NEVER start with cliché AI openings like "In a world where...", "In today's fast-paced...", "In a groundbreaking...", "In a move that...", "In an era of..."
+- NEVER use phrases like "It's worth noting", "Interestingly enough", "Needless to say", "At the end of the day"
+- Write in flowing paragraphs with natural transitions
+- Vary sentence length - mix short punchy sentences with longer complex ones
+- Start paragraphs differently - avoid repetitive structures
+- Use specific details, names, and concrete examples
 
-Remember:
-- First line should be the new headline (no prefix)
-- Then a blank line
-- Then approximately 700 words of article content
-- Professional format without numbering or crazy subheadings
-- Write like a human journalist, not AI`;
+OPENING PARAGRAPH:
+- Start with a specific fact, striking observation, or narrative hook
+- Jump straight into the story - no throat-clearing or context-setting
+- Make it feel like you're continuing an ongoing conversation with the reader
+- Examples of good openings: "The numbers are staggering.", "Three days ago, everything changed.", "Nobody expected this."
+
+TONE: ${selectedTone.toUpperCase()}
+${toneInstruction}
+
+TARGET LENGTH: Approximately 700 words
+STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings`;
+
+    const userPrompt = `Write an article based on this headline: "${headline}"
+
+TITLE REQUIREMENTS:
+- Create a NEW compelling headline that sparks curiosity
+- If there are names (people, companies, countries, cities), emphasize them prominently
+- Make it intriguing - readers should NEED to click
+- Keep it concise but impactful
+- Examples of good titles: "Tesla's Berlin Gambit Could Reshape European Manufacturing", "Why Warren Buffett Just Made His Biggest Bet Yet", "The $50 Billion Question Hanging Over London"
+
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+[Your new headline here - no prefix, just the headline]
+
+[Article content starts here - approximately 700 words, flowing paragraphs, human writing style]
+
+Remember: Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
