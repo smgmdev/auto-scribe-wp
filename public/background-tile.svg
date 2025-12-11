@@ -1,0 +1,16 @@
+<svg width="111" height="65" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="67" width="113" y="-1" x="-1"/>
+  <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+   <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+  </g>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_1" y2="65" x2="0.5" y1="0" x1="0.5" stroke="#232323" fill="none"/>
+  <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_5" y2="20.09692" x2="126.62392" y1="20.09692" x1="126.49472" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#232323" fill="none"/>
+  <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_6" y2="65" x2="111" y1="0" x1="1" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#232323" fill="none"/>
+  <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_7" y2="65" x2="1" y1="0" x1="111" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#232323" fill="none"/>
+ </g>
+</svg>
