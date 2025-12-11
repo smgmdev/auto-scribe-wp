@@ -9,7 +9,7 @@ const corsHeaders = {
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest';
   url: string;
   publishedAt: string;
   summary?: string;
@@ -346,6 +346,80 @@ async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
   return headlines;
 }
 
+async function scrapeBloombergLatest(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
+  
+  try {
+    console.log('Scraping Bloomberg Latest...');
+    
+    const pageUrl = 'https://www.bloomberg.com/latest?utm_source=homepage&utm_medium=web&utm_campaign=latest';
+    
+    try {
+      const response = await fetch(pageUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        }
+      });
+      const html = await response.text();
+      console.log(`Bloomberg Latest page length: ${html.length}`);
+      
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      
+      if (doc) {
+        const allLinks = doc.querySelectorAll('a[href]');
+        console.log(`Found ${allLinks.length} links on Bloomberg Latest`);
+        
+        allLinks.forEach((article) => {
+          if (headlines.length >= 30) return;
+          const link = article as any;
+          const href = link.getAttribute('href') || '';
+          let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+          
+          // Only include article links
+          if (!href.includes('/news/') && !href.includes('/articles/')) return;
+          
+          // Check for date in URL
+          const tParts = today.split('-');
+          const yParts = yesterday.split('-');
+          
+          if (!href.includes(`/${tParts[0]}-${tParts[1]}-${tParts[2]}`) &&
+              !href.includes(`/${yParts[0]}-${yParts[1]}-${yParts[2]}`)) {
+            return;
+          }
+          
+          if (!title || title.length < 30 || title.length > 300) return;
+          if (seen.has(title.toLowerCase())) return;
+          
+          const fullUrl = href.startsWith('http') ? href : `https://www.bloomberg.com${href}`;
+          const articleDate = extractDateFromUrl(fullUrl);
+          
+          if (articleDate && isTodayOrYesterday(articleDate)) {
+            seen.add(title.toLowerCase());
+            headlines.push({
+              id: `bloomberg-latest-${Date.now()}-${headlines.length}`,
+              title: title,
+              source: 'bloomberg-latest',
+              url: fullUrl,
+              publishedAt: articleDate.toISOString(),
+            });
+            console.log(`Added Bloomberg Latest headline: ${title.substring(0, 50)}...`);
+          }
+        });
+      }
+    } catch (e) {
+      console.error(`Error fetching Bloomberg Latest:`, e);
+    }
+    
+    console.log(`Found ${headlines.length} Bloomberg Latest headlines`);
+  } catch (error) {
+    console.error('Error scraping Bloomberg Latest:', error);
+  }
+  return headlines;
+}
+
 async function scrapeBloombergAsia(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
@@ -573,6 +647,9 @@ serve(async (req) => {
     }
     if (sources.includes('bloomberg-asia')) {
       scrapePromises.push(scrapeBloombergAsia());
+    }
+    if (sources.includes('bloomberg-latest')) {
+      scrapePromises.push(scrapeBloombergLatest());
     }
     if (sources.includes('fortune')) {
       scrapePromises.push(scrapeFortune());

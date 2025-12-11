@@ -26,7 +26,7 @@ interface AppState {
   // AI Settings
   aiSettings: AISettings;
   updateAISettings: (settings: Partial<AISettings>) => void;
-  toggleSource: (source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia') => void;
+  toggleSource: (source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest') => void;
   
   // UI State
   currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings';

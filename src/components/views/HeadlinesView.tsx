@@ -14,6 +14,7 @@ const sourceColors = {
   bloomberg: 'bg-headline-financial/10 text-headline-financial border-headline-financial/30',
   'bloomberg-middleeast': 'bg-amber-500/10 text-amber-600 border-amber-500/30',
   'bloomberg-asia': 'bg-red-500/10 text-red-600 border-red-500/30',
+  'bloomberg-latest': 'bg-purple-500/10 text-purple-600 border-purple-500/30',
   fortune: 'bg-headline-crypto/10 text-headline-crypto border-headline-crypto/30',
 };
 
@@ -22,10 +23,11 @@ const sourceLabels = {
   bloomberg: 'Bloomberg (US Global)',
   'bloomberg-middleeast': 'Bloomberg Middle East',
   'bloomberg-asia': 'Bloomberg Asia',
+  'bloomberg-latest': 'Bloomberg Latest',
   fortune: 'Fortune',
 };
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest';
 
 export function HeadlinesView() {
   const { 
@@ -117,7 +119,7 @@ export function HeadlinesView() {
   };
 
   const mainSources: SourceType[] = ['euronews', 'bloomberg', 'fortune'];
-  const bloombergSubSources: SourceType[] = ['bloomberg-middleeast', 'bloomberg-asia'];
+  const bloombergSubSources: SourceType[] = ['bloomberg-latest', 'bloomberg-middleeast', 'bloomberg-asia'];
   const allSources: SourceType[] = [...mainSources, ...bloombergSubSources];
 
   return (
