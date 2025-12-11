@@ -136,6 +136,8 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          pin_enabled: boolean
+          pin_hash: string | null
           updated_at: string
           username: string | null
         }
@@ -143,6 +145,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
+          pin_enabled?: boolean
+          pin_hash?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -150,6 +154,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          pin_enabled?: boolean
+          pin_hash?: string | null
           updated_at?: string
           username?: string | null
         }

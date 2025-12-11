@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { PinSettings } from './PinSettings';
 
 export function AccountSettings() {
   const { user } = useAuth();
@@ -292,6 +293,11 @@ export function AccountSettings() {
             </Button>
           </div>
         </div>
+
+        <Separator />
+
+        {/* PIN Settings */}
+        <PinSettings />
       </CardContent>
     </Card>
   );
