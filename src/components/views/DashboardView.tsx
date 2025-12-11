@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
 const stats = [{
   label: 'Media Sites',
   icon: Globe,
@@ -101,9 +102,9 @@ export function DashboardView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card">
+      <Card className="border-border/50 bg-card">
           <CardHeader>
-            <CardTitle className="text-xl">Recent Articles</CardTitle>
+            <CardTitle className="text-xl">My Recent Articles</CardTitle>
           </CardHeader>
           <CardContent>
             {articles.length === 0 ? <p className="text-sm text-muted-foreground">
@@ -121,5 +122,15 @@ export function DashboardView() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Latest Global Articles */}
+      <Card className="border-border/50 bg-card">
+        <CardHeader>
+          <CardTitle className="text-xl">Latest Global Articles</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LatestGlobalArticles />
+        </CardContent>
+      </Card>
     </div>;
 }
