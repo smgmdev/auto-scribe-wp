@@ -134,14 +134,22 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
     // Add SEO data based on plugin type
     if (params.seo) {
       if (params.site.seoPlugin === 'aioseo') {
-        // AIOSEO uses aioseo_meta_data object
+        // AIOSEO Pro uses specific meta structure for TruSEO
+        body.meta = {
+          _aioseo_description: params.seo.metaDescription || '',
+          _aioseo_keywords: params.seo.focusKeyword || '',
+        };
+        // Also include aioseo_meta_data for REST API compatibility
         body.aioseo_meta_data = {
           description: params.seo.metaDescription || '',
-          keyphrases: params.seo.focusKeyword ? {
+          keyphrases: {
             focus: {
-              keyphrase: params.seo.focusKeyword
-            }
-          } : undefined,
+              keyphrase: params.seo.focusKeyword || '',
+              score: 0,
+              analysis: {}
+            },
+            additional: []
+          },
         };
       } else if (params.site.seoPlugin === 'rankmath') {
         // RankMath uses meta object
@@ -210,14 +218,22 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
     // Add SEO data based on plugin type
     if (params.seo) {
       if (params.site.seoPlugin === 'aioseo') {
-        // AIOSEO uses aioseo_meta_data object
+        // AIOSEO Pro uses specific meta structure for TruSEO
+        body.meta = {
+          _aioseo_description: params.seo.metaDescription || '',
+          _aioseo_keywords: params.seo.focusKeyword || '',
+        };
+        // Also include aioseo_meta_data for REST API compatibility
         body.aioseo_meta_data = {
           description: params.seo.metaDescription || '',
-          keyphrases: params.seo.focusKeyword ? {
+          keyphrases: {
             focus: {
-              keyphrase: params.seo.focusKeyword
-            }
-          } : undefined,
+              keyphrase: params.seo.focusKeyword || '',
+              score: 0,
+              analysis: {}
+            },
+            additional: []
+          },
         };
       } else if (params.site.seoPlugin === 'rankmath') {
         // RankMath uses meta object
@@ -251,6 +267,93 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
   } catch (error) {
     console.error('Error updating article:', error);
     throw error;
+  }
+}
+
+// Update existing media metadata
+export async function updateMediaMetadata(
+  site: WordPressSite,
+  mediaId: number,
+  metadata: { title?: string; alt_text?: string; caption?: string; description?: string }
+): Promise<void> {
+  try {
+    const baseUrl = normalizeUrl(site.url);
+    
+    const response = await fetch(`${baseUrl}/wp-json/wp/v2/media/${mediaId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': createAuthHeader(site),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: metadata.title ?? '',
+        alt_text: metadata.alt_text ?? '',
+        caption: metadata.caption ?? '',
+        description: metadata.description ?? '',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to update media metadata:', response.status, errorData);
+      throw new Error(errorData.message || 'Failed to update media metadata');
+    }
+    
+    console.log('Media metadata updated successfully');
+  } catch (error) {
+    console.error('Error updating media metadata:', error);
+    throw error;
+  }
+}
+
+// Fetch post SEO data from WordPress
+export async function fetchPostSEOData(
+  site: WordPressSite,
+  postId: number
+): Promise<{ focusKeyword: string; metaDescription: string }> {
+  try {
+    const baseUrl = normalizeUrl(site.url);
+    
+    const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
+      method: 'GET',
+      headers: {
+        'Authorization': createAuthHeader(site),
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Failed to fetch post SEO data:', response.status);
+      return { focusKeyword: '', metaDescription: '' };
+    }
+
+    const data = await response.json();
+    
+    let focusKeyword = '';
+    let metaDescription = '';
+    
+    if (site.seoPlugin === 'aioseo') {
+      // AIOSEO stores data in aioseo_meta_data or meta
+      const aioseoData = data.aioseo_meta_data || data.meta?.aioseo_meta_data;
+      if (aioseoData) {
+        metaDescription = aioseoData.description || '';
+        focusKeyword = aioseoData.keyphrases?.focus?.keyphrase || '';
+      }
+      // Also check post meta for AIOSEO
+      if (!focusKeyword && data.meta?._aioseo_keywords) {
+        focusKeyword = data.meta._aioseo_keywords;
+      }
+      if (!metaDescription && data.meta?._aioseo_description) {
+        metaDescription = data.meta._aioseo_description;
+      }
+    } else if (site.seoPlugin === 'rankmath') {
+      focusKeyword = data.meta?.rank_math_focus_keyword || '';
+      metaDescription = data.meta?.rank_math_description || '';
+    }
+    
+    return { focusKeyword, metaDescription };
+  } catch (error) {
+    console.error('Error fetching post SEO data:', error);
+    return { focusKeyword: '', metaDescription: '' };
   }
 }
 
