@@ -69,17 +69,15 @@ export function Sidebar() {
           <div className="px-4 py-3 border-b border-sidebar-border">
             <div className="flex items-center justify-between">
               <CreditDisplay />
-              {!isAdmin && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setBuyCreditsOpen(true)}
-                  className="text-xs"
-                >
-                  <Coins className="h-3 w-3 mr-1" />
-                  Buy
-                </Button>
-              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setBuyCreditsOpen(true)}
+                className="text-xs text-sidebar-foreground"
+              >
+                <Coins className="h-3 w-3 mr-1" />
+                Buy
+              </Button>
             </div>
           </div>
 
