@@ -300,6 +300,7 @@ export function ComposeView() {
 
     try {
       let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
+      let featuredImageUrl: string | undefined = editingArticle?.featuredImage?.url;
 
       // Upload featured image first if exists and is a new file
       if (featuredImage.file) {
@@ -315,6 +316,7 @@ export function ComposeView() {
           description: featuredImage.description,
         });
         featuredMediaId = mediaResult.id;
+        featuredImageUrl = mediaResult.source_url;
       }
 
       let result: { id: number; link: string };
@@ -344,11 +346,21 @@ export function ComposeView() {
       }
 
       // Save to local state
+      const savedFeaturedImage = featuredImageUrl ? {
+        file: null,
+        url: featuredImageUrl,
+        title: featuredImage.title,
+        caption: featuredImage.caption,
+        altText: featuredImage.altText,
+        description: featuredImage.description,
+      } : undefined;
+
       if (editingArticle) {
         updateArticle(editingArticle.id, {
           title,
           content,
           tone,
+          featuredImage: savedFeaturedImage || editingArticle.featuredImage,
           status: 'published',
           publishedTo: selectedSite,
           wpPostId: result.id,
@@ -368,7 +380,7 @@ export function ComposeView() {
           content,
           tone,
           sourceHeadline: selectedHeadline || undefined,
-          featuredImage: featuredImage.file ? featuredImage : undefined,
+          featuredImage: savedFeaturedImage,
           status: 'published',
           publishedTo: selectedSite,
           wpPostId: result.id,
@@ -442,6 +454,7 @@ export function ComposeView() {
       // Update WordPress if there's an existing post
       if (editingArticle.wpPostId && currentSite) {
         let featuredMediaId: number | undefined = editingArticle.wpFeaturedMediaId;
+        let featuredImageUrl: string | undefined = editingArticle.featuredImage?.url;
 
         // Upload new image if provided
         if (featuredImage.file) {
@@ -452,6 +465,7 @@ export function ComposeView() {
             description: featuredImage.description,
           });
           featuredMediaId = mediaResult.id;
+          featuredImageUrl = mediaResult.source_url;
         }
 
         await updateWPArticle({
@@ -463,19 +477,42 @@ export function ComposeView() {
           tags: selectedTagIds,
           featuredMediaId,
         });
+
+        const savedFeaturedImage = featuredImageUrl ? {
+          file: null,
+          url: featuredImageUrl,
+          title: featuredImage.title,
+          caption: featuredImage.caption,
+          altText: featuredImage.altText,
+          description: featuredImage.description,
+        } : undefined;
+
+        updateArticle(editingArticle.id, {
+          title,
+          content,
+          tone,
+          featuredImage: savedFeaturedImage || editingArticle.featuredImage,
+          wpFeaturedMediaId: featuredMediaId,
+          categories: selectedCategories,
+          tagIds: selectedTagIds,
+          tags: availableTags
+            .filter(t => selectedTagIds.includes(t.id))
+            .map(t => t.name),
+          updatedAt: new Date(),
+        });
+      } else {
+        updateArticle(editingArticle.id, {
+          title,
+          content,
+          tone,
+          categories: selectedCategories,
+          tagIds: selectedTagIds,
+          tags: availableTags
+            .filter(t => selectedTagIds.includes(t.id))
+            .map(t => t.name),
+          updatedAt: new Date(),
+        });
       }
-      
-      updateArticle(editingArticle.id, {
-        title,
-        content,
-        tone,
-        categories: selectedCategories,
-        tagIds: selectedTagIds,
-        tags: availableTags
-          .filter(t => selectedTagIds.includes(t.id))
-          .map(t => t.name),
-        updatedAt: new Date(),
-      });
 
       toast({
         title: "Article saved",
