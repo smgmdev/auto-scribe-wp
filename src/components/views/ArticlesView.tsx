@@ -127,6 +127,7 @@ export function ArticlesView() {
                     <Button 
                       variant="ghost" 
                       size="icon"
+                      className="hover:bg-[hsl(var(--icon-hover))] hover:text-white"
                       onClick={() => handleEdit(article)}
                     >
                       <Edit className="h-4 w-4" />
@@ -134,7 +135,7 @@ export function ArticlesView() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="text-destructive hover:text-destructive"
+                      className="hover:bg-[hsl(var(--icon-hover))] hover:text-white"
                       onClick={() => handleDelete(article.id, article.title)}
                     >
                       <Trash2 className="h-4 w-4" />

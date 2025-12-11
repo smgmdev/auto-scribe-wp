@@ -195,10 +195,10 @@ export function AdminCreditsView() {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(pack)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white" onClick={() => openEditDialog(pack)}>
                     <Edit2 className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(pack)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white" onClick={() => handleDelete(pack)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
