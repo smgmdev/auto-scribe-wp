@@ -29,7 +29,7 @@ interface AppState {
   toggleSource: (source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy') => void;
   
   // UI State
-  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'admin-credits' | 'admin-users';
+  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users';
   setCurrentView: (view: AppState['currentView']) => void;
 }
 

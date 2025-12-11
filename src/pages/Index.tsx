@@ -5,6 +5,7 @@ import { HeadlinesView } from '@/components/views/HeadlinesView';
 import { ComposeView } from '@/components/views/ComposeView';
 import { ArticlesView } from '@/components/views/ArticlesView';
 import { SettingsView } from '@/components/views/SettingsView';
+import { AccountView } from '@/components/views/AccountView';
 import { AdminCreditsView } from '@/components/views/AdminCreditsView';
 import { AdminUsersView } from '@/components/views/AdminUsersView';
 import { useAppStore } from '@/stores/appStore';
@@ -16,6 +17,7 @@ const views = {
   compose: ComposeView,
   articles: ArticlesView,
   settings: SettingsView,
+  account: AccountView,
   'admin-credits': AdminCreditsView,
   'admin-users': AdminUsersView,
 };

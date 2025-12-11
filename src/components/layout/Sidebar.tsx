@@ -10,7 +10,8 @@ import {
   LogOut,
   Coins,
   Users,
-  CreditCard
+  CreditCard,
+  UserCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -110,8 +111,19 @@ export function Sidebar() {
             })}
           </nav>
 
-          {/* Sign Out */}
-          <div className="border-t border-sidebar-border p-4">
+          {/* Account & Sign Out */}
+          <div className="border-t border-sidebar-border p-4 space-y-1">
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                currentView === 'account' && "bg-sidebar-accent text-sidebar-primary font-medium"
+              )}
+              onClick={() => setCurrentView('account')}
+            >
+              <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-sidebar-primary")} />
+              Account
+            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive"
