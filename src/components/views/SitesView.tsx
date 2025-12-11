@@ -62,7 +62,7 @@ export function SitesView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">
+          <h1 className="font-body text-4xl font-bold text-foreground">
             Media Network  
           </h1>
           <p className="mt-2 text-muted-foreground">Connect and manage media sites</p>
@@ -173,7 +173,7 @@ export function SitesView() {
                       <Globe className="h-4 w-4 text-accent hidden" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-sm truncate">{site.name}</h3>
+                      <h3 className="font-body text-sm truncate">{site.name}</h3>
                       <a href={site.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1">
                         <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
                         <ExternalLink className="h-3 w-3 flex-shrink-0" />
