@@ -41,6 +41,7 @@ export function SitesView() {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [siteCredits, setSiteCredits] = useState<Record<string, number>>({});
   const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
@@ -179,6 +180,7 @@ export function SitesView() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // Add site to database
       const newSite = await addSite(formData);
@@ -209,6 +211,8 @@ export function SitesView() {
         description: error instanceof Error ? error.message : "Could not add the site",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -343,7 +347,7 @@ export function SitesView() {
                     value={formData.seoPlugin} 
                     onValueChange={(value: SEOPlugin) => setFormData({ ...formData, seoPlugin: value })}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full focus:ring-border focus:ring-offset-0">
                       <SelectValue placeholder="Select SEO plugin" />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border border-border">
@@ -359,8 +363,9 @@ export function SitesView() {
                   <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" variant="accent">
-                    Connect Site
+                  <Button type="submit" variant="accent" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isSubmitting ? 'Connecting...' : 'Connect Site'}
                   </Button>
                 </div>
               </form>
