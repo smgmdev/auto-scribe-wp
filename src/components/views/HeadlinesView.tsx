@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Newspaper, RefreshCw, ExternalLink, ArrowRight, Clock } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,20 +56,19 @@ const allSources: SourceType[] = [
 
 export function HeadlinesView() {
   const { 
-    aiSettings, 
     setSelectedHeadline, 
     setCurrentView, 
     setHeadlines, 
     headlines,
-    toggleSource 
   } = useAppStore();
+  const { settings, toggleSource, isLoading: settingsLoading } = useUserSettings();
   const { toast } = useToast();
   const [isScanning, setIsScanning] = useState(false);
   const [displayedHeadlines, setDisplayedHeadlines] = useState<Headline[]>(headlines);
   const [activeTab, setActiveTab] = useState('political');
 
   const handleScan = async () => {
-    if (aiSettings.selectedSources.length === 0) {
+    if (settings.selectedSources.length === 0) {
       toast({
         title: "No sources selected",
         description: "Please select at least one news source to scan",
@@ -81,7 +81,7 @@ export function HeadlinesView() {
     
     try {
       const { data, error } = await supabase.functions.invoke('scan-headlines', {
-        body: { sources: aiSettings.selectedSources }
+        body: { sources: settings.selectedSources }
       });
 
       if (error) {
@@ -97,7 +97,7 @@ export function HeadlinesView() {
         setHeadlines(parsedHeadlines);
         toast({
           title: "Headlines scanned",
-          description: `Found ${parsedHeadlines.length} headlines from ${aiSettings.selectedSources.length} source(s)`,
+          description: `Found ${parsedHeadlines.length} headlines from ${settings.selectedSources.length} source(s)`,
         });
       } else {
         throw new Error(data?.error || 'Failed to scan headlines');
@@ -124,7 +124,7 @@ export function HeadlinesView() {
   };
 
   const filteredHeadlines = displayedHeadlines.filter(
-    h => aiSettings.selectedSources.includes(h.source)
+    h => settings.selectedSources.includes(h.source)
   );
 
   const formatTimeAgo = (date: Date) => {
@@ -149,12 +149,13 @@ export function HeadlinesView() {
       className="flex items-center gap-2 cursor-pointer group"
     >
       <Checkbox 
-        checked={aiSettings.selectedSources.includes(source)}
+        checked={settings.selectedSources.includes(source)}
         onCheckedChange={() => handleToggleSource(source)}
         className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+        disabled={settingsLoading}
       />
       <span className={`text-sm font-medium transition-colors ${
-        aiSettings.selectedSources.includes(source) 
+        settings.selectedSources.includes(source) 
           ? 'text-foreground' 
           : 'text-muted-foreground'
       }`}>
@@ -179,7 +180,7 @@ export function HeadlinesView() {
         <Button 
           variant="accent" 
           onClick={handleScan}
-          disabled={isScanning || aiSettings.selectedSources.length === 0}
+          disabled={isScanning || settings.selectedSources.length === 0 || settingsLoading}
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
           {isScanning ? 'Scanning...' : 'Scan Headlines'}
@@ -192,7 +193,7 @@ export function HeadlinesView() {
           <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
             <span>Active Sources</span>
             <Badge variant="secondary" className="text-xs">
-              {aiSettings.selectedSources.length} selected
+              {settings.selectedSources.length} selected
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -244,7 +245,7 @@ export function HeadlinesView() {
               <Newspaper className="h-12 w-12 text-muted-foreground/50" />
               <h3 className="mt-4 text-xl font-semibold">No headlines found</h3>
               <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-                {aiSettings.selectedSources.length === 0 
+                {settings.selectedSources.length === 0 
                   ? "Select at least one source, then click 'Scan Headlines'"
                   : "Click 'Scan Headlines' to fetch the latest news from your selected sources"
                 }
