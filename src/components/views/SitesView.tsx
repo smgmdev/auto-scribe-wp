@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react';
+import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,7 +37,7 @@ const TAG_COLORS = [
 ];
 
 export function SitesView() {
-  const { sites, addSite, removeSite, updateSite } = useAppStore();
+  const { sites, loading: sitesLoading, addSite, removeSite } = useSites();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -179,44 +179,58 @@ export function SitesView() {
       return;
     }
 
-    // Add site to local store
-    addSite(formData);
+    try {
+      // Add site to database
+      const newSite = await addSite(formData);
 
-    // Get the newly created site ID (it's the last one added)
-    const newSiteId = crypto.randomUUID();
+      // Create default site credits if admin
+      if (isAdmin && newSite) {
+        await supabase.from('site_credits').insert({
+          site_id: newSite.id,
+          credits_required: 1
+        });
+      }
 
-    // Create default site credits if admin
-    if (isAdmin) {
-      await supabase.from('site_credits').insert({
-        site_id: newSiteId,
-        credits_required: 1
+      setFormData({
+        name: '',
+        url: '',
+        username: '',
+        applicationPassword: '',
+        seoPlugin: 'aioseo'
+      });
+      setIsOpen(false);
+      toast({
+        title: "Site connected",
+        description: `${formData.name} has been added successfully`
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to add site",
+        description: error instanceof Error ? error.message : "Could not add the site",
+        variant: "destructive"
       });
     }
-
-    setFormData({
-      name: '',
-      url: '',
-      username: '',
-      applicationPassword: '',
-      seoPlugin: 'aioseo'
-    });
-    setIsOpen(false);
-    toast({
-      title: "Site connected",
-      description: `${formData.name} has been added successfully`
-    });
   };
 
   const handleRemove = async (id: string, name: string) => {
-    removeSite(id);
-    
-    // Also remove site credits
-    await supabase.from('site_credits').delete().eq('site_id', id);
-    
-    toast({
-      title: "Site removed",
-      description: `${name} has been disconnected`
-    });
+    try {
+      await removeSite(id);
+      
+      // Also remove site credits and tags
+      await supabase.from('site_credits').delete().eq('site_id', id);
+      await supabase.from('site_tags').delete().eq('site_id', id);
+      
+      toast({
+        title: "Site removed",
+        description: `${name} has been disconnected`
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to remove site",
+        description: error instanceof Error ? error.message : "Could not remove the site",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSaveCredits = async (siteId: string) => {
@@ -356,7 +370,14 @@ export function SitesView() {
       </div>
 
       {/* Sites Grid */}
-      {sites.length === 0 ? (
+      {sitesLoading ? (
+        <Card className="border-border/50">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="mt-4 text-sm text-muted-foreground">Loading sites...</p>
+          </CardContent>
+        </Card>
+      ) : sites.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Globe className="h-12 w-12 text-muted-foreground/50" />

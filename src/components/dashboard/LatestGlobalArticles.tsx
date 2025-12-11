@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow, isYesterday, format } from 'date-fns';
-import { useAppStore } from '@/stores/appStore';
+import { useSites } from '@/hooks/useSites';
 
 interface GlobalArticle {
   id: string;
@@ -36,7 +36,7 @@ function formatRelativeTime(dateString: string): string {
 export function LatestGlobalArticles() {
   const [articles, setArticles] = useState<GlobalArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sites } = useAppStore();
+  const { sites } = useSites();
 
   useEffect(() => {
     const fetchGlobalArticles = async () => {

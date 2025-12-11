@@ -2,6 +2,7 @@ import { Globe, Newspaper, TrendingUp, ExternalLink, Plus, FileText } from 'luci
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
+import { useSites } from '@/hooks/useSites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
@@ -41,7 +42,6 @@ const stats = [{
 }];
 export function DashboardView() {
   const {
-    sites,
     setCurrentView
   } = useAppStore();
   const {
@@ -51,6 +51,7 @@ export function DashboardView() {
   const {
     articles
   } = useArticles();
+  const { sites } = useSites();
   const getSiteName = (siteId: string | undefined): string | null => {
     if (!siteId) return null;
     const site = sites.find(s => s.id === siteId);

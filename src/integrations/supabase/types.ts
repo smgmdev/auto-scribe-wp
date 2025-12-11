@@ -254,6 +254,45 @@ export type Database = {
         }
         Relationships: []
       }
+      wordpress_sites: {
+        Row: {
+          app_password: string
+          connected: boolean
+          created_at: string
+          favicon: string | null
+          id: string
+          name: string
+          seo_plugin: string
+          updated_at: string
+          url: string
+          username: string
+        }
+        Insert: {
+          app_password: string
+          connected?: boolean
+          created_at?: string
+          favicon?: string | null
+          id?: string
+          name: string
+          seo_plugin?: string
+          updated_at?: string
+          url: string
+          username: string
+        }
+        Update: {
+          app_password?: string
+          connected?: boolean
+          created_at?: string
+          favicon?: string | null
+          id?: string
+          name?: string
+          seo_plugin?: string
+          updated_at?: string
+          url?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

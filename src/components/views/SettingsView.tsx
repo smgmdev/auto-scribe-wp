@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Save, Info } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import { useSites } from '@/hooks/useSites';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -38,9 +39,9 @@ const tones: {
 export function SettingsView() {
   const {
     aiSettings,
-    updateAISettings,
-    sites
+    updateAISettings
   } = useAppStore();
+  const { sites } = useSites();
   const {
     toast
   } = useToast();
