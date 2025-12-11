@@ -141,12 +141,21 @@ serve(async (req) => {
 
     // Build source context section if we have source content
     const sourceContextSection = sourceContent 
-      ? `\n\nSOURCE ARTICLE CONTENT (use these facts as the foundation - DO NOT copy verbatim, rewrite completely in your own words):
+      ? `\n\nSOURCE ARTICLE REFERENCE (extract facts only - DO NOT rewrite or paraphrase):
 ---
 ${sourceContent}
 ---
 
-IMPORTANT: Base your article on the FACTS from the source above. Include accurate details, figures, quotes, and information from the source. However, you MUST completely rewrite everything in your own words and style. Do not plagiarize.`
+CRITICAL ORIGINALITY RULES:
+- Your article must be LESS THAN 50% similar to the source
+- DO NOT paraphrase or reword the source sentence by sentence
+- DO NOT follow the same structure or paragraph order as the source
+- Extract ONLY the key facts, data points, quotes, and figures
+- Write a COMPLETELY ORIGINAL article using those facts as raw material
+- Use a different angle, different narrative structure, different opening
+- Add your own analysis, context, and perspective based on the tone
+- The source is REFERENCE MATERIAL, not a template to rewrite
+- Think of the source as interview notes - you have the facts, now write YOUR story`
       : '';
 
     const systemPrompt = `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
@@ -182,7 +191,12 @@ TITLE REQUIREMENTS:
 - Keep it concise but impactful
 - Examples of good titles: "Tesla's Berlin Gambit Could Reshape European Manufacturing", "Why Warren Buffett Just Made His Biggest Bet Yet", "The $50 Billion Question Hanging Over London"
 
-${sourceContent ? 'ACCURACY: Use the facts, figures, and details from the source article. Be accurate and factual.' : ''}
+${sourceContent ? `ORIGINALITY REQUIREMENT:
+- Use facts and data from the source but write a COMPLETELY ORIGINAL article
+- Your article must be LESS THAN 50% textually similar to the source
+- Take a fresh angle - maybe focus on implications, or a specific detail, or the bigger picture
+- The structure and narrative flow must be entirely your own creation
+- Think like a journalist who just finished an interview - you have the facts, now tell YOUR story` : ''}
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 [Your new headline here - no prefix, just the headline]
