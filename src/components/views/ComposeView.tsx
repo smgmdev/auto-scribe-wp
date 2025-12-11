@@ -839,7 +839,73 @@ export function ComposeView() {
             </p>
           </div>
 
-          {/* SEO Settings - Under Content */}
+          {/* Featured Image - Under Content */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Featured Image</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              
+              {imagePreview ? (
+                <div className="relative">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-40 object-cover rounded-lg"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8"
+                    onClick={removeImage}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`w-full h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+                    isDragging 
+                      ? 'border-accent bg-accent/10' 
+                      : 'border-border hover:border-accent hover:bg-accent/5'
+                  }`}
+                >
+                  <Upload className={`h-8 w-8 ${isDragging ? 'text-accent' : 'text-muted-foreground'}`} />
+                  <span className={`text-sm ${isDragging ? 'text-accent' : 'text-muted-foreground'}`}>
+                    {isDragging ? 'Drop image here' : 'Drag & drop or click to upload'}
+                  </span>
+                </div>
+              )}
+
+              {imagePreview && (
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="img-caption" className="text-xs">Caption</Label>
+                    <Input
+                      id="img-caption"
+                      placeholder="Image caption"
+                      value={featuredImage.caption}
+                      onChange={(e) => setFeaturedImage({ ...featuredImage, caption: e.target.value })}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* SEO Settings - Under Featured Image */}
           {selectedSite && currentSite && (
             <Card>
               <CardHeader>
@@ -861,6 +927,9 @@ export function ComposeView() {
                     onChange={(e) => setFocusKeyword(e.target.value)}
                     className="h-8 text-sm"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Title and Meta Description should contain the same Focus Keyword to maximize SEO
+                  </p>
                 </div>
                 
                 {/* Meta Description - AIO SEO PRO only */}
@@ -887,6 +956,55 @@ export function ComposeView() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Actions - At Top */}
+          <div className="space-y-3">
+            {editingArticle && (
+              <Button 
+                variant="default" 
+                className="w-full"
+                onClick={handleSaveChanges}
+                disabled={!title || isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            )}
+            <Button 
+              variant="accent" 
+              className="w-full"
+              onClick={handlePublish}
+              disabled={!content || !selectedSite || isPublishing}
+            >
+              {isPublishing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  {editingArticle ? 'Update & Publish' : 'Publish Article'}
+                </>
+              )}
+            </Button>
+            {!editingArticle && (
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleSaveDraft}
+                disabled={!title || isPublishing}
+              >
+                Save as Draft
+              </Button>
+            )}
+          </div>
+
           {/* Categories */}
           {selectedSite && (
             <Card>
@@ -1040,121 +1158,6 @@ export function ComposeView() {
               </CardContent>
             </Card>
           )}
-
-          {/* Featured Image */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Featured Image</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              
-              {imagePreview ? (
-                <div className="relative">
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
-                    className="w-full h-40 object-cover rounded-lg"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-8 w-8"
-                    onClick={removeImage}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`w-full h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
-                    isDragging 
-                      ? 'border-accent bg-accent/10' 
-                      : 'border-border hover:border-accent hover:bg-accent/5'
-                  }`}
-                >
-                  <Upload className={`h-8 w-8 ${isDragging ? 'text-accent' : 'text-muted-foreground'}`} />
-                  <span className={`text-sm ${isDragging ? 'text-accent' : 'text-muted-foreground'}`}>
-                    {isDragging ? 'Drop image here' : 'Drag & drop or click to upload'}
-                  </span>
-                </div>
-              )}
-
-              {imagePreview && (
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="img-caption" className="text-xs">Caption</Label>
-                    <Input
-                      id="img-caption"
-                      placeholder="Image caption"
-                      value={featuredImage.caption}
-                      onChange={(e) => setFeaturedImage({ ...featuredImage, caption: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <div className="space-y-3">
-            {editingArticle && (
-              <Button 
-                variant="default" 
-                className="w-full"
-                onClick={handleSaveChanges}
-                disabled={!title || isSaving}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
-            )}
-            <Button 
-              variant="accent" 
-              className="w-full"
-              onClick={handlePublish}
-              disabled={!content || !selectedSite || isPublishing}
-            >
-              {isPublishing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  {editingArticle ? 'Update & Publish' : 'Publish Article'}
-                </>
-              )}
-            </Button>
-            {!editingArticle && (
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={handleSaveDraft}
-                disabled={!title || isPublishing}
-              >
-                Save as Draft
-              </Button>
-            )}
-          </div>
         </div>
       </div>
     </div>
