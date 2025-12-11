@@ -18,7 +18,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(true)}
-          className="text-white hover:text-white hover:bg-[#999]/30"
+          className="text-white hover:text-white hover:bg-[#999]/30 rounded-full"
         >
           <Menu className="h-6 w-6" />
         </Button>
