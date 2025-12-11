@@ -179,6 +179,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          label: string
+          site_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          label: string
+          site_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          label?: string
+          site_id?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string

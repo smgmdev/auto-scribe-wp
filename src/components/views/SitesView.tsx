@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,24 @@ interface SiteCredit {
   credits_required: number;
 }
 
+interface SiteTag {
+  id: string;
+  site_id: string;
+  label: string;
+  color: string;
+}
+
+const TAG_COLORS = [
+  { name: 'Green', value: '#22c55e' },
+  { name: 'Blue', value: '#3b82f6' },
+  { name: 'Purple', value: '#a855f7' },
+  { name: 'Orange', value: '#f97316' },
+  { name: 'Pink', value: '#ec4899' },
+  { name: 'Cyan', value: '#06b6d4' },
+  { name: 'Yellow', value: '#eab308' },
+  { name: 'Red', value: '#ef4444' },
+];
+
 export function SitesView() {
   const { sites, addSite, removeSite, updateSite } = useAppStore();
   const { isAdmin } = useAuth();
@@ -25,8 +43,12 @@ export function SitesView() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [siteCredits, setSiteCredits] = useState<Record<string, number>>({});
+  const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
   const [editingCredits, setEditingCredits] = useState<string | null>(null);
   const [creditInput, setCreditInput] = useState('');
+  const [newTagLabel, setNewTagLabel] = useState('');
+  const [newTagColor, setNewTagColor] = useState('#22c55e');
+  const [addingTagForSite, setAddingTagForSite] = useState<string | null>(null);
 
   const toggleExpand = (siteId: string) => {
     setExpandedSites(prev => {
@@ -49,6 +71,7 @@ export function SitesView() {
 
   useEffect(() => {
     fetchSiteCredits();
+    fetchSiteTags();
   }, [sites]);
 
   const fetchSiteCredits = async () => {
@@ -64,6 +87,84 @@ export function SitesView() {
         creditsMap[sc.site_id] = sc.credits_required;
       });
       setSiteCredits(creditsMap);
+    }
+  };
+
+  const fetchSiteTags = async () => {
+    const { data, error } = await supabase
+      .from('site_tags')
+      .select('*');
+
+    if (!error && data) {
+      const tagsMap: Record<string, SiteTag[]> = {};
+      data.forEach((tag: SiteTag) => {
+        if (!tagsMap[tag.site_id]) {
+          tagsMap[tag.site_id] = [];
+        }
+        tagsMap[tag.site_id].push(tag);
+      });
+      setSiteTags(tagsMap);
+    }
+  };
+
+  const handleAddTag = async (siteId: string) => {
+    if (!newTagLabel.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid tag',
+        description: 'Please enter a tag label.'
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('site_tags')
+      .insert({
+        site_id: siteId,
+        label: newTagLabel.trim(),
+        color: newTagColor
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error adding tag',
+        description: error.message
+      });
+    } else if (data) {
+      setSiteTags(prev => ({
+        ...prev,
+        [siteId]: [...(prev[siteId] || []), data as SiteTag]
+      }));
+      setNewTagLabel('');
+      setNewTagColor('#22c55e');
+      setAddingTagForSite(null);
+      toast({
+        title: 'Tag added',
+        description: `"${newTagLabel}" has been added.`
+      });
+    }
+  };
+
+  const handleRemoveTag = async (tagId: string, siteId: string) => {
+    const { error } = await supabase
+      .from('site_tags')
+      .delete()
+      .eq('id', tagId);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error removing tag',
+        description: error.message
+      });
+    } else {
+      setSiteTags(prev => ({
+        ...prev,
+        [siteId]: (prev[siteId] || []).filter(t => t.id !== tagId)
+      }));
     }
   };
 
@@ -389,30 +490,121 @@ export function SitesView() {
                       </Button>
                     )}
 
-                    {/* Expand/Collapse Toggle - only for non-admin */}
-                    {!isAdmin && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => toggleExpand(site.id)}
-                      >
-                        {expandedSites.has(site.id) ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </Button>
-                    )}
+                    {/* Expand/Collapse Toggle - for both admin and non-admin */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => toggleExpand(site.id)}
+                    >
+                      {expandedSites.has(site.id) ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                 </div>
 
-                {/* Row 2: Green badges (expanded state for non-admin) */}
-                {!isAdmin && expandedSites.has(site.id) && (
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">Editorial</Badge>
-                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">No sponsor marks</Badge>
-                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">LLM friendly</Badge>
+                {/* Row 2: Tags (expanded state) */}
+                {expandedSites.has(site.id) && (
+                  <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
+                    {/* Existing tags */}
+                    {(siteTags[site.id] || []).map(tag => (
+                      <Badge 
+                        key={tag.id} 
+                        variant="outline" 
+                        className="text-xs"
+                        style={{ 
+                          borderColor: `${tag.color}50`,
+                          color: tag.color,
+                          backgroundColor: `${tag.color}15`
+                        }}
+                      >
+                        {tag.label}
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleRemoveTag(tag.id, site.id)}
+                            className="ml-1.5 hover:opacity-70"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        )}
+                      </Badge>
+                    ))}
+
+                    {/* Add tag button/form for admin */}
+                    {isAdmin && (
+                      addingTagForSite === site.id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder="Tag label"
+                            value={newTagLabel}
+                            onChange={(e) => setNewTagLabel(e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
+                          <Select value={newTagColor} onValueChange={setNewTagColor}>
+                            <SelectTrigger className="h-7 w-24 text-xs">
+                              <div className="flex items-center gap-1.5">
+                                <div 
+                                  className="h-3 w-3 rounded-full" 
+                                  style={{ backgroundColor: newTagColor }}
+                                />
+                                <span className="text-xs">Color</span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent className="bg-popover border border-border">
+                              {TAG_COLORS.map(color => (
+                                <SelectItem key={color.value} value={color.value}>
+                                  <div className="flex items-center gap-2">
+                                    <div 
+                                      className="h-3 w-3 rounded-full" 
+                                      style={{ backgroundColor: color.value }}
+                                    />
+                                    {color.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 px-2 text-xs"
+                            onClick={() => handleAddTag(site.id)}
+                          >
+                            Add
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 px-2 text-xs"
+                            onClick={() => {
+                              setAddingTagForSite(null);
+                              setNewTagLabel('');
+                              setNewTagColor('#22c55e');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-2 text-xs text-muted-foreground"
+                          onClick={() => setAddingTagForSite(site.id)}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Tag
+                        </Button>
+                      )
+                    )}
+
+                    {/* Show message if no tags */}
+                    {(!siteTags[site.id] || siteTags[site.id].length === 0) && !isAdmin && (
+                      <span className="text-xs text-muted-foreground">No tags available</span>
+                    )}
                   </div>
                 )}
               </CardContent>
