@@ -226,19 +226,29 @@ export function ComposeView() {
   };
 
   const toggleCategory = (categoryId: number) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
-    );
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryId)) {
+        return prev.filter(id => id !== categoryId);
+      }
+      // Max 2 categories
+      if (prev.length >= 2) {
+        return prev;
+      }
+      return [...prev, categoryId];
+    });
   };
 
   const toggleTag = (tagId: number) => {
-    setSelectedTagIds(prev =>
-      prev.includes(tagId)
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
-    );
+    setSelectedTagIds(prev => {
+      if (prev.includes(tagId)) {
+        return prev.filter(id => id !== tagId);
+      }
+      // Max 3 tags
+      if (prev.length >= 3) {
+        return prev;
+      }
+      return [...prev, tagId];
+    });
   };
 
   const addNewTag = async () => {
@@ -1011,11 +1021,9 @@ export function ComposeView() {
               <CardHeader>
                 <CardTitle className="text-sm font-medium">
                   Categories
-                  {selectedCategories.length > 0 && (
-                    <Badge variant="secondary" className="ml-2">
-                      {selectedCategories.length} selected
-                    </Badge>
-                  )}
+                  <Badge variant="secondary" className="ml-2">
+                    {selectedCategories.length}/2 selected
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1029,7 +1037,7 @@ export function ComposeView() {
                     No categories found on this site
                   </p>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <div className="space-y-2">
                     {availableCategories.map((category) => (
                       <label
                         key={category.id}
@@ -1056,11 +1064,9 @@ export function ComposeView() {
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Tag className="h-4 w-4" />
                   Tags
-                  {selectedTagIds.length > 0 && (
-                    <Badge variant="secondary" className="ml-auto">
-                      {selectedTagIds.length} selected
-                    </Badge>
-                  )}
+                  <Badge variant="secondary" className="ml-auto">
+                    {selectedTagIds.length}/3 selected
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
