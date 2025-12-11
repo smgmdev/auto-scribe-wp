@@ -62,7 +62,7 @@ export function ComposeView() {
     setEditingArticle
   } = useAppStore();
   const { addArticle, updateArticle } = useArticles();
-  const { credits, isAdmin } = useAuth();
+  const { user, credits, isAdmin, refreshCredits } = useAuth();
   const {
     toast
   } = useToast();
@@ -539,6 +539,35 @@ export function ComposeView() {
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
         });
       }
+      // Deduct credits for non-admin users (only for new articles, not updates)
+      if (!isAdmin && !editingArticle && user) {
+        const creditCost = getSiteCreditCost(selectedSite);
+        if (creditCost > 0) {
+          const newCredits = credits - creditCost;
+          
+          // Update credits in database
+          const { error: creditsError } = await supabase
+            .from('user_credits')
+            .update({ credits: newCredits, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id);
+          
+          if (creditsError) {
+            console.error('Failed to deduct credits:', creditsError);
+          } else {
+            // Record transaction
+            await supabase.from('credit_transactions').insert({
+              user_id: user.id,
+              amount: -creditCost,
+              type: 'publish',
+              description: `Published article to ${currentSite.name}`
+            });
+            
+            // Refresh credits in auth context
+            await refreshCredits();
+          }
+        }
+      }
+
       toast({
         title: "Article published!",
         description: <div>

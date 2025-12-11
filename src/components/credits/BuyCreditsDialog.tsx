@@ -80,6 +80,14 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       if (data?.url) {
         window.open(data.url, '_blank');
         onOpenChange(false);
+        
+        // Poll for credit updates after checkout (user may complete payment in new tab)
+        const pollInterval = setInterval(async () => {
+          await refreshCredits();
+        }, 3000);
+        
+        // Stop polling after 5 minutes
+        setTimeout(() => clearInterval(pollInterval), 300000);
       }
     } catch (error: any) {
       toast({
