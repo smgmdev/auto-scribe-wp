@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { WordPressSite, Headline, Article, AISettings, ArticleTone } from '@/types';
+import type { WordPressSite, Headline, Article, AISettings } from '@/types';
 
 interface AppState {
   // WordPress Sites
@@ -15,11 +15,7 @@ interface AppState {
   selectedHeadline: Headline | null;
   setSelectedHeadline: (headline: Headline | null) => void;
   
-  // Articles
-  articles: Article[];
-  addArticle: (article: Article) => void;
-  updateArticle: (id: string, updates: Partial<Article>) => void;
-  deleteArticle: (id: string) => void;
+  // Editing Article (for compose view)
   editingArticle: Article | null;
   setEditingArticle: (article: Article | null) => void;
   
@@ -66,22 +62,7 @@ export const useAppStore = create<AppState>()(
       selectedHeadline: null,
       setSelectedHeadline: (headline) => set({ selectedHeadline: headline }),
 
-      // Articles
-      articles: [],
-      addArticle: (article) =>
-        set((state) => ({
-          articles: [article, ...state.articles],
-        })),
-      updateArticle: (id, updates) =>
-        set((state) => ({
-          articles: state.articles.map((a) =>
-            a.id === id ? { ...a, ...updates } : a
-          ),
-        })),
-      deleteArticle: (id) =>
-        set((state) => ({
-          articles: state.articles.filter((a) => a.id !== id),
-        })),
+      // Editing Article
       editingArticle: null,
       setEditingArticle: (article) => set({ editingArticle: article }),
 
@@ -115,7 +96,6 @@ export const useAppStore = create<AppState>()(
       name: 'wp-publisher-storage',
       partialize: (state) => ({
         sites: state.sites,
-        articles: state.articles,
         aiSettings: state.aiSettings,
       }),
     }

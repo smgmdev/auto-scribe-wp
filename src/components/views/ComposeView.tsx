@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import { useArticles } from '@/hooks/useArticles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,11 +52,10 @@ export function ComposeView() {
     selectedHeadline,
     setSelectedHeadline,
     sites,
-    addArticle,
-    updateArticle,
     editingArticle,
     setEditingArticle
   } = useAppStore();
+  const { addArticle, updateArticle } = useArticles();
   const {
     toast
   } = useToast();
@@ -471,7 +471,7 @@ export function ComposeView() {
         description: featuredImage.description
       } : undefined;
       if (editingArticle) {
-        updateArticle(editingArticle.id, {
+        await updateArticle(editingArticle.id, {
           title,
           content,
           tone,
@@ -484,11 +484,9 @@ export function ComposeView() {
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
-          updatedAt: new Date()
         });
       } else {
-        addArticle({
-          id: crypto.randomUUID(),
+        await addArticle({
           title,
           content,
           tone,
@@ -502,8 +500,6 @@ export function ComposeView() {
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
-          createdAt: new Date(),
-          updatedAt: new Date()
         });
       }
       toast({
@@ -594,7 +590,7 @@ export function ComposeView() {
           altText: featuredImage.altText,
           description: featuredImage.description
         } : undefined;
-        updateArticle(editingArticle.id, {
+        await updateArticle(editingArticle.id, {
           title,
           content,
           tone,
@@ -603,17 +599,15 @@ export function ComposeView() {
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
-          updatedAt: new Date()
         });
       } else {
-        updateArticle(editingArticle.id, {
+        await updateArticle(editingArticle.id, {
           title,
           content,
           tone,
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
-          updatedAt: new Date()
         });
       }
       toast({
@@ -678,9 +672,8 @@ export function ComposeView() {
       }
     }
 
-    // Always save locally
-    addArticle({
-      id: crypto.randomUUID(),
+    // Always save to database
+    await addArticle({
       title,
       content,
       tone,
@@ -689,15 +682,12 @@ export function ComposeView() {
       status: 'draft',
       categories: selectedCategories,
       tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
-      createdAt: new Date(),
-      updatedAt: new Date()
     });
-    if (!currentSite) {
-      toast({
-        title: "Draft saved locally",
-        description: "Select a site to save to WordPress"
-      });
-    }
+    
+    toast({
+      title: "Draft saved",
+      description: currentSite ? `Draft saved to ${currentSite.name}` : "Your draft has been saved"
+    });
   };
   return <div className="space-y-8 animate-fade-in">
       {/* Header */}

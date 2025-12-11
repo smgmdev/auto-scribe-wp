@@ -1,6 +1,7 @@
 import { Globe, FileText, Newspaper, TrendingUp } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
+import { useArticles } from '@/hooks/useArticles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -12,8 +13,9 @@ const stats = [
 ];
 
 export function DashboardView() {
-  const { sites, articles, setCurrentView } = useAppStore();
+  const { sites, setCurrentView } = useAppStore();
   const { isAdmin } = useAuth();
+  const { articles } = useArticles();
 
   const getStatValue = (key: string) => {
     switch (key) {
