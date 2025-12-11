@@ -789,9 +789,9 @@ export function ComposeView() {
                         key={site.id} 
                         value={site.id}
                         disabled={!canAfford}
-                        className={!canAfford ? "opacity-50" : ""}
+                        className={`${!canAfford ? "opacity-50" : ""} [&>span]:w-full`}
                       >
-                        <div className="flex items-center justify-between w-full gap-4">
+                        <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <img 
                               src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`} 
@@ -803,7 +803,7 @@ export function ComposeView() {
                             />
                             <span>{site.name}</span>
                           </div>
-                          <div className={`flex items-center gap-1 text-xs ${canAfford ? 'text-muted-foreground' : 'text-destructive'}`}>
+                          <div className={`flex items-center gap-1 text-xs ml-auto ${canAfford ? 'text-muted-foreground' : 'text-destructive'}`}>
                             {!canAfford && <Lock className="h-3 w-3" />}
                             <Coins className="h-3 w-3" />
                             <span>{creditCost}</span>
