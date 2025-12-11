@@ -58,11 +58,18 @@ export function useArticles() {
 
     setLoading(true);
     
-    // Admins see all articles, users see only their own (via RLS)
-    const { data, error } = await supabase
+    // Admins see all articles, regular users see only their own personal articles
+    let query = supabase
       .from('articles')
       .select('*')
       .order('created_at', { ascending: false });
+    
+    // For non-admin users, filter to only their own articles
+    if (!isAdmin) {
+      query = query.eq('user_id', user.id);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching articles:', error);
@@ -76,7 +83,7 @@ export function useArticles() {
     }
     
     setLoading(false);
-  }, [user, toast]);
+  }, [user, isAdmin, toast]);
 
   useEffect(() => {
     fetchArticles();
