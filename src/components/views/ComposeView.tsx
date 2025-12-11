@@ -35,16 +35,17 @@ const toneOptions: { value: ArticleTone; label: string; color: string }[] = [
 ];
 
 export function ComposeView() {
-  const { selectedHeadline, setSelectedHeadline, sites, addArticle } = useAppStore();
+  const { selectedHeadline, setSelectedHeadline, sites, addArticle, updateArticle, editingArticle, setEditingArticle } = useAppStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [tone, setTone] = useState<ArticleTone>('business');
-  const [title, setTitle] = useState(selectedHeadline?.title || '');
-  const [content, setContent] = useState('');
+  const [tone, setTone] = useState<ArticleTone>(editingArticle?.tone || 'business');
+  const [title, setTitle] = useState(editingArticle?.title || selectedHeadline?.title || '');
+  const [content, setContent] = useState(editingArticle?.content || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [selectedSite, setSelectedSite] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedSite, setSelectedSite] = useState<string>(editingArticle?.publishedTo || '');
   const [featuredImage, setFeaturedImage] = useState<FeaturedImage>({
     file: null,
     title: '',
@@ -117,6 +118,13 @@ export function ComposeView() {
       setFetchError(null);
     }
   }, [currentSite?.id]);
+
+  // Clear editing article on unmount
+  useEffect(() => {
+    return () => {
+      setEditingArticle(null);
+    };
+  }, [setEditingArticle]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -300,22 +308,39 @@ export function ComposeView() {
       });
 
       // Save to local state
-      addArticle({
-        id: crypto.randomUUID(),
-        title,
-        content,
-        tone,
-        sourceHeadline: selectedHeadline || undefined,
-        featuredImage: featuredImage.file ? featuredImage : undefined,
-        status: 'published',
-        publishedTo: selectedSite,
-        categories: selectedCategories,
-        tags: availableTags
-          .filter(t => selectedTagIds.includes(t.id))
-          .map(t => t.name),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      if (editingArticle) {
+        updateArticle(editingArticle.id, {
+          title,
+          content,
+          tone,
+          status: 'published',
+          publishedTo: selectedSite,
+          wpLink: result.link,
+          categories: selectedCategories,
+          tags: availableTags
+            .filter(t => selectedTagIds.includes(t.id))
+            .map(t => t.name),
+          updatedAt: new Date(),
+        });
+      } else {
+        addArticle({
+          id: crypto.randomUUID(),
+          title,
+          content,
+          tone,
+          sourceHeadline: selectedHeadline || undefined,
+          featuredImage: featuredImage.file ? featuredImage : undefined,
+          status: 'published',
+          publishedTo: selectedSite,
+          wpLink: result.link,
+          categories: selectedCategories,
+          tags: availableTags
+            .filter(t => selectedTagIds.includes(t.id))
+            .map(t => t.name),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
 
       toast({
         title: "Article published!",
@@ -357,6 +382,35 @@ export function ComposeView() {
     }
   };
 
+  const handleSaveChanges = () => {
+    if (!title) {
+      toast({
+        title: "Title required",
+        description: "Please enter a title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!editingArticle) return;
+
+    setIsSaving(true);
+    
+    updateArticle(editingArticle.id, {
+      title,
+      content,
+      tone,
+      updatedAt: new Date(),
+    });
+
+    toast({
+      title: "Article saved",
+      description: "Your changes have been saved",
+    });
+
+    setIsSaving(false);
+  };
+
   const handleSaveDraft = async () => {
     if (!title) {
       toast({
@@ -364,6 +418,12 @@ export function ComposeView() {
         description: "Please enter a title for your draft",
         variant: "destructive",
       });
+      return;
+    }
+
+    // If editing, just update the article
+    if (editingArticle) {
+      handleSaveChanges();
       return;
     }
 
@@ -425,10 +485,13 @@ export function ComposeView() {
       {/* Header */}
       <div>
         <h1 className="font-display text-4xl font-bold text-foreground">
-          Compose Article
+          {editingArticle ? 'Edit Article' : 'Compose Article'}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Write or generate AI-powered articles for your WordPress sites
+          {editingArticle 
+            ? 'Make changes to your article and save or publish'
+            : 'Write or generate AI-powered articles for your WordPress sites'
+          }
         </p>
       </div>
 
@@ -831,6 +894,23 @@ export function ComposeView() {
 
           {/* Actions */}
           <div className="space-y-3">
+            {editingArticle && (
+              <Button 
+                variant="default" 
+                className="w-full"
+                onClick={handleSaveChanges}
+                disabled={!title || isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            )}
             <Button 
               variant="accent" 
               className="w-full"
@@ -845,18 +925,20 @@ export function ComposeView() {
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
-                  Publish Article
+                  {editingArticle ? 'Update & Publish' : 'Publish Article'}
                 </>
               )}
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={handleSaveDraft}
-              disabled={!title || isPublishing}
-            >
-              Save as Draft
-            </Button>
+            {!editingArticle && (
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleSaveDraft}
+                disabled={!title || isPublishing}
+              >
+                Save as Draft
+              </Button>
+            )}
           </div>
         </div>
       </div>

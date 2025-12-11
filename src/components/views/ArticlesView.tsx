@@ -3,6 +3,7 @@ import { useAppStore } from '@/stores/appStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 const toneColors: Record<string, string> = {
   political: 'bg-headline-political/10 text-headline-political border-headline-political/30',
@@ -19,11 +20,25 @@ const statusColors: Record<string, string> = {
 };
 
 export function ArticlesView() {
-  const { articles, sites } = useAppStore();
+  const { articles, sites, deleteArticle, setEditingArticle, setCurrentView } = useAppStore();
+  const { toast } = useToast();
 
   const getSiteName = (siteId?: string) => {
     if (!siteId) return '';
     return sites.find(s => s.id === siteId)?.name || 'Unknown site';
+  };
+
+  const handleEdit = (article: typeof articles[0]) => {
+    setEditingArticle(article);
+    setCurrentView('compose');
+  };
+
+  const handleDelete = (articleId: string, articleTitle: string) => {
+    deleteArticle(articleId);
+    toast({
+      title: "Article deleted",
+      description: `"${articleTitle}" has been removed`,
+    });
   };
 
   return (
@@ -96,14 +111,37 @@ export function ArticlesView() {
                           <span>Published to: {getSiteName(article.publishedTo)}</span>
                         </>
                       )}
+                      {article.wpLink && (
+                        <>
+                          <span>•</span>
+                          <a 
+                            href={article.wpLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-accent hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            View on WordPress
+                          </a>
+                        </>
+                      )}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleEdit(article)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => handleDelete(article.id, article.title)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
