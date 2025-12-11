@@ -80,7 +80,7 @@ export function Sidebar({
             <div className="flex items-center gap-3">
               <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
               <div>
-                <h1 className="text-lg font-semibold text-sidebar-foreground">
+                <h1 className="text-lg font-semibold text-white">
                   Arcana Mace 
                 </h1>
                 
