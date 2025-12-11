@@ -121,24 +121,34 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
   try {
     const baseUrl = normalizeUrl(params.site.url);
     
-    // Build meta object for SEO plugins
-    const meta: Record<string, string> = {};
-    
+    // Build the request body
+    const body: Record<string, any> = {
+      title: params.title,
+      content: params.content,
+      status: params.status,
+      categories: params.categories,
+      tags: params.tags,
+      featured_media: params.featuredMediaId || 0,
+    };
+
+    // Add SEO data based on plugin type
     if (params.seo) {
       if (params.site.seoPlugin === 'aioseo') {
-        if (params.seo.focusKeyword) {
-          meta['_aioseo_keywords'] = params.seo.focusKeyword;
-        }
-        if (params.seo.metaDescription) {
-          meta['_aioseo_description'] = params.seo.metaDescription;
-        }
+        // AIOSEO uses aioseo_meta_data object
+        body.aioseo_meta_data = {
+          description: params.seo.metaDescription || '',
+          keyphrases: params.seo.focusKeyword ? {
+            focus: {
+              keyphrase: params.seo.focusKeyword
+            }
+          } : undefined,
+        };
       } else if (params.site.seoPlugin === 'rankmath') {
-        if (params.seo.focusKeyword) {
-          meta['rank_math_focus_keyword'] = params.seo.focusKeyword;
-        }
-        if (params.seo.metaDescription) {
-          meta['rank_math_description'] = params.seo.metaDescription;
-        }
+        // RankMath uses meta object
+        body.meta = {
+          rank_math_focus_keyword: params.seo.focusKeyword || '',
+          rank_math_description: params.seo.metaDescription || '',
+        };
       }
     }
 
@@ -148,15 +158,7 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
         'Authorization': createAuthHeader(params.site),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        title: params.title,
-        content: params.content,
-        status: params.status,
-        categories: params.categories,
-        tags: params.tags,
-        featured_media: params.featuredMediaId || 0,
-        meta: Object.keys(meta).length > 0 ? meta : undefined,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -195,24 +197,34 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
   try {
     const baseUrl = normalizeUrl(params.site.url);
     
-    // Build meta object for SEO plugins
-    const meta: Record<string, string> = {};
-    
+    // Build the request body
+    const body: Record<string, any> = {
+      title: params.title,
+      content: params.content,
+      status: params.status,
+      categories: params.categories,
+      tags: params.tags,
+      featured_media: params.featuredMediaId ?? undefined,
+    };
+
+    // Add SEO data based on plugin type
     if (params.seo) {
       if (params.site.seoPlugin === 'aioseo') {
-        if (params.seo.focusKeyword) {
-          meta['_aioseo_keywords'] = params.seo.focusKeyword;
-        }
-        if (params.seo.metaDescription) {
-          meta['_aioseo_description'] = params.seo.metaDescription;
-        }
+        // AIOSEO uses aioseo_meta_data object
+        body.aioseo_meta_data = {
+          description: params.seo.metaDescription || '',
+          keyphrases: params.seo.focusKeyword ? {
+            focus: {
+              keyphrase: params.seo.focusKeyword
+            }
+          } : undefined,
+        };
       } else if (params.site.seoPlugin === 'rankmath') {
-        if (params.seo.focusKeyword) {
-          meta['rank_math_focus_keyword'] = params.seo.focusKeyword;
-        }
-        if (params.seo.metaDescription) {
-          meta['rank_math_description'] = params.seo.metaDescription;
-        }
+        // RankMath uses meta object
+        body.meta = {
+          rank_math_focus_keyword: params.seo.focusKeyword || '',
+          rank_math_description: params.seo.metaDescription || '',
+        };
       }
     }
 
@@ -222,15 +234,7 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
         'Authorization': createAuthHeader(params.site),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        title: params.title,
-        content: params.content,
-        status: params.status,
-        categories: params.categories,
-        tags: params.tags,
-        featured_media: params.featuredMediaId ?? undefined,
-        meta: Object.keys(meta).length > 0 ? meta : undefined,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -258,14 +262,11 @@ export async function uploadMedia(
   try {
     const baseUrl = normalizeUrl(site.url);
     
+    // Step 1: Upload the file
     const formData = new FormData();
     formData.append('file', file);
-    if (metadata.title) formData.append('title', metadata.title);
-    if (metadata.alt_text) formData.append('alt_text', metadata.alt_text);
-    if (metadata.caption) formData.append('caption', metadata.caption);
-    if (metadata.description) formData.append('description', metadata.description);
 
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+    const uploadResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
       method: 'POST',
       headers: {
         'Authorization': createAuthHeader(site),
@@ -273,16 +274,40 @@ export async function uploadMedia(
       body: formData,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Failed to upload media:', response.status, errorData);
-      throw new Error(errorData.message || `Failed to upload: ${response.statusText}`);
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json().catch(() => ({}));
+      console.error('Failed to upload media:', uploadResponse.status, errorData);
+      throw new Error(errorData.message || `Failed to upload: ${uploadResponse.statusText}`);
     }
 
-    const data = await response.json();
+    const uploadData = await uploadResponse.json();
+    const mediaId = uploadData.id;
+
+    // Step 2: Update the media metadata (always send to allow clearing/overriding)
+    const updateResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media/${mediaId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': createAuthHeader(site),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: metadata.title || '',
+        alt_text: metadata.alt_text || '',
+        caption: metadata.caption || '',
+        description: metadata.description || '',
+      }),
+    });
+
+    if (!updateResponse.ok) {
+      console.warn('Failed to update media metadata, but upload succeeded');
+    }
+
+    // Get the updated media data
+    const finalData = updateResponse.ok ? await updateResponse.json() : uploadData;
+    
     return {
-      id: data.id,
-      source_url: data.source_url,
+      id: finalData.id,
+      source_url: finalData.source_url,
     };
   } catch (error) {
     console.error('Error uploading media:', error);
