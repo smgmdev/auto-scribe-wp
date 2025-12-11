@@ -9,7 +9,7 @@ const corsHeaders = {
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-china';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia';
   url: string;
   publishedAt: string;
   summary?: string;
@@ -346,18 +346,17 @@ async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
   return headlines;
 }
 
-async function scrapeBloombergChina(): Promise<Headline[]> {
+async function scrapeBloombergAsia(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
   const { today, yesterday } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Bloomberg China...');
+    console.log('Scraping Bloomberg Asia...');
     
-    // Scrape Bloomberg China section
+    // Scrape Bloomberg Asia section
     const urls = [
-      'https://www.bloomberg.com/china',
-      'https://www.bloomberg.com/topics/china',
+      'https://www.bloomberg.com/asia',
     ];
     
     for (const pageUrl of urls) {
@@ -371,13 +370,13 @@ async function scrapeBloombergChina(): Promise<Headline[]> {
           }
         });
         const html = await response.text();
-        console.log(`Bloomberg China page ${pageUrl} length: ${html.length}`);
+        console.log(`Bloomberg Asia page ${pageUrl} length: ${html.length}`);
         
         const doc = new DOMParser().parseFromString(html, 'text/html');
         
         if (doc) {
           const allLinks = doc.querySelectorAll('a[href]');
-          console.log(`Found ${allLinks.length} links on Bloomberg China`);
+          console.log(`Found ${allLinks.length} links on Bloomberg Asia`);
           
           allLinks.forEach((article) => {
             if (headlines.length >= 30) return;
@@ -406,13 +405,13 @@ async function scrapeBloombergChina(): Promise<Headline[]> {
             if (articleDate && isTodayOrYesterday(articleDate)) {
               seen.add(title.toLowerCase());
               headlines.push({
-                id: `bloomberg-china-${Date.now()}-${headlines.length}`,
+                id: `bloomberg-asia-${Date.now()}-${headlines.length}`,
                 title: title,
-                source: 'bloomberg-china',
+                source: 'bloomberg-asia',
                 url: fullUrl,
                 publishedAt: articleDate.toISOString(),
               });
-              console.log(`Added Bloomberg China headline: ${title.substring(0, 50)}...`);
+              console.log(`Added Bloomberg Asia headline: ${title.substring(0, 50)}...`);
             }
           });
         }
@@ -423,7 +422,7 @@ async function scrapeBloombergChina(): Promise<Headline[]> {
     
     // Also try RSS if available
     try {
-      const rssResponse = await fetch('https://feeds.bloomberg.com/china/news.rss', {
+      const rssResponse = await fetch('https://feeds.bloomberg.com/asia/news.rss', {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
           'Accept': 'application/rss+xml, application/xml, text/xml',
@@ -432,7 +431,7 @@ async function scrapeBloombergChina(): Promise<Headline[]> {
       
       if (rssResponse.ok) {
         const xml = await rssResponse.text();
-        console.log(`Bloomberg China RSS length: ${xml.length}`);
+        console.log(`Bloomberg Asia RSS length: ${xml.length}`);
         
         const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
         
@@ -463,23 +462,23 @@ async function scrapeBloombergChina(): Promise<Headline[]> {
           if (articleDate && isTodayOrYesterday(articleDate)) {
             seen.add(title.toLowerCase());
             headlines.push({
-              id: `bloomberg-china-${Date.now()}-${headlines.length}`,
+              id: `bloomberg-asia-${Date.now()}-${headlines.length}`,
               title: title,
-              source: 'bloomberg-china',
+              source: 'bloomberg-asia',
               url: url,
               publishedAt: articleDate.toISOString(),
             });
-            console.log(`Added Bloomberg China RSS headline: ${title.substring(0, 50)}...`);
+            console.log(`Added Bloomberg Asia RSS headline: ${title.substring(0, 50)}...`);
           }
         }
       }
     } catch (e) {
-      console.log('Bloomberg China RSS not available:', e);
+      console.log('Bloomberg Asia RSS not available:', e);
     }
     
-    console.log(`Found ${headlines.length} Bloomberg China headlines`);
+    console.log(`Found ${headlines.length} Bloomberg Asia headlines`);
   } catch (error) {
-    console.error('Error scraping Bloomberg China:', error);
+    console.error('Error scraping Bloomberg Asia:', error);
   }
   return headlines;
 }
@@ -572,8 +571,8 @@ serve(async (req) => {
     if (sources.includes('bloomberg-middleeast')) {
       scrapePromises.push(scrapeBloombergMiddleEast());
     }
-    if (sources.includes('bloomberg-china')) {
-      scrapePromises.push(scrapeBloombergChina());
+    if (sources.includes('bloomberg-asia')) {
+      scrapePromises.push(scrapeBloombergAsia());
     }
     if (sources.includes('fortune')) {
       scrapePromises.push(scrapeFortune());
