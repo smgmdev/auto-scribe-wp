@@ -105,14 +105,16 @@ export default function Auth() {
     }
   };
 
-  const inputClassName = "bg-black border-white/30 text-white placeholder:text-white/50 focus:border-blue-500 focus:bg-white focus:text-black focus:placeholder:text-gray-400";
+  const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200";
+
+  const buttonClassName = "w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200";
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-black border-white/20">
+      <Card className="w-full max-w-md bg-[#1c1c1c] border-white/20">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={amlogo} alt="Logo" className="h-12 w-12 object-contain" />
+            <img src={amlogo} alt="Logo" className="h-20 w-20 object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold text-white">Arcana Mace</CardTitle>
           <CardDescription className="text-white/70">AI Content Studio</CardDescription>
@@ -120,8 +122,8 @@ export default function Auth() {
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-white/10">
-              <TabsTrigger value="signin" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin" className="text-white data-[state=active]:bg-[#3872e0] data-[state=active]:text-white transition-all duration-200">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-white data-[state=active]:bg-[#3872e0] data-[state=active]:text-white transition-all duration-200">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -156,7 +158,7 @@ export default function Auth() {
                     <p className="text-sm text-red-400">{errors.password}</p>
                   )}
                 </div>
-                <Button type="submit" className="w-full bg-white text-black hover:bg-white/90" disabled={isLoading}>
+                <Button type="submit" className={buttonClassName} disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -201,7 +203,7 @@ export default function Auth() {
                     <p className="text-sm text-red-400">{errors.password}</p>
                   )}
                 </div>
-                <Button type="submit" className="w-full bg-white text-black hover:bg-white/90" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
