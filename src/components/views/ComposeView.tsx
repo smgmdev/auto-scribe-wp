@@ -332,6 +332,10 @@ export function ComposeView() {
           categories: selectedCategories,
           tags: selectedTagIds,
           featuredMediaId,
+          seo: {
+            focusKeyword,
+            metaDescription,
+          },
         });
       } else {
         result = await publishArticle({
@@ -342,6 +346,10 @@ export function ComposeView() {
           categories: selectedCategories,
           tags: selectedTagIds,
           featuredMediaId,
+          seo: {
+            focusKeyword,
+            metaDescription,
+          },
         });
       }
 
@@ -476,6 +484,10 @@ export function ComposeView() {
           categories: selectedCategories,
           tags: selectedTagIds,
           featuredMediaId,
+          seo: {
+            focusKeyword,
+            metaDescription,
+          },
         });
 
         const savedFeaturedImage = featuredImageUrl ? {
@@ -557,6 +569,10 @@ export function ComposeView() {
           status: 'draft',
           categories: selectedCategories,
           tags: selectedTagIds,
+          seo: {
+            focusKeyword,
+            metaDescription,
+          },
         });
 
         toast({
