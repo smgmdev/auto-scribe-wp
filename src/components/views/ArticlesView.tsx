@@ -78,15 +78,9 @@ export function ArticlesView() {
                     <div className="flex items-center gap-2 mb-2">
                       <Badge 
                         variant="outline" 
-                        className={toneColors[article.tone]}
-                      >
-                        {article.tone}
-                      </Badge>
-                      <Badge 
-                        variant="outline" 
                         className={statusColors[article.status]}
                       >
-                        {article.status}
+                        {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
                       </Badge>
                     </div>
                     <h3 className="text-xl font-semibold text-foreground">
@@ -108,21 +102,19 @@ export function ArticlesView() {
                       {article.publishedTo && (
                         <>
                           <span>•</span>
-                          <span>Published to: {getSiteName(article.publishedTo)}</span>
-                        </>
-                      )}
-                      {article.wpLink && (
-                        <>
-                          <span>•</span>
-                          <a 
-                            href={article.wpLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-accent hover:underline"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            View on WordPress
-                          </a>
+                          {article.wpLink ? (
+                            <a 
+                              href={article.wpLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-accent hover:underline"
+                            >
+                              Published to: {getSiteName(article.publishedTo)}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <span>Published to: {getSiteName(article.publishedTo)}</span>
+                          )}
                         </>
                       )}
                     </div>
