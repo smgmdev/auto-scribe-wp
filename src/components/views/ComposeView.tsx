@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle } from 'lucide-react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,6 +87,7 @@ export function ComposeView() {
   const [isLoadingTags, setIsLoadingTags] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [isRefreshingTitle, setIsRefreshingTitle] = useState(false);
 
   // SEO Settings state
   const [focusKeyword, setFocusKeyword] = useState('');
@@ -399,14 +400,6 @@ export function ComposeView() {
       toast({
         title: "Featured image required",
         description: "Please upload a featured image",
-        variant: "destructive"
-      });
-      return;
-    }
-    if (!featuredImage.caption) {
-      toast({
-        title: "Image caption required",
-        description: "Please enter a caption for the featured image",
         variant: "destructive"
       });
       return;
@@ -770,7 +763,50 @@ export function ComposeView() {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Article Title</Label>
-            <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-lg" />
+            <div className="flex gap-2">
+              <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-lg flex-1" />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={async () => {
+                  if (!title) {
+                    toast({
+                      title: "Title required",
+                      description: "Please enter a title first",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  setIsRefreshingTitle(true);
+                  try {
+                    const { data, error } = await supabase.functions.invoke('generate-title', {
+                      body: { headline: title, tone }
+                    });
+                    if (error) throw error;
+                    if (data?.title) {
+                      setTitle(data.title);
+                      toast({
+                        title: "Title refreshed",
+                        description: "New title generated successfully"
+                      });
+                    }
+                  } catch (error) {
+                    console.error('Error refreshing title:', error);
+                    toast({
+                      title: "Failed to refresh title",
+                      description: error instanceof Error ? error.message : "Could not generate new title",
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setIsRefreshingTitle(false);
+                  }
+                }}
+                disabled={isRefreshingTitle || !title}
+                title="Generate new title"
+              >
+                {isRefreshingTitle ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
 
           {/* Tone Selection */}
@@ -825,8 +861,8 @@ export function ComposeView() {
 
               {imagePreview && <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="img-caption" className="text-xs">Caption <span className="text-destructive">*</span></Label>
-                    <Input id="img-caption" placeholder="Image caption (required)" value={featuredImage.caption} onChange={e => setFeaturedImage({
+                    <Label htmlFor="img-caption" className="text-xs">Caption</Label>
+                    <Input id="img-caption" placeholder="Image caption (optional)" value={featuredImage.caption} onChange={e => setFeaturedImage({
                   ...featuredImage,
                   caption: e.target.value
                 })} className="h-8 text-sm" />
