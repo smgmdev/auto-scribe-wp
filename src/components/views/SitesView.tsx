@@ -149,7 +149,7 @@ export function SitesView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Media Network</h1>
-          <p className="mt-2 text-muted-foreground">Connect and manage media sites</p>
+          <p className="mt-2 text-muted-foreground">Available media sites for direct publishing</p>
         </div>
         
         {isAdmin && (
@@ -345,19 +345,25 @@ export function SitesView() {
                       </Badge>
                     )}
 
-                    <Badge variant="outline" className="text-xs">
-                      {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                    </Badge>
-                    {site.connected ? (
-                      <div className="flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5 text-success" />
-                        <span className="text-xs text-success">Connected</span>
-                      </div>
+                    {isAdmin ? (
+                      <>
+                        <Badge variant="outline" className="text-xs">
+                          {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                        </Badge>
+                        {site.connected ? (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5 text-success" />
+                            <span className="text-xs text-success">Connected</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <XCircle className="h-3.5 w-3.5 text-destructive" />
+                            <span className="text-xs text-destructive">Disconnected</span>
+                          </div>
+                        )}
+                      </>
                     ) : (
-                      <div className="flex items-center gap-1">
-                        <XCircle className="h-3.5 w-3.5 text-destructive" />
-                        <span className="text-xs text-destructive">Disconnected</span>
-                      </div>
+                      <span className="text-xs text-muted-foreground">Editorial, no sponsor marks, LLM search friendly</span>
                     )}
                     {isAdmin && (
                       <Button 
