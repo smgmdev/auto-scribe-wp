@@ -975,7 +975,7 @@ export function ComposeView() {
                     Saving...
                   </> : 'Save Changes'}
               </Button>}
-            <Button variant="accent" className="w-full" onClick={handlePublish} disabled={isPublishing}>
+            <Button variant="accent" className="w-full" onClick={handlePublish} disabled={isPublishing || !selectedSite}>
               {isPublishing ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Publishing...
