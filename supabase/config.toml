@@ -1,0 +1,4 @@
+project_id = "sdjwglenqfzzgvyhtufv"
+
+[functions.scan-headlines]
+verify_jwt = false

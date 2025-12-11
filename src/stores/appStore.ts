@@ -23,6 +23,7 @@ interface AppState {
   // AI Settings
   aiSettings: AISettings;
   updateAISettings: (settings: Partial<AISettings>) => void;
+  toggleSource: (source: 'euronews' | 'bloomberg' | 'fortune') => void;
   
   // UI State
   currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings';
@@ -82,6 +83,16 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           aiSettings: { ...state.aiSettings, ...settings },
         })),
+      toggleSource: (source) =>
+        set((state) => {
+          const currentSources = state.aiSettings.selectedSources;
+          const newSources = currentSources.includes(source)
+            ? currentSources.filter(s => s !== source)
+            : [...currentSources, source];
+          return {
+            aiSettings: { ...state.aiSettings, selectedSources: newSources },
+          };
+        }),
 
       // UI State
       currentView: 'dashboard',
