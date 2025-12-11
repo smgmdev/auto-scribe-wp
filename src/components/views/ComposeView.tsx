@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Sparkles, Upload, X, Image as ImageIcon, Send, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import type { ArticleTone, FeaturedImage } from '@/types';
+import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
 
 const toneOptions: { value: ArticleTone; label: string; color: string }[] = [
   { value: 'political', label: 'Political', color: 'bg-headline-political' },
@@ -23,6 +24,29 @@ const toneOptions: { value: ArticleTone; label: string; color: string }[] = [
   { value: 'financial', label: 'Financial', color: 'bg-headline-financial' },
   { value: 'crypto', label: 'Crypto', color: 'bg-headline-crypto' },
   { value: 'realestate', label: 'Real Estate', color: 'bg-headline-realestate' },
+];
+
+// Mock categories and tags per site (in real app, these would be fetched from WP REST API)
+const mockCategoriesBySite: Record<string, WPCategory[]> = {};
+const mockTagsBySite: Record<string, WPTag[]> = {};
+
+const getDefaultCategories = (): WPCategory[] => [
+  { id: 1, name: 'Uncategorized', slug: 'uncategorized' },
+  { id: 2, name: 'News', slug: 'news' },
+  { id: 3, name: 'Business', slug: 'business' },
+  { id: 4, name: 'Technology', slug: 'technology' },
+  { id: 5, name: 'Finance', slug: 'finance' },
+  { id: 6, name: 'Markets', slug: 'markets' },
+  { id: 7, name: 'Economy', slug: 'economy' },
+  { id: 8, name: 'Opinion', slug: 'opinion' },
+];
+
+const getDefaultTags = (): WPTag[] => [
+  { id: 1, name: 'Breaking News', slug: 'breaking-news' },
+  { id: 2, name: 'Analysis', slug: 'analysis' },
+  { id: 3, name: 'Exclusive', slug: 'exclusive' },
+  { id: 4, name: 'Featured', slug: 'featured' },
+  { id: 5, name: 'Trending', slug: 'trending' },
 ];
 
 export function ComposeView() {
@@ -34,7 +58,7 @@ export function ComposeView() {
   const [title, setTitle] = useState(selectedHeadline?.title || '');
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedSites, setSelectedSites] = useState<string[]>([]);
+  const [selectedSite, setSelectedSite] = useState<string>('');
   const [featuredImage, setFeaturedImage] = useState<FeaturedImage>({
     file: null,
     title: '',
@@ -43,6 +67,42 @@ export function ComposeView() {
     description: '',
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // Categories and Tags state
+  const [availableCategories, setAvailableCategories] = useState<WPCategory[]>([]);
+  const [availableTags, setAvailableTags] = useState<WPTag[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [newTagInput, setNewTagInput] = useState('');
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+
+  // Fetch categories and tags when site is selected
+  useEffect(() => {
+    if (selectedSite) {
+      setIsLoadingCategories(true);
+      // Simulate API fetch delay
+      setTimeout(() => {
+        // Get or create mock data for this site
+        if (!mockCategoriesBySite[selectedSite]) {
+          mockCategoriesBySite[selectedSite] = getDefaultCategories();
+        }
+        if (!mockTagsBySite[selectedSite]) {
+          mockTagsBySite[selectedSite] = getDefaultTags();
+        }
+        
+        setAvailableCategories(mockCategoriesBySite[selectedSite]);
+        setAvailableTags(mockTagsBySite[selectedSite]);
+        setSelectedCategories([]);
+        setSelectedTags([]);
+        setIsLoadingCategories(false);
+      }, 800);
+    } else {
+      setAvailableCategories([]);
+      setAvailableTags([]);
+      setSelectedCategories([]);
+      setSelectedTags([]);
+    }
+  }, [selectedSite]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,6 +130,48 @@ export function ComposeView() {
     }
   };
 
+  const toggleCategory = (categoryId: number) => {
+    setSelectedCategories(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const toggleTag = (tagName: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tagName)
+        ? prev.filter(t => t !== tagName)
+        : [...prev, tagName]
+    );
+  };
+
+  const addNewTag = () => {
+    const trimmedTag = newTagInput.trim();
+    if (trimmedTag && !selectedTags.includes(trimmedTag)) {
+      // Add to selected tags
+      setSelectedTags(prev => [...prev, trimmedTag]);
+      
+      // Also add to available tags if it doesn't exist
+      const existingTag = availableTags.find(
+        t => t.name.toLowerCase() === trimmedTag.toLowerCase()
+      );
+      if (!existingTag) {
+        const newTag: WPTag = {
+          id: Date.now(),
+          name: trimmedTag,
+          slug: trimmedTag.toLowerCase().replace(/\s+/g, '-'),
+        };
+        setAvailableTags(prev => [...prev, newTag]);
+        // Also update the mock data so it persists
+        if (selectedSite && mockTagsBySite[selectedSite]) {
+          mockTagsBySite[selectedSite].push(newTag);
+        }
+      }
+      setNewTagInput('');
+    }
+  };
+
   const handleGenerate = async () => {
     if (!title && !selectedHeadline) {
       toast({
@@ -82,10 +184,8 @@ export function ComposeView() {
 
     setIsGenerating(true);
     
-    // Simulate AI generation
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Generate rewritten headline based on original
     const rewrittenTitles: Record<string, Record<string, string>> = {
       political: {
         default: "Strategic Policy Shifts Reshape Global Economic Landscape",
@@ -133,7 +233,6 @@ export function ComposeView() {
     const newTitle = rewrittenTitles[tone]?.[titleKey] || rewrittenTitles[tone]?.default || title;
     setTitle(newTitle);
     
-    // Generate ~700 word article
     const generatedContent = `The current state of affairs in the ${tone} sector presents a fascinating study in adaptation and resilience. As market participants grapple with shifting fundamentals and evolving consumer expectations, the contours of a new landscape are beginning to emerge with increasing clarity.
 
 Industry veterans point to several factors driving these changes. The acceleration of digital transformation, coupled with evolving regulatory frameworks, has created an environment where traditional playbooks no longer guarantee success. Organizations that once dominated their respective niches now find themselves competing against nimble challengers armed with innovative approaches and unburdened by legacy constraints.
@@ -181,14 +280,16 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       return;
     }
 
-    if (selectedSites.length === 0) {
+    if (!selectedSite) {
       toast({
-        title: "No sites selected",
-        description: "Please select at least one WordPress site to publish to",
+        title: "No site selected",
+        description: "Please select a WordPress site to publish to",
         variant: "destructive",
       });
       return;
     }
+
+    const siteName = sites.find(s => s.id === selectedSite)?.name || 'Unknown';
 
     addArticle({
       id: crypto.randomUUID(),
@@ -198,21 +299,25 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       sourceHeadline: selectedHeadline || undefined,
       featuredImage: featuredImage.file ? featuredImage : undefined,
       status: 'published',
-      publishedTo: selectedSites,
+      publishedTo: selectedSite,
+      categories: selectedCategories,
+      tags: selectedTags,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
     toast({
       title: "Article published",
-      description: `Successfully published to ${selectedSites.length} site(s)`,
+      description: `Successfully published to ${siteName}${selectedTags.length > 0 ? ` with ${selectedTags.length} tag(s)` : ''}`,
     });
 
     // Reset form
     setTitle('');
     setContent('');
     setSelectedHeadline(null);
-    setSelectedSites([]);
+    setSelectedSite('');
+    setSelectedCategories([]);
+    setSelectedTags([]);
     removeImage();
   };
 
@@ -234,6 +339,8 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       sourceHeadline: selectedHeadline || undefined,
       featuredImage: featuredImage.file ? featuredImage : undefined,
       status: 'draft',
+      categories: selectedCategories,
+      tags: selectedTags,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -242,14 +349,6 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       title: "Draft saved",
       description: "Your article has been saved as a draft",
     });
-  };
-
-  const toggleSite = (siteId: string) => {
-    setSelectedSites(prev => 
-      prev.includes(siteId) 
-        ? prev.filter(id => id !== siteId)
-        : [...prev, siteId]
-    );
   };
 
   return (
@@ -357,6 +456,146 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Publish To - Single Site Dropdown */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Publish To</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {sites.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No WordPress sites connected. Add a site first.
+                </p>
+              ) : (
+                <Select value={selectedSite} onValueChange={setSelectedSite}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a WordPress site" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border z-50">
+                    {sites.map((site) => (
+                      <SelectItem key={site.id} value={site.id}>
+                        {site.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Categories */}
+          {selectedSite && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">Categories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingCategories ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading categories...
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {availableCategories.map((category) => (
+                      <label
+                        key={category.id}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1.5 rounded"
+                      >
+                        <Checkbox
+                          checked={selectedCategories.includes(category.id)}
+                          onCheckedChange={() => toggleCategory(category.id)}
+                          className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                        />
+                        <span className="text-sm">{category.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tags */}
+          {selectedSite && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Tags
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {isLoadingCategories ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading tags...
+                  </div>
+                ) : (
+                  <>
+                    {/* Selected Tags */}
+                    {selectedTags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedTags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="secondary"
+                            className="cursor-pointer hover:bg-destructive/20"
+                            onClick={() => toggleTag(tag)}
+                          >
+                            {tag}
+                            <X className="ml-1 h-3 w-3" />
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add New Tag */}
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add new tag..."
+                        value={newTagInput}
+                        onChange={(e) => setNewTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addNewTag();
+                          }
+                        }}
+                        className="h-8 text-sm"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={addNewTag}
+                        disabled={!newTagInput.trim()}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* Available Tags */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableTags
+                        .filter(tag => !selectedTags.includes(tag.name))
+                        .map((tag) => (
+                          <Badge
+                            key={tag.id}
+                            variant="outline"
+                            className="cursor-pointer hover:bg-accent/10"
+                            onClick={() => toggleTag(tag.name)}
+                          >
+                            {tag.name}
+                          </Badge>
+                        ))}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Featured Image */}
           <Card>
             <CardHeader>
@@ -444,59 +683,13 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
             </CardContent>
           </Card>
 
-          {/* Publish To */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Publish To</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {sites.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No WordPress sites connected. Add a site first.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {sites.map((site) => (
-                    <label 
-                      key={site.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedSites.includes(site.id)
-                          ? 'border-accent bg-accent/5'
-                          : 'border-border hover:bg-muted/50'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedSites.includes(site.id)}
-                        onChange={() => toggleSite(site.id)}
-                        className="sr-only"
-                      />
-                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                        selectedSites.includes(site.id)
-                          ? 'bg-accent border-accent'
-                          : 'border-muted-foreground/30'
-                      }`}>
-                        {selectedSites.includes(site.id) && (
-                          <svg className="w-3 h-3 text-white" viewBox="0 0 12 12">
-                            <path d="M10 3L4.5 8.5 2 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
-                      <span className="text-sm font-medium">{site.name}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Actions */}
           <div className="space-y-3">
             <Button 
               variant="accent" 
               className="w-full"
               onClick={handlePublish}
-              disabled={!content || selectedSites.length === 0}
+              disabled={!content || !selectedSite}
             >
               <Send className="mr-2 h-4 w-4" />
               Publish Article
