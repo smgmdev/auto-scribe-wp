@@ -32,7 +32,7 @@ export function Sidebar() {
             <Sparkles className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
+            <h1 className="text-lg font-semibold text-sidebar-foreground">
               Publisher
             </h1>
             <p className="text-xs text-sidebar-foreground/60">AI Content Studio</p>

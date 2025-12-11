@@ -60,7 +60,7 @@ export function SettingsView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-4xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold text-foreground">
             Settings
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -77,7 +77,7 @@ export function SettingsView() {
         {/* News Sources */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">News Sources</CardTitle>
+            <CardTitle className="text-xl">News Sources</CardTitle>
             <CardDescription>
               Select which sources to scan for daily headlines
             </CardDescription>
@@ -109,7 +109,7 @@ export function SettingsView() {
         {/* Default Tone */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">Default Article Tone</CardTitle>
+            <CardTitle className="text-xl">Default Article Tone</CardTitle>
             <CardDescription>
               Set the default tone for AI-generated articles
             </CardDescription>
@@ -152,7 +152,7 @@ export function SettingsView() {
         {/* Auto-Publish */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">Auto-Publish</CardTitle>
+            <CardTitle className="text-xl">Auto-Publish</CardTitle>
             <CardDescription>
               Automatically publish generated articles
             </CardDescription>
@@ -178,7 +178,7 @@ export function SettingsView() {
         {/* Target Sites */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">Default Target Sites</CardTitle>
+            <CardTitle className="text-xl">Default Target Sites</CardTitle>
             <CardDescription>
               Select default sites for publishing
             </CardDescription>
