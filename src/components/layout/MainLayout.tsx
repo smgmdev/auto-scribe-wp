@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
+import amlogo from '@/assets/amlogo.png';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -22,7 +23,8 @@ export function MainLayout({ children }: MainLayoutProps) {
         >
           <Menu className="h-6 w-6" />
         </Button>
-        <span className="ml-3 text-lg font-semibold text-sidebar-foreground">Publisher</span>
+        <img src={amlogo} alt="Logo" className="ml-3 h-7 w-7 object-contain" />
+        <span className="ml-2 text-lg font-semibold text-sidebar-foreground">Publisher</span>
       </header>
 
       {/* Mobile Overlay */}
