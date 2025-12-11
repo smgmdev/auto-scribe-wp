@@ -107,6 +107,11 @@ export default {
           from: { backgroundPosition: "200% 0" },
           to: { backgroundPosition: "-200% 0" },
         },
+        "loading-bar": {
+          "0%": { width: "0%", marginLeft: "0%" },
+          "50%": { width: "30%", marginLeft: "70%" },
+          "100%": { width: "0%", marginLeft: "100%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -115,6 +120,7 @@ export default {
         "slide-in-left": "slide-in-left 0.4s ease-out forwards",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         shimmer: "shimmer 3s ease-in-out infinite",
+        "loading-bar": "loading-bar 1.5s ease-in-out infinite",
       },
     },
   },
