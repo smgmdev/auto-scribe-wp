@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail, KeyRound } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import amlogo from '@/assets/amlogo.png';
@@ -105,7 +105,7 @@ export default function Auth() {
     }
   };
 
-  const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200";
+  const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200 pl-10";
 
   const buttonClassName = "w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200";
 
@@ -130,30 +130,36 @@ export default function Auth() {
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email" className="text-white">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                    className={inputClassName}
-                  />
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      className={inputClassName}
+                    />
+                  </div>
                   {errors.email && (
                     <p className="text-sm text-red-400">{errors.email}</p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password" className="text-white">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    className={inputClassName}
-                  />
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      className={inputClassName}
+                    />
+                  </div>
                   {errors.password && (
                     <p className="text-sm text-red-400">{errors.password}</p>
                   )}
@@ -175,30 +181,36 @@ export default function Auth() {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-email" className="text-white">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                    className={inputClassName}
-                  />
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      className={inputClassName}
+                    />
+                  </div>
                   {errors.email && (
                     <p className="text-sm text-red-400">{errors.email}</p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password" className="text-white">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    className={inputClassName}
-                  />
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      className={inputClassName}
+                    />
+                  </div>
                   {errors.password && (
                     <p className="text-sm text-red-400">{errors.password}</p>
                   )}
