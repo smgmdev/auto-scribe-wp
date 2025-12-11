@@ -331,6 +331,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_sites: {
+        Args: never
+        Returns: {
+          connected: boolean
+          favicon: string
+          id: string
+          name: string
+          seo_plugin: string
+          url: string
+        }[]
+      }
       get_user_credits: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
