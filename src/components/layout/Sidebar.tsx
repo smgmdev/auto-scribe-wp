@@ -88,7 +88,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="lg:hidden text-sidebar-foreground"
+              className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full"
             >
               <X className="h-5 w-5" />
             </Button>
