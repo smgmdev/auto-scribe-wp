@@ -48,6 +48,7 @@ export interface Article {
   featuredImage?: FeaturedImage;
   status: 'draft' | 'published' | 'scheduled';
   publishedTo?: string;
+  wpLink?: string;
   categories?: number[];
   tags?: string[];
   createdAt: Date;

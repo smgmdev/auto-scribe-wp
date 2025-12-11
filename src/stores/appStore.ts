@@ -19,6 +19,9 @@ interface AppState {
   articles: Article[];
   addArticle: (article: Article) => void;
   updateArticle: (id: string, updates: Partial<Article>) => void;
+  deleteArticle: (id: string) => void;
+  editingArticle: Article | null;
+  setEditingArticle: (article: Article | null) => void;
   
   // AI Settings
   aiSettings: AISettings;
@@ -71,6 +74,12 @@ export const useAppStore = create<AppState>()(
             a.id === id ? { ...a, ...updates } : a
           ),
         })),
+      deleteArticle: (id) =>
+        set((state) => ({
+          articles: state.articles.filter((a) => a.id !== id),
+        })),
+      editingArticle: null,
+      setEditingArticle: (article) => set({ editingArticle: article }),
 
       // AI Settings
       aiSettings: {
