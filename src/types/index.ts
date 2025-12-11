@@ -33,11 +33,13 @@ export interface Headline {
 }
 
 export type ArticleTone = 
-  | 'political' 
-  | 'business' 
-  | 'financial' 
-  | 'crypto' 
-  | 'realestate';
+  | 'neutral' 
+  | 'professional' 
+  | 'journalist' 
+  | 'inspiring' 
+  | 'aggressive' 
+  | 'powerful' 
+  | 'important';
 
 export interface Article {
   id: string;

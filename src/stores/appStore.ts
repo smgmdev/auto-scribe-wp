@@ -84,7 +84,7 @@ export const useAppStore = create<AppState>()(
       // AI Settings
       aiSettings: {
         selectedSources: ['euronews', 'bloomberg', 'fortune'],
-        defaultTone: 'business',
+        defaultTone: 'neutral',
         autoPublish: false,
         targetSites: [],
       },

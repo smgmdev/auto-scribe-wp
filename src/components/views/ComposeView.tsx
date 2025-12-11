@@ -30,11 +30,13 @@ import {
 import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
 
 const toneOptions: { value: ArticleTone; label: string; color: string }[] = [
-  { value: 'political', label: 'Political', color: 'bg-headline-political' },
-  { value: 'business', label: 'Business', color: 'bg-headline-business' },
-  { value: 'financial', label: 'Financial', color: 'bg-headline-financial' },
-  { value: 'crypto', label: 'Crypto', color: 'bg-headline-crypto' },
-  { value: 'realestate', label: 'Real Estate', color: 'bg-headline-realestate' },
+  { value: 'neutral', label: 'Neutral', color: 'bg-slate-500' },
+  { value: 'professional', label: 'Professional Corporate', color: 'bg-blue-600' },
+  { value: 'journalist', label: 'Journalist', color: 'bg-emerald-600' },
+  { value: 'inspiring', label: 'Inspiring', color: 'bg-amber-500' },
+  { value: 'aggressive', label: 'Aggressive', color: 'bg-red-600' },
+  { value: 'powerful', label: 'Powerful', color: 'bg-purple-600' },
+  { value: 'important', label: 'Important', color: 'bg-orange-600' },
 ];
 
 export function ComposeView() {
@@ -42,7 +44,7 @@ export function ComposeView() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [tone, setTone] = useState<ArticleTone>(editingArticle?.tone || 'business');
+  const [tone, setTone] = useState<ArticleTone>(editingArticle?.tone || 'neutral');
   const [title, setTitle] = useState(editingArticle?.title || selectedHeadline?.title || '');
   const [content, setContent] = useState(editingArticle?.content || '');
   const [isGenerating, setIsGenerating] = useState(false);
