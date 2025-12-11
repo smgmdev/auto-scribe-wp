@@ -71,9 +71,8 @@ export function Sidebar() {
               <CreditDisplay />
               <button 
                 onClick={() => setBuyCreditsOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/30 text-sm font-medium text-sidebar-foreground hover:bg-accent/20 transition-colors"
+                className="flex items-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/30 text-sm font-medium text-sidebar-foreground hover:bg-accent/20 transition-colors"
               >
-                <Coins className="h-4 w-4 text-accent" />
                 Buy credits
               </button>
             </div>
