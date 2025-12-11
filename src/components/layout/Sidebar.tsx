@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 
 const navigation = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'sites', label: 'WP Sites', icon: Globe },
+  { id: 'sites', label: 'Media Network', icon: Globe },
   { id: 'headlines', label: 'Headlines', icon: Newspaper },
   { id: 'compose', label: 'Compose', icon: PenTool },
   { id: 'articles', label: 'Articles', icon: FileText },
