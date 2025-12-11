@@ -2,7 +2,7 @@ import amlogo from '@/assets/amlogo.png';
 
 export function LoadingScreen() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black">
       {/* Logo with pulse effect */}
       <div className="relative mb-8">
         <img 
@@ -14,8 +14,8 @@ export function LoadingScreen() {
       </div>
       
       {/* LinkedIn-style loading bar */}
-      <div className="w-48 h-1 bg-muted rounded-full overflow-hidden">
-        <div className="h-full bg-foreground rounded-full animate-loading-bar" />
+      <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
+        <div className="h-full bg-white rounded-full animate-loading-bar" />
       </div>
     </div>
   );
