@@ -51,7 +51,8 @@ export function DashboardView() {
     setCurrentView
   } = useAppStore();
   const {
-    isAdmin
+    isAdmin,
+    user
   } = useAuth();
   const {
     articles
@@ -85,7 +86,7 @@ export function DashboardView() {
         <h1 className="text-4xl font-bold text-foreground">
           Dashboard
         </h1>
-        <p className="mt-2 text-muted-foreground">Monitor your media publishing workflow</p>
+        <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
       </div>
 
       {/* Stats Grid */}
