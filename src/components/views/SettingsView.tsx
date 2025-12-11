@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { AccountSettings } from '@/components/settings/AccountSettings';
 import type { ArticleTone } from '@/types';
 
 const sources = ['euronews', 'bloomberg', 'fortune'] as const;
@@ -72,6 +73,9 @@ export function SettingsView() {
           Save Settings
         </Button>
       </div>
+
+      {/* Account Settings - Full Width */}
+      <AccountSettings />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* News Sources */}
