@@ -38,7 +38,7 @@ export function DashboardView() {
           Dashboard
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Manage your WordPress publishing workflow
+          Manage your media publishing workflow
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export function DashboardView() {
               onClick={() => setCurrentView('sites')}
             >
               <Globe className="mr-2 h-4 w-4" />
-              Add WordPress Site
+              Add New Media Site
             </Button>
           </CardContent>
         </Card>
