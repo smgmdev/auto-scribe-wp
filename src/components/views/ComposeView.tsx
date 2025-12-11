@@ -23,7 +23,9 @@ import {
   createTag, 
   publishArticle, 
   updateArticle as updateWPArticle,
-  uploadMedia 
+  uploadMedia,
+  updateMediaMetadata,
+  fetchPostSEOData
 } from '@/lib/wordpress-api';
 import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
 
@@ -83,9 +85,9 @@ export function ComposeView() {
       if (!editingArticle) {
         setSelectedCategories([]);
         setSelectedTagIds([]);
+        setFocusKeyword('');
+        setMetaDescription('');
       }
-      setFocusKeyword('');
-      setMetaDescription('');
       
       // Fetch categories
       setIsLoadingCategories(true);
@@ -121,6 +123,18 @@ export function ComposeView() {
           setIsLoadingTags(false);
           setAvailableTags([]);
         });
+      
+      // Fetch SEO data if editing an existing WP post
+      if (editingArticle?.wpPostId) {
+        fetchPostSEOData(currentSite, editingArticle.wpPostId)
+          .then(seoData => {
+            setFocusKeyword(seoData.focusKeyword);
+            setMetaDescription(seoData.metaDescription);
+          })
+          .catch(error => {
+            console.error('Failed to fetch SEO data:', error);
+          });
+      }
     } else {
       setAvailableCategories([]);
       setAvailableTags([]);
@@ -474,6 +488,14 @@ export function ComposeView() {
           });
           featuredMediaId = mediaResult.id;
           featuredImageUrl = mediaResult.source_url;
+        } else if (featuredMediaId) {
+          // Update existing image metadata if no new file uploaded
+          await updateMediaMetadata(currentSite, featuredMediaId, {
+            title: featuredImage.title,
+            alt_text: featuredImage.altText,
+            caption: featuredImage.caption,
+            description: featuredImage.description,
+          });
         }
 
         await updateWPArticle({
