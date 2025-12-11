@@ -20,7 +20,6 @@ const sourceColors: Record<string, string> = {
   'bloomberg-latest': 'bg-purple-500/10 text-purple-600 border-purple-500/30',
   fortune: 'bg-headline-crypto/10 text-headline-crypto border-headline-crypto/30',
   'fortune-latest': 'bg-pink-500/10 text-pink-600 border-pink-500/30',
-  'fortune-tech': 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30',
   'nikkei-asia': 'bg-rose-500/10 text-rose-600 border-rose-500/30',
 };
 
@@ -34,24 +33,22 @@ const sourceLabels: Record<string, string> = {
   'bloomberg-latest': 'Bloomberg Latest',
   fortune: 'Fortune',
   'fortune-latest': 'Fortune Latest',
-  'fortune-tech': 'Fortune Tech',
   'nikkei-asia': 'NIKKEI Asia',
 };
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia';
 
 // Category to sources mapping
 const categorySourcesMap: Record<string, SourceType[]> = {
   political: ['euronews', 'euronews-economy'],
   business: ['bloomberg', 'bloomberg-latest', 'fortune'],
-  tech: ['fortune-tech'],
   middleeast: ['bloomberg-middleeast'],
   asia: ['bloomberg-asia', 'nikkei-asia'],
 };
 
 const allSources: SourceType[] = [
   'euronews', 'euronews-economy', 'bloomberg', 'bloomberg-latest', 'fortune',
-  'fortune-tech', 'bloomberg-middleeast', 'bloomberg-asia', 'nikkei-asia'
+  'bloomberg-middleeast', 'bloomberg-asia', 'nikkei-asia'
 ];
 
 export function HeadlinesView() {
@@ -199,10 +196,9 @@ export function HeadlinesView() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5 mb-4">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger value="political">Political</TabsTrigger>
               <TabsTrigger value="business">Business</TabsTrigger>
-              <TabsTrigger value="tech">Tech</TabsTrigger>
               <TabsTrigger value="middleeast">Middle East</TabsTrigger>
               <TabsTrigger value="asia">Asia</TabsTrigger>
             </TabsList>
@@ -218,13 +214,6 @@ export function HeadlinesView() {
               <p className="text-xs text-muted-foreground mb-3">Business & Finance</p>
               <div className="flex flex-wrap gap-6">
                 {categorySourcesMap.business.map(renderSourceCheckbox)}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="tech" className="space-y-3">
-              <p className="text-xs text-muted-foreground mb-3">Technology</p>
-              <div className="flex flex-wrap gap-6">
-                {categorySourcesMap.tech.map(renderSourceCheckbox)}
               </div>
             </TabsContent>
 
