@@ -4,10 +4,10 @@ project_id = "sdjwglenqfzzgvyhtufv"
 verify_jwt = false
 
 [functions.generate-article]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-title]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-checkout-session]
 verify_jwt = true
