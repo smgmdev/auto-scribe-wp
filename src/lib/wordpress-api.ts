@@ -286,7 +286,8 @@ export async function updateMediaMetadata(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        title: metadata.title ?? '',
+        // Use single space to clear title if explicitly set to empty string
+        title: metadata.title !== undefined ? (metadata.title || ' ') : undefined,
         alt_text: metadata.alt_text ?? '',
         caption: metadata.caption ?? '',
         description: metadata.description ?? '',
@@ -369,17 +370,26 @@ export async function uploadMedia(
     const formData = new FormData();
     formData.append('file', file);
     
-    // Always include metadata fields (empty string to clear/override defaults)
-    formData.append('title', metadata.title ?? '');
-    formData.append('alt_text', metadata.alt_text ?? '');
-    formData.append('caption', metadata.caption ?? '');
-    formData.append('description', metadata.description ?? '');
+    // WordPress ignores empty strings for title and uses filename as default
+    // Use a single space ' ' to actually clear the title, but only if explicitly set to empty
+    // If undefined, don't send the field so WordPress uses its default
+    const titleValue = metadata.title !== undefined ? (metadata.title || ' ') : undefined;
+    const altValue = metadata.alt_text ?? '';
+    const captionValue = metadata.caption ?? '';
+    const descValue = metadata.description ?? '';
+    
+    if (titleValue !== undefined) {
+      formData.append('title', titleValue);
+    }
+    formData.append('alt_text', altValue);
+    formData.append('caption', captionValue);
+    formData.append('description', descValue);
 
     console.log('Uploading media with metadata:', {
-      title: metadata.title ?? '',
-      alt_text: metadata.alt_text ?? '',
-      caption: metadata.caption ?? '',
-      description: metadata.description ?? '',
+      title: titleValue,
+      alt_text: altValue,
+      caption: captionValue,
+      description: descValue,
     });
 
     const uploadResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
