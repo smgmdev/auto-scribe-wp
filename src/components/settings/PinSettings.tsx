@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { KeyRound, Loader2, Save, Trash2 } from 'lucide-react';
+import { KeyRound, Loader2, ShieldCheck, ShieldOff } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,10 +21,9 @@ export function PinSettings() {
   const { toast } = useToast();
   
   const [pinEnabled, setPinEnabled] = useState(false);
-  const [currentPin, setCurrentPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
-  const [hasExistingPin, setHasExistingPin] = useState(false);
+  const [showSetupForm, setShowSetupForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -47,12 +45,11 @@ export function PinSettings() {
     
     if (data) {
       setPinEnabled(data.pin_enabled || false);
-      setHasExistingPin(!!data.pin_hash);
     }
     setLoading(false);
   };
 
-  const handleSavePin = async () => {
+  const handleSetPin = async () => {
     if (!user) return;
 
     if (newPin.length !== 4) {
@@ -73,37 +70,7 @@ export function PinSettings() {
       return;
     }
 
-    // Verify current PIN if one exists
-    if (hasExistingPin && currentPin.length !== 4) {
-      toast({
-        variant: 'destructive',
-        title: 'Current PIN required',
-        description: 'Please enter your current PIN',
-      });
-      return;
-    }
-
     setSaving(true);
-
-    // Verify current PIN if exists
-    if (hasExistingPin) {
-      const currentPinHash = await hashPin(currentPin);
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('pin_hash')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profile?.pin_hash !== currentPinHash) {
-        setSaving(false);
-        toast({
-          variant: 'destructive',
-          title: 'Incorrect PIN',
-          description: 'Your current PIN is incorrect',
-        });
-        return;
-      }
-    }
 
     const pinHash = await hashPin(newPin);
 
@@ -126,49 +93,21 @@ export function PinSettings() {
       return;
     }
 
-    setCurrentPin('');
     setNewPin('');
     setConfirmPin('');
-    setHasExistingPin(true);
+    setShowSetupForm(false);
     setPinEnabled(true);
 
     toast({
-      title: 'PIN saved',
+      title: 'PIN enabled',
       description: 'Your PIN has been set successfully',
     });
   };
 
-  const handleRemovePin = async () => {
+  const handleDisablePin = async () => {
     if (!user) return;
 
-    if (hasExistingPin && currentPin.length !== 4) {
-      toast({
-        variant: 'destructive',
-        title: 'Current PIN required',
-        description: 'Please enter your current PIN to remove it',
-      });
-      return;
-    }
-
     setSaving(true);
-
-    // Verify current PIN
-    const currentPinHash = await hashPin(currentPin);
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('pin_hash')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (profile?.pin_hash !== currentPinHash) {
-      setSaving(false);
-      toast({
-        variant: 'destructive',
-        title: 'Incorrect PIN',
-        description: 'Your current PIN is incorrect',
-      });
-      return;
-    }
 
     const { error } = await supabase
       .from('profiles')
@@ -183,47 +122,17 @@ export function PinSettings() {
     if (error) {
       toast({
         variant: 'destructive',
-        title: 'Error removing PIN',
+        title: 'Error disabling PIN',
         description: error.message,
       });
       return;
     }
 
-    setCurrentPin('');
-    setNewPin('');
-    setConfirmPin('');
-    setHasExistingPin(false);
     setPinEnabled(false);
 
     toast({
-      title: 'PIN removed',
+      title: 'PIN disabled',
       description: 'Your PIN has been removed',
-    });
-  };
-
-  const handleTogglePinEnabled = async (enabled: boolean) => {
-    if (!user || !hasExistingPin) return;
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ pin_enabled: enabled })
-      .eq('id', user.id);
-
-    if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message,
-      });
-      return;
-    }
-
-    setPinEnabled(enabled);
-    toast({
-      title: enabled ? 'PIN enabled' : 'PIN disabled',
-      description: enabled 
-        ? 'You will be asked for PIN on login' 
-        : 'PIN verification on login is now disabled',
     });
   };
 
@@ -235,37 +144,63 @@ export function PinSettings() {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <Label className="flex items-center gap-2">
-        <KeyRound className="h-4 w-4" />
-        PIN Security
-      </Label>
+  // PIN is enabled - show status and disable option
+  if (pinEnabled) {
+    return (
+      <div className="space-y-4">
+        <Label className="flex items-center gap-2">
+          <KeyRound className="h-4 w-4" />
+          PIN Security
+        </Label>
 
-      {hasExistingPin && (
-        <div className="flex items-center justify-between rounded-lg border p-3">
-          <div>
-            <p className="text-sm font-medium">Require PIN on login</p>
-            <p className="text-xs text-muted-foreground">
-              Ask for PIN after password authentication
-            </p>
+        <div className="flex items-center justify-between rounded-lg border border-green-500/30 bg-green-500/10 p-4">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="h-5 w-5 text-green-500" />
+            <div>
+              <p className="text-sm font-medium text-green-600 dark:text-green-400">PIN Enabled</p>
+              <p className="text-xs text-muted-foreground">
+                You will be asked for PIN on login
+              </p>
+            </div>
           </div>
-          <Switch
-            checked={pinEnabled}
-            onCheckedChange={handleTogglePinEnabled}
-          />
+          <Button 
+            onClick={handleDisablePin} 
+            disabled={saving}
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <ShieldOff className="mr-2 h-4 w-4" />
+                Disable
+              </>
+            )}
+          </Button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      <div className="space-y-3">
-        {hasExistingPin && (
+  // Show setup form
+  if (showSetupForm) {
+    return (
+      <div className="space-y-4">
+        <Label className="flex items-center gap-2">
+          <KeyRound className="h-4 w-4" />
+          PIN Security
+        </Label>
+
+        <div className="space-y-4 rounded-lg border p-4">
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Current PIN</Label>
+            <Label className="text-sm text-muted-foreground">Set PIN</Label>
             <div className="flex justify-center">
               <InputOTP
                 maxLength={4}
-                value={currentPin}
-                onChange={setCurrentPin}
+                value={newPin}
+                onChange={setNewPin}
               >
                 <InputOTPGroup>
                   <InputOTPSlot index={0} />
@@ -276,73 +211,77 @@ export function PinSettings() {
               </InputOTP>
             </div>
           </div>
-        )}
 
-        <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">
-            {hasExistingPin ? 'New PIN' : 'Set PIN'}
-          </Label>
-          <div className="flex justify-center">
-            <InputOTP
-              maxLength={4}
-              value={newPin}
-              onChange={setNewPin}
-            >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-              </InputOTPGroup>
-            </InputOTP>
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">Confirm PIN</Label>
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={4}
+                value={confirmPin}
+                onChange={setConfirmPin}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">Confirm PIN</Label>
-          <div className="flex justify-center">
-            <InputOTP
-              maxLength={4}
-              value={confirmPin}
-              onChange={setConfirmPin}
-            >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-              </InputOTPGroup>
-            </InputOTP>
-          </div>
-        </div>
-
-        <div className="flex gap-2 pt-2">
-          <Button 
-            onClick={handleSavePin} 
-            disabled={saving || newPin.length !== 4 || confirmPin.length !== 4}
-            variant="outline"
-            className="flex-1"
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                {hasExistingPin ? 'Update PIN' : 'Set PIN'}
-              </>
-            )}
-          </Button>
-          
-          {hasExistingPin && (
+          <div className="flex gap-2 pt-2">
             <Button 
-              onClick={handleRemovePin} 
-              disabled={saving || currentPin.length !== 4}
-              variant="destructive"
+              onClick={() => {
+                setShowSetupForm(false);
+                setNewPin('');
+                setConfirmPin('');
+              }}
+              variant="outline"
+              className="flex-1"
             >
-              <Trash2 className="h-4 w-4" />
+              Cancel
             </Button>
-          )}
+            <Button 
+              onClick={handleSetPin} 
+              disabled={saving || newPin.length !== 4 || confirmPin.length !== 4}
+              className="flex-1"
+            >
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Set PIN
+                </>
+              )}
+            </Button>
+          </div>
         </div>
+      </div>
+    );
+  }
+
+  // Default state - show Enable PIN button
+  return (
+    <div className="space-y-4">
+      <Label className="flex items-center gap-2">
+        <KeyRound className="h-4 w-4" />
+        PIN Security
+      </Label>
+
+      <div className="rounded-lg border p-4">
+        <p className="mb-3 text-sm text-muted-foreground">
+          Add an extra layer of security by requiring a 4-digit PIN after login.
+        </p>
+        <Button 
+          onClick={() => setShowSetupForm(true)}
+          variant="outline"
+          className="w-full"
+        >
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          Enable PIN
+        </Button>
       </div>
     </div>
   );
