@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [pinRequired, setPinRequired] = useState(false);
   const [pinVerified, setPinVerified] = useState(false);
 
-  const fetchUserData = async (userId: string) => {
+  const fetchUserData = async (userId: string): Promise<void> => {
     // Fetch role
     const { data: roleData } = await supabase
       .from('user_roles')
@@ -121,27 +121,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Defer Supabase calls with setTimeout
         if (session?.user) {
-          setTimeout(() => {
-            fetchUserData(session.user.id);
+          setLoading(true);
+          setTimeout(async () => {
+            await fetchUserData(session.user.id);
+            setLoading(false);
           }, 0);
         } else {
           setRole(null);
           setCredits(0);
           setPinRequired(false);
           setPinVerified(false);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserData(session.user.id);
+        await fetchUserData(session.user.id);
       }
       
       setLoading(false);
