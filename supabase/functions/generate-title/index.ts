@@ -1,9 +1,32 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Authenticate user from request
+async function authenticateUser(req: Request): Promise<{ userId: string; email: string | undefined }> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    throw new Error("No authorization header provided");
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !userData.user) {
+    console.error("Authentication error:", userError);
+    throw new Error("Unauthorized - Invalid token");
+  }
+
+  return { userId: userData.user.id, email: userData.user.email };
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,6 +34,10 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user first
+    const { userId, email } = await authenticateUser(req);
+    console.log("Authenticated user:", { userId, email });
+
     const { headline, tone } = await req.json();
     
     if (!headline) {
@@ -121,12 +148,14 @@ Return ONLY the headline text, nothing else. No quotes, no prefixes, just the he
     );
   } catch (error) {
     console.error('Error generating title:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate title';
+    const status = errorMessage.includes("Unauthorized") ? 401 : 500;
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error instanceof Error ? error.message : 'Failed to generate title' 
+        error: errorMessage
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
