@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 const navigation = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'sites', label: 'Media Network', icon: Globe },
-  { id: 'headlines', label: 'Headlines', icon: Newspaper },
+  { id: 'headlines', label: 'Sources', icon: Newspaper },
   { id: 'compose', label: 'New Article', icon: PenTool },
   { id: 'articles', label: 'Articles', icon: FileText },
   { id: 'settings', label: 'Settings', icon: Settings },
