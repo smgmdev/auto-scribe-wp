@@ -262,9 +262,22 @@ export async function uploadMedia(
   try {
     const baseUrl = normalizeUrl(site.url);
     
-    // Step 1: Upload the file
+    // Upload the file with all metadata in FormData
     const formData = new FormData();
     formData.append('file', file);
+    
+    // Always include metadata fields (empty string to clear/override defaults)
+    formData.append('title', metadata.title ?? '');
+    formData.append('alt_text', metadata.alt_text ?? '');
+    formData.append('caption', metadata.caption ?? '');
+    formData.append('description', metadata.description ?? '');
+
+    console.log('Uploading media with metadata:', {
+      title: metadata.title ?? '',
+      alt_text: metadata.alt_text ?? '',
+      caption: metadata.caption ?? '',
+      description: metadata.description ?? '',
+    });
 
     const uploadResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
       method: 'POST',
@@ -281,33 +294,17 @@ export async function uploadMedia(
     }
 
     const uploadData = await uploadResponse.json();
-    const mediaId = uploadData.id;
-
-    // Step 2: Update the media metadata (always send to allow clearing/overriding)
-    const updateResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media/${mediaId}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': createAuthHeader(site),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title: metadata.title || '',
-        alt_text: metadata.alt_text || '',
-        caption: metadata.caption || '',
-        description: metadata.description || '',
-      }),
+    console.log('Media uploaded, response:', {
+      id: uploadData.id,
+      title: uploadData.title,
+      caption: uploadData.caption,
+      alt_text: uploadData.alt_text,
+      description: uploadData.description,
     });
-
-    if (!updateResponse.ok) {
-      console.warn('Failed to update media metadata, but upload succeeded');
-    }
-
-    // Get the updated media data
-    const finalData = updateResponse.ok ? await updateResponse.json() : uploadData;
     
     return {
-      id: finalData.id,
-      source_url: finalData.source_url,
+      id: uploadData.id,
+      source_url: uploadData.source_url,
     };
   } catch (error) {
     console.error('Error uploading media:', error);
