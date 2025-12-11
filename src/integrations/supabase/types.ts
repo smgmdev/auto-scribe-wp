@@ -138,6 +138,7 @@ export type Database = {
           id: string
           pin_enabled: boolean
           pin_hash: string | null
+          pin_salt: string | null
           updated_at: string
           username: string | null
         }
@@ -147,6 +148,7 @@ export type Database = {
           id: string
           pin_enabled?: boolean
           pin_hash?: string | null
+          pin_salt?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -156,6 +158,7 @@ export type Database = {
           id?: string
           pin_enabled?: boolean
           pin_hash?: string | null
+          pin_salt?: string | null
           updated_at?: string
           username?: string | null
         }
