@@ -801,12 +801,36 @@ export function ComposeView() {
               ) : (
                 <Select value={selectedSite} onValueChange={setSelectedSite}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a WordPress site" />
+                    <SelectValue placeholder="Select a WordPress site">
+                      {selectedSite && currentSite && (
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={currentSite.favicon || `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`}
+                            alt=""
+                            className="h-4 w-4 rounded-sm"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`;
+                            }}
+                          />
+                          <span>{currentSite.name}</span>
+                        </div>
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="bg-popover border border-border z-50">
                     {sites.map((site) => (
                       <SelectItem key={site.id} value={site.id}>
-                        {site.name}
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`}
+                            alt=""
+                            className="h-4 w-4 rounded-sm"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`;
+                            }}
+                          />
+                          <span>{site.name}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
