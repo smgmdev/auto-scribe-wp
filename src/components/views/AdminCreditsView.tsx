@@ -169,38 +169,36 @@ export function AdminCreditsView() {
               Create First Pack
             </Button>
           </CardContent>
-        </Card> : <div className="space-y-3">
+        </Card> : <div className="space-y-2">
           {packs.map(pack => (
             <Card key={pack.id} className={!pack.active ? 'opacity-60' : ''}>
-              <CardContent className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-6">
+              <CardContent className="flex items-center justify-between px-4 py-2">
+                <div className="grid grid-cols-[180px_100px_100px_80px] items-center gap-4 text-sm">
                   <div>
-                    <h3 className="font-semibold">{pack.name}</h3>
+                    <h3 className="font-semibold truncate">{pack.name}</h3>
                     {!pack.stripe_price_id && (
-                      <p className="text-xs text-warning">⚠️ No Stripe Price ID</p>
+                      <p className="text-xs text-warning">⚠️ No Stripe ID</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-6 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Credits: </span>
-                      <span className="font-medium">{pack.credits}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Price: </span>
-                      <span className="font-medium">${(pack.price_cents / 100).toFixed(2)}</span>
-                    </div>
-                    <div>
-                      <span className={pack.active ? 'text-green-500' : 'text-muted-foreground'}>
-                        {pack.active ? 'Active' : 'Inactive'}
-                      </span>
-                    </div>
+                  <div>
+                    <span className="text-muted-foreground">Credits: </span>
+                    <span className="font-medium">{pack.credits}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Price: </span>
+                    <span className="font-medium">${(pack.price_cents / 100).toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <span className={pack.active ? 'text-green-500' : 'text-muted-foreground'}>
+                      {pack.active ? 'Active' : 'Inactive'}
+                    </span>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(pack)}>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(pack)}>
                     <Edit2 className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(pack)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(pack)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
