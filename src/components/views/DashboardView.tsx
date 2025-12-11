@@ -5,7 +5,29 @@ import { useArticles } from '@/hooks/useArticles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
-import { format } from 'date-fns';
+import { isYesterday, format } from 'date-fns';
+
+function formatRelativeTime(dateInput: string | Date): string {
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+  
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}min ago`;
+  }
+  
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours}h ago`;
+  }
+  
+  if (isYesterday(date)) {
+    return 'yesterday';
+  }
+  
+  return format(date, 'MMM d, yyyy');
+}
+
 const stats = [{
   label: 'Media Sites',
   icon: Globe,
@@ -34,6 +56,13 @@ export function DashboardView() {
   const {
     articles
   } = useArticles();
+
+  const getSiteName = (siteId: string | undefined): string | null => {
+    if (!siteId) return null;
+    const site = sites.find(s => s.id === siteId);
+    return site?.name || null;
+  };
+
   const getStatValue = (key: string) => {
     switch (key) {
       case 'sites':
@@ -111,35 +140,40 @@ export function DashboardView() {
             {articles.length === 0 ? <p className="text-sm text-muted-foreground">
                 No articles yet. Start by scanning headlines or writing a new article.
               </p> : <ul className="space-y-3">
-                {articles.slice(0, 3).map(article => (
-                  <li key={article.id}>
-                    {article.wpLink ? (
-                      <a 
-                        href={article.wpLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(article.createdAt), 'MMM d, yyyy')}
-                          </p>
+                {articles.slice(0, 3).map(article => {
+                  const siteName = getSiteName(article.publishedTo);
+                  return (
+                    <li key={article.id}>
+                      {article.wpLink ? (
+                        <a 
+                          href={article.wpLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatRelativeTime(article.createdAt)}
+                              {siteName && <span> • {siteName}</span>}
+                            </p>
+                          </div>
+                          <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
+                        </a>
+                      ) : (
+                        <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatRelativeTime(article.createdAt)}
+                              {siteName && <span> • {siteName}</span>}
+                            </p>
+                          </div>
                         </div>
-                        <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
-                      </a>
-                    ) : (
-                      <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(article.createdAt), 'MMM d, yyyy')}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                ))}
+                      )}
+                    </li>
+                  );
+                })}
               </ul>}
           </CardContent>
         </Card>
