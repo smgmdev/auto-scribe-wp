@@ -722,12 +722,12 @@ export function ComposeView() {
             <Label className="whitespace-nowrap text-sm font-medium">Publish To</Label>
             {sites.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No WordPress sites connected. Add a site first.
+                No media sites connected. Add a site first.
               </p>
             ) : (
               <Select value={selectedSite} onValueChange={setSelectedSite}>
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a WordPress site">
+                  <SelectValue placeholder="Select a media site">
                     {selectedSite && currentSite && (
                       <div className="flex items-center gap-2">
                         <img 
@@ -838,11 +838,8 @@ export function ComposeView() {
               {content.split(/\s+/).filter(Boolean).length} words
             </p>
           </div>
-        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* SEO Settings */}
+          {/* SEO Settings - Under Content */}
           {selectedSite && currentSite && (
             <Card>
               <CardHeader>
@@ -885,7 +882,11 @@ export function ComposeView() {
               </CardContent>
             </Card>
           )}
+        </div>
 
+
+        {/* Sidebar */}
+        <div className="space-y-6">
           {/* Categories */}
           {selectedSite && (
             <Card>
