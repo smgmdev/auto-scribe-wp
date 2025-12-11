@@ -165,7 +165,7 @@ export function SitesView() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10 overflow-hidden">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
                       <img src={site.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`} alt={`${site.name} favicon`} className="h-5 w-5 object-contain" onError={e => {
                   e.currentTarget.style.display = 'none';
                   (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
