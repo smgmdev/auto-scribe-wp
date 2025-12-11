@@ -509,7 +509,7 @@ export function SitesView() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" 
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
                         onClick={() => handleRemove(site.id, site.name)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -520,7 +520,7 @@ export function SitesView() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-7 w-7 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
                       onClick={() => toggleExpand(site.id)}
                     >
                       {expandedSites.has(site.id) ? (
@@ -618,7 +618,7 @@ export function SitesView() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 px-2 text-xs text-muted-foreground"
+                          className="h-6 px-2 text-xs text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white"
                           onClick={() => setAddingTagForSite(site.id)}
                         >
                           <Plus className="h-3 w-3 mr-1" />

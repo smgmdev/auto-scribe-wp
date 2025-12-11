@@ -38,7 +38,9 @@
 
     /* Custom tokens */
     --success: 152 69% 40%;
-    --success-foreground: 0 0% 100%;
+  --success-foreground: 0 0% 100%;
+  
+  --icon-hover: 220 67% 56%;
     
     --warning: 38 92% 50%;
     --warning-foreground: 220 25% 10%;
