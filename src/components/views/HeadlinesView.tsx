@@ -21,6 +21,7 @@ const sourceColors: Record<string, string> = {
   fortune: 'bg-headline-crypto/10 text-headline-crypto border-headline-crypto/30',
   'fortune-latest': 'bg-pink-500/10 text-pink-600 border-pink-500/30',
   'nikkei-asia': 'bg-rose-500/10 text-rose-600 border-rose-500/30',
+  'cnn-middleeast': 'bg-orange-500/10 text-orange-600 border-orange-500/30',
 };
 
 const sourceLabels: Record<string, string> = {
@@ -34,21 +35,22 @@ const sourceLabels: Record<string, string> = {
   fortune: 'Fortune',
   'fortune-latest': 'Fortune Latest',
   'nikkei-asia': 'NIKKEI Asia',
+  'cnn-middleeast': 'CNN Middle East',
 };
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
 
 // Category to sources mapping
 const categorySourcesMap: Record<string, SourceType[]> = {
   political: ['euronews', 'euronews-economy'],
   business: ['bloomberg', 'bloomberg-latest', 'fortune'],
-  middleeast: ['bloomberg-middleeast'],
+  middleeast: ['bloomberg-middleeast', 'cnn-middleeast'],
   asia: ['bloomberg-asia', 'nikkei-asia'],
 };
 
 const allSources: SourceType[] = [
   'euronews', 'euronews-economy', 'bloomberg', 'bloomberg-latest', 'fortune',
-  'bloomberg-middleeast', 'bloomberg-asia', 'nikkei-asia'
+  'bloomberg-middleeast', 'cnn-middleeast', 'bloomberg-asia', 'nikkei-asia'
 ];
 
 export function HeadlinesView() {

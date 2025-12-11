@@ -9,7 +9,7 @@ const corsHeaders = {
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
   url: string;
   publishedAt: string;
   summary?: string;
@@ -598,89 +598,61 @@ async function scrapeFortune(): Promise<Headline[]> {
   return headlines;
 }
 
-async function scrapeFortuneTech(): Promise<Headline[]> {
+async function scrapeCNNMiddleEast(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
-  const { today, yesterday } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Fortune Tech...');
+    console.log('Scraping CNN Middle East...');
     
-    // Fortune Tech section - try multiple URL patterns
-    const techUrls = [
-      'https://fortune.com/section/tech/',
-      'https://fortune.com/tag/tech/',
-    ];
-    
-    for (const techUrl of techUrls) {
-      if (headlines.length >= 30) break;
-      
-      try {
-        const response = await fetch(techUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          }
-        });
-        const html = await response.text();
-        console.log(`Fortune Tech page length: ${html.length}`);
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        
-        if (doc) {
-          const allLinks = doc.querySelectorAll('a[href]');
-          console.log(`Found ${allLinks.length} links on Fortune Tech`);
-          
-          allLinks.forEach((article) => {
-            if (headlines.length >= 30) return;
-            const link = article as any;
-            const href = link.getAttribute('href') || '';
-            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
-            
-            // Check if it's a Fortune article URL with date pattern
-            const tParts = today.split('-');
-            const yParts = yesterday.split('-');
-            
-            // Fortune uses different date formats in URLs
-            const hasDatePattern = 
-              href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) ||
-              href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) ||
-              href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) ||
-              href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`) ||
-              // Also check for articles without leading zeros
-              href.includes(`/${tParts[0]}-${tParts[1]}-${tParts[2]}`) ||
-              href.includes(`/${yParts[0]}-${yParts[1]}-${yParts[2]}`);
-            
-            if (!hasDatePattern) {
-              return;
-            }
-            
-            if (!title || title.length < 30 || title.length > 300) return;
-            if (seen.has(title.toLowerCase())) return;
-            
-            const fullUrl = href.startsWith('http') ? href : `https://fortune.com${href}`;
-            const articleDate = extractDateFromUrl(fullUrl);
-            
-            if (articleDate && isTodayOrYesterday(articleDate)) {
-              seen.add(title.toLowerCase());
-              headlines.push({
-                id: `fortune-tech-${Date.now()}-${headlines.length}`,
-                title: title,
-                source: 'fortune-tech',
-                url: fullUrl,
-                publishedAt: articleDate.toISOString(),
-              });
-              console.log(`Added Fortune Tech headline: ${title.substring(0, 50)}...`);
-            }
-          });
-        }
-      } catch (e) {
-        console.error(`Error fetching ${techUrl}:`, e);
+    const response = await fetch('https://edition.cnn.com/world/middle-east', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       }
+    });
+    const html = await response.text();
+    console.log(`CNN Middle East page length: ${html.length}`);
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (doc) {
+      // CNN uses container cards with links
+      const allLinks = doc.querySelectorAll('a[href*="/middle-east/"], a[href*="/middleeast/"]');
+      console.log(`Found ${allLinks.length} Middle East links on CNN`);
+      
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+        
+        // Skip non-article links
+        if (!href || href === '#' || href.includes('/live-news/') && href.endsWith('/index.html')) return;
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://edition.cnn.com${href}`;
+        
+        // CNN articles are typically fresh on their main sections
+        // Use current time as an approximation for recent articles
+        const now = new Date();
+        
+        seen.add(title.toLowerCase());
+        headlines.push({
+          id: `cnn-middleeast-${Date.now()}-${headlines.length}`,
+          title: title,
+          source: 'cnn-middleeast',
+          url: fullUrl,
+          publishedAt: now.toISOString(),
+        });
+        console.log(`Added CNN Middle East headline: ${title.substring(0, 50)}...`);
+      });
     }
     
-    console.log(`Found ${headlines.length} Fortune Tech headlines`);
+    console.log(`Found ${headlines.length} CNN Middle East headlines`);
   } catch (error) {
-    console.error('Error scraping Fortune Tech:', error);
+    console.error('Error scraping CNN Middle East:', error);
   }
   return headlines;
 }
@@ -788,8 +760,8 @@ serve(async (req) => {
     if (sources.includes('fortune')) {
       scrapePromises.push(scrapeFortune());
     }
-    if (sources.includes('fortune-tech')) {
-      scrapePromises.push(scrapeFortuneTech());
+    if (sources.includes('cnn-middleeast')) {
+      scrapePromises.push(scrapeCNNMiddleEast());
     }
     if (sources.includes('nikkei-asia')) {
       scrapePromises.push(scrapeNikkeiAsia());

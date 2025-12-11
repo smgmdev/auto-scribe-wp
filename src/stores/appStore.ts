@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { WordPressSite, Headline, Article, AISettings } from '@/types';
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
 
 // Valid sources list for filtering out removed sources from persisted state
-const validSources: SourceType[] = ['euronews', 'bloomberg', 'fortune', 'bloomberg-middleeast', 'bloomberg-asia', 'bloomberg-latest', 'fortune-latest', 'euronews-latest', 'euronews-economy', 'nikkei-asia'];
+const validSources: SourceType[] = ['euronews', 'bloomberg', 'fortune', 'bloomberg-middleeast', 'bloomberg-asia', 'bloomberg-latest', 'fortune-latest', 'euronews-latest', 'euronews-economy', 'nikkei-asia', 'cnn-middleeast'];
 
 interface AppState {
   // WordPress Sites
