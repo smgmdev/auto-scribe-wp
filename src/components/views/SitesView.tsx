@@ -182,47 +182,45 @@ export function SitesView() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
           {sites.map((site, index) => (
             <Card 
               key={site.id} 
-              className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="group hover:shadow-md transition-all duration-300"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10 overflow-hidden">
-                    <img 
-                      src={site.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
-                      alt={`${site.name} favicon`}
-                      className="h-5 w-5 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                      }}
-                    />
-                    <Globe className="h-4 w-4 text-accent hidden" />
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10 overflow-hidden">
+                      <img 
+                        src={site.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
+                        alt={`${site.name} favicon`}
+                        className="h-5 w-5 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                        }}
+                      />
+                      <Globe className="h-4 w-4 text-accent hidden" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-sm truncate">{site.name}</h3>
+                      <a 
+                        href={site.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
+                      >
+                        <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
+                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      </a>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="font-display text-sm font-semibold truncate">{site.name}</CardTitle>
-                    <a 
-                      href={site.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 truncate"
-                    >
-                      <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
-                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                    </a>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0 flex-1 flex flex-col justify-end">
-                <div className="flex items-center justify-between gap-2">
-                  <Badge variant="outline" className="text-xs flex-shrink-0">
-                    {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                  </Badge>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    <Badge variant="outline" className="text-xs">
+                      {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                    </Badge>
                     {site.connected ? (
                       <div className="flex items-center gap-1">
                         <CheckCircle className="h-3.5 w-3.5 text-success" />
