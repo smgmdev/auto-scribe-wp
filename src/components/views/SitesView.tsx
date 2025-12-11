@@ -412,27 +412,8 @@ export function SitesView() {
                       </a>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 flex-shrink-0">
-                    {isAdmin && (
-                      <>
-                        <Badge variant="outline" className="text-xs">
-                          {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                        </Badge>
-                        {site.connected ? (
-                          <div className="flex items-center gap-1">
-                            <CheckCircle className="h-3.5 w-3.5 text-success" />
-                            <span className="text-xs text-success">Connected</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            <XCircle className="h-3.5 w-3.5 text-destructive" />
-                            <span className="text-xs text-destructive">Disconnected</span>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* Credit Cost Display/Edit */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Credit Cost Display/Edit - moved first for admin */}
                     {editingCredits === site.id ? (
                       <div className="flex items-center gap-2">
                         <Input
@@ -477,6 +458,25 @@ export function SitesView() {
                           </Button>
                         )}
                       </Badge>
+                    )}
+
+                    {isAdmin && (
+                      <>
+                        <Badge variant="outline" className="text-xs">
+                          {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                        </Badge>
+                        {site.connected ? (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5 text-success" />
+                            <span className="text-xs text-success">Connected</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <XCircle className="h-3.5 w-3.5 text-destructive" />
+                            <span className="text-xs text-destructive">Disconnected</span>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {isAdmin && (
