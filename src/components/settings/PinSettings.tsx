@@ -144,6 +144,7 @@ export function PinSettings() {
       .from('profiles')
       .update({ 
         pin_hash: null, 
+        pin_salt: null,
         pin_enabled: false 
       })
       .eq('id', user.id);
