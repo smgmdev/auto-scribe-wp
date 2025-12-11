@@ -345,10 +345,19 @@ export function ComposeView() {
   };
 
   const handlePublish = async () => {
-    if (!title || !content) {
+    if (!title) {
       toast({
-        title: "Missing content",
-        description: "Please generate or write article content first",
+        title: "Title required",
+        description: "Please enter an article title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!content) {
+      toast({
+        title: "Content required",
+        description: "Please generate or write article content",
         variant: "destructive",
       });
       return;
@@ -357,7 +366,61 @@ export function ComposeView() {
     if (!currentSite) {
       toast({
         title: "No site selected",
-        description: "Please select a WordPress site to publish to",
+        description: "Please select a media site to publish to",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedCategories.length === 0) {
+      toast({
+        title: "Category required",
+        description: "Please select at least 1 category",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedTagIds.length === 0) {
+      toast({
+        title: "Tag required",
+        description: "Please add at least 1 tag",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!focusKeyword) {
+      toast({
+        title: "Focus keyword required",
+        description: "Please enter a focus keyword for SEO",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentSite.seoPlugin === 'aioseo' && !metaDescription) {
+      toast({
+        title: "Meta description required",
+        description: "Please enter a meta description for SEO",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!imagePreview) {
+      toast({
+        title: "Featured image required",
+        description: "Please upload a featured image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!featuredImage.caption) {
+      toast({
+        title: "Image caption required",
+        description: "Please enter a caption for the featured image",
         variant: "destructive",
       });
       return;
@@ -901,10 +964,10 @@ export function ComposeView() {
               {imagePreview && (
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="img-caption" className="text-xs">Caption</Label>
+                    <Label htmlFor="img-caption" className="text-xs">Caption <span className="text-destructive">*</span></Label>
                     <Input
                       id="img-caption"
-                      placeholder="Image caption"
+                      placeholder="Image caption (required)"
                       value={featuredImage.caption}
                       onChange={(e) => setFeaturedImage({ ...featuredImage, caption: e.target.value })}
                       className="h-8 text-sm"
@@ -989,7 +1052,7 @@ export function ComposeView() {
               variant="accent" 
               className="w-full"
               onClick={handlePublish}
-              disabled={!content || !selectedSite || isPublishing}
+              disabled={isPublishing}
             >
               {isPublishing ? (
                 <>
@@ -1022,15 +1085,16 @@ export function ComposeView() {
                 <CardTitle className="text-sm font-medium">
                   Categories
                   <Badge variant="secondary" className="ml-2">
-                    {selectedCategories.length}/2 selected
+                    {selectedCategories.length}/2
                   </Badge>
                 </CardTitle>
+                <p className="text-xs text-muted-foreground">1 selected category recommended. Max 2.</p>
               </CardHeader>
               <CardContent>
                 {isLoadingCategories ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Fetching categories from WordPress...
+                    Fetching categories from the selected media site...
                   </div>
                 ) : availableCategories.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
@@ -1065,15 +1129,16 @@ export function ComposeView() {
                   <Tag className="h-4 w-4" />
                   Tags
                   <Badge variant="secondary" className="ml-auto">
-                    {selectedTagIds.length}/3 selected
+                    {selectedTagIds.length}/3 added
                   </Badge>
                 </CardTitle>
+                <p className="text-xs text-muted-foreground">1-2 tags recommended. Max 3.</p>
               </CardHeader>
               <CardContent className="space-y-3">
                 {isLoadingTags ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Fetching tags from WordPress...
+                    Fetching tags from the selected media site...
                   </div>
                 ) : (
                   <>
