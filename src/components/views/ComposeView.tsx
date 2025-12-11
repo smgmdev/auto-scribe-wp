@@ -856,10 +856,9 @@ export function ComposeView() {
                       value={metaDescription}
                       onChange={(e) => setMetaDescription(e.target.value)}
                       className="min-h-[80px] text-sm resize-none"
-                      maxLength={160}
                     />
-                    <p className="text-xs text-muted-foreground text-right">
-                      {metaDescription.length}/160 characters
+                    <p className={`text-xs text-right ${metaDescription.length > 160 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                      {metaDescription.length}/160 characters (160 recommended)
                     </p>
                   </div>
                 )}
@@ -952,53 +951,69 @@ export function ComposeView() {
                       </div>
                     )}
 
-                    {/* Add New Tag */}
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add new tag..."
-                        value={newTagInput}
-                        onChange={(e) => setNewTagInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addNewTag();
-                          }
-                        }}
-                        className="h-8 text-sm"
-                        disabled={isAddingTag}
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        onClick={addNewTag}
-                        disabled={!newTagInput.trim() || isAddingTag}
-                      >
-                        {isAddingTag ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Plus className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-
-                    {/* Available Tags */}
-                    {availableTags.filter(tag => !selectedTagIds.includes(tag.id)).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {availableTags
-                          .filter(tag => !selectedTagIds.includes(tag.id))
-                          .map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              className="cursor-pointer hover:bg-accent/10"
-                              onClick={() => toggleTag(tag.id)}
-                            >
-                              {tag.name}
-                            </Badge>
-                          ))}
+                    {/* Tag Input with Autocomplete */}
+                    <div className="relative">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Type to search or add tag..."
+                          value={newTagInput}
+                          onChange={(e) => setNewTagInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              addNewTag();
+                            }
+                          }}
+                          className="h-8 text-sm"
+                          disabled={isAddingTag}
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={addNewTag}
+                          disabled={!newTagInput.trim() || isAddingTag}
+                        >
+                          {isAddingTag ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Plus className="h-4 w-4" />
+                          )}
+                        </Button>
                       </div>
-                    )}
+                      
+                      {/* Dropdown suggestions */}
+                      {newTagInput.trim() && (
+                        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                          {availableTags
+                            .filter(tag => 
+                              !selectedTagIds.includes(tag.id) &&
+                              tag.name.toLowerCase().includes(newTagInput.toLowerCase())
+                            )
+                            .slice(0, 10)
+                            .map((tag) => (
+                              <div
+                                key={tag.id}
+                                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent/50"
+                                onClick={() => {
+                                  toggleTag(tag.id);
+                                  setNewTagInput('');
+                                }}
+                              >
+                                {tag.name}
+                              </div>
+                            ))}
+                          {availableTags.filter(tag => 
+                            !selectedTagIds.includes(tag.id) &&
+                            tag.name.toLowerCase().includes(newTagInput.toLowerCase())
+                          ).length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                              Press Enter to create "{newTagInput.trim()}"
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </CardContent>
