@@ -264,18 +264,35 @@ async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
   const seen = new Set<string>();
   
   try {
-    console.log('Fetching Bloomberg Middle East via RSS feeds with keyword filtering...');
+    console.log('Fetching Bloomberg Middle East via RSS feeds with MENA keyword filtering...');
     
     const rssFeeds = [
       'https://feeds.bloomberg.com/markets/news.rss',
       'https://feeds.bloomberg.com/politics/news.rss',
       'https://feeds.bloomberg.com/wealth/news.rss',
+      'https://feeds.bloomberg.com/industries/news.rss',
     ];
     
-    const middleEastKeywords = [
-      'middle east', 'saudi', 'arabia', 'uae', 'emirates', 'dubai', 'abu dhabi',
-      'qatar', 'kuwait', 'bahrain', 'oman', 'israel', 'iran', 'iraq', 'jordan',
-      'lebanon', 'syria', 'egypt', 'opec', 'riyadh', 'tehran', 'doha'
+    // Comprehensive MENA (Middle East and North Africa) keywords
+    const menaKeywords = [
+      // Middle East general
+      'middle east', 'mideast', 'gulf', 'gcc', 'arab', 'arabian',
+      // Gulf states
+      'saudi', 'arabia', 'uae', 'emirates', 'dubai', 'abu dhabi', 'sharjah',
+      'qatar', 'doha', 'kuwait', 'bahrain', 'oman', 'muscat',
+      // Levant
+      'israel', 'israeli', 'tel aviv', 'jerusalem', 'palestine', 'palestinian', 'gaza', 'west bank',
+      'lebanon', 'lebanese', 'beirut', 'syria', 'syrian', 'damascus',
+      'jordan', 'jordanian', 'amman',
+      // Iran & Iraq
+      'iran', 'iranian', 'tehran', 'iraq', 'iraqi', 'baghdad',
+      // North Africa (MENA)
+      'egypt', 'egyptian', 'cairo', 'morocco', 'moroccan', 'casablanca', 'rabat',
+      'algeria', 'algerian', 'algiers', 'tunisia', 'tunisian', 'tunis',
+      'libya', 'libyan', 'tripoli',
+      // Regional organizations & terms
+      'opec', 'opec+', 'aramco', 'adnoc', 'mubadala', 'sovereign wealth',
+      'riyadh', 'jeddah', 'neom', 'vision 2030'
     ];
     
     for (const feedUrl of rssFeeds) {
@@ -302,16 +319,21 @@ async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
           const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/);
           const url = linkMatch ? linkMatch[1].trim() : '';
           
+          // Also check description for MENA keywords
+          const descMatch = itemXml.match(/<description>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/description>/);
+          const description = descMatch ? descMatch[1].trim() : '';
+          
           const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
           const pubDateStr = dateMatch ? dateMatch[1] : '';
           
           const titleLower = title.toLowerCase();
           const urlLower = url.toLowerCase();
-          const isMiddleEast = middleEastKeywords.some(kw => 
-            titleLower.includes(kw) || urlLower.includes(kw)
+          const descLower = description.toLowerCase();
+          const isMENA = menaKeywords.some(kw => 
+            titleLower.includes(kw) || urlLower.includes(kw) || descLower.includes(kw)
           );
           
-          if (!isMiddleEast) continue;
+          if (!isMENA) continue;
           if (!title || title.length < 30 || title.length > 300) continue;
           if (seen.has(title.toLowerCase())) continue;
           if (!url) continue;
@@ -584,53 +606,76 @@ async function scrapeFortuneTech(): Promise<Headline[]> {
   try {
     console.log('Scraping Fortune Tech...');
     
-    const response = await fetch('https://fortune.com/section/tech/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      }
-    });
-    const html = await response.text();
-    console.log(`Fortune Tech page length: ${html.length}`);
-    const doc = new DOMParser().parseFromString(html, 'text/html');
+    // Fortune Tech section - try multiple URL patterns
+    const techUrls = [
+      'https://fortune.com/section/tech/',
+      'https://fortune.com/tag/tech/',
+    ];
     
-    if (doc) {
-      const allLinks = doc.querySelectorAll('a[href]');
-      console.log(`Found ${allLinks.length} links on Fortune Tech`);
+    for (const techUrl of techUrls) {
+      if (headlines.length >= 30) break;
       
-      allLinks.forEach((article) => {
-        if (headlines.length >= 30) return;
-        const link = article as any;
-        const href = link.getAttribute('href') || '';
-        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+      try {
+        const response = await fetch(techUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          }
+        });
+        const html = await response.text();
+        console.log(`Fortune Tech page length: ${html.length}`);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
         
-        const tParts = today.split('-');
-        const yParts = yesterday.split('-');
-        
-        if (!href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) &&
-            !href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) &&
-            !href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
-            !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
-          return;
-        }
-        
-        if (!title || title.length < 30 || title.length > 300) return;
-        if (seen.has(title.toLowerCase())) return;
-        
-        const fullUrl = href.startsWith('http') ? href : `https://fortune.com${href}`;
-        const articleDate = extractDateFromUrl(fullUrl);
-        
-        if (articleDate && isTodayOrYesterday(articleDate)) {
-          seen.add(title.toLowerCase());
-          headlines.push({
-            id: `fortune-tech-${Date.now()}-${headlines.length}`,
-            title: title,
-            source: 'fortune-tech',
-            url: fullUrl,
-            publishedAt: articleDate.toISOString(),
+        if (doc) {
+          const allLinks = doc.querySelectorAll('a[href]');
+          console.log(`Found ${allLinks.length} links on Fortune Tech`);
+          
+          allLinks.forEach((article) => {
+            if (headlines.length >= 30) return;
+            const link = article as any;
+            const href = link.getAttribute('href') || '';
+            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+            
+            // Check if it's a Fortune article URL with date pattern
+            const tParts = today.split('-');
+            const yParts = yesterday.split('-');
+            
+            // Fortune uses different date formats in URLs
+            const hasDatePattern = 
+              href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) ||
+              href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) ||
+              href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) ||
+              href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`) ||
+              // Also check for articles without leading zeros
+              href.includes(`/${tParts[0]}-${tParts[1]}-${tParts[2]}`) ||
+              href.includes(`/${yParts[0]}-${yParts[1]}-${yParts[2]}`);
+            
+            if (!hasDatePattern) {
+              return;
+            }
+            
+            if (!title || title.length < 30 || title.length > 300) return;
+            if (seen.has(title.toLowerCase())) return;
+            
+            const fullUrl = href.startsWith('http') ? href : `https://fortune.com${href}`;
+            const articleDate = extractDateFromUrl(fullUrl);
+            
+            if (articleDate && isTodayOrYesterday(articleDate)) {
+              seen.add(title.toLowerCase());
+              headlines.push({
+                id: `fortune-tech-${Date.now()}-${headlines.length}`,
+                title: title,
+                source: 'fortune-tech',
+                url: fullUrl,
+                publishedAt: articleDate.toISOString(),
+              });
+              console.log(`Added Fortune Tech headline: ${title.substring(0, 50)}...`);
+            }
           });
-          console.log(`Added Fortune Tech headline: ${title.substring(0, 50)}...`);
         }
-      });
+      } catch (e) {
+        console.error(`Error fetching ${techUrl}:`, e);
+      }
     }
     
     console.log(`Found ${headlines.length} Fortune Tech headlines`);
