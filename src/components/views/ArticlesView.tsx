@@ -21,11 +21,9 @@ const statusColors: Record<string, string> = {
 export function ArticlesView() {
   const { articles, sites } = useAppStore();
 
-  const getSiteNames = (siteIds: string[] = []) => {
-    return siteIds
-      .map(id => sites.find(s => s.id === id)?.name)
-      .filter(Boolean)
-      .join(', ');
+  const getSiteName = (siteId?: string) => {
+    if (!siteId) return '';
+    return sites.find(s => s.id === siteId)?.name || 'Unknown site';
   };
 
   return (
@@ -92,10 +90,10 @@ export function ArticlesView() {
                       </span>
                       <span>•</span>
                       <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
-                      {article.publishedTo && article.publishedTo.length > 0 && (
+                      {article.publishedTo && (
                         <>
                           <span>•</span>
-                          <span>Published to: {getSiteNames(article.publishedTo)}</span>
+                          <span>Published to: {getSiteName(article.publishedTo)}</span>
                         </>
                       )}
                     </div>

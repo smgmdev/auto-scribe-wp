@@ -8,6 +8,18 @@ export interface WordPressSite {
   lastSync?: Date;
 }
 
+export interface WPCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface WPTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Headline {
   id: string;
   title: string;
@@ -32,7 +44,9 @@ export interface Article {
   sourceHeadline?: Headline;
   featuredImage?: FeaturedImage;
   status: 'draft' | 'published' | 'scheduled';
-  publishedTo?: string[];
+  publishedTo?: string;
+  categories?: number[];
+  tags?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
