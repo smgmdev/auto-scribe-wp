@@ -7,8 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import amlogo from '@/assets/amlogo.png';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -20,7 +22,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const { user, signIn, signUp } = useAuth();
+  const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -29,6 +31,11 @@ export default function Auth() {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Show loading screen while checking initial auth state
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   const validateForm = () => {
     try {
@@ -103,11 +110,9 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img src={amlogo} alt="Logo" className="h-12 w-12 object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold">Publisher</CardTitle>
+          <CardTitle className="text-2xl font-bold">Arcana Mace</CardTitle>
           <CardDescription>AI Content Studio</CardDescription>
         </CardHeader>
         <CardContent>
