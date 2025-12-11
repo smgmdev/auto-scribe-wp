@@ -48,8 +48,11 @@ export interface Article {
   featuredImage?: FeaturedImage;
   status: 'draft' | 'published' | 'scheduled';
   publishedTo?: string;
+  wpPostId?: number;
   wpLink?: string;
+  wpFeaturedMediaId?: number;
   categories?: number[];
+  tagIds?: number[];
   tags?: string[];
   createdAt: Date;
   updatedAt: Date;

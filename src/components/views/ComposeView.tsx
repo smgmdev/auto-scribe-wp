@@ -22,6 +22,7 @@ import {
   fetchTags, 
   createTag, 
   publishArticle, 
+  updateArticle as updateWPArticle,
   uploadMedia 
 } from '@/lib/wordpress-api';
 import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
@@ -77,8 +78,12 @@ export function ComposeView() {
   useEffect(() => {
     if (currentSite) {
       setFetchError(null);
-      setSelectedCategories([]);
-      setSelectedTagIds([]);
+      
+      // Only reset if not editing or site changed
+      if (!editingArticle) {
+        setSelectedCategories([]);
+        setSelectedTagIds([]);
+      }
       setFocusKeyword('');
       setMetaDescription('');
       
@@ -88,6 +93,10 @@ export function ComposeView() {
         .then(categories => {
           setAvailableCategories(categories);
           setIsLoadingCategories(false);
+          // Pre-select categories if editing
+          if (editingArticle?.categories) {
+            setSelectedCategories(editingArticle.categories);
+          }
         })
         .catch(error => {
           console.error('Failed to fetch categories:', error);
@@ -102,6 +111,10 @@ export function ComposeView() {
         .then(tags => {
           setAvailableTags(tags);
           setIsLoadingTags(false);
+          // Pre-select tags if editing
+          if (editingArticle?.tagIds) {
+            setSelectedTagIds(editingArticle.tagIds);
+          }
         })
         .catch(error => {
           console.error('Failed to fetch tags:', error);
@@ -117,7 +130,15 @@ export function ComposeView() {
       setMetaDescription('');
       setFetchError(null);
     }
-  }, [currentSite?.id]);
+  }, [currentSite?.id, editingArticle]);
+
+  // Pre-populate image preview if editing
+  useEffect(() => {
+    if (editingArticle?.featuredImage?.url) {
+      setImagePreview(editingArticle.featuredImage.url);
+      setFeaturedImage(editingArticle.featuredImage);
+    }
+  }, [editingArticle]);
 
   // Clear editing article on unmount
   useEffect(() => {
@@ -278,9 +299,9 @@ export function ComposeView() {
     setIsPublishing(true);
 
     try {
-      let featuredMediaId: number | undefined;
+      let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
 
-      // Upload featured image first if exists
+      // Upload featured image first if exists and is a new file
       if (featuredImage.file) {
         toast({
           title: "Uploading image...",
@@ -296,16 +317,31 @@ export function ComposeView() {
         featuredMediaId = mediaResult.id;
       }
 
-      // Publish article
-      const result = await publishArticle({
-        site: currentSite,
-        title,
-        content,
-        status: 'publish',
-        categories: selectedCategories,
-        tags: selectedTagIds,
-        featuredMediaId,
-      });
+      let result: { id: number; link: string };
+
+      // Update existing WordPress post or create new
+      if (editingArticle?.wpPostId) {
+        result = await updateWPArticle({
+          site: currentSite,
+          postId: editingArticle.wpPostId,
+          title,
+          content,
+          status: 'publish',
+          categories: selectedCategories,
+          tags: selectedTagIds,
+          featuredMediaId,
+        });
+      } else {
+        result = await publishArticle({
+          site: currentSite,
+          title,
+          content,
+          status: 'publish',
+          categories: selectedCategories,
+          tags: selectedTagIds,
+          featuredMediaId,
+        });
+      }
 
       // Save to local state
       if (editingArticle) {
@@ -315,8 +351,11 @@ export function ComposeView() {
           tone,
           status: 'published',
           publishedTo: selectedSite,
+          wpPostId: result.id,
           wpLink: result.link,
+          wpFeaturedMediaId: featuredMediaId,
           categories: selectedCategories,
+          tagIds: selectedTagIds,
           tags: availableTags
             .filter(t => selectedTagIds.includes(t.id))
             .map(t => t.name),
@@ -332,8 +371,11 @@ export function ComposeView() {
           featuredImage: featuredImage.file ? featuredImage : undefined,
           status: 'published',
           publishedTo: selectedSite,
+          wpPostId: result.id,
           wpLink: result.link,
+          wpFeaturedMediaId: featuredMediaId,
           categories: selectedCategories,
+          tagIds: selectedTagIds,
           tags: availableTags
             .filter(t => selectedTagIds.includes(t.id))
             .map(t => t.name),
@@ -382,7 +424,7 @@ export function ComposeView() {
     }
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!title) {
       toast({
         title: "Title required",
@@ -395,20 +437,60 @@ export function ComposeView() {
     if (!editingArticle) return;
 
     setIsSaving(true);
-    
-    updateArticle(editingArticle.id, {
-      title,
-      content,
-      tone,
-      updatedAt: new Date(),
-    });
 
-    toast({
-      title: "Article saved",
-      description: "Your changes have been saved",
-    });
+    try {
+      // Update WordPress if there's an existing post
+      if (editingArticle.wpPostId && currentSite) {
+        let featuredMediaId: number | undefined = editingArticle.wpFeaturedMediaId;
 
-    setIsSaving(false);
+        // Upload new image if provided
+        if (featuredImage.file) {
+          const mediaResult = await uploadMedia(currentSite, featuredImage.file, {
+            title: featuredImage.title,
+            alt_text: featuredImage.altText,
+            caption: featuredImage.caption,
+            description: featuredImage.description,
+          });
+          featuredMediaId = mediaResult.id;
+        }
+
+        await updateWPArticle({
+          site: currentSite,
+          postId: editingArticle.wpPostId,
+          title,
+          content,
+          categories: selectedCategories,
+          tags: selectedTagIds,
+          featuredMediaId,
+        });
+      }
+      
+      updateArticle(editingArticle.id, {
+        title,
+        content,
+        tone,
+        categories: selectedCategories,
+        tagIds: selectedTagIds,
+        tags: availableTags
+          .filter(t => selectedTagIds.includes(t.id))
+          .map(t => t.name),
+        updatedAt: new Date(),
+      });
+
+      toast({
+        title: "Article saved",
+        description: editingArticle.wpPostId ? "Changes saved to WordPress" : "Your changes have been saved locally",
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({
+        title: "Save failed",
+        description: error instanceof Error ? error.message : "Could not save changes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSaveDraft = async () => {
