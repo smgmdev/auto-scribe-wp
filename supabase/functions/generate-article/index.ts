@@ -1,9 +1,99 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Extract main content from HTML
+async function fetchSourceArticle(url: string): Promise<string | null> {
+  try {
+    console.log('Fetching source article from:', url);
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch source:', response.status);
+      return null;
+    }
+    
+    const html = await response.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (!doc) return null;
+    
+    // Remove script and style elements
+    const scripts = doc.querySelectorAll('script, style, nav, header, footer, aside, .advertisement, .ad, .sidebar');
+    scripts.forEach((el: any) => el.remove?.());
+    
+    // Try to find main article content using common selectors
+    const contentSelectors = [
+      'article',
+      '[role="main"]',
+      '.article-content',
+      '.article-body',
+      '.post-content',
+      '.entry-content',
+      '.story-body',
+      '.content-body',
+      'main',
+      '.main-content',
+    ];
+    
+    let articleText = '';
+    
+    for (const selector of contentSelectors) {
+      const element = doc.querySelector(selector);
+      if (element) {
+        // Get all paragraphs within the article
+        const paragraphs = element.querySelectorAll('p');
+        const texts: string[] = [];
+        paragraphs.forEach((p: any) => {
+          const text = p.textContent?.trim();
+          if (text && text.length > 50) {
+            texts.push(text);
+          }
+        });
+        if (texts.length > 0) {
+          articleText = texts.join('\n\n');
+          break;
+        }
+      }
+    }
+    
+    // Fallback: get all paragraphs from body
+    if (!articleText) {
+      const allParagraphs = doc.querySelectorAll('p');
+      const texts: string[] = [];
+      allParagraphs.forEach((p: any) => {
+        const text = p.textContent?.trim();
+        if (text && text.length > 80) {
+          texts.push(text);
+        }
+      });
+      articleText = texts.slice(0, 20).join('\n\n'); // Limit to first 20 paragraphs
+    }
+    
+    // Truncate if too long (keep under ~3000 words for context)
+    const words = articleText.split(/\s+/);
+    if (words.length > 2500) {
+      articleText = words.slice(0, 2500).join(' ') + '...';
+    }
+    
+    console.log('Extracted source content:', articleText.length, 'characters');
+    return articleText || null;
+  } catch (error) {
+    console.error('Error fetching source article:', error);
+    return null;
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,7 +101,7 @@ serve(async (req) => {
   }
 
   try {
-    const { headline, tone } = await req.json();
+    const { headline, tone, sourceUrl } = await req.json();
     
     if (!headline) {
       return new Response(
@@ -27,6 +117,13 @@ serve(async (req) => {
 
     console.log('Generating article for headline:', headline);
     console.log('Tone:', tone);
+    console.log('Source URL:', sourceUrl || 'none');
+
+    // Fetch source article content if URL provided
+    let sourceContent: string | null = null;
+    if (sourceUrl) {
+      sourceContent = await fetchSourceArticle(sourceUrl);
+    }
 
     // Tone-specific writing guidance
     const toneGuidance: Record<string, string> = {
@@ -41,6 +138,16 @@ serve(async (req) => {
 
     const selectedTone = tone || 'neutral';
     const toneInstruction = toneGuidance[selectedTone] || toneGuidance.neutral;
+
+    // Build source context section if we have source content
+    const sourceContextSection = sourceContent 
+      ? `\n\nSOURCE ARTICLE CONTENT (use these facts as the foundation - DO NOT copy verbatim, rewrite completely in your own words):
+---
+${sourceContent}
+---
+
+IMPORTANT: Base your article on the FACTS from the source above. Include accurate details, figures, quotes, and information from the source. However, you MUST completely rewrite everything in your own words and style. Do not plagiarize.`
+      : '';
 
     const systemPrompt = `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
 
@@ -64,7 +171,7 @@ TONE: ${selectedTone.toUpperCase()}
 ${toneInstruction}
 
 TARGET LENGTH: Approximately 700 words
-STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings`;
+STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings${sourceContextSection}`;
 
     const userPrompt = `Write an article based on this headline: "${headline}"
 
@@ -74,6 +181,8 @@ TITLE REQUIREMENTS:
 - Make it intriguing - readers should NEED to click
 - Keep it concise but impactful
 - Examples of good titles: "Tesla's Berlin Gambit Could Reshape European Manufacturing", "Why Warren Buffett Just Made His Biggest Bet Yet", "The $50 Billion Question Hanging Over London"
+
+${sourceContent ? 'ACCURACY: Use the facts, figures, and details from the source article. Be accurate and factual.' : ''}
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 [Your new headline here - no prefix, just the headline]
@@ -143,12 +252,14 @@ Remember: Write like a seasoned journalist, not an AI. No lists. No excessive fo
 
     console.log('Generated title:', newTitle);
     console.log('Article length:', articleContent.split(/\s+/).length, 'words');
+    console.log('Used source content:', sourceContent ? 'yes' : 'no');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         title: newTitle,
-        content: articleContent
+        content: articleContent,
+        usedSource: !!sourceContent
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

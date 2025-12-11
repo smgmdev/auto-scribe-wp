@@ -295,10 +295,14 @@ export function ComposeView() {
     setIsGenerating(true);
     
     try {
+      // Pass source URL if headline was selected from news sources
+      const sourceUrl = selectedHeadline?.url;
+      
       const { data, error } = await supabase.functions.invoke('generate-article', {
         body: { 
           headline: headlineToUse,
-          tone: tone 
+          tone: tone,
+          sourceUrl: sourceUrl
         }
       });
 
@@ -310,9 +314,10 @@ export function ComposeView() {
         setTitle(data.title);
         setContent(data.content);
         
+        const sourceNote = data.usedSource ? ' (based on source article)' : '';
         toast({
           title: "Article generated",
-          description: `${data.content.split(/\s+/).length} words generated with AI`,
+          description: `${data.content.split(/\s+/).length} words generated with AI${sourceNote}`,
         });
       } else {
         throw new Error(data?.error || 'Failed to generate article');
