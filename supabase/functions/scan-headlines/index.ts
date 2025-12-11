@@ -128,55 +128,77 @@ async function scrapeEuronews(): Promise<Headline[]> {
 async function scrapeBloomberg(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
-  const { today, yesterday } = getTodayAndYesterday();
+  const { today, yesterday, todayDate, yesterdayDate } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Bloomberg front page...');
+    console.log('Fetching Bloomberg RSS feeds...');
     
-    // Only scrape front page
-    const response = await fetch('https://www.bloomberg.com/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Cache-Control': 'no-cache',
-      }
-    });
-    const html = await response.text();
-    console.log(`Bloomberg response length: ${html.length} characters`);
+    // Bloomberg RSS feeds provide actual content
+    const rssFeeds = [
+      'https://feeds.bloomberg.com/markets/news.rss',
+      'https://feeds.bloomberg.com/technology/news.rss',
+      'https://feeds.bloomberg.com/politics/news.rss',
+    ];
     
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    
-    if (doc) {
-      const allLinks = doc.querySelectorAll('a[href]');
-      console.log(`Found ${allLinks.length} links on Bloomberg front page`);
+    for (const feedUrl of rssFeeds) {
+      if (headlines.length >= 30) break;
       
-      allLinks.forEach((article) => {
-        if (headlines.length >= 30) return;
-        const link = article as any;
-        const href = link.getAttribute('href') || '';
-        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+      try {
+        const response = await fetch(feedUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/rss+xml, application/xml, text/xml',
+          }
+        });
+        const xml = await response.text();
+        console.log(`Bloomberg RSS ${feedUrl.split('/').slice(-2).join('/')} length: ${xml.length}`);
         
-        // Bloomberg uses YYYY-MM-DD format in URLs
-        if (!href.includes(`/${today}`) && !href.includes(`/${yesterday}`)) return;
-        if (!title || title.length < 30 || title.length > 300) return;
-        if (seen.has(title.toLowerCase())) return;
+        // Parse RSS items manually
+        const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
         
-        const fullUrl = href.startsWith('http') ? href : `https://www.bloomberg.com${href}`;
-        const articleDate = extractDateFromUrl(fullUrl);
-        
-        if (articleDate && isTodayOrYesterday(articleDate)) {
-          seen.add(title.toLowerCase());
-          headlines.push({
-            id: `bloomberg-${Date.now()}-${headlines.length}`,
-            title: title,
-            source: 'bloomberg',
-            url: fullUrl,
-            publishedAt: articleDate.toISOString(),
-          });
-          console.log(`Added Bloomberg headline: ${title.substring(0, 50)}...`);
+        for (const match of itemMatches) {
+          if (headlines.length >= 30) break;
+          const itemXml = match[1];
+          
+          // Extract title
+          const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/);
+          const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ') : '';
+          
+          // Extract link
+          const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/);
+          const url = linkMatch ? linkMatch[1].trim() : '';
+          
+          // Extract pubDate
+          const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
+          const pubDateStr = dateMatch ? dateMatch[1] : '';
+          
+          if (!title || title.length < 30 || title.length > 300) continue;
+          if (seen.has(title.toLowerCase())) continue;
+          if (!url) continue;
+          
+          // Parse publication date
+          let articleDate: Date | null = null;
+          if (pubDateStr) {
+            articleDate = new Date(pubDateStr);
+          } else {
+            articleDate = extractDateFromUrl(url);
+          }
+          
+          if (articleDate && isTodayOrYesterday(articleDate)) {
+            seen.add(title.toLowerCase());
+            headlines.push({
+              id: `bloomberg-${Date.now()}-${headlines.length}`,
+              title: title,
+              source: 'bloomberg',
+              url: url,
+              publishedAt: articleDate.toISOString(),
+            });
+            console.log(`Added Bloomberg headline: ${title.substring(0, 50)}...`);
+          }
         }
-      });
+      } catch (e) {
+        console.error(`Error fetching ${feedUrl}:`, e);
+      }
     }
     
     console.log(`Found ${headlines.length} Bloomberg headlines`);
