@@ -111,11 +111,37 @@ export interface PublishArticleParams {
   categories: number[];
   tags: number[];
   featuredMediaId?: number;
+  seo?: {
+    focusKeyword?: string;
+    metaDescription?: string;
+  };
 }
 
 export async function publishArticle(params: PublishArticleParams): Promise<{ id: number; link: string }> {
   try {
     const baseUrl = normalizeUrl(params.site.url);
+    
+    // Build meta object for SEO plugins
+    const meta: Record<string, string> = {};
+    
+    if (params.seo) {
+      if (params.site.seoPlugin === 'aioseo') {
+        if (params.seo.focusKeyword) {
+          meta['_aioseo_keywords'] = params.seo.focusKeyword;
+        }
+        if (params.seo.metaDescription) {
+          meta['_aioseo_description'] = params.seo.metaDescription;
+        }
+      } else if (params.site.seoPlugin === 'rankmath') {
+        if (params.seo.focusKeyword) {
+          meta['rank_math_focus_keyword'] = params.seo.focusKeyword;
+        }
+        if (params.seo.metaDescription) {
+          meta['rank_math_description'] = params.seo.metaDescription;
+        }
+      }
+    }
+
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
       method: 'POST',
       headers: {
@@ -129,6 +155,7 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
         categories: params.categories,
         tags: params.tags,
         featured_media: params.featuredMediaId || 0,
+        meta: Object.keys(meta).length > 0 ? meta : undefined,
       }),
     });
 
@@ -158,11 +185,37 @@ export interface UpdateArticleParams {
   categories?: number[];
   tags?: number[];
   featuredMediaId?: number;
+  seo?: {
+    focusKeyword?: string;
+    metaDescription?: string;
+  };
 }
 
 export async function updateArticle(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
   try {
     const baseUrl = normalizeUrl(params.site.url);
+    
+    // Build meta object for SEO plugins
+    const meta: Record<string, string> = {};
+    
+    if (params.seo) {
+      if (params.site.seoPlugin === 'aioseo') {
+        if (params.seo.focusKeyword) {
+          meta['_aioseo_keywords'] = params.seo.focusKeyword;
+        }
+        if (params.seo.metaDescription) {
+          meta['_aioseo_description'] = params.seo.metaDescription;
+        }
+      } else if (params.site.seoPlugin === 'rankmath') {
+        if (params.seo.focusKeyword) {
+          meta['rank_math_focus_keyword'] = params.seo.focusKeyword;
+        }
+        if (params.seo.metaDescription) {
+          meta['rank_math_description'] = params.seo.metaDescription;
+        }
+      }
+    }
+
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${params.postId}`, {
       method: 'PUT',
       headers: {
@@ -176,6 +229,7 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
         categories: params.categories,
         tags: params.tags,
         featured_media: params.featuredMediaId ?? undefined,
+        meta: Object.keys(meta).length > 0 ? meta : undefined,
       }),
     });
 
