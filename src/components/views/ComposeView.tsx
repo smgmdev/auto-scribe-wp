@@ -977,7 +977,43 @@ export function ComposeView() {
                 {/* Focus Keyword - Both plugins */}
                 <div className="space-y-1">
                   <Label htmlFor="focus-keyword" className="text-xs">Focus Keyword</Label>
-                  <Input id="focus-keyword" placeholder="Enter focus keyword..." value={focusKeyword} onChange={e => setFocusKeyword(e.target.value)} className="h-8 text-sm" />
+                  {focusKeyword ? (
+                    <div className="flex items-center gap-2 min-h-8">
+                      <Badge variant="secondary" className="flex items-center gap-1 px-2 py-1">
+                        {focusKeyword}
+                        <button
+                          type="button"
+                          onClick={() => setFocusKeyword('')}
+                          className="ml-1 rounded-full hover:bg-muted p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    </div>
+                  ) : (
+                    <Input 
+                      id="focus-keyword" 
+                      placeholder="Enter focus keyword and press Enter..." 
+                      className="h-8 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = (e.target as HTMLInputElement).value.trim();
+                          if (value) {
+                            setFocusKeyword(value);
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value.trim();
+                        if (value) {
+                          setFocusKeyword(value);
+                          e.target.value = '';
+                        }
+                      }}
+                    />
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {currentSite?.seoPlugin === 'rankmath' 
                       ? "Title should contain the Focus Keyword to maximize SEO"
