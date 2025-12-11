@@ -363,7 +363,11 @@ export function SitesView() {
                         )}
                       </>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Editorial, no sponsor marks, LLM search friendly</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">Editorial</Badge>
+                        <Badge variant="outline" className="text-xs">No sponsor marks</Badge>
+                        <Badge variant="outline" className="text-xs">LLM friendly</Badge>
+                      </div>
                     )}
                     {isAdmin && (
                       <Button 
