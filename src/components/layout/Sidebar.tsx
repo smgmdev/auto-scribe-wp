@@ -83,7 +83,7 @@ export function Sidebar({
                 <h1 className="text-lg font-semibold text-sidebar-foreground">
                   Arcana Mace 
                 </h1>
-                <p className="text-xs text-sidebar-foreground/60">AI-First Media Control and Distribution Platform</p>
+                <p className="text-xs text-sidebar-foreground/60">AI-Powered Media Control and Distribution Platform</p>
               </div>
             </div>
             {/* Close button for mobile */}
