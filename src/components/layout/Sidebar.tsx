@@ -94,18 +94,20 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </Button>
           </div>
 
-          {/* Credits Display */}
-          <div className="px-4 py-3 border-b border-sidebar-border">
-            <div className="flex items-center justify-between">
-              <CreditDisplay />
-              <button 
-                onClick={() => setBuyCreditsOpen(true)}
-                className="flex items-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/30 text-sm font-medium text-sidebar-foreground hover:bg-accent/20 transition-colors"
-              >
-                Buy credits
-              </button>
+          {/* Credits Display - Only for non-admin users */}
+          {!isAdmin && (
+            <div className="px-4 py-3 border-b border-sidebar-border">
+              <div className="flex items-center justify-between">
+                <CreditDisplay />
+                <button 
+                  onClick={() => setBuyCreditsOpen(true)}
+                  className="flex items-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/30 text-sm font-medium text-sidebar-foreground hover:bg-accent/20 transition-colors"
+                >
+                  Buy credits
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
