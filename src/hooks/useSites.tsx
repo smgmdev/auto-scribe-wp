@@ -53,7 +53,8 @@ export function useSites() {
   const [sites, setSites] = useState<WordPressSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAdmin } = useAuth();
+  const { isAdmin, loading: authLoading } = useAuth();
+  const [lastIsAdmin, setLastIsAdmin] = useState<boolean | null>(null);
 
   const fetchSites = useCallback(async () => {
     setLoading(true);
@@ -90,8 +91,13 @@ export function useSites() {
   }, [isAdmin]);
 
   useEffect(() => {
+    // Only refetch if auth is loaded and isAdmin actually changed
+    if (authLoading) return;
+    if (lastIsAdmin === isAdmin) return;
+    
+    setLastIsAdmin(isAdmin);
     fetchSites();
-  }, [fetchSites]);
+  }, [fetchSites, authLoading, isAdmin, lastIsAdmin]);
 
   const addSite = async (site: Omit<WordPressSite, 'id' | 'connected'>) => {
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
