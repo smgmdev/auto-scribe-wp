@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Lock, Save, Loader2 } from 'lucide-react';
+import { Mail, Lock, Save, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,82 +14,18 @@ export function AccountSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  const [loadingProfile, setLoadingProfile] = useState(false);
-  const [savingUsername, setSavingUsername] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
       setEmail(user.email || '');
-      fetchProfile();
     }
   }, [user]);
-
-  const fetchProfile = async () => {
-    if (!user) return;
-    
-    setLoadingProfile(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', user.id)
-      .maybeSingle();
-    
-    if (data?.username) {
-      setUsername(data.username);
-    }
-    setLoadingProfile(false);
-  };
-
-  const handleUpdateUsername = async () => {
-    if (!user) return;
-    
-    if (!username.trim()) {
-      toast({
-        title: "Error",
-        description: "Username cannot be empty",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSavingUsername(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ username: username.trim() })
-      .eq('id', user.id);
-    
-    setSavingUsername(false);
-    
-    if (error) {
-      if (error.code === '23505') {
-        toast({
-          title: "Error",
-          description: "This username is already taken",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
-      }
-      return;
-    }
-    
-    toast({
-      title: "Username updated",
-      description: "Your username has been successfully updated"
-    });
-  };
 
   const handleUpdateEmail = async () => {
     if (!email.trim()) {
@@ -161,7 +97,6 @@ export function AccountSettings() {
       return;
     }
     
-    setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     
@@ -170,16 +105,6 @@ export function AccountSettings() {
       description: "Your password has been successfully changed"
     });
   };
-
-  if (loadingProfile) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -190,36 +115,6 @@ export function AccountSettings() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Username */}
-        <div className="space-y-3">
-          <Label htmlFor="username" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Username
-          </Label>
-          <div className="flex gap-3">
-            <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-              className="flex-1"
-            />
-            <Button 
-              onClick={handleUpdateUsername} 
-              disabled={savingUsername}
-              variant="outline"
-            >
-              {savingUsername ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        <Separator />
-
         {/* Email */}
         <div className="space-y-3">
           <Label htmlFor="email" className="flex items-center gap-2">
