@@ -151,7 +151,7 @@ export function AdminCreditsView() {
         </div>
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4 mr-2" />
-          Add New Price
+          New Credit Pack
         </Button>
       </div>
 
