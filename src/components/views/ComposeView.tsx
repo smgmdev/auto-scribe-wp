@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Upload, X, Send, Loader2, Plus, Tag } from 'lucide-react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  fetchCategories, 
+  fetchTags, 
+  createTag, 
+  publishArticle, 
+  uploadMedia 
+} from '@/lib/wordpress-api';
 import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
 
 const toneOptions: { value: ArticleTone; label: string; color: string }[] = [
@@ -24,29 +31,6 @@ const toneOptions: { value: ArticleTone; label: string; color: string }[] = [
   { value: 'financial', label: 'Financial', color: 'bg-headline-financial' },
   { value: 'crypto', label: 'Crypto', color: 'bg-headline-crypto' },
   { value: 'realestate', label: 'Real Estate', color: 'bg-headline-realestate' },
-];
-
-// Mock categories and tags per site (in real app, these would be fetched from WP REST API)
-const mockCategoriesBySite: Record<string, WPCategory[]> = {};
-const mockTagsBySite: Record<string, WPTag[]> = {};
-
-const getDefaultCategories = (): WPCategory[] => [
-  { id: 1, name: 'Uncategorized', slug: 'uncategorized' },
-  { id: 2, name: 'News', slug: 'news' },
-  { id: 3, name: 'Business', slug: 'business' },
-  { id: 4, name: 'Technology', slug: 'technology' },
-  { id: 5, name: 'Finance', slug: 'finance' },
-  { id: 6, name: 'Markets', slug: 'markets' },
-  { id: 7, name: 'Economy', slug: 'economy' },
-  { id: 8, name: 'Opinion', slug: 'opinion' },
-];
-
-const getDefaultTags = (): WPTag[] => [
-  { id: 1, name: 'Breaking News', slug: 'breaking-news' },
-  { id: 2, name: 'Analysis', slug: 'analysis' },
-  { id: 3, name: 'Exclusive', slug: 'exclusive' },
-  { id: 4, name: 'Featured', slug: 'featured' },
-  { id: 5, name: 'Trending', slug: 'trending' },
 ];
 
 export function ComposeView() {
@@ -58,6 +42,7 @@ export function ComposeView() {
   const [title, setTitle] = useState(selectedHeadline?.title || '');
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [selectedSite, setSelectedSite] = useState<string>('');
   const [featuredImage, setFeaturedImage] = useState<FeaturedImage>({
     file: null,
@@ -72,37 +57,57 @@ export function ComposeView() {
   const [availableCategories, setAvailableCategories] = useState<WPCategory[]>([]);
   const [availableTags, setAvailableTags] = useState<WPTag[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [newTagInput, setNewTagInput] = useState('');
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Get the currently selected site object
+  const currentSite = sites.find(s => s.id === selectedSite);
 
   // Fetch categories and tags when site is selected
   useEffect(() => {
-    if (selectedSite) {
+    if (currentSite) {
+      setFetchError(null);
+      setSelectedCategories([]);
+      setSelectedTagIds([]);
+      
+      // Fetch categories
       setIsLoadingCategories(true);
-      // Simulate API fetch delay
-      setTimeout(() => {
-        // Get or create mock data for this site
-        if (!mockCategoriesBySite[selectedSite]) {
-          mockCategoriesBySite[selectedSite] = getDefaultCategories();
-        }
-        if (!mockTagsBySite[selectedSite]) {
-          mockTagsBySite[selectedSite] = getDefaultTags();
-        }
-        
-        setAvailableCategories(mockCategoriesBySite[selectedSite]);
-        setAvailableTags(mockTagsBySite[selectedSite]);
-        setSelectedCategories([]);
-        setSelectedTags([]);
-        setIsLoadingCategories(false);
-      }, 800);
+      fetchCategories(currentSite)
+        .then(categories => {
+          setAvailableCategories(categories);
+          setIsLoadingCategories(false);
+        })
+        .catch(error => {
+          console.error('Failed to fetch categories:', error);
+          setFetchError('Failed to fetch categories. Check site connection.');
+          setIsLoadingCategories(false);
+          setAvailableCategories([]);
+        });
+      
+      // Fetch tags
+      setIsLoadingTags(true);
+      fetchTags(currentSite)
+        .then(tags => {
+          setAvailableTags(tags);
+          setIsLoadingTags(false);
+        })
+        .catch(error => {
+          console.error('Failed to fetch tags:', error);
+          setIsLoadingTags(false);
+          setAvailableTags([]);
+        });
     } else {
       setAvailableCategories([]);
       setAvailableTags([]);
       setSelectedCategories([]);
-      setSelectedTags([]);
+      setSelectedTagIds([]);
+      setFetchError(null);
     }
-  }, [selectedSite]);
+  }, [currentSite?.id]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -138,37 +143,50 @@ export function ComposeView() {
     );
   };
 
-  const toggleTag = (tagName: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tagName)
-        ? prev.filter(t => t !== tagName)
-        : [...prev, tagName]
+  const toggleTag = (tagId: number) => {
+    setSelectedTagIds(prev =>
+      prev.includes(tagId)
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
     );
   };
 
-  const addNewTag = () => {
+  const addNewTag = async () => {
     const trimmedTag = newTagInput.trim();
-    if (trimmedTag && !selectedTags.includes(trimmedTag)) {
-      // Add to selected tags
-      setSelectedTags(prev => [...prev, trimmedTag]);
-      
-      // Also add to available tags if it doesn't exist
-      const existingTag = availableTags.find(
-        t => t.name.toLowerCase() === trimmedTag.toLowerCase()
-      );
-      if (!existingTag) {
-        const newTag: WPTag = {
-          id: Date.now(),
-          name: trimmedTag,
-          slug: trimmedTag.toLowerCase().replace(/\s+/g, '-'),
-        };
-        setAvailableTags(prev => [...prev, newTag]);
-        // Also update the mock data so it persists
-        if (selectedSite && mockTagsBySite[selectedSite]) {
-          mockTagsBySite[selectedSite].push(newTag);
-        }
+    if (!trimmedTag || !currentSite) return;
+
+    // Check if tag already exists
+    const existingTag = availableTags.find(
+      t => t.name.toLowerCase() === trimmedTag.toLowerCase()
+    );
+    
+    if (existingTag) {
+      if (!selectedTagIds.includes(existingTag.id)) {
+        setSelectedTagIds(prev => [...prev, existingTag.id]);
       }
       setNewTagInput('');
+      return;
+    }
+
+    // Create new tag on WordPress
+    setIsAddingTag(true);
+    try {
+      const newTag = await createTag(currentSite, trimmedTag);
+      setAvailableTags(prev => [...prev, newTag]);
+      setSelectedTagIds(prev => [...prev, newTag.id]);
+      setNewTagInput('');
+      toast({
+        title: "Tag created",
+        description: `"${newTag.name}" has been added to your WordPress site`,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to create tag",
+        description: "Could not create the tag on WordPress",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingTag(false);
     }
   };
 
@@ -270,7 +288,7 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
     });
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!title || !content) {
       toast({
         title: "Missing content",
@@ -280,7 +298,7 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       return;
     }
 
-    if (!selectedSite) {
+    if (!currentSite) {
       toast({
         title: "No site selected",
         description: "Please select a WordPress site to publish to",
@@ -289,39 +307,95 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       return;
     }
 
-    const siteName = sites.find(s => s.id === selectedSite)?.name || 'Unknown';
+    setIsPublishing(true);
 
-    addArticle({
-      id: crypto.randomUUID(),
-      title,
-      content,
-      tone,
-      sourceHeadline: selectedHeadline || undefined,
-      featuredImage: featuredImage.file ? featuredImage : undefined,
-      status: 'published',
-      publishedTo: selectedSite,
-      categories: selectedCategories,
-      tags: selectedTags,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    try {
+      let featuredMediaId: number | undefined;
 
-    toast({
-      title: "Article published",
-      description: `Successfully published to ${siteName}${selectedTags.length > 0 ? ` with ${selectedTags.length} tag(s)` : ''}`,
-    });
+      // Upload featured image first if exists
+      if (featuredImage.file) {
+        toast({
+          title: "Uploading image...",
+          description: "Please wait while we upload your featured image",
+        });
+        
+        const mediaResult = await uploadMedia(currentSite, featuredImage.file, {
+          title: featuredImage.title,
+          alt_text: featuredImage.altText,
+          caption: featuredImage.caption,
+          description: featuredImage.description,
+        });
+        featuredMediaId = mediaResult.id;
+      }
 
-    // Reset form
-    setTitle('');
-    setContent('');
-    setSelectedHeadline(null);
-    setSelectedSite('');
-    setSelectedCategories([]);
-    setSelectedTags([]);
-    removeImage();
+      // Publish article
+      const result = await publishArticle({
+        site: currentSite,
+        title,
+        content,
+        status: 'publish',
+        categories: selectedCategories,
+        tags: selectedTagIds,
+        featuredMediaId,
+      });
+
+      // Save to local state
+      addArticle({
+        id: crypto.randomUUID(),
+        title,
+        content,
+        tone,
+        sourceHeadline: selectedHeadline || undefined,
+        featuredImage: featuredImage.file ? featuredImage : undefined,
+        status: 'published',
+        publishedTo: selectedSite,
+        categories: selectedCategories,
+        tags: availableTags
+          .filter(t => selectedTagIds.includes(t.id))
+          .map(t => t.name),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      toast({
+        title: "Article published!",
+        description: (
+          <div>
+            Successfully published to {currentSite.name}.{' '}
+            <a 
+              href={result.link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline font-medium"
+            >
+              View article
+            </a>
+          </div>
+        ),
+      });
+
+      // Reset form
+      setTitle('');
+      setContent('');
+      setSelectedHeadline(null);
+      setSelectedSite('');
+      setSelectedCategories([]);
+      setSelectedTagIds([]);
+      removeImage();
+
+    } catch (error) {
+      console.error('Publish error:', error);
+      toast({
+        title: "Failed to publish",
+        description: error instanceof Error ? error.message : "Could not publish to WordPress",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     if (!title) {
       toast({
         title: "Title required",
@@ -331,6 +405,35 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       return;
     }
 
+    // If site is selected, save as draft to WordPress
+    if (currentSite) {
+      setIsPublishing(true);
+      try {
+        await publishArticle({
+          site: currentSite,
+          title,
+          content,
+          status: 'draft',
+          categories: selectedCategories,
+          tags: selectedTagIds,
+        });
+
+        toast({
+          title: "Draft saved to WordPress",
+          description: `Draft saved to ${currentSite.name}`,
+        });
+      } catch (error) {
+        toast({
+          title: "Failed to save draft",
+          description: "Saved locally only",
+          variant: "destructive",
+        });
+      } finally {
+        setIsPublishing(false);
+      }
+    }
+
+    // Always save locally
     addArticle({
       id: crypto.randomUUID(),
       title,
@@ -340,15 +443,19 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       featuredImage: featuredImage.file ? featuredImage : undefined,
       status: 'draft',
       categories: selectedCategories,
-      tags: selectedTags,
+      tags: availableTags
+        .filter(t => selectedTagIds.includes(t.id))
+        .map(t => t.name),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    toast({
-      title: "Draft saved",
-      description: "Your article has been saved as a draft",
-    });
+    if (!currentSite) {
+      toast({
+        title: "Draft saved locally",
+        description: "Select a site to save to WordPress",
+      });
+    }
   };
 
   return (
@@ -480,6 +587,13 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
                   </SelectContent>
                 </Select>
               )}
+              
+              {fetchError && (
+                <div className="mt-3 flex items-start gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>{fetchError}</span>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -487,14 +601,25 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
           {selectedSite && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Categories
+                  {selectedCategories.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {selectedCategories.length} selected
+                    </Badge>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingCategories ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading categories...
+                    Fetching categories from WordPress...
                   </div>
+                ) : availableCategories.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No categories found on this site
+                  </p>
                 ) : (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {availableCategories.map((category) => (
@@ -523,30 +648,37 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Tag className="h-4 w-4" />
                   Tags
+                  {selectedTagIds.length > 0 && (
+                    <Badge variant="secondary" className="ml-auto">
+                      {selectedTagIds.length} selected
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {isLoadingCategories ? (
+                {isLoadingTags ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading tags...
+                    Fetching tags from WordPress...
                   </div>
                 ) : (
                   <>
                     {/* Selected Tags */}
-                    {selectedTags.length > 0 && (
+                    {selectedTagIds.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
-                        {selectedTags.map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="secondary"
-                            className="cursor-pointer hover:bg-destructive/20"
-                            onClick={() => toggleTag(tag)}
-                          >
-                            {tag}
-                            <X className="ml-1 h-3 w-3" />
-                          </Badge>
-                        ))}
+                        {availableTags
+                          .filter(tag => selectedTagIds.includes(tag.id))
+                          .map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant="secondary"
+                              className="cursor-pointer hover:bg-destructive/20"
+                              onClick={() => toggleTag(tag.id)}
+                            >
+                              {tag.name}
+                              <X className="ml-1 h-3 w-3" />
+                            </Badge>
+                          ))}
                       </div>
                     )}
 
@@ -563,33 +695,40 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
                           }
                         }}
                         className="h-8 text-sm"
+                        disabled={isAddingTag}
                       />
                       <Button
                         variant="outline"
                         size="icon"
                         className="h-8 w-8 shrink-0"
                         onClick={addNewTag}
-                        disabled={!newTagInput.trim()}
+                        disabled={!newTagInput.trim() || isAddingTag}
                       >
-                        <Plus className="h-4 w-4" />
+                        {isAddingTag ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
 
                     {/* Available Tags */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {availableTags
-                        .filter(tag => !selectedTags.includes(tag.name))
-                        .map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="outline"
-                            className="cursor-pointer hover:bg-accent/10"
-                            onClick={() => toggleTag(tag.name)}
-                          >
-                            {tag.name}
-                          </Badge>
-                        ))}
-                    </div>
+                    {availableTags.filter(tag => !selectedTagIds.includes(tag.id)).length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {availableTags
+                          .filter(tag => !selectedTagIds.includes(tag.id))
+                          .map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant="outline"
+                              className="cursor-pointer hover:bg-accent/10"
+                              onClick={() => toggleTag(tag.id)}
+                            >
+                              {tag.name}
+                            </Badge>
+                          ))}
+                      </div>
+                    )}
                   </>
                 )}
               </CardContent>
@@ -689,16 +828,25 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
               variant="accent" 
               className="w-full"
               onClick={handlePublish}
-              disabled={!content || !selectedSite}
+              disabled={!content || !selectedSite || isPublishing}
             >
-              <Send className="mr-2 h-4 w-4" />
-              Publish Article
+              {isPublishing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Publish Article
+                </>
+              )}
             </Button>
             <Button 
               variant="outline" 
               className="w-full"
               onClick={handleSaveDraft}
-              disabled={!title}
+              disabled={!title || isPublishing}
             >
               Save as Draft
             </Button>
