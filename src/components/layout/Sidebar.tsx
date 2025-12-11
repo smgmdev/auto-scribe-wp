@@ -27,12 +27,12 @@ const getNavigation = (isAdmin: boolean) => {
     { id: 'headlines', label: 'Sources', icon: Newspaper },
     { id: 'compose', label: 'New Article', icon: PenTool },
     { id: 'articles', label: 'Articles', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   if (isAdmin) {
     return [
       ...base,
+      { id: 'settings', label: 'Settings', icon: Settings },
       { id: 'admin-credits', label: 'Credit Packs', icon: CreditCard },
       { id: 'admin-users', label: 'Users', icon: Users },
     ];

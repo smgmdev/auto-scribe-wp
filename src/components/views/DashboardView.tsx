@@ -1,10 +1,11 @@
 import { Globe, FileText, Newspaper, TrendingUp } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const stats = [
-  { label: 'Connected Sites', icon: Globe, key: 'sites' },
+  { label: 'Media Sites', icon: Globe, key: 'sites' },
   { label: 'Published Articles', icon: FileText, key: 'published' },
   { label: 'Draft Articles', icon: Newspaper, key: 'drafts' },
   { label: 'This Week', icon: TrendingUp, key: 'weekly' },
@@ -12,6 +13,7 @@ const stats = [
 
 export function DashboardView() {
   const { sites, articles, setCurrentView } = useAppStore();
+  const { isAdmin } = useAuth();
 
   const getStatValue = (key: string) => {
     switch (key) {
@@ -91,14 +93,16 @@ export function DashboardView() {
               <FileText className="mr-2 h-4 w-4" />
               Write New Article
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => setCurrentView('sites')}
-            >
-              <Globe className="mr-2 h-4 w-4" />
-              Add New Media Site
-            </Button>
+            {isAdmin && (
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setCurrentView('sites')}
+              >
+                <Globe className="mr-2 h-4 w-4" />
+                Add New Media Site
+              </Button>
+            )}
           </CardContent>
         </Card>
 
