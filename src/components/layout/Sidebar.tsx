@@ -67,17 +67,6 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="border-t border-sidebar-border p-4 mt-auto">
-          <div className="rounded-lg bg-sidebar-accent/50 p-3">
-            <p className="text-xs text-sidebar-foreground/60">
-              Connected Sites
-            </p>
-            <p className="mt-1 font-display text-2xl font-semibold text-sidebar-primary">
-              {sites.filter(s => s.connected).length}
-            </p>
-          </div>
-        </div>
       </div>
     </aside>
   );
