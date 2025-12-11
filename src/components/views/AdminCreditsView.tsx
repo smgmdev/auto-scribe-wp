@@ -169,10 +169,33 @@ export function AdminCreditsView() {
               Create First Pack
             </Button>
           </CardContent>
-        </Card> : <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {packs.map(pack => <Card key={pack.id} className={!pack.active ? 'opacity-60' : ''}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg">{pack.name}</CardTitle>
+        </Card> : <div className="space-y-3">
+          {packs.map(pack => (
+            <Card key={pack.id} className={!pack.active ? 'opacity-60' : ''}>
+              <CardContent className="flex items-center justify-between py-4">
+                <div className="flex items-center gap-6">
+                  <div>
+                    <h3 className="font-semibold">{pack.name}</h3>
+                    {!pack.stripe_price_id && (
+                      <p className="text-xs text-warning">⚠️ No Stripe Price ID</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Credits: </span>
+                      <span className="font-medium">{pack.credits}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Price: </span>
+                      <span className="font-medium">${(pack.price_cents / 100).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className={pack.active ? 'text-green-500' : 'text-muted-foreground'}>
+                        {pack.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="icon" onClick={() => openEditDialog(pack)}>
                     <Edit2 className="h-4 w-4" />
@@ -181,29 +204,9 @@ export function AdminCreditsView() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Credits:</span>
-                    <span className="font-semibold">{pack.credits}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Price:</span>
-                    <span className="font-semibold">${(pack.price_cents / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status:</span>
-                    <span className={pack.active ? 'text-success' : 'text-muted-foreground'}>
-                      {pack.active ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                  {!pack.stripe_price_id && <p className="text-xs text-warning mt-2">
-                      ⚠️ No Stripe Price ID configured
-                    </p>}
-                </div>
               </CardContent>
-            </Card>)}
+            </Card>
+          ))}
         </div>}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
