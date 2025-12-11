@@ -80,18 +80,16 @@ export function Sidebar() {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground/70"
                 >
                   <div className="flex h-5 w-5 items-center justify-center flex-shrink-0">
-                    {site.favicon ? (
-                      <img 
-                        src={site.favicon} 
-                        alt={`${site.name} favicon`}
-                        className="h-4 w-4 object-contain"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <Globe className={`h-4 w-4 text-sidebar-foreground/50 ${site.favicon ? 'hidden' : ''}`} />
+                    <img 
+                      src={site.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
+                      alt={`${site.name} favicon`}
+                      className="h-4 w-4 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                      }}
+                    />
+                    <Globe className="h-4 w-4 text-sidebar-foreground/50 hidden" />
                   </div>
                   <span className="truncate">{site.name}</span>
                   {site.connected && (
