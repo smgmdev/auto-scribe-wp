@@ -1085,10 +1085,9 @@ export function ComposeView() {
                 <CardTitle className="text-sm font-medium">
                   Categories
                   <Badge variant="secondary" className="ml-2">
-                    {selectedCategories.length}/2
+                    {selectedCategories.length}/2 selected
                   </Badge>
                 </CardTitle>
-                <p className="text-xs text-muted-foreground">1 selected category recommended. Max 2.</p>
               </CardHeader>
               <CardContent>
                 {isLoadingCategories ? (
@@ -1101,21 +1100,33 @@ export function ComposeView() {
                     No categories found on this site
                   </p>
                 ) : (
-                  <div className="space-y-2">
-                    {availableCategories.map((category) => (
-                      <label
-                        key={category.id}
-                        className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1.5 rounded"
-                      >
-                        <Checkbox
-                          checked={selectedCategories.includes(category.id)}
-                          onCheckedChange={() => toggleCategory(category.id)}
-                          className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                        />
-                        <span className="text-sm">{category.name}</span>
-                      </label>
-                    ))}
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      {availableCategories.map((category) => {
+                        const isChecked = selectedCategories.includes(category.id);
+                        const isDisabled = !isChecked && selectedCategories.length >= 2;
+                        return (
+                          <label
+                            key={category.id}
+                            className={`flex items-center gap-2 p-1.5 rounded ${
+                              isDisabled 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : 'cursor-pointer hover:bg-muted/50'
+                            }`}
+                          >
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={() => toggleCategory(category.id)}
+                              disabled={isDisabled}
+                              className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                            />
+                            <span className="text-sm">{category.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-3">1 selected category recommended. Max 2.</p>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -1132,7 +1143,6 @@ export function ComposeView() {
                     {selectedTagIds.length}/3 added
                   </Badge>
                 </CardTitle>
-                <p className="text-xs text-muted-foreground">1-2 tags recommended. Max 3.</p>
               </CardHeader>
               <CardContent className="space-y-3">
                 {isLoadingTags ? (
@@ -1165,7 +1175,7 @@ export function ComposeView() {
                     <div className="relative">
                       <div className="flex gap-2">
                         <Input
-                          placeholder="Type to search or add tag..."
+                          placeholder={selectedTagIds.length >= 3 ? "Max 3 tags reached" : "Type to search or add tag..."}
                           value={newTagInput}
                           onChange={(e) => setNewTagInput(e.target.value)}
                           onKeyDown={(e) => {
@@ -1175,14 +1185,14 @@ export function ComposeView() {
                             }
                           }}
                           className="h-8 text-sm"
-                          disabled={isAddingTag}
+                          disabled={isAddingTag || selectedTagIds.length >= 3}
                         />
                         <Button
                           variant="outline"
                           size="icon"
                           className="h-8 w-8 shrink-0"
                           onClick={addNewTag}
-                          disabled={!newTagInput.trim() || isAddingTag}
+                          disabled={!newTagInput.trim() || isAddingTag || selectedTagIds.length >= 3}
                         >
                           {isAddingTag ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -1224,6 +1234,7 @@ export function ComposeView() {
                         </div>
                       )}
                     </div>
+                    <p className="text-xs text-muted-foreground mt-3">1-2 tags recommended. Max 3.</p>
                   </>
                 )}
               </CardContent>
