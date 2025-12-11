@@ -183,9 +183,22 @@ export function HeadlinesView() {
           </Card>
         ) : (
           <>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              <span>Showing {filteredHeadlines.length} headlines from the last 24 hours</span>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <span>Last 24 hours headlines</span>
+              </div>
+              <div className="flex gap-3">
+                {(['euronews', 'bloomberg', 'fortune'] as const).map(source => {
+                  const count = filteredHeadlines.filter(h => h.source === source).length;
+                  if (count === 0) return null;
+                  return (
+                    <Badge key={source} variant="outline" className={sourceColors[source]}>
+                      {sourceLabels[source]}: {count}
+                    </Badge>
+                  );
+                })}
+              </div>
             </div>
             {filteredHeadlines.map((headline, index) => (
               <Card 
