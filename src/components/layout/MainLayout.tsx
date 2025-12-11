@@ -3,37 +3,25 @@ import { Menu, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import amlogo from '@/assets/amlogo.png';
-
 interface MainLayoutProps {
   children: ReactNode;
 }
-
-export function MainLayout({ children }: MainLayoutProps) {
+export function MainLayout({
+  children
+}: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Mobile Header with Burger Menu */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center px-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(true)}
-          className="text-white hover:text-white hover:bg-[#999]/30 rounded-full"
-        >
+        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full">
           <Menu className="h-6 w-6" />
         </Button>
         <img src={amlogo} alt="Logo" className="ml-3 h-7 w-7 object-contain" />
-        <span className="ml-2 text-lg font-semibold text-sidebar-foreground">Publisher</span>
+        <span className="ml-2 text-lg font-semibold text-sidebar-foreground">Arcana Mace</span>
       </header>
 
       {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {sidebarOpen && <div className="lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity" onClick={() => setSidebarOpen(false)} />}
 
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -44,6 +32,5 @@ export function MainLayout({ children }: MainLayoutProps) {
           {children}
         </div>
       </main>
-    </div>
-  );
+    </div>;
 }
