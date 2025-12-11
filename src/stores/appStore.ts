@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { WordPressSite, Headline, Article, AISettings } from '@/types';
 
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
+
 interface AppState {
   // WordPress Sites
   sites: WordPressSite[];
@@ -22,7 +24,7 @@ interface AppState {
   // AI Settings
   aiSettings: AISettings;
   updateAISettings: (settings: Partial<AISettings>) => void;
-  toggleSource: (source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy') => void;
+  toggleSource: (source: SourceType) => void;
   
   // UI State
   currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users';
