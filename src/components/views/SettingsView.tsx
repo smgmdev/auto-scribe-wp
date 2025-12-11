@@ -18,11 +18,13 @@ import type { ArticleTone } from '@/types';
 
 const sources = ['euronews', 'bloomberg', 'fortune'] as const;
 const tones: { value: ArticleTone; label: string }[] = [
-  { value: 'political', label: 'Political' },
-  { value: 'business', label: 'Business' },
-  { value: 'financial', label: 'Financial' },
-  { value: 'crypto', label: 'Crypto' },
-  { value: 'realestate', label: 'Real Estate' },
+  { value: 'neutral', label: 'Neutral' },
+  { value: 'professional', label: 'Professional Corporate' },
+  { value: 'journalist', label: 'Journalist' },
+  { value: 'inspiring', label: 'Inspiring' },
+  { value: 'aggressive', label: 'Aggressive' },
+  { value: 'powerful', label: 'Powerful' },
+  { value: 'important', label: 'Important' },
 ];
 
 export function SettingsView() {
