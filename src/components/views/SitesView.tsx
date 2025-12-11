@@ -186,65 +186,63 @@ export function SitesView() {
           {sites.map((site, index) => (
             <Card 
               key={site.id} 
-              className="group hover:shadow-lg transition-all duration-300"
+              className="group hover:shadow-lg transition-all duration-300 h-full flex flex-col"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 overflow-hidden">
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10 overflow-hidden">
                     <img 
                       src={site.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
                       alt={`${site.name} favicon`}
-                      className="h-6 w-6 object-contain"
+                      className="h-5 w-5 object-contain"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
                       }}
                     />
-                    <Globe className="h-5 w-5 text-accent hidden" />
+                    <Globe className="h-4 w-4 text-accent hidden" />
                   </div>
-                  <div>
-                    <CardTitle className="font-display text-lg">{site.name}</CardTitle>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="font-display text-sm font-semibold truncate">{site.name}</CardTitle>
                     <a 
                       href={site.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
+                      className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 truncate"
                     >
-                      {site.url.replace(/^https?:\/\//, '')}
-                      <ExternalLink className="h-3 w-3" />
+                      <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
+                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
                     </a>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline" className="text-xs">
-                    {site.seoPlugin === 'aioseo' ? 'AIO SEO PRO' : 'Rank Math'}
+              <CardContent className="pt-0 flex-1 flex flex-col justify-end">
+                <div className="flex items-center justify-between gap-2">
+                  <Badge variant="outline" className="text-xs flex-shrink-0">
+                    {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                   </Badge>
-                </div>
-                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {site.connected ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-success" />
-                        <span className="text-sm text-success">Connected</span>
-                      </>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5 text-success" />
+                        <span className="text-xs text-success">Connected</span>
+                      </div>
                     ) : (
-                      <>
-                        <XCircle className="h-4 w-4 text-destructive" />
-                        <span className="text-sm text-destructive">Disconnected</span>
-                      </>
+                      <div className="flex items-center gap-1">
+                        <XCircle className="h-3.5 w-3.5 text-destructive" />
+                        <span className="text-xs text-destructive">Disconnected</span>
+                      </div>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      onClick={() => handleRemove(site.id, site.name)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                    onClick={() => handleRemove(site.id, site.name)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                 </div>
               </CardContent>
             </Card>
