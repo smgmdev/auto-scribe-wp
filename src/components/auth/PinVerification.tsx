@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,19 +14,14 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
   const [pin, setPin] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
+  const hasVerifiedRef = useRef(false);
 
-  const handleVerify = async () => {
-    if (pin.length !== 4) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid PIN',
-        description: 'Please enter a 4-digit PIN',
-      });
-      return;
-    }
+  const handleVerify = async (pinToVerify: string) => {
+    if (pinToVerify.length !== 4 || hasVerifiedRef.current) return;
 
+    hasVerifiedRef.current = true;
     setIsVerifying(true);
-    const isValid = await onVerify(pin);
+    const isValid = await onVerify(pinToVerify);
     setIsVerifying(false);
 
     if (!isValid) {
@@ -36,8 +31,16 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
         description: 'The PIN you entered is incorrect. Please try again.',
       });
       setPin('');
+      hasVerifiedRef.current = false;
     }
   };
+
+  // Auto-verify when 4 digits are entered
+  useEffect(() => {
+    if (pin.length === 4 && !isVerifying) {
+      handleVerify(pin);
+    }
+  }, [pin]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -70,8 +73,8 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
           
           <div className="space-y-3">
             <Button 
-              onClick={handleVerify} 
-              className="w-full" 
+              onClick={() => handleVerify(pin)} 
+              className="w-full"
               disabled={isVerifying || pin.length !== 4}
             >
               {isVerifying ? (
