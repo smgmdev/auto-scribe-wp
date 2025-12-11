@@ -9,7 +9,7 @@ const corsHeaders = {
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy';
   url: string;
   publishedAt: string;
   summary?: string;
@@ -121,6 +121,134 @@ async function scrapeEuronews(): Promise<Headline[]> {
     console.log(`Found ${headlines.length} Euronews headlines`);
   } catch (error) {
     console.error('Error scraping Euronews:', error);
+  }
+  return headlines;
+}
+
+async function scrapeEuronewsLatest(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
+  
+  try {
+    console.log('Scraping Euronews Latest (Just In)...');
+    
+    const response = await fetch('https://www.euronews.com/just-in', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      }
+    });
+    const html = await response.text();
+    console.log(`Euronews Latest page length: ${html.length}`);
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (doc) {
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on Euronews Latest`);
+      
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+        
+        const tParts = today.split('-');
+        const yParts = yesterday.split('-');
+        
+        if (!href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) &&
+            !href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) &&
+            !href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
+            !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
+          return;
+        }
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://www.euronews.com${href}`;
+        const articleDate = extractDateFromUrl(fullUrl);
+        
+        if (articleDate && isTodayOrYesterday(articleDate)) {
+          seen.add(title.toLowerCase());
+          headlines.push({
+            id: `euronews-latest-${Date.now()}-${headlines.length}`,
+            title: title,
+            source: 'euronews-latest',
+            url: fullUrl,
+            publishedAt: articleDate.toISOString(),
+          });
+          console.log(`Added Euronews Latest headline: ${title.substring(0, 50)}...`);
+        }
+      });
+    }
+    
+    console.log(`Found ${headlines.length} Euronews Latest headlines`);
+  } catch (error) {
+    console.error('Error scraping Euronews Latest:', error);
+  }
+  return headlines;
+}
+
+async function scrapeEuronewsEconomy(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
+  
+  try {
+    console.log('Scraping Euronews Economy...');
+    
+    const response = await fetch('https://www.euronews.com/business/economy', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      }
+    });
+    const html = await response.text();
+    console.log(`Euronews Economy page length: ${html.length}`);
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (doc) {
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on Euronews Economy`);
+      
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+        
+        const tParts = today.split('-');
+        const yParts = yesterday.split('-');
+        
+        if (!href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) &&
+            !href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) &&
+            !href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
+            !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
+          return;
+        }
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://www.euronews.com${href}`;
+        const articleDate = extractDateFromUrl(fullUrl);
+        
+        if (articleDate && isTodayOrYesterday(articleDate)) {
+          seen.add(title.toLowerCase());
+          headlines.push({
+            id: `euronews-economy-${Date.now()}-${headlines.length}`,
+            title: title,
+            source: 'euronews-economy',
+            url: fullUrl,
+            publishedAt: articleDate.toISOString(),
+          });
+          console.log(`Added Euronews Economy headline: ${title.substring(0, 50)}...`);
+        }
+      });
+    }
+    
+    console.log(`Found ${headlines.length} Euronews Economy headlines`);
+  } catch (error) {
+    console.error('Error scraping Euronews Economy:', error);
   }
   return headlines;
 }
@@ -622,6 +750,70 @@ async function scrapeFortune(): Promise<Headline[]> {
   return headlines;
 }
 
+async function scrapeFortuneLatest(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
+  
+  try {
+    console.log('Scraping Fortune Latest...');
+    
+    const response = await fetch('https://fortune.com/the-latest/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      }
+    });
+    const html = await response.text();
+    console.log(`Fortune Latest page length: ${html.length}`);
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (doc) {
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on Fortune Latest`);
+      
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+        
+        const tParts = today.split('-');
+        const yParts = yesterday.split('-');
+        
+        if (!href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) &&
+            !href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) &&
+            !href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
+            !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
+          return;
+        }
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://fortune.com${href}`;
+        const articleDate = extractDateFromUrl(fullUrl);
+        
+        if (articleDate && isTodayOrYesterday(articleDate)) {
+          seen.add(title.toLowerCase());
+          headlines.push({
+            id: `fortune-latest-${Date.now()}-${headlines.length}`,
+            title: title,
+            source: 'fortune-latest',
+            url: fullUrl,
+            publishedAt: articleDate.toISOString(),
+          });
+          console.log(`Added Fortune Latest headline: ${title.substring(0, 50)}...`);
+        }
+      });
+    }
+    
+    console.log(`Found ${headlines.length} Fortune Latest headlines`);
+  } catch (error) {
+    console.error('Error scraping Fortune Latest:', error);
+  }
+  return headlines;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -653,6 +845,15 @@ serve(async (req) => {
     }
     if (sources.includes('fortune')) {
       scrapePromises.push(scrapeFortune());
+    }
+    if (sources.includes('fortune-latest')) {
+      scrapePromises.push(scrapeFortuneLatest());
+    }
+    if (sources.includes('euronews-latest')) {
+      scrapePromises.push(scrapeEuronewsLatest());
+    }
+    if (sources.includes('euronews-economy')) {
+      scrapePromises.push(scrapeEuronewsEconomy());
     }
     
     const results = await Promise.all(scrapePromises);
