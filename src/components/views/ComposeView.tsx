@@ -717,6 +717,60 @@ export function ComposeView() {
             </Card>
           )}
 
+          {/* Publish To - Single Line */}
+          <div className="flex items-center gap-4">
+            <Label className="whitespace-nowrap text-sm font-medium">Publish To</Label>
+            {sites.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No WordPress sites connected. Add a site first.
+              </p>
+            ) : (
+              <Select value={selectedSite} onValueChange={setSelectedSite}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a WordPress site">
+                    {selectedSite && currentSite && (
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={currentSite.favicon || `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`}
+                          alt=""
+                          className="h-4 w-4 rounded-sm"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`;
+                          }}
+                        />
+                        <span>{currentSite.name}</span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-popover border border-border z-50">
+                  {sites.map((site) => (
+                    <SelectItem key={site.id} value={site.id}>
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`}
+                          alt=""
+                          className="h-4 w-4 rounded-sm"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`;
+                          }}
+                        />
+                        <span>{site.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          {fetchError && (
+            <div className="flex items-start gap-2 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{fetchError}</span>
+            </div>
+          )}
+
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Article Title</Label>
@@ -788,64 +842,6 @@ export function ComposeView() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Publish To - Single Site Dropdown */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Publish To</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {sites.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No WordPress sites connected. Add a site first.
-                </p>
-              ) : (
-                <Select value={selectedSite} onValueChange={setSelectedSite}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a WordPress site">
-                      {selectedSite && currentSite && (
-                        <div className="flex items-center gap-2">
-                          <img 
-                            src={currentSite.favicon || `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`}
-                            alt=""
-                            className="h-4 w-4 rounded-sm"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`;
-                            }}
-                          />
-                          <span>{currentSite.name}</span>
-                        </div>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border z-50">
-                    {sites.map((site) => (
-                      <SelectItem key={site.id} value={site.id}>
-                        <div className="flex items-center gap-2">
-                          <img 
-                            src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`}
-                            alt=""
-                            className="h-4 w-4 rounded-sm"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`;
-                            }}
-                          />
-                          <span>{site.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              
-              {fetchError && (
-                <div className="mt-3 flex items-start gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                  <span>{fetchError}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* SEO Settings */}
           {selectedSite && currentSite && (
             <Card>
