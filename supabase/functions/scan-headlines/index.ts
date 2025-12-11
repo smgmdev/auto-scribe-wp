@@ -9,7 +9,7 @@ const corsHeaders = {
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
   url: string;
   publishedAt: string;
   summary?: string;
@@ -65,7 +65,6 @@ async function scrapeEuronews(): Promise<Headline[]> {
   try {
     console.log('Scraping Euronews front page...');
     
-    // Only scrape front page
     const response = await fetch('https://www.euronews.com/', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -77,74 +76,6 @@ async function scrapeEuronews(): Promise<Headline[]> {
     if (doc) {
       const allLinks = doc.querySelectorAll('a[href]');
       console.log(`Found ${allLinks.length} links on Euronews front page`);
-      
-      allLinks.forEach((article) => {
-        if (headlines.length >= 30) return;
-        const link = article as any;
-        const href = link.getAttribute('href') || '';
-        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
-        
-        // Check for today or yesterday date patterns in URL
-        const todaySlash = today.replace(/-/g, '/').replace(/^(\d{4})\/0?(\d+)\/0?(\d+)$/, '$1/$2/$3');
-        const yesterdaySlash = yesterday.replace(/-/g, '/').replace(/^(\d{4})\/0?(\d+)\/0?(\d+)$/, '$1/$2/$3');
-        
-        if (!href.includes(`/${today.split('-')[0]}/${today.split('-')[1]}/${today.split('-')[2]}/`) &&
-            !href.includes(`/${yesterday.split('-')[0]}/${yesterday.split('-')[1]}/${yesterday.split('-')[2]}/`)) {
-          // Also check without leading zeros
-          const tParts = today.split('-');
-          const yParts = yesterday.split('-');
-          if (!href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
-              !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
-            return;
-          }
-        }
-        
-        if (!title || title.length < 30 || title.length > 300) return;
-        if (seen.has(title.toLowerCase())) return;
-        
-        const fullUrl = href.startsWith('http') ? href : `https://www.euronews.com${href}`;
-        const articleDate = extractDateFromUrl(fullUrl);
-        
-        if (articleDate && isTodayOrYesterday(articleDate)) {
-          seen.add(title.toLowerCase());
-          headlines.push({
-            id: `euronews-${Date.now()}-${headlines.length}`,
-            title: title,
-            source: 'euronews',
-            url: fullUrl,
-            publishedAt: articleDate.toISOString(),
-          });
-        }
-      });
-    }
-    
-    console.log(`Found ${headlines.length} Euronews headlines`);
-  } catch (error) {
-    console.error('Error scraping Euronews:', error);
-  }
-  return headlines;
-}
-
-async function scrapeEuronewsLatest(): Promise<Headline[]> {
-  const headlines: Headline[] = [];
-  const seen = new Set<string>();
-  const { today, yesterday } = getTodayAndYesterday();
-  
-  try {
-    console.log('Scraping Euronews Latest (Just In)...');
-    
-    const response = await fetch('https://www.euronews.com/just-in', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      }
-    });
-    const html = await response.text();
-    console.log(`Euronews Latest page length: ${html.length}`);
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    
-    if (doc) {
-      const allLinks = doc.querySelectorAll('a[href]');
-      console.log(`Found ${allLinks.length} links on Euronews Latest`);
       
       allLinks.forEach((article) => {
         if (headlines.length >= 30) return;
@@ -171,20 +102,19 @@ async function scrapeEuronewsLatest(): Promise<Headline[]> {
         if (articleDate && isTodayOrYesterday(articleDate)) {
           seen.add(title.toLowerCase());
           headlines.push({
-            id: `euronews-latest-${Date.now()}-${headlines.length}`,
+            id: `euronews-${Date.now()}-${headlines.length}`,
             title: title,
-            source: 'euronews-latest',
+            source: 'euronews',
             url: fullUrl,
             publishedAt: articleDate.toISOString(),
           });
-          console.log(`Added Euronews Latest headline: ${title.substring(0, 50)}...`);
         }
       });
     }
     
-    console.log(`Found ${headlines.length} Euronews Latest headlines`);
+    console.log(`Found ${headlines.length} Euronews headlines`);
   } catch (error) {
-    console.error('Error scraping Euronews Latest:', error);
+    console.error('Error scraping Euronews:', error);
   }
   return headlines;
 }
@@ -256,12 +186,10 @@ async function scrapeEuronewsEconomy(): Promise<Headline[]> {
 async function scrapeBloomberg(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
-  const { today, yesterday, todayDate, yesterdayDate } = getTodayAndYesterday();
   
   try {
     console.log('Fetching Bloomberg RSS feeds...');
     
-    // Bloomberg RSS feeds provide actual content
     const rssFeeds = [
       'https://feeds.bloomberg.com/markets/news.rss',
       'https://feeds.bloomberg.com/technology/news.rss',
@@ -281,22 +209,18 @@ async function scrapeBloomberg(): Promise<Headline[]> {
         const xml = await response.text();
         console.log(`Bloomberg RSS ${feedUrl.split('/').slice(-2).join('/')} length: ${xml.length}`);
         
-        // Parse RSS items manually
         const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
         
         for (const match of itemMatches) {
           if (headlines.length >= 30) break;
           const itemXml = match[1];
           
-          // Extract title
           const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/);
           const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ') : '';
           
-          // Extract link
           const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/);
           const url = linkMatch ? linkMatch[1].trim() : '';
           
-          // Extract pubDate
           const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
           const pubDateStr = dateMatch ? dateMatch[1] : '';
           
@@ -304,7 +228,6 @@ async function scrapeBloomberg(): Promise<Headline[]> {
           if (seen.has(title.toLowerCase())) continue;
           if (!url) continue;
           
-          // Parse publication date
           let articleDate: Date | null = null;
           if (pubDateStr) {
             articleDate = new Date(pubDateStr);
@@ -343,7 +266,6 @@ async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
   try {
     console.log('Fetching Bloomberg Middle East via RSS feeds with keyword filtering...');
     
-    // Use main RSS feeds and filter for Middle East related content
     const rssFeeds = [
       'https://feeds.bloomberg.com/markets/news.rss',
       'https://feeds.bloomberg.com/politics/news.rss',
@@ -383,7 +305,6 @@ async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
           const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
           const pubDateStr = dateMatch ? dateMatch[1] : '';
           
-          // Check if title or URL contains Middle East keywords
           const titleLower = title.toLowerCase();
           const urlLower = url.toLowerCase();
           const isMiddleEast = middleEastKeywords.some(kw => 
@@ -433,7 +354,6 @@ async function scrapeBloombergLatest(): Promise<Headline[]> {
   try {
     console.log('Fetching Bloomberg Latest via all RSS feeds...');
     
-    // Bloomberg Latest = all recent headlines from all RSS feeds
     const rssFeeds = [
       'https://feeds.bloomberg.com/markets/news.rss',
       'https://feeds.bloomberg.com/technology/news.rss',
@@ -511,7 +431,6 @@ async function scrapeBloombergAsia(): Promise<Headline[]> {
   try {
     console.log('Fetching Bloomberg Asia via RSS feeds with keyword filtering...');
     
-    // Use main RSS feeds and filter for Asia related content
     const rssFeeds = [
       'https://feeds.bloomberg.com/markets/news.rss',
       'https://feeds.bloomberg.com/technology/news.rss',
@@ -553,7 +472,6 @@ async function scrapeBloombergAsia(): Promise<Headline[]> {
           const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
           const pubDateStr = dateMatch ? dateMatch[1] : '';
           
-          // Check if title or URL contains Asia keywords
           const titleLower = title.toLowerCase();
           const urlLower = url.toLowerCase();
           const isAsia = asiaKeywords.some(kw => 
@@ -604,7 +522,6 @@ async function scrapeFortune(): Promise<Headline[]> {
   try {
     console.log('Scraping Fortune front page...');
     
-    // Only scrape front page
     const response = await fetch('https://fortune.com/', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -623,11 +540,9 @@ async function scrapeFortune(): Promise<Headline[]> {
         const href = link.getAttribute('href') || '';
         let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
         
-        // Fortune uses /YYYY/MM/DD/ format
         const tParts = today.split('-');
         const yParts = yesterday.split('-');
         
-        // Check with and without leading zeros
         if (!href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) &&
             !href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) &&
             !href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
@@ -661,26 +576,26 @@ async function scrapeFortune(): Promise<Headline[]> {
   return headlines;
 }
 
-async function scrapeFortuneLatest(): Promise<Headline[]> {
+async function scrapeFortuneTech(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
   const { today, yesterday } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Fortune Latest...');
+    console.log('Scraping Fortune Tech...');
     
-    const response = await fetch('https://fortune.com/the-latest/', {
+    const response = await fetch('https://fortune.com/section/tech/', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       }
     });
     const html = await response.text();
-    console.log(`Fortune Latest page length: ${html.length}`);
+    console.log(`Fortune Tech page length: ${html.length}`);
     const doc = new DOMParser().parseFromString(html, 'text/html');
     
     if (doc) {
       const allLinks = doc.querySelectorAll('a[href]');
-      console.log(`Found ${allLinks.length} links on Fortune Latest`);
+      console.log(`Found ${allLinks.length} links on Fortune Tech`);
       
       allLinks.forEach((article) => {
         if (headlines.length >= 30) return;
@@ -707,20 +622,89 @@ async function scrapeFortuneLatest(): Promise<Headline[]> {
         if (articleDate && isTodayOrYesterday(articleDate)) {
           seen.add(title.toLowerCase());
           headlines.push({
-            id: `fortune-latest-${Date.now()}-${headlines.length}`,
+            id: `fortune-tech-${Date.now()}-${headlines.length}`,
             title: title,
-            source: 'fortune-latest',
+            source: 'fortune-tech',
             url: fullUrl,
             publishedAt: articleDate.toISOString(),
           });
-          console.log(`Added Fortune Latest headline: ${title.substring(0, 50)}...`);
+          console.log(`Added Fortune Tech headline: ${title.substring(0, 50)}...`);
         }
       });
     }
     
-    console.log(`Found ${headlines.length} Fortune Latest headlines`);
+    console.log(`Found ${headlines.length} Fortune Tech headlines`);
   } catch (error) {
-    console.error('Error scraping Fortune Latest:', error);
+    console.error('Error scraping Fortune Tech:', error);
+  }
+  return headlines;
+}
+
+async function scrapeNikkeiAsia(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  
+  try {
+    console.log('Scraping NIKKEI Asia...');
+    
+    const response = await fetch('https://asia.nikkei.com/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      }
+    });
+    const html = await response.text();
+    console.log(`NIKKEI Asia page length: ${html.length}`);
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (doc) {
+      // NIKKEI Asia uses article cards with headlines
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on NIKKEI Asia`);
+      
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+        
+        // NIKKEI Asia articles are typically under specific paths
+        if (!href.includes('/Economy/') && 
+            !href.includes('/Business/') && 
+            !href.includes('/Politics/') &&
+            !href.includes('/Tech/') &&
+            !href.includes('/Markets/') &&
+            !href.includes('/Spotlight/') &&
+            !href.includes('/Opinion/')) {
+          return;
+        }
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://asia.nikkei.com${href}`;
+        
+        // NIKKEI doesn't always have dates in URLs, so we'll assume recent articles are valid
+        // We'll use current time as a fallback for articles without clear date patterns
+        const articleDate = extractDateFromUrl(fullUrl);
+        const publishDate = articleDate && isTodayOrYesterday(articleDate) 
+          ? articleDate 
+          : new Date(); // Fallback to now for fresh content
+        
+        seen.add(title.toLowerCase());
+        headlines.push({
+          id: `nikkei-asia-${Date.now()}-${headlines.length}`,
+          title: title,
+          source: 'nikkei-asia',
+          url: fullUrl,
+          publishedAt: publishDate.toISOString(),
+        });
+        console.log(`Added NIKKEI Asia headline: ${title.substring(0, 50)}...`);
+      });
+    }
+    
+    console.log(`Found ${headlines.length} NIKKEI Asia headlines`);
+  } catch (error) {
+    console.error('Error scraping NIKKEI Asia:', error);
   }
   return headlines;
 }
@@ -742,6 +726,9 @@ serve(async (req) => {
     if (sources.includes('euronews')) {
       scrapePromises.push(scrapeEuronews());
     }
+    if (sources.includes('euronews-economy')) {
+      scrapePromises.push(scrapeEuronewsEconomy());
+    }
     if (sources.includes('bloomberg')) {
       scrapePromises.push(scrapeBloomberg());
     }
@@ -757,14 +744,11 @@ serve(async (req) => {
     if (sources.includes('fortune')) {
       scrapePromises.push(scrapeFortune());
     }
-    if (sources.includes('fortune-latest')) {
-      scrapePromises.push(scrapeFortuneLatest());
+    if (sources.includes('fortune-tech')) {
+      scrapePromises.push(scrapeFortuneTech());
     }
-    if (sources.includes('euronews-latest')) {
-      scrapePromises.push(scrapeEuronewsLatest());
-    }
-    if (sources.includes('euronews-economy')) {
-      scrapePromises.push(scrapeEuronewsEconomy());
+    if (sources.includes('nikkei-asia')) {
+      scrapePromises.push(scrapeNikkeiAsia());
     }
     
     const results = await Promise.all(scrapePromises);

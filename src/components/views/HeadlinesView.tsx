@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { Headline } from '@/types';
 
-const sourceColors = {
+const sourceColors: Record<string, string> = {
   euronews: 'bg-headline-business/10 text-headline-business border-headline-business/30',
   'euronews-latest': 'bg-teal-500/10 text-teal-600 border-teal-500/30',
   'euronews-economy': 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30',
@@ -19,9 +20,11 @@ const sourceColors = {
   'bloomberg-latest': 'bg-purple-500/10 text-purple-600 border-purple-500/30',
   fortune: 'bg-headline-crypto/10 text-headline-crypto border-headline-crypto/30',
   'fortune-latest': 'bg-pink-500/10 text-pink-600 border-pink-500/30',
+  'fortune-tech': 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30',
+  'nikkei-asia': 'bg-rose-500/10 text-rose-600 border-rose-500/30',
 };
 
-const sourceLabels = {
+const sourceLabels: Record<string, string> = {
   euronews: 'Euronews',
   'euronews-latest': 'Euronews Latest',
   'euronews-economy': 'Euronews Economy',
@@ -31,9 +34,25 @@ const sourceLabels = {
   'bloomberg-latest': 'Bloomberg Latest',
   fortune: 'Fortune',
   'fortune-latest': 'Fortune Latest',
+  'fortune-tech': 'Fortune Tech',
+  'nikkei-asia': 'NIKKEI Asia',
 };
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
+
+// Category to sources mapping
+const categorySourcesMap: Record<string, SourceType[]> = {
+  political: ['euronews', 'euronews-economy'],
+  business: ['bloomberg', 'bloomberg-latest', 'fortune'],
+  tech: ['fortune-tech'],
+  middleeast: ['bloomberg-middleeast'],
+  asia: ['bloomberg-asia', 'nikkei-asia'],
+};
+
+const allSources: SourceType[] = [
+  'euronews', 'euronews-economy', 'bloomberg', 'bloomberg-latest', 'fortune',
+  'fortune-tech', 'bloomberg-middleeast', 'bloomberg-asia', 'nikkei-asia'
+];
 
 export function HeadlinesView() {
   const { 
@@ -47,6 +66,7 @@ export function HeadlinesView() {
   const { toast } = useToast();
   const [isScanning, setIsScanning] = useState(false);
   const [displayedHeadlines, setDisplayedHeadlines] = useState<Headline[]>(headlines);
+  const [activeTab, setActiveTab] = useState('political');
 
   const handleScan = async () => {
     if (aiSettings.selectedSources.length === 0) {
@@ -124,11 +144,25 @@ export function HeadlinesView() {
     return 'Just now';
   };
 
-  const mainSources: SourceType[] = ['euronews', 'bloomberg', 'fortune'];
-  const euronewsSubSources: SourceType[] = ['euronews-latest', 'euronews-economy'];
-  const bloombergSubSources: SourceType[] = ['bloomberg-latest', 'bloomberg-middleeast', 'bloomberg-asia'];
-  const fortuneSubSources: SourceType[] = ['fortune-latest'];
-  const allSources: SourceType[] = [...mainSources, ...euronewsSubSources, ...bloombergSubSources, ...fortuneSubSources];
+  const renderSourceCheckbox = (source: SourceType) => (
+    <label 
+      key={source}
+      className="flex items-center gap-2 cursor-pointer group"
+    >
+      <Checkbox 
+        checked={aiSettings.selectedSources.includes(source)}
+        onCheckedChange={() => handleToggleSource(source)}
+        className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+      />
+      <span className={`text-sm font-medium transition-colors ${
+        aiSettings.selectedSources.includes(source) 
+          ? 'text-foreground' 
+          : 'text-muted-foreground'
+      }`}>
+        {sourceLabels[source]}
+      </span>
+    </label>
+  );
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -136,7 +170,7 @@ export function HeadlinesView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
-            Headlines
+            Sources
           </h1>
           <p className="mt-2 text-muted-foreground">
             Scan news sources for trending stories to write about
@@ -153,7 +187,7 @@ export function HeadlinesView() {
         </Button>
       </div>
 
-      {/* Source Filters */}
+      {/* Source Filters with Tabs */}
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
@@ -163,132 +197,51 @@ export function HeadlinesView() {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Euronews section */}
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <Checkbox 
-                checked={aiSettings.selectedSources.includes('euronews')}
-                onCheckedChange={() => handleToggleSource('euronews')}
-                className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-              />
-              <span className={`text-sm font-medium transition-colors ${
-                aiSettings.selectedSources.includes('euronews') 
-                  ? 'text-foreground' 
-                  : 'text-muted-foreground'
-              }`}>
-                {sourceLabels['euronews']}.com
-              </span>
-            </label>
-            <div className="border-l-2 border-headline-business/30 pl-4 ml-2">
-              <p className="text-xs text-muted-foreground mb-2">Euronews Sections</p>
-              <div className="flex gap-6">
-                {euronewsSubSources.map((source) => (
-                  <label 
-                    key={source}
-                    className="flex items-center gap-2 cursor-pointer group"
-                  >
-                    <Checkbox 
-                      checked={aiSettings.selectedSources.includes(source)}
-                      onCheckedChange={() => handleToggleSource(source)}
-                      className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                    />
-                    <span className={`text-sm font-medium transition-colors ${
-                      aiSettings.selectedSources.includes(source) 
-                        ? 'text-foreground' 
-                        : 'text-muted-foreground'
-                    }`}>
-                      {sourceLabels[source]}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          {/* Bloomberg section */}
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <Checkbox 
-                checked={aiSettings.selectedSources.includes('bloomberg')}
-                onCheckedChange={() => handleToggleSource('bloomberg')}
-                className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-              />
-              <span className={`text-sm font-medium transition-colors ${
-                aiSettings.selectedSources.includes('bloomberg') 
-                  ? 'text-foreground' 
-                  : 'text-muted-foreground'
-              }`}>
-                {sourceLabels['bloomberg']}
-              </span>
-            </label>
-            <div className="border-l-2 border-headline-financial/30 pl-4 ml-2">
-              <p className="text-xs text-muted-foreground mb-2">Bloomberg Sections</p>
-              <div className="flex gap-6">
-                {bloombergSubSources.map((source) => (
-                  <label 
-                    key={source}
-                    className="flex items-center gap-2 cursor-pointer group"
-                  >
-                    <Checkbox 
-                      checked={aiSettings.selectedSources.includes(source)}
-                      onCheckedChange={() => handleToggleSource(source)}
-                      className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                    />
-                    <span className={`text-sm font-medium transition-colors ${
-                      aiSettings.selectedSources.includes(source) 
-                        ? 'text-foreground' 
-                        : 'text-muted-foreground'
-                    }`}>
-                      {sourceLabels[source]}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-5 mb-4">
+              <TabsTrigger value="political">Political</TabsTrigger>
+              <TabsTrigger value="business">Business</TabsTrigger>
+              <TabsTrigger value="tech">Tech</TabsTrigger>
+              <TabsTrigger value="middleeast">Middle East</TabsTrigger>
+              <TabsTrigger value="asia">Asia</TabsTrigger>
+            </TabsList>
 
-          {/* Fortune section */}
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <Checkbox 
-                checked={aiSettings.selectedSources.includes('fortune')}
-                onCheckedChange={() => handleToggleSource('fortune')}
-                className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-              />
-              <span className={`text-sm font-medium transition-colors ${
-                aiSettings.selectedSources.includes('fortune') 
-                  ? 'text-foreground' 
-                  : 'text-muted-foreground'
-              }`}>
-                {sourceLabels['fortune']}.com
-              </span>
-            </label>
-            <div className="border-l-2 border-headline-crypto/30 pl-4 ml-2">
-              <p className="text-xs text-muted-foreground mb-2">Fortune Sections</p>
-              <div className="flex gap-6">
-                {fortuneSubSources.map((source) => (
-                  <label 
-                    key={source}
-                    className="flex items-center gap-2 cursor-pointer group"
-                  >
-                    <Checkbox 
-                      checked={aiSettings.selectedSources.includes(source)}
-                      onCheckedChange={() => handleToggleSource(source)}
-                      className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                    />
-                    <span className={`text-sm font-medium transition-colors ${
-                      aiSettings.selectedSources.includes(source) 
-                        ? 'text-foreground' 
-                        : 'text-muted-foreground'
-                    }`}>
-                      {sourceLabels[source]}
-                    </span>
-                  </label>
-                ))}
+            <TabsContent value="political" className="space-y-3">
+              <p className="text-xs text-muted-foreground mb-3">Political & Current Affairs</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.political.map(renderSourceCheckbox)}
               </div>
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="business" className="space-y-3">
+              <p className="text-xs text-muted-foreground mb-3">Business & Finance</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.business.map(renderSourceCheckbox)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tech" className="space-y-3">
+              <p className="text-xs text-muted-foreground mb-3">Technology</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.tech.map(renderSourceCheckbox)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="middleeast" className="space-y-3">
+              <p className="text-xs text-muted-foreground mb-3">Middle East News</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.middleeast.map(renderSourceCheckbox)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="asia" className="space-y-3">
+              <p className="text-xs text-muted-foreground mb-3">Asia Pacific</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.asia.map(renderSourceCheckbox)}
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

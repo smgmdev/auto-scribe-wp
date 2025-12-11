@@ -27,7 +27,7 @@ export interface WPTag {
 export interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
   url: string;
   publishedAt: Date;
   summary?: string;
@@ -71,7 +71,7 @@ export interface FeaturedImage {
 }
 
 export interface AISettings {
-  selectedSources: ('euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy')[];
+  selectedSources: ('euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia')[];
   defaultTone: ArticleTone;
   autoPublish: boolean;
   targetSites: string[];
