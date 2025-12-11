@@ -27,7 +27,7 @@ export interface WPTag {
 export interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-china';
   url: string;
   publishedAt: Date;
   summary?: string;
@@ -71,7 +71,7 @@ export interface FeaturedImage {
 }
 
 export interface AISettings {
-  selectedSources: ('euronews' | 'bloomberg' | 'fortune')[];
+  selectedSources: ('euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-china')[];
   defaultTone: ArticleTone;
   autoPublish: boolean;
   targetSites: string[];

@@ -12,14 +12,20 @@ import type { Headline } from '@/types';
 const sourceColors = {
   euronews: 'bg-headline-business/10 text-headline-business border-headline-business/30',
   bloomberg: 'bg-headline-financial/10 text-headline-financial border-headline-financial/30',
+  'bloomberg-middleeast': 'bg-amber-500/10 text-amber-600 border-amber-500/30',
+  'bloomberg-china': 'bg-red-500/10 text-red-600 border-red-500/30',
   fortune: 'bg-headline-crypto/10 text-headline-crypto border-headline-crypto/30',
 };
 
 const sourceLabels = {
   euronews: 'Euronews',
   bloomberg: 'Bloomberg',
+  'bloomberg-middleeast': 'Bloomberg Middle East',
+  'bloomberg-china': 'Bloomberg China',
   fortune: 'Fortune',
 };
+
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-china';
 
 export function HeadlinesView() {
   const { 
@@ -86,7 +92,7 @@ export function HeadlinesView() {
     setCurrentView('compose');
   };
 
-  const handleToggleSource = (source: 'euronews' | 'bloomberg' | 'fortune') => {
+  const handleToggleSource = (source: SourceType) => {
     toggleSource(source);
   };
 
@@ -109,6 +115,10 @@ export function HeadlinesView() {
     }
     return 'Just now';
   };
+
+  const mainSources: SourceType[] = ['euronews', 'bloomberg', 'fortune'];
+  const bloombergSubSources: SourceType[] = ['bloomberg-middleeast', 'bloomberg-china'];
+  const allSources: SourceType[] = [...mainSources, ...bloombergSubSources];
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -143,26 +153,55 @@ export function HeadlinesView() {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-6">
-          {(['euronews', 'bloomberg', 'fortune'] as const).map((source) => (
-            <label 
-              key={source}
-              className="flex items-center gap-2 cursor-pointer group"
-            >
-              <Checkbox 
-                checked={aiSettings.selectedSources.includes(source)}
-                onCheckedChange={() => handleToggleSource(source)}
-                className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-              />
-              <span className={`text-sm font-medium transition-colors ${
-                aiSettings.selectedSources.includes(source) 
-                  ? 'text-foreground' 
-                  : 'text-muted-foreground'
-              }`}>
-                {sourceLabels[source]}.com
-              </span>
-            </label>
-          ))}
+        <CardContent className="space-y-4">
+          {/* Main sources */}
+          <div className="flex gap-6">
+            {mainSources.map((source) => (
+              <label 
+                key={source}
+                className="flex items-center gap-2 cursor-pointer group"
+              >
+                <Checkbox 
+                  checked={aiSettings.selectedSources.includes(source)}
+                  onCheckedChange={() => handleToggleSource(source)}
+                  className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                />
+                <span className={`text-sm font-medium transition-colors ${
+                  aiSettings.selectedSources.includes(source) 
+                    ? 'text-foreground' 
+                    : 'text-muted-foreground'
+                }`}>
+                  {sourceLabels[source]}.com
+                </span>
+              </label>
+            ))}
+          </div>
+          
+          {/* Bloomberg sub-sources */}
+          <div className="border-l-2 border-headline-financial/30 pl-4 ml-6">
+            <p className="text-xs text-muted-foreground mb-2">Bloomberg Regions</p>
+            <div className="flex gap-6">
+              {bloombergSubSources.map((source) => (
+                <label 
+                  key={source}
+                  className="flex items-center gap-2 cursor-pointer group"
+                >
+                  <Checkbox 
+                    checked={aiSettings.selectedSources.includes(source)}
+                    onCheckedChange={() => handleToggleSource(source)}
+                    className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                  />
+                  <span className={`text-sm font-medium transition-colors ${
+                    aiSettings.selectedSources.includes(source) 
+                      ? 'text-foreground' 
+                      : 'text-muted-foreground'
+                  }`}>
+                    {sourceLabels[source]}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -188,8 +227,8 @@ export function HeadlinesView() {
                 <Clock className="h-4 w-4" />
                 <span>Last 24 hours headlines</span>
               </div>
-              <div className="flex gap-3">
-                {(['euronews', 'bloomberg', 'fortune'] as const).map(source => {
+              <div className="flex gap-3 flex-wrap">
+                {allSources.map(source => {
                   const count = filteredHeadlines.filter(h => h.source === source).length;
                   if (count === 0) return null;
                   return (

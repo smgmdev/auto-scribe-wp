@@ -9,7 +9,7 @@ const corsHeaders = {
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune';
+  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-china';
   url: string;
   publishedAt: string;
   summary?: string;
@@ -208,6 +208,282 @@ async function scrapeBloomberg(): Promise<Headline[]> {
   return headlines;
 }
 
+async function scrapeBloombergMiddleEast(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
+  
+  try {
+    console.log('Scraping Bloomberg Middle East...');
+    
+    // Scrape Bloomberg Middle East section
+    const urls = [
+      'https://www.bloomberg.com/middleeast',
+      'https://www.bloomberg.com/topics/middle-east',
+    ];
+    
+    for (const pageUrl of urls) {
+      if (headlines.length >= 30) break;
+      
+      try {
+        const response = await fetch(pageUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          }
+        });
+        const html = await response.text();
+        console.log(`Bloomberg Middle East page ${pageUrl} length: ${html.length}`);
+        
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        
+        if (doc) {
+          const allLinks = doc.querySelectorAll('a[href]');
+          console.log(`Found ${allLinks.length} links on Bloomberg Middle East`);
+          
+          allLinks.forEach((article) => {
+            if (headlines.length >= 30) return;
+            const link = article as any;
+            const href = link.getAttribute('href') || '';
+            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+            
+            // Only include article links
+            if (!href.includes('/news/') && !href.includes('/articles/')) return;
+            
+            // Check for date in URL
+            const tParts = today.split('-');
+            const yParts = yesterday.split('-');
+            
+            if (!href.includes(`/${tParts[0]}-${tParts[1]}-${tParts[2]}`) &&
+                !href.includes(`/${yParts[0]}-${yParts[1]}-${yParts[2]}`)) {
+              return;
+            }
+            
+            if (!title || title.length < 30 || title.length > 300) return;
+            if (seen.has(title.toLowerCase())) return;
+            
+            const fullUrl = href.startsWith('http') ? href : `https://www.bloomberg.com${href}`;
+            const articleDate = extractDateFromUrl(fullUrl);
+            
+            if (articleDate && isTodayOrYesterday(articleDate)) {
+              seen.add(title.toLowerCase());
+              headlines.push({
+                id: `bloomberg-middleeast-${Date.now()}-${headlines.length}`,
+                title: title,
+                source: 'bloomberg-middleeast',
+                url: fullUrl,
+                publishedAt: articleDate.toISOString(),
+              });
+              console.log(`Added Bloomberg Middle East headline: ${title.substring(0, 50)}...`);
+            }
+          });
+        }
+      } catch (e) {
+        console.error(`Error fetching ${pageUrl}:`, e);
+      }
+    }
+    
+    // Also try RSS if available
+    try {
+      const rssResponse = await fetch('https://feeds.bloomberg.com/middleeast/news.rss', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        }
+      });
+      
+      if (rssResponse.ok) {
+        const xml = await rssResponse.text();
+        console.log(`Bloomberg Middle East RSS length: ${xml.length}`);
+        
+        const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
+        
+        for (const match of itemMatches) {
+          if (headlines.length >= 30) break;
+          const itemXml = match[1];
+          
+          const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/);
+          const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ') : '';
+          
+          const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/);
+          const url = linkMatch ? linkMatch[1].trim() : '';
+          
+          const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
+          const pubDateStr = dateMatch ? dateMatch[1] : '';
+          
+          if (!title || title.length < 30 || title.length > 300) continue;
+          if (seen.has(title.toLowerCase())) continue;
+          if (!url) continue;
+          
+          let articleDate: Date | null = null;
+          if (pubDateStr) {
+            articleDate = new Date(pubDateStr);
+          } else {
+            articleDate = extractDateFromUrl(url);
+          }
+          
+          if (articleDate && isTodayOrYesterday(articleDate)) {
+            seen.add(title.toLowerCase());
+            headlines.push({
+              id: `bloomberg-middleeast-${Date.now()}-${headlines.length}`,
+              title: title,
+              source: 'bloomberg-middleeast',
+              url: url,
+              publishedAt: articleDate.toISOString(),
+            });
+            console.log(`Added Bloomberg Middle East RSS headline: ${title.substring(0, 50)}...`);
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Bloomberg Middle East RSS not available:', e);
+    }
+    
+    console.log(`Found ${headlines.length} Bloomberg Middle East headlines`);
+  } catch (error) {
+    console.error('Error scraping Bloomberg Middle East:', error);
+  }
+  return headlines;
+}
+
+async function scrapeBloombergChina(): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
+  
+  try {
+    console.log('Scraping Bloomberg China...');
+    
+    // Scrape Bloomberg China section
+    const urls = [
+      'https://www.bloomberg.com/china',
+      'https://www.bloomberg.com/topics/china',
+    ];
+    
+    for (const pageUrl of urls) {
+      if (headlines.length >= 30) break;
+      
+      try {
+        const response = await fetch(pageUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          }
+        });
+        const html = await response.text();
+        console.log(`Bloomberg China page ${pageUrl} length: ${html.length}`);
+        
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        
+        if (doc) {
+          const allLinks = doc.querySelectorAll('a[href]');
+          console.log(`Found ${allLinks.length} links on Bloomberg China`);
+          
+          allLinks.forEach((article) => {
+            if (headlines.length >= 30) return;
+            const link = article as any;
+            const href = link.getAttribute('href') || '';
+            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+            
+            // Only include article links
+            if (!href.includes('/news/') && !href.includes('/articles/')) return;
+            
+            // Check for date in URL
+            const tParts = today.split('-');
+            const yParts = yesterday.split('-');
+            
+            if (!href.includes(`/${tParts[0]}-${tParts[1]}-${tParts[2]}`) &&
+                !href.includes(`/${yParts[0]}-${yParts[1]}-${yParts[2]}`)) {
+              return;
+            }
+            
+            if (!title || title.length < 30 || title.length > 300) return;
+            if (seen.has(title.toLowerCase())) return;
+            
+            const fullUrl = href.startsWith('http') ? href : `https://www.bloomberg.com${href}`;
+            const articleDate = extractDateFromUrl(fullUrl);
+            
+            if (articleDate && isTodayOrYesterday(articleDate)) {
+              seen.add(title.toLowerCase());
+              headlines.push({
+                id: `bloomberg-china-${Date.now()}-${headlines.length}`,
+                title: title,
+                source: 'bloomberg-china',
+                url: fullUrl,
+                publishedAt: articleDate.toISOString(),
+              });
+              console.log(`Added Bloomberg China headline: ${title.substring(0, 50)}...`);
+            }
+          });
+        }
+      } catch (e) {
+        console.error(`Error fetching ${pageUrl}:`, e);
+      }
+    }
+    
+    // Also try RSS if available
+    try {
+      const rssResponse = await fetch('https://feeds.bloomberg.com/china/news.rss', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        }
+      });
+      
+      if (rssResponse.ok) {
+        const xml = await rssResponse.text();
+        console.log(`Bloomberg China RSS length: ${xml.length}`);
+        
+        const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
+        
+        for (const match of itemMatches) {
+          if (headlines.length >= 30) break;
+          const itemXml = match[1];
+          
+          const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/);
+          const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ') : '';
+          
+          const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/);
+          const url = linkMatch ? linkMatch[1].trim() : '';
+          
+          const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
+          const pubDateStr = dateMatch ? dateMatch[1] : '';
+          
+          if (!title || title.length < 30 || title.length > 300) continue;
+          if (seen.has(title.toLowerCase())) continue;
+          if (!url) continue;
+          
+          let articleDate: Date | null = null;
+          if (pubDateStr) {
+            articleDate = new Date(pubDateStr);
+          } else {
+            articleDate = extractDateFromUrl(url);
+          }
+          
+          if (articleDate && isTodayOrYesterday(articleDate)) {
+            seen.add(title.toLowerCase());
+            headlines.push({
+              id: `bloomberg-china-${Date.now()}-${headlines.length}`,
+              title: title,
+              source: 'bloomberg-china',
+              url: url,
+              publishedAt: articleDate.toISOString(),
+            });
+            console.log(`Added Bloomberg China RSS headline: ${title.substring(0, 50)}...`);
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Bloomberg China RSS not available:', e);
+    }
+    
+    console.log(`Found ${headlines.length} Bloomberg China headlines`);
+  } catch (error) {
+    console.error('Error scraping Bloomberg China:', error);
+  }
+  return headlines;
+}
+
 async function scrapeFortune(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
@@ -292,6 +568,12 @@ serve(async (req) => {
     }
     if (sources.includes('bloomberg')) {
       scrapePromises.push(scrapeBloomberg());
+    }
+    if (sources.includes('bloomberg-middleeast')) {
+      scrapePromises.push(scrapeBloombergMiddleEast());
+    }
+    if (sources.includes('bloomberg-china')) {
+      scrapePromises.push(scrapeBloombergChina());
     }
     if (sources.includes('fortune')) {
       scrapePromises.push(scrapeFortune());
