@@ -254,6 +254,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          auto_publish: boolean
+          created_at: string
+          default_tone: string
+          id: string
+          selected_sources: string[]
+          target_sites: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_publish?: boolean
+          created_at?: string
+          default_tone?: string
+          id?: string
+          selected_sources?: string[]
+          target_sites?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_publish?: boolean
+          created_at?: string
+          default_tone?: string
+          id?: string
+          selected_sources?: string[]
+          target_sites?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wordpress_sites: {
         Row: {
           app_password: string
