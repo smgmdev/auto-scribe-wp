@@ -117,7 +117,7 @@ export default function Auth() {
             <img src={amlogo} alt="Logo" className="h-20 w-20 object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold text-white">Arcana Mace</CardTitle>
-          <CardDescription className="text-white/70">AI Content Studio</CardDescription>
+          <CardDescription className="text-white/70">AI-Powered Media Control Publishing Platform</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
