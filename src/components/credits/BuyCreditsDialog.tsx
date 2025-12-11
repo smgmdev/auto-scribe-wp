@@ -78,7 +78,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       if (error) throw error;
 
       if (data?.url) {
-        window.location.href = data.url;
+        window.open(data.url, '_blank');
+        onOpenChange(false);
       }
     } catch (error: any) {
       toast({
