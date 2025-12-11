@@ -118,11 +118,14 @@ export function SitesView() {
 
     const { error } = await supabase
       .from('site_credits')
-      .upsert({ 
-        site_id: siteId, 
-        credits_required: credits,
-        updated_at: new Date().toISOString()
-      });
+      .upsert(
+        { 
+          site_id: siteId, 
+          credits_required: credits,
+          updated_at: new Date().toISOString()
+        },
+        { onConflict: 'site_id' }
+      );
 
     if (error) {
       toast({
