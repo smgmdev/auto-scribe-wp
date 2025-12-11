@@ -62,7 +62,7 @@ export function ComposeView() {
     setEditingArticle
   } = useAppStore();
   const { addArticle, updateArticle } = useArticles();
-  const { credits } = useAuth();
+  const { credits, isAdmin } = useAuth();
   const {
     toast
   } = useToast();
@@ -126,8 +126,9 @@ export function ComposeView() {
     return siteCredit?.credits_required || 0;
   };
 
-  // Check if user can afford a site
+  // Check if user can afford a site (admins bypass credit check)
   const canAffordSite = (siteId: string): boolean => {
+    if (isAdmin) return true;
     const cost = getSiteCreditCost(siteId);
     return credits >= cost;
   };
