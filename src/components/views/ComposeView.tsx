@@ -949,7 +949,9 @@ export function ComposeView() {
                   <Label htmlFor="focus-keyword" className="text-xs">Focus Keyword</Label>
                   <Input id="focus-keyword" placeholder="Enter focus keyword..." value={focusKeyword} onChange={e => setFocusKeyword(e.target.value)} className="h-8 text-sm" />
                   <p className="text-xs text-muted-foreground">
-                    Title and Meta Description should contain the same Focus Keyword to maximize SEO
+                    {currentSite?.seoPlugin === 'rankmath' 
+                      ? "Title should contain the Focus Keyword to maximize SEO"
+                      : "Title and Meta Description should contain the same Focus Keyword to maximize SEO"}
                   </p>
                 </div>
                 
