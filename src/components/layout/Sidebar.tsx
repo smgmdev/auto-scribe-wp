@@ -101,11 +101,6 @@ export function Sidebar() {
                 >
                   <Icon className={cn("h-5 w-5", isActive && "text-sidebar-primary")} />
                   {item.label}
-                  {item.id === 'sites' && sites.length > 0 && (
-                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-sidebar-primary/20 text-xs text-sidebar-primary">
-                      {sites.length}
-                    </span>
-                  )}
                 </Button>
               );
             })}
