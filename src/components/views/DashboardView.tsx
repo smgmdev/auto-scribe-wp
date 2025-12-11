@@ -34,7 +34,7 @@ export function DashboardView() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="font-display text-4xl font-bold text-foreground">
+        <h1 className="text-4xl font-bold text-foreground">
           Dashboard
         </h1>
         <p className="mt-2 text-muted-foreground">
@@ -59,7 +59,7 @@ export function DashboardView() {
                 <Icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="font-display text-3xl font-bold">
+                <div className="text-3xl font-bold">
                   {getStatValue(stat.key)}
                 </div>
               </CardContent>
@@ -72,7 +72,7 @@ export function DashboardView() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-border/50 bg-card">
           <CardHeader>
-            <CardTitle className="font-display text-xl">Quick Actions</CardTitle>
+            <CardTitle className="text-xl">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button 
@@ -104,7 +104,7 @@ export function DashboardView() {
 
         <Card className="border-border/50 bg-card">
           <CardHeader>
-            <CardTitle className="font-display text-xl">Recent Articles</CardTitle>
+            <CardTitle className="text-xl">Recent Articles</CardTitle>
           </CardHeader>
           <CardContent>
             {articles.length === 0 ? (

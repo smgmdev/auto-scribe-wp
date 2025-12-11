@@ -135,7 +135,7 @@ export function HeadlinesView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-4xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold text-foreground">
             Headlines
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -298,7 +298,7 @@ export function HeadlinesView() {
           <Card className="border-dashed border-2">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <Newspaper className="h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 font-display text-xl font-semibold">No headlines found</h3>
+              <h3 className="mt-4 text-xl font-semibold">No headlines found</h3>
               <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
                 {aiSettings.selectedSources.length === 0 
                   ? "Select at least one source, then click 'Scan Headlines'"
@@ -346,7 +346,7 @@ export function HeadlinesView() {
                         {formatTimeAgo(headline.publishedAt)}
                       </span>
                     </div>
-                    <h3 className="font-display text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
+                    <h3 className="text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
                       {headline.title}
                     </h3>
                     {headline.summary && (

@@ -684,7 +684,7 @@ export function ComposeView() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="font-display text-4xl font-bold text-foreground">
+        <h1 className="text-4xl font-bold text-foreground">
           {editingArticle ? 'Edit Article' : 'Compose Article'}
         </h1>
         <p className="mt-2 text-muted-foreground">
@@ -725,7 +725,7 @@ export function ComposeView() {
               placeholder="Enter your article title..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-display"
+              className="text-lg"
             />
           </div>
 

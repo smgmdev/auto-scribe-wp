@@ -45,7 +45,7 @@ export function ArticlesView() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="font-display text-4xl font-bold text-foreground">
+        <h1 className="text-4xl font-bold text-foreground">
           Articles
         </h1>
         <p className="mt-2 text-muted-foreground">
@@ -58,7 +58,7 @@ export function ArticlesView() {
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 font-display text-xl font-semibold">No articles yet</h3>
+            <h3 className="mt-4 text-xl font-semibold">No articles yet</h3>
             <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
               Start by composing a new article or generating one from headlines
             </p>
@@ -89,7 +89,7 @@ export function ArticlesView() {
                         {article.status}
                       </Badge>
                     </div>
-                    <h3 className="font-display text-xl font-semibold text-foreground">
+                    <h3 className="text-xl font-semibold text-foreground">
                       {article.title}
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2">

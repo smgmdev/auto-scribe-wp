@@ -62,7 +62,7 @@ export function SitesView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-body text-4xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold text-foreground">
             Media Network  
           </h1>
           <p className="mt-2 text-muted-foreground">Connect and manage media sites</p>
@@ -77,7 +77,7 @@ export function SitesView() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-display text-xl">Connect WordPress Site</DialogTitle>
+              <DialogTitle className="text-xl">Connect WordPress Site</DialogTitle>
               <DialogDescription>
                 Enter your WordPress site details. You'll need an application password for authentication.
               </DialogDescription>
@@ -149,7 +149,7 @@ export function SitesView() {
       {sites.length === 0 ? <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Globe className="h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 font-display text-xl font-semibold">No sites connected</h3>
+            <h3 className="mt-4 text-xl font-semibold">No sites connected</h3>
             <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
               Connect your first WordPress site to start publishing articles
             </p>
@@ -173,7 +173,7 @@ export function SitesView() {
                       <Globe className="h-4 w-4 text-accent hidden" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-body text-sm truncate">{site.name}</h3>
+                      <h3 className="text-sm truncate">{site.name}</h3>
                       <a href={site.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1">
                         <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
                         <ExternalLink className="h-3 w-3 flex-shrink-0" />
