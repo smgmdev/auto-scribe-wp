@@ -13,25 +13,43 @@ serve(async (req) => {
   }
 
   try {
-    const { priceId, packId, userId } = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    // Create client with anon key for user authentication
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    // Authenticate user from JWT token
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("No authorization header provided");
+    }
+    
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !userData.user) {
+      console.error("Authentication error:", userError);
+      throw new Error("Unauthorized - Invalid token");
+    }
+    
+    const userId = userData.user.id;
+    const email = userData.user.email;
+    
+    console.log("Authenticated user:", { userId, email });
+
+    const { priceId, packId } = await req.json();
 
     console.log("Creating checkout session:", { priceId, packId, userId });
 
-    if (!priceId || !packId || !userId) {
-      throw new Error("Missing required parameters");
+    if (!priceId || !packId) {
+      throw new Error("Missing required parameters: priceId and packId are required");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
     });
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get user email
-    const { data: userData } = await supabase.auth.admin.getUserById(userId);
-    const email = userData?.user?.email;
 
     // Check if customer exists in Stripe
     let customerId: string | undefined;
@@ -81,7 +99,7 @@ serve(async (req) => {
     console.error("Error creating checkout session:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
+      status: error.message.includes("Unauthorized") ? 401 : 400,
     });
   }
 });
