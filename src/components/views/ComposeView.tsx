@@ -63,6 +63,10 @@ export function ComposeView() {
   const [isLoadingTags, setIsLoadingTags] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  
+  // SEO Settings state
+  const [focusKeyword, setFocusKeyword] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
 
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
@@ -73,6 +77,8 @@ export function ComposeView() {
       setFetchError(null);
       setSelectedCategories([]);
       setSelectedTagIds([]);
+      setFocusKeyword('');
+      setMetaDescription('');
       
       // Fetch categories
       setIsLoadingCategories(true);
@@ -105,6 +111,8 @@ export function ComposeView() {
       setAvailableTags([]);
       setSelectedCategories([]);
       setSelectedTagIds([]);
+      setFocusKeyword('');
+      setMetaDescription('');
       setFetchError(null);
     }
   }, [currentSite?.id]);
@@ -381,6 +389,8 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
       setSelectedSite('');
       setSelectedCategories([]);
       setSelectedTagIds([]);
+      setFocusKeyword('');
+      setMetaDescription('');
       removeImage();
 
     } catch (error) {
@@ -596,6 +606,51 @@ As stakeholders across the ecosystem assess their positions and chart paths forw
               )}
             </CardContent>
           </Card>
+
+          {/* SEO Settings */}
+          {selectedSite && currentSite && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  SEO Settings
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    {currentSite.seoPlugin === 'aioseo' ? 'AIO SEO PRO' : 'Rank Math'}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Focus Keyword - Both plugins */}
+                <div className="space-y-1">
+                  <Label htmlFor="focus-keyword" className="text-xs">Focus Keyword</Label>
+                  <Input
+                    id="focus-keyword"
+                    placeholder="Enter focus keyword..."
+                    value={focusKeyword}
+                    onChange={(e) => setFocusKeyword(e.target.value)}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                
+                {/* Meta Description - AIO SEO PRO only */}
+                {currentSite.seoPlugin === 'aioseo' && (
+                  <div className="space-y-1">
+                    <Label htmlFor="meta-description" className="text-xs">Meta Description</Label>
+                    <Textarea
+                      id="meta-description"
+                      placeholder="Enter meta description..."
+                      value={metaDescription}
+                      onChange={(e) => setMetaDescription(e.target.value)}
+                      className="min-h-[80px] text-sm resize-none"
+                      maxLength={160}
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {metaDescription.length}/160 characters
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Categories */}
           {selectedSite && (

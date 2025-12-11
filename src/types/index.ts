@@ -1,9 +1,12 @@
+export type SEOPlugin = 'aioseo' | 'rankmath';
+
 export interface WordPressSite {
   id: string;
   name: string;
   url: string;
   username: string;
   applicationPassword: string;
+  seoPlugin: SEOPlugin;
   connected: boolean;
   lastSync?: Date;
 }
