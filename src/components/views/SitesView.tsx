@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2 } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,9 +23,22 @@ export function SitesView() {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [siteCredits, setSiteCredits] = useState<Record<string, number>>({});
   const [editingCredits, setEditingCredits] = useState<string | null>(null);
   const [creditInput, setCreditInput] = useState('');
+
+  const toggleExpand = (siteId: string) => {
+    setExpandedSites(prev => {
+      const next = new Set(prev);
+      if (next.has(siteId)) {
+        next.delete(siteId);
+      } else {
+        next.add(siteId);
+      }
+      return next;
+    });
+  };
   const [formData, setFormData] = useState({
     name: '',
     url: '',
@@ -270,6 +283,7 @@ export function SitesView() {
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <CardContent className="p-4">
+                {/* Row 1: Site info, credits, and expand toggle */}
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
@@ -298,6 +312,25 @@ export function SitesView() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 flex-shrink-0">
+                    {isAdmin && (
+                      <>
+                        <Badge variant="outline" className="text-xs">
+                          {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                        </Badge>
+                        {site.connected ? (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5 text-success" />
+                            <span className="text-xs text-success">Connected</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <XCircle className="h-3.5 w-3.5 text-destructive" />
+                            <span className="text-xs text-destructive">Disconnected</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+
                     {/* Credit Cost Display/Edit */}
                     {editingCredits === site.id ? (
                       <div className="flex items-center gap-2">
@@ -345,30 +378,6 @@ export function SitesView() {
                       </Badge>
                     )}
 
-                    {isAdmin ? (
-                      <>
-                        <Badge variant="outline" className="text-xs">
-                          {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                        </Badge>
-                        {site.connected ? (
-                          <div className="flex items-center gap-1">
-                            <CheckCircle className="h-3.5 w-3.5 text-success" />
-                            <span className="text-xs text-success">Connected</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            <XCircle className="h-3.5 w-3.5 text-destructive" />
-                            <span className="text-xs text-destructive">Disconnected</span>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">Editorial</Badge>
-                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">No sponsor marks</Badge>
-                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">LLM friendly</Badge>
-                      </div>
-                    )}
                     {isAdmin && (
                       <Button 
                         variant="ghost" 
@@ -379,8 +388,33 @@ export function SitesView() {
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
+
+                    {/* Expand/Collapse Toggle - only for non-admin */}
+                    {!isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => toggleExpand(site.id)}
+                      >
+                        {expandedSites.has(site.id) ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
+
+                {/* Row 2: Green badges (expanded state for non-admin) */}
+                {!isAdmin && expandedSites.has(site.id) && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">Editorial</Badge>
+                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">No sponsor marks</Badge>
+                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-600 bg-green-500/10">LLM friendly</Badge>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
