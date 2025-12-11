@@ -195,7 +195,7 @@ export function PinSettings() {
 
         <div className="space-y-4 rounded-lg border p-4">
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Set PIN</Label>
+            <Label className="block text-center text-sm text-muted-foreground">Set PIN</Label>
             <div className="flex justify-center">
               <InputOTP
                 maxLength={4}
@@ -213,7 +213,7 @@ export function PinSettings() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Confirm PIN</Label>
+            <Label className="block text-center text-sm text-muted-foreground">Confirm PIN</Label>
             <div className="flex justify-center">
               <InputOTP
                 maxLength={4}
