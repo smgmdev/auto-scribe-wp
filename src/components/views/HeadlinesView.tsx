@@ -308,11 +308,11 @@ export function HeadlinesView() {
                       href={headline.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-md hover:bg-[hsl(var(--icon-hover))] transition-colors"
+                      className="p-2 rounded-md hover:bg-muted transition-colors"
                       onClick={(e) => e.stopPropagation()}
                       title={headline.url}
                     >
-                      <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-white" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-accent" />
                     </a>
                     <Button 
                       variant="ghost" 
