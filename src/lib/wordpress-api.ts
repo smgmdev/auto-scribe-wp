@@ -149,6 +149,53 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
   }
 }
 
+export interface UpdateArticleParams {
+  site: WordPressSite;
+  postId: number;
+  title: string;
+  content: string;
+  status?: 'publish' | 'draft';
+  categories?: number[];
+  tags?: number[];
+  featuredMediaId?: number;
+}
+
+export async function updateArticle(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
+  try {
+    const baseUrl = normalizeUrl(params.site.url);
+    const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${params.postId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': createAuthHeader(params.site),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: params.title,
+        content: params.content,
+        status: params.status,
+        categories: params.categories,
+        tags: params.tags,
+        featured_media: params.featuredMediaId ?? undefined,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to update article:', response.status, errorData);
+      throw new Error(errorData.message || `Failed to update: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      id: data.id,
+      link: data.link,
+    };
+  } catch (error) {
+    console.error('Error updating article:', error);
+    throw error;
+  }
+}
+
 export async function uploadMedia(
   site: WordPressSite,
   file: File,
