@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          categories: number[] | null
+          content: string
+          created_at: string
+          featured_image: Json | null
+          id: string
+          published_to: string | null
+          source_headline: Json | null
+          status: string
+          tag_ids: number[] | null
+          tags: string[] | null
+          title: string
+          tone: string
+          updated_at: string
+          user_id: string
+          wp_featured_media_id: number | null
+          wp_link: string | null
+          wp_post_id: number | null
+        }
+        Insert: {
+          categories?: number[] | null
+          content: string
+          created_at?: string
+          featured_image?: Json | null
+          id?: string
+          published_to?: string | null
+          source_headline?: Json | null
+          status?: string
+          tag_ids?: number[] | null
+          tags?: string[] | null
+          title: string
+          tone?: string
+          updated_at?: string
+          user_id: string
+          wp_featured_media_id?: number | null
+          wp_link?: string | null
+          wp_post_id?: number | null
+        }
+        Update: {
+          categories?: number[] | null
+          content?: string
+          created_at?: string
+          featured_image?: Json | null
+          id?: string
+          published_to?: string | null
+          source_headline?: Json | null
+          status?: string
+          tag_ids?: number[] | null
+          tags?: string[] | null
+          title?: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+          wp_featured_media_id?: number | null
+          wp_link?: string | null
+          wp_post_id?: number | null
+        }
+        Relationships: []
+      }
       credit_packs: {
         Row: {
           active: boolean

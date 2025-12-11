@@ -1,17 +1,11 @@
-import { FileText, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { FileText, Edit, Trash2, ExternalLink, Loader2 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import { useArticles } from '@/hooks/useArticles';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-
-const toneColors: Record<string, string> = {
-  political: 'bg-headline-political/10 text-headline-political border-headline-political/30',
-  business: 'bg-headline-business/10 text-headline-business border-headline-business/30',
-  financial: 'bg-headline-financial/10 text-headline-financial border-headline-financial/30',
-  crypto: 'bg-headline-crypto/10 text-headline-crypto border-headline-crypto/30',
-  realestate: 'bg-headline-realestate/10 text-headline-realestate border-headline-realestate/30',
-};
+import type { Article } from '@/types';
 
 const statusColors: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -20,7 +14,8 @@ const statusColors: Record<string, string> = {
 };
 
 export function ArticlesView() {
-  const { articles, sites, deleteArticle, setEditingArticle, setCurrentView } = useAppStore();
+  const { sites, setEditingArticle, setCurrentView } = useAppStore();
+  const { articles, loading, deleteArticle } = useArticles();
   const { toast } = useToast();
 
   const getSiteName = (siteId?: string) => {
@@ -28,17 +23,19 @@ export function ArticlesView() {
     return sites.find(s => s.id === siteId)?.name || 'Unknown site';
   };
 
-  const handleEdit = (article: typeof articles[0]) => {
+  const handleEdit = (article: Article) => {
     setEditingArticle(article);
     setCurrentView('compose');
   };
 
-  const handleDelete = (articleId: string, articleTitle: string) => {
-    deleteArticle(articleId);
-    toast({
-      title: "Article deleted",
-      description: `"${articleTitle}" has been removed`,
-    });
+  const handleDelete = async (articleId: string, articleTitle: string) => {
+    const success = await deleteArticle(articleId);
+    if (success) {
+      toast({
+        title: "Article deleted",
+        description: `"${articleTitle}" has been removed`,
+      });
+    }
   };
 
   return (
@@ -54,7 +51,11 @@ export function ArticlesView() {
       </div>
 
       {/* Articles List */}
-      {articles.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : articles.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="h-12 w-12 text-muted-foreground/50" />
