@@ -1,7 +1,7 @@
 project_id = "sdjwglenqfzzgvyhtufv"
 
 [functions.scan-headlines]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-article]
 verify_jwt = true
