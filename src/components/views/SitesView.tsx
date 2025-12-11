@@ -13,7 +13,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import type { SEOPlugin } from '@/types';
 
 export function SitesView() {
   const { sites, addSite, removeSite } = useAppStore();
@@ -24,6 +33,7 @@ export function SitesView() {
     url: '',
     username: '',
     applicationPassword: '',
+    seoPlugin: 'aioseo' as SEOPlugin,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +49,7 @@ export function SitesView() {
     }
 
     addSite(formData);
-    setFormData({ name: '', url: '', username: '', applicationPassword: '' });
+    setFormData({ name: '', url: '', username: '', applicationPassword: '', seoPlugin: 'aioseo' });
     setIsOpen(false);
     
     toast({
@@ -125,6 +135,24 @@ export function SitesView() {
                   Generate this in WordPress under Users → Profile → Application Passwords
                 </p>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="seoPlugin">SEO Plugin</Label>
+                <Select 
+                  value={formData.seoPlugin} 
+                  onValueChange={(value: SEOPlugin) => setFormData({ ...formData, seoPlugin: value })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select SEO plugin" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border">
+                    <SelectItem value="aioseo">AIO SEO PRO</SelectItem>
+                    <SelectItem value="rankmath">Rank Math</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Select the SEO plugin installed on this WordPress site
+                </p>
+              </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                   Cancel
@@ -181,6 +209,11 @@ export function SitesView() {
                 </div>
               </CardHeader>
               <CardContent>
+                <div className="flex items-center justify-between mb-2">
+                  <Badge variant="outline" className="text-xs">
+                    {site.seoPlugin === 'aioseo' ? 'AIO SEO PRO' : 'Rank Math'}
+                  </Badge>
+                </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {site.connected ? (
