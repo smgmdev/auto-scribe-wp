@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
@@ -7,6 +8,7 @@ interface GlobalArticle {
   title: string;
   tone: string;
   created_at: string;
+  wp_link: string | null;
 }
 
 export function LatestGlobalArticles() {
@@ -17,7 +19,7 @@ export function LatestGlobalArticles() {
     const fetchGlobalArticles = async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select('id, title, tone, created_at')
+        .select('id, title, tone, created_at, wp_link')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(5);
@@ -49,6 +51,17 @@ export function LatestGlobalArticles() {
               {article.tone} • {format(new Date(article.created_at), 'MMM d, yyyy')}
             </p>
           </div>
+          {article.wp_link && (
+            <a 
+              href={article.wp_link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="ml-2 p-1.5 rounded-md text-muted-foreground hover:text-accent hover:bg-muted transition-colors"
+              title="View article"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
         </li>
       ))}
     </ul>
