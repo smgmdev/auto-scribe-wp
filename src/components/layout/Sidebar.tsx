@@ -32,8 +32,8 @@ const getNavigation = (isAdmin: boolean) => {
   if (isAdmin) {
     return [
       ...base,
-      { id: 'settings', label: 'Settings', icon: Settings },
-      { id: 'admin-credits', label: 'Credit Packs', icon: CreditCard },
+      { id: 'settings', label: 'Global Settings', icon: Settings },
+      { id: 'admin-credits', label: 'Credit Management', icon: CreditCard },
       { id: 'admin-users', label: 'Users', icon: Users },
     ];
   }

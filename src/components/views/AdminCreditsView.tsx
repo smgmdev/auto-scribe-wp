@@ -169,7 +169,7 @@ export function AdminCreditsView() {
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">Credit Packs</h1>
+          <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
           <p className="mt-2 text-muted-foreground">
             Manage credit packs for purchase
           </p>
