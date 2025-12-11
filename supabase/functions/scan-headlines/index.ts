@@ -15,6 +15,20 @@ interface Headline {
   summary?: string;
 }
 
+// Get today and yesterday's date strings
+function getTodayAndYesterday(): { today: string; yesterday: string; todayDate: Date; yesterdayDate: Date } {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  
+  return {
+    today: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`,
+    yesterday: `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`,
+    todayDate: today,
+    yesterdayDate: yesterday,
+  };
+}
+
 // Extract date from URL patterns
 function extractDateFromUrl(url: string): Date | null {
   // Pattern: /YYYY/MM/DD/ 
@@ -36,72 +50,72 @@ function extractDateFromUrl(url: string): Date | null {
   return null;
 }
 
-// Check if date is within last 48 hours (to account for timezone differences)
-function isRecent(date: Date): boolean {
-  const now = new Date();
-  const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
-  return date >= fortyEightHoursAgo && date <= now;
+// Check if date is today or yesterday only
+function isTodayOrYesterday(date: Date): boolean {
+  const { todayDate, yesterdayDate } = getTodayAndYesterday();
+  const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return dateOnly.getTime() === todayDate.getTime() || dateOnly.getTime() === yesterdayDate.getTime();
 }
 
 async function scrapeEuronews(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Euronews...');
+    console.log('Scraping Euronews front page...');
     
-    const sections = [
-      'https://www.euronews.com/news',
-      'https://www.euronews.com/business',
-      'https://www.euronews.com/my-europe'
-    ];
+    // Only scrape front page
+    const response = await fetch('https://www.euronews.com/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      }
+    });
+    const html = await response.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
     
-    for (const sectionUrl of sections) {
-      if (headlines.length >= 30) break;
+    if (doc) {
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on Euronews front page`);
       
-      try {
-        const response = await fetch(sectionUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          }
-        });
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
         
-        if (doc) {
-          // Get all links that look like articles
-          const allLinks = doc.querySelectorAll('a[href]');
-          console.log(`Found ${allLinks.length} links on ${sectionUrl}`);
-          
-          allLinks.forEach((article) => {
-            if (headlines.length >= 30) return;
-            const link = article as any;
-            const href = link.getAttribute('href') || '';
-            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
-            
-            // Must have /2025/ or /2024/12/ in URL (recent articles)
-            if (!href.includes('/2025/') && !href.includes('/2024/12/')) return;
-            if (!title || title.length < 30 || title.length > 300) return;
-            if (seen.has(title.toLowerCase())) return;
-            
-            const fullUrl = href.startsWith('http') ? href : `https://www.euronews.com${href}`;
-            const articleDate = extractDateFromUrl(fullUrl);
-            
-            if (articleDate && isRecent(articleDate)) {
-              seen.add(title.toLowerCase());
-              headlines.push({
-                id: `euronews-${Date.now()}-${headlines.length}`,
-                title: title,
-                source: 'euronews',
-                url: fullUrl,
-                publishedAt: articleDate.toISOString(),
-              });
-            }
+        // Check for today or yesterday date patterns in URL
+        const todaySlash = today.replace(/-/g, '/').replace(/^(\d{4})\/0?(\d+)\/0?(\d+)$/, '$1/$2/$3');
+        const yesterdaySlash = yesterday.replace(/-/g, '/').replace(/^(\d{4})\/0?(\d+)\/0?(\d+)$/, '$1/$2/$3');
+        
+        if (!href.includes(`/${today.split('-')[0]}/${today.split('-')[1]}/${today.split('-')[2]}/`) &&
+            !href.includes(`/${yesterday.split('-')[0]}/${yesterday.split('-')[1]}/${yesterday.split('-')[2]}/`)) {
+          // Also check without leading zeros
+          const tParts = today.split('-');
+          const yParts = yesterday.split('-');
+          if (!href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
+              !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
+            return;
+          }
+        }
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://www.euronews.com${href}`;
+        const articleDate = extractDateFromUrl(fullUrl);
+        
+        if (articleDate && isTodayOrYesterday(articleDate)) {
+          seen.add(title.toLowerCase());
+          headlines.push({
+            id: `euronews-${Date.now()}-${headlines.length}`,
+            title: title,
+            source: 'euronews',
+            url: fullUrl,
+            publishedAt: articleDate.toISOString(),
           });
         }
-      } catch (e) {
-        console.error(`Error scraping ${sectionUrl}:`, e);
-      }
+      });
     }
     
     console.log(`Found ${headlines.length} Euronews headlines`);
@@ -114,61 +128,55 @@ async function scrapeEuronews(): Promise<Headline[]> {
 async function scrapeBloomberg(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Bloomberg...');
+    console.log('Scraping Bloomberg front page...');
     
-    // Bloomberg is heavily JS-rendered, try RSS feed approach
-    const sections = [
-      'https://www.bloomberg.com/markets',
-      'https://www.bloomberg.com/technology'
-    ];
-    
-    for (const sectionUrl of sections) {
-      if (headlines.length >= 30) break;
-      
-      try {
-        const response = await fetch(sectionUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          }
-        });
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        
-        if (doc) {
-          const allLinks = doc.querySelectorAll('a[href]');
-          console.log(`Found ${allLinks.length} links on ${sectionUrl}`);
-          
-          allLinks.forEach((article) => {
-            if (headlines.length >= 30) return;
-            const link = article as any;
-            const href = link.getAttribute('href') || '';
-            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
-            
-            // Bloomberg uses YYYY-MM-DD format
-            if (!href.includes('/2025-') && !href.includes('/2024-12-')) return;
-            if (!title || title.length < 30 || title.length > 300) return;
-            if (seen.has(title.toLowerCase())) return;
-            
-            const fullUrl = href.startsWith('http') ? href : `https://www.bloomberg.com${href}`;
-            const articleDate = extractDateFromUrl(fullUrl);
-            
-            if (articleDate && isRecent(articleDate)) {
-              seen.add(title.toLowerCase());
-              headlines.push({
-                id: `bloomberg-${Date.now()}-${headlines.length}`,
-                title: title,
-                source: 'bloomberg',
-                url: fullUrl,
-                publishedAt: articleDate.toISOString(),
-              });
-            }
-          });
-        }
-      } catch (e) {
-        console.error(`Error scraping ${sectionUrl}:`, e);
+    // Only scrape front page
+    const response = await fetch('https://www.bloomberg.com/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Cache-Control': 'no-cache',
       }
+    });
+    const html = await response.text();
+    console.log(`Bloomberg response length: ${html.length} characters`);
+    
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    if (doc) {
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on Bloomberg front page`);
+      
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
+        
+        // Bloomberg uses YYYY-MM-DD format in URLs
+        if (!href.includes(`/${today}`) && !href.includes(`/${yesterday}`)) return;
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://www.bloomberg.com${href}`;
+        const articleDate = extractDateFromUrl(fullUrl);
+        
+        if (articleDate && isTodayOrYesterday(articleDate)) {
+          seen.add(title.toLowerCase());
+          headlines.push({
+            id: `bloomberg-${Date.now()}-${headlines.length}`,
+            title: title,
+            source: 'bloomberg',
+            url: fullUrl,
+            publishedAt: articleDate.toISOString(),
+          });
+          console.log(`Added Bloomberg headline: ${title.substring(0, 50)}...`);
+        }
+      });
     }
     
     console.log(`Found ${headlines.length} Bloomberg headlines`);
@@ -181,61 +189,59 @@ async function scrapeBloomberg(): Promise<Headline[]> {
 async function scrapeFortune(): Promise<Headline[]> {
   const headlines: Headline[] = [];
   const seen = new Set<string>();
+  const { today, yesterday } = getTodayAndYesterday();
   
   try {
-    console.log('Scraping Fortune...');
+    console.log('Scraping Fortune front page...');
     
-    const sections = [
-      'https://fortune.com/the-latest/',
-      'https://fortune.com/section/finance/',
-      'https://fortune.com/section/tech/'
-    ];
+    // Only scrape front page
+    const response = await fetch('https://fortune.com/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      }
+    });
+    const html = await response.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
     
-    for (const sectionUrl of sections) {
-      if (headlines.length >= 30) break;
+    if (doc) {
+      const allLinks = doc.querySelectorAll('a[href]');
+      console.log(`Found ${allLinks.length} links on Fortune front page`);
       
-      try {
-        const response = await fetch(sectionUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          }
-        });
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
+      allLinks.forEach((article) => {
+        if (headlines.length >= 30) return;
+        const link = article as any;
+        const href = link.getAttribute('href') || '';
+        let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
         
-        if (doc) {
-          const allLinks = doc.querySelectorAll('a[href]');
-          console.log(`Found ${allLinks.length} links on ${sectionUrl}`);
-          
-          allLinks.forEach((article) => {
-            if (headlines.length >= 30) return;
-            const link = article as any;
-            const href = link.getAttribute('href') || '';
-            let title = link.textContent?.trim()?.replace(/\s+/g, ' ');
-            
-            // Fortune uses /YYYY/MM/DD/ format
-            if (!href.includes('/2025/') && !href.includes('/2024/12/')) return;
-            if (!title || title.length < 30 || title.length > 300) return;
-            if (seen.has(title.toLowerCase())) return;
-            
-            const fullUrl = href.startsWith('http') ? href : `https://fortune.com${href}`;
-            const articleDate = extractDateFromUrl(fullUrl);
-            
-            if (articleDate && isRecent(articleDate)) {
-              seen.add(title.toLowerCase());
-              headlines.push({
-                id: `fortune-${Date.now()}-${headlines.length}`,
-                title: title,
-                source: 'fortune',
-                url: fullUrl,
-                publishedAt: articleDate.toISOString(),
-              });
-            }
+        // Fortune uses /YYYY/MM/DD/ format
+        const tParts = today.split('-');
+        const yParts = yesterday.split('-');
+        
+        // Check with and without leading zeros
+        if (!href.includes(`/${tParts[0]}/${tParts[1]}/${tParts[2]}/`) &&
+            !href.includes(`/${yParts[0]}/${yParts[1]}/${yParts[2]}/`) &&
+            !href.includes(`/${tParts[0]}/${parseInt(tParts[1])}/${parseInt(tParts[2])}/`) &&
+            !href.includes(`/${yParts[0]}/${parseInt(yParts[1])}/${parseInt(yParts[2])}/`)) {
+          return;
+        }
+        
+        if (!title || title.length < 30 || title.length > 300) return;
+        if (seen.has(title.toLowerCase())) return;
+        
+        const fullUrl = href.startsWith('http') ? href : `https://fortune.com${href}`;
+        const articleDate = extractDateFromUrl(fullUrl);
+        
+        if (articleDate && isTodayOrYesterday(articleDate)) {
+          seen.add(title.toLowerCase());
+          headlines.push({
+            id: `fortune-${Date.now()}-${headlines.length}`,
+            title: title,
+            source: 'fortune',
+            url: fullUrl,
+            publishedAt: articleDate.toISOString(),
           });
         }
-      } catch (e) {
-        console.error(`Error scraping ${sectionUrl}:`, e);
-      }
+      });
     }
     
     console.log(`Found ${headlines.length} Fortune headlines`);
@@ -252,10 +258,9 @@ serve(async (req) => {
 
   try {
     const { sources } = await req.json();
-    const now = new Date();
+    const { today, yesterday } = getTodayAndYesterday();
     console.log('Scanning sources:', sources);
-    console.log('Current date:', now.toISOString());
-    console.log('Looking for articles from:', new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString(), 'to now');
+    console.log('Looking for articles from:', yesterday, 'and', today);
     
     const allHeadlines: Headline[] = [];
     const scrapePromises: Promise<Headline[]>[] = [];
