@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw } from 'lucide-react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,11 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchCategories, fetchTags, createTag, publishArticle, updateArticle as updateWPArticle, uploadMedia, updateMediaMetadata, fetchPostSEOData } from '@/lib/wordpress-api';
 import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
+
+interface SiteCredit {
+  site_id: string;
+  credits_required: number;
+}
 const toneOptions: {
   value: ArticleTone;
   label: string;
@@ -56,9 +62,13 @@ export function ComposeView() {
     setEditingArticle
   } = useAppStore();
   const { addArticle, updateArticle } = useArticles();
+  const { credits } = useAuth();
   const {
     toast
   } = useToast();
+  
+  // Site credits state
+  const [siteCredits, setSiteCredits] = useState<SiteCredit[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tone, setTone] = useState<ArticleTone>(editingArticle?.tone || 'neutral');
   const [title, setTitle] = useState(editingArticle?.title || selectedHeadline?.title || '');
@@ -95,6 +105,32 @@ export function ComposeView() {
 
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
+
+  // Fetch site credits on mount
+  useEffect(() => {
+    const fetchSiteCredits = async () => {
+      const { data, error } = await supabase
+        .from('site_credits')
+        .select('site_id, credits_required');
+      
+      if (!error && data) {
+        setSiteCredits(data);
+      }
+    };
+    fetchSiteCredits();
+  }, []);
+
+  // Helper to get credit cost for a site
+  const getSiteCreditCost = (siteId: string): number => {
+    const siteCredit = siteCredits.find(sc => sc.site_id === siteId);
+    return siteCredit?.credits_required || 0;
+  };
+
+  // Check if user can afford a site
+  const canAffordSite = (siteId: string): boolean => {
+    const cost = getSiteCreditCost(siteId);
+    return credits >= cost;
+  };
 
   // Fetch categories and tags when site is selected
   useEffect(() => {
@@ -721,7 +757,14 @@ export function ComposeView() {
             <Label className="whitespace-nowrap text-sm font-medium">Publish To</Label>
             {sites.length === 0 ? <p className="text-sm text-muted-foreground">
                 No media sites connected. Add a site first.
-              </p> : <Select value={selectedSite} onValueChange={setSelectedSite}>
+              </p> : <Select 
+                value={selectedSite} 
+                onValueChange={(value) => {
+                  if (canAffordSite(value)) {
+                    setSelectedSite(value);
+                  }
+                }}
+              >
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Select a media site">
                     {selectedSite && currentSite && <div className="flex items-center gap-2">
@@ -729,18 +772,46 @@ export function ComposeView() {
                     (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`;
                   }} />
                         <span>{currentSite.name}</span>
+                        <span className="ml-auto flex items-center gap-1 text-muted-foreground">
+                          <Coins className="h-3 w-3" />
+                          {getSiteCreditCost(currentSite.id)}
+                        </span>
                       </div>}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-popover border border-border z-50">
-                  {sites.map(site => <SelectItem key={site.id} value={site.id}>
-                      <div className="flex items-center gap-2">
-                        <img src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`} alt="" className="h-4 w-4 rounded-sm" onError={e => {
-                    (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`;
-                  }} />
-                        <span>{site.name}</span>
-                      </div>
-                    </SelectItem>)}
+                  {sites.map(site => {
+                    const creditCost = getSiteCreditCost(site.id);
+                    const canAfford = canAffordSite(site.id);
+                    
+                    return (
+                      <SelectItem 
+                        key={site.id} 
+                        value={site.id}
+                        disabled={!canAfford}
+                        className={!canAfford ? "opacity-50" : ""}
+                      >
+                        <div className="flex items-center justify-between w-full gap-4">
+                          <div className="flex items-center gap-2">
+                            <img 
+                              src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`} 
+                              alt="" 
+                              className="h-4 w-4 rounded-sm" 
+                              onError={e => {
+                                (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`;
+                              }} 
+                            />
+                            <span>{site.name}</span>
+                          </div>
+                          <div className={`flex items-center gap-1 text-xs ${canAfford ? 'text-muted-foreground' : 'text-destructive'}`}>
+                            {!canAfford && <Lock className="h-3 w-3" />}
+                            <Coins className="h-3 w-3" />
+                            <span>{creditCost}</span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>}
           </div>
