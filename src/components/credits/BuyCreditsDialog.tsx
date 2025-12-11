@@ -67,11 +67,11 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     setPurchasing(pack.id);
 
     try {
+      // User ID is now extracted from JWT token on the server side
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           priceId: pack.stripe_price_id,
           packId: pack.id,
-          userId: user?.id,
         },
       });
 
