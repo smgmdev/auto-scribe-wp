@@ -2,7 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { WordPressSite, Headline, Article, AISettings } from '@/types';
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'fortune-tech' | 'nikkei-asia';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia';
+
+// Valid sources list for filtering out removed sources from persisted state
+const validSources: SourceType[] = ['euronews', 'bloomberg', 'fortune', 'bloomberg-middleeast', 'bloomberg-asia', 'bloomberg-latest', 'fortune-latest', 'euronews-latest', 'euronews-economy', 'nikkei-asia'];
 
 interface AppState {
   // WordPress Sites
@@ -100,6 +103,17 @@ export const useAppStore = create<AppState>()(
         sites: state.sites,
         aiSettings: state.aiSettings,
       }),
+      // Clean up removed sources from persisted state
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const cleanedSources = state.aiSettings.selectedSources.filter(
+            (source) => validSources.includes(source as SourceType)
+          );
+          if (cleanedSources.length !== state.aiSettings.selectedSources.length) {
+            state.aiSettings.selectedSources = cleanedSources;
+          }
+        }
+      },
     }
   )
 );
