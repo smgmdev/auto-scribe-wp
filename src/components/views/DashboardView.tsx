@@ -1,4 +1,4 @@
-import { Globe, Newspaper, TrendingUp, ExternalLink, Plus } from 'lucide-react';
+import { Globe, Newspaper, TrendingUp, ExternalLink, Plus, FileText } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';

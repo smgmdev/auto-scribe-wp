@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Globe, Newspaper, PenTool, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -20,10 +20,10 @@ const getNavigation = (isAdmin: boolean) => {
     id: 'headlines',
     label: 'Sources',
     icon: Newspaper
-  }, {
+}, {
     id: 'compose',
     label: 'New Article',
-    icon: PenTool
+    icon: Plus
   }, {
     id: 'articles',
     label: 'Articles',
