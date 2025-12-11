@@ -107,8 +107,8 @@ export function Sidebar({
             {navigation.map(item => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            return <Button key={item.id} variant="ghost" className={cn("w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", isActive && "bg-sidebar-accent text-sidebar-primary font-medium")} onClick={() => handleNavClick(item.id)}>
-                  <Icon className={cn("h-5 w-5", isActive && "text-sidebar-primary")} />
+            return <Button key={item.id} variant="ghost" className={cn("w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", isActive && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(item.id)}>
+                  <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
                   {item.label}
                 </Button>;
           })}
@@ -116,13 +116,13 @@ export function Sidebar({
 
           {/* Account & Sign Out */}
           <div className="border-t border-sidebar-border p-4 space-y-1">
-            <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-sidebar-primary font-medium")} onClick={() => handleNavClick('account')}>
-              <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-sidebar-primary")} />
+            <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
+              <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
               Account Settings
             </Button>
             <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={signOut}>
               <LogOut className="h-5 w-5" />
-              Sign Out
+              Log Out
             </Button>
           </div>
         </div>
