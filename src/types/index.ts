@@ -9,6 +9,7 @@ export interface WordPressSite {
   seoPlugin: SEOPlugin;
   connected: boolean;
   lastSync?: Date;
+  favicon?: string;
 }
 
 export interface WPCategory {

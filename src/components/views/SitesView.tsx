@@ -191,8 +191,19 @@ export function SitesView() {
             >
               <CardHeader className="flex flex-row items-start justify-between space-y-0">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
-                    <Globe className="h-5 w-5 text-accent" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 overflow-hidden">
+                    {site.favicon ? (
+                      <img 
+                        src={site.favicon} 
+                        alt={`${site.name} favicon`}
+                        className="h-6 w-6 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <Globe className={`h-5 w-5 text-accent ${site.favicon ? 'hidden' : ''}`} />
                   </div>
                   <div>
                     <CardTitle className="font-display text-lg">{site.name}</CardTitle>

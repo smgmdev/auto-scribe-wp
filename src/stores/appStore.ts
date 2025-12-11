@@ -39,12 +39,16 @@ export const useAppStore = create<AppState>()(
       // WordPress Sites
       sites: [],
       addSite: (site) =>
-        set((state) => ({
-          sites: [
-            ...state.sites,
-            { ...site, id: crypto.randomUUID(), connected: true },
-          ],
-        })),
+        set((state) => {
+          // Generate favicon URL using Google's favicon service
+          const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
+          return {
+            sites: [
+              ...state.sites,
+              { ...site, id: crypto.randomUUID(), connected: true, favicon: faviconUrl },
+            ],
+          };
+        }),
       removeSite: (id) =>
         set((state) => ({
           sites: state.sites.filter((s) => s.id !== id),
