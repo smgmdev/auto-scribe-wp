@@ -80,13 +80,27 @@ export async function createTag(site: WordPressSite, tagName: string): Promise<W
     });
 
     if (!response.ok) {
-      // Tag might already exist, try to find it
-      if (response.status === 400) {
-        const existingTags = await fetchTags(site);
-        const existing = existingTags.find(
-          t => t.name.toLowerCase() === tagName.toLowerCase()
-        );
-        if (existing) return existing;
+      const errorData = await response.json().catch(() => ({}));
+      
+      // Tag already exists - WordPress returns the existing tag ID in the error response
+      if (response.status === 400 && errorData.code === 'term_exists' && errorData.data?.term_id) {
+        const existingTagId = errorData.data.term_id;
+        // Fetch the existing tag details
+        const tagResponse = await fetch(`${baseUrl}/wp-json/wp/v2/tags/${existingTagId}`, {
+          headers: {
+            'Authorization': createAuthHeader(site),
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (tagResponse.ok) {
+          const tagData = await tagResponse.json();
+          return {
+            id: tagData.id,
+            name: tagData.name,
+            slug: tagData.slug,
+          };
+        }
       }
       throw new Error(`Failed to create tag: ${response.statusText}`);
     }
