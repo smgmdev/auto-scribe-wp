@@ -340,6 +340,12 @@ export function ComposeView() {
     }
     setIsGenerating(true);
     try {
+      // Refresh the session before making the request to ensure valid token
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        throw new Error("Session expired. Please log in again.");
+      }
+
       // Pass source URL if headline was selected from news sources
       const sourceUrl = selectedHeadline?.url;
       const {
@@ -353,6 +359,10 @@ export function ComposeView() {
         }
       });
       if (error) {
+        // Check for auth errors
+        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+          throw new Error("Session expired. Please refresh the page and try again.");
+        }
         throw error;
       }
       if (data?.success) {
