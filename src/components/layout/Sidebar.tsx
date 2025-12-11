@@ -15,7 +15,7 @@ const navigation = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'sites', label: 'Media Network', icon: Globe },
   { id: 'headlines', label: 'Headlines', icon: Newspaper },
-  { id: 'compose', label: 'Compose', icon: PenTool },
+  { id: 'compose', label: 'New Article', icon: PenTool },
   { id: 'articles', label: 'Articles', icon: FileText },
   { id: 'settings', label: 'Settings', icon: Settings },
 ] as const;

@@ -685,7 +685,7 @@ export function ComposeView() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-foreground">
-          {editingArticle ? 'Edit Article' : 'Compose Article'}
+          {editingArticle ? 'Edit Article' : 'New Article'}
         </h1>
         <p className="mt-2 text-muted-foreground">
           {editingArticle 
