@@ -111,7 +111,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground font-body antialiased text-sm;
   }
 
   h1, h2, h3, h4, h5, h6 {
