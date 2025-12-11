@@ -6,13 +6,13 @@ import {
   PenTool, 
   FileText, 
   Settings,
-  Sparkles,
   LogOut,
   Users,
   CreditCard,
   UserCircle,
   X
 } from 'lucide-react';
+import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -73,9 +73,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Logo */}
           <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-                <Sparkles className="h-5 w-5 text-sidebar-primary-foreground" />
-              </div>
+              <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
               <div>
                 <h1 className="text-lg font-semibold text-sidebar-foreground">
                   Publisher
