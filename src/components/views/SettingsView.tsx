@@ -6,62 +6,72 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { ArticleTone } from '@/types';
-
 const sources = ['euronews', 'bloomberg', 'fortune'] as const;
-const tones: { value: ArticleTone; label: string }[] = [
-  { value: 'neutral', label: 'Neutral' },
-  { value: 'professional', label: 'Professional Corporate' },
-  { value: 'journalist', label: 'Journalist' },
-  { value: 'inspiring', label: 'Inspiring' },
-  { value: 'aggressive', label: 'Aggressive' },
-  { value: 'powerful', label: 'Powerful' },
-  { value: 'important', label: 'Important' },
-];
-
+const tones: {
+  value: ArticleTone;
+  label: string;
+}[] = [{
+  value: 'neutral',
+  label: 'Neutral'
+}, {
+  value: 'professional',
+  label: 'Professional Corporate'
+}, {
+  value: 'journalist',
+  label: 'Journalist'
+}, {
+  value: 'inspiring',
+  label: 'Inspiring'
+}, {
+  value: 'aggressive',
+  label: 'Aggressive'
+}, {
+  value: 'powerful',
+  label: 'Powerful'
+}, {
+  value: 'important',
+  label: 'Important'
+}];
 export function SettingsView() {
-  const { aiSettings, updateAISettings, sites } = useAppStore();
-  const { toast } = useToast();
-  
+  const {
+    aiSettings,
+    updateAISettings,
+    sites
+  } = useAppStore();
+  const {
+    toast
+  } = useToast();
   const [localSettings, setLocalSettings] = useState(aiSettings);
-
   const handleSourceToggle = (source: typeof sources[number]) => {
-    const newSources = localSettings.selectedSources.includes(source)
-      ? localSettings.selectedSources.filter(s => s !== source)
-      : [...localSettings.selectedSources, source];
-    setLocalSettings({ ...localSettings, selectedSources: newSources });
+    const newSources = localSettings.selectedSources.includes(source) ? localSettings.selectedSources.filter(s => s !== source) : [...localSettings.selectedSources, source];
+    setLocalSettings({
+      ...localSettings,
+      selectedSources: newSources
+    });
   };
-
   const handleSiteToggle = (siteId: string) => {
-    const newSites = localSettings.targetSites.includes(siteId)
-      ? localSettings.targetSites.filter(s => s !== siteId)
-      : [...localSettings.targetSites, siteId];
-    setLocalSettings({ ...localSettings, targetSites: newSites });
+    const newSites = localSettings.targetSites.includes(siteId) ? localSettings.targetSites.filter(s => s !== siteId) : [...localSettings.targetSites, siteId];
+    setLocalSettings({
+      ...localSettings,
+      targetSites: newSites
+    });
   };
-
   const handleSave = () => {
     updateAISettings(localSettings);
     toast({
       title: "Settings saved",
-      description: "Your AI publishing settings have been updated",
+      description: "Your AI publishing settings have been updated"
     });
   };
-
-  return (
-    <div className="space-y-8 animate-fade-in">
+  return <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
-            Settings
+            Global Settings
           </h1>
           <p className="mt-2 text-muted-foreground">
             Configure AI article generation and publishing preferences
@@ -83,11 +93,7 @@ export function SettingsView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {sources.map((source) => (
-              <label 
-                key={source}
-                className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
-              >
+            {sources.map(source => <label key={source} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors">
                 <div>
                   <p className="font-medium capitalize">{source}.com</p>
                   <p className="text-sm text-muted-foreground">
@@ -96,13 +102,8 @@ export function SettingsView() {
                     {source === 'fortune' && 'Business leaders and market insights'}
                   </p>
                 </div>
-                <Checkbox 
-                  checked={localSettings.selectedSources.includes(source)}
-                  onCheckedChange={() => handleSourceToggle(source)}
-                  className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                />
-              </label>
-            ))}
+                <Checkbox checked={localSettings.selectedSources.includes(source)} onCheckedChange={() => handleSourceToggle(source)} className="data-[state=checked]:bg-accent data-[state=checked]:border-accent" />
+              </label>)}
           </CardContent>
         </Card>
 
@@ -115,21 +116,17 @@ export function SettingsView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Select 
-              value={localSettings.defaultTone}
-              onValueChange={(value: ArticleTone) => 
-                setLocalSettings({ ...localSettings, defaultTone: value })
-              }
-            >
+            <Select value={localSettings.defaultTone} onValueChange={(value: ArticleTone) => setLocalSettings({
+            ...localSettings,
+            defaultTone: value
+          })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {tones.map((tone) => (
-                  <SelectItem key={tone.value} value={tone.value}>
+                {tones.map(tone => <SelectItem key={tone.value} value={tone.value}>
                     {tone.label}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
 
@@ -165,12 +162,10 @@ export function SettingsView() {
                   Automatically publish articles after AI generation
                 </p>
               </div>
-              <Switch
-                checked={localSettings.autoPublish}
-                onCheckedChange={(checked) => 
-                  setLocalSettings({ ...localSettings, autoPublish: checked })
-                }
-              />
+              <Switch checked={localSettings.autoPublish} onCheckedChange={checked => setLocalSettings({
+              ...localSettings,
+              autoPublish: checked
+            })} />
             </div>
           </CardContent>
         </Card>
@@ -184,35 +179,21 @@ export function SettingsView() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {sites.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+            {sites.length === 0 ? <p className="text-sm text-muted-foreground">
                 No WordPress sites connected. Add sites in the WP Sites section.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {sites.map((site) => (
-                  <label 
-                    key={site.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
-                  >
+              </p> : <div className="space-y-3">
+                {sites.map(site => <label key={site.id} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors">
                     <div>
                       <p className="font-medium">{site.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {site.url}
                       </p>
                     </div>
-                    <Checkbox 
-                      checked={localSettings.targetSites.includes(site.id)}
-                      onCheckedChange={() => handleSiteToggle(site.id)}
-                      className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                    />
-                  </label>
-                ))}
-              </div>
-            )}
+                    <Checkbox checked={localSettings.targetSites.includes(site.id)} onCheckedChange={() => handleSiteToggle(site.id)} className="data-[state=checked]:bg-accent data-[state=checked]:border-accent" />
+                  </label>)}
+              </div>}
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
