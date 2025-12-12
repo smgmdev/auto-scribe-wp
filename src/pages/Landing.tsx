@@ -450,7 +450,7 @@ const Landing = () => {
                           className="flex items-center w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
                           {/* Left: Media logo + name */}
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex items-center gap-3 min-w-0 w-[200px]">
                             <img
                               src={site.favicon || getFaviconUrl(site.link)}
                               alt={site.name}
@@ -459,19 +459,20 @@ const Landing = () => {
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
-                            <span className="font-semibold text-foreground">{site.name}</span>
+                            <span className="font-semibold text-foreground truncate">{site.name}</span>
                           </div>
                           
-                          {/* Spacer */}
-                          <div className="flex-1" />
-                          
-                          {/* Right: Article format + via agency + agency logo */}
-                          <div className="flex items-center gap-3 flex-shrink-0">
+                          {/* Middle: Article format */}
+                          <div className="flex-1 text-center">
                             <span className="text-sm text-foreground">{site.publication_format.toLowerCase()}</span>
+                          </div>
+                          
+                          {/* Right: via agency + agency logo */}
+                          <div className="flex items-center gap-2 flex-shrink-0 justify-end w-[180px]">
                             {site.agency && (
                               <>
-                                <span className="text-sm text-muted-foreground">via</span>
-                                <span className="text-sm text-foreground font-medium">{site.agency}</span>
+                                <span className="text-xs text-muted-foreground">via</span>
+                                <span className="text-sm text-foreground">{site.agency}</span>
                                 {agencyLogos[site.agency] && (
                                   <img
                                     src={agencyLogos[site.agency]}
