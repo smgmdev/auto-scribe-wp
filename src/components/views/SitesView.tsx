@@ -1939,7 +1939,7 @@ export function SitesView() {
                     <div>
                       <p className="text-sm text-muted-foreground">Price</p>
                       <Badge variant="outline" className="text-accent border-accent/30">
-                        {selectedMediaSite.price} USDT
+                        {selectedMediaSite.price} USD
                       </Badge>
                     </div>
                     <div>
@@ -1960,15 +1960,17 @@ export function SitesView() {
                 )}
                 
                 {selectedMediaSite.category && selectedMediaSite.category !== 'Agencies/People' && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Category</p>
-                    <p className="text-foreground">{selectedMediaSite.category}</p>
-                  </div>
-                )}
-                {selectedMediaSite.subcategory && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Subcategory</p>
-                    <p className="text-foreground">{selectedMediaSite.subcategory}</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Category</p>
+                      <p className="text-foreground">{selectedMediaSite.category}</p>
+                    </div>
+                    {selectedMediaSite.subcategory && (
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Subcategory</p>
+                        <p className="text-foreground">{selectedMediaSite.subcategory}</p>
+                      </div>
+                    )}
                   </div>
                 )}
                 {selectedMediaSite.agency && (
