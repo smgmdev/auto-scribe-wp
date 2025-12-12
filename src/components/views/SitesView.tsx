@@ -1072,12 +1072,26 @@ export function SitesView() {
           </div>
           
           {/* Expanded Section with Details */}
-          {isExpanded && site.about && (
-            <div className="mt-3 pt-3 border-t border-border">
-              <div className="flex items-start gap-2">
-                <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Details:</span>
-                <p className="text-xs text-foreground">{site.about}</p>
-              </div>
+          {isExpanded && (
+            <div className="mt-3 pt-3 border-t border-border space-y-2">
+              {site.about && (
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Good to know:</span>
+                  <p className="text-xs text-foreground">{site.about}</p>
+                </div>
+              )}
+              {site.category && (
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Main category:</span>
+                  <p className="text-xs text-foreground">{site.category}</p>
+                </div>
+              )}
+              {site.subcategory && (
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Subcategory:</span>
+                  <p className="text-xs text-foreground">{site.subcategory}</p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
