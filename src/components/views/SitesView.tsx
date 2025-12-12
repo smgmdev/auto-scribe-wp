@@ -106,21 +106,10 @@ export function SitesView() {
     seoPlugin: 'aioseo' as SEOPlugin
   });
 
-  // Media Site form
-  const [mediaFormData, setMediaFormData] = useState({
-    name: '',
-    publication_format: 'Article',
-    google_index: 'Regular',
-    marks: 'No',
-    link: '',
-    publishing_time: '24h',
-    max_words: '',
-    max_images: '',
-    price: '',
-    agency: '',
-    category: 'Global',
-    subcategory: ''
-  });
+  // Google Sheet import
+  const [sheetUrl, setSheetUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importPreview, setImportPreview] = useState<any[]>([]);
 
   useEffect(() => {
     fetchSiteCredits();
@@ -283,66 +272,149 @@ export function SitesView() {
     }
   };
 
-  const handleMediaSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mediaFormData.name || !mediaFormData.link) {
+  const extractSheetId = (url: string): string | null => {
+    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : null;
+  };
+
+  const parseCSV = (csv: string): any[] => {
+    const lines = csv.split('\n');
+    if (lines.length < 2) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const rows: any[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim());
+      if (values.length < 2 || !values[1]) continue; // Skip empty rows
+      
+      const row: any = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      rows.push(row);
+    }
+    
+    return rows;
+  };
+
+  const handleFetchSheet = async () => {
+    if (!sheetUrl) {
       toast({
-        title: "Missing fields",
-        description: "Please fill in Media name and Link",
+        title: "Missing URL",
+        description: "Please enter a Google Sheet URL",
         variant: "destructive"
       });
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      // Generate favicon from link
-      const favicon = getFaviconUrl(mediaFormData.link);
-
-      const { error } = await supabase
-        .from('media_sites')
-        .insert({
-          name: mediaFormData.name,
-          publication_format: mediaFormData.publication_format,
-          google_index: mediaFormData.google_index,
-          marks: mediaFormData.marks,
-          link: mediaFormData.link,
-          publishing_time: mediaFormData.publishing_time,
-          max_words: mediaFormData.max_words ? parseInt(mediaFormData.max_words) : null,
-          max_images: mediaFormData.max_images ? parseInt(mediaFormData.max_images) : null,
-          price: mediaFormData.price ? parseInt(mediaFormData.price) : 0,
-          agency: mediaFormData.agency || null,
-          favicon,
-          category: mediaFormData.category,
-          subcategory: mediaFormData.subcategory || null
-        });
-
-      if (error) throw error;
-
-      setMediaFormData({
-        name: '',
-        publication_format: 'Article',
-        google_index: 'Regular',
-        marks: 'No',
-        link: '',
-        publishing_time: '24h',
-        max_words: '',
-        max_images: '',
-        price: '',
-        agency: '',
-        category: 'Global',
-        subcategory: ''
-      });
-      setIsMediaDialogOpen(false);
-      fetchMediaSites();
+    const sheetId = extractSheetId(sheetUrl);
+    if (!sheetId) {
       toast({
-        title: "Media site added",
-        description: `${mediaFormData.name} has been added successfully`
+        title: "Invalid URL",
+        description: "Could not extract Sheet ID from the URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+      const response = await fetch(csvUrl);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch sheet. Make sure the sheet is publicly accessible.');
+      }
+      
+      const csv = await response.text();
+      const parsed = parseCSV(csv);
+      
+      if (parsed.length === 0) {
+        toast({
+          title: "No data found",
+          description: "The sheet appears to be empty or incorrectly formatted",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setImportPreview(parsed);
+      toast({
+        title: "Sheet loaded",
+        description: `Found ${parsed.length} media sites to import`
       });
     } catch (error) {
       toast({
-        title: "Failed to add media site",
-        description: error instanceof Error ? error.message : "Could not add the media site",
+        title: "Failed to fetch sheet",
+        description: error instanceof Error ? error.message : "Could not load the Google Sheet",
+        variant: "destructive"
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleImportSites = async () => {
+    if (importPreview.length === 0) return;
+
+    setIsSubmitting(true);
+    try {
+      const sitesToInsert = importPreview.map(row => {
+        // Parse subcategories - can be comma-separated
+        const subcategories = row['subcategory']?.split(',').map((s: string) => s.trim()).filter(Boolean);
+        const primarySubcategory = subcategories?.[0] || null;
+        
+        // Get the URL and generate favicon
+        let link = row['url'] || '';
+        if (link && !link.startsWith('http')) {
+          link = `https://${link}`;
+        }
+        
+        return {
+          name: row['title'] || '',
+          link,
+          price: parseInt(row['usd price']) || 0,
+          favicon: row['logo'] || getFaviconUrl(link),
+          publication_format: row['publication format'] || 'Article',
+          category: row['tab'] || 'Global',
+          subcategory: primarySubcategory,
+          agency: row['pr firm'] || null,
+          google_index: 'Regular',
+          marks: 'No',
+          publishing_time: '24h',
+          max_words: null,
+          max_images: null
+        };
+      }).filter(site => site.name && site.link);
+
+      if (sitesToInsert.length === 0) {
+        toast({
+          title: "No valid sites",
+          description: "No sites with valid name and URL found",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('media_sites')
+        .insert(sitesToInsert);
+
+      if (error) throw error;
+
+      setSheetUrl('');
+      setImportPreview([]);
+      setIsMediaDialogOpen(false);
+      fetchMediaSites();
+      toast({
+        title: "Import successful",
+        description: `${sitesToInsert.length} media sites have been added`
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to import sites",
+        description: error instanceof Error ? error.message : "Could not import media sites",
         variant: "destructive"
       });
     } finally {
@@ -968,190 +1040,112 @@ export function SitesView() {
         </DialogContent>
       </Dialog>
 
-      {/* Media Site Dialog */}
-      <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      {/* Media Site Import Dialog */}
+      <Dialog open={isMediaDialogOpen} onOpenChange={(open) => {
+        setIsMediaDialogOpen(open);
+        if (!open) {
+          setSheetUrl('');
+          setImportPreview([]);
+        }
+      }}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl">Add Media Site</DialogTitle>
+            <DialogTitle className="text-xl">Import Media Sites</DialogTitle>
             <DialogDescription>
-              Add a custom media site for manual publishing.
+              Paste a Google Sheet link to automatically import media sites.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleMediaSubmit} className="space-y-4 mt-4">
+          
+          <div className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="media-name">Media Name *</Label>
-              <Input 
-                id="media-name" 
-                placeholder="Forbes, TechCrunch, etc." 
-                value={mediaFormData.name} 
-                onChange={e => setMediaFormData({ ...mediaFormData, name: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="media-link">Link *</Label>
-              <Input 
-                id="media-link" 
-                type="url" 
-                placeholder="https://example.com" 
-                value={mediaFormData.link} 
-                onChange={e => setMediaFormData({ ...mediaFormData, link: e.target.value })} 
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Publication Format</Label>
-                <Select 
-                  value={mediaFormData.publication_format} 
-                  onValueChange={(value) => setMediaFormData({ ...mediaFormData, publication_format: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border">
-                    {PUBLICATION_FORMATS.map(format => (
-                      <SelectItem key={format} value={format}>{format}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Google Index</Label>
-                <Select 
-                  value={mediaFormData.google_index} 
-                  onValueChange={(value) => setMediaFormData({ ...mediaFormData, google_index: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border">
-                    {GOOGLE_INDEX_OPTIONS.map(opt => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Marks</Label>
-                <Select 
-                  value={mediaFormData.marks} 
-                  onValueChange={(value) => setMediaFormData({ ...mediaFormData, marks: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border">
-                    {MARKS_OPTIONS.map(opt => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Publishing Time</Label>
-                <Select 
-                  value={mediaFormData.publishing_time} 
-                  onValueChange={(value) => setMediaFormData({ ...mediaFormData, publishing_time: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border">
-                    {PUBLISHING_TIME_OPTIONS.map(opt => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="media-max-words">Max Words</Label>
+              <Label htmlFor="sheet-url">Google Sheet URL</Label>
+              <div className="flex gap-2">
                 <Input 
-                  id="media-max-words" 
-                  type="number" 
-                  placeholder="1000" 
-                  value={mediaFormData.max_words} 
-                  onChange={e => setMediaFormData({ ...mediaFormData, max_words: e.target.value })} 
+                  id="sheet-url" 
+                  placeholder="https://docs.google.com/spreadsheets/d/..." 
+                  value={sheetUrl}
+                  onChange={e => setSheetUrl(e.target.value)}
+                  className="flex-1"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="media-max-images">Max Images</Label>
-                <Input 
-                  id="media-max-images" 
-                  type="number" 
-                  placeholder="5" 
-                  value={mediaFormData.max_images} 
-                  onChange={e => setMediaFormData({ ...mediaFormData, max_images: e.target.value })} 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="media-price">Price ($)</Label>
-                <Input 
-                  id="media-price" 
-                  type="number" 
-                  placeholder="100" 
-                  value={mediaFormData.price} 
-                  onChange={e => setMediaFormData({ ...mediaFormData, price: e.target.value })} 
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="media-agency">Agency</Label>
-              <Input 
-                id="media-agency" 
-                placeholder="Agency name (optional)" 
-                value={mediaFormData.agency} 
-                onChange={e => setMediaFormData({ ...mediaFormData, agency: e.target.value })} 
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Category *</Label>
-                <Select 
-                  value={mediaFormData.category} 
-                  onValueChange={(value) => setMediaFormData({ ...mediaFormData, category: value, subcategory: '' })}
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={handleFetchSheet}
+                  disabled={isImporting || !sheetUrl}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border">
-                    {MEDIA_CATEGORIES.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {isImporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isImporting ? 'Loading...' : 'Load'}
+                </Button>
               </div>
-              {mediaFormData.category === 'Global' && (
-                <div className="space-y-2">
-                  <Label>Subcategory</Label>
-                  <Select 
-                    value={mediaFormData.subcategory} 
-                    onValueChange={(value) => setMediaFormData({ ...mediaFormData, subcategory: value })}
+              <p className="text-xs text-muted-foreground">
+                Make sure the Google Sheet is set to "Anyone with the link can view"
+              </p>
+            </div>
+
+            {importPreview.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Preview ({importPreview.length} sites found)</Label>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => setImportPreview([])}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select subcategory" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border border-border">
-                      {GLOBAL_SUBCATEGORIES.map(sub => (
-                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    Clear
+                  </Button>
                 </div>
-              )}
-            </div>
+                <div className="border border-border rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 sticky top-0">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-medium">Name</th>
+                        <th className="px-3 py-2 text-left font-medium">Category</th>
+                        <th className="px-3 py-2 text-left font-medium">Subcategory</th>
+                        <th className="px-3 py-2 text-right font-medium">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {importPreview.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-muted/30">
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              {row['logo'] && (
+                                <img 
+                                  src={row['logo']} 
+                                  alt="" 
+                                  className="h-4 w-4 object-contain"
+                                  onError={(e) => e.currentTarget.style.display = 'none'}
+                                />
+                              )}
+                              <span className="truncate max-w-[200px]">{row['title']}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 text-muted-foreground">{row['tab'] || 'Global'}</td>
+                          <td className="px-3 py-2 text-muted-foreground">{row['subcategory'] || '-'}</td>
+                          <td className="px-3 py-2 text-right">${row['usd price'] || '0'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setIsMediaDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="accent" disabled={isSubmitting}>
+              <Button 
+                type="button" 
+                variant="accent" 
+                disabled={isSubmitting || importPreview.length === 0}
+                onClick={handleImportSites}
+              >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? 'Adding...' : 'Add Media Site'}
+                {isSubmitting ? 'Importing...' : `Import ${importPreview.length} Sites`}
               </Button>
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
