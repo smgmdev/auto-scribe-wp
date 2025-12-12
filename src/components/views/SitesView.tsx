@@ -44,6 +44,7 @@ interface MediaSite {
   category: string;
   subcategory: string | null;
   about: string | null;
+  country: string | null;
 }
 
 const MEDIA_CATEGORIES = ['Global', 'Focused', 'Epic', 'Agencies/People'];
@@ -108,6 +109,7 @@ export function SitesView() {
     name: '',
     logo: '',
     link: '',
+    country: '',
     about: ''
   });
 
@@ -560,6 +562,7 @@ export function SitesView() {
             name: agencyFormData.name.trim(),
             link: agencyFormData.link.trim(),
             favicon: faviconUrl,
+            country: agencyFormData.country.trim() || null,
             about: agencyFormData.about.trim() || null
           })
           .eq('id', editingAgencyId)
@@ -581,6 +584,7 @@ export function SitesView() {
             name: agencyFormData.name.trim(),
             link: agencyFormData.link.trim(),
             favicon: faviconUrl,
+            country: agencyFormData.country.trim() || null,
             about: agencyFormData.about.trim() || null,
             category: 'Agencies/People',
             publication_format: 'Article',
@@ -601,7 +605,7 @@ export function SitesView() {
         });
       }
       
-      setAgencyFormData({ name: '', logo: '', link: '', about: '' });
+      setAgencyFormData({ name: '', logo: '', link: '', country: '', about: '' });
       setEditingAgencyId(null);
       setIsAgencyDialogOpen(false);
     } catch (error) {
@@ -621,6 +625,7 @@ export function SitesView() {
       name: site.name,
       logo: site.favicon || '',
       link: site.link,
+      country: site.country || '',
       about: site.about || ''
     });
     setIsAgencyDialogOpen(true);
@@ -1114,7 +1119,12 @@ export function SitesView() {
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {site.country && (
+                <Badge variant="outline" className="text-xs">
+                  {site.country}
+                </Badge>
+              )}
               {isAdmin && (
                 <>
                   <Button 
@@ -1653,7 +1663,7 @@ export function SitesView() {
       <Dialog open={isAgencyDialogOpen} onOpenChange={(open) => {
         setIsAgencyDialogOpen(open);
         if (!open) {
-          setAgencyFormData({ name: '', logo: '', link: '', about: '' });
+          setAgencyFormData({ name: '', logo: '', link: '', country: '', about: '' });
           setEditingAgencyId(null);
         }
       }}>
@@ -1700,6 +1710,16 @@ export function SitesView() {
                 value={agencyFormData.link}
                 onChange={e => setAgencyFormData(prev => ({ ...prev, link: e.target.value }))}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="agency-country">Country</Label>
+              <Input 
+                id="agency-country" 
+                placeholder="e.g. United States, UAE, etc." 
+                value={agencyFormData.country}
+                onChange={e => setAgencyFormData(prev => ({ ...prev, country: e.target.value }))}
               />
             </div>
 
