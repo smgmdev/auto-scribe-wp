@@ -5,6 +5,7 @@ import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
 import { isYesterday, format } from 'date-fns';
 function formatRelativeTime(dateInput: string | Date): string {
@@ -75,11 +76,16 @@ export function DashboardView() {
   };
   return <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">
-          Dashboard
-        </h1>
-        <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Dashboard
+          </h1>
+          <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
+        </div>
+        {!isAdmin && (
+          <Badge className="bg-black text-white border-black hover:bg-black">Regular user</Badge>
+        )}
       </div>
 
       {/* Stats Grid */}
