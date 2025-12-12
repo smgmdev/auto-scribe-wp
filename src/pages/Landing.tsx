@@ -150,7 +150,10 @@ const Landing = () => {
       .filter(site => site.category === activeTab)
       .forEach(site => {
         if (site.subcategory) {
-          subcats.add(site.subcategory);
+          // Handle comma-separated subcategories
+          site.subcategory.split(',').map(s => s.trim()).forEach(subcat => {
+            if (subcat) subcats.add(subcat);
+          });
         }
       });
     return Array.from(subcats);
@@ -179,16 +182,19 @@ const Landing = () => {
   }, [mediaSites, activeTab, activeSubcategory, searchQuery]);
 
   const chinaSites = useMemo(() => {
-    return mediaSites.filter(site => 
-      site.subcategory?.toLowerCase() === 'china'
-    );
+    return mediaSites.filter(site => {
+      if (!site.subcategory) return false;
+      const subcats = site.subcategory.toLowerCase().split(',').map(s => s.trim());
+      return subcats.includes('china');
+    });
   }, [mediaSites]);
 
   const businessSites = useMemo(() => {
-    return mediaSites.filter(site => 
-      site.subcategory?.toLowerCase() === 'business and finance' ||
-      site.subcategory?.toLowerCase() === 'business'
-    );
+    return mediaSites.filter(site => {
+      if (!site.subcategory) return false;
+      const subcats = site.subcategory.toLowerCase().split(',').map(s => s.trim());
+      return subcats.includes('business and finance') || subcats.includes('business');
+    });
   }, [mediaSites]);
 
   const extractDomain = (url: string) => {
