@@ -441,7 +441,7 @@ export function SitesView() {
         const category = row['tab'] || row['category'] || 'Global';
         const googleIndex = row['google index'] || row['index'] || 'Regular';
         const marks = row['marks'] || row['sponsor marks'] || 'No';
-        const publishingTime = row['publishing time'] || row['time'] || null;
+        const publishingTime = row['publishing time'] || row['time'] || '24h';
         const maxWords = row['max words'] ? parseInt(row['max words']) : null;
         const maxImages = row['max images'] ? parseInt(row['max images']) : null;
         
