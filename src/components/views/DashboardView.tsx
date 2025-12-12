@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Globe, Newspaper, TrendingUp, ExternalLink, Plus, FileText } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
+import { supabase } from '@/integrations/supabase/client';
 import { isYesterday, format } from 'date-fns';
+
 function formatRelativeTime(dateInput: string | Date): string {
   const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
   const now = new Date();
@@ -24,6 +27,7 @@ function formatRelativeTime(dateInput: string | Date): string {
   }
   return format(date, 'MMM d, yyyy');
 }
+
 const stats = [{
   label: 'Media Sites',
   icon: Globe,
@@ -41,6 +45,7 @@ const stats = [{
   icon: TrendingUp,
   key: 'weekly'
 }];
+
 export function DashboardView() {
   const {
     setCurrentView
@@ -53,6 +58,25 @@ export function DashboardView() {
     articles
   } = useArticles();
   const { sites } = useSites();
+  const [isAgency, setIsAgency] = useState(false);
+
+  useEffect(() => {
+    const fetchAgencyStatus = async () => {
+      if (!user || isAdmin) return;
+      
+      const { data } = await supabase
+        .from('agency_applications')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      setIsAgency(!!data);
+    };
+
+    fetchAgencyStatus();
+  }, [user, isAdmin]);
+
   const getSiteName = (siteId: string | undefined): string | null => {
     if (!siteId) return null;
     const site = sites.find(s => s.id === siteId);
@@ -84,7 +108,9 @@ export function DashboardView() {
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {!isAdmin && (
-          <Badge className="bg-black text-white border-black hover:bg-black">Regular user</Badge>
+          <Badge className="bg-black text-white border-black hover:bg-black">
+            {isAgency ? 'Agency' : 'Regular user'}
+          </Badge>
         )}
       </div>
 
