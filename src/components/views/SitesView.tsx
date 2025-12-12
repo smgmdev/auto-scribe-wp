@@ -1960,13 +1960,13 @@ export function SitesView() {
                 )}
                 
                 {selectedMediaSite.category && selectedMediaSite.category !== 'Agencies/People' && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Category</p>
                       <p className="text-foreground">{selectedMediaSite.category}</p>
                     </div>
                     {selectedMediaSite.subcategory && (
-                      <div className="text-right">
+                      <div>
                         <p className="text-sm text-muted-foreground">Subcategory</p>
                         <p className="text-foreground">{selectedMediaSite.subcategory}</p>
                       </div>
