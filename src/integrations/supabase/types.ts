@@ -136,6 +136,7 @@ export type Database = {
           about: string | null
           agency: string | null
           category: string
+          country: string | null
           created_at: string
           favicon: string | null
           google_index: string
@@ -155,6 +156,7 @@ export type Database = {
           about?: string | null
           agency?: string | null
           category?: string
+          country?: string | null
           created_at?: string
           favicon?: string | null
           google_index?: string
@@ -174,6 +176,7 @@ export type Database = {
           about?: string | null
           agency?: string | null
           category?: string
+          country?: string | null
           created_at?: string
           favicon?: string | null
           google_index?: string
