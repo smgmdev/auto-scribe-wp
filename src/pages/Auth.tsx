@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,12 @@ const authSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
+interface LocationState {
+  redirectTo?: string;
+  targetView?: string;
+  targetSubcategory?: string;
+}
+
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,13 +30,22 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  const locationState = location.state as LocationState | null;
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      // Pass along the target view and subcategory state when redirecting
+      navigate('/dashboard', { 
+        state: { 
+          targetView: locationState?.targetView,
+          targetSubcategory: locationState?.targetSubcategory 
+        } 
+      });
     }
-  }, [user, navigate]);
+  }, [user, navigate, locationState]);
 
   // Show loading screen while checking initial auth state
   if (loading) {
