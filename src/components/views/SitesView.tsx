@@ -1942,8 +1942,8 @@ export function SitesView() {
                     {/* Agency-specific badges */}
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="outline">Agency/People</Badge>
-                      {selectedMediaSite.country && (
-                        <Badge variant="secondary">{selectedMediaSite.country}</Badge>
+                      {(selectedMediaSite as any).country && (
+                        <Badge variant="secondary">{(selectedMediaSite as any).country}</Badge>
                       )}
                     </div>
 
