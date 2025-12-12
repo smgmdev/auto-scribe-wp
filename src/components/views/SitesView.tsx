@@ -66,7 +66,7 @@ const MARKS_OPTIONS = ['Yes', 'No', 'Custom Marks'];
 const PUBLISHING_TIME_OPTIONS = ['24h', 'within 3 days', 'within 7 days', 'within 14 days', 'within 3 weeks', '4 weeks', '5 weeks'];
 
 export function SitesView() {
-  const { sites, loading: sitesLoading, addSite, removeSite } = useSites();
+  const { sites, loading: sitesLoading, addSite, removeSite, refetchSites } = useSites();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('instant');
@@ -701,13 +701,24 @@ export function SitesView() {
 
       if (error) throw error;
 
-      window.location.reload();
+      // Update local sites state without refresh
+      const updatedSites = sites.map(site => 
+        site.id === editingLogoSiteId 
+          ? { ...site, favicon: faviconUrl || undefined }
+          : site
+      );
+      // Force re-render by triggering a refetch
+      await refetchSites();
 
       toast({
         title: 'Logo updated',
         description: 'The site logo has been updated successfully.'
       });
       setIsLogoDialogOpen(false);
+      setEditingLogoSiteId(null);
+      setLogoUrl('');
+      setLogoFile(null);
+      setLogoPreview(null);
     } catch (error) {
       toast({
         title: 'Failed to update logo',
