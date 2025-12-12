@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { CreditDisplay } from '@/components/credits/CreditDisplay';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 const getNavigation = (isAdmin: boolean) => {
   const base = [{
@@ -75,10 +77,12 @@ const getNavigation = (isAdmin: boolean) => {
   }
   return base;
 };
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
 export function Sidebar({
   isOpen,
   onClose
@@ -89,14 +93,51 @@ export function Sidebar({
   } = useAppStore();
   const {
     signOut,
-    isAdmin
+    isAdmin,
+    user
   } = useAuth();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
   const navigation = getNavigation(isAdmin);
+
+  useEffect(() => {
+    const fetchApplicationStatus = async () => {
+      if (!user || isAdmin) return;
+      
+      const { data } = await supabase
+        .from('agency_applications')
+        .select('status')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (data) {
+        setApplicationStatus(data.status);
+      }
+    };
+
+    fetchApplicationStatus();
+  }, [user, isAdmin]);
+
   const handleNavClick = (viewId: string) => {
     setCurrentView(viewId as typeof currentView);
     onClose();
   };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="ml-auto bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">Pending</Badge>;
+      case 'approved':
+        return <Badge className="ml-auto bg-green-500/20 text-green-400 border-green-500/30 text-xs">Approved</Badge>;
+      case 'rejected':
+        return <Badge className="ml-auto bg-red-500/20 text-red-400 border-red-500/30 text-xs">Rejected</Badge>;
+      default:
+        return null;
+    }
+  };
+
   return <>
       <aside className={cn("fixed left-0 top-0 z-50 h-screen w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
     // Desktop: always visible
@@ -136,9 +177,11 @@ export function Sidebar({
             {navigation.map(item => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
+            const showStatusBadge = item.id === 'agency-application' && applicationStatus;
             return <Button key={item.id} variant="ghost" className={cn("w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", isActive && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(item.id)}>
-                  <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
-                  {item.label}
+                  <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
+                  <span className="truncate">{item.label}</span>
+                  {showStatusBadge && getStatusBadge(applicationStatus)}
                 </Button>;
           })}
           </nav>
