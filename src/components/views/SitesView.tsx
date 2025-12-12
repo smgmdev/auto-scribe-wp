@@ -917,16 +917,16 @@ export function SitesView() {
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Badge variant="secondary" className="text-xs">
-                {site.publication_format}
-              </Badge>
+            <div className="flex items-center gap-3 flex-shrink-0">
               {site.price > 0 && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 min-w-[60px] justify-center">
                   <Coins className="h-3 w-3" />
                   ${site.price}
                 </Badge>
               )}
+              <Badge variant="outline" className="text-xs min-w-[60px] text-center justify-center">
+                {site.publication_format}
+              </Badge>
               {isAdmin && (
                 <Button 
                   variant="ghost" 
