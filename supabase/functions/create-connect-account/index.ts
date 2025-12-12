@@ -106,7 +106,7 @@ serve(async (req) => {
       const resend = new Resend(resendKey);
       try {
         await resend.emails.send({
-          from: "Arcana Mace <onboarding@resend.dev>",
+          from: "Arcana Mace <noreply@arcanamace.com>",
           to: [email],
           subject: `${agency_name} - Complete Your Stripe Connect Setup`,
           html: `
