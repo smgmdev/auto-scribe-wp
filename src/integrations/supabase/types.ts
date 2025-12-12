@@ -134,6 +134,7 @@ export type Database = {
       media_sites: {
         Row: {
           agency: string | null
+          category: string
           created_at: string
           favicon: string | null
           google_index: string
@@ -146,10 +147,12 @@ export type Database = {
           price: number
           publication_format: string
           publishing_time: string
+          subcategory: string | null
           updated_at: string
         }
         Insert: {
           agency?: string | null
+          category?: string
           created_at?: string
           favicon?: string | null
           google_index?: string
@@ -162,10 +165,12 @@ export type Database = {
           price?: number
           publication_format?: string
           publishing_time?: string
+          subcategory?: string | null
           updated_at?: string
         }
         Update: {
           agency?: string | null
+          category?: string
           created_at?: string
           favicon?: string | null
           google_index?: string
@@ -178,6 +183,7 @@ export type Database = {
           price?: number
           publication_format?: string
           publishing_time?: string
+          subcategory?: string | null
           updated_at?: string
         }
         Relationships: []

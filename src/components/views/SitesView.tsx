@@ -41,7 +41,12 @@ interface MediaSite {
   price: number;
   agency: string | null;
   favicon: string | null;
+  category: string;
+  subcategory: string | null;
 }
+
+const MEDIA_CATEGORIES = ['Global', 'Focused', 'Epic', 'Agencies/People'];
+const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
 
 const TAG_COLORS = [
   { name: 'Green', value: '#22c55e' },
@@ -64,6 +69,8 @@ export function SitesView() {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('instant');
+  const [activeMediaCategory, setActiveMediaCategory] = useState('Global');
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,7 +117,9 @@ export function SitesView() {
     max_words: '',
     max_images: '',
     price: '',
-    agency: ''
+    agency: '',
+    category: 'Global',
+    subcategory: ''
   });
 
   useEffect(() => {
@@ -303,7 +312,9 @@ export function SitesView() {
           max_images: mediaFormData.max_images ? parseInt(mediaFormData.max_images) : null,
           price: mediaFormData.price ? parseInt(mediaFormData.price) : 0,
           agency: mediaFormData.agency || null,
-          favicon
+          favicon,
+          category: mediaFormData.category,
+          subcategory: mediaFormData.subcategory || null
         });
 
       if (error) throw error;
@@ -318,7 +329,9 @@ export function SitesView() {
         max_words: '',
         max_images: '',
         price: '',
-        agency: ''
+        agency: '',
+        category: 'Global',
+        subcategory: ''
       });
       setIsMediaDialogOpen(false);
       fetchMediaSites();
@@ -788,28 +801,86 @@ export function SitesView() {
                 <p className="mt-4 text-sm text-muted-foreground">Loading media sites...</p>
               </CardContent>
             </Card>
-          ) : mediaSites.length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <Globe className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No media sites added</h3>
-                <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-                  {isAdmin 
-                    ? "Add custom media sites for manual publishing"
-                    : "No custom media sites available yet."
-                  }
-                </p>
-                {isAdmin && (
-                  <Button variant="accent" className="mt-6" onClick={() => setIsMediaDialogOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Media Site
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
           ) : (
-            <div className="space-y-2">
-              {mediaSites.map((site, index) => renderMediaSiteCard(site, index))}
+            <div className="space-y-4">
+              {/* Category Tabs */}
+              <Tabs value={activeMediaCategory} onValueChange={(val) => {
+                setActiveMediaCategory(val);
+                setActiveSubcategory(null);
+              }}>
+                <TabsList className="w-full max-w-lg">
+                  {MEDIA_CATEGORIES.map(cat => (
+                    <TabsTrigger key={cat} value={cat} className="flex-1">{cat}</TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {MEDIA_CATEGORIES.map(category => (
+                  <TabsContent key={category} value={category} className="mt-4">
+                    {/* Subcategories for Global */}
+                    {category === 'Global' && (
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        <Button
+                          variant={activeSubcategory === null ? "secondary" : "ghost"}
+                          size="sm"
+                          onClick={() => setActiveSubcategory(null)}
+                        >
+                          All
+                        </Button>
+                        {GLOBAL_SUBCATEGORIES.map(sub => (
+                          <Button
+                            key={sub}
+                            variant={activeSubcategory === sub ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => setActiveSubcategory(sub)}
+                          >
+                            {sub}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Filter and render media sites */}
+                    {(() => {
+                      const filtered = mediaSites.filter(site => {
+                        if (site.category !== category) return false;
+                        if (category === 'Global' && activeSubcategory) {
+                          return site.subcategory === activeSubcategory;
+                        }
+                        return true;
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <Card className="border-dashed border-2">
+                            <CardContent className="flex flex-col items-center justify-center py-16">
+                              <Globe className="h-12 w-12 text-muted-foreground/50" />
+                              <h3 className="mt-4 text-xl font-semibold">No media sites</h3>
+                              <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
+                                {isAdmin 
+                                  ? `No sites in ${category}${activeSubcategory ? ` > ${activeSubcategory}` : ''} yet`
+                                  : "No custom media sites available in this category."
+                                }
+                              </p>
+                              {isAdmin && (
+                                <Button variant="accent" className="mt-6" onClick={() => setIsMediaDialogOpen(true)}>
+                                  <Plus className="mr-2 h-4 w-4" />
+                                  Add Media Site
+                                </Button>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      }
+
+                      return (
+                        <div className="space-y-2">
+                          {filtered.map((site, index) => renderMediaSiteCard(site, index))}
+                        </div>
+                      );
+                    })()}
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
           )}
         </TabsContent>
@@ -1034,6 +1105,42 @@ export function SitesView() {
                 value={mediaFormData.agency} 
                 onChange={e => setMediaFormData({ ...mediaFormData, agency: e.target.value })} 
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category *</Label>
+                <Select 
+                  value={mediaFormData.category} 
+                  onValueChange={(value) => setMediaFormData({ ...mediaFormData, category: value, subcategory: '' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border">
+                    {MEDIA_CATEGORIES.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {mediaFormData.category === 'Global' && (
+                <div className="space-y-2">
+                  <Label>Subcategory</Label>
+                  <Select 
+                    value={mediaFormData.subcategory} 
+                    onValueChange={(value) => setMediaFormData({ ...mediaFormData, subcategory: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subcategory" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border border-border">
+                      {GLOBAL_SUBCATEGORIES.map(sub => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setIsMediaDialogOpen(false)}>
