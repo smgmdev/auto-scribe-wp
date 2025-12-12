@@ -111,11 +111,14 @@ export function Sidebar({
     setExpandedMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
   };
 
+  const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
+
   useEffect(() => {
     const fetchApplicationStatus = async () => {
       if (!user || isAdmin) return;
       
-      const { data } = await supabase
+      // Check application status
+      const { data: appData } = await supabase
         .from('agency_applications')
         .select('status')
         .eq('user_id', user.id)
@@ -123,8 +126,19 @@ export function Sidebar({
         .limit(1)
         .maybeSingle();
       
-      if (data) {
-        setApplicationStatus(data.status);
+      if (appData) {
+        setApplicationStatus(appData.status);
+      }
+
+      // Check if user has completed agency onboarding
+      const { data: agencyData } = await supabase
+        .from('agency_payouts')
+        .select('onboarding_complete')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (agencyData?.onboarding_complete) {
+        setIsAgencyOnboarded(true);
       }
     };
 
@@ -255,8 +269,8 @@ export function Sidebar({
 
           {/* Account & Sign Out */}
           <div className="border-t border-sidebar-border p-4 space-y-1">
-            {/* Upgrade to Agency - Only for non-admin users who haven't been approved */}
-            {!isAdmin && applicationStatus !== 'approved' && (
+            {/* Upgrade to Agency - Only for non-admin users who haven't completed agency onboarding */}
+            {!isAdmin && !isAgencyOnboarded && (
               <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent border border-[#3872e0]/50", currentView === 'agency-application' && "bg-sidebar-accent text-[#3872e0] font-medium border-[#3872e0]")} onClick={() => handleNavClick('agency-application')}>
                 <Briefcase className={cn("h-5 w-5 flex-shrink-0 text-[#3872e0]", currentView === 'agency-application' && "text-[#3872e0]")} />
                 <span className="truncate">Upgrade to Agency</span>

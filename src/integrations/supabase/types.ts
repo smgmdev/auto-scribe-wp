@@ -78,6 +78,7 @@ export type Database = {
           password_hash: string | null
           stripe_account_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           agency_name: string
@@ -91,6 +92,7 @@ export type Database = {
           password_hash?: string | null
           stripe_account_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           agency_name?: string
@@ -104,6 +106,7 @@ export type Database = {
           password_hash?: string | null
           stripe_account_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

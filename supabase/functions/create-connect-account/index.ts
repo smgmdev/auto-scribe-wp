@@ -48,8 +48,8 @@ serve(async (req) => {
       throw new Error("Admin access required");
     }
 
-    const { agency_name, email, commission_percentage, country } = await req.json();
-    logStep("Creating Connect account for agency", { agency_name, email, country });
+    const { agency_name, email, commission_percentage, country, user_id } = await req.json();
+    logStep("Creating Connect account for agency", { agency_name, email, country, user_id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -66,32 +66,39 @@ serve(async (req) => {
       business_type: "company",
       metadata: {
         agency_name: agency_name,
+        user_id: user_id || "",
       },
     });
 
     logStep("Stripe account created", { accountId: account.id });
 
-    // Create onboarding link
+    // Create onboarding link - redirect back to user's dashboard
     const origin = req.headers.get("origin") || "http://localhost:5173";
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${origin}/dashboard?tab=agencies&refresh=true`,
-      return_url: `${origin}/dashboard?tab=agencies&onboarding=complete`,
+      refresh_url: `${origin}/dashboard?onboarding=refresh`,
+      return_url: `${origin}/dashboard?onboarding=complete`,
       type: "account_onboarding",
     });
 
     logStep("Onboarding link created", { url: accountLink.url });
 
-    // Save to database
+    // Save to database with user_id if provided
+    const insertData: any = {
+      agency_name,
+      email,
+      stripe_account_id: account.id,
+      commission_percentage: commission_percentage || 10,
+      invite_sent_at: new Date().toISOString(),
+    };
+    
+    if (user_id) {
+      insertData.user_id = user_id;
+    }
+
     const { error: dbError } = await supabaseClient
       .from("agency_payouts")
-      .insert({
-        agency_name,
-        email,
-        stripe_account_id: account.id,
-        commission_percentage: commission_percentage || 10,
-        invite_sent_at: new Date().toISOString(),
-      });
+      .insert(insertData);
 
     if (dbError) {
       logStep("Database error", { error: dbError.message });

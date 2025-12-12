@@ -69,24 +69,32 @@ export function AdminApplicationsView() {
 
       if (updateError) throw updateError;
 
-      // If approved, create agency_payout entry
+      // If approved, create agency_payout entry with user_id and send Stripe Connect invite
       if (status === 'approved') {
-        const { error: agencyError } = await supabase
-          .from('agency_payouts')
-          .insert({
+        // Create Stripe Connect account and agency_payout via edge function
+        const response = await supabase.functions.invoke('create-connect-account', {
+          body: {
             agency_name: selectedApp.agency_name,
             email: selectedApp.email,
             commission_percentage: 10,
-            onboarding_complete: false
-          });
+            country: selectedApp.country,
+            user_id: selectedApp.user_id
+          }
+        });
 
-        if (agencyError) throw agencyError;
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+
+        if (response.data?.error) {
+          throw new Error(response.data.error);
+        }
       }
 
       toast({
         title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
         description: status === 'approved' 
-          ? 'Agency has been created. Send onboarding invite next.'
+          ? 'Stripe Connect invite sent to user.'
           : 'The applicant has been notified.',
         className: status === 'approved' ? 'bg-green-600 text-white border-green-600' : undefined
       });

@@ -62,6 +62,7 @@ interface AgencyPayout {
   email: string | null;
   invite_sent_at: string | null;
   created_at: string;
+  user_id: string | null;
 }
 
 export function AdminAgenciesView() {
