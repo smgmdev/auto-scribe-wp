@@ -13,7 +13,7 @@ interface AppState {
   setEditingArticle: (article: Article | null) => void;
   
   // UI State
-  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications';
+  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application';
   setCurrentView: (view: AppState['currentView']) => void;
   
   // Target tab and subcategory for Sites view navigation

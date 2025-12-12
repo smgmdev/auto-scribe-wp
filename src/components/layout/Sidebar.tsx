@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { CreditDisplay } from '@/components/credits/CreditDisplay';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
+
 const getNavigation = (isAdmin: boolean) => {
   const base = [{
     id: 'dashboard',
@@ -36,9 +37,13 @@ const getNavigation = (isAdmin: boolean) => {
     id: 'my-requests',
     label: 'My Requests',
     icon: MessageSquare
+  }, {
+    id: 'agency-application',
+    label: 'Apply for Agency',
+    icon: Briefcase
   }];
   if (isAdmin) {
-    return [...base.filter(item => item.id !== 'orders' && item.id !== 'my-requests'), {
+    return [...base.filter(item => item.id !== 'orders' && item.id !== 'my-requests' && item.id !== 'agency-application'), {
       id: 'admin-orders',
       label: 'Order Management',
       icon: Package
