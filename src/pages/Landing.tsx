@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, Coins, ExternalLink, ChevronRight } from 'lucide-react';
+import { Search, Globe, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,8 @@ interface MediaSite {
 
 type SelectedSite = WPSite | MediaSite | null;
 
+const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
+
 const Landing = () => {
   const navigate = useNavigate();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
@@ -42,6 +44,8 @@ const Landing = () => {
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
   const [selectedSiteType, setSelectedSiteType] = useState<'wp' | 'media' | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [activeTab, setActiveTab] = useState('Global');
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,41 +111,37 @@ const Landing = () => {
     );
   }, [wpSites, searchQuery]);
 
-  // Get unique categories and subcategories
-  const categories = useMemo(() => {
-    const cats = new Map<string, Set<string>>();
-    mediaSites.forEach(site => {
-      if (!cats.has(site.category)) {
-        cats.set(site.category, new Set());
-      }
-      if (site.subcategory) {
-        cats.get(site.category)?.add(site.subcategory);
-      }
-    });
-    return cats;
-  }, [mediaSites]);
+  // Get subcategories for active tab
+  const subcategories = useMemo(() => {
+    const subcats = new Set<string>();
+    mediaSites
+      .filter(site => site.category === activeTab)
+      .forEach(site => {
+        if (site.subcategory) {
+          subcats.add(site.subcategory);
+        }
+      });
+    return Array.from(subcats);
+  }, [mediaSites, activeTab]);
 
-  // Filter media sites by search
-  const searchedMediaSites = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
-    return mediaSites.filter(site => 
-      site.name.toLowerCase().includes(query) ||
-      site.link.toLowerCase().includes(query) ||
-      site.category?.toLowerCase().includes(query) ||
-      site.subcategory?.toLowerCase().includes(query)
-    ).slice(0, 5);
-  }, [mediaSites, searchQuery]);
-
-  // Filter WP sites by search for dropdown
-  const searchedWpSites = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
-    return wpSites.filter(site => 
-      site.name.toLowerCase().includes(query) ||
-      site.url.toLowerCase().includes(query)
-    ).slice(0, 3);
-  }, [wpSites, searchQuery]);
+  // Filter media sites for dropdown based on tab and subcategory
+  const dropdownMediaSites = useMemo(() => {
+    let filtered = mediaSites.filter(site => site.category === activeTab);
+    
+    if (activeSubcategory) {
+      filtered = filtered.filter(site => site.subcategory === activeSubcategory);
+    }
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(site => 
+        site.name.toLowerCase().includes(query) ||
+        site.link.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
+  }, [mediaSites, activeTab, activeSubcategory, searchQuery]);
 
   const chinaSites = useMemo(() => {
     const sites = mediaSites.filter(site => 
@@ -182,13 +182,9 @@ const Landing = () => {
     setShowDropdown(false);
   };
 
-  const handleCategoryClick = (category: string, subcategory?: string) => {
-    if (subcategory) {
-      setSearchQuery(subcategory);
-    } else {
-      setSearchQuery(category);
-    }
-    setShowDropdown(false);
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setActiveSubcategory(null);
   };
 
   const renderWPSiteCard = (site: WPSite) => (
@@ -281,109 +277,79 @@ const Landing = () => {
 
   const renderSearchDropdown = () => (
     <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
-      <ScrollArea className="max-h-[400px]">
-        {/* Categories Section */}
-        <div className="p-3 border-b border-border">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-            Categories
-          </p>
-          <div className="space-y-1">
-            {Array.from(categories.entries()).map(([category, subcats]) => (
-              <div key={category}>
-                <button
-                  onClick={() => handleCategoryClick(category)}
-                  className="flex items-center justify-between w-full px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors"
-                >
-                  <span>{category}</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </button>
-                {subcats.size > 0 && (
-                  <div className="ml-4 space-y-0.5">
-                    {Array.from(subcats).map(subcat => (
-                      <button
-                        key={subcat}
-                        onClick={() => handleCategoryClick(category, subcat)}
-                        className="flex items-center w-full px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
-                      >
-                        {subcat}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+      {/* Category Tabs */}
+      <div className="border-b border-border">
+        <div className="flex gap-1 px-4 pt-3">
+          {CATEGORY_TABS.map(tab => (
+            <button
+              key={tab}
+              onClick={() => handleTabChange(tab)}
+              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                activeTab === tab
+                  ? 'text-foreground border-accent'
+                  : 'text-muted-foreground border-transparent hover:text-foreground'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Subcategory Pills */}
+      {subcategories.length > 0 && (
+        <div className="px-4 py-3 border-b border-border">
+          <div className="flex flex-wrap gap-2">
+            {subcategories.map(subcat => (
+              <button
+                key={subcat}
+                onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
+                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                  activeSubcategory === subcat
+                    ? 'bg-accent text-accent-foreground border-accent'
+                    : 'bg-muted/50 text-foreground border-border hover:bg-muted'
+                }`}
+              >
+                {subcat}
+              </button>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Real-time Search Results */}
-        {searchQuery.trim() && (searchedMediaSites.length > 0 || searchedWpSites.length > 0) && (
-          <div className="p-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-              Search Results
-            </p>
-            
-            {searchedWpSites.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs text-muted-foreground mb-1">WordPress Sites</p>
-                {searchedWpSites.map(site => (
-                  <button
-                    key={site.id}
-                    onClick={() => handleSiteClick(site, 'wp')}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted rounded-lg transition-colors"
-                  >
-                    <img
-                      src={getFaviconUrl(site.url)}
-                      alt={site.name}
-                      className="h-8 w-8 rounded-lg bg-muted object-contain"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{site.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{extractDomain(site.url)}</p>
-                    </div>
-                    <Badge variant="outline" className="text-xs text-accent border-accent/30">
-                      {site.credits_required} Credits
-                    </Badge>
-                  </button>
-                ))}
-              </div>
-            )}
-            
-            {searchedMediaSites.length > 0 && (
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Global Library</p>
-                {searchedMediaSites.map(site => (
-                  <button
-                    key={site.id}
-                    onClick={() => handleSiteClick(site, 'media')}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted rounded-lg transition-colors"
-                  >
-                    <img
-                      src={site.favicon || getFaviconUrl(site.link)}
-                      alt={site.name}
-                      className="h-8 w-8 rounded-lg bg-muted object-contain"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{site.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{site.subcategory || site.category}</p>
-                    </div>
-                    {site.price > 0 && (
-                      <Badge variant="outline" className="text-xs text-accent border-accent/30">
-                        ${site.price}
-                      </Badge>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* No Results */}
-        {searchQuery.trim() && searchedMediaSites.length === 0 && searchedWpSites.length === 0 && (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            No results found for "{searchQuery}"
-          </div>
-        )}
+      {/* Media Sites List */}
+      <ScrollArea className="max-h-[350px]">
+        <div className="py-2">
+          {dropdownMediaSites.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No media outlets found
+            </div>
+          ) : (
+            dropdownMediaSites.map(site => (
+              <button
+                key={site.id}
+                onClick={() => handleSiteClick(site, 'media')}
+                className="flex items-center gap-4 w-full px-4 py-3 text-left hover:bg-muted transition-colors"
+              >
+                <img
+                  src={site.favicon || getFaviconUrl(site.link)}
+                  alt={site.name}
+                  className="h-12 w-12 rounded-xl bg-muted object-contain flex-shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground truncate">{site.name}</p>
+                  <p className="text-sm text-accent truncate">{extractDomain(site.link)}</p>
+                </div>
+                <span className="text-sm font-medium text-foreground flex-shrink-0">
+                  {site.price} USDT
+                </span>
+              </button>
+            ))
+          )}
+        </div>
       </ScrollArea>
     </div>
   );
@@ -529,7 +495,7 @@ const Landing = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Price</p>
                   <Badge variant="outline" className="text-accent border-accent/30">
-                    ${(selectedSite as MediaSite).price}
+                    {(selectedSite as MediaSite).price} USDT
                   </Badge>
                 </div>
                 <div>
