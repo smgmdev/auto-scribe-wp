@@ -240,7 +240,7 @@ const Landing = () => {
       </div>
       {site.price > 0 && (
         <Badge variant="outline" className="text-xs text-accent border-accent/30 flex-shrink-0">
-          ${site.price}
+          {site.price} USD
         </Badge>
       )}
     </div>
