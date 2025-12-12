@@ -22,7 +22,9 @@ export type Database = {
           email: string | null
           id: string
           invite_sent_at: string | null
+          last_login_at: string | null
           onboarding_complete: boolean
+          password_hash: string | null
           stripe_account_id: string | null
           updated_at: string
         }
@@ -33,7 +35,9 @@ export type Database = {
           email?: string | null
           id?: string
           invite_sent_at?: string | null
+          last_login_at?: string | null
           onboarding_complete?: boolean
+          password_hash?: string | null
           stripe_account_id?: string | null
           updated_at?: string
         }
@@ -44,7 +48,9 @@ export type Database = {
           email?: string | null
           id?: string
           invite_sent_at?: string | null
+          last_login_at?: string | null
           onboarding_complete?: boolean
+          password_hash?: string | null
           stripe_account_id?: string | null
           updated_at?: string
         }
@@ -378,6 +384,102 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      service_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          request_id: string
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          request_id: string
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          request_id?: string
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          agency_payout_id: string | null
+          created_at: string
+          description: string
+          id: string
+          media_site_id: string
+          order_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agency_payout_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          media_site_id: string
+          order_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agency_payout_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          media_site_id?: string
+          order_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_agency_payout_id_fkey"
+            columns: ["agency_payout_id"]
+            isOneToOne: false
+            referencedRelation: "agency_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_media_site_id_fkey"
+            columns: ["media_site_id"]
+            isOneToOne: false
+            referencedRelation: "media_sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_credits: {
         Row: {

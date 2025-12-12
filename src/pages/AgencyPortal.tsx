@@ -1,0 +1,468 @@
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, MessageSquare, Send, CheckCircle, XCircle, AlertCircle, Clock, LogOut, Eye } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import amlogo from '@/assets/amlogo.png';
+
+interface ServiceRequest {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  media_sites: {
+    name: string;
+    favicon: string | null;
+    price: number;
+  };
+  profiles: {
+    email: string;
+    username: string | null;
+  };
+  messages: ServiceMessage[];
+}
+
+interface ServiceMessage {
+  id: string;
+  request_id: string;
+  sender_type: 'client' | 'agency' | 'admin';
+  sender_id: string;
+  message: string;
+  created_at: string;
+}
+
+interface Agency {
+  id: string;
+  agency_name: string;
+  email: string;
+  commission_percentage: number;
+  onboarding_complete: boolean;
+}
+
+export default function AgencyPortal() {
+  const [agency, setAgency] = useState<Agency | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [responseStatus, setResponseStatus] = useState<'accepted' | 'changes_requested' | 'rejected'>('accepted');
+
+  useEffect(() => {
+    // Check for stored agency session
+    const storedAgency = localStorage.getItem('agency_session');
+    if (storedAgency) {
+      try {
+        const parsed = JSON.parse(storedAgency);
+        setAgency(parsed);
+      } catch (e) {
+        localStorage.removeItem('agency_session');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (agency) {
+      fetchRequests();
+    }
+  }, [agency]);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing credentials',
+        description: 'Please enter email and password.',
+      });
+      return;
+    }
+
+    setIsLoggingIn(true);
+    try {
+      const response = await supabase.functions.invoke('agency-auth', {
+        body: { action: 'login', email, password }
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      const agencyData = response.data.agency;
+      setAgency(agencyData);
+      localStorage.setItem('agency_session', JSON.stringify(agencyData));
+      
+      toast({
+        title: 'Welcome back!',
+        description: `Logged in as ${agencyData.agency_name}`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Login failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setAgency(null);
+    localStorage.removeItem('agency_session');
+    setRequests([]);
+  };
+
+  const fetchRequests = async () => {
+    if (!agency) return;
+
+    setLoading(true);
+    try {
+      const response = await supabase.functions.invoke('agency-requests', {
+        body: { action: 'list' },
+        headers: { 'x-agency-id': agency.id }
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      setRequests(response.data.requests || []);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to load requests',
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendResponse = async () => {
+    if (!agency || !selectedRequest || !newMessage.trim()) return;
+
+    setSending(true);
+    try {
+      const response = await supabase.functions.invoke('agency-requests', {
+        body: { 
+          action: 'respond',
+          request_id: selectedRequest.id,
+          message: newMessage.trim(),
+          status: responseStatus
+        },
+        headers: { 'x-agency-id': agency.id }
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      toast({
+        title: 'Response sent',
+        description: `Request marked as ${responseStatus.replace('_', ' ')}`,
+      });
+
+      setNewMessage('');
+      setSelectedRequest(null);
+      fetchRequests();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to send response',
+        description: error.message,
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending_review':
+        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
+      case 'changes_requested':
+        return <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes Requested</Badge>;
+      case 'accepted':
+        return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+      case 'paid':
+        return <Badge className="bg-blue-600">Paid</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  // Login Screen
+  if (!agency) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <img src={amlogo} alt="Logo" className="h-16 w-16 mx-auto mb-4" />
+            <CardTitle>Agency Portal</CardTitle>
+            <p className="text-sm text-muted-foreground">Sign in to manage your requests</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoggingIn}
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoggingIn}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              />
+            </div>
+            <Button className="w-full" onClick={handleLogin} disabled={isLoggingIn}>
+              {isLoggingIn && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Dashboard
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src={amlogo} alt="Logo" className="h-10 w-10" />
+            <div>
+              <h1 className="font-bold">{agency.agency_name}</h1>
+              <p className="text-xs text-muted-foreground">{agency.email}</p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="pending" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="pending">
+              Pending ({requests.filter(r => r.status === 'pending_review').length})
+            </TabsTrigger>
+            <TabsTrigger value="in_progress">
+              In Progress ({requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).length})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              Completed ({requests.filter(r => ['paid', 'rejected'].includes(r.status)).length})
+            </TabsTrigger>
+          </TabsList>
+
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              <TabsContent value="pending" className="space-y-4">
+                {requests.filter(r => r.status === 'pending_review').map((request) => (
+                  <RequestCard key={request.id} request={request} onSelect={() => setSelectedRequest(request)} getStatusBadge={getStatusBadge} />
+                ))}
+                {requests.filter(r => r.status === 'pending_review').length === 0 && (
+                  <EmptyState message="No pending requests" />
+                )}
+              </TabsContent>
+
+              <TabsContent value="in_progress" className="space-y-4">
+                {requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).map((request) => (
+                  <RequestCard key={request.id} request={request} onSelect={() => setSelectedRequest(request)} getStatusBadge={getStatusBadge} />
+                ))}
+                {requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).length === 0 && (
+                  <EmptyState message="No requests in progress" />
+                )}
+              </TabsContent>
+
+              <TabsContent value="completed" className="space-y-4">
+                {requests.filter(r => ['paid', 'rejected'].includes(r.status)).map((request) => (
+                  <RequestCard key={request.id} request={request} onSelect={() => setSelectedRequest(request)} getStatusBadge={getStatusBadge} />
+                ))}
+                {requests.filter(r => ['paid', 'rejected'].includes(r.status)).length === 0 && (
+                  <EmptyState message="No completed requests" />
+                )}
+              </TabsContent>
+            </>
+          )}
+        </Tabs>
+      </main>
+
+      {/* Request Detail Dialog */}
+      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>{selectedRequest?.title}</DialogTitle>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {selectedRequest.media_sites?.favicon && (
+                    <img src={selectedRequest.media_sites.favicon} alt="" className="w-6 h-6 rounded" />
+                  )}
+                  <span className="text-sm">{selectedRequest.media_sites?.name}</span>
+                </div>
+                {getStatusBadge(selectedRequest.status)}
+              </div>
+
+              <div className="text-sm text-muted-foreground">
+                Client: {selectedRequest.profiles?.email}
+              </div>
+
+              {/* Messages */}
+              <ScrollArea className="h-[250px] border rounded-lg p-4">
+                <div className="space-y-4">
+                  {(selectedRequest.messages || []).map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${
+                          msg.sender_type === 'agency'
+                            ? 'bg-primary text-primary-foreground'
+                            : msg.sender_type === 'admin'
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <p className="text-xs font-medium mb-1 opacity-70">
+                          {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
+                        </p>
+                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        <p className="text-xs opacity-50 mt-1">
+                          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+
+              {/* Response Form */}
+              {selectedRequest.status !== 'paid' && selectedRequest.status !== 'rejected' && (
+                <div className="space-y-3">
+                  <Textarea
+                    placeholder="Your response to the client..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    rows={3}
+                    disabled={sending}
+                  />
+
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant={responseStatus === 'accepted' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setResponseStatus('accepted')}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Accept
+                    </Button>
+                    <Button
+                      variant={responseStatus === 'changes_requested' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setResponseStatus('changes_requested')}
+                    >
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      Request Changes
+                    </Button>
+                    <Button
+                      variant={responseStatus === 'rejected' ? 'destructive' : 'outline'}
+                      size="sm"
+                      onClick={() => setResponseStatus('rejected')}
+                    >
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Reject
+                    </Button>
+                  </div>
+
+                  <Button 
+                    className="w-full" 
+                    onClick={sendResponse}
+                    disabled={sending || !newMessage.trim()}
+                  >
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                    Send Response
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function RequestCard({ request, onSelect, getStatusBadge }: { 
+  request: ServiceRequest; 
+  onSelect: () => void;
+  getStatusBadge: (status: string) => React.ReactNode;
+}) {
+  return (
+    <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={onSelect}>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            {request.media_sites?.favicon && (
+              <img src={request.media_sites.favicon} alt="" className="w-10 h-10 rounded" />
+            )}
+            <div>
+              <h3 className="font-medium">{request.title}</h3>
+              <p className="text-sm text-muted-foreground">{request.media_sites?.name}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Client: {request.profiles?.email}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {getStatusBadge(request.status)}
+            <span className="text-xs text-muted-foreground">
+              {format(new Date(request.updated_at), 'MMM d, yyyy')}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center py-12">
+        <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">{message}</p>
+      </CardContent>
+    </Card>
+  );
+}
