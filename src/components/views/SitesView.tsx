@@ -43,6 +43,7 @@ interface MediaSite {
   favicon: string | null;
   category: string;
   subcategory: string | null;
+  about: string | null;
 }
 
 const MEDIA_CATEGORIES = ['Global', 'Focused', 'Epic', 'Agencies/People'];
@@ -76,6 +77,7 @@ export function SitesView() {
   const searchRef = useRef<HTMLDivElement>(null);
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
+  const [isAgencyDialogOpen, setIsAgencyDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [siteCredits, setSiteCredits] = useState<Record<string, number>>({});
@@ -87,6 +89,14 @@ export function SitesView() {
   const [addingTagForSite, setAddingTagForSite] = useState<string | null>(null);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
+
+  // Agency form
+  const [agencyFormData, setAgencyFormData] = useState({
+    name: '',
+    logo: '',
+    link: '',
+    about: ''
+  });
 
   const toggleExpand = (siteId: string) => {
     setExpandedSites(prev => {
@@ -495,6 +505,58 @@ export function SitesView() {
     }
   };
 
+  const handleAddAgency = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agencyFormData.name.trim() || !agencyFormData.link.trim()) {
+      toast({
+        title: "Missing fields",
+        description: "Name and Link are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const faviconUrl = agencyFormData.logo || getFaviconUrl(agencyFormData.link);
+      
+      const { data, error } = await supabase
+        .from('media_sites')
+        .insert({
+          name: agencyFormData.name.trim(),
+          link: agencyFormData.link.trim(),
+          favicon: faviconUrl,
+          about: agencyFormData.about.trim() || null,
+          category: 'Agencies/People',
+          publication_format: 'Article',
+          google_index: 'Regular',
+          marks: 'No',
+          publishing_time: '24h',
+          price: 0
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setMediaSites(prev => [...prev, data]);
+      setAgencyFormData({ name: '', logo: '', link: '', about: '' });
+      setIsAgencyDialogOpen(false);
+      toast({
+        title: "Agency added",
+        description: `${agencyFormData.name} has been added`
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to add agency",
+        description: error instanceof Error ? error.message : "Could not add the agency",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSaveCredits = async (siteId: string) => {
     const credits = parseInt(creditInput);
     if (isNaN(credits) || credits < 1) {
@@ -823,6 +885,60 @@ export function SitesView() {
     </Card>
   );
 
+  const renderAgencyCard = (site: MediaSite, index: number) => (
+    <Card 
+      key={site.id} 
+      className="group hover:shadow-md transition-all duration-300" 
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+              <img 
+                src={site.favicon || getFaviconUrl(site.link)} 
+                alt={`${site.name} logo`} 
+                className="h-6 w-6 object-contain" 
+                onError={e => {
+                  e.currentTarget.style.display = 'none';
+                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                }} 
+              />
+              <Globe className="h-5 w-5 text-accent hidden" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-medium">{site.name}</h3>
+              <a 
+                href={site.link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
+              >
+                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+              </a>
+              {site.about && (
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{site.about}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {isAdmin && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                onClick={() => handleRemoveMediaSite(site.id, site.name)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -851,7 +967,7 @@ export function SitesView() {
               <DropdownMenuItem onClick={() => {
                 setActiveTab('custom');
                 setActiveMediaCategory('Agencies/People');
-                setIsMediaDialogOpen(true);
+                setIsAgencyDialogOpen(true);
               }}>
                 Agency/People
               </DropdownMenuItem>
@@ -1058,17 +1174,27 @@ export function SitesView() {
                           <Card className="border-dashed border-2">
                             <CardContent className="flex flex-col items-center justify-center py-16">
                               <Globe className="h-12 w-12 text-muted-foreground/50" />
-                              <h3 className="mt-4 text-xl font-semibold">No media sites</h3>
+                              <h3 className="mt-4 text-xl font-semibold">
+                                {category === 'Agencies/People' ? 'No agencies or people' : 'No media sites'}
+                              </h3>
                               <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
                                 {isAdmin 
-                                  ? `No sites in ${category}${activeSubcategory ? ` > ${activeSubcategory}` : ''} yet`
-                                  : "No custom media sites available in this category."
+                                  ? category === 'Agencies/People' 
+                                    ? 'No agencies or people added yet'
+                                    : `No sites in ${category}${activeSubcategory ? ` > ${activeSubcategory}` : ''} yet`
+                                  : category === 'Agencies/People'
+                                    ? 'No agencies or people available.'
+                                    : 'No custom media sites available in this category.'
                                 }
                               </p>
                               {isAdmin && (
-                                <Button variant="accent" className="mt-6" onClick={() => setIsMediaDialogOpen(true)}>
+                                <Button 
+                                  variant="accent" 
+                                  className="mt-6" 
+                                  onClick={() => category === 'Agencies/People' ? setIsAgencyDialogOpen(true) : setIsMediaDialogOpen(true)}
+                                >
                                   <Plus className="mr-2 h-4 w-4" />
-                                  Add Media Site
+                                  {category === 'Agencies/People' ? 'Add Agency/People' : 'Add Media Site'}
                                 </Button>
                               )}
                             </CardContent>
@@ -1078,7 +1204,11 @@ export function SitesView() {
 
                       return (
                         <div className="space-y-2">
-                          {filtered.map((site, index) => renderMediaSiteCard(site, index))}
+                          {filtered.map((site, index) => 
+                            category === 'Agencies/People' 
+                              ? renderAgencyCard(site, index)
+                              : renderMediaSiteCard(site, index)
+                          )}
                         </div>
                       );
                     })()}
@@ -1278,6 +1408,81 @@ export function SitesView() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agency/People Dialog */}
+      <Dialog open={isAgencyDialogOpen} onOpenChange={(open) => {
+        setIsAgencyDialogOpen(open);
+        if (!open) {
+          setAgencyFormData({ name: '', logo: '', link: '', about: '' });
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Add Agency/People</DialogTitle>
+            <DialogDescription>
+              Add a new agency or person to the network.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleAddAgency} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="agency-name">Name *</Label>
+              <Input 
+                id="agency-name" 
+                placeholder="Agency or person name" 
+                value={agencyFormData.name}
+                onChange={e => setAgencyFormData(prev => ({ ...prev, name: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="agency-logo">Logo URL</Label>
+              <Input 
+                id="agency-logo" 
+                placeholder="https://example.com/logo.png" 
+                value={agencyFormData.logo}
+                onChange={e => setAgencyFormData(prev => ({ ...prev, logo: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty to auto-generate from link
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="agency-link">Link *</Label>
+              <Input 
+                id="agency-link" 
+                placeholder="https://example.com" 
+                value={agencyFormData.link}
+                onChange={e => setAgencyFormData(prev => ({ ...prev, link: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="agency-about">About</Label>
+              <textarea
+                id="agency-about"
+                placeholder="Brief description..."
+                value={agencyFormData.about}
+                onChange={e => setAgencyFormData(prev => ({ ...prev, about: e.target.value }))}
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsAgencyDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="accent" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? 'Adding...' : 'Add Agency'}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
