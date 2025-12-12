@@ -1040,14 +1040,25 @@ export function SitesView() {
                   {site.price} USD
                 </Badge>
               )}
+              {site.agency && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span>via</span>
+                  <span className="text-foreground">{site.agency}</span>
+                  {(() => {
+                    const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
+                    return agencySite?.favicon ? (
+                      <img 
+                        src={agencySite.favicon} 
+                        alt={site.agency} 
+                        className="h-4 w-4 object-contain rounded-full"
+                      />
+                    ) : null;
+                  })()}
+                </div>
+              )}
               <Badge variant="outline" className="text-xs min-w-[60px] text-center justify-center">
                 {site.publication_format}
               </Badge>
-              {site.agency && (
-                <Badge className="text-xs bg-black text-white hover:bg-black">
-                  {site.agency}
-                </Badge>
-              )}
               {isAdmin && (
                 <Button 
                   variant="ghost" 
