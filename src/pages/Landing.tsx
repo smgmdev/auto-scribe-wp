@@ -278,9 +278,6 @@ const Landing = () => {
         <p className="text-xs text-muted-foreground truncate">
           {extractDomain(site.link)}
         </p>
-        <Badge variant="secondary" className="text-xs mt-1">
-          {site.publication_format}
-        </Badge>
       </div>
       {site.price > 0 && (
         <Badge variant="outline" className="text-xs text-accent border-accent/30 flex-shrink-0">
