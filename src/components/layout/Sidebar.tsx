@@ -184,8 +184,8 @@ export function Sidebar({
           <div className="border-t border-sidebar-border p-4 space-y-1">
             {/* Upgrade to Agency - Only for non-admin users */}
             {!isAdmin && (
-              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'agency-application' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('agency-application')}>
-                <Briefcase className={cn("h-5 w-5 flex-shrink-0", currentView === 'agency-application' && "text-[#3872e0]")} />
+              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent border border-[#3872e0]/50", currentView === 'agency-application' && "bg-sidebar-accent text-[#3872e0] font-medium border-[#3872e0]")} onClick={() => handleNavClick('agency-application')}>
+                <Briefcase className={cn("h-5 w-5 flex-shrink-0 text-[#3872e0]", currentView === 'agency-application' && "text-[#3872e0]")} />
                 <span className="truncate">Upgrade to Agency</span>
                 {applicationStatus && getStatusBadge(applicationStatus)}
               </Button>
