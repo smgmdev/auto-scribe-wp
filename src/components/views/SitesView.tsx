@@ -91,6 +91,7 @@ export function SitesView() {
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
 
   // Agency form
+  const [editingAgencyId, setEditingAgencyId] = useState<string | null>(null);
   const [agencyFormData, setAgencyFormData] = useState({
     name: '',
     logo: '',
@@ -520,41 +521,78 @@ export function SitesView() {
     try {
       const faviconUrl = agencyFormData.logo || getFaviconUrl(agencyFormData.link);
       
-      const { data, error } = await supabase
-        .from('media_sites')
-        .insert({
-          name: agencyFormData.name.trim(),
-          link: agencyFormData.link.trim(),
-          favicon: faviconUrl,
-          about: agencyFormData.about.trim() || null,
-          category: 'Agencies/People',
-          publication_format: 'Article',
-          google_index: 'Regular',
-          marks: 'No',
-          publishing_time: '24h',
-          price: 0
-        })
-        .select()
-        .single();
+      if (editingAgencyId) {
+        // Update existing agency
+        const { data, error } = await supabase
+          .from('media_sites')
+          .update({
+            name: agencyFormData.name.trim(),
+            link: agencyFormData.link.trim(),
+            favicon: faviconUrl,
+            about: agencyFormData.about.trim() || null
+          })
+          .eq('id', editingAgencyId)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setMediaSites(prev => [...prev, data]);
+        setMediaSites(prev => prev.map(s => s.id === editingAgencyId ? data : s));
+        toast({
+          title: "Agency updated",
+          description: `${agencyFormData.name} has been updated`
+        });
+      } else {
+        // Create new agency
+        const { data, error } = await supabase
+          .from('media_sites')
+          .insert({
+            name: agencyFormData.name.trim(),
+            link: agencyFormData.link.trim(),
+            favicon: faviconUrl,
+            about: agencyFormData.about.trim() || null,
+            category: 'Agencies/People',
+            publication_format: 'Article',
+            google_index: 'Regular',
+            marks: 'No',
+            publishing_time: '24h',
+            price: 0
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setMediaSites(prev => [...prev, data]);
+        toast({
+          title: "Agency added",
+          description: `${agencyFormData.name} has been added`
+        });
+      }
+      
       setAgencyFormData({ name: '', logo: '', link: '', about: '' });
+      setEditingAgencyId(null);
       setIsAgencyDialogOpen(false);
-      toast({
-        title: "Agency added",
-        description: `${agencyFormData.name} has been added`
-      });
     } catch (error) {
       toast({
-        title: "Failed to add agency",
-        description: error instanceof Error ? error.message : "Could not add the agency",
+        title: editingAgencyId ? "Failed to update agency" : "Failed to add agency",
+        description: error instanceof Error ? error.message : "Could not save the agency",
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEditAgency = (site: MediaSite) => {
+    setEditingAgencyId(site.id);
+    setAgencyFormData({
+      name: site.name,
+      logo: site.favicon || '',
+      link: site.link,
+      about: site.about || ''
+    });
+    setIsAgencyDialogOpen(true);
   };
 
   const handleSaveCredits = async (siteId: string) => {
@@ -922,16 +960,26 @@ export function SitesView() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {isAdmin && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                onClick={() => handleRemoveMediaSite(site.id, site.name)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                  onClick={() => handleEditAgency(site)}
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                  onClick={() => handleRemoveMediaSite(site.id, site.name)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -1416,13 +1464,16 @@ export function SitesView() {
         setIsAgencyDialogOpen(open);
         if (!open) {
           setAgencyFormData({ name: '', logo: '', link: '', about: '' });
+          setEditingAgencyId(null);
         }
       }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Add Agency/People</DialogTitle>
+            <DialogTitle className="text-xl">
+              {editingAgencyId ? 'Edit Agency/People' : 'Add Agency/People'}
+            </DialogTitle>
             <DialogDescription>
-              Add a new agency or person to the network.
+              {editingAgencyId ? 'Update the agency or person details.' : 'Add a new agency or person to the network.'}
             </DialogDescription>
           </DialogHeader>
           
@@ -1479,7 +1530,7 @@ export function SitesView() {
               </Button>
               <Button type="submit" variant="accent" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? 'Adding...' : 'Add Agency'}
+                {isSubmitting ? (editingAgencyId ? 'Saving...' : 'Adding...') : (editingAgencyId ? 'Save Changes' : 'Add Agency')}
               </Button>
             </div>
           </form>
