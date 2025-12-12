@@ -431,7 +431,7 @@ export function SitesView() {
         const agency = row['agencies/people'] || row['agency/people'] || row['agency'] || row['pr firm'] || row['people'] || null;
         
         // Map details column to about field (check multiple possible column names)
-        const about = row['details'] || row['about'] || row['description'] || null;
+        const about = row['good to know'] || row['details'] || row['about'] || row['description'] || null;
         
         // Map other fields with fallbacks
         const name = row['title'] || row['name'] || row['site'] || '';
