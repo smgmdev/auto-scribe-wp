@@ -354,6 +354,8 @@ export function SitesView() {
     return rows;
   };
 
+  const REQUIRED_COLUMNS = ['title', 'usd price', 'logo', 'publication format', 'url', 'tab', 'subcategory', 'agencies/people', 'good to know'];
+
   const handleFetchSheet = async () => {
     if (!sheetUrl) {
       toast({
@@ -390,6 +392,29 @@ export function SitesView() {
         toast({
           title: "No data found",
           description: "The sheet appears to be empty or incorrectly formatted",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate columns - check that all required columns exist
+      const sheetColumns = Object.keys(parsed[0]).map(col => col.toLowerCase());
+      const missingColumns = REQUIRED_COLUMNS.filter(col => !sheetColumns.includes(col));
+      const extraColumns = sheetColumns.filter(col => !REQUIRED_COLUMNS.includes(col));
+
+      if (missingColumns.length > 0) {
+        toast({
+          title: "Missing required columns",
+          description: `Sheet is missing: ${missingColumns.join(', ')}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (extraColumns.length > 0) {
+        toast({
+          title: "Invalid columns detected",
+          description: `Remove these columns: ${extraColumns.join(', ')}`,
           variant: "destructive"
         });
         return;
