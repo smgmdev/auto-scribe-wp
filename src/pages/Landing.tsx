@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
-import amlogo from '@/assets/amlogo.png';
+import amblack from '@/assets/amblack.png';
 
 interface WPSite {
   id: string;
@@ -277,7 +277,7 @@ const Landing = () => {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <img src={amlogo} alt="Arcana Mace" className="h-10 w-10" />
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           
