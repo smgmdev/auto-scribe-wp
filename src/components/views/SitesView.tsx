@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,6 +89,15 @@ export function SitesView() {
   const [addingTagForSite, setAddingTagForSite] = useState<string | null>(null);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
+
+  // Logo editing state
+  const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
+  const [editingLogoSiteId, setEditingLogoSiteId] = useState<string | null>(null);
+  const [logoInputType, setLogoInputType] = useState<'url' | 'upload'>('url');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoFileInputRef = useRef<HTMLInputElement>(null);
 
   // Agency form
   const [editingAgencyId, setEditingAgencyId] = useState<string | null>(null);
@@ -652,6 +661,63 @@ export function SitesView() {
     }
   };
 
+  const handleOpenLogoDialog = (siteId: string, currentFavicon: string | null) => {
+    setEditingLogoSiteId(siteId);
+    setLogoUrl(currentFavicon || '');
+    setLogoPreview(currentFavicon || null);
+    setLogoFile(null);
+    setLogoInputType('url');
+    setIsLogoDialogOpen(true);
+  };
+
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveLogo = async () => {
+    if (!editingLogoSiteId) return;
+
+    setIsSubmitting(true);
+    try {
+      let faviconUrl = logoUrl;
+
+      if (logoInputType === 'upload' && logoFile) {
+        faviconUrl = logoPreview || '';
+      }
+
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .update({ favicon: faviconUrl || null })
+        .eq('id', editingLogoSiteId);
+
+      if (error) throw error;
+
+      window.location.reload();
+
+      toast({
+        title: 'Logo updated',
+        description: 'The site logo has been updated successfully.'
+      });
+      setIsLogoDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: 'Failed to update logo',
+        description: error instanceof Error ? error.message : 'Could not update the logo',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const renderWPSiteCard = (site: any, index: number) => (
     <Card 
       key={site.id} 
@@ -661,9 +727,9 @@ export function SitesView() {
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+            <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
               <img 
-                src={getFaviconUrl(site.url)} 
+                src={site.favicon || getFaviconUrl(site.url)} 
                 alt={`${site.name} favicon`} 
                 className="h-5 w-5 object-contain" 
                 onError={e => {
@@ -672,6 +738,14 @@ export function SitesView() {
                 }} 
               />
               <Globe className="h-4 w-4 text-accent hidden" />
+              {isAdmin && (
+                <button
+                  onClick={() => handleOpenLogoDialog(site.id, site.favicon)}
+                  className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
+                >
+                  <Edit2 className="h-3 w-3 text-foreground" />
+                </button>
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm truncate">{site.name}</h3>
@@ -1601,6 +1675,126 @@ export function SitesView() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logo Edit Dialog */}
+      <Dialog open={isLogoDialogOpen} onOpenChange={(open) => {
+        setIsLogoDialogOpen(open);
+        if (!open) {
+          setEditingLogoSiteId(null);
+          setLogoUrl('');
+          setLogoFile(null);
+          setLogoPreview(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Edit Site Logo</DialogTitle>
+            <DialogDescription>
+              Upload an image or provide a URL for the site logo.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            {/* Input Type Tabs */}
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+              <button
+                type="button"
+                onClick={() => setLogoInputType('url')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                  logoInputType === 'url' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Link2 className="h-4 w-4" />
+                URL
+              </button>
+              <button
+                type="button"
+                onClick={() => setLogoInputType('upload')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                  logoInputType === 'upload' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Upload className="h-4 w-4" />
+                Upload
+              </button>
+            </div>
+
+            {/* URL Input */}
+            {logoInputType === 'url' && (
+              <div className="space-y-2">
+                <Label htmlFor="logo-url">Logo URL</Label>
+                <Input 
+                  id="logo-url" 
+                  placeholder="https://example.com/logo.png" 
+                  value={logoUrl}
+                  onChange={e => {
+                    setLogoUrl(e.target.value);
+                    setLogoPreview(e.target.value);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Upload Input */}
+            {logoInputType === 'upload' && (
+              <div className="space-y-2">
+                <Label>Upload Image</Label>
+                <input
+                  type="file"
+                  ref={logoFileInputRef}
+                  accept="image/*"
+                  onChange={handleLogoFileChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => logoFileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-6 border-2 border-dashed border-border rounded-lg hover:border-accent hover:bg-muted/50 transition-colors"
+                >
+                  <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {logoFile ? logoFile.name : 'Click to upload image'}
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {/* Preview */}
+            {logoPreview && (
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="flex items-center justify-center p-4 bg-muted rounded-lg">
+                  <img 
+                    src={logoPreview} 
+                    alt="Logo preview" 
+                    className="max-h-16 max-w-full object-contain"
+                    onError={() => setLogoPreview(null)}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsLogoDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                variant="accent" 
+                disabled={isSubmitting || (!logoUrl && !logoFile)}
+                onClick={handleSaveLogo}
+              >
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? 'Saving...' : 'Save Logo'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
