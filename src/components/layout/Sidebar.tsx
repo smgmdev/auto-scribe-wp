@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase, ChevronDown, Zap } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -20,17 +20,14 @@ const getNavigation = (isAdmin: boolean) => {
     label: 'Media Network',
     icon: Globe
   }, {
-    id: 'headlines',
-    label: 'Sources',
-    icon: Newspaper
-  }, {
-    id: 'compose',
-    label: 'New Article',
-    icon: Plus
-  }, {
-    id: 'articles',
-    label: 'Articles',
-    icon: FileText
+    id: 'instant-publishing',
+    label: 'Instant Publishing',
+    icon: Zap,
+    submenu: [
+      { id: 'headlines', label: 'Sources', icon: Newspaper },
+      { id: 'compose', label: 'New Article', icon: Plus },
+      { id: 'articles', label: 'Articles', icon: FileText }
+    ]
   }, {
     id: 'orders',
     label: 'My Orders',
@@ -94,7 +91,16 @@ export function Sidebar({
   } = useAuth();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+  const [instantPublishingOpen, setInstantPublishingOpen] = useState(false);
   const navigation = getNavigation(isAdmin);
+
+  // Auto-expand Instant Publishing if current view is one of its submenu items
+  useEffect(() => {
+    const submenuIds = ['headlines', 'compose', 'articles'];
+    if (submenuIds.includes(currentView)) {
+      setInstantPublishingOpen(true);
+    }
+  }, [currentView]);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
@@ -171,13 +177,70 @@ export function Sidebar({
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
             {navigation.map(item => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
-            return <Button key={item.id} variant="ghost" className={cn("w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", isActive && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(item.id)}>
+              const Icon = item.icon;
+              const hasSubmenu = 'submenu' in item && item.submenu;
+              const isSubmenuActive = hasSubmenu && item.submenu?.some(sub => currentView === sub.id);
+              const isActive = currentView === item.id || isSubmenuActive;
+
+              if (hasSubmenu) {
+                return (
+                  <div key={item.id}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        isActive && "text-[#3872e0] font-medium"
+                      )}
+                      onClick={() => setInstantPublishingOpen(!instantPublishingOpen)}
+                    >
+                      <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
+                      <span className="truncate flex-1 text-left">{item.label}</span>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        instantPublishingOpen && "rotate-180"
+                      )} />
+                    </Button>
+                    {instantPublishingOpen && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {item.submenu?.map(subItem => {
+                          const SubIcon = subItem.icon;
+                          const isSubActive = currentView === subItem.id;
+                          return (
+                            <Button
+                              key={subItem.id}
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start gap-3 px-3 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                              )}
+                              onClick={() => handleNavClick(subItem.id)}
+                            >
+                              <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
+                              <span className="truncate">{subItem.label}</span>
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <Button
+                  key={item.id}
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                  )}
+                  onClick={() => handleNavClick(item.id)}
+                >
                   <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                   <span className="truncate">{item.label}</span>
-                </Button>;
-          })}
+                </Button>
+              );
+            })}
           </nav>
 
           {/* Account & Sign Out */}
