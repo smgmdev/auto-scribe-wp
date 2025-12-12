@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Globe, ExternalLink, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -89,6 +88,19 @@ const Landing = () => {
     fetchSites();
   }, []);
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCloseSearchModal();
+      }
+    };
+    if (showSearchModal) {
+      document.addEventListener('keydown', handleEsc);
+      return () => document.removeEventListener('keydown', handleEsc);
+    }
+  }, [showSearchModal]);
+
   const filteredWpSites = useMemo(() => {
     if (!searchQuery.trim()) return wpSites;
     const query = searchQuery.toLowerCase();
@@ -98,7 +110,6 @@ const Landing = () => {
     );
   }, [wpSites, searchQuery]);
 
-  // Get subcategories for active tab
   const subcategories = useMemo(() => {
     const subcats = new Set<string>();
     mediaSites
@@ -111,7 +122,6 @@ const Landing = () => {
     return Array.from(subcats);
   }, [mediaSites, activeTab]);
 
-  // Filter media sites for search modal based on tab and subcategory
   const modalMediaSites = useMemo(() => {
     let filtered = mediaSites.filter(site => site.category === activeTab);
     
@@ -131,29 +141,17 @@ const Landing = () => {
   }, [mediaSites, activeTab, activeSubcategory, searchQuery]);
 
   const chinaSites = useMemo(() => {
-    const sites = mediaSites.filter(site => 
+    return mediaSites.filter(site => 
       site.subcategory?.toLowerCase() === 'china'
     );
-    if (!searchQuery.trim()) return sites;
-    const query = searchQuery.toLowerCase();
-    return sites.filter(site => 
-      site.name.toLowerCase().includes(query) ||
-      site.link.toLowerCase().includes(query)
-    );
-  }, [mediaSites, searchQuery]);
+  }, [mediaSites]);
 
   const businessSites = useMemo(() => {
-    const sites = mediaSites.filter(site => 
+    return mediaSites.filter(site => 
       site.subcategory?.toLowerCase() === 'business and finance' ||
       site.subcategory?.toLowerCase() === 'business'
     );
-    if (!searchQuery.trim()) return sites;
-    const query = searchQuery.toLowerCase();
-    return sites.filter(site => 
-      site.name.toLowerCase().includes(query) ||
-      site.link.toLowerCase().includes(query)
-    );
-  }, [mediaSites, searchQuery]);
+  }, [mediaSites]);
 
   const extractDomain = (url: string) => {
     try {
@@ -314,132 +312,141 @@ const Landing = () => {
         </button>
       </div>
 
-      {/* TradingView-style Search Modal */}
+      {/* TradingView-style Search Overlay */}
       {showSearchModal && (
-        <div className="fixed inset-0 z-[100] bg-background">
-          {/* Search Header */}
-          <div className="border-b border-border bg-card">
-            <div className="flex items-center gap-4 px-4 py-3">
-              <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-              <input
-                type="text"
-                autoFocus
-                placeholder="Search media outlets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent text-lg text-foreground placeholder:text-muted-foreground outline-none"
-              />
-              {searchQuery && (
-                <button
-                  onClick={handleClearSearch}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Clear
-                </button>
-              )}
-              <button
-                onClick={handleCloseSearchModal}
-                className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Search Content */}
-          <div className="h-[calc(100vh-60px)] overflow-hidden">
-            {/* Category Tabs */}
-            <div className="border-b border-border bg-card">
-              <div className="flex gap-6 px-4">
-                {CATEGORY_TABS.map(tab => (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm"
+            onClick={handleCloseSearchModal}
+          />
+          
+          {/* Search Container */}
+          <div className="fixed top-0 left-0 right-0 z-[101] flex justify-center pt-4 px-4">
+            <div className="w-full max-w-3xl">
+              {/* Search Input Bar */}
+              <div className="flex items-center gap-4 px-4 py-3 bg-card border border-border rounded-t-xl shadow-xl">
+                <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Search media outlets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent text-lg text-foreground placeholder:text-muted-foreground outline-none"
+                />
+                {searchQuery && (
                   <button
-                    key={tab}
-                    onClick={() => handleTabChange(tab)}
-                    className={`py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                      activeTab === tab
-                        ? 'text-foreground border-foreground'
-                        : 'text-muted-foreground border-transparent hover:text-foreground'
-                    }`}
+                    onClick={handleClearSearch}
+                    className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                   >
-                    {tab}
+                    Clear
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Subcategory Pills */}
-            {subcategories.length > 0 && (
-              <div className="border-b border-border bg-card px-4 py-3">
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setActiveSubcategory(null)}
-                    className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
-                      !activeSubcategory
-                        ? 'bg-foreground text-background border-foreground'
-                        : 'bg-transparent text-foreground border-border hover:bg-muted'
-                    }`}
-                  >
-                    All
-                  </button>
-                  {subcategories.map(subcat => (
-                    <button
-                      key={subcat}
-                      onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
-                      className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
-                        activeSubcategory === subcat
-                          ? 'bg-foreground text-background border-foreground'
-                          : 'bg-transparent text-foreground border-border hover:bg-muted'
-                      }`}
-                    >
-                      {subcat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Results List */}
-            <ScrollArea className="h-full">
-              <div className="pb-20">
-                {modalMediaSites.length === 0 ? (
-                  <div className="px-4 py-12 text-center text-muted-foreground">
-                    No media outlets found
-                  </div>
-                ) : (
-                  modalMediaSites.map(site => (
-                    <button
-                      key={site.id}
-                      onClick={() => handleSiteClick(site, 'media')}
-                      className="flex items-center gap-4 w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50"
-                    >
-                      <img
-                        src={site.favicon || getFaviconUrl(site.link)}
-                        alt={site.name}
-                        className="h-10 w-10 rounded-lg bg-muted object-contain flex-shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3">
-                          <span className="font-semibold text-foreground">{site.name}</span>
-                          <span className="text-muted-foreground truncate">{extractDomain(site.link)}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-xs text-muted-foreground">{site.publication_format.toLowerCase()}</span>
-                        <span className="text-sm font-medium text-foreground">{site.price} USDT</span>
-                        {site.agency && (
-                          <span className="text-xs text-muted-foreground">{site.agency}</span>
-                        )}
-                      </div>
-                    </button>
-                  ))
                 )}
+                <button
+                  onClick={handleCloseSearchModal}
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-            </ScrollArea>
+
+              {/* Dropdown Panel */}
+              <div className="bg-card border border-t-0 border-border rounded-b-xl shadow-xl overflow-hidden">
+                {/* Category Tabs */}
+                <div className="border-b border-border">
+                  <div className="flex gap-6 px-4">
+                    {CATEGORY_TABS.map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => handleTabChange(tab)}
+                        className={`py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                          activeTab === tab
+                            ? 'text-foreground border-foreground'
+                            : 'text-muted-foreground border-transparent hover:text-foreground'
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Subcategory Pills */}
+                {subcategories.length > 0 && (
+                  <div className="border-b border-border px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setActiveSubcategory(null)}
+                        className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
+                          !activeSubcategory
+                            ? 'bg-foreground text-background border-foreground'
+                            : 'bg-transparent text-foreground border-border hover:bg-muted'
+                        }`}
+                      >
+                        All
+                      </button>
+                      {subcategories.map(subcat => (
+                        <button
+                          key={subcat}
+                          onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
+                          className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
+                            activeSubcategory === subcat
+                              ? 'bg-foreground text-background border-foreground'
+                              : 'bg-transparent text-foreground border-border hover:bg-muted'
+                          }`}
+                        >
+                          {subcat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Results List */}
+                <ScrollArea className="max-h-[60vh]">
+                  <div>
+                    {modalMediaSites.length === 0 ? (
+                      <div className="px-4 py-12 text-center text-muted-foreground">
+                        No media outlets found
+                      </div>
+                    ) : (
+                      modalMediaSites.map(site => (
+                        <button
+                          key={site.id}
+                          onClick={() => handleSiteClick(site, 'media')}
+                          className="flex items-center gap-4 w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+                        >
+                          <img
+                            src={site.favicon || getFaviconUrl(site.link)}
+                            alt={site.name}
+                            className="h-10 w-10 rounded-lg bg-muted object-contain flex-shrink-0"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-foreground">{site.name}</span>
+                              <span className="text-muted-foreground truncate">{extractDomain(site.link)}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground">{site.publication_format.toLowerCase()}</span>
+                            <span className="text-sm font-medium text-foreground">{site.price} USDT</span>
+                            {site.agency && (
+                              <span className="text-xs text-muted-foreground">{site.agency}</span>
+                            )}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Main content */}
