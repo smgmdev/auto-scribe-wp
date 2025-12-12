@@ -220,12 +220,40 @@ export function AdminAgenciesView() {
     }
 
     setSendingInvite(agency.id);
-    // TODO: Implement resend onboarding link
-    toast({
-      title: 'Coming soon',
-      description: 'Resend invite functionality will be available soon.'
-    });
-    setSendingInvite(null);
+    
+    try {
+      const response = await supabase.functions.invoke('resend-agency-invite', {
+        body: { agency_id: agency.id }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
+      toast({
+        title: 'Invite sent',
+        description: `Onboarding link sent to ${agency.email}`
+      });
+
+      // Open onboarding URL in new tab
+      if (response.data?.onboarding_url) {
+        window.open(response.data.onboarding_url, '_blank');
+      }
+
+      fetchAgencies();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error sending invite',
+        description: error.message
+      });
+    } finally {
+      setSendingInvite(null);
+    }
   };
 
   const handleDelete = async (agency: AgencyPayout) => {
