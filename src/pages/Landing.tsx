@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink } from 'lucide-react';
+import { Search, Globe, ExternalLink, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,10 +43,9 @@ const Landing = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
   const [selectedSiteType, setSelectedSiteType] = useState<'wp' | 'media' | null>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [activeTab, setActiveTab] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchSites = async () => {
@@ -90,18 +89,6 @@ const Landing = () => {
     fetchSites();
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const filteredWpSites = useMemo(() => {
     if (!searchQuery.trim()) return wpSites;
     const query = searchQuery.toLowerCase();
@@ -124,8 +111,8 @@ const Landing = () => {
     return Array.from(subcats);
   }, [mediaSites, activeTab]);
 
-  // Filter media sites for dropdown based on tab and subcategory
-  const dropdownMediaSites = useMemo(() => {
+  // Filter media sites for search modal based on tab and subcategory
+  const modalMediaSites = useMemo(() => {
     let filtered = mediaSites.filter(site => site.category === activeTab);
     
     if (activeSubcategory) {
@@ -179,11 +166,22 @@ const Landing = () => {
   const handleSiteClick = (site: WPSite | MediaSite, type: 'wp' | 'media') => {
     setSelectedSite(site);
     setSelectedSiteType(type);
-    setShowDropdown(false);
+    setShowSearchModal(false);
   };
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    setActiveSubcategory(null);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+  };
+
+  const handleCloseSearchModal = () => {
+    setShowSearchModal(false);
+    setSearchQuery('');
+    setActiveTab('Global');
     setActiveSubcategory(null);
   };
 
@@ -275,94 +273,6 @@ const Landing = () => {
     );
   };
 
-  const renderSearchDropdown = () => (
-    <div 
-      className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden"
-      onMouseDown={(e) => e.stopPropagation()}
-    >
-      {/* Category Tabs */}
-      <div className="border-b border-border">
-        <div className="flex gap-1 px-4 pt-3">
-          {CATEGORY_TABS.map(tab => (
-            <button
-              key={tab}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleTabChange(tab);
-              }}
-              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === tab
-                  ? 'text-foreground border-accent'
-                  : 'text-muted-foreground border-transparent hover:text-foreground'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Subcategory Pills */}
-      {subcategories.length > 0 && (
-        <div className="px-4 py-3 border-b border-border">
-          <div className="flex flex-wrap gap-2">
-            {subcategories.map(subcat => (
-              <button
-                key={subcat}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveSubcategory(activeSubcategory === subcat ? null : subcat);
-                }}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                  activeSubcategory === subcat
-                    ? 'bg-accent text-accent-foreground border-accent'
-                    : 'bg-muted/50 text-foreground border-border hover:bg-muted'
-                }`}
-              >
-                {subcat}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Media Sites List */}
-      <ScrollArea className="max-h-[350px]">
-        <div className="py-2">
-          {dropdownMediaSites.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No media outlets found
-            </div>
-          ) : (
-            dropdownMediaSites.map(site => (
-              <button
-                key={site.id}
-                onClick={() => handleSiteClick(site, 'media')}
-                className="flex items-center gap-4 w-full px-4 py-3 text-left hover:bg-muted transition-colors"
-              >
-                <img
-                  src={site.favicon || getFaviconUrl(site.link)}
-                  alt={site.name}
-                  className="h-12 w-12 rounded-xl bg-muted object-contain flex-shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">{site.name}</p>
-                  <p className="text-sm text-accent truncate">{extractDomain(site.link)}</p>
-                </div>
-                <span className="text-sm font-medium text-foreground flex-shrink-0">
-                  {site.price} USDT
-                </span>
-              </button>
-            ))
-          )}
-        </div>
-      </ScrollArea>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -373,19 +283,15 @@ const Landing = () => {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           
-          <div className="hidden md:flex flex-1 max-w-xl mx-8" ref={searchRef}>
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search media outlets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setShowDropdown(true)}
-                className="pl-10 bg-muted/50 border-border focus:bg-card"
-              />
-              {showDropdown && renderSearchDropdown()}
-            </div>
+          {/* Search Trigger */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
           </div>
           
           <Button 
@@ -397,21 +303,144 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Mobile search */}
+      {/* Mobile search trigger */}
       <div className="md:hidden px-4 py-3 border-b border-border bg-card">
-        <div className="relative" ref={searchRef}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search media outlets..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setShowDropdown(true)}
-            className="pl-10 bg-muted/50 border-border focus:bg-card"
-          />
-          {showDropdown && renderSearchDropdown()}
-        </div>
+        <button
+          onClick={() => setShowSearchModal(true)}
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+        >
+          <Search className="h-4 w-4" />
+          <span>Search media outlets...</span>
+        </button>
       </div>
+
+      {/* TradingView-style Search Modal */}
+      {showSearchModal && (
+        <div className="fixed inset-0 z-[100] bg-background">
+          {/* Search Header */}
+          <div className="border-b border-border bg-card">
+            <div className="flex items-center gap-4 px-4 py-3">
+              <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Search media outlets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent text-lg text-foreground placeholder:text-muted-foreground outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={handleClearSearch}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                onClick={handleCloseSearchModal}
+                className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Search Content */}
+          <div className="h-[calc(100vh-60px)] overflow-hidden">
+            {/* Category Tabs */}
+            <div className="border-b border-border bg-card">
+              <div className="flex gap-6 px-4">
+                {CATEGORY_TABS.map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => handleTabChange(tab)}
+                    className={`py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                      activeTab === tab
+                        ? 'text-foreground border-foreground'
+                        : 'text-muted-foreground border-transparent hover:text-foreground'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Subcategory Pills */}
+            {subcategories.length > 0 && (
+              <div className="border-b border-border bg-card px-4 py-3">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setActiveSubcategory(null)}
+                    className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
+                      !activeSubcategory
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-transparent text-foreground border-border hover:bg-muted'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {subcategories.map(subcat => (
+                    <button
+                      key={subcat}
+                      onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
+                      className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
+                        activeSubcategory === subcat
+                          ? 'bg-foreground text-background border-foreground'
+                          : 'bg-transparent text-foreground border-border hover:bg-muted'
+                      }`}
+                    >
+                      {subcat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Results List */}
+            <ScrollArea className="h-full">
+              <div className="pb-20">
+                {modalMediaSites.length === 0 ? (
+                  <div className="px-4 py-12 text-center text-muted-foreground">
+                    No media outlets found
+                  </div>
+                ) : (
+                  modalMediaSites.map(site => (
+                    <button
+                      key={site.id}
+                      onClick={() => handleSiteClick(site, 'media')}
+                      className="flex items-center gap-4 w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50"
+                    >
+                      <img
+                        src={site.favicon || getFaviconUrl(site.link)}
+                        alt={site.name}
+                        className="h-10 w-10 rounded-lg bg-muted object-contain flex-shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-foreground">{site.name}</span>
+                          <span className="text-muted-foreground truncate">{extractDomain(site.link)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className="text-xs text-muted-foreground">{site.publication_format.toLowerCase()}</span>
+                        <span className="text-sm font-medium text-foreground">{site.price} USDT</span>
+                        {site.agency && (
+                          <span className="text-xs text-muted-foreground">{site.agency}</span>
+                        )}
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <main className="container mx-auto px-4 py-8">
