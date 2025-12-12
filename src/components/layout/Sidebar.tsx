@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase, ChevronDown, Zap } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase, ChevronDown, Zap, ShoppingBag } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -29,16 +29,16 @@ const getNavigation = (isAdmin: boolean) => {
       { id: 'articles', label: 'Articles', icon: FileText }
     ]
   }, {
-    id: 'orders',
-    label: 'My Orders',
-    icon: Package
-  }, {
-    id: 'my-requests',
-    label: 'My Requests',
-    icon: MessageSquare
+    id: 'b2b-media-buying',
+    label: 'B2B Media Buying',
+    icon: ShoppingBag,
+    submenu: [
+      { id: 'orders', label: 'My Orders', icon: Package },
+      { id: 'my-requests', label: 'My Requests', icon: MessageSquare }
+    ]
   }];
   if (isAdmin) {
-    return [...base.filter(item => item.id !== 'orders' && item.id !== 'my-requests'), {
+    return [...base.filter(item => item.id !== 'b2b-media-buying'), {
       id: 'admin-orders',
       label: 'Order Management',
       icon: Package
@@ -91,16 +91,25 @@ export function Sidebar({
   } = useAuth();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
-  const [instantPublishingOpen, setInstantPublishingOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const navigation = getNavigation(isAdmin);
 
-  // Auto-expand Instant Publishing if current view is one of its submenu items
+  // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
-    const submenuIds = ['headlines', 'compose', 'articles'];
-    if (submenuIds.includes(currentView)) {
-      setInstantPublishingOpen(true);
+    const instantPublishingIds = ['headlines', 'compose', 'articles'];
+    const b2bMediaBuyingIds = ['orders', 'my-requests'];
+    
+    if (instantPublishingIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
+    }
+    if (b2bMediaBuyingIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'b2b-media-buying': true }));
     }
   }, [currentView]);
+
+  const toggleMenu = (menuId: string) => {
+    setExpandedMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
+  };
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
@@ -183,6 +192,7 @@ export function Sidebar({
               const isActive = currentView === item.id || isSubmenuActive;
 
               if (hasSubmenu) {
+                const isExpanded = expandedMenus[item.id] || false;
                 return (
                   <div key={item.id}>
                     <Button
@@ -191,16 +201,16 @@ export function Sidebar({
                         "w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                         isActive && "text-[#3872e0] font-medium"
                       )}
-                      onClick={() => setInstantPublishingOpen(!instantPublishingOpen)}
+                      onClick={() => toggleMenu(item.id)}
                     >
                       <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                       <span className="truncate flex-1 text-left">{item.label}</span>
                       <ChevronDown className={cn(
                         "h-4 w-4 transition-transform duration-200",
-                        instantPublishingOpen && "rotate-180"
+                        isExpanded && "rotate-180"
                       )} />
                     </Button>
-                    {instantPublishingOpen && (
+                    {isExpanded && (
                       <div className="ml-4 mt-1 space-y-1">
                         {item.submenu?.map(subItem => {
                           const SubIcon = subItem.icon;
