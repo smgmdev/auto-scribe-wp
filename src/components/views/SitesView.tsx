@@ -1040,6 +1040,9 @@ export function SitesView() {
                   {site.price} USD
                 </Badge>
               )}
+              <Badge variant="outline" className="text-xs min-w-[60px] text-center justify-center">
+                {site.publication_format}
+              </Badge>
               {site.agency && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span>via</span>
@@ -1056,9 +1059,6 @@ export function SitesView() {
                   })()}
                 </div>
               )}
-              <Badge variant="outline" className="text-xs min-w-[60px] text-center justify-center">
-                {site.publication_format}
-              </Badge>
               {isAdmin && (
                 <Button 
                   variant="ghost" 
