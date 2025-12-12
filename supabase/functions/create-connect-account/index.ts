@@ -53,11 +53,13 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     // Create Stripe Connect Express account with country
+    // Some countries require card_payments capability along with transfers
     const account = await stripe.accounts.create({
       type: "express",
       country: country || "US", // Default to US if not provided
       email: email,
       capabilities: {
+        card_payments: { requested: true },
         transfers: { requested: true },
       },
       business_type: "company",
