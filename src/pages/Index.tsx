@@ -10,6 +10,9 @@ import { SettingsView } from '@/components/views/SettingsView';
 import { AccountView } from '@/components/views/AccountView';
 import { AdminCreditsView } from '@/components/views/AdminCreditsView';
 import { AdminUsersView } from '@/components/views/AdminUsersView';
+import { AdminAgenciesView } from '@/components/views/AdminAgenciesView';
+import { OrdersView } from '@/components/views/OrdersView';
+import { AdminOrdersView } from '@/components/views/AdminOrdersView';
 import { useAppStore } from '@/stores/appStore';
 
 interface LocationState {
@@ -18,7 +21,7 @@ interface LocationState {
   targetSubcategory?: string;
 }
 
-const views = {
+const views: Record<string, React.ComponentType> = {
   dashboard: DashboardView,
   sites: SitesView,
   headlines: HeadlinesView,
@@ -28,6 +31,9 @@ const views = {
   account: AccountView,
   'admin-credits': AdminCreditsView,
   'admin-users': AdminUsersView,
+  'admin-agencies': AdminAgenciesView,
+  'orders': OrdersView,
+  'admin-orders': AdminOrdersView,
 };
 
 const Index = () => {
