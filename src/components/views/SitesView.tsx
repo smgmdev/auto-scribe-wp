@@ -1415,7 +1415,9 @@ export function SitesView() {
                       const filtered = mediaSites.filter(site => {
                         if (site.category !== category) return false;
                         if (category === 'Global' && activeSubcategory) {
-                          return site.subcategory === activeSubcategory;
+                          if (!site.subcategory) return false;
+                          const subcats = site.subcategory.split(',').map(s => s.trim());
+                          return subcats.includes(activeSubcategory);
                         }
                         return true;
                       });
