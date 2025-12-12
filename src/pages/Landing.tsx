@@ -181,20 +181,36 @@ const Landing = () => {
     return filtered;
   }, [mediaSites, activeTab, activeSubcategory, searchQuery]);
 
+  // Helper function to shuffle array randomly
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const randomizedWpSites = useMemo(() => {
+    return shuffleArray(filteredWpSites);
+  }, [filteredWpSites]);
+
   const chinaSites = useMemo(() => {
-    return mediaSites.filter(site => {
+    const filtered = mediaSites.filter(site => {
       if (!site.subcategory) return false;
       const subcats = site.subcategory.toLowerCase().split(',').map(s => s.trim());
       return subcats.includes('china');
     });
+    return shuffleArray(filtered);
   }, [mediaSites]);
 
   const businessSites = useMemo(() => {
-    return mediaSites.filter(site => {
+    const filtered = mediaSites.filter(site => {
       if (!site.subcategory) return false;
       const subcats = site.subcategory.toLowerCase().split(',').map(s => s.trim());
       return subcats.includes('business and finance') || subcats.includes('business');
     });
+    return shuffleArray(filtered);
   }, [mediaSites]);
 
   const extractDomain = (url: string) => {
@@ -291,16 +307,22 @@ const Landing = () => {
     title: string,
     sites: (WPSite | MediaSite)[],
     type: 'wp' | 'media',
-    seeAllSubcategory?: string
+    seeAllConfig?: { tab?: string; subcategory?: string }
   ) => {
     if (sites.length === 0) return null;
 
-    const displaySites = seeAllSubcategory ? sites.slice(0, 12) : sites;
-    const hasMore = seeAllSubcategory && sites.length > 12;
+    const displaySites = seeAllConfig ? sites.slice(0, 12) : sites;
 
     const handleSeeAll = () => {
-      // Navigate to auth with state indicating target subcategory
-      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'sites', targetSubcategory: seeAllSubcategory } });
+      // Navigate to auth with state indicating target tab and/or subcategory
+      navigate('/auth', { 
+        state: { 
+          redirectTo: '/dashboard', 
+          targetView: 'sites', 
+          targetTab: seeAllConfig?.tab,
+          targetSubcategory: seeAllConfig?.subcategory 
+        } 
+      });
     };
 
     return (
@@ -309,7 +331,7 @@ const Landing = () => {
           <h2 className="text-xl font-semibold text-foreground">
             {title}
           </h2>
-          {seeAllSubcategory && (
+          {seeAllConfig && (
             <button
               onClick={handleSeeAll}
               className="text-sm text-accent hover:text-accent/80 transition-colors"
@@ -549,9 +571,9 @@ const Landing = () => {
           </div>
         ) : (
           <>
-            {renderSection('Instant Self Publishing Media Library', filteredWpSites, 'wp')}
-            {renderSection('Global Media Library China', chinaSites, 'media', 'China')}
-            {renderSection('Global Media Library Business', businessSites, 'media', 'Business and Finance')}
+            {renderSection('Instant Self Publishing Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
+            {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
+            {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
           </>
         )}
       </main>
