@@ -1034,29 +1034,38 @@ export function SitesView() {
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Badge variant="secondary" className="min-w-[70px] justify-center text-xs">
-                {site.price > 0 ? `${site.price} USD` : 'Free'}
-              </Badge>
-              <Badge variant="outline" className="min-w-[90px] justify-center text-xs">
-                {site.publication_format}
-              </Badge>
-              {site.agency && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span>via</span>
-                  <span className="text-foreground">{site.agency}</span>
-                  {(() => {
-                    const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
-                    return agencySite?.favicon ? (
-                      <img 
-                        src={agencySite.favicon} 
-                        alt={site.agency} 
-                        className="h-4 w-4 object-contain rounded-full"
-                      />
-                    ) : null;
-                  })()}
-                </div>
-              )}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Fixed width container for price badge */}
+              <div className="w-[75px] flex justify-end">
+                <Badge variant="secondary" className="w-full justify-center text-xs">
+                  {site.price > 0 ? `${site.price} USD` : 'Free'}
+                </Badge>
+              </div>
+              {/* Fixed width container for format badge */}
+              <div className="w-[100px] flex justify-start">
+                <Badge variant="outline" className="w-full justify-center text-xs">
+                  {site.publication_format}
+                </Badge>
+              </div>
+              {/* Fixed width container for agency info */}
+              <div className="w-[150px] flex items-center gap-1.5 text-xs text-muted-foreground">
+                {site.agency ? (
+                  <>
+                    <span>via</span>
+                    <span className="text-foreground truncate">{site.agency}</span>
+                    {(() => {
+                      const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
+                      return agencySite?.favicon ? (
+                        <img 
+                          src={agencySite.favicon} 
+                          alt={site.agency} 
+                          className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                        />
+                      ) : null;
+                    })()}
+                  </>
+                ) : null}
+              </div>
               {isAdmin && (
                 <Button 
                   variant="ghost" 
