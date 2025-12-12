@@ -39,13 +39,9 @@ const getNavigation = (isAdmin: boolean) => {
     id: 'my-requests',
     label: 'My Requests',
     icon: MessageSquare
-  }, {
-    id: 'agency-application',
-    label: 'Apply for Agency',
-    icon: Briefcase
   }];
   if (isAdmin) {
-    return [...base.filter(item => item.id !== 'orders' && item.id !== 'my-requests' && item.id !== 'agency-application'), {
+    return [...base.filter(item => item.id !== 'orders' && item.id !== 'my-requests'), {
       id: 'admin-orders',
       label: 'Order Management',
       icon: Package
@@ -177,17 +173,23 @@ export function Sidebar({
             {navigation.map(item => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            const showStatusBadge = item.id === 'agency-application' && applicationStatus;
             return <Button key={item.id} variant="ghost" className={cn("w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", isActive && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(item.id)}>
                   <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                   <span className="truncate">{item.label}</span>
-                  {showStatusBadge && getStatusBadge(applicationStatus)}
                 </Button>;
           })}
           </nav>
 
           {/* Account & Sign Out */}
           <div className="border-t border-sidebar-border p-4 space-y-1">
+            {/* Upgrade to Agency - Only for non-admin users */}
+            {!isAdmin && (
+              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'agency-application' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('agency-application')}>
+                <Briefcase className={cn("h-5 w-5 flex-shrink-0", currentView === 'agency-application' && "text-[#3872e0]")} />
+                <span className="truncate">Upgrade to Agency</span>
+                {applicationStatus && getStatusBadge(applicationStatus)}
+              </Button>
+            )}
             <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
               <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
               Account Settings
