@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, ShoppingCart } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, FileText } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from '@/hooks/use-toast';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
+import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
 import type { SEOPlugin } from '@/types';
 
 interface SiteCredit {
@@ -105,8 +106,9 @@ export function SitesView() {
   const [isDragging, setIsDragging] = useState(false);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   
-  // Payment state
-  const [isPurchasing, setIsPurchasing] = useState(false);
+  // Brief dialog state
+  const [briefDialogOpen, setBriefDialogOpen] = useState(false);
+  const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
 
   // Agency form
   const [editingAgencyId, setEditingAgencyId] = useState<string | null>(null);
@@ -130,59 +132,18 @@ export function SitesView() {
     });
   };
 
-  // Handle purchase/escrow payment
-  const handlePurchase = async (mediaSite: MediaSite) => {
+  // Handle opening brief submission
+  const handleRequestService = (mediaSite: MediaSite) => {
     if (isAdmin) {
-      // Admins don't need to pay
       toast({
         title: 'Admin access',
         description: 'As an admin, you have direct access to all media sites.',
       });
       return;
     }
-
-    if (!mediaSite.agency) {
-      toast({
-        variant: 'destructive',
-        title: 'No agency assigned',
-        description: 'This media site does not have an agency configured for payments.',
-      });
-      return;
-    }
-
-    setIsPurchasing(true);
-
-    try {
-      const response = await supabase.functions.invoke('create-escrow-payment', {
-        body: { media_site_id: mediaSite.id }
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-
-      if (response.data?.url) {
-        // Open Stripe Checkout in new tab
-        window.open(response.data.url, '_blank');
-        toast({
-          title: 'Redirecting to checkout',
-          description: 'Complete your payment in the new tab.',
-        });
-      }
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Payment failed',
-        description: error.message,
-      });
-    } finally {
-      setIsPurchasing(false);
-      setSelectedMediaSite(null);
-    }
+    setSelectedForBrief(mediaSite);
+    setBriefDialogOpen(true);
+    setSelectedMediaSite(null);
   };
 
   // WordPress form
@@ -2101,15 +2062,10 @@ export function SitesView() {
                 {selectedMediaSite.category !== 'Agencies/People' && (
                   <Button 
                     variant="accent" 
-                    onClick={() => handlePurchase(selectedMediaSite)}
-                    disabled={isPurchasing}
+                    onClick={() => handleRequestService(selectedMediaSite)}
                   >
-                    {isPurchasing ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                    )}
-                    {isPurchasing ? 'Processing...' : `Buy for $${selectedMediaSite.price}`}
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit Brief - ${selectedMediaSite.price}
                   </Button>
                 )}
               </div>
@@ -2117,6 +2073,17 @@ export function SitesView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Brief Submission Dialog */}
+      <BriefSubmissionDialog
+        open={briefDialogOpen}
+        onOpenChange={setBriefDialogOpen}
+        mediaSite={selectedForBrief}
+        onSuccess={() => {
+          setSelectedForBrief(null);
+          toast({ title: 'Brief submitted! View it in My Requests.' });
+        }}
+      />
     </div>
   );
 }

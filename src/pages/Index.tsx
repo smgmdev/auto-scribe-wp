@@ -13,6 +13,8 @@ import { AdminUsersView } from '@/components/views/AdminUsersView';
 import { AdminAgenciesView } from '@/components/views/AdminAgenciesView';
 import { OrdersView } from '@/components/views/OrdersView';
 import { AdminOrdersView } from '@/components/views/AdminOrdersView';
+import { MyRequestsView } from '@/components/views/MyRequestsView';
+import { AdminEngagementsView } from '@/components/views/AdminEngagementsView';
 import { useAppStore } from '@/stores/appStore';
 
 interface LocationState {
@@ -34,6 +36,8 @@ const views: Record<string, React.ComponentType> = {
   'admin-agencies': AdminAgenciesView,
   'orders': OrdersView,
   'admin-orders': AdminOrdersView,
+  'my-requests': MyRequestsView,
+  'admin-engagements': AdminEngagementsView,
 };
 
 const Index = () => {

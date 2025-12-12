@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.mark-delivered]
 verify_jwt = true
+
+[functions.agency-auth]
+verify_jwt = false
+
+[functions.agency-requests]
+verify_jwt = false
