@@ -609,37 +609,41 @@ const Landing = () => {
               
               {/* Show price and format only for non-agency sites */}
               {(selectedSite as MediaSite).category !== 'Agencies/People' && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <Badge variant="outline" className="text-accent border-accent/30">
-                        {(selectedSite as MediaSite).price} USD
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Format</p>
-                      <Badge variant="secondary">
-                        {(selectedSite as MediaSite).publication_format}
-                      </Badge>
-                    </div>
+                <div className="flex gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <Badge variant="outline" className="text-accent border-accent/30">
+                      {(selectedSite as MediaSite).price} USD
+                    </Badge>
                   </div>
-                  
-                  {(selectedSite as MediaSite).category && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Category</p>
-                        <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
-                      </div>
-                      {(selectedSite as MediaSite).subcategory && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Subcategory</p>
-                          <p className="text-foreground">{(selectedSite as MediaSite).subcategory}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Format</p>
+                    <Badge variant="secondary">
+                      {(selectedSite as MediaSite).publication_format}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+              
+              {/* Show country for agencies */}
+              {(selectedSite as MediaSite).category === 'Agencies/People' && (selectedSite as any).country && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Country</p>
+                  <p className="text-foreground">{(selectedSite as any).country}</p>
+                </div>
+              )}
+              
+              {(selectedSite as MediaSite).category && (selectedSite as MediaSite).category !== 'Agencies/People' && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Category</p>
+                  <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
+                </div>
+              )}
+              {(selectedSite as MediaSite).subcategory && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Subcategory</p>
+                  <p className="text-foreground">{(selectedSite as MediaSite).subcategory}</p>
+                </div>
               )}
               {(selectedSite as MediaSite).agency && (
                 <div>
