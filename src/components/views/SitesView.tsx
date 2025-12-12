@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, ShoppingCart } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -104,6 +104,9 @@ export function SitesView() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Payment state
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   // Agency form
   const [editingAgencyId, setEditingAgencyId] = useState<string | null>(null);
@@ -125,6 +128,61 @@ export function SitesView() {
       }
       return next;
     });
+  };
+
+  // Handle purchase/escrow payment
+  const handlePurchase = async (mediaSite: MediaSite) => {
+    if (isAdmin) {
+      // Admins don't need to pay
+      toast({
+        title: 'Admin access',
+        description: 'As an admin, you have direct access to all media sites.',
+      });
+      return;
+    }
+
+    if (!mediaSite.agency) {
+      toast({
+        variant: 'destructive',
+        title: 'No agency assigned',
+        description: 'This media site does not have an agency configured for payments.',
+      });
+      return;
+    }
+
+    setIsPurchasing(true);
+
+    try {
+      const response = await supabase.functions.invoke('create-escrow-payment', {
+        body: { media_site_id: mediaSite.id }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
+      if (response.data?.url) {
+        // Open Stripe Checkout in new tab
+        window.open(response.data.url, '_blank');
+        toast({
+          title: 'Redirecting to checkout',
+          description: 'Complete your payment in the new tab.',
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Payment failed',
+        description: error.message,
+      });
+    } finally {
+      setIsPurchasing(false);
+      setSelectedMediaSite(null);
+    }
   };
 
   // WordPress form
@@ -2040,12 +2098,20 @@ export function SitesView() {
                 <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
                   Close
                 </Button>
-                <Button 
-                  variant="accent" 
-                  onClick={() => window.open(selectedMediaSite.link, '_blank')}
-                >
-                  Buy
-                </Button>
+                {selectedMediaSite.category !== 'Agencies/People' && (
+                  <Button 
+                    variant="accent" 
+                    onClick={() => handlePurchase(selectedMediaSite)}
+                    disabled={isPurchasing}
+                  >
+                    {isPurchasing ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                    )}
+                    {isPurchasing ? 'Processing...' : `Buy for $${selectedMediaSite.price}`}
+                  </Button>
+                )}
               </div>
             </>
           )}
