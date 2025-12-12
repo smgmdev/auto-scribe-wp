@@ -613,7 +613,7 @@ const Landing = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Price</p>
                     <Badge variant="outline" className="text-accent border-accent/30">
-                      {(selectedSite as MediaSite).price} USDT
+                      {(selectedSite as MediaSite).price} USD
                     </Badge>
                   </div>
                   <div>
@@ -634,15 +634,17 @@ const Landing = () => {
               )}
               
               {(selectedSite as MediaSite).category && (selectedSite as MediaSite).category !== 'Agencies/People' && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Category</p>
-                  <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
-                </div>
-              )}
-              {(selectedSite as MediaSite).subcategory && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Subcategory</p>
-                  <p className="text-foreground">{(selectedSite as MediaSite).subcategory}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Category</p>
+                    <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
+                  </div>
+                  {(selectedSite as MediaSite).subcategory && (
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Subcategory</p>
+                      <p className="text-foreground">{(selectedSite as MediaSite).subcategory}</p>
+                    </div>
+                  )}
                 </div>
               )}
               {(selectedSite as MediaSite).agency && (
