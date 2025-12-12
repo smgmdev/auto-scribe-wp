@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchCategories, fetchTags, createTag, publishArticle, updateArticle as updateWPArticle, uploadMedia, updateMediaMetadata, fetchPostSEOData } from '@/lib/wordpress-api';
+import { getFaviconUrl } from '@/lib/favicon';
 import type { ArticleTone, FeaturedImage, WPCategory, WPTag } from '@/types';
 
 interface SiteCredit {
@@ -809,9 +810,7 @@ export function ComposeView() {
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Select a media site">
                     {selectedSite && currentSite && <div className="flex items-center gap-2">
-                        <img src={currentSite.favicon || `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`} alt="" className="h-4 w-4 rounded-sm" onError={e => {
-                    (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(currentSite.url).hostname}&sz=32`;
-                  }} />
+                        <img src={getFaviconUrl(currentSite.url, 32)} alt="" className="h-4 w-4 rounded-sm" />
                         <span>{currentSite.name}</span>
                         <span className="ml-auto flex items-center gap-1 text-muted-foreground">
                           <Coins className="h-3 w-3" />
@@ -835,12 +834,9 @@ export function ComposeView() {
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={site.favicon || `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`} 
+                              src={getFaviconUrl(site.url, 32)} 
                               alt="" 
                               className="h-4 w-4 rounded-sm" 
-                              onError={e => {
-                                (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32`;
-                              }} 
                             />
                             <span>{site.name}</span>
                           </div>

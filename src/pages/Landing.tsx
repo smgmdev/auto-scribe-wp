@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { getFaviconUrl } from '@/lib/favicon';
 import amlogo from '@/assets/amlogo.png';
 
 interface Site {
@@ -74,11 +75,6 @@ const Landing = () => {
     } catch {
       return url;
     }
-  };
-
-  const getFaviconUrl = (siteUrl: string) => {
-    const domain = extractDomain(siteUrl);
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
   };
 
   return (
