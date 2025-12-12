@@ -1035,12 +1035,10 @@ export function SitesView() {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-1 justify-end">
-              {/* Fixed width container for price badge */}
-              <div className="w-[75px] flex justify-end">
-                <Badge variant="secondary" className="w-full justify-center text-xs">
-                  {site.price > 0 ? `${site.price} USD` : 'Free'}
-                </Badge>
-              </div>
+              {/* Price badge */}
+              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                {site.price > 0 ? `${site.price} USD` : 'Free'}
+              </Badge>
               {/* Fixed width container for format */}
               <div className="w-[100px] flex justify-start">
                 <span className="text-xs text-muted-foreground">{site.publication_format}</span>
