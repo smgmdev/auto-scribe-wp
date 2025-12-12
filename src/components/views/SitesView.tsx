@@ -89,6 +89,7 @@ export function SitesView() {
   const [addingTagForSite, setAddingTagForSite] = useState<string | null>(null);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
+  const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -1302,8 +1303,7 @@ export function SitesView() {
                           key={site.id}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
                           onClick={() => {
-                            setActiveMediaCategory(site.category);
-                            setActiveSubcategory(site.subcategory);
+                            setSelectedMediaSite(site);
                             setSearchQuery('');
                             setShowSearchDropdown(false);
                           }}
@@ -1855,6 +1855,143 @@ export function SitesView() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Media Site Detail Dialog */}
+      <Dialog open={!!selectedMediaSite} onOpenChange={(open) => !open && setSelectedMediaSite(null)}>
+        <DialogContent className="sm:max-w-lg">
+          {selectedMediaSite && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                    {selectedMediaSite.favicon ? (
+                      <img 
+                        src={selectedMediaSite.favicon} 
+                        alt={`${selectedMediaSite.name} logo`} 
+                        className="h-10 w-10 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <Globe className="h-8 w-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <DialogTitle className="text-xl">{selectedMediaSite.name}</DialogTitle>
+                    <DialogDescription className="truncate">
+                      <a 
+                        href={selectedMediaSite.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:text-accent flex items-center gap-1"
+                      >
+                        {selectedMediaSite.link.replace(/^https?:\/\//, '')}
+                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      </a>
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-4 mt-4">
+                {/* Price & Format */}
+                <div className="flex flex-wrap gap-2">
+                  {selectedMediaSite.price > 0 && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Coins className="h-3 w-3" />
+                      ${selectedMediaSite.price}
+                    </Badge>
+                  )}
+                  <Badge variant="outline">{selectedMediaSite.publication_format}</Badge>
+                  <Badge variant="outline">{selectedMediaSite.category}</Badge>
+                  {selectedMediaSite.subcategory && (
+                    <Badge variant="outline">{selectedMediaSite.subcategory}</Badge>
+                  )}
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Google Index</p>
+                    <p className="font-medium">{selectedMediaSite.google_index}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Sponsor Marks</p>
+                    <p className="font-medium">{selectedMediaSite.marks}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Publishing Time</p>
+                    <p className="font-medium">{selectedMediaSite.publishing_time}</p>
+                  </div>
+                  {selectedMediaSite.agency && (
+                    <div>
+                      <p className="text-muted-foreground">Agency</p>
+                      <p className="font-medium">{selectedMediaSite.agency}</p>
+                    </div>
+                  )}
+                  {selectedMediaSite.max_words && (
+                    <div>
+                      <p className="text-muted-foreground">Max Words</p>
+                      <p className="font-medium">{selectedMediaSite.max_words}</p>
+                    </div>
+                  )}
+                  {selectedMediaSite.max_images && (
+                    <div>
+                      <p className="text-muted-foreground">Max Images</p>
+                      <p className="font-medium">{selectedMediaSite.max_images}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* About Section */}
+                {selectedMediaSite.about && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-sm text-muted-foreground mb-1">About</p>
+                    <p className="text-sm">{selectedMediaSite.about}</p>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {siteTags[selectedMediaSite.id] && siteTags[selectedMediaSite.id].length > 0 && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-sm text-muted-foreground mb-2">Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {siteTags[selectedMediaSite.id].map(tag => (
+                        <Badge 
+                          key={tag.id} 
+                          variant="outline" 
+                          className="text-xs"
+                          style={{ 
+                            borderColor: `${tag.color}50`,
+                            color: tag.color,
+                            backgroundColor: `${tag.color}15`
+                          }}
+                        >
+                          {tag.label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
+                  Close
+                </Button>
+                <Button 
+                  variant="accent" 
+                  onClick={() => window.open(selectedMediaSite.link, '_blank')}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Visit Site
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
