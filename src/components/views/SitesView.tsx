@@ -751,12 +751,12 @@ export function SitesView() {
       {isAdmin && (
         <div className="absolute top-0 right-0">
           {site.connected ? (
-            <div className="flex items-center gap-px px-1 py-px bg-success/10 rounded-bl text-success">
+            <div className="flex items-center gap-px px-1 py-px bg-success/10 rounded-bl rounded-tr-[calc(var(--radius)-1px)] text-success">
               <CheckCircle className="h-2 w-2" />
               <span className="text-[8px] leading-none">Connected</span>
             </div>
           ) : (
-            <div className="flex items-center gap-px px-1 py-px bg-destructive/10 rounded-bl text-destructive">
+            <div className="flex items-center gap-px px-1 py-px bg-destructive/10 rounded-bl rounded-tr-[calc(var(--radius)-1px)] text-destructive">
               <XCircle className="h-2 w-2" />
               <span className="text-[8px] leading-none">Disconnected</span>
             </div>
