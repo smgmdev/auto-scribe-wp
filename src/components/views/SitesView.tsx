@@ -413,6 +413,12 @@ export function SitesView() {
           link = `https://${link}`;
         }
         
+        // Map agencies/people column (also check for 'pr firm' for backwards compatibility)
+        const agency = row['agencies/people'] || row['pr firm'] || null;
+        
+        // Map details column to about field
+        const about = row['details'] || null;
+        
         return {
           name: row['title'] || '',
           link,
@@ -421,7 +427,8 @@ export function SitesView() {
           publication_format: row['publication format'] || 'Article',
           category: row['tab'] || 'Global',
           subcategory: primarySubcategory,
-          agency: row['pr firm'] || null,
+          agency: agency,
+          about: about,
           google_index: 'Regular',
           marks: 'No',
           publishing_time: '24h',
