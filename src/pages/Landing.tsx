@@ -450,15 +450,13 @@ const Landing = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3">
                               <span className="font-semibold text-foreground">{site.name}</span>
-                              <span className="text-muted-foreground truncate">{extractDomain(site.link)}</span>
+                              <span className="text-xs text-muted-foreground truncate">{extractDomain(site.link)}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-xs text-muted-foreground">{site.publication_format.toLowerCase()}</span>
-                            <span className="text-sm font-medium text-foreground">{site.price} USDT</span>
-                            {site.agency && (
-                              <span className="text-xs text-muted-foreground">{site.agency}</span>
-                            )}
+                          <div className="flex items-center gap-4 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground w-20">{site.publication_format.toLowerCase()}</span>
+                            <span className="text-xs font-medium text-foreground w-16 text-right">{site.price} USD</span>
+                            <span className="text-xs text-muted-foreground w-24 truncate">{site.agency || '-'}</span>
                           </div>
                         </button>
                       ))
