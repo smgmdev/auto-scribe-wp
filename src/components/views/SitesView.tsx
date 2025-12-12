@@ -1347,17 +1347,30 @@ export function SitesView() {
                 setActiveMediaCategory(val);
                 setActiveSubcategory(null);
               }}>
-                <TabsList className="w-full max-w-lg">
+                <div className="flex gap-6 border-b border-border">
                   {MEDIA_CATEGORIES.map(cat => (
-                    <TabsTrigger key={cat} value={cat} className="flex-1">{cat}</TabsTrigger>
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setActiveMediaCategory(cat);
+                        setActiveSubcategory(null);
+                      }}
+                      className={`pb-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                        activeMediaCategory === cat
+                          ? 'text-foreground border-foreground'
+                          : 'text-muted-foreground border-transparent hover:text-foreground'
+                      }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
-                </TabsList>
+                </div>
 
                 {MEDIA_CATEGORIES.map(category => (
-                  <TabsContent key={category} value={category} className="mt-4">
+                  <TabsContent key={category} value={category} className="mt-3">
                     {/* Subcategories for Global */}
                     {category === 'Global' && (
-                      <div className="mb-4 flex flex-wrap gap-2">
+                      <div className="mb-3 flex flex-wrap gap-2">
                         <Button
                           variant={activeSubcategory === null ? "secondary" : "ghost"}
                           size="sm"
