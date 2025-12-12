@@ -744,9 +744,26 @@ export function SitesView() {
   const renderWPSiteCard = (site: any, index: number) => (
     <Card 
       key={site.id} 
-      className="group hover:shadow-md transition-all duration-300" 
+      className="group hover:shadow-md transition-all duration-300 relative" 
       style={{ animationDelay: `${index * 50}ms` }}
     >
+      {/* Connected status - top right corner (admin only) */}
+      {isAdmin && (
+        <div className="absolute top-0 right-0">
+          {site.connected ? (
+            <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-success/10 rounded-bl text-success">
+              <CheckCircle className="h-2.5 w-2.5" />
+              <span className="text-[10px]">Connected</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-destructive/10 rounded-bl text-destructive">
+              <XCircle className="h-2.5 w-2.5" />
+              <span className="text-[10px]">Disconnected</span>
+            </div>
+          )}
+        </div>
+      )}
+
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -831,22 +848,9 @@ export function SitesView() {
             )}
 
             {isAdmin && (
-              <>
-                <Badge variant="outline" className="text-xs">
-                  {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                </Badge>
-                {site.connected ? (
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="h-3.5 w-3.5 text-success" />
-                    <span className="text-xs text-success">Connected</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <XCircle className="h-3.5 w-3.5 text-destructive" />
-                    <span className="text-xs text-destructive">Disconnected</span>
-                  </div>
-                )}
-              </>
+              <Badge variant="outline" className="text-xs">
+                {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+              </Badge>
             )}
 
             {isAdmin && (
