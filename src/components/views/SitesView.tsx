@@ -408,32 +408,44 @@ export function SitesView() {
         const primarySubcategory = subcategories?.[0] || null;
         
         // Get the URL and generate favicon
-        let link = row['url'] || '';
+        let link = row['url'] || row['link'] || '';
         if (link && !link.startsWith('http')) {
           link = `https://${link}`;
         }
         
-        // Map agencies/people column (also check for 'pr firm' for backwards compatibility)
-        const agency = row['agencies/people'] || row['pr firm'] || null;
+        // Map agencies/people column (check multiple possible column names)
+        const agency = row['agencies/people'] || row['agency/people'] || row['agency'] || row['pr firm'] || row['people'] || null;
         
-        // Map details column to about field
-        const about = row['details'] || null;
+        // Map details column to about field (check multiple possible column names)
+        const about = row['details'] || row['about'] || row['description'] || null;
+        
+        // Map other fields with fallbacks
+        const name = row['title'] || row['name'] || row['site'] || '';
+        const price = parseInt(row['usd price'] || row['price'] || row['usd'] || '0') || 0;
+        const favicon = row['logo'] || row['favicon'] || row['icon'] || getFaviconUrl(link);
+        const publicationFormat = row['publication format'] || row['format'] || 'Article';
+        const category = row['tab'] || row['category'] || 'Global';
+        const googleIndex = row['google index'] || row['index'] || 'Regular';
+        const marks = row['marks'] || row['sponsor marks'] || 'No';
+        const publishingTime = row['publishing time'] || row['time'] || '24h';
+        const maxWords = row['max words'] ? parseInt(row['max words']) : null;
+        const maxImages = row['max images'] ? parseInt(row['max images']) : null;
         
         return {
-          name: row['title'] || '',
+          name,
           link,
-          price: parseInt(row['usd price']) || 0,
-          favicon: row['logo'] || getFaviconUrl(link),
-          publication_format: row['publication format'] || 'Article',
-          category: row['tab'] || 'Global',
+          price,
+          favicon,
+          publication_format: publicationFormat,
+          category,
           subcategory: primarySubcategory,
-          agency: agency,
-          about: about,
-          google_index: 'Regular',
-          marks: 'No',
-          publishing_time: '24h',
-          max_words: null,
-          max_images: null
+          agency,
+          about,
+          google_index: googleIndex,
+          marks,
+          publishing_time: publishingTime,
+          max_words: maxWords,
+          max_images: maxImages
         };
       }).filter(site => site.name && site.link);
 
