@@ -982,7 +982,7 @@ export function SitesView() {
 
   const renderMediaSiteCard = (site: MediaSite, index: number) => {
     const isExpanded = expandedSites.has(site.id);
-    const hasExpandableContent = site.agency || site.about;
+    const hasExpandableContent = !!site.about;
     
     return (
       <Card 
@@ -1026,16 +1026,20 @@ export function SitesView() {
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {site.price > 0 && (
-                <Badge variant="secondary" className="flex items-center gap-1 min-w-[60px] justify-center">
-                  <Coins className="h-3 w-3" />
-                  ${site.price}
+                <Badge variant="secondary" className="min-w-[60px] justify-center">
+                  {site.price} USD
                 </Badge>
               )}
               <Badge variant="outline" className="text-xs min-w-[60px] text-center justify-center">
                 {site.publication_format}
               </Badge>
+              {site.agency && (
+                <Badge variant="outline" className="text-xs text-muted-foreground">
+                  {site.agency}
+                </Badge>
+              )}
               {isAdmin && (
                 <Button 
                   variant="ghost" 
@@ -1059,21 +1063,13 @@ export function SitesView() {
             </div>
           </div>
           
-          {/* Expanded Section with Agency and Details */}
-          {isExpanded && hasExpandableContent && (
-            <div className="mt-3 pt-3 border-t border-border space-y-2">
-              {site.agency && (
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Agency:</span>
-                  <span className="text-xs text-foreground">{site.agency}</span>
-                </div>
-              )}
-              {site.about && (
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Details:</span>
-                  <p className="text-xs text-foreground">{site.about}</p>
-                </div>
-              )}
+          {/* Expanded Section with Details */}
+          {isExpanded && site.about && (
+            <div className="mt-3 pt-3 border-t border-border">
+              <div className="flex items-start gap-2">
+                <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Details:</span>
+                <p className="text-xs text-foreground">{site.about}</p>
+              </div>
             </div>
           )}
         </CardContent>
