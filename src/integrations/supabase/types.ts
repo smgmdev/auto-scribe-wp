@@ -133,6 +133,7 @@ export type Database = {
       }
       media_sites: {
         Row: {
+          about: string | null
           agency: string | null
           category: string
           created_at: string
@@ -151,6 +152,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          about?: string | null
           agency?: string | null
           category?: string
           created_at?: string
@@ -169,6 +171,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          about?: string | null
           agency?: string | null
           category?: string
           created_at?: string
