@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      agency_payouts: {
+        Row: {
+          agency_name: string
+          commission_percentage: number
+          created_at: string
+          email: string | null
+          id: string
+          invite_sent_at: string | null
+          onboarding_complete: boolean
+          stripe_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_name: string
+          commission_percentage?: number
+          created_at?: string
+          email?: string | null
+          id?: string
+          invite_sent_at?: string | null
+          onboarding_complete?: boolean
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_name?: string
+          commission_percentage?: number
+          created_at?: string
+          email?: string | null
+          id?: string
+          invite_sent_at?: string | null
+          onboarding_complete?: boolean
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           categories: number[] | null
@@ -193,6 +229,122 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      orders: {
+        Row: {
+          accepted_at: string | null
+          agency_payout_cents: number
+          amount_cents: number
+          created_at: string
+          delivered_at: string | null
+          delivery_notes: string | null
+          delivery_status: string
+          delivery_url: string | null
+          id: string
+          media_site_id: string
+          paid_at: string | null
+          platform_fee_cents: number
+          released_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          agency_payout_cents?: number
+          amount_cents: number
+          created_at?: string
+          delivered_at?: string | null
+          delivery_notes?: string | null
+          delivery_status?: string
+          delivery_url?: string | null
+          id?: string
+          media_site_id: string
+          paid_at?: string | null
+          platform_fee_cents?: number
+          released_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          agency_payout_cents?: number
+          amount_cents?: number
+          created_at?: string
+          delivered_at?: string | null
+          delivery_notes?: string | null
+          delivery_status?: string
+          delivery_url?: string | null
+          id?: string
+          media_site_id?: string
+          paid_at?: string | null
+          platform_fee_cents?: number
+          released_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_media_site_id_fkey"
+            columns: ["media_site_id"]
+            isOneToOne: false
+            referencedRelation: "media_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_transactions: {
+        Row: {
+          agency_payout_id: string
+          amount_cents: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          order_id: string
+          status: string
+          stripe_transfer_id: string | null
+        }
+        Insert: {
+          agency_payout_id: string
+          amount_cents: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          status?: string
+          stripe_transfer_id?: string | null
+        }
+        Update: {
+          agency_payout_id?: string
+          amount_cents?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          status?: string
+          stripe_transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_transactions_agency_payout_id_fkey"
+            columns: ["agency_payout_id"]
+            isOneToOne: false
+            referencedRelation: "agency_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
