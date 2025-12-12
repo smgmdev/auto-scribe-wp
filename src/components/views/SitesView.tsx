@@ -1359,17 +1359,13 @@ export function SitesView() {
                               {site.category}{site.subcategory ? ` › ${site.subcategory}` : ''}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
                             {site.price > 0 && (
-                              <Badge variant="secondary" className="text-xs">
-                                {site.price} USD
-                              </Badge>
+                              <span>{site.price} USD</span>
                             )}
-                            <Badge variant="outline" className="text-xs">
-                              {site.publication_format}
-                            </Badge>
+                            <span>{site.publication_format}</span>
                             {site.agency && (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1.5">
                                 <span>via</span>
                                 <span className="text-foreground">{site.agency}</span>
                                 {(() => {
