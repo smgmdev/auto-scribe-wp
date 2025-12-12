@@ -427,7 +427,7 @@ export function SitesView() {
         const category = row['tab'] || row['category'] || 'Global';
         const googleIndex = row['google index'] || row['index'] || 'Regular';
         const marks = row['marks'] || row['sponsor marks'] || 'No';
-        const publishingTime = row['publishing time'] || row['time'] || '24h';
+        const publishingTime = row['publishing time'] || row['time'] || null;
         const maxWords = row['max words'] ? parseInt(row['max words']) : null;
         const maxImages = row['max images'] ? parseInt(row['max images']) : null;
         
@@ -920,9 +920,6 @@ export function SitesView() {
             <div className="flex items-center gap-2 flex-shrink-0">
               <Badge variant="secondary" className="text-xs">
                 {site.publication_format}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {site.publishing_time}
               </Badge>
               {site.price > 0 && (
                 <Badge variant="secondary" className="flex items-center gap-1">
