@@ -1371,22 +1371,28 @@ export function SitesView() {
                     {/* Subcategories for Global */}
                     {category === 'Global' && (
                       <div className="mb-3 flex flex-wrap gap-2">
-                        <Button
-                          variant={activeSubcategory === null ? "secondary" : "ghost"}
-                          size="sm"
+                        <button
                           onClick={() => setActiveSubcategory(null)}
+                          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                            activeSubcategory === null
+                              ? 'bg-foreground text-background'
+                              : 'text-muted-foreground hover:bg-foreground hover:text-background'
+                          }`}
                         >
                           All
-                        </Button>
+                        </button>
                         {GLOBAL_SUBCATEGORIES.map(sub => (
-                          <Button
+                          <button
                             key={sub}
-                            variant={activeSubcategory === sub ? "secondary" : "ghost"}
-                            size="sm"
                             onClick={() => setActiveSubcategory(sub)}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                              activeSubcategory === sub
+                                ? 'bg-foreground text-background'
+                                : 'text-muted-foreground hover:bg-foreground hover:text-background'
+                            }`}
                           >
                             {sub}
-                          </Button>
+                          </button>
                         ))}
                       </div>
                     )}
