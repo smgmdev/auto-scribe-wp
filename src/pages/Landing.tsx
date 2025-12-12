@@ -45,6 +45,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -101,6 +102,15 @@ const Landing = () => {
 
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
+
+        // Build agency logos map from Agencies/People category
+        const logosMap: Record<string, string> = {};
+        mediaData?.forEach(site => {
+          if (site.category === 'Agencies/People' && site.favicon) {
+            logosMap[site.name] = site.favicon;
+          }
+        });
+        setAgencyLogos(logosMap);
 
       } catch (error) {
         console.error('Error fetching sites:', error);
@@ -456,14 +466,16 @@ const Landing = () => {
                             <div className="flex items-center gap-2 w-32">
                               {site.agency && (
                                 <>
-                                  <img
-                                    src={getFaviconUrl(site.link)}
-                                    alt={site.agency}
-                                    className="h-5 w-5 rounded object-contain flex-shrink-0"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
+                                  {agencyLogos[site.agency] && (
+                                    <img
+                                      src={agencyLogos[site.agency]}
+                                      alt={site.agency}
+                                      className="h-5 w-5 rounded object-contain flex-shrink-0"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  )}
                                   <span className="text-sm text-muted-foreground truncate">{site.agency}</span>
                                 </>
                               )}
