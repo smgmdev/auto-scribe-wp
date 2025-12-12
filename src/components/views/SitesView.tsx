@@ -2028,8 +2028,7 @@ export function SitesView() {
                   variant="accent" 
                   onClick={() => window.open(selectedMediaSite.link, '_blank')}
                 >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Visit Site
+                  Buy
                 </Button>
               </div>
             </>
