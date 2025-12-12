@@ -837,7 +837,7 @@ export function SitesView() {
             <DropdownMenuTrigger asChild>
               <Button variant="accent">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Site
+                Add
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -847,6 +847,13 @@ export function SitesView() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsMediaDialogOpen(true)}>
                 Media Site
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                setActiveTab('custom');
+                setActiveMediaCategory('Agencies/People');
+                setIsMediaDialogOpen(true);
+              }}>
+                Agency/People
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
