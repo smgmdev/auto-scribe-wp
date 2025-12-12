@@ -479,6 +479,9 @@ const Landing = () => {
                               </>
                             ) : (
                               <>
+                                {site.price > 0 && (
+                                  <span className="text-sm text-foreground">{site.price} USD</span>
+                                )}
                                 <span className="text-sm text-foreground">{site.publication_format}</span>
                                 {site.agency && (
                                   <>
