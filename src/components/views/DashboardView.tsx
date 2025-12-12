@@ -107,11 +107,9 @@ export function DashboardView() {
           </h1>
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
-        {!isAdmin && (
-          <Badge className="bg-black text-white border-black hover:bg-black">
-            {isAgency ? 'Agency' : 'Regular user'}
-          </Badge>
-        )}
+        <Badge className="bg-black text-white border-black hover:bg-black">
+          {isAdmin ? 'Corporate' : isAgency ? 'Agency' : 'Regular user'}
+        </Badge>
       </div>
 
       {/* Stats Grid */}
