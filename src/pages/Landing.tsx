@@ -463,20 +463,20 @@ const Landing = () => {
                           <div className="flex items-center gap-4 flex-shrink-0">
                             <span className="text-sm text-muted-foreground w-24">{site.publication_format}</span>
                             <span className="text-sm text-foreground w-20 text-right">{site.price} USD</span>
-                            <div className="flex items-center gap-2 w-32">
+                            <div className="flex items-center gap-2 w-40">
                               {site.agency && (
                                 <>
+                                  <span className="text-sm text-muted-foreground truncate">{site.agency}</span>
                                   {agencyLogos[site.agency] && (
                                     <img
                                       src={agencyLogos[site.agency]}
                                       alt={site.agency}
-                                      className="h-5 w-5 rounded object-contain flex-shrink-0"
+                                      className="h-10 w-10 rounded-lg object-contain flex-shrink-0"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                       }}
                                     />
                                   )}
-                                  <span className="text-sm text-muted-foreground truncate">{site.agency}</span>
                                 </>
                               )}
                             </div>
