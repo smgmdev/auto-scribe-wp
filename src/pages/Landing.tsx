@@ -290,17 +290,36 @@ const Landing = () => {
   const renderSection = (
     title: string,
     sites: (WPSite | MediaSite)[],
-    type: 'wp' | 'media'
+    type: 'wp' | 'media',
+    seeAllSubcategory?: string
   ) => {
     if (sites.length === 0) return null;
 
+    const displaySites = seeAllSubcategory ? sites.slice(0, 12) : sites;
+    const hasMore = seeAllSubcategory && sites.length > 12;
+
+    const handleSeeAll = () => {
+      // Navigate to auth with state indicating target subcategory
+      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'sites', targetSubcategory: seeAllSubcategory } });
+    };
+
     return (
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-foreground mb-4">
-          {title}
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-foreground">
+            {title}
+          </h2>
+          {seeAllSubcategory && (
+            <button
+              onClick={handleSeeAll}
+              className="text-sm text-accent hover:text-accent/80 transition-colors"
+            >
+              See All →
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          {sites.map((site) => 
+          {displaySites.map((site) => 
             type === 'wp' 
               ? renderWPSiteCard(site as WPSite)
               : renderMediaSiteCard(site as MediaSite)
@@ -531,8 +550,8 @@ const Landing = () => {
         ) : (
           <>
             {renderSection('Instant Self Publishing Media Library', filteredWpSites, 'wp')}
-            {renderSection('Global Media Library China', chinaSites, 'media')}
-            {renderSection('Global Media Library Business', businessSites, 'media')}
+            {renderSection('Global Media Library China', chinaSites, 'media', 'China')}
+            {renderSection('Global Media Library Business', businessSites, 'media', 'Business and Finance')}
           </>
         )}
       </main>

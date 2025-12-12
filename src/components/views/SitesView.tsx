@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
+import { useAppStore } from '@/stores/appStore';
 import type { SEOPlugin } from '@/types';
 
 interface SiteCredit {
@@ -70,6 +71,7 @@ export function SitesView() {
   const { sites, loading: sitesLoading, addSite, removeSite, refetchSites } = useSites();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const { targetSubcategory, setTargetSubcategory } = useAppStore();
   const [activeTab, setActiveTab] = useState('instant');
   const [activeMediaCategory, setActiveMediaCategory] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
@@ -147,6 +149,17 @@ export function SitesView() {
   useEffect(() => {
     fetchMediaSites();
   }, []);
+
+  // Handle navigation from landing page with target subcategory
+  useEffect(() => {
+    if (targetSubcategory) {
+      setActiveTab('global');
+      setActiveMediaCategory('Global');
+      setActiveSubcategory(targetSubcategory);
+      // Clear the target subcategory after applying it
+      setTargetSubcategory(null);
+    }
+  }, [targetSubcategory, setTargetSubcategory]);
 
   const fetchMediaSites = async () => {
     setMediaSitesLoading(true);
