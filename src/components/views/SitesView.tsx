@@ -1936,84 +1936,107 @@ export function SitesView() {
               </DialogHeader>
               
               <div className="space-y-4 mt-4">
-                {/* Price & Format */}
-                <div className="flex flex-wrap gap-2">
-                  {selectedMediaSite.price > 0 && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      <Coins className="h-3 w-3" />
-                      ${selectedMediaSite.price}
-                    </Badge>
-                  )}
-                  <Badge variant="outline">{selectedMediaSite.publication_format}</Badge>
-                  <Badge variant="outline">{selectedMediaSite.category}</Badge>
-                  {selectedMediaSite.subcategory && (
-                    <Badge variant="outline">{selectedMediaSite.subcategory}</Badge>
-                  )}
-                </div>
-
-                {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Google Index</p>
-                    <p className="font-medium">{selectedMediaSite.google_index}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Sponsor Marks</p>
-                    <p className="font-medium">{selectedMediaSite.marks}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Publishing Time</p>
-                    <p className="font-medium">{selectedMediaSite.publishing_time}</p>
-                  </div>
-                  {selectedMediaSite.agency && (
-                    <div>
-                      <p className="text-muted-foreground">Agency</p>
-                      <p className="font-medium">{selectedMediaSite.agency}</p>
-                    </div>
-                  )}
-                  {selectedMediaSite.max_words && (
-                    <div>
-                      <p className="text-muted-foreground">Max Words</p>
-                      <p className="font-medium">{selectedMediaSite.max_words}</p>
-                    </div>
-                  )}
-                  {selectedMediaSite.max_images && (
-                    <div>
-                      <p className="text-muted-foreground">Max Images</p>
-                      <p className="font-medium">{selectedMediaSite.max_images}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* About Section */}
-                {selectedMediaSite.about && (
-                  <div className="pt-2 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-1">About</p>
-                    <p className="text-sm">{selectedMediaSite.about}</p>
-                  </div>
-                )}
-
-                {/* Tags */}
-                {siteTags[selectedMediaSite.id] && siteTags[selectedMediaSite.id].length > 0 && (
-                  <div className="pt-2 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-2">Tags</p>
+                {/* Check if it's an Agency/People */}
+                {selectedMediaSite.category === 'Agencies/People' ? (
+                  <>
+                    {/* Agency-specific badges */}
                     <div className="flex flex-wrap gap-2">
-                      {siteTags[selectedMediaSite.id].map(tag => (
-                        <Badge 
-                          key={tag.id} 
-                          variant="outline" 
-                          className="text-xs"
-                          style={{ 
-                            borderColor: `${tag.color}50`,
-                            color: tag.color,
-                            backgroundColor: `${tag.color}15`
-                          }}
-                        >
-                          {tag.label}
-                        </Badge>
-                      ))}
+                      <Badge variant="outline">Agency/People</Badge>
+                      {selectedMediaSite.country && (
+                        <Badge variant="secondary">{selectedMediaSite.country}</Badge>
+                      )}
                     </div>
-                  </div>
+
+                    {/* About Section */}
+                    {selectedMediaSite.about && (
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-1">About</p>
+                        <p className="text-sm">{selectedMediaSite.about}</p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Media Site badges - Price & Format */}
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMediaSite.price > 0 && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Coins className="h-3 w-3" />
+                          ${selectedMediaSite.price}
+                        </Badge>
+                      )}
+                      <Badge variant="outline">{selectedMediaSite.publication_format}</Badge>
+                      <Badge variant="outline">{selectedMediaSite.category}</Badge>
+                      {selectedMediaSite.subcategory && (
+                        <Badge variant="outline">{selectedMediaSite.subcategory}</Badge>
+                      )}
+                    </div>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Google Index</p>
+                        <p className="font-medium">{selectedMediaSite.google_index}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Sponsor Marks</p>
+                        <p className="font-medium">{selectedMediaSite.marks}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Publishing Time</p>
+                        <p className="font-medium">{selectedMediaSite.publishing_time}</p>
+                      </div>
+                      {selectedMediaSite.agency && (
+                        <div>
+                          <p className="text-muted-foreground">Agency</p>
+                          <p className="font-medium">{selectedMediaSite.agency}</p>
+                        </div>
+                      )}
+                      {selectedMediaSite.max_words && (
+                        <div>
+                          <p className="text-muted-foreground">Max Words</p>
+                          <p className="font-medium">{selectedMediaSite.max_words}</p>
+                        </div>
+                      )}
+                      {selectedMediaSite.max_images && (
+                        <div>
+                          <p className="text-muted-foreground">Max Images</p>
+                          <p className="font-medium">{selectedMediaSite.max_images}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* About Section */}
+                    {selectedMediaSite.about && (
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-1">About</p>
+                        <p className="text-sm">{selectedMediaSite.about}</p>
+                      </div>
+                    )}
+
+                    {/* Tags */}
+                    {siteTags[selectedMediaSite.id] && siteTags[selectedMediaSite.id].length > 0 && (
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-2">Tags</p>
+                        <div className="flex flex-wrap gap-2">
+                          {siteTags[selectedMediaSite.id].map(tag => (
+                            <Badge 
+                              key={tag.id} 
+                              variant="outline" 
+                              className="text-xs"
+                              style={{ 
+                                borderColor: `${tag.color}50`,
+                                color: tag.color,
+                                backgroundColor: `${tag.color}15`
+                              }}
+                            >
+                              {tag.label}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
