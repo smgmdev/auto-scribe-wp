@@ -76,6 +76,11 @@ const Landing = () => {
     }
   };
 
+  const getFaviconUrl = (siteUrl: string) => {
+    const domain = extractDomain(siteUrl);
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -158,12 +163,9 @@ const Landing = () => {
                 {/* Favicon */}
                 <div className="flex-shrink-0">
                   <img
-                    src={site.favicon || `https://www.google.com/s2/favicons?domain=${site.url}&sz=64`}
+                    src={getFaviconUrl(site.url)}
                     alt={site.name}
                     className="h-10 w-10 rounded-md bg-muted"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${site.url}&sz=64`;
-                    }}
                   />
                 </div>
                 
