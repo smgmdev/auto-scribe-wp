@@ -93,6 +93,7 @@ export function SitesView() {
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
   const [editingLogoSiteId, setEditingLogoSiteId] = useState<string | null>(null);
+  const [editingLogoSiteType, setEditingLogoSiteType] = useState<'wp' | 'media'>('wp');
   const [logoInputType, setLogoInputType] = useState<'url' | 'upload'>('url');
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -662,8 +663,9 @@ export function SitesView() {
     }
   };
 
-  const handleOpenLogoDialog = (siteId: string, currentFavicon: string | null) => {
+  const handleOpenLogoDialog = (siteId: string, currentFavicon: string | null, siteType: 'wp' | 'media' = 'wp') => {
     setEditingLogoSiteId(siteId);
+    setEditingLogoSiteType(siteType);
     setLogoUrl(currentFavicon || '');
     setLogoPreview(currentFavicon || null);
     setLogoFile(null);
@@ -694,21 +696,29 @@ export function SitesView() {
         faviconUrl = logoPreview || '';
       }
 
-      const { error } = await supabase
-        .from('wordpress_sites')
-        .update({ favicon: faviconUrl || null })
-        .eq('id', editingLogoSiteId);
+      if (editingLogoSiteType === 'wp') {
+        const { error } = await supabase
+          .from('wordpress_sites')
+          .update({ favicon: faviconUrl || null })
+          .eq('id', editingLogoSiteId);
 
-      if (error) throw error;
+        if (error) throw error;
+        await refetchSites();
+      } else {
+        const { error } = await supabase
+          .from('media_sites')
+          .update({ favicon: faviconUrl || null })
+          .eq('id', editingLogoSiteId);
 
-      // Update local sites state without refresh
-      const updatedSites = sites.map(site => 
-        site.id === editingLogoSiteId 
-          ? { ...site, favicon: faviconUrl || undefined }
-          : site
-      );
-      // Force re-render by triggering a refetch
-      await refetchSites();
+        if (error) throw error;
+        
+        // Update local media sites state
+        setMediaSites(prev => prev.map(site => 
+          site.id === editingLogoSiteId 
+            ? { ...site, favicon: faviconUrl || null }
+            : site
+        ));
+      }
 
       toast({
         title: 'Logo updated',
@@ -752,7 +762,7 @@ export function SitesView() {
               <Globe className="h-4 w-4 text-accent hidden" />
               {isAdmin && (
                 <button
-                  onClick={() => handleOpenLogoDialog(site.id, site.favicon)}
+                  onClick={() => handleOpenLogoDialog(site.id, site.favicon, 'wp')}
                   className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
                 >
                   <Edit2 className="h-3 w-3 text-foreground" />
@@ -978,7 +988,7 @@ export function SitesView() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+              <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
                 <img 
                   src={site.favicon || getFaviconUrl(site.link)} 
                   alt={`${site.name} favicon`} 
@@ -989,6 +999,14 @@ export function SitesView() {
                   }} 
                 />
                 <Globe className="h-4 w-4 text-accent hidden" />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleOpenLogoDialog(site.id, site.favicon, 'media')}
+                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
+                  >
+                    <Edit2 className="h-3 w-3 text-foreground" />
+                  </button>
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm truncate">{site.name}</h3>
