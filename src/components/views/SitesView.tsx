@@ -1035,12 +1035,10 @@ export function SitesView() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {site.price > 0 && (
-                <Badge variant="secondary" className="min-w-[60px] justify-center">
-                  {site.price} USD
-                </Badge>
-              )}
-              <Badge variant="outline" className="text-xs min-w-[60px] text-center justify-center">
+              <Badge variant="secondary" className="min-w-[70px] justify-center text-xs">
+                {site.price > 0 ? `${site.price} USD` : 'Free'}
+              </Badge>
+              <Badge variant="outline" className="min-w-[90px] justify-center text-xs">
                 {site.publication_format}
               </Badge>
               {site.agency && (
