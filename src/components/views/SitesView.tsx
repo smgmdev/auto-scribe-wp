@@ -1073,24 +1073,17 @@ export function SitesView() {
           
           {/* Expanded Section with Details */}
           {isExpanded && (
-            <div className="mt-3 pt-3 border-t border-border space-y-2">
+            <div className="mt-3 pt-3 border-t border-border space-y-3">
               {site.about && (
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Good to know:</span>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
                   <p className="text-xs text-foreground">{site.about}</p>
                 </div>
               )}
-              {site.category && (
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Main category:</span>
-                  <p className="text-xs text-foreground">{site.category}</p>
-                </div>
-              )}
-              {site.subcategory && (
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Subcategory:</span>
-                  <p className="text-xs text-foreground">{site.subcategory}</p>
-                </div>
+              {(site.category || site.subcategory) && (
+                <p className="text-xs text-muted-foreground">
+                  {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                </p>
               )}
             </div>
           )}
