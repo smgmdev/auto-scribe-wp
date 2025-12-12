@@ -276,14 +276,20 @@ const Landing = () => {
   };
 
   const renderSearchDropdown = () => (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+    <div 
+      className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       {/* Category Tabs */}
       <div className="border-b border-border">
         <div className="flex gap-1 px-4 pt-3">
           {CATEGORY_TABS.map(tab => (
             <button
               key={tab}
-              onClick={() => handleTabChange(tab)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTabChange(tab);
+              }}
               className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
                 activeTab === tab
                   ? 'text-foreground border-accent'
@@ -303,7 +309,10 @@ const Landing = () => {
             {subcategories.map(subcat => (
               <button
                 key={subcat}
-                onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveSubcategory(activeSubcategory === subcat ? null : subcat);
+                }}
                 className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
                   activeSubcategory === subcat
                     ? 'bg-accent text-accent-foreground border-accent'
