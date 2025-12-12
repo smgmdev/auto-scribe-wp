@@ -1036,7 +1036,7 @@ export function SitesView() {
                 {site.publication_format}
               </Badge>
               {site.agency && (
-                <Badge variant="outline" className="text-xs text-muted-foreground">
+                <Badge className="text-xs bg-black text-white hover:bg-black">
                   {site.agency}
                 </Badge>
               )}
