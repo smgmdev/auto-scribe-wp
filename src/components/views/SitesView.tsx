@@ -980,7 +980,7 @@ export function SitesView() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="instant">Instant Publishing</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
+          <TabsTrigger value="custom">Global Library</TabsTrigger>
         </TabsList>
 
         {/* Instant Publishing Tab - WordPress Sites */}
