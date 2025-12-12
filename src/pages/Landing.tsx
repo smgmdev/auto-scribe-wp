@@ -448,15 +448,26 @@ const Landing = () => {
                             }}
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3">
-                              <span className="font-semibold text-foreground">{site.name}</span>
-                              <span className="text-xs text-muted-foreground truncate">{extractDomain(site.link)}</span>
-                            </div>
+                            <span className="font-semibold text-foreground">{site.name}</span>
                           </div>
                           <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className="text-xs text-muted-foreground w-20">{site.publication_format.toLowerCase()}</span>
-                            <span className="text-xs font-medium text-foreground w-16 text-right">{site.price} USD</span>
-                            <span className="text-xs text-muted-foreground w-24 truncate">{site.agency || '-'}</span>
+                            <span className="text-sm text-muted-foreground w-24">{site.publication_format}</span>
+                            <span className="text-sm text-foreground w-20 text-right">{site.price} USD</span>
+                            <div className="flex items-center gap-2 w-32">
+                              {site.agency && (
+                                <>
+                                  <img
+                                    src={getFaviconUrl(site.link)}
+                                    alt={site.agency}
+                                    className="h-5 w-5 rounded object-contain flex-shrink-0"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                  <span className="text-sm text-muted-foreground truncate">{site.agency}</span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </button>
                       ))
