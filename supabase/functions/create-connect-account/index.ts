@@ -47,14 +47,15 @@ serve(async (req) => {
       throw new Error("Admin access required");
     }
 
-    const { agency_name, email, commission_percentage } = await req.json();
-    logStep("Creating Connect account for agency", { agency_name, email });
+    const { agency_name, email, commission_percentage, country } = await req.json();
+    logStep("Creating Connect account for agency", { agency_name, email, country });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Create Stripe Connect Express account
+    // Create Stripe Connect Express account with country
     const account = await stripe.accounts.create({
       type: "express",
+      country: country || "US", // Default to US if not provided
       email: email,
       capabilities: {
         transfers: { requested: true },

@@ -8,6 +8,50 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const STRIPE_COUNTRIES = [
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'CY', name: 'Cyprus' },
+  { code: 'CZ', name: 'Czech Republic' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'EE', name: 'Estonia' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'HK', name: 'Hong Kong' },
+  { code: 'HU', name: 'Hungary' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'LV', name: 'Latvia' },
+  { code: 'LT', name: 'Lithuania' },
+  { code: 'LU', name: 'Luxembourg' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'MT', name: 'Malta' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'SK', name: 'Slovakia' },
+  { code: 'SI', name: 'Slovenia' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'TH', name: 'Thailand' },
+  { code: 'AE', name: 'United Arab Emirates' },
+];
 
 interface AgencyPayout {
   id: string;
@@ -32,7 +76,8 @@ export function AdminAgenciesView() {
   const [formData, setFormData] = useState({
     agency_name: '',
     email: '',
-    commission_percentage: '10'
+    commission_percentage: '10',
+    country: 'US'
   });
 
   useEffect(() => {
@@ -63,7 +108,8 @@ export function AdminAgenciesView() {
     setFormData({
       agency_name: '',
       email: '',
-      commission_percentage: '10'
+      commission_percentage: '10',
+      country: 'US'
     });
     setDialogOpen(true);
   };
@@ -73,7 +119,8 @@ export function AdminAgenciesView() {
     setFormData({
       agency_name: agency.agency_name,
       email: agency.email || '',
-      commission_percentage: agency.commission_percentage.toString()
+      commission_percentage: agency.commission_percentage.toString(),
+      country: 'US'
     });
     setDialogOpen(true);
   };
@@ -124,7 +171,8 @@ export function AdminAgenciesView() {
           body: {
             agency_name: formData.agency_name,
             email: formData.email,
-            commission_percentage: parseFloat(formData.commission_percentage)
+            commission_percentage: parseFloat(formData.commission_percentage),
+            country: formData.country
           }
         });
 
@@ -374,6 +422,30 @@ export function AdminAgenciesView() {
                 Percentage your platform keeps from each sale
               </p>
             </div>
+
+            {!editingAgency && (
+              <div className="space-y-2">
+                <Label htmlFor="country">Country *</Label>
+                <Select
+                  value={formData.country}
+                  onValueChange={(value) => setFormData({ ...formData, country: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STRIPE_COUNTRIES.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Country where the agency is incorporated
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
