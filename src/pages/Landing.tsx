@@ -634,13 +634,13 @@ const Landing = () => {
               )}
               
               {(selectedSite as MediaSite).category && (selectedSite as MediaSite).category !== 'Agencies/People' && (
-                <div className="flex items-center justify-between">
+                <div className="flex gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Category</p>
                     <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
                   </div>
                   {(selectedSite as MediaSite).subcategory && (
-                    <div className="text-right">
+                    <div>
                       <p className="text-sm text-muted-foreground">Subcategory</p>
                       <p className="text-foreground">{(selectedSite as MediaSite).subcategory}</p>
                     </div>
