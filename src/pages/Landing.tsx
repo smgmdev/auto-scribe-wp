@@ -234,17 +234,15 @@ const Landing = () => {
         <p className="text-xs text-muted-foreground truncate">
           {extractDomain(site.link)}
         </p>
-      </div>
-      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        {site.price > 0 && (
-          <Badge variant="outline" className="text-xs text-accent border-accent/30">
-            ${site.price}
-          </Badge>
-        )}
-        <Badge variant="secondary" className="text-xs">
+        <Badge variant="secondary" className="text-xs mt-1">
           {site.publication_format}
         </Badge>
       </div>
+      {site.price > 0 && (
+        <Badge variant="outline" className="text-xs text-accent border-accent/30 flex-shrink-0">
+          ${site.price}
+        </Badge>
+      )}
     </div>
   );
 
