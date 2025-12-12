@@ -160,7 +160,11 @@ const Landing = () => {
     let filtered = mediaSites.filter(site => site.category === activeTab);
     
     if (activeSubcategory) {
-      filtered = filtered.filter(site => site.subcategory === activeSubcategory);
+      filtered = filtered.filter(site => {
+        if (!site.subcategory) return false;
+        const subcats = site.subcategory.split(',').map(s => s.trim());
+        return subcats.includes(activeSubcategory);
+      });
     }
     
     if (searchQuery.trim()) {
