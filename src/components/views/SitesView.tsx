@@ -1317,8 +1317,7 @@ export function SitesView() {
                     {(() => {
                       const searchResults = mediaSites.filter(site => 
                         site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        site.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (site.subcategory && site.subcategory.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                        site.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         (site.agency && site.agency.toLowerCase().includes(searchQuery.toLowerCase()))
                       );
                       
@@ -1357,7 +1356,7 @@ export function SitesView() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{site.name}</p>
                             <p className="text-xs text-muted-foreground truncate">
-                              {site.category}{site.subcategory ? ` › ${site.subcategory}` : ''}
+                              {site.link.replace(/^https?:\/\//, '')}
                             </p>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
