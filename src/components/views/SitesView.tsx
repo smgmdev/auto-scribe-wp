@@ -999,8 +999,8 @@ export function SitesView() {
         style={{ animationDelay: `${index * 50}ms` }}
       >
         <CardContent className="p-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
               <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
                 <img 
                   src={site.favicon || getFaviconUrl(site.link)} 
@@ -1034,7 +1034,7 @@ export function SitesView() {
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-1 justify-end">
               {/* Fixed width container for price badge */}
               <div className="w-[75px] flex justify-end">
                 <Badge variant="secondary" className="w-full justify-center text-xs">
