@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { getFaviconUrl } from '@/lib/favicon';
+import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import amblack from '@/assets/amblack.png';
 
 interface SiteTag {
@@ -713,10 +713,18 @@ const Landing = () => {
 
           <div className="mt-4">
             <Button 
-              onClick={() => navigate('/auth')}
+              onClick={() => {
+                // Pass the selected site info to auth for redirect after login
+                navigate('/auth', { 
+                  state: { 
+                    targetView: 'orders',
+                    pendingPurchase: selectedSiteType === 'media' ? (selectedSite as MediaSite).id : null
+                  } 
+                });
+              }}
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
             >
-              Sign In to Publish
+              Sign In to Purchase
             </Button>
           </div>
         </DialogContent>
