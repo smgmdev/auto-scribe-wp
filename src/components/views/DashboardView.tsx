@@ -64,14 +64,14 @@ export function DashboardView() {
     const fetchAgencyStatus = async () => {
       if (!user || isAdmin) return;
       
+      // Check if user has completed agency onboarding (not just application approved)
       const { data } = await supabase
-        .from('agency_applications')
-        .select('status')
+        .from('agency_payouts')
+        .select('onboarding_complete')
         .eq('user_id', user.id)
-        .eq('status', 'approved')
         .maybeSingle();
       
-      setIsAgency(!!data);
+      setIsAgency(data?.onboarding_complete === true);
     };
 
     fetchAgencyStatus();
