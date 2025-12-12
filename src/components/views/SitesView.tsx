@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,6 +71,9 @@ export function SitesView() {
   const [activeTab, setActiveTab] = useState('instant');
   const [activeMediaCategory, setActiveMediaCategory] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -875,6 +878,100 @@ export function SitesView() {
             </Card>
           ) : (
             <div className="space-y-4">
+              {/* Search Bar */}
+              <div ref={searchRef} className="relative w-full">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search media sites..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSearchDropdown(e.target.value.length > 0);
+                    }}
+                    onFocus={() => searchQuery.length > 0 && setShowSearchDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
+                    className="w-full pl-10 h-11"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setShowSearchDropdown(false);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Search Results Dropdown */}
+                {showSearchDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto">
+                    {(() => {
+                      const searchResults = mediaSites.filter(site => 
+                        site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        site.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (site.subcategory && site.subcategory.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                        (site.agency && site.agency.toLowerCase().includes(searchQuery.toLowerCase()))
+                      );
+                      
+                      if (searchResults.length === 0) {
+                        return (
+                          <div className="p-4 text-center text-muted-foreground text-sm">
+                            No media sites found for "{searchQuery}"
+                          </div>
+                        );
+                      }
+                      
+                      return searchResults.map((site) => (
+                        <div
+                          key={site.id}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
+                          onClick={() => {
+                            setActiveMediaCategory(site.category);
+                            setActiveSubcategory(site.subcategory);
+                            setSearchQuery('');
+                            setShowSearchDropdown(false);
+                          }}
+                        >
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
+                            {site.favicon ? (
+                              <img 
+                                src={site.favicon} 
+                                alt={`${site.name} logo`} 
+                                className="h-6 w-6 object-contain"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <Globe className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{site.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {site.category}{site.subcategory ? ` › ${site.subcategory}` : ''}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {site.price > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                ${site.price}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </div>
+
               {/* Category Tabs */}
               <Tabs value={activeMediaCategory} onValueChange={(val) => {
                 setActiveMediaCategory(val);
