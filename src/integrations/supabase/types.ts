@@ -131,6 +131,57 @@ export type Database = {
         }
         Relationships: []
       }
+      media_sites: {
+        Row: {
+          agency: string | null
+          created_at: string
+          favicon: string | null
+          google_index: string
+          id: string
+          link: string
+          marks: string
+          max_images: number | null
+          max_words: number | null
+          name: string
+          price: number
+          publication_format: string
+          publishing_time: string
+          updated_at: string
+        }
+        Insert: {
+          agency?: string | null
+          created_at?: string
+          favicon?: string | null
+          google_index?: string
+          id?: string
+          link: string
+          marks?: string
+          max_images?: number | null
+          max_words?: number | null
+          name: string
+          price?: number
+          publication_format?: string
+          publishing_time?: string
+          updated_at?: string
+        }
+        Update: {
+          agency?: string | null
+          created_at?: string
+          favicon?: string | null
+          google_index?: string
+          id?: string
+          link?: string
+          marks?: string
+          max_images?: number | null
+          max_words?: number | null
+          name?: string
+          price?: number
+          publication_format?: string
+          publishing_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
