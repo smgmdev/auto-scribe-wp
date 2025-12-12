@@ -462,22 +462,32 @@ const Landing = () => {
                             <span className="font-semibold text-foreground">{site.name}</span>
                           </div>
                           
-                          {/* Right: Article format + via agency + agency logo */}
+                          {/* Right: Format/Country + via agency + agency logo */}
                           <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-sm text-foreground">{site.publication_format}</span>
-                            {site.agency && (
+                            {site.category === 'Agencies/People' ? (
                               <>
-                                <span className="text-xs text-muted-foreground">via</span>
-                                <span className="text-sm text-foreground">{site.agency}</span>
-                                {agencyLogos[site.agency] && (
-                                  <img
-                                    src={agencyLogos[site.agency]}
-                                    alt={site.agency}
-                                    className="h-5 w-5 rounded object-contain flex-shrink-0"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
+                                {(site as any).country && (
+                                  <span className="text-sm text-foreground">{(site as any).country}</span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-sm text-foreground">{site.publication_format}</span>
+                                {site.agency && (
+                                  <>
+                                    <span className="text-xs text-muted-foreground">via</span>
+                                    <span className="text-sm text-foreground">{site.agency}</span>
+                                    {agencyLogos[site.agency] && (
+                                      <img
+                                        src={agencyLogos[site.agency]}
+                                        alt={site.agency}
+                                        className="h-5 w-5 rounded object-contain flex-shrink-0"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    )}
+                                  </>
                                 )}
                               </>
                             )}
@@ -596,21 +606,34 @@ const Landing = () => {
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
-              <div className="flex gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
-                  <Badge variant="outline" className="text-accent border-accent/30">
-                    {(selectedSite as MediaSite).price} USDT
-                  </Badge>
+              
+              {/* Show price and format only for non-agency sites */}
+              {(selectedSite as MediaSite).category !== 'Agencies/People' && (
+                <div className="flex gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <Badge variant="outline" className="text-accent border-accent/30">
+                      {(selectedSite as MediaSite).price} USDT
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Format</p>
+                    <Badge variant="secondary">
+                      {(selectedSite as MediaSite).publication_format}
+                    </Badge>
+                  </div>
                 </div>
+              )}
+              
+              {/* Show country for agencies */}
+              {(selectedSite as MediaSite).category === 'Agencies/People' && (selectedSite as any).country && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Format</p>
-                  <Badge variant="secondary">
-                    {(selectedSite as MediaSite).publication_format}
-                  </Badge>
+                  <p className="text-sm text-muted-foreground">Country</p>
+                  <p className="text-foreground">{(selectedSite as any).country}</p>
                 </div>
-              </div>
-              {(selectedSite as MediaSite).category && (
+              )}
+              
+              {(selectedSite as MediaSite).category && (selectedSite as MediaSite).category !== 'Agencies/People' && (
                 <div>
                   <p className="text-sm text-muted-foreground">Category</p>
                   <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
