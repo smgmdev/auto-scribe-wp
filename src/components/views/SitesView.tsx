@@ -97,6 +97,7 @@ export function SitesView() {
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
 
   // Agency form
@@ -1752,16 +1753,46 @@ export function SitesView() {
                   onChange={handleLogoFileChange}
                   className="hidden"
                 />
-                <button
-                  type="button"
+                <div
                   onClick={() => logoFileInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 py-6 border-2 border-dashed border-border rounded-lg hover:border-accent hover:bg-muted/50 transition-colors"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragging(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragging(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file && file.type.startsWith('image/')) {
+                      setLogoFile(file);
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setLogoPreview(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className={`w-full flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                    isDragging 
+                      ? 'border-accent bg-accent/10' 
+                      : 'border-border hover:border-accent hover:bg-muted/50'
+                  }`}
                 >
-                  <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {logoFile ? logoFile.name : 'Click to upload image'}
+                  <ImageIcon className={`h-8 w-8 ${isDragging ? 'text-accent' : 'text-muted-foreground'}`} />
+                  <span className={`text-sm ${isDragging ? 'text-accent' : 'text-muted-foreground'}`}>
+                    {logoFile ? logoFile.name : 'Drag & drop or click to upload'}
                   </span>
-                </button>
+                  <span className="text-xs text-muted-foreground">
+                    PNG, JPG, SVG up to 2MB
+                  </span>
+                </div>
               </div>
             )}
 
