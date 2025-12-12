@@ -447,7 +447,7 @@ const Landing = () => {
                         <button
                           key={site.id}
                           onClick={() => handleSiteClick(site, 'media')}
-                          className="flex items-center gap-4 w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+                          className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
                           <img
                             src={site.favicon || getFaviconUrl(site.link)}
