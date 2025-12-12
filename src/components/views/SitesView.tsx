@@ -1362,8 +1362,27 @@ export function SitesView() {
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {site.price > 0 && (
                               <Badge variant="secondary" className="text-xs">
-                                ${site.price}
+                                {site.price} USD
                               </Badge>
+                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {site.publication_format}
+                            </Badge>
+                            {site.agency && (
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span>via</span>
+                                <span className="text-foreground">{site.agency}</span>
+                                {(() => {
+                                  const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
+                                  return agencySite?.favicon ? (
+                                    <img 
+                                      src={agencySite.favicon} 
+                                      alt={site.agency} 
+                                      className="h-4 w-4 object-contain rounded-full"
+                                    />
+                                  ) : null;
+                                })()}
+                              </div>
                             )}
                           </div>
                         </div>
