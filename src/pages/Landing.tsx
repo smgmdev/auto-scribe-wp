@@ -447,39 +447,43 @@ const Landing = () => {
                         <button
                           key={site.id}
                           onClick={() => handleSiteClick(site, 'media')}
-                          className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+                          className="flex items-center w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
-                          <img
-                            src={site.favicon || getFaviconUrl(site.link)}
-                            alt={site.name}
-                            className="h-10 w-10 rounded-lg bg-muted object-contain flex-shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          <div className="flex-1 min-w-0">
+                          {/* Left: Media logo + name */}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img
+                              src={site.favicon || getFaviconUrl(site.link)}
+                              alt={site.name}
+                              className="h-10 w-10 rounded-lg bg-muted object-contain flex-shrink-0"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
                             <span className="font-semibold text-foreground">{site.name}</span>
                           </div>
-                          <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className="text-sm text-muted-foreground w-24">{site.publication_format}</span>
-                            <span className="text-sm text-foreground w-20 text-right">{site.price} USD</span>
-                            <div className="flex items-center gap-2 w-40">
-                              {site.agency && (
-                                <>
-                                  <span className="text-sm text-muted-foreground truncate">{site.agency}</span>
-                                  {agencyLogos[site.agency] && (
-                                    <img
-                                      src={agencyLogos[site.agency]}
-                                      alt={site.agency}
-                                      className="h-5 w-5 rounded object-contain flex-shrink-0"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
-                                  )}
-                                </>
-                              )}
-                            </div>
+                          
+                          {/* Spacer */}
+                          <div className="flex-1" />
+                          
+                          {/* Right: Article format + via agency + agency logo */}
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="text-sm text-foreground">{site.publication_format.toLowerCase()}</span>
+                            {site.agency && (
+                              <>
+                                <span className="text-sm text-muted-foreground">via</span>
+                                <span className="text-sm text-foreground font-medium">{site.agency}</span>
+                                {agencyLogos[site.agency] && (
+                                  <img
+                                    src={agencyLogos[site.agency]}
+                                    alt={site.agency}
+                                    className="h-5 w-5 rounded object-contain flex-shrink-0"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                              </>
+                            )}
                           </div>
                         </button>
                       ))
