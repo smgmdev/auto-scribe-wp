@@ -464,7 +464,7 @@ const Landing = () => {
                           
                           {/* Middle: Article format */}
                           <div className="flex-1 text-center">
-                            <span className="text-sm text-foreground">{site.publication_format.toLowerCase()}</span>
+                            <span className="text-sm text-foreground">{site.publication_format}</span>
                           </div>
                           
                           {/* Right: via agency + agency logo */}
