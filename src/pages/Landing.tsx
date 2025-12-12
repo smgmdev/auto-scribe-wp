@@ -190,7 +190,7 @@ const Landing = () => {
       className="flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-muted/50 cursor-pointer transition-all duration-200"
     >
       <img
-        src={getFaviconUrl(site.url)}
+        src={site.favicon || getFaviconUrl(site.url)}
         alt={site.name}
         className="h-14 w-14 rounded-xl bg-muted object-contain flex-shrink-0"
       />
