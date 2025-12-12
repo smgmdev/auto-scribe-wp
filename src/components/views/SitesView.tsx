@@ -1022,7 +1022,7 @@ export function SitesView() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm truncate">{site.name}</h3>
+                <h3 className="text-sm break-words">{site.name}</h3>
                 <a 
                   href={site.link} 
                   target="_blank" 
