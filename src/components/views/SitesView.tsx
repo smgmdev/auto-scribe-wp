@@ -1041,11 +1041,9 @@ export function SitesView() {
                   {site.price > 0 ? `${site.price} USD` : 'Free'}
                 </Badge>
               </div>
-              {/* Fixed width container for format badge */}
+              {/* Fixed width container for format */}
               <div className="w-[100px] flex justify-start">
-                <Badge variant="outline" className="w-full justify-center text-xs">
-                  {site.publication_format}
-                </Badge>
+                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
               </div>
               {/* Fixed width container for agency info */}
               <div className="w-[150px] flex items-center gap-1.5 text-xs text-muted-foreground">
