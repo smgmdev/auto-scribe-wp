@@ -1,6 +1,10 @@
 import { AccountSettings } from '@/components/settings/AccountSettings';
+import { AgencyApplicationForm } from '@/components/agency/AgencyApplicationForm';
+import { useAuth } from '@/hooks/useAuth';
 
 export function AccountView() {
+  const { isAdmin } = useAuth();
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -14,6 +18,13 @@ export function AccountView() {
       </div>
 
       <AccountSettings />
+
+      {/* Agency Application - Only for non-admin users */}
+      {!isAdmin && (
+        <div className="pt-4">
+          <AgencyApplicationForm />
+        </div>
+      )}
     </div>
   );
 }

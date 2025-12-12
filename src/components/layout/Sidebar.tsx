@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -50,6 +50,10 @@ const getNavigation = (isAdmin: boolean) => {
       id: 'admin-agencies',
       label: 'Agency Payouts',
       icon: Building2
+    }, {
+      id: 'admin-applications',
+      label: 'Applications',
+      icon: ClipboardList
     }, {
       id: 'settings',
       label: 'Global Settings',

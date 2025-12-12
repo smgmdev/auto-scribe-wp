@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      agency_applications: {
+        Row: {
+          admin_notes: string | null
+          agency_name: string
+          agency_website: string
+          country: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          incorporation_document_url: string
+          reviewed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          whatsapp_phone: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          agency_name: string
+          agency_website: string
+          country: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          incorporation_document_url: string
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          whatsapp_phone: string
+        }
+        Update: {
+          admin_notes?: string | null
+          agency_name?: string
+          agency_website?: string
+          country?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          incorporation_document_url?: string
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          whatsapp_phone?: string
+        }
+        Relationships: []
+      }
       agency_payouts: {
         Row: {
           agency_name: string
