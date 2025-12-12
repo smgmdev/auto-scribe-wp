@@ -9,6 +9,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import amblack from '@/assets/amblack.png';
 
+interface SiteTag {
+  id: string;
+  site_id: string;
+  label: string;
+  color: string;
+}
+
 interface WPSite {
   id: string;
   name: string;
@@ -38,6 +45,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
@@ -69,6 +77,22 @@ const Landing = () => {
         })) || [];
 
         setWpSites(sitesWithCredits);
+
+        // Fetch site tags for WP sites
+        const { data: tagsData, error: tagsError } = await supabase
+          .from('site_tags')
+          .select('*');
+        
+        if (!tagsError && tagsData) {
+          const tagsMap: Record<string, SiteTag[]> = {};
+          tagsData.forEach(tag => {
+            if (!tagsMap[tag.site_id]) {
+              tagsMap[tag.site_id] = [];
+            }
+            tagsMap[tag.site_id].push(tag);
+          });
+          setSiteTags(tagsMap);
+        }
 
         const { data: mediaData, error: mediaError } = await supabase
           .from('media_sites')
@@ -481,7 +505,7 @@ const Landing = () => {
                   <img
                     src={
                       selectedSiteType === 'wp'
-                        ? getFaviconUrl((selectedSite as WPSite).url)
+                        ? (selectedSite as WPSite).favicon || getFaviconUrl((selectedSite as WPSite).url)
                         : (selectedSite as MediaSite).favicon || getFaviconUrl((selectedSite as MediaSite).link)
                     }
                     alt={selectedSite.name}
@@ -517,6 +541,22 @@ const Landing = () => {
                   {(selectedSite as WPSite).credits_required} Credits
                 </Badge>
               </div>
+              {siteTags[(selectedSite as WPSite).id]?.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Tags</p>
+                  <div className="flex flex-wrap gap-2">
+                    {siteTags[(selectedSite as WPSite).id].map(tag => (
+                      <Badge 
+                        key={tag.id} 
+                        style={{ backgroundColor: tag.color }}
+                        className="text-white text-xs"
+                      >
+                        {tag.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
