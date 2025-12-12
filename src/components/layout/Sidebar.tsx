@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -32,12 +32,20 @@ const getNavigation = (isAdmin: boolean) => {
     id: 'orders',
     label: 'My Orders',
     icon: Package
+  }, {
+    id: 'my-requests',
+    label: 'My Requests',
+    icon: MessageSquare
   }];
   if (isAdmin) {
-    return [...base.filter(item => item.id !== 'orders'), {
+    return [...base.filter(item => item.id !== 'orders' && item.id !== 'my-requests'), {
       id: 'admin-orders',
       label: 'Order Management',
       icon: Package
+    }, {
+      id: 'admin-engagements',
+      label: 'Engagements',
+      icon: MessageSquare
     }, {
       id: 'admin-agencies',
       label: 'Agency Payouts',

@@ -39,8 +39,8 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { media_site_id } = await req.json();
-    logStep("Creating escrow payment", { media_site_id, userId: user.id });
+    const { media_site_id, service_request_id } = await req.json();
+    logStep("Creating escrow payment", { media_site_id, service_request_id, userId: user.id });
 
     // Get media site details
     const { data: mediaSite, error: siteError } = await supabaseClient
@@ -114,6 +114,15 @@ serve(async (req) => {
 
     logStep("Order created", { orderId: order.id });
 
+    // Link to service request if provided
+    if (service_request_id) {
+      await supabaseClient
+        .from("service_requests")
+        .update({ order_id: order.id, status: "paid" })
+        .eq("id", service_request_id);
+      logStep("Linked to service request", { service_request_id });
+    }
+
     // Create Stripe Checkout session
     const origin = req.headers.get("origin") || "http://localhost:5173";
     const session = await stripe.checkout.sessions.create({
@@ -146,8 +155,8 @@ serve(async (req) => {
         order_id: order.id,
         type: "escrow_payment",
       },
-      success_url: `${origin}/dashboard?order=${order.id}&status=success`,
-      cancel_url: `${origin}/dashboard?order=${order.id}&status=cancelled`,
+      success_url: `${origin}/payment-success`,
+      cancel_url: `${origin}/payment-cancelled`,
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
