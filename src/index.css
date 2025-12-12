@@ -32,7 +32,7 @@
 
     --border: 220 15% 88%;
     --input: 220 15% 88%;
-    --ring: 38 92% 50%;
+    --ring: currentColor;
 
     --radius: 0.625rem;
 
