@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, Coins, ExternalLink, X } from 'lucide-react';
+import { Search, Globe, Coins, ExternalLink, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import amlogo from '@/assets/amlogo.png';
@@ -40,6 +41,8 @@ const Landing = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
   const [selectedSiteType, setSelectedSiteType] = useState<'wp' | 'media' | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchSites = async () => {
@@ -83,6 +86,18 @@ const Landing = () => {
     fetchSites();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const filteredWpSites = useMemo(() => {
     if (!searchQuery.trim()) return wpSites;
     const query = searchQuery.toLowerCase();
@@ -90,6 +105,42 @@ const Landing = () => {
       site.name.toLowerCase().includes(query) ||
       site.url.toLowerCase().includes(query)
     );
+  }, [wpSites, searchQuery]);
+
+  // Get unique categories and subcategories
+  const categories = useMemo(() => {
+    const cats = new Map<string, Set<string>>();
+    mediaSites.forEach(site => {
+      if (!cats.has(site.category)) {
+        cats.set(site.category, new Set());
+      }
+      if (site.subcategory) {
+        cats.get(site.category)?.add(site.subcategory);
+      }
+    });
+    return cats;
+  }, [mediaSites]);
+
+  // Filter media sites by search
+  const searchedMediaSites = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return mediaSites.filter(site => 
+      site.name.toLowerCase().includes(query) ||
+      site.link.toLowerCase().includes(query) ||
+      site.category?.toLowerCase().includes(query) ||
+      site.subcategory?.toLowerCase().includes(query)
+    ).slice(0, 5);
+  }, [mediaSites, searchQuery]);
+
+  // Filter WP sites by search for dropdown
+  const searchedWpSites = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return wpSites.filter(site => 
+      site.name.toLowerCase().includes(query) ||
+      site.url.toLowerCase().includes(query)
+    ).slice(0, 3);
   }, [wpSites, searchQuery]);
 
   const chinaSites = useMemo(() => {
@@ -128,6 +179,16 @@ const Landing = () => {
   const handleSiteClick = (site: WPSite | MediaSite, type: 'wp' | 'media') => {
     setSelectedSite(site);
     setSelectedSiteType(type);
+    setShowDropdown(false);
+  };
+
+  const handleCategoryClick = (category: string, subcategory?: string) => {
+    if (subcategory) {
+      setSearchQuery(subcategory);
+    } else {
+      setSearchQuery(category);
+    }
+    setShowDropdown(false);
   };
 
   const renderWPSiteCard = (site: WPSite) => (
@@ -218,6 +279,115 @@ const Landing = () => {
     );
   };
 
+  const renderSearchDropdown = () => (
+    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+      <ScrollArea className="max-h-[400px]">
+        {/* Categories Section */}
+        <div className="p-3 border-b border-border">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+            Categories
+          </p>
+          <div className="space-y-1">
+            {Array.from(categories.entries()).map(([category, subcats]) => (
+              <div key={category}>
+                <button
+                  onClick={() => handleCategoryClick(category)}
+                  className="flex items-center justify-between w-full px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors"
+                >
+                  <span>{category}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+                {subcats.size > 0 && (
+                  <div className="ml-4 space-y-0.5">
+                    {Array.from(subcats).map(subcat => (
+                      <button
+                        key={subcat}
+                        onClick={() => handleCategoryClick(category, subcat)}
+                        className="flex items-center w-full px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+                      >
+                        {subcat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Real-time Search Results */}
+        {searchQuery.trim() && (searchedMediaSites.length > 0 || searchedWpSites.length > 0) && (
+          <div className="p-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+              Search Results
+            </p>
+            
+            {searchedWpSites.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-muted-foreground mb-1">WordPress Sites</p>
+                {searchedWpSites.map(site => (
+                  <button
+                    key={site.id}
+                    onClick={() => handleSiteClick(site, 'wp')}
+                    className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted rounded-lg transition-colors"
+                  >
+                    <img
+                      src={getFaviconUrl(site.url)}
+                      alt={site.name}
+                      className="h-8 w-8 rounded-lg bg-muted object-contain"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{site.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{extractDomain(site.url)}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs text-accent border-accent/30">
+                      {site.credits_required} Credits
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {searchedMediaSites.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Global Library</p>
+                {searchedMediaSites.map(site => (
+                  <button
+                    key={site.id}
+                    onClick={() => handleSiteClick(site, 'media')}
+                    className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted rounded-lg transition-colors"
+                  >
+                    <img
+                      src={site.favicon || getFaviconUrl(site.link)}
+                      alt={site.name}
+                      className="h-8 w-8 rounded-lg bg-muted object-contain"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{site.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{site.subcategory || site.category}</p>
+                    </div>
+                    {site.price > 0 && (
+                      <Badge variant="outline" className="text-xs text-accent border-accent/30">
+                        ${site.price}
+                      </Badge>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* No Results */}
+        {searchQuery.trim() && searchedMediaSites.length === 0 && searchedWpSites.length === 0 && (
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            No results found for "{searchQuery}"
+          </div>
+        )}
+      </ScrollArea>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -228,7 +398,7 @@ const Landing = () => {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <div className="hidden md:flex flex-1 max-w-xl mx-8" ref={searchRef}>
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -236,8 +406,10 @@ const Landing = () => {
                 placeholder="Search media outlets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowDropdown(true)}
                 className="pl-10 bg-muted/50 border-border focus:bg-card"
               />
+              {showDropdown && renderSearchDropdown()}
             </div>
           </div>
           
@@ -252,15 +424,17 @@ const Landing = () => {
 
       {/* Mobile search */}
       <div className="md:hidden px-4 py-3 border-b border-border bg-card">
-        <div className="relative">
+        <div className="relative" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search media outlets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setShowDropdown(true)}
             className="pl-10 bg-muted/50 border-border focus:bg-card"
           />
+          {showDropdown && renderSearchDropdown()}
         </div>
       </div>
 
