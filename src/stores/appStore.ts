@@ -16,7 +16,9 @@ interface AppState {
   currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users';
   setCurrentView: (view: AppState['currentView']) => void;
   
-  // Target subcategory for Global Library navigation
+  // Target tab and subcategory for Sites view navigation
+  targetTab: string | null;
+  setTargetTab: (tab: string | null) => void;
   targetSubcategory: string | null;
   setTargetSubcategory: (subcategory: string | null) => void;
 }
@@ -36,7 +38,9 @@ export const useAppStore = create<AppState>()((set) => ({
   currentView: 'dashboard',
   setCurrentView: (view) => set({ currentView: view }),
   
-  // Target subcategory
+  // Target tab and subcategory
+  targetTab: null,
+  setTargetTab: (tab) => set({ targetTab: tab }),
   targetSubcategory: null,
   setTargetSubcategory: (subcategory) => set({ targetSubcategory: subcategory }),
 }));

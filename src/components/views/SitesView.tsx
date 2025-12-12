@@ -71,7 +71,7 @@ export function SitesView() {
   const { sites, loading: sitesLoading, addSite, removeSite, refetchSites } = useSites();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
-  const { targetSubcategory, setTargetSubcategory } = useAppStore();
+  const { targetTab, setTargetTab, targetSubcategory, setTargetSubcategory } = useAppStore();
   const [activeTab, setActiveTab] = useState('instant');
   const [activeMediaCategory, setActiveMediaCategory] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
@@ -150,16 +150,19 @@ export function SitesView() {
     fetchMediaSites();
   }, []);
 
-  // Handle navigation from landing page with target subcategory
+  // Handle navigation from landing page with target tab and subcategory
   useEffect(() => {
+    if (targetTab) {
+      setActiveTab(targetTab);
+      setTargetTab(null);
+    }
     if (targetSubcategory) {
-      setActiveTab('global');
+      setActiveTab('custom'); // 'custom' is the Global Library tab
       setActiveMediaCategory('Global');
       setActiveSubcategory(targetSubcategory);
-      // Clear the target subcategory after applying it
       setTargetSubcategory(null);
     }
-  }, [targetSubcategory, setTargetSubcategory]);
+  }, [targetTab, setTargetTab, targetSubcategory, setTargetSubcategory]);
 
   const fetchMediaSites = async () => {
     setMediaSitesLoading(true);

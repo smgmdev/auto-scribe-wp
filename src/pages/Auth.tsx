@@ -20,6 +20,7 @@ const authSchema = z.object({
 interface LocationState {
   redirectTo?: string;
   targetView?: string;
+  targetTab?: string;
   targetSubcategory?: string;
 }
 
@@ -37,10 +38,11 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      // Pass along the target view and subcategory state when redirecting
+      // Pass along the target view, tab and subcategory state when redirecting
       navigate('/dashboard', { 
         state: { 
           targetView: locationState?.targetView,
+          targetTab: locationState?.targetTab,
           targetSubcategory: locationState?.targetSubcategory 
         } 
       });

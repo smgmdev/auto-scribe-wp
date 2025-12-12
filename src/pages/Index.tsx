@@ -14,6 +14,7 @@ import { useAppStore } from '@/stores/appStore';
 
 interface LocationState {
   targetView?: string;
+  targetTab?: string;
   targetSubcategory?: string;
 }
 
@@ -30,7 +31,7 @@ const views = {
 };
 
 const Index = () => {
-  const { currentView, setCurrentView, setTargetSubcategory } = useAppStore();
+  const { currentView, setCurrentView, setTargetTab, setTargetSubcategory } = useAppStore();
   const location = useLocation();
   const CurrentView = views[currentView] || DashboardView;
   
@@ -38,13 +39,16 @@ const Index = () => {
     const state = location.state as LocationState | null;
     if (state?.targetView === 'sites') {
       setCurrentView('sites');
+      if (state?.targetTab) {
+        setTargetTab(state.targetTab);
+      }
       if (state?.targetSubcategory) {
         setTargetSubcategory(state.targetSubcategory);
       }
       // Clear the state to prevent re-triggering on subsequent renders
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, setCurrentView, setTargetSubcategory]);
+  }, [location.state, setCurrentView, setTargetTab, setTargetSubcategory]);
 
   return (
     <MainLayout>
