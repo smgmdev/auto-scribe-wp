@@ -471,7 +471,7 @@ const Landing = () => {
                                     <img
                                       src={agencyLogos[site.agency]}
                                       alt={site.agency}
-                                      className="h-10 w-10 rounded-lg object-contain flex-shrink-0"
+                                      className="h-5 w-5 rounded object-contain flex-shrink-0"
                                       onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                       }}
