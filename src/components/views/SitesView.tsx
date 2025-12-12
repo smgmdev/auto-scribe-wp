@@ -879,68 +879,101 @@ export function SitesView() {
     </Card>
   );
 
-  const renderMediaSiteCard = (site: MediaSite, index: number) => (
-    <Card 
-      key={site.id} 
-      className="group hover:shadow-md transition-all duration-300" 
-      style={{ animationDelay: `${index * 50}ms` }}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-              <img 
-                src={site.favicon || getFaviconUrl(site.link)} 
-                alt={`${site.name} favicon`} 
-                className="h-5 w-5 object-contain" 
-                onError={e => {
-                  e.currentTarget.style.display = 'none';
-                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                }} 
-              />
-              <Globe className="h-4 w-4 text-accent hidden" />
+  const renderMediaSiteCard = (site: MediaSite, index: number) => {
+    const isExpanded = expandedSites.has(site.id);
+    const hasExpandableContent = site.agency || site.about;
+    
+    return (
+      <Card 
+        key={site.id} 
+        className="group hover:shadow-md transition-all duration-300" 
+        style={{ animationDelay: `${index * 50}ms` }}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                <img 
+                  src={site.favicon || getFaviconUrl(site.link)} 
+                  alt={`${site.name} favicon`} 
+                  className="h-5 w-5 object-contain" 
+                  onError={e => {
+                    e.currentTarget.style.display = 'none';
+                    (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                  }} 
+                />
+                <Globe className="h-4 w-4 text-accent hidden" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm truncate">{site.name}</h3>
+                <a 
+                  href={site.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
+                >
+                  <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                  <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                </a>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm truncate">{site.name}</h3>
-              <a 
-                href={site.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
-              >
-                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </a>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant="secondary" className="text-xs">
-              {site.publication_format}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {site.publishing_time}
-            </Badge>
-            {site.price > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Coins className="h-3 w-3" />
-                ${site.price}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Badge variant="secondary" className="text-xs">
+                {site.publication_format}
               </Badge>
-            )}
-            {isAdmin && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                onClick={() => handleRemoveMediaSite(site.id, site.name)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            )}
+              <Badge variant="outline" className="text-xs">
+                {site.publishing_time}
+              </Badge>
+              {site.price > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Coins className="h-3 w-3" />
+                  ${site.price}
+                </Badge>
+              )}
+              {isAdmin && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                  onClick={() => handleRemoveMediaSite(site.id, site.name)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              {hasExpandableContent && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                  onClick={() => toggleExpand(site.id)}
+                >
+                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+          
+          {/* Expanded Section with Agency and Details */}
+          {isExpanded && hasExpandableContent && (
+            <div className="mt-3 pt-3 border-t border-border space-y-2">
+              {site.agency && (
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Agency:</span>
+                  <span className="text-xs text-foreground">{site.agency}</span>
+                </div>
+              )}
+              {site.about && (
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Details:</span>
+                  <p className="text-xs text-foreground">{site.about}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderAgencyCard = (site: MediaSite, index: number) => {
     const isExpanded = expandedSites.has(site.id);
