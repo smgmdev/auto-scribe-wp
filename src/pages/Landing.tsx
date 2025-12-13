@@ -1,12 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
+import { useAuth } from '@/hooks/useAuth';
+import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
+import { toast } from '@/hooks/use-toast';
 import amblack from '@/assets/amblack.png';
 
 interface SiteTag {
@@ -43,6 +46,7 @@ const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
@@ -54,6 +58,10 @@ const Landing = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [activeTab, setActiveTab] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
+  
+  // Brief submission dialog state
+  const [briefDialogOpen, setBriefDialogOpen] = useState(false);
+  const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
 
   useEffect(() => {
     const fetchSites = async () => {
@@ -314,15 +322,26 @@ const Landing = () => {
     const displaySites = seeAllConfig ? sites.slice(0, 12) : sites;
 
     const handleSeeAll = () => {
-      // Navigate to auth with state indicating target tab and/or subcategory
-      navigate('/auth', { 
-        state: { 
-          redirectTo: '/dashboard', 
-          targetView: 'sites', 
-          targetTab: seeAllConfig?.tab,
-          targetSubcategory: seeAllConfig?.subcategory 
-        } 
-      });
+      if (user) {
+        // Logged in user - go directly to dashboard
+        navigate('/dashboard', { 
+          state: { 
+            targetView: 'sites', 
+            targetTab: seeAllConfig?.tab,
+            targetSubcategory: seeAllConfig?.subcategory 
+          } 
+        });
+      } else {
+        // Not logged in - go to auth with redirect
+        navigate('/auth', { 
+          state: { 
+            redirectTo: '/dashboard', 
+            targetView: 'sites', 
+            targetTab: seeAllConfig?.tab,
+            targetSubcategory: seeAllConfig?.subcategory 
+          } 
+        });
+      }
     };
 
     return (
@@ -372,12 +391,21 @@ const Landing = () => {
             </button>
           </div>
           
-          <Button 
-            onClick={() => navigate('/auth')}
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
-          >
-            Sign In
-          </Button>
+          {user ? (
+            <Button 
+              onClick={() => navigate('/dashboard')}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              Account
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => navigate('/auth')}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </header>
 
@@ -711,24 +739,64 @@ const Landing = () => {
             </div>
           )}
 
-          <div className="mt-4">
+          <div className="flex justify-between gap-3 mt-4">
             <Button 
-              onClick={() => {
-                // Pass the selected site info to auth for redirect after login
-                navigate('/auth', { 
-                  state: { 
-                    targetView: 'orders',
-                    pendingPurchase: selectedSiteType === 'media' ? (selectedSite as MediaSite).id : null
-                  } 
-                });
-              }}
-              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+              variant="outline"
+              onClick={() => setSelectedSite(null)}
+              className="hover:bg-black hover:text-white transition-colors"
             >
-              Sign In to Purchase
+              Close
             </Button>
+            {selectedSiteType === 'media' && (selectedSite as MediaSite).category !== 'Agencies/People' && (
+              user ? (
+                <Button 
+                  className="bg-black text-white hover:bg-gray-800 transition-colors"
+                  onClick={() => {
+                    setSelectedForBrief(selectedSite as MediaSite);
+                    setBriefDialogOpen(true);
+                    setSelectedSite(null);
+                  }}
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  I'm Interested - ${(selectedSite as MediaSite).price}
+                </Button>
+              ) : (
+                <Button 
+                  className="bg-black text-white hover:bg-gray-800 transition-colors"
+                  onClick={() => {
+                    navigate('/auth', { 
+                      state: { 
+                        targetView: 'orders',
+                        pendingPurchase: (selectedSite as MediaSite).id
+                      } 
+                    });
+                  }}
+                >
+                  Sign In to Purchase
+                </Button>
+              )
+            )}
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Brief Submission Dialog */}
+      <BriefSubmissionDialog
+        open={briefDialogOpen}
+        onOpenChange={setBriefDialogOpen}
+        mediaSite={selectedForBrief}
+        onSuccess={() => {
+          setSelectedForBrief(null);
+          toast({ title: 'Brief submitted! View it in My Requests.' });
+          navigate('/dashboard', { state: { targetView: 'my-requests' } });
+        }}
+        onBack={() => {
+          if (selectedForBrief) {
+            setSelectedSite(selectedForBrief);
+            setSelectedSiteType('media');
+          }
+        }}
+      />
 
       {/* Footer */}
       <footer className="border-t border-border bg-card mt-12">
