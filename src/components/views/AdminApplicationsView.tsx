@@ -72,13 +72,17 @@ export function AdminApplicationsView() {
       // If approved, create agency_payout entry with user_id and send Stripe Connect invite
       if (status === 'approved') {
         // Create Stripe Connect account and agency_payout via edge function
+        // Pre-fill as much data as possible from the application
         const response = await supabase.functions.invoke('create-connect-account', {
           body: {
             agency_name: selectedApp.agency_name,
             email: selectedApp.email,
             commission_percentage: 10,
             country: selectedApp.country,
-            user_id: selectedApp.user_id
+            user_id: selectedApp.user_id,
+            phone: selectedApp.whatsapp_phone,
+            website: selectedApp.agency_website,
+            representative_name: selectedApp.full_name
           }
         });
 
