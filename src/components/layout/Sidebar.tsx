@@ -26,7 +26,7 @@ const getNavigation = (isAdmin: boolean) => {
     submenu: [
       { id: 'compose', label: 'New Article', icon: Plus },
       { id: 'headlines', label: 'Sources', icon: Newspaper },
-      { id: 'articles', label: 'Articles', icon: FileText },
+      { id: 'articles', label: 'My Articles', icon: FileText },
       ...(isAdmin ? [
         { id: 'admin-credits', label: 'Credit Management', icon: CreditCard },
         { id: 'settings', label: 'Settings', icon: Settings }
