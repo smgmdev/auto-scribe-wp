@@ -656,7 +656,7 @@ export function AdminAgenciesView() {
             <div className="w-full flex flex-col gap-4">
               <div className="w-full h-[70vh] bg-muted rounded-lg overflow-hidden">
                 <iframe
-                  src={documentUrl}
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
                   className="w-full h-full border-0"
                   title="Document viewer"
                 />
