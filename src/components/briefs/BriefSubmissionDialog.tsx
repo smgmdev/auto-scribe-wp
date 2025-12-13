@@ -279,11 +279,16 @@ export function BriefSubmissionDialog({
         </div>
 
         <div className="flex justify-between gap-3 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)} 
+            disabled={isSubmitting}
+            className="hover:bg-gray-100 transition-colors"
+          >
             Cancel
           </Button>
           <Button 
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-black text-white hover:bg-gray-800 transition-colors"
             onClick={handleSubmit} 
             disabled={isSubmitting || !description.trim()}
           >

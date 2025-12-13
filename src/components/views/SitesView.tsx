@@ -2056,12 +2056,16 @@ export function SitesView() {
               </div>
 
               <div className="flex justify-between gap-3 mt-4">
-                <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedMediaSite(null)}
+                  className="hover:bg-gray-100 transition-colors"
+                >
                   Close
                 </Button>
                 {selectedMediaSite.category !== 'Agencies/People' && (
                   <Button 
-                    className="bg-black text-white hover:bg-black/90"
+                    className="bg-black text-white hover:bg-gray-800 transition-colors"
                     onClick={() => handleRequestService(selectedMediaSite)}
                   >
                     <Heart className="h-4 w-4 mr-2" />
