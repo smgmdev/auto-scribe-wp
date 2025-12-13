@@ -65,8 +65,10 @@ serve(async (req) => {
       created_at: user.created_at,
       last_sign_in_at: user.user_metadata?.last_sign_in_at_custom || user.last_sign_in_at,
       last_sign_in_ip: user.user_metadata?.last_sign_in_ip || null,
+      last_sign_in_location: user.user_metadata?.last_sign_in_location || null,
       last_attempt_at: user.user_metadata?.last_attempt_at || null,
       last_attempt_ip: user.user_metadata?.last_attempt_ip || null,
+      last_attempt_location: user.user_metadata?.last_attempt_location || null,
     }));
 
     return new Response(JSON.stringify({ users: usersAuthStatus }), {

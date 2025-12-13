@@ -81,6 +81,15 @@ export default function Auth() {
     
     setIsLoading(true);
 
+    // Capture login attempt (before any checks)
+    try {
+      await supabase.functions.invoke('capture-login-attempt', {
+        body: { email, type: 'attempt' }
+      });
+    } catch (attemptError) {
+      console.error('Failed to capture login attempt:', attemptError);
+    }
+
     // First check if user is suspended
     const { data: isSuspended, error: suspendedError } = await supabase
       .rpc('check_user_suspended', { check_email: email });
@@ -134,9 +143,11 @@ export default function Auth() {
       return;
     }
 
-    // Capture IP on successful login
+    // Capture successful login with location
     try {
-      await supabase.functions.invoke('capture-login-ip');
+      await supabase.functions.invoke('capture-login-attempt', {
+        body: { email, type: 'login' }
+      });
     } catch (ipError) {
       console.error('Failed to capture login IP:', ipError);
     }
