@@ -107,7 +107,7 @@ const Landing = () => {
         const { data: mediaData, error: mediaError } = await supabase
           .from('media_sites')
           .select('*')
-          .order('name', { ascending: true });
+          .order('created_at', { ascending: true });
 
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
