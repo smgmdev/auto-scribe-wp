@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, Info } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -148,11 +148,14 @@ export function DashboardView() {
                 {stat.tooltip ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <CardTitle className="text-sm font-medium text-muted-foreground cursor-help">
-                        {stat.label}
-                      </CardTitle>
+                      <div className="flex items-center gap-1 cursor-help">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                          {stat.label}
+                        </CardTitle>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                      </div>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
+                    <TooltipContent side="bottom" className="max-w-xs z-50">
                       <p>{stat.tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
