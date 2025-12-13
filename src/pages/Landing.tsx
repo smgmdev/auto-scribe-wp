@@ -253,6 +253,12 @@ const Landing = () => {
     setShowSearchModal(false);
   };
 
+  const handleDropdownSiteClick = (site: WPSite | MediaSite, type: 'wp' | 'media') => {
+    setSelectedSite(site);
+    setSelectedSiteType(type);
+    // Keep dropdown open
+  };
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setActiveSubcategory(null);
@@ -541,7 +547,7 @@ const Landing = () => {
                       modalMediaSites.map(site => (
                         <button
                           key={site.id}
-                          onClick={() => handleSiteClick(site, 'media')}
+                          onClick={() => handleDropdownSiteClick(site, 'media')}
                           className="flex items-center w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
                           {/* Left: Media logo + name */}
