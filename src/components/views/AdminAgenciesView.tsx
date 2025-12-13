@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -696,6 +696,18 @@ export function AdminAgenciesView() {
           <DialogHeader className="px-2 pb-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => {
+                    setWebsiteLoading(true);
+                    const iframe = document.querySelector('iframe[title="Website viewer"]') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 hover:bg-muted"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
                 {websiteLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                 <DialogTitle className="text-sm">Agency Website</DialogTitle>
               </div>
