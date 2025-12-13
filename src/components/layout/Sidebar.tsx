@@ -108,7 +108,6 @@ export function Sidebar({
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
@@ -129,7 +128,7 @@ export function Sidebar({
       // Regular user: check their own application status (most recent)
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('status, admin_notes')
+        .select('status')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -137,9 +136,6 @@ export function Sidebar({
       
       if (appData) {
         setApplicationStatus(appData.status);
-        if (appData.status === 'rejected') {
-          setRejectionReason(appData.admin_notes);
-        }
       }
 
       // Check if user has agency payout record and onboarding status
@@ -280,7 +276,6 @@ export function Sidebar({
             {!isAdmin && (
               <AgencyStatusCard
                 applicationStatus={applicationStatus}
-                rejectionReason={rejectionReason}
                 hasStripeAccount={hasStripeAccount}
                 isAgencyOnboarded={isAgencyOnboarded}
                 onNavigateToApplication={() => handleNavClick('agency-application')}

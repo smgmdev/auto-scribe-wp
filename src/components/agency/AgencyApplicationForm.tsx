@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Upload, Building2, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Loader2, Upload, Building2, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -33,6 +33,7 @@ export function AgencyApplicationForm() {
   const [uploading, setUploading] = useState(false);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [showRejectionReason, setShowRejectionReason] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -190,19 +191,20 @@ export function AgencyApplicationForm() {
 
   // Show existing application status
   if (existingApplication) {
+    const isRejected = existingApplication.status === 'rejected';
+    
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Agency Application
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Status</span>
+          <div className="flex items-start justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Agency Application
+            </CardTitle>
             {getStatusBadge(existingApplication.status)}
           </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Agency Name</p>
@@ -223,20 +225,45 @@ export function AgencyApplicationForm() {
               </a>
             </div>
           </div>
-          {existingApplication.admin_notes && (
-            <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground mb-1">Admin Notes</p>
-              <p className="text-sm">{existingApplication.admin_notes}</p>
-            </div>
-          )}
-          {existingApplication.status === 'rejected' && (
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => setExistingApplication(null)}
-            >
-              Submit New Application
-            </Button>
+          
+          {isRejected && (
+            <>
+              {!showRejectionReason ? (
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setShowRejectionReason(true)}
+                >
+                  <ChevronDown className="h-4 w-4 mr-2" />
+                  See reason
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-muted-foreground"
+                    onClick={() => setShowRejectionReason(false)}
+                  >
+                    <ChevronUp className="h-4 w-4 mr-2" />
+                    Hide reason
+                  </Button>
+                  <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                    <p className="text-sm text-muted-foreground mb-1">Reason</p>
+                    <p className="text-sm">{existingApplication.admin_notes || 'No reason provided'}</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setExistingApplication(null);
+                      setShowRejectionReason(false);
+                    }}
+                  >
+                    Submit New Application
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
