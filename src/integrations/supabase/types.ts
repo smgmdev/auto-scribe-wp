@@ -410,32 +410,41 @@ export type Database = {
         Row: {
           created_at: string
           email: string | null
+          email_verified: boolean
           id: string
           pin_enabled: boolean
           pin_hash: string | null
           pin_salt: string | null
           updated_at: string
           username: string | null
+          verification_token: string | null
+          verification_token_expires_at: string | null
         }
         Insert: {
           created_at?: string
           email?: string | null
+          email_verified?: boolean
           id: string
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
           updated_at?: string
           username?: string | null
+          verification_token?: string | null
+          verification_token_expires_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string | null
+          email_verified?: boolean
           id?: string
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
           updated_at?: string
           username?: string | null
+          verification_token?: string | null
+          verification_token_expires_at?: string | null
         }
         Relationships: []
       }

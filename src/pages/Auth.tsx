@@ -79,26 +79,48 @@ export default function Auth() {
     
     setIsLoading(true);
     const { error } = await signIn(email, password);
-    setIsLoading(false);
     
     if (error) {
+      setIsLoading(false);
       let errorMessage = error.message;
       if (error.message === 'Invalid login credentials') {
         errorMessage = 'Invalid email or password. Please try again.';
-      } else if (error.message.includes('Email not confirmed')) {
-        errorMessage = 'Please verify your email before signing in. Check your inbox for the confirmation link.';
       }
       toast({
         variant: 'destructive',
         title: 'Sign in failed',
         description: errorMessage,
       });
-    } else {
-      toast({
-        title: 'Welcome back!',
-        description: 'You have successfully signed in.',
-      });
+      return;
     }
+
+    // Check if email is verified in our custom system
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (currentUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email_verified')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+      if (profile && !profile.email_verified) {
+        // Sign out and show error
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        toast({
+          variant: 'destructive',
+          title: 'Email not verified',
+          description: 'Please verify your email before signing in. Check your inbox for the verification link.',
+        });
+        return;
+      }
+    }
+
+    setIsLoading(false);
+    toast({
+      title: 'Welcome back!',
+      description: 'You have successfully signed in.',
+    });
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -106,7 +128,7 @@ export default function Auth() {
     if (!validateForm()) return;
     
     setIsLoading(true);
-    const { error } = await signUp(email, password);
+    const { error, data } = await signUp(email, password);
     
     if (error) {
       setIsLoading(false);
@@ -119,14 +141,32 @@ export default function Auth() {
         title: 'Sign up failed',
         description: errorMessage,
       });
-    } else {
-      // Email will be sent automatically via the email-hook edge function
-      setIsLoading(false);
-      toast({
-        title: 'Check your email!',
-        description: 'We sent you a verification link. Please verify your email to sign in.',
-      });
+      return;
     }
+
+    // Send custom verification email via Resend
+    if (data?.user) {
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+          body: { email, userId: data.user.id }
+        });
+        
+        if (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+        }
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+      }
+
+      // Sign out immediately since they need to verify
+      await supabase.auth.signOut();
+    }
+    
+    setIsLoading(false);
+    toast({
+      title: 'Check your email!',
+      description: 'We sent you a verification link. Please verify your email to sign in.',
+    });
   };
 
   const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200 pl-10";
