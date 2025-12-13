@@ -471,18 +471,10 @@ export function AdminUsersView() {
     }
   };
 
-  const formatLoginDateTime = (loginDateStr: string | null, createdAtStr: string | null) => {
+  const formatLoginDateTime = (loginDateStr: string | null) => {
     if (!loginDateStr) return 'Never';
     try {
-      const loginDate = new Date(loginDateStr);
-      const createdAt = createdAtStr ? new Date(createdAtStr) : null;
-      
-      // If login happened within 1 minute of account creation, it's the auto-login from signup
-      if (createdAt && Math.abs(loginDate.getTime() - createdAt.getTime()) < 60000) {
-        return 'Never (just signed up)';
-      }
-      
-      return format(loginDate, 'MMM d, yyyy HH:mm');
+      return format(new Date(loginDateStr), 'MMM d, yyyy HH:mm');
     } catch {
       return 'Invalid date';
     }
@@ -693,7 +685,7 @@ export function AdminUsersView() {
                                 </div>
                                 <div className="flex gap-2">
                                   <span className="text-muted-foreground">Last login:</span>
-                                  <span>{formatLoginDateTime(user.lastSignInAt, user.createdAt)}</span>
+                                  <span>{formatLoginDateTime(user.lastSignInAt)}</span>
                                 </div>
                                 <div className="flex gap-2">
                                   <span className="text-muted-foreground">Last login IP:</span>
@@ -704,7 +696,7 @@ export function AdminUsersView() {
                                 </div>
                                 <div className="flex gap-2">
                                   <span className="text-muted-foreground">Last login attempt:</span>
-                                  <span>{formatLoginDateTime(user.lastAttemptAt, user.createdAt)}</span>
+                                  <span>{formatLoginDateTime(user.lastAttemptAt)}</span>
                                 </div>
                                 <div className="flex gap-2">
                                   <span className="text-muted-foreground">Last login attempt IP:</span>

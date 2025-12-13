@@ -59,11 +59,13 @@ serve(async (req) => {
     }
 
     // Return user details including login info
+    // Only use custom metadata fields for login tracking (not Supabase's built-in last_sign_in_at)
+    // because the built-in field gets set on auto-login after signup
     const usersAuthStatus = users.map((user) => ({
       id: user.id,
       email_confirmed_at: user.email_confirmed_at,
       created_at: user.created_at,
-      last_sign_in_at: user.user_metadata?.last_sign_in_at_custom || user.last_sign_in_at,
+      last_sign_in_at: user.user_metadata?.last_sign_in_at_custom || null,
       last_sign_in_ip: user.user_metadata?.last_sign_in_ip || null,
       last_sign_in_location: user.user_metadata?.last_sign_in_location || null,
       last_attempt_at: user.user_metadata?.last_attempt_at || null,
