@@ -28,8 +28,8 @@ const getNavigation = (isAdmin: boolean) => {
       { id: 'compose', label: 'New Article', icon: Plus },
       { id: 'articles', label: 'Articles', icon: FileText },
       ...(isAdmin ? [
-        { id: 'settings', label: 'Global Settings', icon: Settings },
-        { id: 'admin-credits', label: 'Credit Management', icon: CreditCard }
+        { id: 'admin-credits', label: 'Credit Management', icon: CreditCard },
+        { id: 'settings', label: 'Settings', icon: Settings }
       ] : [])
     ]
   }, {
