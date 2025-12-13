@@ -33,6 +33,7 @@ export function AgencyStatusCard({
   const [expanded, setExpanded] = useState(false);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [dismissedRejection, setDismissedRejection] = useState(false);
 
   const fetchStripeStatus = async () => {
     if (!hasStripeAccount || stripeStatus) return;
@@ -249,8 +250,8 @@ export function AgencyStatusCard({
     );
   }
 
-  // Rejected application - can resubmit
-  if (applicationStatus === 'rejected') {
+  // Rejected application - show Ok button to dismiss and show Apply Now
+  if (applicationStatus === 'rejected' && !dismissedRejection) {
     return (
       <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
         <div className="flex items-start gap-3">
@@ -267,9 +268,9 @@ export function AgencyStatusCard({
               size="sm"
               variant="outline"
               className="mt-3 border-red-500/50 text-red-400 hover:bg-red-500/10"
-              onClick={onNavigateToApplication}
+              onClick={() => setDismissedRejection(true)}
             >
-              Resubmit Application
+              Ok
             </Button>
           </div>
         </div>
