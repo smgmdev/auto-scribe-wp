@@ -87,7 +87,8 @@ export function DashboardView() {
       setGlobalLibraryLoading(true);
       const { count, error } = await supabase
         .from('media_sites')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .neq('category', 'Agencies/People');
       
       if (!error && count !== null) {
         setGlobalLibraryCount(count);
