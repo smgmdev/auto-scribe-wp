@@ -78,6 +78,25 @@ export default function Auth() {
     if (!validateForm()) return;
     
     setIsLoading(true);
+
+    // First check if email is verified BEFORE actually signing in
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email_verified')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (profile && !profile.email_verified) {
+      setIsLoading(false);
+      toast({
+        variant: 'destructive',
+        title: 'Email not verified',
+        description: 'Please verify your email before signing in. Check your inbox for the verification link.',
+      });
+      return;
+    }
+
+    // Only proceed with sign in if email is verified
     const { error } = await signIn(email, password);
     
     if (error) {
@@ -92,28 +111,6 @@ export default function Auth() {
         description: errorMessage,
       });
       return;
-    }
-
-    // Check if email is verified in our custom system
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email_verified')
-        .eq('id', currentUser.id)
-        .maybeSingle();
-
-      if (profile && !profile.email_verified) {
-        // Sign out and show error
-        await supabase.auth.signOut();
-        setIsLoading(false);
-        toast({
-          variant: 'destructive',
-          title: 'Email not verified',
-          description: 'Please verify your email before signing in. Check your inbox for the verification link.',
-        });
-        return;
-      }
     }
 
     setIsLoading(false);
