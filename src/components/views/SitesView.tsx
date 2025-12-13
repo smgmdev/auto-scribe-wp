@@ -2055,19 +2055,19 @@ export function SitesView() {
                 )}
               </div>
 
-              <div className="flex justify-end gap-3 mt-4">
+              <div className="flex justify-between gap-3 mt-4">
+                <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
+                  Close
+                </Button>
                 {selectedMediaSite.category !== 'Agencies/People' && (
                   <Button 
-                    variant="accent" 
+                    className="bg-black text-white hover:bg-black/90"
                     onClick={() => handleRequestService(selectedMediaSite)}
                   >
                     <Heart className="h-4 w-4 mr-2" />
                     I'm Interested - ${selectedMediaSite.price}
                   </Button>
                 )}
-                <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
-                  Close
-                </Button>
               </div>
             </>
           )}
