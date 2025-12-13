@@ -141,9 +141,9 @@ export function AdminUsersView() {
     }
   };
 
-  const openCreditDialog = (user: UserData, action: 'add' | 'remove') => {
+  const openCreditDialog = (user: UserData) => {
     setSelectedUser(user);
-    setCreditAction(action);
+    setCreditAction('add');
     setCreditAmount('');
     setCreditDialogOpen(true);
   };
@@ -362,16 +362,10 @@ export function AdminUsersView() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openCreditDialog(user, 'add')}
+                          onClick={() => openCreditDialog(user)}
                         >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openCreditDialog(user, 'remove')}
-                        >
-                          <Minus className="h-4 w-4" />
+                          <Coins className="h-4 w-4 mr-1" />
+                          Credits
                         </Button>
                       </>
                     )}
@@ -398,9 +392,7 @@ export function AdminUsersView() {
       <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {creditAction === 'add' ? 'Add Credits' : 'Remove Credits'}
-            </DialogTitle>
+            <DialogTitle>Manage Credits</DialogTitle>
             <DialogDescription>
               {selectedUser?.email}
             </DialogDescription>
@@ -409,6 +401,27 @@ export function AdminUsersView() {
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground">
               Current balance: <strong>{selectedUser?.credits} credits</strong>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant={creditAction === 'add' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCreditAction('add')}
+                className="flex-1"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add
+              </Button>
+              <Button
+                variant={creditAction === 'remove' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCreditAction('remove')}
+                className="flex-1"
+              >
+                <Minus className="h-4 w-4 mr-1" />
+                Remove
+              </Button>
             </div>
 
             <Input
@@ -423,15 +436,11 @@ export function AdminUsersView() {
               <Button variant="outline" onClick={() => setCreditDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreditChange} disabled={saving}>
+              <Button onClick={handleCreditChange} disabled={saving || !creditAmount}>
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : creditAction === 'add' ? (
-                  <Plus className="h-4 w-4 mr-2" />
-                ) : (
-                  <Minus className="h-4 w-4 mr-2" />
-                )}
-                {creditAction === 'add' ? 'Add' : 'Remove'}
+                ) : null}
+                {creditAction === 'add' ? 'Add Credits' : 'Remove Credits'}
               </Button>
             </div>
           </div>
