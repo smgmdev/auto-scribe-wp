@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Upload, Building2, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Upload, Building2, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -61,6 +61,11 @@ export function AgencyApplicationForm() {
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [otherNiche, setOtherNiche] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [isDraggingLogo, setIsDraggingLogo] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -144,6 +149,61 @@ export function AgencyApplicationForm() {
     }
   };
 
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: 'destructive',
+        title: 'File too large',
+        description: 'Maximum logo size is 5MB'
+      });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file type',
+        description: 'Please upload an image file (PNG, JPG, etc.)'
+      });
+      return;
+    }
+
+    setUploadingLogo(true);
+    setLogoFile(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => setLogoPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('agency-documents')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      setLogoUrl(fileName);
+      toast({ title: 'Logo uploaded successfully' });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: error.message
+      });
+      setLogoFile(null);
+      setLogoPreview(null);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !documentUrl) return;
@@ -201,6 +261,7 @@ export function AgencyApplicationForm() {
         country,
         agency_website,
         incorporation_document_url: documentUrl,
+        logo_url: logoUrl,
         media_niches: niches,
         media_channels,
         status: 'pending'
@@ -472,6 +533,79 @@ export function AgencyApplicationForm() {
               disabled={submitting}
               rows={4}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Agency Logo (optional)</Label>
+            <div 
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                isDraggingLogo ? 'border-primary bg-primary/5' : 'border-border'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDraggingLogo(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                setIsDraggingLogo(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDraggingLogo(false);
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                  const syntheticEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                  handleLogoChange(syntheticEvent);
+                }
+              }}
+            >
+              {logoPreview ? (
+                <div className="flex flex-col items-center gap-2">
+                  <img 
+                    src={logoPreview} 
+                    alt="Agency logo preview" 
+                    className="h-20 w-20 object-contain rounded-lg border"
+                  />
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">{logoFile?.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setLogoFile(null);
+                        setLogoUrl(null);
+                        setLogoPreview(null);
+                      }}
+                      disabled={uploadingLogo || submitting}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Image className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Drag and drop or click to upload (PNG/JPG, max 5MB)
+                  </p>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    disabled={uploadingLogo || submitting}
+                    className="max-w-xs mx-auto"
+                  />
+                </>
+              )}
+              {uploadingLogo && (
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Uploading...</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
