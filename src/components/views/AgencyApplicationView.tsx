@@ -166,7 +166,7 @@ export function AgencyApplicationView() {
           Why Upgrade to Agency?
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Use Arcana Mace as your personal global media channel merchant to provide media access to global companies and other agencies.
+          Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
         </p>
       </div>
 
