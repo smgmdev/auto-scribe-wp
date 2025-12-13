@@ -283,7 +283,7 @@ export function AgencyApplicationForm() {
           Apply for Agency Account
         </CardTitle>
         <CardDescription>
-          Partner with us to list your media sites and receive payouts
+          Upgrade your account to list your media sites and receive payouts
         </CardDescription>
       </CardHeader>
       <CardContent>
