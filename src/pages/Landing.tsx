@@ -43,6 +43,7 @@ interface MediaSite {
 type SelectedSite = WPSite | MediaSite | null;
 
 const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
+const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -153,12 +154,28 @@ const Landing = () => {
   }, [wpSites, searchQuery]);
 
   const subcategories = useMemo(() => {
+    // For Global tab, use fixed order from GLOBAL_SUBCATEGORIES
+    if (activeTab === 'Global') {
+      const availableSubcats = new Set<string>();
+      mediaSites
+        .filter(site => site.category === 'Global')
+        .forEach(site => {
+          if (site.subcategory) {
+            site.subcategory.split(',').map(s => s.trim()).forEach(subcat => {
+              if (subcat) availableSubcats.add(subcat);
+            });
+          }
+        });
+      // Return only subcategories that exist in data, in the fixed order
+      return GLOBAL_SUBCATEGORIES.filter(sub => availableSubcats.has(sub));
+    }
+    
+    // For other tabs, dynamically generate from data
     const subcats = new Set<string>();
     mediaSites
       .filter(site => site.category === activeTab)
       .forEach(site => {
         if (site.subcategory) {
-          // Handle comma-separated subcategories
           site.subcategory.split(',').map(s => s.trim()).forEach(subcat => {
             if (subcat) subcats.add(subcat);
           });
