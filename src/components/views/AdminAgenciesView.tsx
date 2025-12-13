@@ -642,12 +642,40 @@ export function AdminAgenciesView() {
             <DialogTitle>Incorporation Document</DialogTitle>
           </DialogHeader>
           {documentUrl && (
-            <div className="w-full h-[70vh]">
-              <iframe 
-                src={documentUrl} 
-                className="w-full h-full border-0 rounded-lg"
-                title="Document viewer"
-              />
+            <div className="w-full flex flex-col gap-4">
+              <div className="w-full h-[70vh] bg-muted rounded-lg overflow-hidden">
+                <object
+                  data={documentUrl}
+                  type="application/pdf"
+                  className="w-full h-full"
+                >
+                  <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
+                    <FileText className="h-16 w-16 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      Unable to display document in browser.
+                    </p>
+                    <Button
+                      onClick={() => window.open(documentUrl, '_blank')}
+                      className="hover:bg-black hover:text-white"
+                      variant="outline"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                  </div>
+                </object>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => window.open(documentUrl, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="hover:bg-black hover:text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in New Tab
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
