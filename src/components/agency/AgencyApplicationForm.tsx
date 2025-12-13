@@ -48,7 +48,12 @@ interface AgencyApplication {
   reviewed_at: string | null;
 }
 
-export function AgencyApplicationForm() {
+interface AgencyApplicationFormProps {
+  onApplicationStatusChange?: (hasRejected: boolean) => void;
+  triggerNewApplication?: boolean;
+}
+
+export function AgencyApplicationForm({ onApplicationStatusChange, triggerNewApplication }: AgencyApplicationFormProps) {
   const { user } = useAuth();
   const { setUserApplicationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
@@ -103,12 +108,27 @@ export function AgencyApplicationForm() {
 
       if (error) throw error;
       setExistingApplication(data);
+      
+      // Notify parent about rejected status
+      if (data?.status === 'rejected') {
+        onApplicationStatusChange?.(true);
+      } else {
+        onApplicationStatusChange?.(false);
+      }
     } catch (error: any) {
       console.error('Error checking application:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Handle trigger from parent to start new application
+  useEffect(() => {
+    if (triggerNewApplication && existingApplication?.status === 'rejected') {
+      localStorage.setItem('agency_new_application_mode', 'true');
+      setIsFillingNewApplication(true);
+    }
+  }, [triggerNewApplication, existingApplication]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -406,17 +426,6 @@ export function AgencyApplicationForm() {
                     <p className="text-sm text-muted-foreground mb-1">Reason</p>
                     <p className="text-sm">{existingApplication.admin_notes || 'No reason provided'}</p>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full hover:bg-black hover:text-white"
-                    onClick={() => {
-                      localStorage.setItem('agency_new_application_mode', 'true');
-                      setIsFillingNewApplication(true);
-                      setShowRejectionReason(false);
-                    }}
-                  >
-                    Submit New Application
-                  </Button>
                 </div>
               )}
             </>
