@@ -418,6 +418,7 @@ export type Database = {
           pin_enabled: boolean
           pin_hash: string | null
           pin_salt: string | null
+          suspended: boolean
           updated_at: string
           username: string | null
           verification_token: string | null
@@ -431,6 +432,7 @@ export type Database = {
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
+          suspended?: boolean
           updated_at?: string
           username?: string | null
           verification_token?: string | null
@@ -444,6 +446,7 @@ export type Database = {
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
+          suspended?: boolean
           updated_at?: string
           username?: string | null
           verification_token?: string | null
@@ -715,6 +718,7 @@ export type Database = {
     }
     Functions: {
       check_email_verified: { Args: { check_email: string }; Returns: boolean }
+      check_user_suspended: { Args: { check_email: string }; Returns: boolean }
       get_public_sites: {
         Args: never
         Returns: {
