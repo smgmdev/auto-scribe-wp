@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { DashboardView } from '@/components/views/DashboardView';
@@ -18,6 +18,7 @@ import { AdminEngagementsView } from '@/components/views/AdminEngagementsView';
 import { AgencyApplicationView } from '@/components/views/AgencyApplicationView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LocationState {
   targetView?: string;
@@ -25,7 +26,7 @@ interface LocationState {
   targetSubcategory?: string;
 }
 
-// Views accessible by all authenticated users
+// Views accessible by all authenticated users (regular users)
 const publicViews: Record<string, React.ComponentType> = {
   dashboard: DashboardView,
   sites: SitesView,
@@ -38,7 +39,13 @@ const publicViews: Record<string, React.ComponentType> = {
   'agency-application': AgencyApplicationView,
 };
 
-// Views accessible ONLY by admin users
+// Views accessible ONLY by approved agency users (NOT regular users)
+// Note: Admin can also access these
+const agencyOnlyViews: Record<string, React.ComponentType> = {
+  // Add agency-specific views here when created
+};
+
+// Views accessible ONLY by admin users (NOT regular users, NOT agencies)
 const adminOnlyViews: Record<string, React.ComponentType> = {
   settings: SettingsView,
   'admin-credits': AdminCreditsView,
@@ -50,33 +57,84 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
 
 const Index = () => {
   const { currentView, setCurrentView, setTargetTab, setTargetSubcategory } = useAppStore();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const location = useLocation();
+  const [isApprovedAgency, setIsApprovedAgency] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Check if user is an approved agency
+  useEffect(() => {
+    const checkAgencyStatus = async () => {
+      if (!user || isAdmin) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const { data } = await supabase
+          .from('agency_payouts')
+          .select('onboarding_complete')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        setIsApprovedAgency(data?.onboarding_complete === true);
+      } catch (error) {
+        console.error('Error checking agency status:', error);
+      }
+      setIsLoading(false);
+    };
+    
+    checkAgencyStatus();
+  }, [user, isAdmin]);
   
   // Determine which view to render based on role
   const getAuthorizedView = () => {
-    // Check if it's a public view
+    // Admin can access everything
+    if (isAdmin) {
+      if (publicViews[currentView]) return publicViews[currentView];
+      if (agencyOnlyViews[currentView]) return agencyOnlyViews[currentView];
+      if (adminOnlyViews[currentView]) return adminOnlyViews[currentView];
+      return DashboardView;
+    }
+    
+    // Approved agency can access public + agency views
+    if (isApprovedAgency) {
+      if (publicViews[currentView]) return publicViews[currentView];
+      if (agencyOnlyViews[currentView]) return agencyOnlyViews[currentView];
+      // Agency cannot access admin views - redirect to dashboard
+      return DashboardView;
+    }
+    
+    // Regular user can only access public views
     if (publicViews[currentView]) {
       return publicViews[currentView];
     }
     
-    // Check if it's an admin-only view and user is admin
-    if (adminOnlyViews[currentView] && isAdmin) {
-      return adminOnlyViews[currentView];
-    }
-    
-    // Unauthorized access to admin view - redirect to dashboard
+    // Unauthorized access - redirect to dashboard
     return DashboardView;
   };
   
   const CurrentView = getAuthorizedView();
   
-  // If user tries to access admin view without permission, reset to dashboard
+  // If user tries to access unauthorized view, reset to dashboard
   useEffect(() => {
-    if (adminOnlyViews[currentView] && !isAdmin) {
+    if (isLoading) return;
+    
+    const isAdminView = !!adminOnlyViews[currentView];
+    const isAgencyView = !!agencyOnlyViews[currentView];
+    
+    // Block admin views for non-admins
+    if (isAdminView && !isAdmin) {
       setCurrentView('dashboard');
+      return;
     }
-  }, [currentView, isAdmin, setCurrentView]);
+    
+    // Block agency views for non-agency users (unless admin)
+    if (isAgencyView && !isApprovedAgency && !isAdmin) {
+      setCurrentView('dashboard');
+      return;
+    }
+  }, [currentView, isAdmin, isApprovedAgency, isLoading, setCurrentView]);
   
   useEffect(() => {
     const state = location.state as LocationState | null;
