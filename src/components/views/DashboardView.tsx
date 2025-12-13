@@ -251,7 +251,7 @@ export function DashboardView() {
             </p>
           ) : (
             <ul className="space-y-2">
-              {articles.slice(0, 5).map(article => {
+              {articles.slice(0, 3).map(article => {
                 const siteName = getSiteName(article.publishedTo);
                 return (
                   <li key={article.id}>
