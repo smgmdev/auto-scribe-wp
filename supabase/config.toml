@@ -78,3 +78,6 @@ verify_jwt = false
 
 [functions.verify-email-api]
 verify_jwt = false
+
+[functions.notify-admin-application]
+verify_jwt = true
