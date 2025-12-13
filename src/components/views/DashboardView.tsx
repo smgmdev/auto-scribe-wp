@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, TrendingUp, ExternalLink, Plus, FileText } from 'lucide-react';
+import { Globe, Newspaper, TrendingUp, ExternalLink, Plus, FileText, Loader2 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -55,10 +55,13 @@ export function DashboardView() {
     user
   } = useAuth();
   const {
-    articles
+    articles,
+    loading: articlesLoading
   } = useArticles();
-  const { sites } = useSites();
+  const { sites, loading: sitesLoading } = useSites();
   const [isAgency, setIsAgency] = useState(false);
+
+  const isDataLoading = articlesLoading || sitesLoading;
 
   useEffect(() => {
     const fetchAgencyStatus = async () => {
@@ -127,7 +130,11 @@ export function DashboardView() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-3xl font-bold text-foreground">
-                  {getStatValue(stat.key)}
+                  {isDataLoading ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  ) : (
+                    getStatValue(stat.key)
+                  )}
                 </div>
               </CardContent>
             </Card>;
