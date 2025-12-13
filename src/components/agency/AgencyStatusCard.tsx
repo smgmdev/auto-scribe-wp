@@ -33,6 +33,7 @@ export function AgencyStatusCard({
   const [expanded, setExpanded] = useState(false);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [dismissedRejection, setDismissedRejection] = useState(false);
 
   const fetchStripeStatus = async () => {
     if (!hasStripeAccount || stripeStatus) return;
@@ -250,7 +251,7 @@ export function AgencyStatusCard({
   }
 
   // Rejected application - can view details
-  if (applicationStatus === 'rejected') {
+  if (applicationStatus === 'rejected' && !dismissedRejection) {
     return (
       <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
         <div className="flex items-start gap-3">
@@ -263,7 +264,10 @@ export function AgencyStatusCard({
             <Button
               size="sm"
               className="mt-3 bg-red-500/20 hover:bg-red-500/20 text-white border-0"
-              onClick={onNavigateToApplication}
+              onClick={() => {
+                setDismissedRejection(true);
+                onNavigateToApplication();
+              }}
             >
               View Details
             </Button>
