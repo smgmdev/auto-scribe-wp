@@ -13,6 +13,84 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CONNECT-ACCOUNT] ${step}${detailsStr}`);
 };
 
+// Country name to ISO 3166-1 alpha-2 code mapping
+const countryNameToCode: Record<string, string> = {
+  "United States": "US",
+  "United Kingdom": "GB",
+  "United Arab Emirates": "AE",
+  "Saudi Arabia": "SA",
+  "Germany": "DE",
+  "France": "FR",
+  "Italy": "IT",
+  "Spain": "ES",
+  "Netherlands": "NL",
+  "Belgium": "BE",
+  "Switzerland": "CH",
+  "Austria": "AT",
+  "Australia": "AU",
+  "Canada": "CA",
+  "Japan": "JP",
+  "China": "CN",
+  "India": "IN",
+  "Singapore": "SG",
+  "Hong Kong": "HK",
+  "Malaysia": "MY",
+  "Indonesia": "ID",
+  "Thailand": "TH",
+  "Vietnam": "VN",
+  "Philippines": "PH",
+  "South Korea": "KR",
+  "Taiwan": "TW",
+  "Brazil": "BR",
+  "Mexico": "MX",
+  "Argentina": "AR",
+  "Chile": "CL",
+  "Colombia": "CO",
+  "Peru": "PE",
+  "Egypt": "EG",
+  "South Africa": "ZA",
+  "Nigeria": "NG",
+  "Kenya": "KE",
+  "Morocco": "MA",
+  "Turkey": "TR",
+  "Israel": "IL",
+  "Poland": "PL",
+  "Czech Republic": "CZ",
+  "Hungary": "HU",
+  "Romania": "RO",
+  "Greece": "GR",
+  "Portugal": "PT",
+  "Sweden": "SE",
+  "Norway": "NO",
+  "Denmark": "DK",
+  "Finland": "FI",
+  "Ireland": "IE",
+  "New Zealand": "NZ",
+  "Russia": "RU",
+  "Ukraine": "UA",
+  "Pakistan": "PK",
+  "Bangladesh": "BD",
+  "Sri Lanka": "LK",
+  "Nepal": "NP",
+  "Qatar": "QA",
+  "Kuwait": "KW",
+  "Bahrain": "BH",
+  "Oman": "OM",
+  "Jordan": "JO",
+  "Lebanon": "LB",
+  "Iraq": "IQ",
+  "Iran": "IR",
+};
+
+// Convert country name to ISO code
+const getCountryCode = (country: string): string => {
+  if (!country) return "US";
+  // If already a 2-letter code, return as-is
+  if (country.length === 2) return country.toUpperCase();
+  // Look up the country name
+  return countryNameToCode[country] || "US";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -49,7 +127,10 @@ serve(async (req) => {
     }
 
     const { agency_name, email, commission_percentage, country, user_id, phone, website, representative_name } = await req.json();
-    logStep("Creating Connect account for agency", { agency_name, email, country, user_id });
+    
+    // Convert country name to ISO code for Stripe
+    const countryCode = getCountryCode(country);
+    logStep("Creating Connect account for agency", { agency_name, email, country, countryCode, user_id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -65,7 +146,7 @@ serve(async (req) => {
     // Create Stripe Connect Express account with pre-filled company data
     const accountParams: any = {
       type: "express",
-      country: country || "US",
+      country: countryCode,
       email: email,
       capabilities: {
         card_payments: { requested: true },
