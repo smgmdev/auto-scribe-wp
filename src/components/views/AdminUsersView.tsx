@@ -299,7 +299,7 @@ export function AdminUsersView() {
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium truncate">{user.email}</p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-4 mt-1">
                         {user.role === 'admin' ? (
                           <Badge 
                             variant="outline"
@@ -324,7 +324,7 @@ export function AdminUsersView() {
                             User
                           </Badge>
                         )}
-                        <Badge variant="secondary" className="min-w-[90px] justify-center">
+                        <Badge variant="secondary" className="min-w-[90px] justify-start">
                           <Coins className="h-3 w-3 mr-1" />
                           {user.credits} credits
                         </Badge>
