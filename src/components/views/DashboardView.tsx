@@ -210,49 +210,6 @@ export function DashboardView() {
                 <Globe className="mr-2 h-4 w-4" />
                 Add New Media Site
               </Button>}
-            
-            {/* Recent Articles */}
-            <div className="pt-4 border-t border-border/50">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">My Recent Articles</h3>
-              {articles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No articles yet. Start by scanning headlines or writing a new article.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {articles.slice(0, 3).map(article => {
-                    const siteName = getSiteName(article.publishedTo);
-                    return (
-                      <li key={article.id}>
-                        {article.wpLink ? (
-                          <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatRelativeTime(article.createdAt)}
-                                {siteName && <span> • {siteName}</span>}
-                              </p>
-                            </div>
-                            <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
-                          </a>
-                        ) : (
-                          <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors cursor-pointer" onClick={() => setCurrentView('compose')}>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatRelativeTime(article.createdAt)}
-                                {siteName && <span> • {siteName}</span>}
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="text-xs">Draft</Badge>
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
           </CardContent>
         </Card>
 
@@ -277,6 +234,53 @@ export function DashboardView() {
           </CardContent>
         </Card>
       </div>
+
+      {/* My Recent Articles */}
+      <Card className="border-border/50 bg-card">
+        <CardHeader>
+          <CardTitle className="text-xl">My Recent Articles</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {articles.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No articles yet. Start by scanning headlines or writing a new article.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {articles.slice(0, 5).map(article => {
+                const siteName = getSiteName(article.publishedTo);
+                return (
+                  <li key={article.id}>
+                    {article.wpLink ? (
+                      <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatRelativeTime(article.createdAt)}
+                            {siteName && <span> • {siteName}</span>}
+                          </p>
+                        </div>
+                        <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
+                      </a>
+                    ) : (
+                      <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors cursor-pointer" onClick={() => setCurrentView('compose')}>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatRelativeTime(article.createdAt)}
+                            {siteName && <span> • {siteName}</span>}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Draft</Badge>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Latest Global Articles */}
       <Card className="border-border/50 bg-card">
