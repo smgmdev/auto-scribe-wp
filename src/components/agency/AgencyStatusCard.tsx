@@ -134,6 +134,12 @@ export function AgencyStatusCard({
           </div>
         </div>
         
+        {!statusLoading && stripeStatus && stripeStatus.missingRequirements.length > 0 && (
+          <div className="mt-2 px-2 py-1.5 bg-yellow-500/10 rounded text-xs text-yellow-400">
+            {stripeStatus.missingRequirements.length} item{stripeStatus.missingRequirements.length > 1 ? 's' : ''} remaining
+          </div>
+        )}
+        
         <Button
           size="sm"
           className="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-black"
