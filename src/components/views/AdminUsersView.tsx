@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, Plus, Minus, Ban } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,14 +15,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
+import { format } from 'date-fns';
 
 interface UserData {
   id: string;
@@ -32,6 +26,9 @@ interface UserData {
   isAgency: boolean;
   emailConfirmed: boolean;
   suspended: boolean;
+  createdAt: string | null;
+  lastSignInAt: string | null;
+  lastSignInIp: string | null;
 }
 
 export function AdminUsersView() {
@@ -45,6 +42,7 @@ export function AdminUsersView() {
   const [creditAction, setCreditAction] = useState<'add' | 'remove'>('add');
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   
   // Delete options
   const [deleteCredits, setDeleteCredits] = useState(true);
@@ -67,12 +65,24 @@ export function AdminUsersView() {
     fetchUsers();
   }, []);
 
+  const toggleUserExpand = (userId: string) => {
+    setExpandedUsers(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) {
+        next.delete(userId);
+      } else {
+        next.add(userId);
+      }
+      return next;
+    });
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
 
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, email, email_verified, suspended');
+      .select('id, email, email_verified, suspended, created_at');
 
     if (profilesError) {
       toast({
@@ -96,10 +106,28 @@ export function AdminUsersView() {
       .from('agency_payouts')
       .select('user_id, onboarding_complete');
 
+    // Fetch auth user details for last login info
+    let authUsersMap: Record<string, { lastSignInAt: string | null; lastSignInIp: string | null; createdAt: string | null }> = {};
+    try {
+      const { data: authData } = await supabase.functions.invoke('get-users-auth-status');
+      if (authData?.users) {
+        authData.users.forEach((u: any) => {
+          authUsersMap[u.id] = {
+            lastSignInAt: u.last_sign_in_at,
+            lastSignInIp: u.last_sign_in_ip,
+            createdAt: u.created_at,
+          };
+        });
+      }
+    } catch (e) {
+      console.error('Failed to fetch auth user details:', e);
+    }
+
     const usersData = (profiles || []).map((profile) => {
       const userRole = roles?.find((r) => r.user_id === profile.id);
       const userCredits = credits?.find((c) => c.user_id === profile.id);
       const userAgency = agencies?.find((a) => a.user_id === profile.id);
+      const authInfo = authUsersMap[profile.id];
 
       return {
         id: profile.id,
@@ -109,6 +137,9 @@ export function AdminUsersView() {
         isAgency: userAgency?.onboarding_complete === true,
         emailConfirmed: profile.email_verified ?? false,
         suspended: profile.suspended ?? false,
+        createdAt: authInfo?.createdAt || profile.created_at,
+        lastSignInAt: authInfo?.lastSignInAt || null,
+        lastSignInIp: authInfo?.lastSignInIp || null,
       };
     });
 
@@ -116,28 +147,8 @@ export function AdminUsersView() {
     setLoading(false);
   };
 
-  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user') => {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ role: newRole })
-      .eq('user_id', userId);
-
-    if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error updating role',
-        description: error.message,
-      });
-    } else {
-      toast({
-        title: 'Role updated',
-        description: `User role changed to ${newRole}.`,
-      });
-      fetchUsers();
-    }
-  };
-
-  const openCreditDialog = (user: UserData) => {
+  const openCreditDialog = (user: UserData, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedUser(user);
     setCreditAction('add');
     setCreditAmount('');
@@ -195,7 +206,8 @@ export function AdminUsersView() {
     fetchUsers();
   };
 
-  const openActionDialog = (user: UserData) => {
+  const openActionDialog = (user: UserData, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedUser(user);
     setDeleteCredits(true);
     setDeleteArticles(true);
@@ -247,7 +259,6 @@ export function AdminUsersView() {
     setProcessing(true);
 
     try {
-      // Delete selected data
       if (deleteCredits) {
         await supabase.from('user_credits').delete().eq('user_id', selectedUser.id);
         await supabase.from('credit_transactions').delete().eq('user_id', selectedUser.id);
@@ -258,7 +269,6 @@ export function AdminUsersView() {
       }
       
       if (deleteOrders) {
-        // Delete service requests and messages first
         const { data: requests } = await supabase
           .from('service_requests')
           .select('id')
@@ -274,7 +284,6 @@ export function AdminUsersView() {
       }
 
       if (deleteAccount) {
-        // Delete the user fully via edge function
         const { data, error } = await supabase.functions.invoke('delete-user', {
           body: { userId: selectedUser.id },
         });
@@ -306,12 +315,21 @@ export function AdminUsersView() {
     }
   };
 
+  const formatDateTime = (dateStr: string | null) => {
+    if (!dateStr) return 'Never';
+    try {
+      return format(new Date(dateStr), 'MMM d, yyyy HH:mm');
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-4xl font-bold text-foreground">Users</h1>
         <p className="mt-2 text-muted-foreground">
-          Manage user roles and credits
+          Manage users and credits
         </p>
       </div>
 
@@ -345,110 +363,125 @@ export function AdminUsersView() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredUsers.map((user) => (
-            <Card key={user.id}>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium truncate">{user.email}</p>
-                      {user.suspended && (
-                        <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
-                      )}
-                      {user.role !== 'admin' && !user.suspended && (
-                        user.emailConfirmed ? (
-                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+          {filteredUsers.map((user) => {
+            const isExpanded = expandedUsers.has(user.id);
+            
+            return (
+              <Card key={user.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <CardContent className="p-4">
+                  <div 
+                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4"
+                    onClick={() => toggleUserExpand(user.id)}
+                  >
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate">{user.email}</p>
+                        {user.suspended && (
+                          <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
+                        )}
+                        {user.role !== 'admin' && !user.suspended && (
+                          user.emailConfirmed ? (
+                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          ) : (
+                            <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                          )
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {user.suspended ? (
+                          <Badge variant="destructive" className="w-[80px] justify-center">
+                            <Ban className="h-3 w-3 mr-1" />
+                            Suspended
+                          </Badge>
+                        ) : user.role === 'admin' ? (
+                          <Badge 
+                            variant="outline"
+                            className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
+                          >
+                            <Shield className="h-3 w-3 mr-1" />
+                            Admin
+                          </Badge>
+                        ) : user.isAgency ? (
+                          <Badge 
+                            className="bg-black text-white hover:bg-black w-[72px] justify-center"
+                          >
+                            <Building2 className="h-3 w-3 mr-1" />
+                            Agency
+                          </Badge>
                         ) : (
-                          <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                        )
-                      )}
+                          <Badge 
+                            variant="outline"
+                            className="w-[72px] justify-center"
+                          >
+                            <Shield className="h-3 w-3 mr-1" />
+                            User
+                          </Badge>
+                        )}
+                        {user.role !== 'admin' && (
+                          <Badge variant="secondary" className="min-w-[90px] justify-start">
+                            <Coins className="h-3 w-3 mr-1" />
+                            {user.credits} credits
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      {user.suspended ? (
-                        <Badge variant="destructive" className="w-[72px] justify-center">
-                          <Ban className="h-3 w-3 mr-1" />
-                          Suspended
-                        </Badge>
-                      ) : user.role === 'admin' ? (
-                        <Badge 
-                          variant="outline"
-                          className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
-                        >
-                          <Shield className="h-3 w-3 mr-1" />
-                          Admin
-                        </Badge>
-                      ) : user.isAgency ? (
-                        <Badge 
-                          className="bg-black text-white hover:bg-black w-[72px] justify-center"
-                        >
-                          <Building2 className="h-3 w-3 mr-1" />
-                          Agency
-                        </Badge>
-                      ) : (
-                        <Badge 
-                          variant="outline"
-                          className="w-[72px] justify-center"
-                        >
-                          <Shield className="h-3 w-3 mr-1" />
-                          User
-                        </Badge>
-                      )}
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {user.role !== 'admin' && (
-                        <Badge variant="secondary" className="min-w-[90px] justify-start">
-                          <Coins className="h-3 w-3 mr-1" />
-                          {user.credits} credits
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {user.role !== 'admin' && (
-                      <>
-                        <Select
-                          value={user.role}
-                          onValueChange={(value: 'admin' | 'user') => handleRoleChange(user.id, value)}
-                        >
-                          <SelectTrigger className="w-[100px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="user" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">User</SelectItem>
-                            <SelectItem value="admin" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openCreditDialog(user)}
+                          onClick={(e) => openCreditDialog(user, e)}
                           className="hover:bg-black hover:text-white"
                         >
                           <Coins className="h-4 w-4 mr-1" />
                           Credits
                         </Button>
-                      </>
-                    )}
-                    {user.id !== currentUser?.id ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="hover:bg-black hover:text-white"
-                        onClick={() => openActionDialog(user)}
-                      >
-                        <AlertCircle className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <div className="w-9" />
-                    )}
+                      )}
+                      {user.id !== currentUser?.id ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-black hover:text-white"
+                          onClick={(e) => openActionDialog(user, e)}
+                        >
+                          <AlertCircle className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <div className="w-9" />
+                      )}
+                      <ChevronDown 
+                        className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                      />
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="grid gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Account created:</span>
+                          <span className="font-medium">{formatDateTime(user.createdAt)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Last login:</span>
+                          <span className="font-medium">{formatDateTime(user.lastSignInAt)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Last IP:</span>
+                          <span className="font-medium">{user.lastSignInIp || 'Not available'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
