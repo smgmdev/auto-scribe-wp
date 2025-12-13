@@ -344,16 +344,18 @@ export function AdminUsersView() {
                           {user.credits} credits
                         </Badge>
                       )}
-                      {user.emailConfirmed ? (
-                        <Badge className="bg-green-500/20 text-green-600 border-green-500/30 hover:bg-green-500/20">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Email Confirmed
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/20">
-                          <Clock className="h-3 w-3 mr-1" />
-                          Pending Confirmation
-                        </Badge>
+                      {user.role !== 'admin' && (
+                        user.emailConfirmed ? (
+                          <Badge className="bg-green-500/20 text-green-600 border-green-500/30 hover:bg-green-500/20 w-[145px] justify-center">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Email Confirmed
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/20 w-[145px] justify-center">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pending Confirmation
+                          </Badge>
+                        )
                       )}
                     </div>
                   </div>
