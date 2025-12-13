@@ -109,12 +109,24 @@ export function Sidebar({
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
+  const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
+
+  // Reset agency data when user changes
+  useEffect(() => {
+    setAgencyDataLoaded(false);
+    setIsAgencyOnboarded(false);
+    setHasStripeAccount(false);
+    setUserApplicationStatus(null);
+  }, [user?.id]);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
-      if (!user) return;
+      if (!user) {
+        setAgencyDataLoaded(true);
+        return;
+      }
       
-      // Admin: fetch pending applications count
+      // Admin: fetch pending applications count only
       if (isAdmin) {
         const { count } = await supabase
           .from('agency_applications')
@@ -123,6 +135,7 @@ export function Sidebar({
           .eq('read', false);
         
         setUnreadAgencyApplicationsCount(count || 0);
+        setAgencyDataLoaded(true);
         return;
       }
       
@@ -150,6 +163,8 @@ export function Sidebar({
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
         setHasStripeAccount(!!agencyData.stripe_account_id);
       }
+      
+      setAgencyDataLoaded(true);
     };
 
     fetchApplicationStatus();
@@ -273,8 +288,8 @@ export function Sidebar({
 
           {/* Agency Status & Account */}
           <div className="border-t border-sidebar-border p-4 space-y-3">
-            {/* Agency Status Card - Only for non-admin users */}
-            {!isAdmin && (
+            {/* Agency Status Card - Only for non-admin users after data is loaded */}
+            {!isAdmin && agencyDataLoaded && (
               <AgencyStatusCard
                 applicationStatus={userApplicationStatus}
                 hasStripeAccount={hasStripeAccount}
