@@ -59,6 +59,8 @@ export function AdminAgenciesView() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [websiteDialogOpen, setWebsiteDialogOpen] = useState(false);
+  const [websiteUrl, setWebsiteUrl] = useState<string | null>(null);
   const { decrementUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
@@ -567,11 +569,17 @@ export function AdminAgenciesView() {
               )}
 
               <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" className="hover:bg-black hover:text-white" asChild>
-                  <a href={selectedApp.agency_website} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-1" />
-                    Website
-                  </a>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-black hover:text-white"
+                  onClick={() => {
+                    setWebsiteUrl(selectedApp.agency_website);
+                    setWebsiteDialogOpen(true);
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Website
                 </Button>
                 <Button 
                   variant="outline" 
@@ -668,6 +676,38 @@ export function AdminAgenciesView() {
               <div className="flex justify-end">
                 <Button
                   onClick={() => window.open(documentUrl, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="hover:bg-black hover:text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in New Tab
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Website Viewer Dialog */}
+      <Dialog open={websiteDialogOpen} onOpenChange={setWebsiteDialogOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Agency Website</DialogTitle>
+          </DialogHeader>
+          {websiteUrl && (
+            <div className="w-full flex flex-col gap-4">
+              <div className="w-full h-[70vh] bg-muted rounded-lg overflow-hidden">
+                <iframe
+                  src={websiteUrl}
+                  className="w-full h-full border-0"
+                  title="Website viewer"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => window.open(websiteUrl, '_blank')}
                   variant="outline"
                   size="sm"
                   className="hover:bg-black hover:text-white"
