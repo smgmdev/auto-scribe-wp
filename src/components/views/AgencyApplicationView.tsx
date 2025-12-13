@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Loader2, ChevronDown } from 'lucide-react';
-import { AgencyApplicationForm } from '@/components/agency/AgencyApplicationForm';
+import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { AgencyVerificationStatus } from '@/components/agency/AgencyVerificationStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { CheckCircle, Clock, XCircle, ChevronUp } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,6 +29,16 @@ const faqItems = [
     answer: "You will list your media channels available for sale with your details. Clients can then engage you and ask questions about their orders, you can provide guidance and feedback to clients' requirements. If both client and you accept on a media publishing plan, then the client will place the order and you deliver. Arcana Mace holds the payment. After delivery, the client reviews your delivery and accepts, and once accepted, your payment is released to you. Simple."
   }
 ];
+
+interface AgencyApplication {
+  id: string;
+  agency_name: string;
+  country: string;
+  agency_website: string;
+  status: string;
+  admin_notes: string | null;
+  created_at: string;
+}
 
 function AgencyFAQ() {
   const [openItems, setOpenItems] = useState<number[]>([]);
@@ -71,12 +85,14 @@ export function AgencyApplicationView() {
   const [loading, setLoading] = useState(true);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
   const [isOnboarded, setIsOnboarded] = useState(false);
-  const [hasRejectedApplication, setHasRejectedApplication] = useState(false);
-  const [triggerNewApp, setTriggerNewApp] = useState(false);
+  const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
+  const [showRejectionReason, setShowRejectionReason] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
       checkAgencyStatus();
+      checkExistingApplication();
     }
   }, [user]);
 
@@ -101,8 +117,40 @@ export function AgencyApplicationView() {
     }
   };
 
+  const checkExistingApplication = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('agency_applications')
+        .select('id, agency_name, country, agency_website, status, admin_notes, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      setExistingApplication(data);
+    } catch (error: any) {
+      console.error('Error checking application:', error);
+    }
+  };
+
   const handleStatusUpdate = (onboarded: boolean) => {
     setIsOnboarded(onboarded);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
+      case 'approved':
+        return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
   };
 
   if (loading) {
@@ -173,22 +221,85 @@ export function AgencyApplicationView() {
             Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
           </p>
         </div>
-        {hasRejectedApplication && (
-          <Button 
-            variant="outline" 
-            className="hover:bg-black hover:text-white shrink-0"
-            onClick={() => setTriggerNewApp(prev => !prev)}
-          >
-            Submit New Application
-          </Button>
-        )}
+        <Button 
+          variant="outline" 
+          className="hover:bg-black hover:text-white shrink-0"
+          onClick={() => setDialogOpen(true)}
+        >
+          Submit New Application
+        </Button>
       </div>
 
       <AgencyFAQ />
 
-      <AgencyApplicationForm 
-        onApplicationStatusChange={setHasRejectedApplication}
-        triggerNewApplication={triggerNewApp}
+      {/* Show existing application status card */}
+      {existingApplication && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <CardTitle className="text-lg">Your Latest Application</CardTitle>
+              {getStatusBadge(existingApplication.status)}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Agency Name</p>
+                <p className="font-medium">{existingApplication.agency_name}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Country</p>
+                <p className="font-medium">{existingApplication.country}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Submitted</p>
+                <p className="font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Website</p>
+                <a href={existingApplication.agency_website} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                  {existingApplication.agency_website}
+                </a>
+              </div>
+            </div>
+            
+            {existingApplication.status === 'rejected' && (
+              <>
+                {!showRejectionReason ? (
+                  <Button 
+                    variant="outline" 
+                    className="w-full hover:bg-black hover:text-white"
+                    onClick={() => setShowRejectionReason(true)}
+                  >
+                    <ChevronDown className="h-4 w-4 mr-2" />
+                    See reason
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full hover:bg-black hover:text-white"
+                      onClick={() => setShowRejectionReason(false)}
+                    >
+                      <ChevronUp className="h-4 w-4 mr-2" />
+                      Hide reason
+                    </Button>
+                    <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                      <p className="text-sm text-muted-foreground mb-1">Reason</p>
+                      <p className="text-sm">{existingApplication.admin_notes || 'No reason provided'}</p>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <AgencyApplicationDialog 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen}
+        onSubmitSuccess={checkExistingApplication}
       />
     </div>
   );
