@@ -292,8 +292,8 @@ export function AdminUsersView() {
           {filteredUsers.map((user) => (
             <Card key={user.id}>
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                       <Users className="h-5 w-5 text-muted-foreground" />
                     </div>
@@ -332,7 +332,7 @@ export function AdminUsersView() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                     <Select
                       value={user.role}
                       onValueChange={(value: 'admin' | 'user') => handleRoleChange(user.id, value)}
