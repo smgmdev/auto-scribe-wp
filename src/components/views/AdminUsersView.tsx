@@ -626,7 +626,7 @@ export function AdminUsersView() {
                 ) : (
                   <Ban className="h-4 w-4 mr-2" />
                 )}
-                {selectedUser?.suspended ? 'Unsuspend User' : 'Suspend User'}
+                {selectedUser?.suspended ? 'Remove Suspension' : 'Suspend User'}
               </Button>
             </div>
 
