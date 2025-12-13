@@ -269,12 +269,16 @@ export function AdminUsersView() {
         description: error.message,
       });
     } else {
+      // Update local state without full refresh
+      setUsers(prev => prev.map(u => 
+        u.id === selectedUser.id ? { ...u, suspended: newSuspendedStatus } : u
+      ));
+      setSelectedUser({ ...selectedUser, suspended: newSuspendedStatus });
+      
       toast({
-        title: newSuspendedStatus ? 'User suspended' : 'User unsuspended',
+        title: newSuspendedStatus ? 'User suspended' : 'Suspension removed',
         description: `${selectedUser.email} has been ${newSuspendedStatus ? 'suspended' : 'unsuspended'}.`,
       });
-      setActionDialogOpen(false);
-      fetchUsers();
     }
     setProcessing(false);
   };
