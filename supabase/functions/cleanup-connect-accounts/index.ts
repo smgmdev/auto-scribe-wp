@@ -43,14 +43,75 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // List all connected accounts
+    // Parse request body
+    const body = await req.json().catch(() => ({}));
+    const { action, accountIds } = body;
+
+    // If action is 'list', return all connected accounts
+    if (action === 'list') {
+      console.log("Listing all connected accounts");
+      const accounts = await stripe.accounts.list({ limit: 100 });
+      console.log(`Found ${accounts.data.length} connected accounts`);
+
+      const accountList = accounts.data.map((account: any) => ({
+        id: account.id,
+        name: account.business_profile?.name || 'Unknown',
+        email: account.email || 'No email',
+        created: account.created,
+        chargesEnabled: account.charges_enabled,
+        payoutsEnabled: account.payouts_enabled,
+      }));
+
+      return new Response(JSON.stringify({ 
+        success: true,
+        accounts: accountList
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // If action is 'delete', delete specific accounts
+    if (action === 'delete' && Array.isArray(accountIds) && accountIds.length > 0) {
+      console.log(`Deleting ${accountIds.length} accounts`);
+      
+      const results = [];
+      for (const accountId of accountIds) {
+        try {
+          await stripe.accounts.del(accountId);
+          results.push({ id: accountId, deleted: true });
+          console.log(`Deleted: ${accountId}`);
+
+          // Also remove from agency_payouts if exists
+          await supabaseClient
+            .from("agency_payouts")
+            .delete()
+            .eq("stripe_account_id", accountId);
+
+        } catch (err: any) {
+          results.push({ id: accountId, deleted: false, error: err.message });
+          console.log(`Failed to delete ${accountId}: ${err.message}`);
+        }
+      }
+
+      return new Response(JSON.stringify({ 
+        success: true,
+        results
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // Default: delete all (legacy behavior)
+    console.log("Deleting all connected accounts (legacy)");
     const accounts = await stripe.accounts.list({ limit: 100 });
     console.log(`Found ${accounts.data.length} connected accounts`);
 
     const results = [];
     for (const account of accounts.data) {
       try {
-        const deleted = await stripe.accounts.del(account.id);
+        await stripe.accounts.del(account.id);
         results.push({ id: account.id, name: account.business_profile?.name || account.email, deleted: true });
         console.log(`Deleted: ${account.id}`);
       } catch (err: any) {

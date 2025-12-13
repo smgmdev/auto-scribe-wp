@@ -7,9 +7,19 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+
+interface StripeAccount {
+  id: string;
+  name: string;
+  email: string;
+  created: number;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+}
 
 interface AgencyApplication {
   id: string;
@@ -55,6 +65,11 @@ export function AdminAgenciesView() {
   const [sendingInvite, setSendingInvite] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [stripeAccountsDialogOpen, setStripeAccountsDialogOpen] = useState(false);
+  const [stripeAccounts, setStripeAccounts] = useState<StripeAccount[]>([]);
+  const [selectedStripeAccounts, setSelectedStripeAccounts] = useState<string[]>([]);
+  const [loadingStripeAccounts, setLoadingStripeAccounts] = useState(false);
+  const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
@@ -239,30 +254,70 @@ export function AdminAgenciesView() {
     }
   };
 
-  const handleCleanupStripeAccounts = async () => {
-    if (!confirm('Are you sure you want to delete ALL Stripe Connect accounts? This cannot be undone.')) return;
-
-    setCleaningUp(true);
+  const handleOpenStripeAccountsDialog = async () => {
+    setStripeAccountsDialogOpen(true);
+    setLoadingStripeAccounts(true);
+    setSelectedStripeAccounts([]);
     try {
-      const response = await supabase.functions.invoke('cleanup-connect-accounts');
+      const response = await supabase.functions.invoke('cleanup-connect-accounts', {
+        body: { action: 'list' }
+      });
 
       if (response.error) throw new Error(response.error.message);
       if (response.data?.error) throw new Error(response.data.error);
 
+      setStripeAccounts(response.data?.accounts || []);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      setStripeAccountsDialogOpen(false);
+    } finally {
+      setLoadingStripeAccounts(false);
+    }
+  };
+
+  const handleDeleteSelectedStripeAccounts = async () => {
+    if (selectedStripeAccounts.length === 0) return;
+    
+    setDeletingStripeAccounts(true);
+    try {
+      const response = await supabase.functions.invoke('cleanup-connect-accounts', {
+        body: { action: 'delete', accountIds: selectedStripeAccounts }
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      const deletedCount = response.data?.results?.filter((r: any) => r.deleted).length || 0;
       toast({
-        title: 'Cleanup complete',
-        description: `Deleted ${response.data?.results?.filter((r: any) => r.deleted).length || 0} Stripe accounts.`,
+        title: 'Accounts deleted',
+        description: `Successfully deleted ${deletedCount} Stripe account(s).`,
         className: 'bg-green-600 text-white border-green-600'
       });
 
-      // Also clean up local agency_payouts table
-      await supabase.from('agency_payouts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      
+      // Remove deleted accounts from local state
+      setStripeAccounts(prev => prev.filter(acc => !selectedStripeAccounts.includes(acc.id)));
+      setSelectedStripeAccounts([]);
       fetchData();
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
-      setCleaningUp(false);
+      setDeletingStripeAccounts(false);
+    }
+  };
+
+  const toggleStripeAccountSelection = (accountId: string) => {
+    setSelectedStripeAccounts(prev => 
+      prev.includes(accountId) 
+        ? prev.filter(id => id !== accountId)
+        : [...prev, accountId]
+    );
+  };
+
+  const toggleSelectAllStripeAccounts = () => {
+    if (selectedStripeAccounts.length === stripeAccounts.length) {
+      setSelectedStripeAccounts([]);
+    } else {
+      setSelectedStripeAccounts(stripeAccounts.map(acc => acc.id));
     }
   };
 
@@ -308,13 +363,12 @@ export function AdminAgenciesView() {
           <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
         </div>
         <Button 
-          variant="destructive" 
-          onClick={handleCleanupStripeAccounts}
-          disabled={cleaningUp}
+          variant="outline" 
+          onClick={handleOpenStripeAccountsDialog}
+          className="hover:bg-black hover:text-white"
         >
-          {cleaningUp && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           <Trash2 className="h-4 w-4 mr-2" />
-          Cleanup All Stripe Accounts
+          Manage Stripe Accounts
         </Button>
       </div>
 
@@ -770,6 +824,93 @@ export function AdminAgenciesView() {
                 onLoad={() => setWebsiteLoading(false)}
               />
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Stripe Accounts Management Dialog */}
+      <Dialog open={stripeAccountsDialogOpen} onOpenChange={setStripeAccountsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Manage Stripe Connect Accounts</DialogTitle>
+          </DialogHeader>
+          
+          {loadingStripeAccounts ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : stripeAccounts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Building2 className="h-12 w-12 mb-4" />
+              <p>No Stripe Connect accounts found</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between py-2 border-b">
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    checked={selectedStripeAccounts.length === stripeAccounts.length}
+                    onCheckedChange={toggleSelectAllStripeAccounts}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {selectedStripeAccounts.length > 0 
+                      ? `${selectedStripeAccounts.length} selected` 
+                      : 'Select all'}
+                  </span>
+                </div>
+                <Badge variant="secondary">{stripeAccounts.length} account(s)</Badge>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-2 py-2">
+                {stripeAccounts.map(account => (
+                  <div 
+                    key={account.id}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                      selectedStripeAccounts.includes(account.id) 
+                        ? "bg-muted border-primary" 
+                        : "hover:bg-muted/50"
+                    )}
+                    onClick={() => toggleStripeAccountSelection(account.id)}
+                  >
+                    <Checkbox 
+                      checked={selectedStripeAccounts.includes(account.id)}
+                      onCheckedChange={() => toggleStripeAccountSelection(account.id)}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate">{account.name}</p>
+                        {account.chargesEnabled && account.payoutsEnabled && (
+                          <Badge className="bg-green-600 text-xs">Verified</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate">{account.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        ID: {account.id} • Created: {format(new Date(account.created * 1000), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-between items-center pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setStripeAccountsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDeleteSelectedStripeAccounts}
+                  disabled={selectedStripeAccounts.length === 0 || deletingStripeAccounts}
+                >
+                  {deletingStripeAccounts && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Selected ({selectedStripeAccounts.length})
+                </Button>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
