@@ -703,11 +703,11 @@ export function AdminUsersView() {
                                   </span>
                                 </div>
                                 <div className="flex gap-2">
-                                  <span className="text-muted-foreground">Last attempt:</span>
+                                  <span className="text-muted-foreground">Last login attempt:</span>
                                   <span>{formatLoginDateTime(user.lastAttemptAt, user.createdAt)}</span>
                                 </div>
                                 <div className="flex gap-2">
-                                  <span className="text-muted-foreground">Last attempt IP:</span>
+                                  <span className="text-muted-foreground">Last login attempt IP:</span>
                                   <span>
                                     {user.lastAttemptIp || 'Not available'}
                                     {user.lastAttemptLocation && ` (${user.lastAttemptLocation})`}
