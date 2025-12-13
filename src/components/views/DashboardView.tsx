@@ -166,7 +166,7 @@ export function DashboardView() {
             <CardTitle className="text-xl">Instant Publishing</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="accent" className="w-full justify-start" onClick={() => setCurrentView('headlines')}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('headlines')}>
               <Newspaper className="mr-2 h-4 w-4" />
               Scan Headlines
             </Button>
@@ -233,7 +233,7 @@ export function DashboardView() {
             <CardTitle className="text-xl">B2B Media Buying</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="accent" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
               <Library className="mr-2 h-4 w-4" />
               Global Library
             </Button>
