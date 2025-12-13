@@ -609,7 +609,7 @@ export function AgencyApplicationForm() {
                       accept="image/*"
                       onChange={handleLogoChange}
                       disabled={uploadingLogo || submitting}
-                      className="max-w-[130px] mx-auto text-xs h-7"
+                      className="max-w-[130px] mx-auto text-[10px] h-6 file:text-[10px] file:h-5 file:px-2"
                     />
                   </>
                 )}
@@ -680,7 +680,7 @@ export function AgencyApplicationForm() {
                       accept=".pdf,.doc,.docx"
                       onChange={handleFileChange}
                       disabled={uploading || submitting}
-                      className="max-w-[130px] mx-auto text-xs h-7"
+                      className="max-w-[130px] mx-auto text-[10px] h-6 file:text-[10px] file:h-5 file:px-2"
                     />
                   </>
                 )}
