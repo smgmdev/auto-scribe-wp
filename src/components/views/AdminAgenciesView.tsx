@@ -367,7 +367,7 @@ export function AdminAgenciesView() {
           onClick={handleOpenStripeAccountsDialog}
           className="hover:bg-black hover:text-white"
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <AlertTriangle className="h-4 w-4 mr-2" />
           Manage Stripe Accounts
         </Button>
       </div>
