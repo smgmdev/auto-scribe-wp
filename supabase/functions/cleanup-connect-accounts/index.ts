@@ -47,8 +47,11 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { action, accountIds } = body;
 
-    // If action is 'list', return all connected accounts
-    if (action === 'list') {
+    // Default to 'list' if no action specified (NEVER delete by default)
+    const safeAction = action || 'list';
+
+    // If action is 'list' or default, return all connected accounts
+    if (safeAction === 'list') {
       console.log("Listing all connected accounts");
       const accounts = await stripe.accounts.list({ limit: 100 });
       console.log(`Found ${accounts.data.length} connected accounts`);
@@ -103,30 +106,12 @@ serve(async (req) => {
       });
     }
 
-    // Default: delete all (legacy behavior)
-    console.log("Deleting all connected accounts (legacy)");
-    const accounts = await stripe.accounts.list({ limit: 100 });
-    console.log(`Found ${accounts.data.length} connected accounts`);
-
-    const results = [];
-    for (const account of accounts.data) {
-      try {
-        await stripe.accounts.del(account.id);
-        results.push({ id: account.id, name: account.business_profile?.name || account.email, deleted: true });
-        console.log(`Deleted: ${account.id}`);
-      } catch (err: any) {
-        results.push({ id: account.id, name: account.business_profile?.name || account.email, deleted: false, error: err.message });
-        console.log(`Failed to delete ${account.id}: ${err.message}`);
-      }
-    }
-
+    // No valid action - return error instead of deleting
     return new Response(JSON.stringify({ 
-      success: true,
-      total: accounts.data.length,
-      results
+      error: "Invalid action. Use 'list' or 'delete'." 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+      status: 400,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
