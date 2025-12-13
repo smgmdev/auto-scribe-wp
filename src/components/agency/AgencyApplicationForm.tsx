@@ -548,7 +548,7 @@ export function AgencyApplicationForm() {
             <div className="space-y-2">
               <Label>Agency Logo *</Label>
               <div 
-                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors h-[200px] flex flex-col justify-center ${
+                className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors h-[140px] flex flex-col justify-center ${
                   isDraggingLogo ? 'border-primary bg-primary/5' : 'border-border'
                 }`}
                 onDragOver={(e) => {
@@ -570,20 +570,20 @@ export function AgencyApplicationForm() {
                 }}
               >
                 {logoPreview ? (
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-1">
                     <img 
                       src={logoPreview} 
                       alt="Agency logo preview" 
-                      className="h-16 w-16 object-contain rounded-lg border"
+                      className="h-12 w-12 object-contain rounded-lg border"
                     />
                     <div className="flex items-center gap-1 flex-wrap justify-center">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span className="text-xs truncate max-w-[100px]">{logoFile?.name}</span>
+                      <CheckCircle className="h-3 w-3 text-green-600" />
+                      <span className="text-xs truncate max-w-[80px]">{logoFile?.name}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-xs"
+                        className="h-5 px-1 text-xs"
                         onClick={() => {
                           setLogoFile(null);
                           setLogoUrl(null);
@@ -597,8 +597,11 @@ export function AgencyApplicationForm() {
                   </div>
                 ) : (
                   <>
-                    <Image className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-xs text-muted-foreground mb-2">
+                    <Image className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Drag & drop or click to upload
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/70 mb-1">
                       PNG/JPG, max 5MB
                     </p>
                     <Input
@@ -606,7 +609,7 @@ export function AgencyApplicationForm() {
                       accept="image/*"
                       onChange={handleLogoChange}
                       disabled={uploadingLogo || submitting}
-                      className="max-w-[150px] mx-auto text-xs"
+                      className="max-w-[130px] mx-auto text-xs h-7"
                     />
                   </>
                 )}
@@ -622,7 +625,7 @@ export function AgencyApplicationForm() {
             <div className="space-y-2">
               <Label>Company Incorporation Document *</Label>
               <div 
-                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors h-[200px] flex flex-col justify-center ${
+                className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors h-[140px] flex flex-col justify-center ${
                   isDragging ? 'border-primary bg-primary/5' : 'border-border'
                 }`}
                 onDragOver={(e) => {
@@ -644,15 +647,15 @@ export function AgencyApplicationForm() {
                 }}
               >
                 {documentFile ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  <div className="flex flex-col items-center gap-1">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                     <div className="flex items-center gap-1 flex-wrap justify-center">
-                      <span className="text-xs truncate max-w-[100px]">{documentFile.name}</span>
+                      <span className="text-xs truncate max-w-[80px]">{documentFile.name}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-xs"
+                        className="h-5 px-1 text-xs"
                         onClick={() => {
                           setDocumentFile(null);
                           setDocumentUrl('');
@@ -665,8 +668,11 @@ export function AgencyApplicationForm() {
                   </div>
                 ) : (
                   <>
-                    <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-xs text-muted-foreground mb-2">
+                    <Upload className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Drag & drop or click to upload
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/70 mb-1">
                       PDF/DOC, max 10MB
                     </p>
                     <Input
@@ -674,7 +680,7 @@ export function AgencyApplicationForm() {
                       accept=".pdf,.doc,.docx"
                       onChange={handleFileChange}
                       disabled={uploading || submitting}
-                      className="max-w-[150px] mx-auto text-xs"
+                      className="max-w-[130px] mx-auto text-xs h-7"
                     />
                   </>
                 )}
