@@ -1154,50 +1154,70 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md transition-all duration-300" 
+        className="group hover:shadow-md transition-all duration-300 cursor-pointer" 
         style={{ animationDelay: `${index * 50}ms` }}
+        onClick={() => toggleExpand(site.id)}
       >
         <CardContent className="p-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+              <div 
+                className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <img 
                   src={site.favicon || getFaviconUrl(site.link)} 
                   alt={`${site.name} logo`} 
-                  className="h-6 w-6 object-contain" 
+                  className="h-5 w-5 object-contain" 
                   onError={e => {
                     e.currentTarget.style.display = 'none';
                     (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
                   }} 
                 />
-                <Globe className="h-5 w-5 text-accent hidden" />
+                <Globe className="h-4 w-4 text-accent hidden" />
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenLogoDialog(site.id, site.favicon, 'media');
+                    }}
+                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
+                  >
+                    <Edit2 className="h-3 w-3 text-foreground" />
+                  </button>
+                )}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-medium">{site.name}</h3>
-                <a 
-                  href={site.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
-                >
-                  <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                  <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                </a>
+                <h3 className="text-sm break-words">{site.name}</h3>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-1 justify-end">
               {site.country && (
                 <Badge variant="outline" className="text-xs">
                   {site.country}
                 </Badge>
               )}
+              {/* Link */}
+              <a 
+                href={site.link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="truncate max-w-[150px]">{site.link.replace(/^https?:\/\//, '')}</span>
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+              </a>
               {isAdmin && (
                 <>
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                    onClick={() => handleEditAgency(site)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditAgency(site);
+                    }}
                   >
                     <Edit2 className="h-3.5 w-3.5" />
                   </Button>
@@ -1205,28 +1225,27 @@ export function SitesView() {
                     variant="ghost" 
                     size="icon" 
                     className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                    onClick={() => handleRemoveMediaSite(site.id, site.name)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveMediaSite(site.id, site.name);
+                    }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
-              {site.about && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                  onClick={() => toggleExpand(site.id)}
-                >
-                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              )}
+              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </div>
             </div>
           </div>
           
           {/* Expanded About Section */}
           {isExpanded && site.about && (
-            <div className="mt-3 pt-3 border-t border-border">
+            <div 
+              className="mt-3 pt-3 border-t border-border animate-fade-in"
+              onClick={(e) => e.stopPropagation()}
+            >
               <p className="text-xs text-muted-foreground">{site.about}</p>
             </div>
           )}
