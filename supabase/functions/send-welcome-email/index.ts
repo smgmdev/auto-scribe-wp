@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending welcome email to: ${email}`);
 
     const emailResponse = await resend.emails.send({
-      from: "Arcana Mace <onboarding@resend.dev>",
+      from: "Arcana Mace <noreply@arcanamace.com>",
       to: [email],
       subject: "Welcome to Arcana Mace - Confirm Your Account",
       html: `
