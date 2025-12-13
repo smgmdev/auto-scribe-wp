@@ -56,10 +56,11 @@ export function LatestGlobalArticles() {
     fetchGlobalArticles();
   }, []);
 
-  const getSiteName = (siteId: string | null): string | null => {
+  const getSiteInfo = (siteId: string | null): { name: string; favicon: string | null } | null => {
     if (!siteId) return null;
     const site = sites.find(s => s.id === siteId);
-    return site?.name || null;
+    if (!site) return null;
+    return { name: site.name, favicon: site.favicon || null };
   };
 
   if (loading) {
@@ -73,7 +74,7 @@ export function LatestGlobalArticles() {
   return (
     <ul className="space-y-3">
       {articles.map(article => {
-        const siteName = getSiteName(article.published_to);
+        const siteInfo = getSiteInfo(article.published_to);
         return (
           <li key={article.id}>
             {article.wp_link ? (
@@ -85,10 +86,18 @@ export function LatestGlobalArticles() {
               >
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatRelativeTime(article.created_at)}
-                    {siteName && <span> • {siteName}</span>}
-                  </p>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span>{formatRelativeTime(article.created_at)}</span>
+                    {siteInfo && (
+                      <>
+                        <span>•</span>
+                        {siteInfo.favicon && (
+                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                        )}
+                        <span>{siteInfo.name}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
               </a>
@@ -96,10 +105,18 @@ export function LatestGlobalArticles() {
               <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatRelativeTime(article.created_at)}
-                    {siteName && <span> • {siteName}</span>}
-                  </p>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span>{formatRelativeTime(article.created_at)}</span>
+                    {siteInfo && (
+                      <>
+                        <span>•</span>
+                        {siteInfo.favicon && (
+                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                        )}
+                        <span>{siteInfo.name}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
