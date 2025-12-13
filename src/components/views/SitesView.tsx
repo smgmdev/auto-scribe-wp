@@ -2059,7 +2059,7 @@ export function SitesView() {
                 <Button 
                   variant="outline" 
                   onClick={() => setSelectedMediaSite(null)}
-                  className="hover:bg-gray-100 transition-colors"
+                  className="hover:bg-black hover:text-white transition-colors"
                 >
                   Close
                 </Button>
@@ -2086,6 +2086,11 @@ export function SitesView() {
         onSuccess={() => {
           setSelectedForBrief(null);
           toast({ title: 'Brief submitted! View it in My Requests.' });
+        }}
+        onBack={() => {
+          if (selectedForBrief) {
+            setSelectedMediaSite(selectedForBrief as any);
+          }
         }}
       />
     </div>

@@ -21,13 +21,15 @@ interface BriefSubmissionDialogProps {
   onOpenChange: (open: boolean) => void;
   mediaSite: MediaSite | null;
   onSuccess: () => void;
+  onBack?: () => void;
 }
 
 export function BriefSubmissionDialog({ 
   open, 
   onOpenChange, 
   mediaSite,
-  onSuccess 
+  onSuccess,
+  onBack
 }: BriefSubmissionDialogProps) {
   const { user } = useAuth();
   const [description, setDescription] = useState('');
@@ -281,11 +283,14 @@ export function BriefSubmissionDialog({
         <div className="flex justify-between gap-3 mt-4">
           <Button 
             variant="outline" 
-            onClick={() => onOpenChange(false)} 
+            onClick={() => {
+              onOpenChange(false);
+              onBack?.();
+            }} 
             disabled={isSubmitting}
-            className="hover:bg-gray-100 transition-colors"
+            className="hover:bg-black hover:text-white transition-colors"
           >
-            Cancel
+            Back
           </Button>
           <Button 
             className="bg-black text-white hover:bg-gray-800 transition-colors"
