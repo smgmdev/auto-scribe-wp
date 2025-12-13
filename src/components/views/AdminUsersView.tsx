@@ -450,7 +450,7 @@ export function AdminUsersView() {
                       </div>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         {user.suspended ? (
-                          <Badge variant="destructive" className="w-[80px] justify-center">
+                          <Badge variant="destructive" className="w-[80px] justify-center pr-3">
                             <Ban className="h-3 w-3 mr-1" />
                             Suspended
                           </Badge>
