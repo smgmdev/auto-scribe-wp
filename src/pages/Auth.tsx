@@ -82,12 +82,16 @@ export default function Auth() {
     setIsLoading(false);
     
     if (error) {
+      let errorMessage = error.message;
+      if (error.message === 'Invalid login credentials') {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Please verify your email before signing in. Check your inbox for the confirmation link.';
+      }
       toast({
         variant: 'destructive',
         title: 'Sign in failed',
-        description: error.message === 'Invalid login credentials'
-          ? 'Invalid email or password. Please try again.'
-          : error.message,
+        description: errorMessage,
       });
     } else {
       toast({
@@ -116,10 +120,11 @@ export default function Auth() {
         description: errorMessage,
       });
     } else {
-      // Send welcome email via Resend
+      // Send custom welcome/verification email via Resend
       try {
+        const confirmationUrl = `${window.location.origin}/auth`;
         await supabase.functions.invoke('send-welcome-email', {
-          body: { email }
+          body: { email, confirmationUrl }
         });
       } catch (emailError) {
         console.error('Failed to send welcome email:', emailError);
@@ -128,8 +133,8 @@ export default function Auth() {
       
       setIsLoading(false);
       toast({
-        title: 'Account created!',
-        description: 'Welcome email sent. You can now sign in.',
+        title: 'Check your email!',
+        description: 'We sent you a verification link. Please verify your email to sign in.',
       });
     }
   };
