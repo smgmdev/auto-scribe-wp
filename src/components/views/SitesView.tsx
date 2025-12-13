@@ -1266,7 +1266,7 @@ export function SitesView() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="instant">Instant Publishing</TabsTrigger>
+          <TabsTrigger value="instant">Instant Publishing Library</TabsTrigger>
           <TabsTrigger value="custom">Global Library</TabsTrigger>
         </TabsList>
 
