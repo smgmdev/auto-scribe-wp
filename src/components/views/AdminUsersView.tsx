@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useAppStore } from '@/stores/appStore';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -36,7 +37,33 @@ interface UserData {
   lastAttemptLocation: string | null;
 }
 
+interface CreditTransaction {
+  id: string;
+  amount: number;
+  type: string;
+  description: string | null;
+  created_at: string;
+}
+
+interface Order {
+  id: string;
+  amount_cents: number;
+  status: string;
+  delivery_status: string;
+  created_at: string;
+  media_sites?: { name: string } | null;
+}
+
+interface ServiceRequest {
+  id: string;
+  title: string;
+  status: string;
+  created_at: string;
+  media_sites?: { name: string } | null;
+}
+
 type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
+type UserCardTab = 'logs' | 'credits' | 'orders' | 'engagements';
 
 export function AdminUsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -51,6 +78,13 @@ export function AdminUsersView() {
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const [userCardTabs, setUserCardTabs] = useState<Record<string, UserCardTab>>({});
+  const [userCreditTransactions, setUserCreditTransactions] = useState<Record<string, CreditTransaction[]>>({});
+  const [userOrders, setUserOrders] = useState<Record<string, Order[]>>({});
+  const [userEngagements, setUserEngagements] = useState<Record<string, ServiceRequest[]>>({});
+  const [loadingUserData, setLoadingUserData] = useState<Record<string, boolean>>({});
+  
+  const setCurrentView = useAppStore((state) => state.setCurrentView);
   
   // Delete options
   const [deleteCredits, setDeleteCredits] = useState(true);
@@ -108,7 +142,7 @@ export function AdminUsersView() {
     fetchUsers();
   }, []);
 
-  const toggleUserExpand = (userId: string) => {
+  const toggleUserExpand = async (userId: string) => {
     setExpandedUsers(prev => {
       const next = new Set(prev);
       if (next.has(userId)) {
@@ -118,6 +152,56 @@ export function AdminUsersView() {
       }
       return next;
     });
+    
+    // Set default tab and fetch data when expanding
+    if (!expandedUsers.has(userId)) {
+      if (!userCardTabs[userId]) {
+        setUserCardTabs(prev => ({ ...prev, [userId]: 'logs' }));
+      }
+      fetchUserDetails(userId);
+    }
+  };
+
+  const fetchUserDetails = async (userId: string) => {
+    if (loadingUserData[userId]) return;
+    setLoadingUserData(prev => ({ ...prev, [userId]: true }));
+    
+    try {
+      // Fetch credit transactions
+      const { data: transactions } = await supabase
+        .from('credit_transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      // Fetch orders with media site info
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('id, amount_cents, status, delivery_status, created_at, media_sites(name)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      // Fetch service requests (engagements)
+      const { data: engagements } = await supabase
+        .from('service_requests')
+        .select('id, title, status, created_at, media_sites(name)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      setUserCreditTransactions(prev => ({ ...prev, [userId]: transactions || [] }));
+      setUserOrders(prev => ({ ...prev, [userId]: orders || [] }));
+      setUserEngagements(prev => ({ ...prev, [userId]: engagements || [] }));
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setLoadingUserData(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const handleEngagementClick = (engagementId: string) => {
+    // Store engagement ID and navigate to engagements view
+    localStorage.setItem('selectedEngagementId', engagementId);
+    setCurrentView('admin-engagements');
   };
 
   const fetchUsers = async () => {
@@ -540,37 +624,129 @@ export function AdminUsersView() {
                     </div>
                   </div>
 
-                  {/* Expanded Details */}
+                  {/* Expanded Details with Tabs */}
                   {isExpanded && (
                     <div className="mt-4 pt-4 border-t border-border">
-                      <div className="grid gap-1 text-xs">
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground">Account created:</span>
-                          <span>{formatDateTime(user.createdAt)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground">Last login:</span>
-                          <span>{formatDateTime(user.lastSignInAt)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground">Last login IP:</span>
-                          <span>
-                            {user.lastSignInIp || 'Not available'}
-                            {user.lastSignInLocation && ` (${user.lastSignInLocation})`}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground">Last attempt:</span>
-                          <span>{formatDateTime(user.lastAttemptAt)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground">Last attempt IP:</span>
-                          <span>
-                            {user.lastAttemptIp || 'Not available'}
-                            {user.lastAttemptLocation && ` (${user.lastAttemptLocation})`}
-                          </span>
-                        </div>
-                      </div>
+                      <Tabs 
+                        value={userCardTabs[user.id] || 'logs'} 
+                        onValueChange={(v) => setUserCardTabs(prev => ({ ...prev, [user.id]: v as UserCardTab }))}
+                      >
+                        <TabsList className="w-full grid grid-cols-4 mb-4">
+                          <TabsTrigger value="logs" className="text-xs">Account Logs</TabsTrigger>
+                          <TabsTrigger value="credits" className="text-xs">Credit History</TabsTrigger>
+                          <TabsTrigger value="orders" className="text-xs">Orders</TabsTrigger>
+                          <TabsTrigger value="engagements" className="text-xs">Engagements</TabsTrigger>
+                        </TabsList>
+                        
+                        {loadingUserData[user.id] ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <span className="text-xs text-muted-foreground">Loading...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <TabsContent value="logs" className="mt-0">
+                              <div className="grid gap-1 text-xs">
+                                <div className="flex gap-2">
+                                  <span className="text-muted-foreground">Account created:</span>
+                                  <span>{formatDateTime(user.createdAt)}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <span className="text-muted-foreground">Last login:</span>
+                                  <span>{formatDateTime(user.lastSignInAt)}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <span className="text-muted-foreground">Last login IP:</span>
+                                  <span>
+                                    {user.lastSignInIp || 'Not available'}
+                                    {user.lastSignInLocation && ` (${user.lastSignInLocation})`}
+                                  </span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <span className="text-muted-foreground">Last attempt:</span>
+                                  <span>{formatDateTime(user.lastAttemptAt)}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <span className="text-muted-foreground">Last attempt IP:</span>
+                                  <span>
+                                    {user.lastAttemptIp || 'Not available'}
+                                    {user.lastAttemptLocation && ` (${user.lastAttemptLocation})`}
+                                  </span>
+                                </div>
+                              </div>
+                            </TabsContent>
+                            
+                            <TabsContent value="credits" className="mt-0">
+                              {(userCreditTransactions[user.id] || []).length === 0 ? (
+                                <p className="text-xs text-muted-foreground py-2">No credit transactions</p>
+                              ) : (
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                  {(userCreditTransactions[user.id] || []).map((tx) => (
+                                    <div key={tx.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                      <div className="flex items-center gap-2">
+                                        <CreditCard className="h-3 w-3 text-muted-foreground" />
+                                        <span className={tx.type === 'purchase' || tx.type === 'add' ? 'text-green-600' : 'text-red-600'}>
+                                          {tx.type === 'purchase' || tx.type === 'add' ? '+' : '-'}{Math.abs(tx.amount)}
+                                        </span>
+                                        <span className="text-muted-foreground">{tx.description || tx.type}</span>
+                                      </div>
+                                      <span className="text-muted-foreground">{formatDateTime(tx.created_at)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                            
+                            <TabsContent value="orders" className="mt-0">
+                              {(userOrders[user.id] || []).length === 0 ? (
+                                <p className="text-xs text-muted-foreground py-2">No orders</p>
+                              ) : (
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                  {(userOrders[user.id] || []).map((order) => (
+                                    <div key={order.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                      <div className="flex items-center gap-2">
+                                        <ShoppingCart className="h-3 w-3 text-muted-foreground" />
+                                        <span>{order.media_sites?.name || 'Unknown'}</span>
+                                        <Badge variant="outline" className="text-[10px] py-0">{order.status}</Badge>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium">${(order.amount_cents / 100).toFixed(2)}</span>
+                                        <span className="text-muted-foreground">{formatDateTime(order.created_at)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                            
+                            <TabsContent value="engagements" className="mt-0">
+                              {(userEngagements[user.id] || []).length === 0 ? (
+                                <p className="text-xs text-muted-foreground py-2">No engagements</p>
+                              ) : (
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                  {(userEngagements[user.id] || []).map((engagement) => (
+                                    <div 
+                                      key={engagement.id} 
+                                      className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded cursor-pointer hover:bg-muted/50 transition-colors"
+                                      onClick={() => handleEngagementClick(engagement.id)}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <MessageSquare className="h-3 w-3 text-muted-foreground" />
+                                        <span className="truncate max-w-[200px]">{engagement.title}</span>
+                                        <Badge variant="outline" className="text-[10px] py-0">{engagement.status}</Badge>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground">{engagement.media_sites?.name}</span>
+                                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                          </>
+                        )}
+                      </Tabs>
                     </div>
                   )}
                 </CardContent>
