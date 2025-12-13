@@ -240,8 +240,8 @@ export function AgencyApplicationForm() {
               ) : (
                 <div className="space-y-3">
                   <Button 
-                    variant="ghost" 
-                    className="w-full justify-start text-muted-foreground hover:bg-black hover:text-white"
+                    variant="outline" 
+                    className="w-full hover:bg-black hover:text-white"
                     onClick={() => setShowRejectionReason(false)}
                   >
                     <ChevronUp className="h-4 w-4 mr-2" />
