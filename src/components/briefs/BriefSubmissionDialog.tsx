@@ -186,7 +186,7 @@ export function BriefSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg z-[200]">
         <DialogHeader>
           <DialogTitle>Submit Your Brief</DialogTitle>
           <DialogDescription>
