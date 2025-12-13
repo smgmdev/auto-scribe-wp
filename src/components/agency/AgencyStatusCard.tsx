@@ -132,71 +132,21 @@ export function AgencyStatusCard({
             <span className="font-medium text-yellow-400">Verification Required</span>
             <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your Stripe verification to receive payments</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-yellow-500"
-            onClick={handleExpand}
-          >
-            <ChevronDown className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />
-          </Button>
         </div>
-
-        {expanded && (
-          <div className="mt-3 pt-3 border-t border-yellow-500/20 space-y-3">
-            {statusLoading ? (
-              <div className="flex items-center gap-2 text-xs text-sidebar-foreground/60">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                <span>Checking verification status...</span>
-              </div>
-            ) : stripeStatus && stripeStatus.missingRequirements.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-yellow-400 flex items-center gap-1.5">
-                  <FileWarning className="h-3.5 w-3.5" />
-                  Missing Information:
-                </p>
-                <ul className="text-xs text-sidebar-foreground/70 space-y-1 pl-5">
-                  {stripeStatus.missingRequirements.map((req, i) => (
-                    <li key={i} className="list-disc">{req}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : stripeStatus && stripeStatus.pendingVerification.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-blue-400 flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
-                  Pending Review:
-                </p>
-                <ul className="text-xs text-sidebar-foreground/70 space-y-1 pl-5">
-                  {stripeStatus.pendingVerification.map((item, i) => (
-                    <li key={i} className="list-disc">{item}</li>
-                  ))}
-                </ul>
-                <p className="text-xs text-sidebar-foreground/50 mt-2">
-                  Stripe is reviewing your documents. This usually takes 1-2 business days.
-                </p>
-              </div>
-            ) : (
-              <p className="text-xs text-sidebar-foreground/60">
-                Please complete your Stripe onboarding to start receiving payments.
-              </p>
-            )}
-            
-            <Button
-              size="sm"
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-black"
-              onClick={handleContinueOnboarding}
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <ExternalLink className="h-4 w-4 mr-2" />
-              )}
-              Continue Verification
-            </Button>
-          </div>
-        )}
+        
+        <Button
+          size="sm"
+          className="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-black"
+          onClick={handleContinueOnboarding}
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <ExternalLink className="h-4 w-4 mr-2" />
+          )}
+          Continue Verification
+        </Button>
       </div>
     );
   }
