@@ -4,6 +4,7 @@ import { AgencyApplicationForm } from '@/components/agency/AgencyApplicationForm
 import { AgencyVerificationStatus } from '@/components/agency/AgencyVerificationStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -70,6 +71,8 @@ export function AgencyApplicationView() {
   const [loading, setLoading] = useState(true);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
   const [isOnboarded, setIsOnboarded] = useState(false);
+  const [hasRejectedApplication, setHasRejectedApplication] = useState(false);
+  const [triggerNewApp, setTriggerNewApp] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -161,18 +164,32 @@ export function AgencyApplicationView() {
   // Show application form for new applicants
   return (
     <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">
-          Why Upgrade to Agency?
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Why Upgrade to Agency?
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
+          </p>
+        </div>
+        {hasRejectedApplication && (
+          <Button 
+            variant="outline" 
+            className="hover:bg-black hover:text-white shrink-0"
+            onClick={() => setTriggerNewApp(prev => !prev)}
+          >
+            Submit New Application
+          </Button>
+        )}
       </div>
 
       <AgencyFAQ />
 
-      <AgencyApplicationForm />
+      <AgencyApplicationForm 
+        onApplicationStatusChange={setHasRejectedApplication}
+        triggerNewApplication={triggerNewApp}
+      />
     </div>
   );
 }
