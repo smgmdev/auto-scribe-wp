@@ -532,10 +532,10 @@ export function AdminUsersView() {
             const isExpanded = expandedUsers.has(user.id);
             
             return (
-              <Card key={user.id}>
+              <Card key={user.id} className="group">
                 <CardContent className="p-4">
                   <div 
-                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"
+                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"
                     onClick={() => toggleUserExpand(user.id)}
                   >
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
