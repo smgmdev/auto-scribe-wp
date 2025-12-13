@@ -82,6 +82,7 @@ export function AgencyApplicationForm() {
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [otherNiche, setOtherNiche] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -492,18 +493,51 @@ export function AgencyApplicationForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>Incorporation Document *</Label>
-            <div className="border-2 border-dashed rounded-lg p-6 text-center">
+            <Label>Company Incorporation Document *</Label>
+            <div 
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                isDragging ? 'border-primary bg-primary/5' : 'border-border'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                  const syntheticEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                  handleFileChange(syntheticEvent);
+                }
+              }}
+            >
               {documentFile ? (
                 <div className="flex items-center justify-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <span className="text-sm">{documentFile.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setDocumentFile(null);
+                      setDocumentUrl('');
+                    }}
+                    disabled={uploading || submitting}
+                  >
+                    Remove
+                  </Button>
                 </div>
               ) : (
                 <>
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground mb-2">
-                    Upload your incorporation document (PDF, max 10MB)
+                    Drag and drop or click to upload (PDF/DOC, max 10MB)
                   </p>
                   <Input
                     type="file"
