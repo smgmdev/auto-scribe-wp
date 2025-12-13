@@ -17,6 +17,7 @@ import { MyRequestsView } from '@/components/views/MyRequestsView';
 import { AdminEngagementsView } from '@/components/views/AdminEngagementsView';
 import { AgencyApplicationView } from '@/components/views/AgencyApplicationView';
 import { useAppStore } from '@/stores/appStore';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LocationState {
   targetView?: string;
@@ -24,28 +25,58 @@ interface LocationState {
   targetSubcategory?: string;
 }
 
-const views: Record<string, React.ComponentType> = {
+// Views accessible by all authenticated users
+const publicViews: Record<string, React.ComponentType> = {
   dashboard: DashboardView,
   sites: SitesView,
   headlines: HeadlinesView,
   compose: ComposeView,
   articles: ArticlesView,
-  settings: SettingsView,
   account: AccountView,
+  orders: OrdersView,
+  'my-requests': MyRequestsView,
+  'agency-application': AgencyApplicationView,
+};
+
+// Views accessible ONLY by admin users
+const adminOnlyViews: Record<string, React.ComponentType> = {
+  settings: SettingsView,
   'admin-credits': AdminCreditsView,
   'admin-users': AdminUsersView,
   'admin-agencies': AdminAgenciesView,
-  'orders': OrdersView,
   'admin-orders': AdminOrdersView,
-  'my-requests': MyRequestsView,
   'admin-engagements': AdminEngagementsView,
-  'agency-application': AgencyApplicationView,
 };
 
 const Index = () => {
   const { currentView, setCurrentView, setTargetTab, setTargetSubcategory } = useAppStore();
+  const { isAdmin } = useAuth();
   const location = useLocation();
-  const CurrentView = views[currentView] || DashboardView;
+  
+  // Determine which view to render based on role
+  const getAuthorizedView = () => {
+    // Check if it's a public view
+    if (publicViews[currentView]) {
+      return publicViews[currentView];
+    }
+    
+    // Check if it's an admin-only view and user is admin
+    if (adminOnlyViews[currentView] && isAdmin) {
+      return adminOnlyViews[currentView];
+    }
+    
+    // Unauthorized access to admin view - redirect to dashboard
+    return DashboardView;
+  };
+  
+  const CurrentView = getAuthorizedView();
+  
+  // If user tries to access admin view without permission, reset to dashboard
+  useEffect(() => {
+    if (adminOnlyViews[currentView] && !isAdmin) {
+      setCurrentView('dashboard');
+    }
+  }, [currentView, isAdmin, setCurrentView]);
   
   useEffect(() => {
     const state = location.state as LocationState | null;
