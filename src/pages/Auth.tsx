@@ -120,17 +120,7 @@ export default function Auth() {
         description: errorMessage,
       });
     } else {
-      // Send custom welcome/verification email via Resend
-      try {
-        const confirmationUrl = `${window.location.origin}/auth`;
-        await supabase.functions.invoke('send-welcome-email', {
-          body: { email, confirmationUrl }
-        });
-      } catch (emailError) {
-        console.error('Failed to send welcome email:', emailError);
-        // Don't block signup if email fails
-      }
-      
+      // Email will be sent automatically via the email-hook edge function
       setIsLoading(false);
       toast({
         title: 'Check your email!',
