@@ -633,7 +633,7 @@ const Landing = () => {
 
       {/* Site Detail Dialog */}
       <Dialog open={!!selectedSite} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md z-[200]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {selectedSite && (
