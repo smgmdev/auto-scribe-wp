@@ -249,7 +249,7 @@ export function AgencyStatusCard({
     );
   }
 
-  // Rejected application - can resubmit
+  // Rejected application - can view details
   if (applicationStatus === 'rejected') {
     return (
       <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
@@ -258,18 +258,14 @@ export function AgencyStatusCard({
             <AlertTriangle className="h-5 w-5 text-red-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-red-400">Application Rejected</span>
-              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Rejected</Badge>
-            </div>
-            <p className="text-xs text-sidebar-foreground/60 mt-1">Your application was not approved. You can resubmit with updated information.</p>
+            <span className="font-medium text-red-400">Application Rejected</span>
+            <p className="text-xs text-sidebar-foreground/60 mt-1">Your application was not approved.</p>
             <Button
               size="sm"
-              variant="outline"
-              className="mt-3 border-red-500/50 text-red-400 hover:bg-red-500/10"
+              className="mt-3 bg-red-500/20 hover:bg-red-500/20 text-white border-0"
               onClick={onNavigateToApplication}
             >
-              Resubmit Application
+              View Details
             </Button>
           </div>
         </div>
