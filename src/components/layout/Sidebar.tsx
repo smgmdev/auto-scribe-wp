@@ -9,6 +9,7 @@ import { CreditDisplay } from '@/components/credits/CreditDisplay';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
+import { Badge } from '@/components/ui/badge';
 
 const getNavigation = (isAdmin: boolean) => {
   const base = [{
@@ -105,12 +106,24 @@ export function Sidebar({
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
+  const [pendingApplicationsCount, setPendingApplicationsCount] = useState(0);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
-      if (!user || isAdmin) return;
+      if (!user) return;
       
-      // Check application status
+      // Admin: fetch pending applications count
+      if (isAdmin) {
+        const { count } = await supabase
+          .from('agency_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+        
+        setPendingApplicationsCount(count || 0);
+        return;
+      }
+      
+      // Regular user: check their own application status
       const { data: appData } = await supabase
         .from('agency_applications')
         .select('status')
@@ -242,7 +255,12 @@ export function Sidebar({
                   onClick={() => handleNavClick(item.id)}
                 >
                   <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate flex-1">{item.label}</span>
+                  {item.id === 'admin-agencies' && pendingApplicationsCount > 0 && (
+                    <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                      {pendingApplicationsCount}
+                    </Badge>
+                  )}
                 </Button>
               );
             })}
