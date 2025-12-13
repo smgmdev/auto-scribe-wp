@@ -117,7 +117,8 @@ export function Sidebar({
         const { count } = await supabase
           .from('agency_applications')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending');
+          .eq('status', 'pending')
+          .eq('read', false);
         
         setPendingApplicationsCount(count || 0);
         return;

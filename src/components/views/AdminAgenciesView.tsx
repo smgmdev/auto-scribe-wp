@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface AgencyApplication {
   id: string;
@@ -24,6 +25,7 @@ interface AgencyApplication {
   admin_notes: string | null;
   created_at: string;
   reviewed_at: string | null;
+  read: boolean;
 }
 
 interface AgencyPayout {
@@ -82,8 +84,27 @@ export function AdminAgenciesView() {
   };
 
   const pendingApplications = applications.filter(app => app.status === 'pending');
+  const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
   const approvedApplications = applications.filter(app => app.status === 'approved');
+
+  const handleOpenApplication = async (app: AgencyApplication) => {
+    setSelectedApp(app);
+    setAdminNotes(app.admin_notes || '');
+    
+    // Mark as read if not already
+    if (!app.read) {
+      await supabase
+        .from('agency_applications')
+        .update({ read: true })
+        .eq('id', app.id);
+      
+      // Update local state
+      setApplications(prev => 
+        prev.map(a => a.id === app.id ? { ...a, read: true } : a)
+      );
+    }
+  };
 
   // Match agencies with their applications for more context
   const getAgencyWithApplication = (agency: AgencyPayout) => {
@@ -263,9 +284,9 @@ export function AdminAgenciesView() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="pending" className="relative">
             Pending Review
-            {pendingApplications.length > 0 && (
+            {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
-                {pendingApplications.length}
+                {unreadPendingCount}
               </span>
             )}
           </TabsTrigger>
@@ -290,11 +311,11 @@ export function AdminAgenciesView() {
               {pendingApplications.map((app) => (
                 <Card 
                   key={app.id} 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors border-yellow-500/30"
-                  onClick={() => {
-                    setSelectedApp(app);
-                    setAdminNotes(app.admin_notes || '');
-                  }}
+                  className={cn(
+                    "cursor-pointer hover:bg-muted/50 transition-colors",
+                    !app.read ? "border-yellow-500/50 bg-yellow-500/5" : "border-yellow-500/20"
+                  )}
+                  onClick={() => handleOpenApplication(app)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
