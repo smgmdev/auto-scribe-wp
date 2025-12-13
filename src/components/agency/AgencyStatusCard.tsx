@@ -8,7 +8,6 @@ import { toast } from '@/hooks/use-toast';
 
 interface AgencyStatusCardProps {
   applicationStatus: string | null;
-  rejectionReason?: string | null;
   hasStripeAccount: boolean;
   isAgencyOnboarded: boolean;
   onNavigateToApplication: () => void;
@@ -25,7 +24,6 @@ interface StripeStatus {
 
 export function AgencyStatusCard({
   applicationStatus,
-  rejectionReason,
   hasStripeAccount,
   isAgencyOnboarded,
   onNavigateToApplication,
@@ -35,7 +33,6 @@ export function AgencyStatusCard({
   const [expanded, setExpanded] = useState(false);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
-  const [showRejectionReason, setShowRejectionReason] = useState(false);
 
   const fetchStripeStatus = async () => {
     if (!hasStripeAccount || stripeStatus) return;
@@ -252,7 +249,7 @@ export function AgencyStatusCard({
     );
   }
 
-  // Rejected application - show expandable reason section
+  // Rejected application - can resubmit
   if (applicationStatus === 'rejected') {
     return (
       <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
@@ -261,38 +258,19 @@ export function AgencyStatusCard({
             <AlertTriangle className="h-5 w-5 text-red-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-red-400">Agency Application</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-red-400">Application Rejected</span>
               <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Rejected</Badge>
             </div>
-            
-            {!showRejectionReason ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-3 border-red-500/50 text-red-400 hover:bg-red-500/10"
-                onClick={() => setShowRejectionReason(true)}
-              >
-                <ChevronDown className="h-4 w-4 mr-2" />
-                See reason
-              </Button>
-            ) : (
-              <div className="mt-3 space-y-3">
-                <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                  <p className="text-xs text-red-400 font-medium mb-1">Reason</p>
-                  <p className="text-sm text-sidebar-foreground/80">
-                    {rejectionReason || 'No reason provided'}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  className="w-full bg-[#3872e0] hover:bg-[#2b59b4]"
-                  onClick={onNavigateToApplication}
-                >
-                  Apply Again
-                </Button>
-              </div>
-            )}
+            <p className="text-xs text-sidebar-foreground/60 mt-1">Your application was not approved. You can resubmit with updated information.</p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3 border-red-500/50 text-red-400 hover:bg-red-500/10"
+              onClick={onNavigateToApplication}
+            >
+              Resubmit Application
+            </Button>
           </div>
         </div>
       </div>
