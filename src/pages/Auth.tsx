@@ -29,6 +29,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -38,7 +39,8 @@ export default function Auth() {
   const locationState = location.state as LocationState | null;
 
   useEffect(() => {
-    if (user) {
+    // Don't redirect during signup flow - user needs to verify email first
+    if (user && !isSigningUp) {
       // Pass along the target view, tab and subcategory state when redirecting
       navigate('/dashboard', { 
         state: { 
@@ -48,7 +50,7 @@ export default function Auth() {
         } 
       });
     }
-  }, [user, navigate, locationState]);
+  }, [user, navigate, locationState, isSigningUp]);
 
   // Show loading screen while checking initial auth state
   if (loading) {
@@ -151,10 +153,13 @@ export default function Auth() {
     if (!validateForm()) return;
     
     setIsLoading(true);
+    setIsSigningUp(true); // Prevent auto-redirect during signup
+    
     const { error, data } = await signUp(email, password);
     
     if (error) {
       setIsLoading(false);
+      setIsSigningUp(false);
       let errorMessage = error.message;
       if (error.message.includes('already registered')) {
         errorMessage = 'This email is already registered. Please sign in instead.';
@@ -186,6 +191,7 @@ export default function Auth() {
     }
     
     setIsLoading(false);
+    setIsSigningUp(false);
     toast({
       title: 'Check your email!',
       description: 'We sent you a verification link. Please verify your email to sign in.',
