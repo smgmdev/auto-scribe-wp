@@ -138,38 +138,42 @@ export function DashboardView() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => {
         const Icon = stat.icon;
-        return <Card key={stat.key} className="border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow" style={{
+        return <Card key={stat.key} className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all hover:border-border/50 py-3" style={{
           animationDelay: `${index * 100}ms`
         }}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 {stat.tooltip ? (
-                  <Tooltip>
+                  <Tooltip delayDuration={100}>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 cursor-help">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                      <div className="flex items-center gap-1.5 cursor-help">
+                        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                           {stat.label}
                         </CardTitle>
-                        <Info className="h-3 w-3 text-muted-foreground" />
+                        <Info className="h-3 w-3 text-muted-foreground/70" />
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs z-50">
+                    <TooltipContent 
+                      side="bottom" 
+                      sideOffset={8}
+                      className="max-w-xs z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+                    >
                       <p>{stat.tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
                 ) : (
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     {stat.label}
                   </CardTitle>
                 )}
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-3xl font-bold text-foreground">
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
                   {isDataLoading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
                     getStatValue(stat.key)
                   )}
