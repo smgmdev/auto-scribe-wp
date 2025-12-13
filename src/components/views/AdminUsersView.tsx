@@ -488,10 +488,11 @@ export function AdminUsersView() {
           className="bg-black text-white hover:bg-black/90 border-black"
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4 mr-2" />
           )}
+          Refresh
         </Button>
       </div>
 
