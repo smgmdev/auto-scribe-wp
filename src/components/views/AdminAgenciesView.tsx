@@ -274,7 +274,9 @@ export function AdminAgenciesView() {
   };
 
   const handleViewDocument = async (path: string) => {
+    console.log('Attempting to view document:', path);
     const url = await getSignedUrl(path);
+    console.log('Signed URL result:', url);
     if (url) {
       setDocumentUrl(url);
       setDocumentDialogOpen(true);
