@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -27,10 +28,31 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending welcome email to: ${email}`);
 
+    // Generate a magic link for email verification using Supabase Admin
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Generate a magic link for email verification
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: email,
+      options: {
+        redirectTo: confirmationUrl || `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}/dashboard`
+      }
+    });
+
+    let verificationUrl = confirmationUrl || '';
+    if (linkData?.properties?.action_link) {
+      verificationUrl = linkData.properties.action_link;
+    }
+
+    console.log('Generated verification link for email confirmation');
+
     const emailResponse = await resend.emails.send({
       from: "Arcana Mace <noreply@arcanamace.com>",
       to: [email],
-      subject: "Welcome to Arcana Mace - Confirm Your Account",
+      subject: "Welcome to Arcana Mace - Verify Your Email",
       html: `
         <!DOCTYPE html>
         <html>
@@ -50,19 +72,23 @@ const handler = async (req: Request): Promise<Response> => {
                       </h1>
                       
                       <p style="color: #888888; font-size: 16px; line-height: 24px; margin: 0 0 30px 0; text-align: center;">
-                        Thank you for creating an account. Your account has been successfully created and you're ready to get started.
+                        Thank you for creating an account. Please verify your email address to get started.
                       </p>
                       
-                      ${confirmationUrl ? `
+                      ${verificationUrl ? `
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                         <tr>
                           <td align="center" style="padding: 20px 0;">
-                            <a href="${confirmationUrl}" style="display: inline-block; background-color: #3872e0; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 6px;">
-                              Confirm Your Email
+                            <a href="${verificationUrl}" style="display: inline-block; background-color: #3872e0; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 6px;">
+                              Verify Your Email
                             </a>
                           </td>
                         </tr>
                       </table>
+                      <p style="color: #666666; font-size: 12px; line-height: 20px; margin: 10px 0 0 0; text-align: center;">
+                        Or copy and paste this link in your browser:<br/>
+                        <a href="${verificationUrl}" style="color: #3872e0; word-break: break-all;">${verificationUrl}</a>
+                      </p>
                       ` : ''}
                       
                       <div style="border-top: 1px solid #333333; margin: 30px 0; padding-top: 30px;">
