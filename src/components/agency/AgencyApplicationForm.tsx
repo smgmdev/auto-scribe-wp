@@ -421,31 +421,35 @@ export function AgencyApplicationForm() {
           </div>
 
           <div className="space-y-3">
-            <Label>What is your media niche? *</Label>
+            <Label>What is your media niche? (select up to 3) *</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {MEDIA_NICHES.map((niche) => (
-                <div key={niche} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`niche-${niche}`}
-                    checked={selectedNiches.includes(niche)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedNiches(prev => [...prev, niche]);
-                      } else {
-                        setSelectedNiches(prev => prev.filter(n => n !== niche));
-                        if (niche === 'Other') setOtherNiche('');
-                      }
-                    }}
-                    disabled={submitting}
-                  />
-                  <label
-                    htmlFor={`niche-${niche}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {niche}
-                  </label>
-                </div>
-              ))}
+              {MEDIA_NICHES.map((niche) => {
+                const isSelected = selectedNiches.includes(niche);
+                const isDisabled = submitting || (!isSelected && selectedNiches.length >= 3);
+                return (
+                  <div key={niche} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`niche-${niche}`}
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        if (checked && selectedNiches.length < 3) {
+                          setSelectedNiches(prev => [...prev, niche]);
+                        } else if (!checked) {
+                          setSelectedNiches(prev => prev.filter(n => n !== niche));
+                          if (niche === 'Other') setOtherNiche('');
+                        }
+                      }}
+                      disabled={isDisabled}
+                    />
+                    <label
+                      htmlFor={`niche-${niche}`}
+                      className={`text-sm font-medium leading-none cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {niche}
+                    </label>
+                  </div>
+                );
+              })}
             </div>
             {selectedNiches.includes('Other') && (
               <Input
