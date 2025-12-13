@@ -1,5 +1,8 @@
 project_id = "sdjwglenqfzzgvyhtufv"
 
+[functions.capture-login-ip]
+verify_jwt = true
+
 [auth.hook.send_email]
 enabled = true
 uri = "pg-functions://postgres/supabase_functions/http_request"
