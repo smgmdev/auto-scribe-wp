@@ -1040,18 +1040,21 @@ export function SitesView() {
 
   const renderMediaSiteCard = (site: MediaSite, index: number) => {
     const isExpanded = expandedSites.has(site.id);
-    const hasExpandableContent = !!site.about;
     
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md transition-all duration-300" 
+        className="group hover:shadow-md transition-all duration-300 cursor-pointer" 
         style={{ animationDelay: `${index * 50}ms` }}
+        onClick={() => toggleExpand(site.id)}
       >
         <CardContent className="p-3">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-              <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+              <div 
+                className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <img 
                   src={site.favicon || getFaviconUrl(site.link)} 
                   alt={`${site.name} favicon`} 
@@ -1064,7 +1067,10 @@ export function SitesView() {
                 <Globe className="h-4 w-4 text-accent hidden" />
                 {isAdmin && (
                   <button
-                    onClick={() => handleOpenLogoDialog(site.id, site.favicon, 'media')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenLogoDialog(site.id, site.favicon, 'media');
+                    }}
                     className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
                   >
                     <Edit2 className="h-3 w-3 text-foreground" />
@@ -1073,18 +1079,9 @@ export function SitesView() {
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm break-words">{site.name}</h3>
-                <a 
-                  href={site.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
-                >
-                  <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                  <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                </a>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-1 justify-end">
+            <div className="flex items-center gap-3 flex-1 justify-end" onClick={(e) => e.stopPropagation()}>
               {/* Price badge */}
               <Badge variant="secondary" className="text-xs whitespace-nowrap">
                 {site.price > 0 ? `${site.price} USD` : 'Free'}
@@ -1120,22 +1117,18 @@ export function SitesView() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               )}
-              {hasExpandableContent && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                  onClick={() => toggleExpand(site.id)}
-                >
-                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              )}
+              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </div>
             </div>
           </div>
           
           {/* Expanded Section with Details */}
           {isExpanded && (
-            <div className="mt-3 pt-3 border-t border-border space-y-3">
+            <div 
+              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+              onClick={(e) => e.stopPropagation()}
+            >
               {site.about && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
@@ -1147,6 +1140,16 @@ export function SitesView() {
                   {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                 </p>
               )}
+              {/* Link at the bottom */}
+              <a 
+                href={site.link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+              >
+                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+              </a>
             </div>
           )}
         </CardContent>
