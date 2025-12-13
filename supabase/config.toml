@@ -35,3 +35,9 @@ verify_jwt = false
 
 [functions.agency-requests]
 verify_jwt = false
+
+[functions.get-agency-onboarding-link]
+verify_jwt = true
+
+[functions.resend-agency-invite]
+verify_jwt = true
