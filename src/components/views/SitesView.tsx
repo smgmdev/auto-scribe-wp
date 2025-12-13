@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, FileText } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Heart } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -2056,18 +2056,18 @@ export function SitesView() {
               </div>
 
               <div className="flex justify-end gap-3 mt-4">
-                <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
-                  Close
-                </Button>
                 {selectedMediaSite.category !== 'Agencies/People' && (
                   <Button 
                     variant="accent" 
                     onClick={() => handleRequestService(selectedMediaSite)}
                   >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Submit Brief - ${selectedMediaSite.price}
+                    <Heart className="h-4 w-4 mr-2" />
+                    I'm Interested - ${selectedMediaSite.price}
                   </Button>
                 )}
+                <Button variant="outline" onClick={() => setSelectedMediaSite(null)}>
+                  Close
+                </Button>
               </div>
             </>
           )}
