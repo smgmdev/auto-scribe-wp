@@ -1197,17 +1197,6 @@ export function SitesView() {
                   {site.country}
                 </Badge>
               )}
-              {/* Link */}
-              <a 
-                href={site.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="truncate max-w-[150px]">{site.link.replace(/^https?:\/\//, '')}</span>
-                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </a>
               {isAdmin && (
                 <>
                   <Button 
@@ -1240,13 +1229,25 @@ export function SitesView() {
             </div>
           </div>
           
-          {/* Expanded About Section */}
-          {isExpanded && site.about && (
+          {/* Expanded Section */}
+          {isExpanded && (
             <div 
-              className="mt-3 pt-3 border-t border-border animate-fade-in"
+              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
-              <p className="text-xs text-muted-foreground">{site.about}</p>
+              {site.about && (
+                <p className="text-xs text-muted-foreground">{site.about}</p>
+              )}
+              {/* Link at the bottom */}
+              <a 
+                href={site.link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+              >
+                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+              </a>
             </div>
           )}
         </CardContent>
