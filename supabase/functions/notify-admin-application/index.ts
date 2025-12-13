@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+// For production: verify your domain at resend.com/domains and update this
+// For testing: use the email address verified with your Resend account
+const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "stankeviciusmgm@gmail.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,8 +20,6 @@ interface ApplicationNotification {
   media_niches: string[];
   media_channels: string;
 }
-
-const ADMIN_EMAIL = "admin@arcanamace.com"; // Change this to actual admin email
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
