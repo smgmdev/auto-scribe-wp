@@ -323,41 +323,47 @@ export function AdminUsersView() {
                           User
                         </Badge>
                       )}
-                      <Badge variant="secondary" className="min-w-[90px] justify-start">
-                        <Coins className="h-3 w-3 mr-1" />
-                        {user.credits} credits
-                      </Badge>
+                      {user.role !== 'admin' && (
+                        <Badge variant="secondary" className="min-w-[90px] justify-start">
+                          <Coins className="h-3 w-3 mr-1" />
+                          {user.credits} credits
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Select
-                      value={user.role}
-                      onValueChange={(value: 'admin' | 'user') => handleRoleChange(user.id, value)}
-                    >
-                      <SelectTrigger className="w-[100px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {user.role !== 'admin' && (
+                      <>
+                        <Select
+                          value={user.role}
+                          onValueChange={(value: 'admin' | 'user') => handleRoleChange(user.id, value)}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openCreditDialog(user, 'add')}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openCreditDialog(user, 'remove')}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openCreditDialog(user, 'add')}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openCreditDialog(user, 'remove')}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                     {user.id !== currentUser?.id ? (
                       <Button
                         variant="outline"
