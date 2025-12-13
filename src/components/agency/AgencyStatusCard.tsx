@@ -129,10 +129,7 @@ export function AgencyStatusCard({
             <AlertTriangle className="h-5 w-5 text-yellow-500" />
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-yellow-400">Verification Required</span>
-              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">Action Needed</Badge>
-            </div>
+            <span className="font-medium text-yellow-400">Verification Required</span>
             <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your Stripe verification to receive payments</p>
           </div>
           <Button
