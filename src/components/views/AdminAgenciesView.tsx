@@ -536,9 +536,9 @@ export function AdminAgenciesView() {
               {selectedApp.status === 'pending' && (
                 <>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Admin Notes (optional)</p>
+                    <p className="text-sm font-medium">Rejection Reason <span className="text-muted-foreground font-normal">(required if rejecting)</span></p>
                     <Textarea
-                      placeholder="Add notes visible to applicant..."
+                      placeholder="Provide a reason for rejection that will be visible to the applicant..."
                       value={adminNotes}
                       onChange={(e) => setAdminNotes(e.target.value)}
                       rows={3}
@@ -557,7 +557,13 @@ export function AdminAgenciesView() {
                     <Button
                       variant="destructive"
                       className="flex-1"
-                      onClick={() => handleDecision('rejected')}
+                      onClick={() => {
+                        if (!adminNotes.trim()) {
+                          toast({ variant: 'destructive', title: 'Reason required', description: 'Please provide a rejection reason' });
+                          return;
+                        }
+                        handleDecision('rejected');
+                      }}
                       disabled={processing}
                     >
                       {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
@@ -569,7 +575,7 @@ export function AdminAgenciesView() {
 
               {selectedApp.status !== 'pending' && selectedApp.admin_notes && (
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Admin Notes</p>
+                  <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
                   <p className="text-sm">{selectedApp.admin_notes}</p>
                 </div>
               )}
