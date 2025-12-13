@@ -461,9 +461,9 @@ const Landing = () => {
               </div>
 
               {/* Dropdown Panel */}
-              <div className="bg-card border border-t-0 border-border rounded-b-xl shadow-xl overflow-hidden">
+              <div className="bg-card border border-t-0 border-border rounded-b-xl shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col">
                 {/* Category Tabs */}
-                <div className="border-b border-border">
+                <div className="border-b border-border flex-shrink-0">
                   <div className="flex gap-6 px-4">
                     {CATEGORY_TABS.map(tab => (
                       <button
@@ -483,7 +483,7 @@ const Landing = () => {
 
                 {/* Subcategory Pills */}
                 {subcategories.length > 0 && (
-                  <div className="border-b border-border px-4 py-3">
+                  <div className="border-b border-border px-4 py-3 flex-shrink-0">
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setActiveSubcategory(null)}
@@ -513,7 +513,7 @@ const Landing = () => {
                 )}
 
                 {/* Results List */}
-                <ScrollArea className="max-h-[60vh]">
+                <div className="flex-1 overflow-y-auto overscroll-contain">
                   <div>
                     {modalMediaSites.length === 0 ? (
                       <div className="px-4 py-12 text-center text-muted-foreground">
@@ -576,7 +576,7 @@ const Landing = () => {
                       ))
                     )}
                   </div>
-                </ScrollArea>
+                </div>
               </div>
             </div>
           </div>
