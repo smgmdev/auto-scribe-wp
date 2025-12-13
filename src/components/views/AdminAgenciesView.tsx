@@ -648,44 +648,63 @@ export function AdminAgenciesView() {
       </Dialog>
 
       {/* Document Viewer Dialog */}
-      <Dialog open={documentDialogOpen} onOpenChange={setDocumentDialogOpen}>
-        <DialogContent className="max-w-md p-6">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Incorporation Document
-            </DialogTitle>
-          </DialogHeader>
-          {documentUrl && (
-            <div className="flex flex-col items-center gap-6 py-4">
-              <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
-                <FileText className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <p className="text-sm text-muted-foreground text-center">
-                PDF document ready for viewing
-              </p>
-              <div className="flex gap-3">
+      <Dialog open={documentDialogOpen} onOpenChange={(open) => { setDocumentDialogOpen(open); if (!open) setDocumentLoading(true); }}>
+        <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+          <DialogHeader className="px-3 pb-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <Button
                   onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = documentUrl;
-                    link.download = 'incorporation-document.pdf';
-                    link.click();
+                    setDocumentLoading(true);
+                    const iframe = document.querySelector('iframe[title="Document viewer"]') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
                   }}
-                  variant="outline"
-                  className="hover:bg-black hover:text-white"
+                  variant="ghost"
+                  size="sm"
+                  disabled={documentLoading}
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Download
+                  <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
+                </Button>
+                <DialogTitle className="text-sm">Incorporation Document</DialogTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => window.open(documentUrl!, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="hover:bg-black hover:text-white h-7 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Open in New Tab
                 </Button>
                 <Button
-                  onClick={() => window.open(documentUrl, '_blank')}
-                  className="bg-black text-white hover:bg-black/80"
+                  onClick={() => setDocumentDialogOpen(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white"
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View Document
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
+          </DialogHeader>
+          {documentUrl && (
+            <div className="w-full h-[75vh] relative">
+              {documentLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Loading document...</p>
+                  </div>
+                </div>
+              )}
+              <iframe
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+                className="w-full h-full border-0"
+                title="Document viewer"
+                onLoad={() => setDocumentLoading(false)}
+              />
             </div>
           )}
         </DialogContent>
