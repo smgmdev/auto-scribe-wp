@@ -206,7 +206,7 @@ export function AgencyApplicationForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !documentUrl) return;
+    if (!user || !documentUrl || !logoUrl) return;
 
     const { full_name, email, whatsapp_phone, agency_name, country, agency_website, media_channels } = formData;
 
@@ -215,6 +215,15 @@ export function AgencyApplicationForm() {
         variant: 'destructive',
         title: 'Missing fields',
         description: 'Please fill in all required fields'
+      });
+      return;
+    }
+
+    if (!logoUrl) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing fields',
+        description: 'Please upload your agency logo'
       });
       return;
     }
@@ -535,148 +544,154 @@ export function AgencyApplicationForm() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Agency Logo (optional)</Label>
-            <div 
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                isDraggingLogo ? 'border-primary bg-primary/5' : 'border-border'
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDraggingLogo(true);
-              }}
-              onDragLeave={(e) => {
-                e.preventDefault();
-                setIsDraggingLogo(false);
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDraggingLogo(false);
-                const file = e.dataTransfer.files[0];
-                if (file) {
-                  const syntheticEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-                  handleLogoChange(syntheticEvent);
-                }
-              }}
-            >
-              {logoPreview ? (
-                <div className="flex flex-col items-center gap-2">
-                  <img 
-                    src={logoPreview} 
-                    alt="Agency logo preview" 
-                    className="h-20 w-20 object-contain rounded-lg border"
-                  />
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">{logoFile?.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setLogoFile(null);
-                        setLogoUrl(null);
-                        setLogoPreview(null);
-                      }}
-                      disabled={uploadingLogo || submitting}
-                    >
-                      Remove
-                    </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Agency Logo *</Label>
+              <div 
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors h-[200px] flex flex-col justify-center ${
+                  isDraggingLogo ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingLogo(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDraggingLogo(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingLogo(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file) {
+                    const syntheticEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                    handleLogoChange(syntheticEvent);
+                  }
+                }}
+              >
+                {logoPreview ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <img 
+                      src={logoPreview} 
+                      alt="Agency logo preview" 
+                      className="h-16 w-16 object-contain rounded-lg border"
+                    />
+                    <div className="flex items-center gap-1 flex-wrap justify-center">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="text-xs truncate max-w-[100px]">{logoFile?.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => {
+                          setLogoFile(null);
+                          setLogoUrl(null);
+                          setLogoPreview(null);
+                        }}
+                        disabled={uploadingLogo || submitting}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <>
-                  <Image className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Drag and drop or click to upload (PNG/JPG, max 5MB)
-                  </p>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    disabled={uploadingLogo || submitting}
-                    className="max-w-xs mx-auto"
-                  />
-                </>
-              )}
-              {uploadingLogo && (
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Uploading...</span>
-                </div>
-              )}
+                ) : (
+                  <>
+                    <Image className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-xs text-muted-foreground mb-2">
+                      PNG/JPG, max 5MB
+                    </p>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      disabled={uploadingLogo || submitting}
+                      className="max-w-[150px] mx-auto text-xs"
+                    />
+                  </>
+                )}
+                {uploadingLogo && (
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-xs">Uploading...</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Company Incorporation Document *</Label>
-            <div 
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                isDragging ? 'border-primary bg-primary/5' : 'border-border'
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragLeave={(e) => {
-                e.preventDefault();
-                setIsDragging(false);
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragging(false);
-                const file = e.dataTransfer.files[0];
-                if (file) {
-                  const syntheticEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-                  handleFileChange(syntheticEvent);
-                }
-              }}
-            >
-              {documentFile ? (
-                <div className="flex items-center justify-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span className="text-sm">{documentFile.name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setDocumentFile(null);
-                      setDocumentUrl('');
-                    }}
-                    disabled={uploading || submitting}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Drag and drop or click to upload (PDF/DOC, max 10MB)
-                  </p>
-                  <Input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileChange}
-                    disabled={uploading || submitting}
-                    className="max-w-xs mx-auto"
-                  />
-                </>
-              )}
-              {uploading && (
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Uploading...</span>
-                </div>
-              )}
+            <div className="space-y-2">
+              <Label>Company Incorporation Document *</Label>
+              <div 
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors h-[200px] flex flex-col justify-center ${
+                  isDragging ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file) {
+                    const syntheticEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                    handleFileChange(syntheticEvent);
+                  }
+                }}
+              >
+                {documentFile ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                    <div className="flex items-center gap-1 flex-wrap justify-center">
+                      <span className="text-xs truncate max-w-[100px]">{documentFile.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => {
+                          setDocumentFile(null);
+                          setDocumentUrl('');
+                        }}
+                        disabled={uploading || submitting}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-xs text-muted-foreground mb-2">
+                      PDF/DOC, max 10MB
+                    </p>
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileChange}
+                      disabled={uploading || submitting}
+                      className="max-w-[150px] mx-auto text-xs"
+                    />
+                  </>
+                )}
+                {uploading && (
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-xs">Uploading...</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           <Button 
             type="submit" 
             className="w-full"
-            disabled={submitting || uploading || !documentUrl}
+            disabled={submitting || uploading || uploadingLogo || !documentUrl || !logoUrl}
           >
             {submitting ? (
               <>
