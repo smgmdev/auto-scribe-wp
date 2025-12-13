@@ -784,244 +784,258 @@ export function SitesView() {
     }
   };
 
-  const renderWPSiteCard = (site: any, index: number) => (
-    <Card 
-      key={site.id} 
-      className="group hover:shadow-md transition-all duration-300 relative" 
-      style={{ animationDelay: `${index * 50}ms` }}
-    >
-      {/* Connected status - top right corner (admin only) */}
-      {isAdmin && (
-        <div className="absolute top-0 right-0">
-          {site.connected ? (
-            <div className="flex items-center gap-px px-1 py-px bg-success/10 rounded-bl rounded-tr-[calc(var(--radius)-1px)] text-success">
-              <CheckCircle className="h-2 w-2" />
-              <span className="text-[8px] leading-none">Connected</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-px px-1 py-px bg-destructive/10 rounded-bl rounded-tr-[calc(var(--radius)-1px)] text-destructive">
-              <XCircle className="h-2 w-2" />
-              <span className="text-[8px] leading-none">Disconnected</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-              <img 
-                src={site.favicon || getFaviconUrl(site.url)} 
-                alt={`${site.name} favicon`} 
-                className="h-5 w-5 object-contain" 
-                onError={e => {
-                  e.currentTarget.style.display = 'none';
-                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                }} 
-              />
-              <Globe className="h-4 w-4 text-accent hidden" />
-              {isAdmin && (
-                <button
-                  onClick={() => handleOpenLogoDialog(site.id, site.favicon, 'wp')}
-                  className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
-                >
-                  <Edit2 className="h-3 w-3 text-foreground" />
-                </button>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm truncate">{site.name}</h3>
-              <a 
-                href={site.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1"
-              >
-                <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
-                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </a>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {editingCredits === site.id ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min="1"
-                  value={creditInput}
-                  onChange={(e) => setCreditInput(e.target.value)}
-                  className="w-20 h-7 text-xs"
-                />
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="h-7 px-2"
-                  onClick={() => handleSaveCredits(site.id)}
-                >
-                  Save
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="h-7 px-2"
-                  onClick={() => setEditingCredits(null)}
-                >
-                  Cancel
-                </Button>
+  const renderWPSiteCard = (site: any, index: number) => {
+    const isExpanded = expandedSites.has(site.id);
+    
+    return (
+      <Card 
+        key={site.id} 
+        className="group hover:shadow-md transition-all duration-300 relative cursor-pointer" 
+        style={{ animationDelay: `${index * 50}ms` }}
+        onClick={() => toggleExpand(site.id)}
+      >
+        {/* Connected status - top right corner (admin only) */}
+        {isAdmin && (
+          <div className="absolute top-0 right-0">
+            {site.connected ? (
+              <div className="flex items-center gap-px px-1 py-px bg-success/10 rounded-bl rounded-tr-[calc(var(--radius)-1px)] text-success">
+                <CheckCircle className="h-2 w-2" />
+                <span className="text-[8px] leading-none">Connected</span>
               </div>
             ) : (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Coins className="h-3 w-3" />
-                {siteCredits[site.id] || 1} credits
-                {isAdmin && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-4 w-4 p-0 ml-1"
-                    onClick={() => {
-                      setEditingCredits(site.id);
-                      setCreditInput((siteCredits[site.id] || 1).toString());
-                    }}
-                  >
-                    <Edit2 className="h-3 w-3" />
-                  </Button>
-                )}
-              </Badge>
+              <div className="flex items-center gap-px px-1 py-px bg-destructive/10 rounded-bl rounded-tr-[calc(var(--radius)-1px)] text-destructive">
+                <XCircle className="h-2 w-2" />
+                <span className="text-[8px] leading-none">Disconnected</span>
+              </div>
             )}
-
-            {isAdmin && (
-              <Badge variant="outline" className="text-xs">
-                {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-              </Badge>
-            )}
-
-            {isAdmin && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                onClick={() => handleRemoveWPSite(site.id, site.name)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-              onClick={() => toggleExpand(site.id)}
-            >
-              {expandedSites.has(site.id) ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
           </div>
-        </div>
+        )}
 
-        {expandedSites.has(site.id) && (
-          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
-            {(siteTags[site.id] || []).map(tag => (
-              <Badge 
-                key={tag.id} 
-                variant="outline" 
-                className="text-xs"
-                style={{ 
-                  borderColor: `${tag.color}50`,
-                  color: tag.color,
-                  backgroundColor: `${tag.color}15`
-                }}
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div 
+                className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
               >
-                {tag.label}
+                <img 
+                  src={site.favicon || getFaviconUrl(site.url)} 
+                  alt={`${site.name} favicon`} 
+                  className="h-5 w-5 object-contain" 
+                  onError={e => {
+                    e.currentTarget.style.display = 'none';
+                    (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                  }} 
+                />
+                <Globe className="h-4 w-4 text-accent hidden" />
                 {isAdmin && (
                   <button
-                    onClick={() => handleRemoveTag(tag.id, site.id)}
-                    className="ml-1.5 hover:opacity-70"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenLogoDialog(site.id, site.favicon, 'wp');
+                    }}
+                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
                   >
-                    <X className="h-3 w-3" />
+                    <Edit2 className="h-3 w-3 text-foreground" />
                   </button>
                 )}
-              </Badge>
-            ))}
-
-            {isAdmin && (
-              addingTagForSite === site.id ? (
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm truncate">{site.name}</h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+              {editingCredits === site.id ? (
                 <div className="flex items-center gap-2">
                   <Input
-                    placeholder="Tag label"
-                    value={newTagLabel}
-                    onChange={(e) => setNewTagLabel(e.target.value)}
-                    className="h-7 w-24 text-xs"
+                    type="number"
+                    min="1"
+                    value={creditInput}
+                    onChange={(e) => setCreditInput(e.target.value)}
+                    className="w-20 h-7 text-xs"
                   />
-                  <Select value={newTagColor} onValueChange={setNewTagColor}>
-                    <SelectTrigger className="h-7 w-24 text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <div 
-                          className="h-3 w-3 rounded-full" 
-                          style={{ backgroundColor: newTagColor }}
-                        />
-                        <span className="text-xs">Color</span>
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border border-border">
-                      {TAG_COLORS.map(color => (
-                        <SelectItem key={color.value} value={color.value}>
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="h-3 w-3 rounded-full" 
-                              style={{ backgroundColor: color.value }}
-                            />
-                            {color.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="h-7 px-2 text-xs"
-                    onClick={() => handleAddTag(site.id)}
+                    className="h-7 px-2"
+                    onClick={() => handleSaveCredits(site.id)}
                   >
-                    Add
+                    Save
                   </Button>
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="h-7 px-2 text-xs"
-                    onClick={() => {
-                      setAddingTagForSite(null);
-                      setNewTagLabel('');
-                      setNewTagColor('#22c55e');
-                    }}
+                    className="h-7 px-2"
+                    onClick={() => setEditingCredits(null)}
                   >
                     Cancel
                   </Button>
                 </div>
               ) : (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 px-2 text-xs text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                  onClick={() => setAddingTagForSite(site.id)}
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Tag
-                </Button>
-              )
-            )}
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Coins className="h-3 w-3" />
+                  {siteCredits[site.id] || 1} credits
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-4 w-4 p-0 ml-1"
+                      onClick={() => {
+                        setEditingCredits(site.id);
+                        setCreditInput((siteCredits[site.id] || 1).toString());
+                      }}
+                    >
+                      <Edit2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </Badge>
+              )}
 
-            {(!siteTags[site.id] || siteTags[site.id].length === 0) && !isAdmin && (
-              <span className="text-xs text-muted-foreground">No tags available</span>
-            )}
+              {isAdmin && (
+                <Badge variant="outline" className="text-xs">
+                  {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                </Badge>
+              )}
+
+              {isAdmin && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                  onClick={() => handleRemoveWPSite(site.id, site.name)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              )}
+
+              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+
+          {isExpanded && (
+            <div 
+              className="flex flex-col gap-3 mt-3 pt-3 border-t border-border animate-accordion-down"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Tags section */}
+              <div className="flex flex-wrap items-center gap-2">
+                {(siteTags[site.id] || []).map(tag => (
+                  <Badge 
+                    key={tag.id} 
+                    variant="outline" 
+                    className="text-xs"
+                    style={{ 
+                      borderColor: `${tag.color}50`,
+                      color: tag.color,
+                      backgroundColor: `${tag.color}15`
+                    }}
+                  >
+                    {tag.label}
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleRemoveTag(tag.id, site.id)}
+                        className="ml-1.5 hover:opacity-70"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </Badge>
+                ))}
+
+                {isAdmin && (
+                  addingTagForSite === site.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Tag label"
+                        value={newTagLabel}
+                        onChange={(e) => setNewTagLabel(e.target.value)}
+                        className="h-7 w-24 text-xs"
+                      />
+                      <Select value={newTagColor} onValueChange={setNewTagColor}>
+                        <SelectTrigger className="h-7 w-24 text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <div 
+                              className="h-3 w-3 rounded-full" 
+                              style={{ backgroundColor: newTagColor }}
+                            />
+                            <span className="text-xs">Color</span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border border-border">
+                          {TAG_COLORS.map(color => (
+                            <SelectItem key={color.value} value={color.value}>
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="h-3 w-3 rounded-full" 
+                                  style={{ backgroundColor: color.value }}
+                                />
+                                {color.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 px-2 text-xs"
+                        onClick={() => handleAddTag(site.id)}
+                      >
+                        Add
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 px-2 text-xs"
+                        onClick={() => {
+                          setAddingTagForSite(null);
+                          setNewTagLabel('');
+                          setNewTagColor('#22c55e');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-xs text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                      onClick={() => setAddingTagForSite(site.id)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Tag
+                    </Button>
+                  )
+                )}
+
+                {(!siteTags[site.id] || siteTags[site.id].length === 0) && !isAdmin && (
+                  <span className="text-xs text-muted-foreground">No tags available</span>
+                )}
+              </div>
+
+              {/* Link below tags */}
+              <a 
+                href={site.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+              >
+                <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+              </a>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderMediaSiteCard = (site: MediaSite, index: number) => {
     const isExpanded = expandedSites.has(site.id);
