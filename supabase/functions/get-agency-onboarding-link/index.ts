@@ -145,7 +145,13 @@ serve(async (req) => {
           }
         }
         // If no match, format the raw code nicely
-        const formatted = req.replace(/\./g, ' → ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        // Remove long alphanumeric IDs (like person_abc123xyz)
+        const cleanedReq = req.replace(/[a-z]+_[a-zA-Z0-9]{10,}/g, match => {
+          // Extract the prefix (e.g., "person" from "person_abc123xyz")
+          const prefix = match.split('_')[0];
+          return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+        });
+        const formatted = cleanedReq.replace(/\./g, ' → ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         return formatted || req;
       });
     };
