@@ -312,7 +312,16 @@ export function AdminUsersView() {
                     <Users className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium truncate">{user.email}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium truncate">{user.email}</p>
+                      {user.role !== 'admin' && (
+                        user.emailConfirmed ? (
+                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                        )
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       {user.role === 'admin' ? (
                         <Badge 
@@ -343,19 +352,6 @@ export function AdminUsersView() {
                           <Coins className="h-3 w-3 mr-1" />
                           {user.credits} credits
                         </Badge>
-                      )}
-                      {user.role !== 'admin' && (
-                        user.emailConfirmed ? (
-                          <Badge className="bg-green-500/20 text-green-600 border-green-500/30 hover:bg-green-500/20 w-[145px] justify-center">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Email Confirmed
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/20 w-[145px] justify-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Pending Confirmation
-                          </Badge>
-                        )
                       )}
                     </div>
                   </div>
