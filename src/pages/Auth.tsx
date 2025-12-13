@@ -79,14 +79,15 @@ export default function Auth() {
     
     setIsLoading(true);
 
-    // First check if email is verified BEFORE actually signing in
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email_verified')
-      .eq('email', email)
-      .maybeSingle();
+    // First check if email is verified using RPC function (bypasses RLS)
+    const { data: isVerified, error: rpcError } = await supabase
+      .rpc('check_email_verified', { check_email: email });
 
-    if (profile && !profile.email_verified) {
+    if (rpcError) {
+      console.error('Error checking email verification:', rpcError);
+    }
+
+    if (!isVerified) {
       setIsLoading(false);
       toast({
         variant: 'destructive',
