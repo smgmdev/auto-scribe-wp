@@ -156,9 +156,12 @@ export function DashboardView() {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent 
-                      side="bottom" 
+                      side="right" 
+                      align="start"
                       sideOffset={8}
-                      className="max-w-xs z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+                      collisionPadding={16}
+                      avoidCollisions={true}
+                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
                     >
                       <p>{stat.tooltip}</p>
                     </TooltipContent>
