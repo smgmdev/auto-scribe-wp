@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Shield, Coins, Loader2, Plus, Minus, Trash2, Search, Building2 } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, Plus, Minus, Trash2, Search, Building2, CheckCircle, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,7 @@ interface UserData {
   role: 'admin' | 'user';
   credits: number;
   isAgency: boolean;
+  emailConfirmed: boolean;
 }
 
 export function AdminUsersView() {
@@ -100,6 +101,19 @@ export function AdminUsersView() {
       .from('agency_payouts')
       .select('user_id, onboarding_complete');
 
+    // Fetch email confirmation status from edge function
+    let authStatusMap: Record<string, boolean> = {};
+    try {
+      const { data: authData, error: authError } = await supabase.functions.invoke('get-users-auth-status');
+      if (!authError && authData?.users) {
+        authData.users.forEach((u: { id: string; email_confirmed_at: string | null }) => {
+          authStatusMap[u.id] = !!u.email_confirmed_at;
+        });
+      }
+    } catch (e) {
+      console.error('Failed to fetch auth status:', e);
+    }
+
     const usersData = (profiles || []).map((profile) => {
       const userRole = roles?.find((r) => r.user_id === profile.id);
       const userCredits = credits?.find((c) => c.user_id === profile.id);
@@ -111,6 +125,7 @@ export function AdminUsersView() {
         role: (userRole?.role as 'admin' | 'user') || 'user',
         credits: userCredits?.credits || 0,
         isAgency: userAgency?.onboarding_complete === true,
+        emailConfirmed: authStatusMap[profile.id] ?? false,
       };
     });
 
@@ -298,7 +313,7 @@ export function AdminUsersView() {
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium truncate">{user.email}</p>
-                    <div className="flex items-center gap-4 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       {user.role === 'admin' ? (
                         <Badge 
                           variant="outline"
@@ -327,6 +342,17 @@ export function AdminUsersView() {
                         <Badge variant="secondary" className="min-w-[90px] justify-start">
                           <Coins className="h-3 w-3 mr-1" />
                           {user.credits} credits
+                        </Badge>
+                      )}
+                      {user.emailConfirmed ? (
+                        <Badge className="bg-green-500/20 text-green-600 border-green-500/30 hover:bg-green-500/20">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Email Confirmed
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/20">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending Confirmation
                         </Badge>
                       )}
                     </div>

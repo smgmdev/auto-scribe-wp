@@ -63,3 +63,6 @@ verify_jwt = true
 
 [functions.email-hook]
 verify_jwt = false
+
+[functions.get-users-auth-status]
+verify_jwt = true
