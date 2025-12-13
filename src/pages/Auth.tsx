@@ -172,9 +172,12 @@ export default function Auth() {
       return;
     }
 
-    // Send custom verification email via Resend
+    // Send custom verification email and capture IP via Resend
     if (data?.user) {
       try {
+        // Capture signup IP
+        await supabase.functions.invoke('capture-login-ip');
+        
         const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
           body: { email, userId: data.user.id }
         });
