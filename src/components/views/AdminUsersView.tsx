@@ -303,14 +303,14 @@ export function AdminUsersView() {
                         {user.role === 'admin' ? (
                           <Badge 
                             variant="outline"
-                            className="bg-primary/10 text-primary border-primary/30 min-w-[70px] justify-center"
+                            className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
                           >
                             <Shield className="h-3 w-3 mr-1" />
                             Admin
                           </Badge>
                         ) : user.isAgency ? (
                           <Badge 
-                            className="bg-black text-white hover:bg-black min-w-[70px] justify-center"
+                            className="bg-black text-white hover:bg-black w-[72px] justify-center"
                           >
                             <Building2 className="h-3 w-3 mr-1" />
                             Agency
@@ -318,7 +318,7 @@ export function AdminUsersView() {
                         ) : (
                           <Badge 
                             variant="outline"
-                            className="min-w-[70px] justify-center"
+                            className="w-[72px] justify-center"
                           >
                             <Shield className="h-3 w-3 mr-1" />
                             User
@@ -360,7 +360,7 @@ export function AdminUsersView() {
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
-                    {user.id !== currentUser?.id && (
+                    {user.id !== currentUser?.id ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -369,6 +369,8 @@ export function AdminUsersView() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                    ) : (
+                      <div className="w-9" />
                     )}
                   </div>
                 </div>
