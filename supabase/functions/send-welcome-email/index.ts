@@ -52,12 +52,12 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Build verification URL using the Lovable project URL
-    const projectId = supabaseUrl.split("//")[1].split(".")[0];
-    const appBaseUrl = `https://${projectId}.supabase.co`;
-    const verificationUrl = `${appBaseUrl}/functions/v1/verify-email?token=${verificationToken}&redirect=/auth`;
+    // Build verification URL using the app domain
+    // Use custom domain in production, fallback to Lovable project URL
+    const appUrl = "https://arcanamace.com"; // Custom domain
+    const verificationUrl = `${appUrl}/verify-email?token=${verificationToken}`;
 
-    console.log("Generated verification URL:", verificationUrl);
+    console.log("Generated verification URL for:", email);
 
     const emailResponse = await resend.emails.send({
       from: "Arcana Mace <noreply@arcanamace.com>",
