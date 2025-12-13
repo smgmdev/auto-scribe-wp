@@ -54,7 +54,7 @@ function AgencyFAQ() {
               />
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="px-4 pb-4 pt-0">
+              <div className="px-4 py-4">
                 <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
               </div>
             </CollapsibleContent>
