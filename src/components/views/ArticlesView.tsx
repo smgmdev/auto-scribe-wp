@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Edit, Trash2, ExternalLink, Loader2 } from 'lucide-react';
+import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
@@ -21,7 +21,7 @@ export function ArticlesView() {
   const { sites } = useSites();
   const { articles, loading, deleteArticle } = useArticles();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('published');
 
   const getSiteName = (siteId?: string) => {
     if (!siteId) return '';
@@ -44,7 +44,6 @@ export function ArticlesView() {
   };
 
   const filteredArticles = articles.filter(article => {
-    if (activeTab === 'all') return true;
     if (activeTab === 'published') return article.status === 'published';
     if (activeTab === 'drafts') return article.status === 'draft';
     return true;
@@ -145,21 +144,24 @@ export function ArticlesView() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">
-          Articles
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Manage your published and draft articles
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Articles
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage your published and draft articles
+          </p>
+        </div>
+        <Button onClick={() => setCurrentView('compose')} className="gap-2">
+          <Plus className="h-4 w-4" />
+          New Article
+        </Button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="all">
-            All ({articles.length})
-          </TabsTrigger>
+        <TabsList className="grid w-full max-w-xs grid-cols-2">
           <TabsTrigger value="published">
             Published ({publishedCount})
           </TabsTrigger>
@@ -174,16 +176,6 @@ export function ArticlesView() {
           </div>
         ) : (
           <>
-            <TabsContent value="all" className="mt-6">
-              {filteredArticles.length === 0 ? (
-                renderEmptyState('Start by composing a new article or generating one from headlines')
-              ) : (
-                <div className="space-y-4">
-                  {filteredArticles.map((article, index) => renderArticleCard(article, index))}
-                </div>
-              )}
-            </TabsContent>
-
             <TabsContent value="published" className="mt-6">
               {filteredArticles.length === 0 ? (
                 renderEmptyState('No published articles yet. Publish your first article to see it here.')
