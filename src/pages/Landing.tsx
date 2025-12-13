@@ -425,9 +425,9 @@ const Landing = () => {
       {/* TradingView-style Search Overlay */}
       {showSearchModal && (
         <>
-          {/* Backdrop - invisible but catches clicks */}
+          {/* Backdrop with blur */}
           <div 
-            className="fixed inset-0 z-[100]"
+            className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm"
             onClick={handleCloseSearchModal}
           />
           
