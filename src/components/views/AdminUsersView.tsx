@@ -30,6 +30,8 @@ interface UserData {
   createdAt: string | null;
   lastSignInAt: string | null;
   lastSignInIp: string | null;
+  lastAttemptAt: string | null;
+  lastAttemptIp: string | null;
 }
 
 type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
@@ -146,7 +148,13 @@ export function AdminUsersView() {
       .select('user_id, onboarding_complete');
 
     // Fetch auth user details for last login info
-    let authUsersMap: Record<string, { lastSignInAt: string | null; lastSignInIp: string | null; createdAt: string | null }> = {};
+    let authUsersMap: Record<string, { 
+      lastSignInAt: string | null; 
+      lastSignInIp: string | null; 
+      lastAttemptAt: string | null;
+      lastAttemptIp: string | null;
+      createdAt: string | null;
+    }> = {};
     try {
       const { data: authData } = await supabase.functions.invoke('get-users-auth-status');
       if (authData?.users) {
@@ -154,6 +162,8 @@ export function AdminUsersView() {
           authUsersMap[u.id] = {
             lastSignInAt: u.last_sign_in_at,
             lastSignInIp: u.last_sign_in_ip,
+            lastAttemptAt: u.last_attempt_at,
+            lastAttemptIp: u.last_attempt_ip,
             createdAt: u.created_at,
           };
         });
@@ -179,6 +189,8 @@ export function AdminUsersView() {
         createdAt: authInfo?.createdAt || profile.created_at,
         lastSignInAt: authInfo?.lastSignInAt || null,
         lastSignInIp: authInfo?.lastSignInIp || null,
+        lastAttemptAt: authInfo?.lastAttemptAt || null,
+        lastAttemptIp: authInfo?.lastAttemptIp || null,
       };
     });
 
@@ -533,8 +545,16 @@ export function AdminUsersView() {
                           <span>{formatDateTime(user.lastSignInAt)}</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-muted-foreground">Last IP:</span>
+                          <span className="text-muted-foreground">Last login IP:</span>
                           <span>{user.lastSignInIp || 'Not available'}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-muted-foreground">Last attempt:</span>
+                          <span>{formatDateTime(user.lastAttemptAt)}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-muted-foreground">Last attempt IP:</span>
+                          <span>{user.lastAttemptIp || 'Not available'}</span>
                         </div>
                       </div>
                     </div>

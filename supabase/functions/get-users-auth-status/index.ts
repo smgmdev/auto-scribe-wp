@@ -63,9 +63,10 @@ serve(async (req) => {
       id: user.id,
       email_confirmed_at: user.email_confirmed_at,
       created_at: user.created_at,
-      last_sign_in_at: user.last_sign_in_at,
-      // Get IP and location from user_metadata if available
+      last_sign_in_at: user.user_metadata?.last_sign_in_at_custom || user.last_sign_in_at,
       last_sign_in_ip: user.user_metadata?.last_sign_in_ip || null,
+      last_attempt_at: user.user_metadata?.last_attempt_at || null,
+      last_attempt_ip: user.user_metadata?.last_attempt_ip || null,
     }));
 
     return new Response(JSON.stringify({ users: usersAuthStatus }), {
