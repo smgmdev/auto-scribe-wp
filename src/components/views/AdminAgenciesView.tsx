@@ -704,11 +704,11 @@ export function AdminAgenciesView() {
                   }}
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-muted"
+                  disabled={websiteLoading}
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className={`h-4 w-4 ${websiteLoading ? 'animate-spin' : ''}`} />
                 </Button>
-                {websiteLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                 <DialogTitle className="text-sm">Agency Website</DialogTitle>
               </div>
               <div className="flex items-center gap-2">
