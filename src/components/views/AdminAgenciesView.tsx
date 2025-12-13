@@ -56,6 +56,9 @@ export function AdminAgenciesView() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [cleaningUp, setCleaningUp] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const { decrementUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
@@ -97,6 +100,13 @@ export function AdminAgenciesView() {
   const handleOpenApplication = async (app: AgencyApplication) => {
     setSelectedApp(app);
     setAdminNotes(app.admin_notes || '');
+    setLogoUrl(null);
+    
+    // Fetch logo URL if exists
+    if (app.logo_url) {
+      const url = await getSignedUrl(app.logo_url);
+      setLogoUrl(url);
+    }
     
     // Mark as read if not already
     if (!app.read) {
@@ -263,18 +273,10 @@ export function AdminAgenciesView() {
   const handleViewDocument = async (path: string) => {
     const url = await getSignedUrl(path);
     if (url) {
-      window.open(url, '_blank');
+      setDocumentUrl(url);
+      setDocumentDialogOpen(true);
     } else {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not load document' });
-    }
-  };
-
-  const handleViewLogo = async (path: string) => {
-    const url = await getSignedUrl(path);
-    if (url) {
-      window.open(url, '_blank');
-    } else {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not load logo' });
     }
   };
 
@@ -510,10 +512,19 @@ export function AdminAgenciesView() {
       </Tabs>
 
       {/* Application Review Dialog */}
-      <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
+      <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
+            <div className="flex items-center gap-3">
+              {logoUrl && (
+                <img 
+                  src={logoUrl} 
+                  alt="Agency logo" 
+                  className="w-12 h-12 rounded-lg object-cover border border-border"
+                />
+              )}
+              <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
+            </div>
           </DialogHeader>
 
           {selectedApp && (
@@ -556,19 +567,18 @@ export function AdminAgenciesView() {
               )}
 
               <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="hover:bg-black hover:text-white" asChild>
                   <a href={selectedApp.agency_website} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4 mr-1" />
                     Website
                   </a>
                 </Button>
-                {selectedApp.logo_url && (
-                  <Button variant="outline" size="sm" onClick={() => handleViewLogo(selectedApp.logo_url!)}>
-                    <FileText className="h-4 w-4 mr-1" />
-                    View Logo
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-black hover:text-white"
+                  onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
+                >
                   <FileText className="h-4 w-4 mr-1" />
                   View Document
                 </Button>
@@ -620,6 +630,24 @@ export function AdminAgenciesView() {
                   <p className="text-sm">{selectedApp.admin_notes}</p>
                 </div>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Viewer Dialog */}
+      <Dialog open={documentDialogOpen} onOpenChange={setDocumentDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Incorporation Document</DialogTitle>
+          </DialogHeader>
+          {documentUrl && (
+            <div className="w-full h-[70vh]">
+              <iframe 
+                src={documentUrl} 
+                className="w-full h-full border-0 rounded-lg"
+                title="Document viewer"
+              />
             </div>
           )}
         </DialogContent>
