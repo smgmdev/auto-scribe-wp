@@ -253,7 +253,7 @@ export function AgencyApplicationForm() {
                   </div>
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="w-full hover:bg-black hover:text-white"
                     onClick={() => {
                       setExistingApplication(null);
                       setShowRejectionReason(false);
