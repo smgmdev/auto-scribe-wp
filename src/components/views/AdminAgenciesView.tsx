@@ -61,6 +61,7 @@ export function AdminAgenciesView() {
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [websiteDialogOpen, setWebsiteDialogOpen] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState<string | null>(null);
+  const [websiteLoading, setWebsiteLoading] = useState(true);
   const { decrementUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
@@ -690,31 +691,40 @@ export function AdminAgenciesView() {
       </Dialog>
 
       {/* Website Viewer Dialog */}
-      <Dialog open={websiteDialogOpen} onOpenChange={setWebsiteDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Agency Website</DialogTitle>
+      <Dialog open={websiteDialogOpen} onOpenChange={(open) => { setWebsiteDialogOpen(open); if (!open) setWebsiteLoading(true); }}>
+        <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2">
+          <DialogHeader className="px-2 pb-1">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-sm">Agency Website</DialogTitle>
+              <Button
+                onClick={() => window.open(websiteUrl!, '_blank')}
+                variant="outline"
+                size="sm"
+                className="hover:bg-black hover:text-white h-7 text-xs"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Open in New Tab
+              </Button>
+            </div>
           </DialogHeader>
           {websiteUrl && (
-            <div className="w-full flex flex-col gap-4">
-              <div className="w-full h-[70vh] bg-muted rounded-lg overflow-hidden">
+            <div className="w-full relative">
+              {websiteLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg z-10">
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Loading website...</p>
+                  </div>
+                </div>
+              )}
+              <div className="w-full h-[85vh] bg-muted rounded overflow-hidden">
                 <iframe
                   src={websiteUrl}
                   className="w-full h-full border-0"
                   title="Website viewer"
                   sandbox="allow-scripts allow-same-origin allow-popups"
+                  onLoad={() => setWebsiteLoading(false)}
                 />
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => window.open(websiteUrl, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-black hover:text-white"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open in New Tab
-                </Button>
               </div>
             </div>
           )}
