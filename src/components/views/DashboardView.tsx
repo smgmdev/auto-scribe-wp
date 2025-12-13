@@ -29,7 +29,7 @@ function formatRelativeTime(dateInput: string | Date): string {
 }
 
 const stats = [{
-  label: 'Media Sites',
+  label: 'Local Library',
   icon: Globe,
   key: 'sites'
 }, {
