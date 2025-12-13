@@ -354,8 +354,8 @@ export function AdminUsersView() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="user" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">User</SelectItem>
+                            <SelectItem value="admin" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Admin</SelectItem>
                           </SelectContent>
                         </Select>
 
@@ -363,6 +363,7 @@ export function AdminUsersView() {
                           variant="outline"
                           size="sm"
                           onClick={() => openCreditDialog(user)}
+                          className="hover:bg-black hover:text-white"
                         >
                           <Coins className="h-4 w-4 mr-1" />
                           Credits
@@ -373,7 +374,7 @@ export function AdminUsersView() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="hover:bg-black hover:text-white"
                         onClick={() => openDeleteDialog(user)}
                       >
                         <Trash2 className="h-4 w-4" />
