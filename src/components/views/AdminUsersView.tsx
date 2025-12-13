@@ -374,9 +374,13 @@ export function AdminUsersView() {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
           <TabsList className="w-full justify-start">
             <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="users_confirmed">Users (verified)</TabsTrigger>
+            <TabsTrigger value="users_confirmed" className="gap-1">
+              Users <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" />
+            </TabsTrigger>
             <TabsTrigger value="agencies">Agencies</TabsTrigger>
-            <TabsTrigger value="users_pending">Users (pending)</TabsTrigger>
+            <TabsTrigger value="users_pending" className="gap-1">
+              Users <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -500,18 +504,18 @@ export function AdminUsersView() {
                   {/* Expanded Details */}
                   {isExpanded && (
                     <div className="mt-4 pt-4 border-t border-border">
-                      <div className="grid gap-2 text-sm">
-                        <div className="flex justify-between">
+                      <div className="grid gap-1 text-xs">
+                        <div className="flex gap-2">
                           <span className="text-muted-foreground">Account created:</span>
-                          <span className="font-medium">{formatDateTime(user.createdAt)}</span>
+                          <span>{formatDateTime(user.createdAt)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex gap-2">
                           <span className="text-muted-foreground">Last login:</span>
-                          <span className="font-medium">{formatDateTime(user.lastSignInAt)}</span>
+                          <span>{formatDateTime(user.lastSignInAt)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex gap-2">
                           <span className="text-muted-foreground">Last IP:</span>
-                          <span className="font-medium">{user.lastSignInIp || 'Not available'}</span>
+                          <span>{user.lastSignInIp || 'Not available'}</span>
                         </div>
                       </div>
                     </div>
