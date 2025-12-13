@@ -52,10 +52,8 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Build verification URL using the app domain
-    // Use custom domain in production, fallback to Lovable project URL
-    const appUrl = "https://arcanamace.com"; // Custom domain
-    const verificationUrl = `${appUrl}/verify-email?token=${verificationToken}`;
+    // Build verification URL using the Supabase edge function directly
+    const verificationUrl = `${supabaseUrl}/functions/v1/verify-email?token=${verificationToken}&redirect=/auth`;
 
     console.log("Generated verification URL for:", email);
 
