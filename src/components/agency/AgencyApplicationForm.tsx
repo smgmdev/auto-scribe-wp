@@ -231,7 +231,7 @@ export function AgencyApplicationForm() {
               {!showRejectionReason ? (
                 <Button 
                   variant="outline" 
-                  className="w-full"
+                  className="w-full hover:bg-black hover:text-white"
                   onClick={() => setShowRejectionReason(true)}
                 >
                   <ChevronDown className="h-4 w-4 mr-2" />
