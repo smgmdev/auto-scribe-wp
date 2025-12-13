@@ -74,7 +74,8 @@ export function AgencyApplicationForm() {
     agency_name: '',
     country: '',
     agency_website: '',
-    media_channels: ''
+    media_channels: '',
+    payout_method: ''
   });
 
   useEffect(() => {
@@ -562,6 +563,27 @@ export function AgencyApplicationForm() {
               disabled={submitting}
               rows={4}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="payout_method">How would you like to receive your payouts? *</Label>
+            <Select
+              value={formData.payout_method}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, payout_method: value }))}
+              disabled={submitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select payout method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="stripe">Automatic payout via Stripe Connect (Recommended)</SelectItem>
+                <SelectItem value="usdt">USDT payout</SelectItem>
+                <SelectItem value="wire">Wire payout</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Stripe Connect is recommended allowing your customers to pay by credit card directly which makes it easier for clients to perform payments.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
