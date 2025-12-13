@@ -157,16 +157,16 @@ export function BriefSubmissionDialog({
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Cancel
-          </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting || !title.trim() || !description.trim()}>
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
               <Send className="h-4 w-4 mr-2" />
             )}
-            Submit Brief
+            I'm Interested
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            Close
           </Button>
         </div>
       </DialogContent>
