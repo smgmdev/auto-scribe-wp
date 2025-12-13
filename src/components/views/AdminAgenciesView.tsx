@@ -21,6 +21,9 @@ interface AgencyApplication {
   country: string;
   agency_website: string;
   incorporation_document_url: string;
+  logo_url: string | null;
+  media_niches: string[] | null;
+  media_channels: string | null;
   status: string;
   admin_notes: string | null;
   created_at: string;
@@ -249,9 +252,30 @@ export function AdminAgenciesView() {
     }
   };
 
-  const getDocumentUrl = (path: string) => {
-    const { data } = supabase.storage.from('agency-documents').getPublicUrl(path);
-    return data.publicUrl;
+  const getSignedUrl = async (path: string) => {
+    const { data, error } = await supabase.storage
+      .from('agency-documents')
+      .createSignedUrl(path, 3600); // 1 hour expiry
+    if (error || !data) return null;
+    return data.signedUrl;
+  };
+
+  const handleViewDocument = async (path: string) => {
+    const url = await getSignedUrl(path);
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not load document' });
+    }
+  };
+
+  const handleViewLogo = async (path: string) => {
+    const url = await getSignedUrl(path);
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not load logo' });
+    }
   };
 
   const getOnboardingStatus = (agency: AgencyPayout) => {
@@ -513,18 +537,40 @@ export function AdminAgenciesView() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              {selectedApp.media_niches && selectedApp.media_niches.length > 0 && (
+                <div className="text-sm">
+                  <p className="text-muted-foreground mb-1">Media Niches</p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedApp.media_niches.map((niche, i) => (
+                      <Badge key={i} variant="secondary">{niche}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedApp.media_channels && (
+                <div className="text-sm">
+                  <p className="text-muted-foreground mb-1">Media Channels</p>
+                  <p className="font-medium whitespace-pre-wrap">{selectedApp.media_channels}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" asChild>
                   <a href={selectedApp.agency_website} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4 mr-1" />
                     Website
                   </a>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <a href={getDocumentUrl(selectedApp.incorporation_document_url)} target="_blank" rel="noopener noreferrer">
+                {selectedApp.logo_url && (
+                  <Button variant="outline" size="sm" onClick={() => handleViewLogo(selectedApp.logo_url!)}>
                     <FileText className="h-4 w-4 mr-1" />
-                    View Document
-                  </a>
+                    View Logo
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}>
+                  <FileText className="h-4 w-4 mr-1" />
+                  View Document
                 </Button>
               </div>
 
