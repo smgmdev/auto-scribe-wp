@@ -37,39 +37,30 @@ function AgencyFAQ() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-foreground">Why Upgrade to Agency?</h2>
-        <p className="text-muted-foreground">
-          Use Arcana Mace as your personal global media channel merchant to provide media access to global companies and other agencies.
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {faqItems.map((item, index) => (
-          <Collapsible
-            key={index}
-            open={openItems.includes(index)}
-            onOpenChange={() => toggleItem(index)}
-          >
-            <div className="rounded-lg border border-border bg-card overflow-hidden">
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
-                <span className="font-medium text-foreground">{item.question}</span>
-                <ChevronDown 
-                  className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
-                    openItems.includes(index) ? 'rotate-180' : ''
-                  }`} 
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 pb-4 pt-0">
-                  <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
-                </div>
-              </CollapsibleContent>
-            </div>
-          </Collapsible>
-        ))}
-      </div>
+    <div className="space-y-3">
+      {faqItems.map((item, index) => (
+        <Collapsible
+          key={index}
+          open={openItems.includes(index)}
+          onOpenChange={() => toggleItem(index)}
+        >
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
+              <span className="font-medium text-foreground">{item.question}</span>
+              <ChevronDown 
+                className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+                  openItems.includes(index) ? 'rotate-180' : ''
+                }`} 
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-4 pb-4 pt-0">
+                <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      ))}
     </div>
   );
 }
