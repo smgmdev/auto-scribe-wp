@@ -75,3 +75,6 @@ verify_jwt = true
 
 [functions.verify-email]
 verify_jwt = false
+
+[functions.verify-email-api]
+verify_jwt = false
