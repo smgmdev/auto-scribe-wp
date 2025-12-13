@@ -43,13 +43,13 @@ const getNavigation = (isAdmin: boolean) => {
   }];
   if (isAdmin) {
     return [...base.filter(item => item.id !== 'b2b-media-buying'), {
-      id: 'admin-orders',
-      label: 'Order Management',
-      icon: Package
-    }, {
-      id: 'admin-engagements',
-      label: 'Engagements',
-      icon: MessageSquare
+      id: 'b2b-media-buying',
+      label: 'B2B Media Buying',
+      icon: ShoppingBag,
+      submenu: [
+        { id: 'admin-orders', label: 'Order Management', icon: Package },
+        { id: 'admin-engagements', label: 'Engagements', icon: MessageSquare }
+      ]
     }, {
       id: 'admin-agencies',
       label: 'Agencies',
@@ -89,7 +89,7 @@ export function Sidebar({
   // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
-    const b2bMediaBuyingIds = ['orders', 'my-requests'];
+    const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
