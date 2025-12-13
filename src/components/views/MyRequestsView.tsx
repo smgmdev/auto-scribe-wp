@@ -199,8 +199,8 @@ export function MyRequestsView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">My Requests</h2>
-        <p className="text-muted-foreground">Track your service requests and communicate with agencies</p>
+        <h2 className="text-2xl font-bold">My Engagements</h2>
+        <p className="text-muted-foreground">Track your engagements and communicate with agencies</p>
       </div>
 
       {requests.length === 0 ? (
