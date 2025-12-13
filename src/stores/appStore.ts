@@ -21,6 +21,11 @@ interface AppState {
   setTargetTab: (tab: string | null) => void;
   targetSubcategory: string | null;
   setTargetSubcategory: (subcategory: string | null) => void;
+  
+  // Admin notifications
+  unreadAgencyApplicationsCount: number;
+  setUnreadAgencyApplicationsCount: (count: number) => void;
+  decrementUnreadAgencyApplicationsCount: () => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -43,4 +48,11 @@ export const useAppStore = create<AppState>()((set) => ({
   setTargetTab: (tab) => set({ targetTab: tab }),
   targetSubcategory: null,
   setTargetSubcategory: (subcategory) => set({ targetSubcategory: subcategory }),
+  
+  // Admin notifications
+  unreadAgencyApplicationsCount: 0,
+  setUnreadAgencyApplicationsCount: (count) => set({ unreadAgencyApplicationsCount: count }),
+  decrementUnreadAgencyApplicationsCount: () => set((state) => ({ 
+    unreadAgencyApplicationsCount: Math.max(0, state.unreadAgencyApplicationsCount - 1) 
+  })),
 }));

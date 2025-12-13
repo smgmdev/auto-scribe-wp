@@ -75,7 +75,9 @@ export function Sidebar({
 }: SidebarProps) {
   const {
     currentView,
-    setCurrentView
+    setCurrentView,
+    unreadAgencyApplicationsCount,
+    setUnreadAgencyApplicationsCount
   } = useAppStore();
   const {
     signOut,
@@ -106,7 +108,6 @@ export function Sidebar({
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
-  const [pendingApplicationsCount, setPendingApplicationsCount] = useState(0);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
@@ -120,7 +121,7 @@ export function Sidebar({
           .eq('status', 'pending')
           .eq('read', false);
         
-        setPendingApplicationsCount(count || 0);
+        setUnreadAgencyApplicationsCount(count || 0);
         return;
       }
       
@@ -259,9 +260,9 @@ export function Sidebar({
                     <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                     <span className="truncate">{item.label}</span>
                   </div>
-                  {item.id === 'admin-agencies' && pendingApplicationsCount > 0 && (
+                  {item.id === 'admin-agencies' && unreadAgencyApplicationsCount > 0 && (
                     <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                      {pendingApplicationsCount}
+                      {unreadAgencyApplicationsCount}
                     </Badge>
                   )}
                 </Button>
