@@ -77,7 +77,9 @@ export function Sidebar({
     currentView,
     setCurrentView,
     unreadAgencyApplicationsCount,
-    setUnreadAgencyApplicationsCount
+    setUnreadAgencyApplicationsCount,
+    userApplicationStatus,
+    setUserApplicationStatus
   } = useAppStore();
   const {
     signOut,
@@ -85,7 +87,6 @@ export function Sidebar({
     user
   } = useAuth();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
-  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const navigation = getNavigation(isAdmin);
 
@@ -135,7 +136,7 @@ export function Sidebar({
         .maybeSingle();
       
       if (appData) {
-        setApplicationStatus(appData.status);
+        setUserApplicationStatus(appData.status);
       }
 
       // Check if user has agency payout record and onboarding status
@@ -275,7 +276,7 @@ export function Sidebar({
             {/* Agency Status Card - Only for non-admin users */}
             {!isAdmin && (
               <AgencyStatusCard
-                applicationStatus={applicationStatus}
+                applicationStatus={userApplicationStatus}
                 hasStripeAccount={hasStripeAccount}
                 isAgencyOnboarded={isAgencyOnboarded}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
