@@ -239,7 +239,7 @@ export function DashboardView() {
       <Card className="border-border/50 bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl">My Recent Articles</CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="text-muted-foreground hover:bg-black hover:text-white">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
