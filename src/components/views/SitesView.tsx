@@ -77,6 +77,7 @@ export function SitesView() {
   const [activeMediaCategory, setActiveMediaCategory] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [wpSearchQuery, setWpSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
@@ -1313,8 +1314,45 @@ export function SitesView() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-2">
-              {sites.map((site, index) => renderWPSiteCard(site, index))}
+            <div className="space-y-4">
+              {/* Search bar for WP sites */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search WordPress sites..."
+                  value={wpSearchQuery}
+                  onChange={(e) => setWpSearchQuery(e.target.value)}
+                  className="pl-10 pr-10"
+                />
+                {wpSearchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                    onClick={() => setWpSearchQuery('')}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              
+              {/* Filtered sites list */}
+              <div className="space-y-2">
+                {sites
+                  .filter(site => 
+                    site.name.toLowerCase().includes(wpSearchQuery.toLowerCase()) ||
+                    site.url.toLowerCase().includes(wpSearchQuery.toLowerCase())
+                  )
+                  .map((site, index) => renderWPSiteCard(site, index))}
+                {sites.filter(site => 
+                  site.name.toLowerCase().includes(wpSearchQuery.toLowerCase()) ||
+                  site.url.toLowerCase().includes(wpSearchQuery.toLowerCase())
+                ).length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    No sites found for "{wpSearchQuery}"
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </TabsContent>
