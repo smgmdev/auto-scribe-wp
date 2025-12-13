@@ -576,13 +576,13 @@ export function AgencyApplicationForm() {
                 <SelectValue placeholder="Select payout method" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="stripe">Automatic payout via Stripe Connect (Recommended)</SelectItem>
-                <SelectItem value="usdt">USDT payout</SelectItem>
-                <SelectItem value="wire">Wire payout</SelectItem>
+                <SelectItem value="stripe" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Automatic payout via Stripe Connect (Recommended)</SelectItem>
+                <SelectItem value="usdt" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">USDT payout</SelectItem>
+                <SelectItem value="wire" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Wire payout</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Stripe Connect is recommended allowing your customers to pay by credit card directly which makes it easier for clients to perform payments.
+              Stripe Connect is recommended allowing your customers to pay by credit card directly which makes it easier for clients to perform payments. You will have to pass KYC verification to be onboarded on Stripe Connect.
             </p>
           </div>
 
