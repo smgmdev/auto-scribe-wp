@@ -71,10 +71,10 @@ export function AdminUsersView() {
   const fetchUsers = async () => {
     setLoading(true);
 
-    // Fetch profiles
+    // Fetch profiles with email_verified status
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, email');
+      .select('id, email, email_verified');
 
     if (profilesError) {
       toast({
@@ -101,19 +101,6 @@ export function AdminUsersView() {
       .from('agency_payouts')
       .select('user_id, onboarding_complete');
 
-    // Fetch email confirmation status from edge function
-    let authStatusMap: Record<string, boolean> = {};
-    try {
-      const { data: authData, error: authError } = await supabase.functions.invoke('get-users-auth-status');
-      if (!authError && authData?.users) {
-        authData.users.forEach((u: { id: string; email_confirmed_at: string | null }) => {
-          authStatusMap[u.id] = !!u.email_confirmed_at;
-        });
-      }
-    } catch (e) {
-      console.error('Failed to fetch auth status:', e);
-    }
-
     const usersData = (profiles || []).map((profile) => {
       const userRole = roles?.find((r) => r.user_id === profile.id);
       const userCredits = credits?.find((c) => c.user_id === profile.id);
@@ -125,7 +112,7 @@ export function AdminUsersView() {
         role: (userRole?.role as 'admin' | 'user') || 'user',
         credits: userCredits?.credits || 0,
         isAgency: userAgency?.onboarding_complete === true,
-        emailConfirmed: authStatusMap[profile.id] ?? false,
+        emailConfirmed: profile.email_verified ?? false,
       };
     });
 
