@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, Info } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, Info, ArrowRight } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -237,8 +237,12 @@ export function DashboardView() {
 
       {/* My Recent Articles */}
       <Card className="border-border/50 bg-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl">My Recent Articles</CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="text-muted-foreground hover:text-foreground">
+            View All
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
         </CardHeader>
         <CardContent>
           {articles.length === 0 ? (
