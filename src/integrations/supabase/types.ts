@@ -26,6 +26,8 @@ export type Database = {
           id: string
           incorporation_document_url: string
           logo_url: string | null
+          media_channels: string | null
+          media_niches: string[] | null
           read: boolean
           reviewed_at: string | null
           status: string
@@ -44,6 +46,8 @@ export type Database = {
           id?: string
           incorporation_document_url: string
           logo_url?: string | null
+          media_channels?: string | null
+          media_niches?: string[] | null
           read?: boolean
           reviewed_at?: string | null
           status?: string
@@ -62,6 +66,8 @@ export type Database = {
           id?: string
           incorporation_document_url?: string
           logo_url?: string | null
+          media_channels?: string | null
+          media_niches?: string[] | null
           read?: boolean
           reviewed_at?: string | null
           status?: string
