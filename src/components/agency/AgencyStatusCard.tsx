@@ -212,10 +212,7 @@ export function AgencyStatusCard({
             <Clock className="h-5 w-5 text-gray-400" />
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-400">Application Under Review</span>
-              <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs">Pending</Badge>
-            </div>
+            <span className="font-medium text-gray-400">Application Under Review</span>
             <p className="text-xs text-sidebar-foreground/60 mt-0.5">We are reviewing your agency application</p>
           </div>
         </div>
