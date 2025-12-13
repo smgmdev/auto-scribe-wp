@@ -615,7 +615,7 @@ export function AgencyApplicationForm() {
                       accept="image/*"
                       onChange={handleLogoChange}
                       disabled={uploadingLogo || submitting}
-                      className="w-full max-w-[180px] mx-auto text-[10px] h-7 file:text-[10px] file:h-full file:px-3 file:mr-2 file:border-0 file:bg-muted file:rounded"
+                      className="w-full text-xs h-9 file:text-xs file:h-full file:px-4 file:mr-3 file:border-0 file:bg-muted file:rounded cursor-pointer"
                     />
                   </>
                 )}
@@ -686,7 +686,7 @@ export function AgencyApplicationForm() {
                       accept=".pdf,.doc,.docx"
                       onChange={handleFileChange}
                       disabled={uploading || submitting}
-                      className="w-full max-w-[180px] mx-auto text-[10px] h-7 file:text-[10px] file:h-full file:px-3 file:mr-2 file:border-0 file:bg-muted file:rounded"
+                      className="w-full text-xs h-9 file:text-xs file:h-full file:px-4 file:mr-3 file:border-0 file:bg-muted file:rounded cursor-pointer"
                     />
                   </>
                 )}
