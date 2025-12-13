@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.delete-stripe-account]
 verify_jwt = true
+
+[functions.cleanup-connect-accounts]
+verify_jwt = true
