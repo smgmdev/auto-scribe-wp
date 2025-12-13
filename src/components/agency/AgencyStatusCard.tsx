@@ -18,6 +18,8 @@ interface StripeStatus {
   detailsSubmitted: boolean;
   missingRequirements: string[];
   pendingVerification: string[];
+  missingCount?: number;
+  pendingCount?: number;
 }
 
 export function AgencyStatusCard({
@@ -89,7 +91,8 @@ export function AgencyStatusCard({
     }
 
     const allSubmitted = stripeStatus && stripeStatus.missingRequirements.length === 0;
-    const pendingCount = stripeStatus?.pendingVerification.length || 0;
+    const pendingCount = stripeStatus?.pendingCount || stripeStatus?.pendingVerification.length || 0;
+    const missingCount = stripeStatus?.missingCount || stripeStatus?.missingRequirements.length || 0;
 
     // All submitted - show blue "Pending Stripe Review" box
     if (allSubmitted) {
@@ -133,9 +136,9 @@ export function AgencyStatusCard({
           </div>
         </div>
         
-        {stripeStatus && stripeStatus.missingRequirements.length > 0 && (
+        {stripeStatus && missingCount > 0 && (
           <div className="mt-2 px-2 py-1.5 bg-yellow-500/10 rounded text-xs text-yellow-400">
-            {stripeStatus.missingRequirements.length} item{stripeStatus.missingRequirements.length > 1 ? 's' : ''} remaining
+            {missingCount} item{missingCount > 1 ? 's' : ''} remaining
           </div>
         )}
         

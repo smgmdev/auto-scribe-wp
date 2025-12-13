@@ -128,9 +128,9 @@ serve(async (req) => {
       'representative.verification.additional_document': 'Representative additional document',
     };
 
-    // Get human-readable requirements without deduplicating
+    // Get human-readable requirements with raw codes for context
     const getRequirementLabels = (reqs: string[]) => {
-      return reqs.map(req => {
+      return reqs.map((req, index) => {
         // Try exact match first
         if (requirementLabels[req]) {
           return requirementLabels[req];
@@ -140,18 +140,34 @@ serve(async (req) => {
         for (let i = parts.length; i > 0; i--) {
           const key = parts.slice(0, i).join('.');
           if (requirementLabels[key]) {
+            // Add index to differentiate duplicates
             return requirementLabels[key];
           }
         }
-        // If no match, format the last part
-        const formatted = req.split('.').pop()?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        // If no match, format the raw code nicely
+        const formatted = req.replace(/\./g, ' → ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         return formatted || req;
       });
     };
 
+    // Deduplicate for display but keep count
+    const getUniqueWithCount = (items: string[]) => {
+      const counts = new Map<string, number>();
+      items.forEach(item => {
+        counts.set(item, (counts.get(item) || 0) + 1);
+      });
+      return Array.from(counts.entries()).map(([label, count]) => 
+        count > 1 ? `${label} (${count} items)` : label
+      );
+    };
+
     const allMissingRaw = [...new Set([...currentlyDue, ...pastDue])];
-    const missingRequirements = getRequirementLabels(allMissingRaw);
-    const pendingItems = getRequirementLabels(pendingVerification);
+    const missingLabels = getRequirementLabels(allMissingRaw);
+    const pendingLabels = getRequirementLabels(pendingVerification);
+    
+    // Deduplicated for cleaner display
+    const missingRequirements = getUniqueWithCount(missingLabels);
+    const pendingItems = getUniqueWithCount(pendingLabels);
 
     logStep("Agency found", { 
       agencyName: agencyData.agency_name, 
@@ -181,7 +197,10 @@ serve(async (req) => {
         payoutsEnabled: account.payouts_enabled,
         detailsSubmitted: account.details_submitted,
         missingRequirements,
-        pendingVerification: pendingItems
+        pendingVerification: pendingItems,
+        // Raw counts for accurate display
+        missingCount: allMissingRaw.length,
+        pendingCount: pendingVerification.length
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

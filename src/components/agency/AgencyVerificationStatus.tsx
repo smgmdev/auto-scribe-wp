@@ -10,6 +10,8 @@ interface StripeStatus {
   detailsSubmitted: boolean;
   missingRequirements: string[];
   pendingVerification: string[];
+  missingCount?: number;
+  pendingCount?: number;
 }
 
 interface AgencyVerificationStatusProps {
@@ -96,6 +98,8 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
   const hasMissingItems = stripeStatus && stripeStatus.missingRequirements.length > 0;
   const hasPendingItems = stripeStatus && stripeStatus.pendingVerification.length > 0;
   const allSubmitted = stripeStatus && !hasMissingItems;
+  const missingCount = stripeStatus?.missingCount || stripeStatus?.missingRequirements.length || 0;
+  const pendingCount = stripeStatus?.pendingCount || stripeStatus?.pendingVerification.length || 0;
 
   return (
     <div className="space-y-6">
@@ -168,7 +172,7 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
               <h4 className="font-medium text-foreground">Still Required</h4>
               <span className="ml-auto text-xs text-muted-foreground">
-                {stripeStatus.missingRequirements.length} item{stripeStatus.missingRequirements.length !== 1 ? 's' : ''}
+                {missingCount} item{missingCount !== 1 ? 's' : ''}
               </span>
             </div>
             {stripeStatus.missingRequirements.length > 0 ? (
@@ -194,7 +198,7 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
               <Clock className="h-4 w-4 text-blue-400" />
               <h4 className="font-medium text-foreground">Under Review</h4>
               <span className="ml-auto text-xs text-muted-foreground">
-                {stripeStatus.pendingVerification.length} item{stripeStatus.pendingVerification.length !== 1 ? 's' : ''}
+                {pendingCount} item{pendingCount !== 1 ? 's' : ''}
               </span>
             </div>
             {stripeStatus.pendingVerification.length > 0 ? (
