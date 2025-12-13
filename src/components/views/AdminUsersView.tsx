@@ -292,52 +292,50 @@ export function AdminUsersView() {
           {filteredUsers.map((user) => (
             <Card key={user.id}>
               <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{user.email}</p>
-                      <div className="flex items-center gap-4 mt-1">
-                        {user.role === 'admin' ? (
-                          <Badge 
-                            variant="outline"
-                            className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
-                          >
-                            <Shield className="h-3 w-3 mr-1" />
-                            Admin
-                          </Badge>
-                        ) : user.isAgency ? (
-                          <Badge 
-                            className="bg-black text-white hover:bg-black w-[72px] justify-center"
-                          >
-                            <Building2 className="h-3 w-3 mr-1" />
-                            Agency
-                          </Badge>
-                        ) : (
-                          <Badge 
-                            variant="outline"
-                            className="w-[72px] justify-center"
-                          >
-                            <Shield className="h-3 w-3 mr-1" />
-                            User
-                          </Badge>
-                        )}
-                        <Badge variant="secondary" className="min-w-[90px] justify-start">
-                          <Coins className="h-3 w-3 mr-1" />
-                          {user.credits} credits
+                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    <Users className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{user.email}</p>
+                    <div className="flex items-center gap-4 mt-1">
+                      {user.role === 'admin' ? (
+                        <Badge 
+                          variant="outline"
+                          className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
+                        >
+                          <Shield className="h-3 w-3 mr-1" />
+                          Admin
                         </Badge>
-                      </div>
+                      ) : user.isAgency ? (
+                        <Badge 
+                          className="bg-black text-white hover:bg-black w-[72px] justify-center"
+                        >
+                          <Building2 className="h-3 w-3 mr-1" />
+                          Agency
+                        </Badge>
+                      ) : (
+                        <Badge 
+                          variant="outline"
+                          className="w-[72px] justify-center"
+                        >
+                          <Shield className="h-3 w-3 mr-1" />
+                          User
+                        </Badge>
+                      )}
+                      <Badge variant="secondary" className="min-w-[90px] justify-start">
+                        <Coins className="h-3 w-3 mr-1" />
+                        {user.credits} credits
+                      </Badge>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <Select
                       value={user.role}
                       onValueChange={(value: 'admin' | 'user') => handleRoleChange(user.id, value)}
                     >
-                      <SelectTrigger className="w-[120px]">
+                      <SelectTrigger className="w-[100px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
