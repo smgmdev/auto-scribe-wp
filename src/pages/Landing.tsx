@@ -488,10 +488,10 @@ const Landing = () => {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setActiveSubcategory(null)}
-                        className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                           !activeSubcategory
-                            ? 'bg-foreground text-background border-foreground'
-                            : 'bg-transparent text-foreground border-border hover:bg-muted'
+                            ? 'bg-foreground text-background'
+                            : 'text-muted-foreground hover:bg-foreground hover:text-background'
                         }`}
                       >
                         All
@@ -500,10 +500,10 @@ const Landing = () => {
                         <button
                           key={subcat}
                           onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
-                          className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
+                          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                             activeSubcategory === subcat
-                              ? 'bg-foreground text-background border-foreground'
-                              : 'bg-transparent text-foreground border-border hover:bg-muted'
+                              ? 'bg-foreground text-background'
+                              : 'text-muted-foreground hover:bg-foreground hover:text-background'
                           }`}
                         >
                           {subcat}
