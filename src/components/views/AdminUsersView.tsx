@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Shield, Coins, Loader2, Plus, Minus } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, Plus, Minus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,23 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserData {
   id: string;
@@ -32,11 +43,14 @@ export function AdminUsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [creditDialogOpen, setCreditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [creditAmount, setCreditAmount] = useState('');
   const [creditAction, setCreditAction] = useState<'add' | 'remove'>('add');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     fetchUsers();
@@ -166,6 +180,57 @@ export function AdminUsersView() {
     fetchUsers();
   };
 
+  const openDeleteDialog = (user: UserData) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+
+    // Prevent deleting yourself
+    if (selectedUser.id === currentUser?.id) {
+      toast({
+        variant: 'destructive',
+        title: 'Cannot delete',
+        description: 'You cannot delete your own account.',
+      });
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId: selectedUser.id },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: 'User deleted',
+        description: `${selectedUser.email} has been deleted.`,
+      });
+
+      setDeleteDialogOpen(false);
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error deleting user',
+        description: error.message || 'Failed to delete user.',
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -248,6 +313,16 @@ export function AdminUsersView() {
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
+                    {user.id !== currentUser?.id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => openDeleteDialog(user)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -298,6 +373,38 @@ export function AdminUsersView() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{selectedUser?.email}</strong>? 
+              This action cannot be undone. All user data including credits, articles, and orders will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete User
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
