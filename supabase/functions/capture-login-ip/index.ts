@@ -23,6 +23,17 @@ serve(async (req) => {
       });
     }
 
+    // Parse request body for type
+    let eventType = "login"; // default to successful login
+    try {
+      const body = await req.json();
+      if (body.type) {
+        eventType = body.type;
+      }
+    } catch {
+      // No body or invalid JSON, use default
+    }
+
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
     
     // Get the authenticated user
@@ -43,16 +54,29 @@ serve(async (req) => {
       req.headers.get("cf-connecting-ip") ||
       "Unknown";
 
-    console.log(`Capturing login IP for user ${user.id}: ${clientIp}`);
+    const now = new Date().toISOString();
 
-    // Update user metadata with last login IP
+    console.log(`Capturing ${eventType} IP for user ${user.id}: ${clientIp}`);
+
+    // Update user metadata based on event type
+    const metadataUpdate: Record<string, any> = {
+      ...user.user_metadata,
+    };
+
+    if (eventType === "login") {
+      // Successful login
+      metadataUpdate.last_sign_in_ip = clientIp;
+      metadataUpdate.last_sign_in_at_custom = now;
+    }
+    
+    // Always track as attempt
+    metadataUpdate.last_attempt_ip = clientIp;
+    metadataUpdate.last_attempt_at = now;
+
     const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
       user.id,
       {
-        user_metadata: {
-          ...user.user_metadata,
-          last_sign_in_ip: clientIp,
-        },
+        user_metadata: metadataUpdate,
       }
     );
 
@@ -61,7 +85,7 @@ serve(async (req) => {
       throw updateError;
     }
 
-    return new Response(JSON.stringify({ success: true, ip: clientIp }), {
+    return new Response(JSON.stringify({ success: true, ip: clientIp, type: eventType }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
