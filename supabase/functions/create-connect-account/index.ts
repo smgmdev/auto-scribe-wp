@@ -48,27 +48,45 @@ serve(async (req) => {
       throw new Error("Admin access required");
     }
 
-    const { agency_name, email, commission_percentage, country, user_id } = await req.json();
+    const { agency_name, email, commission_percentage, country, user_id, phone, website, representative_name } = await req.json();
     logStep("Creating Connect account for agency", { agency_name, email, country, user_id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Create Stripe Connect Express account with country
-    // Some countries require card_payments capability along with transfers
-    const account = await stripe.accounts.create({
+    // Parse representative name into first and last name
+    let firstName = "";
+    let lastName = "";
+    if (representative_name) {
+      const nameParts = representative_name.trim().split(" ");
+      firstName = nameParts[0] || "";
+      lastName = nameParts.slice(1).join(" ") || "";
+    }
+
+    // Create Stripe Connect Express account with pre-filled company data
+    const accountParams: any = {
       type: "express",
-      country: country || "US", // Default to US if not provided
+      country: country || "US",
       email: email,
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true },
       },
       business_type: "company",
+      business_profile: {
+        name: agency_name,
+        url: website || undefined,
+      },
+      company: {
+        name: agency_name,
+        phone: phone || undefined,
+      },
       metadata: {
         agency_name: agency_name,
         user_id: user_id || "",
       },
-    });
+    };
+
+    const account = await stripe.accounts.create(accountParams);
 
     logStep("Stripe account created", { accountId: account.id });
 
