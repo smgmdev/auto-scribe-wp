@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, TrendingUp, ExternalLink, Plus, FileText, Loader2 } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -33,6 +33,10 @@ const stats = [{
   icon: Globe,
   key: 'sites'
 }, {
+  label: 'Global Library',
+  icon: Library,
+  key: 'globalLibrary'
+}, {
   label: 'Published Articles',
   icon: FileText,
   key: 'published'
@@ -40,10 +44,6 @@ const stats = [{
   label: 'Draft Articles',
   icon: Newspaper,
   key: 'drafts'
-}, {
-  label: 'This Week',
-  icon: TrendingUp,
-  key: 'weekly'
 }];
 
 export function DashboardView() {
@@ -60,8 +60,10 @@ export function DashboardView() {
   } = useArticles();
   const { sites, loading: sitesLoading } = useSites();
   const [isAgency, setIsAgency] = useState(false);
+  const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
+  const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
 
-  const isDataLoading = articlesLoading || sitesLoading;
+  const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
 
   useEffect(() => {
     const fetchAgencyStatus = async () => {
@@ -80,6 +82,22 @@ export function DashboardView() {
     fetchAgencyStatus();
   }, [user, isAdmin]);
 
+  useEffect(() => {
+    const fetchGlobalLibraryCount = async () => {
+      setGlobalLibraryLoading(true);
+      const { count, error } = await supabase
+        .from('media_sites')
+        .select('*', { count: 'exact', head: true });
+      
+      if (!error && count !== null) {
+        setGlobalLibraryCount(count);
+      }
+      setGlobalLibraryLoading(false);
+    };
+
+    fetchGlobalLibraryCount();
+  }, []);
+
   const getSiteName = (siteId: string | undefined): string | null => {
     if (!siteId) return null;
     const site = sites.find(s => s.id === siteId);
@@ -89,14 +107,12 @@ export function DashboardView() {
     switch (key) {
       case 'sites':
         return sites.filter(s => s.connected).length;
+      case 'globalLibrary':
+        return globalLibraryCount;
       case 'published':
         return articles.filter(a => a.status === 'published').length;
       case 'drafts':
         return articles.filter(a => a.status === 'draft').length;
-      case 'weekly':
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return articles.filter(a => new Date(a.createdAt) > weekAgo).length;
       default:
         return 0;
     }
