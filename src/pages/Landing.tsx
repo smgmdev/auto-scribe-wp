@@ -747,7 +747,7 @@ const Landing = () => {
             >
               Close
             </Button>
-            {selectedSiteType === 'media' && (selectedSite as MediaSite).category !== 'Agencies/People' && (
+            {selectedSiteType === 'media' && selectedSite && (selectedSite as MediaSite).category !== 'Agencies/People' && (
               user ? (
                 <Button 
                   className="bg-black text-white hover:bg-gray-800 transition-colors"
