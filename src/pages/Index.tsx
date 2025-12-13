@@ -15,7 +15,6 @@ import { OrdersView } from '@/components/views/OrdersView';
 import { AdminOrdersView } from '@/components/views/AdminOrdersView';
 import { MyRequestsView } from '@/components/views/MyRequestsView';
 import { AdminEngagementsView } from '@/components/views/AdminEngagementsView';
-import { AdminApplicationsView } from '@/components/views/AdminApplicationsView';
 import { AgencyApplicationView } from '@/components/views/AgencyApplicationView';
 import { useAppStore } from '@/stores/appStore';
 
@@ -40,7 +39,6 @@ const views: Record<string, React.ComponentType> = {
   'admin-orders': AdminOrdersView,
   'my-requests': MyRequestsView,
   'admin-engagements': AdminEngagementsView,
-  'admin-applications': AdminApplicationsView,
   'agency-application': AgencyApplicationView,
 };
 
