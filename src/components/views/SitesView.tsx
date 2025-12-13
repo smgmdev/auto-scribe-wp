@@ -920,7 +920,7 @@ export function SitesView() {
 
           {isExpanded && (
             <div 
-              className="flex flex-col gap-3 mt-3 pt-3 border-t border-border animate-accordion-down"
+              className="flex flex-col gap-3 mt-3 pt-3 border-t border-border animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Tags section */}
