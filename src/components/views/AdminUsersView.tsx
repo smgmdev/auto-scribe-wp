@@ -524,6 +524,7 @@ export function AdminUsersView() {
         </Tabs>
       </div>
 
+      <div className="-mt-2">
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -777,6 +778,7 @@ export function AdminUsersView() {
           })}
         </div>
       )}
+      </div>
 
       {/* Credits Dialog */}
       <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
