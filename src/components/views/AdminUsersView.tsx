@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Users, Shield, Coins, Loader2, Plus, Minus, Trash2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Users, Shield, Coins, Loader2, Plus, Minus, Trash2, Search, Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,11 +37,13 @@ interface UserData {
   email: string;
   role: 'admin' | 'user';
   credits: number;
+  isAgency: boolean;
 }
 
 export function AdminUsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [creditDialogOpen, setCreditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -51,6 +53,15 @@ export function AdminUsersView() {
   const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
+
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase();
+    return users.filter(user => 
+      user.email.toLowerCase().includes(query)
+    );
+  }, [users, searchQuery]);
 
   useEffect(() => {
     fetchUsers();
@@ -84,15 +95,22 @@ export function AdminUsersView() {
       .from('user_credits')
       .select('user_id, credits');
 
+    // Fetch agency status
+    const { data: agencies } = await supabase
+      .from('agency_payouts')
+      .select('user_id, onboarding_complete');
+
     const usersData = (profiles || []).map((profile) => {
       const userRole = roles?.find((r) => r.user_id === profile.id);
       const userCredits = credits?.find((c) => c.user_id === profile.id);
+      const userAgency = agencies?.find((a) => a.user_id === profile.id);
 
       return {
         id: profile.id,
         email: profile.email || 'Unknown',
         role: (userRole?.role as 'admin' | 'user') || 'user',
         credits: userCredits?.credits || 0,
+        isAgency: userAgency?.onboarding_complete === true,
       };
     });
 
@@ -240,44 +258,73 @@ export function AdminUsersView() {
         </p>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search users by email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : users.length === 0 ? (
+      ) : filteredUsers.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Users className="h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-xl font-semibold">No users yet</h3>
+            <h3 className="mt-4 text-xl font-semibold">
+              {searchQuery ? 'No users found' : 'No users yet'}
+            </h3>
             <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-              Users will appear here once they sign up
+              {searchQuery 
+                ? 'Try a different search term' 
+                : 'Users will appear here once they sign up'}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <Card key={user.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                       <Users className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <div>
-                      <p className="font-medium">{user.email}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{user.email}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          variant="outline"
-                          className={user.role === 'admin' 
-                            ? 'bg-primary/10 text-primary border-primary/30'
-                            : ''
-                          }
-                        >
-                          <Shield className="h-3 w-3 mr-1" />
-                          {user.role}
-                        </Badge>
-                        <Badge variant="secondary">
+                        {user.role === 'admin' ? (
+                          <Badge 
+                            variant="outline"
+                            className="bg-primary/10 text-primary border-primary/30 min-w-[70px] justify-center"
+                          >
+                            <Shield className="h-3 w-3 mr-1" />
+                            Admin
+                          </Badge>
+                        ) : user.isAgency ? (
+                          <Badge 
+                            className="bg-black text-white hover:bg-black min-w-[70px] justify-center"
+                          >
+                            <Building2 className="h-3 w-3 mr-1" />
+                            Agency
+                          </Badge>
+                        ) : (
+                          <Badge 
+                            variant="outline"
+                            className="min-w-[70px] justify-center"
+                          >
+                            <Shield className="h-3 w-3 mr-1" />
+                            User
+                          </Badge>
+                        )}
+                        <Badge variant="secondary" className="min-w-[90px] justify-center">
                           <Coins className="h-3 w-3 mr-1" />
                           {user.credits} credits
                         </Badge>
@@ -285,7 +332,7 @@ export function AdminUsersView() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <Select
                       value={user.role}
                       onValueChange={(value: 'admin' | 'user') => handleRoleChange(user.id, value)}
