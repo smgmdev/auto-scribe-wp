@@ -4,12 +4,56 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Loader2, Upload, Building2, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
+
+const COUNTRIES = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
+  "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan",
+  "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
+  "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
+  "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt",
+  "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon",
+  "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+  "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel",
+  "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos",
+  "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi",
+  "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova",
+  "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands",
+  "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau",
+  "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania",
+  "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal",
+  "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea",
+  "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan",
+  "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+  "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela",
+  "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
+const MEDIA_NICHES = [
+  "Mainstream",
+  "Crypto",
+  "Finance",
+  "Tech",
+  "Global",
+  "Politics",
+  "Foreign",
+  "WP Media Blog Owner",
+  "Other"
+];
 
 interface AgencyApplication {
   id: string;
@@ -36,6 +80,8 @@ export function AgencyApplicationForm() {
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [showRejectionReason, setShowRejectionReason] = useState(false);
+  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
+  const [otherNiche, setOtherNiche] = useState('');
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -43,7 +89,8 @@ export function AgencyApplicationForm() {
     whatsapp_phone: '',
     agency_name: '',
     country: '',
-    agency_website: ''
+    agency_website: '',
+    media_channels: ''
   });
 
   useEffect(() => {
@@ -122,7 +169,7 @@ export function AgencyApplicationForm() {
     e.preventDefault();
     if (!user || !documentUrl) return;
 
-    const { full_name, email, whatsapp_phone, agency_name, country, agency_website } = formData;
+    const { full_name, email, whatsapp_phone, agency_name, country, agency_website, media_channels } = formData;
 
     if (!full_name || !email || !whatsapp_phone || !agency_name || !country || !agency_website) {
       toast({
@@ -133,7 +180,37 @@ export function AgencyApplicationForm() {
       return;
     }
 
+    if (selectedNiches.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing fields',
+        description: 'Please select at least one media niche'
+      });
+      return;
+    }
+
+    if (selectedNiches.includes('Other') && !otherNiche.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing fields',
+        description: 'Please specify your other niche'
+      });
+      return;
+    }
+
+    if (!media_channels.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing fields',
+        description: 'Please list your media channels'
+      });
+      return;
+    }
+
     setSubmitting(true);
+
+    // Prepare niches array with Other value if specified
+    const niches = selectedNiches.map(n => n === 'Other' && otherNiche ? `Other: ${otherNiche}` : n);
 
     try {
       const { error } = await supabase.from('agency_applications').insert({
@@ -145,8 +222,10 @@ export function AgencyApplicationForm() {
         country,
         agency_website,
         incorporation_document_url: documentUrl,
+        media_niches: niches,
+        media_channels,
         status: 'pending'
-      });
+      } as any);
 
       if (error) throw error;
 
@@ -332,13 +411,22 @@ export function AgencyApplicationForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="country">Country *</Label>
-              <Input
-                id="country"
-                placeholder="United States"
+              <Select
                 value={formData.country}
-                onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
                 disabled={submitting}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your country" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px]">
+                  {COUNTRIES.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="agency_website">Agency Website *</Label>
@@ -351,6 +439,56 @@ export function AgencyApplicationForm() {
                 disabled={submitting}
               />
             </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>What is your media niche? *</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {MEDIA_NICHES.map((niche) => (
+                <div key={niche} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`niche-${niche}`}
+                    checked={selectedNiches.includes(niche)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedNiches(prev => [...prev, niche]);
+                      } else {
+                        setSelectedNiches(prev => prev.filter(n => n !== niche));
+                        if (niche === 'Other') setOtherNiche('');
+                      }
+                    }}
+                    disabled={submitting}
+                  />
+                  <label
+                    htmlFor={`niche-${niche}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {niche}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {selectedNiches.includes('Other') && (
+              <Input
+                placeholder="Please specify your niche"
+                value={otherNiche}
+                onChange={(e) => setOtherNiche(e.target.value)}
+                disabled={submitting}
+                className="mt-2"
+              />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="media_channels">What 10 media channels would you list at the start? *</Label>
+            <Textarea
+              id="media_channels"
+              placeholder="List the media channels you would offer (e.g., Forbes, Bloomberg, TechCrunch...)"
+              value={formData.media_channels}
+              onChange={(e) => setFormData(prev => ({ ...prev, media_channels: e.target.value }))}
+              disabled={submitting}
+              rows={4}
+            />
           </div>
 
           <div className="space-y-2">
