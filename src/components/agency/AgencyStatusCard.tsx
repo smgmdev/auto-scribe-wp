@@ -143,14 +143,8 @@ export function AgencyStatusCard({
         <Button
           size="sm"
           className="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-black"
-          onClick={handleContinueOnboarding}
-          disabled={loading}
+          onClick={onNavigateToApplication}
         >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <ExternalLink className="h-4 w-4 mr-2" />
-          )}
           Continue Verification
         </Button>
       </div>
