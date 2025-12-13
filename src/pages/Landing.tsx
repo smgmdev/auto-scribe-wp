@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, Heart } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, Heart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -394,8 +394,9 @@ const Landing = () => {
           {user ? (
             <Button 
               onClick={() => navigate('/dashboard')}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="bg-black text-white hover:bg-gray-800"
             >
+              <User className="h-4 w-4" />
               Account
             </Button>
           ) : (
