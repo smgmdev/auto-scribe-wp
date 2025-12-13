@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -236,6 +236,14 @@ export function DashboardView() {
             <Button variant="accent" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
               <Library className="mr-2 h-4 w-4" />
               Global Library
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('orders')}>
+              <Package className="mr-2 h-4 w-4" />
+              My Orders
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('my-requests')}>
+              <MessageSquare className="mr-2 h-4 w-4" />
+              My Engagements
             </Button>
           </CardContent>
         </Card>
