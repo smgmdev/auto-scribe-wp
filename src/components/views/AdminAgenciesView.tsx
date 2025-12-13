@@ -47,6 +47,7 @@ export function AdminAgenciesView() {
   const [processing, setProcessing] = useState(false);
   const [sendingInvite, setSendingInvite] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [cleaningUp, setCleaningUp] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
 
   useEffect(() => {
@@ -194,6 +195,33 @@ export function AdminAgenciesView() {
     }
   };
 
+  const handleCleanupStripeAccounts = async () => {
+    if (!confirm('Are you sure you want to delete ALL Stripe Connect accounts? This cannot be undone.')) return;
+
+    setCleaningUp(true);
+    try {
+      const response = await supabase.functions.invoke('cleanup-connect-accounts');
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      toast({
+        title: 'Cleanup complete',
+        description: `Deleted ${response.data?.results?.filter((r: any) => r.deleted).length || 0} Stripe accounts.`,
+        className: 'bg-green-600 text-white border-green-600'
+      });
+
+      // Also clean up local agency_payouts table
+      await supabase.from('agency_payouts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setCleaningUp(false);
+    }
+  };
+
   const getDocumentUrl = (path: string) => {
     const { data } = supabase.storage.from('agency-documents').getPublicUrl(path);
     return data.publicUrl;
@@ -215,9 +243,20 @@ export function AdminAgenciesView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">Agencies</h1>
-        <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Agencies</h1>
+          <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
+        </div>
+        <Button 
+          variant="destructive" 
+          onClick={handleCleanupStripeAccounts}
+          disabled={cleaningUp}
+        >
+          {cleaningUp && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          <Trash2 className="h-4 w-4 mr-2" />
+          Cleanup All Stripe Accounts
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
