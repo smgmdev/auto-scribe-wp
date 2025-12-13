@@ -263,7 +263,7 @@ export function AgencyStatusCard({
             <p className="text-xs text-sidebar-foreground/60 mt-1">Your application was not approved.</p>
             <Button
               size="sm"
-              className="mt-3 bg-red-500/20 hover:bg-red-500/20 text-white border-0"
+              className="mt-3 bg-red-500/20 hover:bg-red-500/30 text-white border border-red-500/50"
               onClick={() => {
                 setDismissedRejection(true);
                 onNavigateToApplication();
