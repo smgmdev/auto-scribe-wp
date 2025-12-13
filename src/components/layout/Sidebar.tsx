@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase, ChevronDown, Zap, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase, ChevronDown, Zap, ShoppingBag, Loader2 } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -9,6 +9,7 @@ import { CreditDisplay } from '@/components/credits/CreditDisplay';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const getNavigation = (isAdmin: boolean) => {
   const base = [{
@@ -112,6 +113,8 @@ export function Sidebar({
   };
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
+  const [hasStripeAccount, setHasStripeAccount] = useState(false);
+  const [loadingOnboardingLink, setLoadingOnboardingLink] = useState(false);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
@@ -130,20 +133,58 @@ export function Sidebar({
         setApplicationStatus(appData.status);
       }
 
-      // Check if user has completed agency onboarding
+      // Check if user has agency payout record and onboarding status
       const { data: agencyData } = await supabase
         .from('agency_payouts')
-        .select('onboarding_complete')
+        .select('onboarding_complete, stripe_account_id')
         .eq('user_id', user.id)
         .maybeSingle();
       
-      if (agencyData?.onboarding_complete) {
-        setIsAgencyOnboarded(true);
+      if (agencyData) {
+        setIsAgencyOnboarded(agencyData.onboarding_complete === true);
+        setHasStripeAccount(!!agencyData.stripe_account_id);
       }
     };
 
     fetchApplicationStatus();
   }, [user, isAdmin]);
+
+  const handleContinueOnboarding = async () => {
+    setLoadingOnboardingLink(true);
+    try {
+      const response = await supabase.functions.invoke('get-agency-onboarding-link');
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+      
+      if (response.data?.already_complete) {
+        setIsAgencyOnboarded(true);
+        toast({
+          title: 'Verification Complete',
+          description: 'Your agency account is fully verified!',
+          className: 'bg-green-600 text-white border-green-600'
+        });
+        return;
+      }
+      
+      if (response.data?.onboarding_url) {
+        window.open(response.data.onboarding_url, '_blank');
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message
+      });
+    } finally {
+      setLoadingOnboardingLink(false);
+    }
+  };
 
   const handleNavClick = (viewId: string) => {
     setCurrentView(viewId as typeof currentView);
@@ -269,8 +310,25 @@ export function Sidebar({
 
           {/* Account & Sign Out */}
           <div className="border-t border-sidebar-border p-4 space-y-1">
-            {/* Upgrade to Agency - Only for non-admin users who haven't completed agency onboarding */}
-            {!isAdmin && !isAgencyOnboarded && (
+            {/* Complete Verification - For users with pending Stripe onboarding */}
+            {!isAdmin && hasStripeAccount && !isAgencyOnboarded && (
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent border border-yellow-500/50 bg-yellow-500/10"
+                onClick={handleContinueOnboarding}
+                disabled={loadingOnboardingLink}
+              >
+                {loadingOnboardingLink ? (
+                  <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-yellow-500" />
+                ) : (
+                  <Building2 className="h-5 w-5 flex-shrink-0 text-yellow-500" />
+                )}
+                <span className="truncate">Complete Verification</span>
+                <Badge className="ml-auto bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">Action Required</Badge>
+              </Button>
+            )}
+            {/* Upgrade to Agency - Only for non-admin users who haven't started agency process */}
+            {!isAdmin && !isAgencyOnboarded && !hasStripeAccount && (
               <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent border border-[#3872e0]/50", currentView === 'agency-application' && "bg-sidebar-accent text-[#3872e0] font-medium border-[#3872e0]")} onClick={() => handleNavClick('agency-application')}>
                 <Briefcase className={cn("h-5 w-5 flex-shrink-0 text-[#3872e0]", currentView === 'agency-application' && "text-[#3872e0]")} />
                 <span className="truncate">Upgrade to Agency</span>
