@@ -695,7 +695,10 @@ export function AdminAgenciesView() {
          <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2 [&>button]:hidden">
           <DialogHeader className="px-2 pb-1">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-sm">Agency Website</DialogTitle>
+              <div className="flex items-center gap-2">
+                {websiteLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                <DialogTitle className="text-sm">Agency Website</DialogTitle>
+              </div>
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => window.open(websiteUrl!, '_blank')}
