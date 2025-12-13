@@ -257,26 +257,39 @@ export function AdminAgenciesView() {
     }
   };
 
+  const [deleting, setDeleting] = useState<string | null>(null);
+
   const handleDelete = async (agency: AgencyPayout) => {
-    if (!confirm(`Are you sure you want to delete "${agency.agency_name}"? This cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete "${agency.agency_name}"? This will also delete the Stripe Connect account and cannot be undone.`)) return;
 
-    const { error } = await supabase
-      .from('agency_payouts')
-      .delete()
-      .eq('id', agency.id);
+    setDeleting(agency.id);
 
-    if (error) {
+    try {
+      const response = await supabase.functions.invoke('delete-connect-account', {
+        body: { agency_payout_id: agency.id }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
+      toast({
+        title: 'Agency deleted',
+        description: response.data?.message || `${agency.agency_name} has been deleted.`
+      });
+      fetchAgencies();
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error deleting agency',
         description: error.message
       });
-    } else {
-      toast({
-        title: 'Agency deleted',
-        description: `${agency.agency_name} has been deleted.`
-      });
-      fetchAgencies();
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -380,8 +393,13 @@ export function AdminAgenciesView() {
                       size="icon"
                       className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
                       onClick={() => handleDelete(agency)}
+                      disabled={deleting === agency.id}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {deleting === agency.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>

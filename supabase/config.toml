@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.resend-agency-invite]
 verify_jwt = true
+
+[functions.delete-connect-account]
+verify_jwt = true
