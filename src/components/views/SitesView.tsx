@@ -1274,17 +1274,17 @@ export function SitesView() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border border-border">
-              <DropdownMenuItem onClick={() => setIsWPDialogOpen(true)}>
+              <DropdownMenuItem onClick={() => setIsWPDialogOpen(true)} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
                 WordPress Site
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsMediaDialogOpen(true)}>
+              <DropdownMenuItem onClick={() => setIsMediaDialogOpen(true)} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
                 Media Site
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
                 setActiveTab('custom');
                 setActiveMediaCategory('Agencies/People');
                 setIsAgencyDialogOpen(true);
-              }}>
+              }} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
                 Agency/People
               </DropdownMenuItem>
             </DropdownMenuContent>
