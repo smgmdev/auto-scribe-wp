@@ -11,43 +11,51 @@ const corsHeaders = {
 
 interface WelcomeEmailRequest {
   email: string;
-  confirmationUrl?: string;
+  userId: string;
 }
 
-const handler = async (req: Request): Promise<Response> => {
+serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, confirmationUrl }: WelcomeEmailRequest = await req.json();
+    const { email, userId }: WelcomeEmailRequest = await req.json();
 
-    if (!email) {
-      throw new Error("Email is required");
+    if (!email || !userId) {
+      throw new Error("Email and userId are required");
     }
 
     console.log(`Sending welcome email to: ${email}`);
 
-    // Generate a magic link for email verification using Supabase Admin
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Generate a magic link for email verification
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email: email,
-      options: {
-        redirectTo: confirmationUrl || `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}/dashboard`
-      }
-    });
+    // Generate verification token
+    const verificationToken = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // Token expires in 24 hours
 
-    let verificationUrl = confirmationUrl || '';
-    if (linkData?.properties?.action_link) {
-      verificationUrl = linkData.properties.action_link;
+    // Store token in profile
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        verification_token: verificationToken,
+        verification_token_expires_at: expiresAt.toISOString(),
+        email_verified: false,
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Failed to store verification token:", updateError);
+      throw updateError;
     }
 
-    console.log('Generated verification link for email confirmation');
+    // Build verification URL
+    const verificationUrl = `${supabaseUrl}/functions/v1/verify-email?token=${verificationToken}&redirect=/auth`;
+
+    console.log("Generated verification URL");
 
     const emailResponse = await resend.emails.send({
       from: "Arcana Mace <noreply@arcanamace.com>",
@@ -75,7 +83,6 @@ const handler = async (req: Request): Promise<Response> => {
                         Thank you for creating an account. Please verify your email address to get started.
                       </p>
                       
-                      ${verificationUrl ? `
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                         <tr>
                           <td align="center" style="padding: 20px 0;">
@@ -85,11 +92,10 @@ const handler = async (req: Request): Promise<Response> => {
                           </td>
                         </tr>
                       </table>
-                      <p style="color: #666666; font-size: 12px; line-height: 20px; margin: 10px 0 0 0; text-align: center;">
-                        Or copy and paste this link in your browser:<br/>
-                        <a href="${verificationUrl}" style="color: #3872e0; word-break: break-all;">${verificationUrl}</a>
+                      
+                      <p style="color: #666666; font-size: 12px; line-height: 20px; margin: 20px 0 0 0; text-align: center;">
+                        This link will expire in 24 hours.
                       </p>
-                      ` : ''}
                       
                       <div style="border-top: 1px solid #333333; margin: 30px 0; padding-top: 30px;">
                         <h3 style="color: #ffffff; font-size: 18px; margin: 0 0 15px 0;">
@@ -137,6 +143,4 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   }
-};
-
-serve(handler);
+});

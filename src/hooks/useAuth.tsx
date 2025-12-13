@@ -13,7 +13,7 @@ interface AuthContextType {
   isAdmin: boolean;
   pinRequired: boolean;
   pinVerified: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
     
-    return { error: error as Error | null };
+    return { error: error as Error | null, data: data ? { user: data.user } : null };
   };
 
   const signIn = async (email: string, password: string) => {
