@@ -281,6 +281,18 @@ export function AgencyStatusCard({
             </div>
             <p className="text-xs text-sidebar-foreground/60 mt-1">{config.description}</p>
             
+            {applicationStatus === 'pending' && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-default"
+                disabled
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                Pending Review
+              </Button>
+            )}
+            
             {applicationStatus === 'rejected' && (
               <Button
                 size="sm"
@@ -297,25 +309,30 @@ export function AgencyStatusCard({
     );
   }
 
-  // No application yet
-  return (
-    <div className="rounded-lg border border-[#3872e0]/30 bg-[#3872e0]/10 p-3">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3872e0]/20">
-          <Building2 className="h-5 w-5 text-[#3872e0]" />
+  // No application yet - show Apply Now button
+  // OR pending application - show Pending Review button
+  if (!applicationStatus) {
+    return (
+      <div className="rounded-lg border border-[#3872e0]/30 bg-[#3872e0]/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3872e0]/20">
+            <Building2 className="h-5 w-5 text-[#3872e0]" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium text-[#3872e0]">Become an Agency</span>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
+          </div>
         </div>
-        <div className="flex-1">
-          <span className="font-medium text-[#3872e0]">Become an Agency</span>
-          <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
-        </div>
+        <Button
+          size="sm"
+          className="w-full mt-3 bg-[#3872e0] hover:bg-[#2b59b4]"
+          onClick={onNavigateToApplication}
+        >
+          Apply Now
+        </Button>
       </div>
-      <Button
-        size="sm"
-        className="w-full mt-3 bg-[#3872e0] hover:bg-[#2b59b4]"
-        onClick={onNavigateToApplication}
-      >
-        Apply Now
-      </Button>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }
