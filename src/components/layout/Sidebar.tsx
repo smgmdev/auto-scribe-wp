@@ -26,7 +26,11 @@ const getNavigation = (isAdmin: boolean) => {
     submenu: [
       { id: 'headlines', label: 'Sources', icon: Newspaper },
       { id: 'compose', label: 'New Article', icon: Plus },
-      { id: 'articles', label: 'Articles', icon: FileText }
+      { id: 'articles', label: 'Articles', icon: FileText },
+      ...(isAdmin ? [
+        { id: 'settings', label: 'Global Settings', icon: Settings },
+        { id: 'admin-credits', label: 'Credit Management', icon: CreditCard }
+      ] : [])
     ]
   }, {
     id: 'b2b-media-buying',
@@ -50,14 +54,6 @@ const getNavigation = (isAdmin: boolean) => {
       id: 'admin-agencies',
       label: 'Agencies',
       icon: Building2
-    }, {
-      id: 'settings',
-      label: 'Global Settings',
-      icon: Settings
-    }, {
-      id: 'admin-credits',
-      label: 'Credit Management',
-      icon: CreditCard
     }, {
       id: 'admin-users',
       label: 'Users',
@@ -92,7 +88,7 @@ export function Sidebar({
 
   // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
-    const instantPublishingIds = ['headlines', 'compose', 'articles'];
+    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
     const b2bMediaBuyingIds = ['orders', 'my-requests'];
     
     if (instantPublishingIds.includes(currentView)) {
