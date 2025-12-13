@@ -82,10 +82,8 @@ export function AgencyStatusCard({
     // Loading state
     if (statusLoading && !stripeStatus) {
       return (
-        <div className="rounded-lg border border-border bg-card p-3">
-          <div className="flex items-center justify-center py-2">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-sidebar-foreground/50" />
         </div>
       );
     }
