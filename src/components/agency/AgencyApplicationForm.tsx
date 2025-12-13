@@ -66,6 +66,10 @@ export function AgencyApplicationForm() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
+  // Track if user is filling a new application after rejection (persisted)
+  const [isFillingNewApplication, setIsFillingNewApplication] = useState(() => {
+    return localStorage.getItem('agency_new_application_mode') === 'true';
+  });
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -299,6 +303,10 @@ export function AgencyApplicationForm() {
         className: 'bg-green-600 text-white border-green-600'
       });
 
+      // Clear the new application mode flag
+      localStorage.removeItem('agency_new_application_mode');
+      setIsFillingNewApplication(false);
+
       // Update the store so sidebar reflects the new status immediately
       setUserApplicationStatus('pending');
       checkExistingApplication();
@@ -336,8 +344,8 @@ export function AgencyApplicationForm() {
     );
   }
 
-  // Show existing application status
-  if (existingApplication) {
+  // Show existing application status (but not if user clicked "Submit New Application")
+  if (existingApplication && !isFillingNewApplication) {
     const isRejected = existingApplication.status === 'rejected';
     
     return (
@@ -402,7 +410,8 @@ export function AgencyApplicationForm() {
                     variant="outline" 
                     className="w-full hover:bg-black hover:text-white"
                     onClick={() => {
-                      setExistingApplication(null);
+                      localStorage.setItem('agency_new_application_mode', 'true');
+                      setIsFillingNewApplication(true);
                       setShowRejectionReason(false);
                     }}
                   >
