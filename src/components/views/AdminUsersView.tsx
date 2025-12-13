@@ -633,9 +633,15 @@ export function AdminUsersView() {
                       >
                         <TabsList className="w-full grid grid-cols-4 mb-4">
                           <TabsTrigger value="logs" className="text-xs">Account Logs</TabsTrigger>
-                          <TabsTrigger value="credits" className="text-xs">Credit History</TabsTrigger>
-                          <TabsTrigger value="orders" className="text-xs">Orders</TabsTrigger>
-                          <TabsTrigger value="engagements" className="text-xs">Engagements</TabsTrigger>
+                          <TabsTrigger value="credits" className="text-xs">
+                            Credit History ({(userCreditTransactions[user.id] || []).length})
+                          </TabsTrigger>
+                          <TabsTrigger value="orders" className="text-xs">
+                            Orders ({(userOrders[user.id] || []).length})
+                          </TabsTrigger>
+                          <TabsTrigger value="engagements" className="text-xs">
+                            Engagements ({(userEngagements[user.id] || []).length})
+                          </TabsTrigger>
                         </TabsList>
                         
                         {loadingUserData[user.id] ? (
