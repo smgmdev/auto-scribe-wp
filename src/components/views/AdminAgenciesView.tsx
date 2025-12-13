@@ -721,24 +721,22 @@ export function AdminAgenciesView() {
             </div>
           </DialogHeader>
           {websiteUrl && (
-            <div className="w-full relative">
+            <div className="w-full h-[85vh] relative">
               {websiteLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg z-10">
+                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg z-50">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Loading website...</p>
                   </div>
                 </div>
               )}
-              <div className="w-full h-[85vh] bg-muted rounded overflow-hidden">
-                <iframe
-                  src={websiteUrl}
-                  className="w-full h-full border-0"
-                  title="Website viewer"
-                  sandbox="allow-scripts allow-same-origin allow-popups"
-                  onLoad={() => setWebsiteLoading(false)}
-                />
-              </div>
+              <iframe
+                src={websiteUrl}
+                className="w-full h-full border-0 rounded overflow-hidden"
+                title="Website viewer"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                onLoad={() => setWebsiteLoading(false)}
+              />
             </div>
           )}
         </DialogContent>
