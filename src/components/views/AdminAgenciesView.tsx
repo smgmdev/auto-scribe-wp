@@ -692,8 +692,8 @@ export function AdminAgenciesView() {
 
       {/* Website Viewer Dialog */}
       <Dialog open={websiteDialogOpen} onOpenChange={(open) => { setWebsiteDialogOpen(open); if (!open) setWebsiteLoading(true); }}>
-         <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2 [&>button]:hidden">
-          <DialogHeader className="px-2 pb-1">
+         <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2 gap-1 [&>button]:hidden">
+          <DialogHeader className="px-2 pb-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
