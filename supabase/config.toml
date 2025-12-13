@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.delete-connect-account]
 verify_jwt = true
+
+[functions.delete-stripe-account]
+verify_jwt = true
