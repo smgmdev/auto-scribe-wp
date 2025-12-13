@@ -7,6 +7,7 @@ import { useSites } from '@/hooks/useSites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
 import { supabase } from '@/integrations/supabase/client';
 import { isYesterday, format } from 'date-fns';
@@ -31,19 +32,23 @@ function formatRelativeTime(dateInput: string | Date): string {
 const stats = [{
   label: 'Local Library',
   icon: Library,
-  key: 'sites'
+  key: 'sites',
+  tooltip: 'Local Library refers to media sites that are available for Instant Publishing.'
 }, {
   label: 'Global Library',
   icon: Library,
-  key: 'globalLibrary'
+  key: 'globalLibrary',
+  tooltip: 'Global Library refers to media sites that are available through agencies worldwide.'
 }, {
   label: 'Published Articles',
   icon: FileText,
-  key: 'published'
+  key: 'published',
+  tooltip: null
 }, {
   label: 'Draft Articles',
   icon: Newspaper,
-  key: 'drafts'
+  key: 'drafts',
+  tooltip: null
 }];
 
 export function DashboardView() {
@@ -140,9 +145,22 @@ export function DashboardView() {
           animationDelay: `${index * 100}ms`
         }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
+                {stat.tooltip ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CardTitle className="text-sm font-medium text-muted-foreground cursor-help">
+                        {stat.label}
+                      </CardTitle>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>{stat.tooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.label}
+                  </CardTitle>
+                )}
                 <Icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="pt-0">
