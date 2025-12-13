@@ -26,6 +26,10 @@ interface AppState {
   unreadAgencyApplicationsCount: number;
   setUnreadAgencyApplicationsCount: (count: number) => void;
   decrementUnreadAgencyApplicationsCount: () => void;
+  
+  // User agency application status
+  userApplicationStatus: string | null;
+  setUserApplicationStatus: (status: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -55,4 +59,8 @@ export const useAppStore = create<AppState>()((set) => ({
   decrementUnreadAgencyApplicationsCount: () => set((state) => ({ 
     unreadAgencyApplicationsCount: Math.max(0, state.unreadAgencyApplicationsCount - 1) 
   })),
+  
+  // User agency application status
+  userApplicationStatus: null,
+  setUserApplicationStatus: (status) => set({ userApplicationStatus: status }),
 }));

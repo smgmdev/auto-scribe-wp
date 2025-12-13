@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useAppStore } from '@/stores/appStore';
 
 interface AgencyApplication {
   id: string;
@@ -27,6 +28,7 @@ interface AgencyApplication {
 
 export function AgencyApplicationForm() {
   const { user } = useAuth();
+  const { setUserApplicationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
@@ -154,6 +156,8 @@ export function AgencyApplicationForm() {
         className: 'bg-green-600 text-white border-green-600'
       });
 
+      // Update the store so sidebar reflects the new status immediately
+      setUserApplicationStatus('pending');
       checkExistingApplication();
     } catch (error: any) {
       toast({
