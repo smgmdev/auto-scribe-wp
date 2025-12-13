@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import { Building2, CheckCircle, Clock, AlertTriangle, FileWarning, Loader2, ChevronDown, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, CheckCircle, Clock, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 interface AgencyStatusCardProps {
   applicationStatus: string | null;
@@ -29,74 +27,31 @@ export function AgencyStatusCard({
   onNavigateToApplication,
   onStatusUpdate
 }: AgencyStatusCardProps) {
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
   const [dismissedRejection, setDismissedRejection] = useState(false);
 
+  // Fetch Stripe status on mount when user has Stripe account
+  useEffect(() => {
+    if (hasStripeAccount && !isAgencyOnboarded) {
+      fetchStripeStatus();
+    }
+  }, [hasStripeAccount, isAgencyOnboarded]);
+
   const fetchStripeStatus = async () => {
-    if (!hasStripeAccount || stripeStatus) return;
-    
     setStatusLoading(true);
     try {
       const response = await supabase.functions.invoke('get-agency-onboarding-link');
       if (response.data?.status) {
         setStripeStatus(response.data.status);
       }
+      if (response.data?.already_complete) {
+        onStatusUpdate(true);
+      }
     } catch (error) {
       console.error('Failed to fetch Stripe status:', error);
     } finally {
       setStatusLoading(false);
-    }
-  };
-
-  const handleExpand = () => {
-    const newExpanded = !expanded;
-    setExpanded(newExpanded);
-    if (newExpanded && hasStripeAccount && !isAgencyOnboarded) {
-      fetchStripeStatus();
-    }
-  };
-
-  const handleContinueOnboarding = async () => {
-    setLoading(true);
-    try {
-      const response = await supabase.functions.invoke('get-agency-onboarding-link');
-      
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-      
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-      
-      if (response.data?.already_complete) {
-        onStatusUpdate(true);
-        toast({
-          title: 'Verification Complete',
-          description: 'Your agency account is fully verified!',
-          className: 'bg-green-600 text-white border-green-600'
-        });
-        return;
-      }
-      
-      if (response.data?.status) {
-        setStripeStatus(response.data.status);
-      }
-      
-      if (response.data?.onboarding_url) {
-        window.open(response.data.onboarding_url, '_blank');
-      }
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -120,8 +75,52 @@ export function AgencyStatusCard({
     );
   }
 
-  // Has Stripe account but needs to complete verification
+  // Has Stripe account - check if all submitted or still needs more
   if (hasStripeAccount) {
+    // Loading state
+    if (statusLoading && !stripeStatus) {
+      return (
+        <div className="rounded-lg border border-border bg-card p-3">
+          <div className="flex items-center justify-center py-2">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      );
+    }
+
+    const allSubmitted = stripeStatus && stripeStatus.missingRequirements.length === 0;
+    const pendingCount = stripeStatus?.pendingVerification.length || 0;
+
+    // All submitted - show blue "Pending Stripe Review" box
+    if (allSubmitted) {
+      return (
+        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
+              <Clock className="h-5 w-5 text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <span className="font-medium text-blue-400">Pending Stripe Review</span>
+              <p className="text-xs text-sidebar-foreground/60 mt-0.5">
+                {pendingCount > 0 
+                  ? `${pendingCount} item${pendingCount > 1 ? 's' : ''} under review`
+                  : 'Stripe is reviewing your account'}
+              </p>
+            </div>
+          </div>
+          
+          <Button
+            size="sm"
+            className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white"
+            onClick={onNavigateToApplication}
+          >
+            See Details
+          </Button>
+        </div>
+      );
+    }
+
+    // Still has missing requirements - show yellow box
     return (
       <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
         <div className="flex items-center gap-3">
@@ -134,7 +133,7 @@ export function AgencyStatusCard({
           </div>
         </div>
         
-        {!statusLoading && stripeStatus && stripeStatus.missingRequirements.length > 0 && (
+        {stripeStatus && stripeStatus.missingRequirements.length > 0 && (
           <div className="mt-2 px-2 py-1.5 bg-yellow-500/10 rounded text-xs text-yellow-400">
             {stripeStatus.missingRequirements.length} item{stripeStatus.missingRequirements.length > 1 ? 's' : ''} remaining
           </div>
@@ -245,6 +244,4 @@ export function AgencyStatusCard({
       </Button>
     </div>
   );
-
-  return null;
 }
