@@ -172,10 +172,10 @@ export function AgencyApplicationView() {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-4xl font-bold text-foreground">
-          Apply for Agency Account
+          Why Upgrade to Agency?
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Submit your application to become a publishing agency
+          Use Arcana Mace as your personal global media channel merchant to provide media access to global companies and other agencies.
         </p>
       </div>
 
