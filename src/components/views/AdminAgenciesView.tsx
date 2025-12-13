@@ -725,7 +725,7 @@ export function AdminAgenciesView() {
                   onClick={() => setWebsiteDialogOpen(false)}
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-muted"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white"
                 >
                   <X className="h-4 w-4" />
                 </Button>
