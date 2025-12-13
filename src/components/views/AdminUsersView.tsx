@@ -32,7 +32,7 @@ interface UserData {
   lastSignInIp: string | null;
 }
 
-type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending';
+type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
 
 export function AdminUsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -60,9 +60,10 @@ export function AdminUsersView() {
   // Calculate counts for each tab
   const tabCounts = useMemo(() => ({
     all: users.length,
-    users_confirmed: users.filter(u => u.emailConfirmed && !u.isAgency).length,
+    users_confirmed: users.filter(u => u.emailConfirmed && !u.isAgency && !u.suspended).length,
     agencies: users.filter(u => u.isAgency).length,
-    users_pending: users.filter(u => !u.emailConfirmed && !u.isAgency).length,
+    users_pending: users.filter(u => !u.emailConfirmed && !u.isAgency && !u.suspended).length,
+    users_suspended: users.filter(u => u.suspended).length,
   }), [users]);
 
   const filteredUsers = useMemo(() => {
@@ -71,14 +72,17 @@ export function AdminUsersView() {
     // Apply tab filter first
     switch (activeTab) {
       case 'users_confirmed':
-        // Users with confirmed email (includes admins)
-        filtered = filtered.filter(u => u.emailConfirmed && !u.isAgency);
+        // Users with confirmed email (excludes agencies and suspended)
+        filtered = filtered.filter(u => u.emailConfirmed && !u.isAgency && !u.suspended);
         break;
       case 'agencies':
         filtered = filtered.filter(u => u.isAgency);
         break;
       case 'users_pending':
-        filtered = filtered.filter(u => !u.emailConfirmed && !u.isAgency);
+        filtered = filtered.filter(u => !u.emailConfirmed && !u.isAgency && !u.suspended);
+        break;
+      case 'users_suspended':
+        filtered = filtered.filter(u => u.suspended);
         break;
       default:
         // 'all' - no filter
@@ -384,21 +388,20 @@ export function AdminUsersView() {
         </div>
         
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
-          <TabsList className="w-full justify-start">
-            <TabsTrigger value="all">All</TabsTrigger>
+          <TabsList className="w-full justify-start flex-wrap h-auto gap-1">
+            <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
             <TabsTrigger value="users_confirmed" className="gap-1">
-              Users <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" />
+              Users <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" /> ({tabCounts.users_confirmed})
             </TabsTrigger>
-            <TabsTrigger value="agencies">Agencies</TabsTrigger>
+            <TabsTrigger value="agencies">Agencies ({tabCounts.agencies})</TabsTrigger>
             <TabsTrigger value="users_pending" className="gap-1">
-              Users <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              Users <Clock className="h-3.5 w-3.5 text-muted-foreground" /> ({tabCounts.users_pending})
+            </TabsTrigger>
+            <TabsTrigger value="users_suspended" className="gap-1">
+              Users <Ban className="h-3.5 w-3.5 text-muted-foreground" /> ({tabCounts.users_suspended})
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        
-        <p className="text-sm text-muted-foreground">
-          {tabCounts[activeTab]} Total
-        </p>
       </div>
 
       {loading ? (
