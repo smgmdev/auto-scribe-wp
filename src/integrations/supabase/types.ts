@@ -711,6 +711,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_email_verified: { Args: { check_email: string }; Returns: boolean }
       get_public_sites: {
         Args: never
         Returns: {
