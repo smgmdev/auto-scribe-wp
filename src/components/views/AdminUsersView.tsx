@@ -408,18 +408,16 @@ export function AdminUsersView() {
                 variant={creditAction === 'add' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setCreditAction('add')}
-                className="flex-1"
+                className={`flex-1 ${creditAction !== 'add' ? 'hover:bg-black hover:text-white' : ''}`}
               >
-                <Plus className="h-4 w-4 mr-1" />
                 Add
               </Button>
               <Button
                 variant={creditAction === 'remove' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setCreditAction('remove')}
-                className="flex-1"
+                className={`flex-1 ${creditAction !== 'remove' ? 'hover:bg-black hover:text-white' : ''}`}
               >
-                <Minus className="h-4 w-4 mr-1" />
                 Remove
               </Button>
             </div>
@@ -433,7 +431,7 @@ export function AdminUsersView() {
             />
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setCreditDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="hover:bg-black hover:text-white">
                 Cancel
               </Button>
               <Button onClick={handleCreditChange} disabled={saving || !creditAmount}>
