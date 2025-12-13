@@ -182,7 +182,8 @@ const Landing = () => {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(site => 
         site.name.toLowerCase().includes(query) ||
-        site.link.toLowerCase().includes(query)
+        site.link.toLowerCase().includes(query) ||
+        (site.agency && site.agency.toLowerCase().includes(query))
       );
     }
     
