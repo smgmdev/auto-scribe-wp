@@ -2085,7 +2085,7 @@ export function SitesView() {
         mediaSite={selectedForBrief}
         onSuccess={() => {
           setSelectedForBrief(null);
-          toast({ title: 'Brief submitted! View it in My Requests.' });
+          toast({ title: 'Brief submitted! View it in My Engagements.' });
         }}
         onBack={() => {
           if (selectedForBrief) {
