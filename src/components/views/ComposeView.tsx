@@ -810,7 +810,7 @@ export function ComposeView() {
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Select a media site">
                     {selectedSite && currentSite && <div className="flex items-center gap-2">
-                        <img src={getFaviconUrl(currentSite.url, 32)} alt="" className="h-4 w-4 rounded-sm" />
+                        <img src={currentSite.favicon || getFaviconUrl(currentSite.url, 32)} alt="" className="h-4 w-4 rounded-sm" />
                         <span>{currentSite.name}</span>
                         <span className="ml-auto flex items-center gap-1 text-muted-foreground">
                           <Coins className="h-3 w-3" />
@@ -834,7 +834,7 @@ export function ComposeView() {
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={getFaviconUrl(site.url, 32)} 
+                              src={site.favicon || getFaviconUrl(site.url, 32)} 
                               alt="" 
                               className="h-4 w-4 rounded-sm" 
                             />
