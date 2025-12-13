@@ -72,19 +72,31 @@ serve(async (req) => {
     const pastDue = requirements?.past_due || [];
     const pendingVerification = requirements?.pending_verification || [];
 
+    // Log raw requirements for debugging
+    logStep("Raw requirements", { 
+      currentlyDue,
+      eventuallyDue,
+      pastDue,
+      pendingVerification,
+      pendingCount: pendingVerification.length
+    });
+
     // Map requirement codes to human-readable labels
     const requirementLabels: Record<string, string> = {
       'business_profile.url': 'Business website URL',
       'business_profile.mcc': 'Business category',
+      'business_profile.product_description': 'Business description',
       'company.phone': 'Company phone number',
+      'company.tax_id': 'Company tax ID',
+      'company.vat_id': 'Company VAT ID',
       'company.address.line1': 'Business address',
       'company.address.city': 'Business city',
       'company.address.postal_code': 'Business postal code',
       'company.address.state': 'Business state/region',
       'external_account': 'Bank account details',
-      'individual.dob.day': 'Date of birth',
-      'individual.dob.month': 'Date of birth',
-      'individual.dob.year': 'Date of birth',
+      'individual.dob.day': 'Date of birth (day)',
+      'individual.dob.month': 'Date of birth (month)',
+      'individual.dob.year': 'Date of birth (year)',
       'individual.first_name': 'First name',
       'individual.last_name': 'Last name',
       'individual.address.line1': 'Personal address',
@@ -100,12 +112,12 @@ serve(async (req) => {
       'company.executives_provided': 'Executive information',
       'company.owners_provided': 'Ownership information',
       'tos_acceptance.date': 'Terms of service acceptance',
-      'tos_acceptance.ip': 'Terms of service acceptance',
+      'tos_acceptance.ip': 'Terms of service acceptance (IP)',
       'representative.first_name': 'Representative first name',
       'representative.last_name': 'Representative last name',
-      'representative.dob.day': 'Representative date of birth',
-      'representative.dob.month': 'Representative date of birth',
-      'representative.dob.year': 'Representative date of birth',
+      'representative.dob.day': 'Representative date of birth (day)',
+      'representative.dob.month': 'Representative date of birth (month)',
+      'representative.dob.year': 'Representative date of birth (year)',
       'representative.address.line1': 'Representative address',
       'representative.address.city': 'Representative city',
       'representative.address.postal_code': 'Representative postal code',
@@ -116,57 +128,36 @@ serve(async (req) => {
       'representative.verification.additional_document': 'Representative additional document',
     };
 
-    // Get unique human-readable requirements
-    const getMissingItems = (reqs: string[]) => {
-      const labels = new Set<string>();
-      for (const req of reqs) {
+    // Get human-readable requirements without deduplicating
+    const getRequirementLabels = (reqs: string[]) => {
+      return reqs.map(req => {
         // Try exact match first
         if (requirementLabels[req]) {
-          labels.add(requirementLabels[req]);
-        } else {
-          // Try partial match for nested requirements
-          const parts = req.split('.');
-          for (let i = parts.length; i > 0; i--) {
-            const key = parts.slice(0, i).join('.');
-            if (requirementLabels[key]) {
-              labels.add(requirementLabels[key]);
-              break;
-            }
-          }
-          // If no match, add a formatted version
-          if (labels.size === 0 || !Array.from(labels).some(l => req.includes(l.toLowerCase().replace(/ /g, '_')))) {
-            const formatted = req.split('.').pop()?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            if (formatted) labels.add(formatted);
+          return requirementLabels[req];
+        }
+        // Try partial match for nested requirements
+        const parts = req.split('.');
+        for (let i = parts.length; i > 0; i--) {
+          const key = parts.slice(0, i).join('.');
+          if (requirementLabels[key]) {
+            return requirementLabels[key];
           }
         }
-      }
-      return Array.from(labels);
+        // If no match, format the last part
+        const formatted = req.split('.').pop()?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        return formatted || req;
+      });
     };
 
-    const missingRequirements = getMissingItems([...new Set([...currentlyDue, ...pastDue])]);
-    const pendingItems = getMissingItems(pendingVerification);
-
-    if (agencyData.onboarding_complete) {
-      return new Response(JSON.stringify({ 
-        success: true,
-        already_complete: true,
-        message: "Onboarding already complete",
-        status: {
-          chargesEnabled: account.charges_enabled,
-          payoutsEnabled: account.payouts_enabled,
-          detailsSubmitted: account.details_submitted,
-          missingRequirements: [],
-          pendingVerification: []
-        }
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
+    const allMissingRaw = [...new Set([...currentlyDue, ...pastDue])];
+    const missingRequirements = getRequirementLabels(allMissingRaw);
+    const pendingItems = getRequirementLabels(pendingVerification);
 
     logStep("Agency found", { 
       agencyName: agencyData.agency_name, 
       stripeAccountId: agencyData.stripe_account_id,
+      missingRequirementsCount: missingRequirements.length,
+      pendingItemsCount: pendingItems.length,
       missingRequirements,
       pendingItems
     });
