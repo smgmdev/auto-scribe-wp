@@ -278,6 +278,20 @@ export function AgencyApplicationForm() {
 
       if (error) throw error;
 
+      // Send notification email to admin (fire and forget)
+      supabase.functions.invoke('notify-admin-application', {
+        body: {
+          agency_name,
+          full_name,
+          email,
+          country,
+          whatsapp_phone,
+          agency_website: `https://${agency_website}`,
+          media_niches: niches,
+          media_channels
+        }
+      }).catch(err => console.error('Failed to send admin notification:', err));
+
       toast({
         title: 'Application submitted!',
         description: 'We will review your application and get back to you.',
