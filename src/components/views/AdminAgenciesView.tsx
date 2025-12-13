@@ -387,11 +387,6 @@ export function AdminAgenciesView() {
                         </div>
 
                         <div className="flex items-center gap-6">
-                          <div className="flex items-center gap-2">
-                            <Percent className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm font-medium">{agency.commission_percentage}%</span>
-                          </div>
-
                           {getOnboardingStatus(agency)}
 
                           <div className="flex gap-1">
