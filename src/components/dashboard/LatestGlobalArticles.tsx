@@ -87,16 +87,16 @@ export function LatestGlobalArticles() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <span>{formatRelativeTime(article.created_at)}</span>
                     {siteInfo && (
                       <>
-                        <span>•</span>
                         {siteInfo.favicon && (
                           <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
                         )}
                         <span>{siteInfo.name}</span>
+                        <span>•</span>
                       </>
                     )}
+                    <span>{formatRelativeTime(article.created_at)}</span>
                   </div>
                 </div>
                 <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
@@ -106,16 +106,16 @@ export function LatestGlobalArticles() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <span>{formatRelativeTime(article.created_at)}</span>
                     {siteInfo && (
                       <>
-                        <span>•</span>
                         {siteInfo.favicon && (
                           <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
                         )}
                         <span>{siteInfo.name}</span>
+                        <span>•</span>
                       </>
                     )}
+                    <span>{formatRelativeTime(article.created_at)}</span>
                   </div>
                 </div>
               </div>
