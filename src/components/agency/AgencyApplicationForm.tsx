@@ -268,7 +268,7 @@ export function AgencyApplicationForm() {
         whatsapp_phone,
         agency_name,
         country,
-        agency_website,
+        agency_website: `https://${agency_website}`,
         incorporation_document_url: documentUrl,
         logo_url: logoUrl,
         media_niches: niches,
@@ -479,14 +479,20 @@ export function AgencyApplicationForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="agency_website">Agency Website *</Label>
-              <Input
-                id="agency_website"
-                type="url"
-                placeholder="https://youragency.com"
-                value={formData.agency_website}
-                onChange={(e) => setFormData(prev => ({ ...prev, agency_website: e.target.value }))}
-                disabled={submitting}
-              />
+              <div className="flex">
+                <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                  https://
+                </span>
+                <Input
+                  id="agency_website"
+                  type="text"
+                  placeholder="youragency.com"
+                  value={formData.agency_website}
+                  onChange={(e) => setFormData(prev => ({ ...prev, agency_website: e.target.value }))}
+                  disabled={submitting}
+                  className="rounded-l-none"
+                />
+              </div>
             </div>
           </div>
 
