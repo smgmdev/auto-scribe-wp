@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -473,14 +473,29 @@ export function AdminUsersView() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">Users</h1>
-        <p className="mt-2 text-muted-foreground">
-          Manage users and credits
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Users</h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage users and credits
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fetchUsers()}
+          disabled={loading}
+          className="bg-black text-white hover:bg-black/90 border-black"
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
