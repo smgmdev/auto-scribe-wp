@@ -30,8 +30,10 @@ interface UserData {
   createdAt: string | null;
   lastSignInAt: string | null;
   lastSignInIp: string | null;
+  lastSignInLocation: string | null;
   lastAttemptAt: string | null;
   lastAttemptIp: string | null;
+  lastAttemptLocation: string | null;
 }
 
 type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
@@ -151,8 +153,10 @@ export function AdminUsersView() {
     let authUsersMap: Record<string, { 
       lastSignInAt: string | null; 
       lastSignInIp: string | null; 
+      lastSignInLocation: string | null;
       lastAttemptAt: string | null;
       lastAttemptIp: string | null;
+      lastAttemptLocation: string | null;
       createdAt: string | null;
     }> = {};
     try {
@@ -162,8 +166,10 @@ export function AdminUsersView() {
           authUsersMap[u.id] = {
             lastSignInAt: u.last_sign_in_at,
             lastSignInIp: u.last_sign_in_ip,
+            lastSignInLocation: u.last_sign_in_location,
             lastAttemptAt: u.last_attempt_at,
             lastAttemptIp: u.last_attempt_ip,
+            lastAttemptLocation: u.last_attempt_location,
             createdAt: u.created_at,
           };
         });
@@ -189,8 +195,10 @@ export function AdminUsersView() {
         createdAt: authInfo?.createdAt || profile.created_at,
         lastSignInAt: authInfo?.lastSignInAt || null,
         lastSignInIp: authInfo?.lastSignInIp || null,
+        lastSignInLocation: authInfo?.lastSignInLocation || null,
         lastAttemptAt: authInfo?.lastAttemptAt || null,
         lastAttemptIp: authInfo?.lastAttemptIp || null,
+        lastAttemptLocation: authInfo?.lastAttemptLocation || null,
       };
     });
 
@@ -546,7 +554,10 @@ export function AdminUsersView() {
                         </div>
                         <div className="flex gap-2">
                           <span className="text-muted-foreground">Last login IP:</span>
-                          <span>{user.lastSignInIp || 'Not available'}</span>
+                          <span>
+                            {user.lastSignInIp || 'Not available'}
+                            {user.lastSignInLocation && ` (${user.lastSignInLocation})`}
+                          </span>
                         </div>
                         <div className="flex gap-2">
                           <span className="text-muted-foreground">Last attempt:</span>
@@ -554,7 +565,10 @@ export function AdminUsersView() {
                         </div>
                         <div className="flex gap-2">
                           <span className="text-muted-foreground">Last attempt IP:</span>
-                          <span>{user.lastAttemptIp || 'Not available'}</span>
+                          <span>
+                            {user.lastAttemptIp || 'Not available'}
+                            {user.lastAttemptLocation && ` (${user.lastAttemptLocation})`}
+                          </span>
                         </div>
                       </div>
                     </div>
