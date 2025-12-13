@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, KeyRound } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 
 const authSchema = z.object({
@@ -102,9 +103,9 @@ export default function Auth() {
     
     setIsLoading(true);
     const { error } = await signUp(email, password);
-    setIsLoading(false);
     
     if (error) {
+      setIsLoading(false);
       let errorMessage = error.message;
       if (error.message.includes('already registered')) {
         errorMessage = 'This email is already registered. Please sign in instead.';
@@ -115,9 +116,20 @@ export default function Auth() {
         description: errorMessage,
       });
     } else {
+      // Send welcome email via Resend
+      try {
+        await supabase.functions.invoke('send-welcome-email', {
+          body: { email }
+        });
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+        // Don't block signup if email fails
+      }
+      
+      setIsLoading(false);
       toast({
         title: 'Account created!',
-        description: 'You have successfully signed up.',
+        description: 'Welcome email sent. You can now sign in.',
       });
     }
   };
