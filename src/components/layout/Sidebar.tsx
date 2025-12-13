@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Building2, Package, MessageSquare, ClipboardList, Briefcase, ChevronDown, Zap, ShoppingBag, Loader2 } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ClipboardList, ChevronDown, Zap, ShoppingBag, Building2 } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -7,9 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { CreditDisplay } from '@/components/credits/CreditDisplay';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
 
 const getNavigation = (isAdmin: boolean) => {
   const base = [{
@@ -114,7 +113,6 @@ export function Sidebar({
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
-  const [loadingOnboardingLink, setLoadingOnboardingLink] = useState(false);
 
   useEffect(() => {
     const fetchApplicationStatus = async () => {
@@ -149,59 +147,9 @@ export function Sidebar({
     fetchApplicationStatus();
   }, [user, isAdmin]);
 
-  const handleContinueOnboarding = async () => {
-    setLoadingOnboardingLink(true);
-    try {
-      const response = await supabase.functions.invoke('get-agency-onboarding-link');
-      
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-      
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-      
-      if (response.data?.already_complete) {
-        setIsAgencyOnboarded(true);
-        toast({
-          title: 'Verification Complete',
-          description: 'Your agency account is fully verified!',
-          className: 'bg-green-600 text-white border-green-600'
-        });
-        return;
-      }
-      
-      if (response.data?.onboarding_url) {
-        window.open(response.data.onboarding_url, '_blank');
-      }
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message
-      });
-    } finally {
-      setLoadingOnboardingLink(false);
-    }
-  };
-
   const handleNavClick = (viewId: string) => {
     setCurrentView(viewId as typeof currentView);
     onClose();
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge className="ml-auto bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">Pending</Badge>;
-      case 'approved':
-        return <Badge className="ml-auto bg-green-500/20 text-green-400 border-green-500/30 text-xs">Approved</Badge>;
-      case 'rejected':
-        return <Badge className="ml-auto bg-red-500/20 text-red-400 border-red-500/30 text-xs">Rejected</Badge>;
-      default:
-        return null;
-    }
   };
 
   return <>
@@ -308,41 +256,29 @@ export function Sidebar({
             })}
           </nav>
 
-          {/* Account & Sign Out */}
-          <div className="border-t border-sidebar-border p-4 space-y-1">
-            {/* Complete Verification - For users with pending Stripe onboarding */}
-            {!isAdmin && hasStripeAccount && !isAgencyOnboarded && (
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent border border-yellow-500/50 bg-yellow-500/10"
-                onClick={handleContinueOnboarding}
-                disabled={loadingOnboardingLink}
-              >
-                {loadingOnboardingLink ? (
-                  <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-yellow-500" />
-                ) : (
-                  <Building2 className="h-5 w-5 flex-shrink-0 text-yellow-500" />
-                )}
-                <span className="truncate">Complete Verification</span>
-                <Badge className="ml-auto bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">Action Required</Badge>
-              </Button>
+          {/* Agency Status & Account */}
+          <div className="border-t border-sidebar-border p-4 space-y-3">
+            {/* Agency Status Card - Only for non-admin users */}
+            {!isAdmin && (
+              <AgencyStatusCard
+                applicationStatus={applicationStatus}
+                hasStripeAccount={hasStripeAccount}
+                isAgencyOnboarded={isAgencyOnboarded}
+                onNavigateToApplication={() => handleNavClick('agency-application')}
+                onStatusUpdate={setIsAgencyOnboarded}
+              />
             )}
-            {/* Upgrade to Agency - Only for non-admin users who haven't started agency process */}
-            {!isAdmin && !isAgencyOnboarded && !hasStripeAccount && (
-              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent border border-[#3872e0]/50", currentView === 'agency-application' && "bg-sidebar-accent text-[#3872e0] font-medium border-[#3872e0]")} onClick={() => handleNavClick('agency-application')}>
-                <Briefcase className={cn("h-5 w-5 flex-shrink-0 text-[#3872e0]", currentView === 'agency-application' && "text-[#3872e0]")} />
-                <span className="truncate">Upgrade to Agency</span>
-                {applicationStatus && getStatusBadge(applicationStatus)}
+            
+            <div className="space-y-1">
+              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
+                <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
+                Account Settings
               </Button>
-            )}
-            <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
-              <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
-              Account Settings
-            </Button>
-            <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={signOut}>
-              <LogOut className="h-5 w-5" />
-              Log Out
-            </Button>
+              <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={signOut}>
+                <LogOut className="h-5 w-5" />
+                Log Out
+              </Button>
+            </div>
           </div>
         </div>
       </aside>
