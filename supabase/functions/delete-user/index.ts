@@ -33,9 +33,15 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get the user from the JWT token
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user: requestingUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    // Get the user from the JWT token using anon client
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: authHeader }
+      }
+    });
+    
+    const { data: { user: requestingUser }, error: authError } = await supabaseClient.auth.getUser();
 
     if (authError || !requestingUser) {
       console.error("Auth error:", authError);
