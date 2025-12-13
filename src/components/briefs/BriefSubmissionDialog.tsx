@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, Upload, X, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -31,18 +30,50 @@ export function BriefSubmissionDialog({
   onSuccess 
 }: BriefSubmissionDialogProps) {
   const { user } = useAuth();
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    const validFiles = selectedFiles.filter(file => {
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          variant: 'destructive',
+          title: 'File too large',
+          description: `${file.name} exceeds 10MB limit.`,
+        });
+        return false;
+      }
+      const ext = file.name.toLowerCase().split('.').pop();
+      if (!['pdf', 'doc', 'docx'].includes(ext || '')) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid file type',
+          description: `${file.name} must be PDF or Word document.`,
+        });
+        return false;
+      }
+      return true;
+    });
+    setFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async () => {
     if (!user || !mediaSite) return;
 
-    if (!title.trim() || !description.trim()) {
+    if (!description.trim()) {
       toast({
         variant: 'destructive',
         title: 'Missing information',
-        description: 'Please provide a title and description for your request.',
+        description: 'Please describe what you are looking for.',
       });
       return;
     }
@@ -64,14 +95,14 @@ export function BriefSubmissionDialog({
         }
       }
 
-      // Create the service request
+      // Create the service request (title defaults to media site name)
       const { data: request, error } = await supabase
         .from('service_requests')
         .insert({
           user_id: user.id,
           media_site_id: mediaSite.id,
           agency_payout_id: agencyPayoutId,
-          title: title.trim(),
+          title: mediaSite.name,
           description: description.trim(),
           status: 'pending_review'
         })
@@ -94,8 +125,8 @@ export function BriefSubmissionDialog({
         className: 'bg-green-600 text-white border-green-600',
       });
 
-      setTitle('');
       setDescription('');
+      setFiles([]);
       onOpenChange(false);
       onSuccess();
     } catch (error: any) {
@@ -133,26 +164,58 @@ export function BriefSubmissionDialog({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              placeholder="Brief title (e.g., Product Launch Announcement)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="description">What are you looking for?</Label>
             <Textarea
               id="description"
-              placeholder="Describe your requirements, goals, target audience, key messages, and any specific instructions..."
+              placeholder="Describe your ideas. What are you looking to publish? What is your story about? Provide specific details and instructions if any."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={6}
               disabled={isSubmitting}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Upload your materials (optional)</Label>
+            <div 
+              className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">
+                Click to upload PDF or Word documents
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Max 10MB per file</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            {files.length > 0 && (
+              <div className="space-y-2 mt-2">
+                {files.map((file, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm flex-1 truncate">{file.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      disabled={isSubmitting}
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -160,7 +223,7 @@ export function BriefSubmissionDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !title.trim() || !description.trim()}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !description.trim()}>
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
