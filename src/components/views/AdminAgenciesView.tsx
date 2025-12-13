@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -692,19 +692,29 @@ export function AdminAgenciesView() {
 
       {/* Website Viewer Dialog */}
       <Dialog open={websiteDialogOpen} onOpenChange={(open) => { setWebsiteDialogOpen(open); if (!open) setWebsiteLoading(true); }}>
-        <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2">
+         <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2 [&>button]:hidden">
           <DialogHeader className="px-2 pb-1">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-sm">Agency Website</DialogTitle>
-              <Button
-                onClick={() => window.open(websiteUrl!, '_blank')}
-                variant="outline"
-                size="sm"
-                className="hover:bg-black hover:text-white h-7 text-xs"
-              >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Open in New Tab
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => window.open(websiteUrl!, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="hover:bg-black hover:text-white h-7 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Open in New Tab
+                </Button>
+                <Button
+                  onClick={() => setWebsiteDialogOpen(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </DialogHeader>
           {websiteUrl && (
