@@ -1,9 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-// For production: verify your domain at resend.com/domains and update this
-// For testing: use the email address verified with your Resend account
-const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "stankeviciusmgm@gmail.com";
+const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "admin@arcanamace.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,7 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Arcana Mace <onboarding@resend.dev>",
+        from: "Arcana Mace <noreply@arcanamace.com>",
         to: [ADMIN_EMAIL],
         subject: `New Agency Application: ${data.agency_name}`,
         html: `
