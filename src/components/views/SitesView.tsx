@@ -845,9 +845,9 @@ export function SitesView() {
                 <h3 className="text-sm truncate">{site.name}</h3>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 flex-shrink-0">
               {editingCredits === site.id ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <Input
                     type="number"
                     min="1"
@@ -881,7 +881,8 @@ export function SitesView() {
                       size="sm"
                       variant="ghost"
                       className="h-4 w-4 p-0 ml-1"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingCredits(site.id);
                         setCreditInput((siteCredits[site.id] || 1).toString());
                       }}
@@ -903,7 +904,10 @@ export function SitesView() {
                   variant="ghost" 
                   size="icon" 
                   className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                  onClick={() => handleRemoveWPSite(site.id, site.name)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveWPSite(site.id, site.name);
+                  }}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -1081,7 +1085,7 @@ export function SitesView() {
                 <h3 className="text-sm break-words">{site.name}</h3>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-1 justify-end" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 flex-1 justify-end">
               {/* Price badge */}
               <Badge variant="secondary" className="text-xs whitespace-nowrap">
                 {site.price > 0 ? `${site.price} USD` : 'Free'}
@@ -1112,7 +1116,10 @@ export function SitesView() {
                   variant="ghost" 
                   size="icon" 
                   className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                  onClick={() => handleRemoveMediaSite(site.id, site.name)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveMediaSite(site.id, site.name);
+                  }}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
