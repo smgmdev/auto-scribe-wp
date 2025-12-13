@@ -132,6 +132,13 @@ export default function Auth() {
       return;
     }
 
+    // Capture IP on successful login
+    try {
+      await supabase.functions.invoke('capture-login-ip');
+    } catch (ipError) {
+      console.error('Failed to capture login IP:', ipError);
+    }
+
     setIsLoading(false);
     toast({
       title: 'Welcome back!',

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -31,10 +32,13 @@ interface UserData {
   lastSignInIp: string | null;
 }
 
+type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending';
+
 export function AdminUsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [creditDialogOpen, setCreditDialogOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -54,12 +58,35 @@ export function AdminUsersView() {
   const { user: currentUser } = useAuth();
 
   const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return users;
-    const query = searchQuery.toLowerCase();
-    return users.filter(user => 
-      user.email.toLowerCase().includes(query)
-    );
-  }, [users, searchQuery]);
+    let filtered = users;
+    
+    // Apply tab filter first
+    switch (activeTab) {
+      case 'users_confirmed':
+        // Users with confirmed email (includes admins)
+        filtered = filtered.filter(u => u.emailConfirmed && !u.isAgency);
+        break;
+      case 'agencies':
+        filtered = filtered.filter(u => u.isAgency);
+        break;
+      case 'users_pending':
+        filtered = filtered.filter(u => !u.emailConfirmed && !u.isAgency);
+        break;
+      default:
+        // 'all' - no filter
+        break;
+    }
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(user => 
+        user.email.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
+  }, [users, searchQuery, activeTab]);
 
   useEffect(() => {
     fetchUsers();
@@ -333,14 +360,25 @@ export function AdminUsersView() {
         </p>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search users by email..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search users by email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="users_confirmed">Users (verified)</TabsTrigger>
+            <TabsTrigger value="agencies">Agencies</TabsTrigger>
+            <TabsTrigger value="users_pending">Users (pending)</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {loading ? (
