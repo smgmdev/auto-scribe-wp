@@ -57,6 +57,14 @@ export function AdminUsersView() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
+  // Calculate counts for each tab
+  const tabCounts = useMemo(() => ({
+    all: users.length,
+    users_confirmed: users.filter(u => u.emailConfirmed && !u.isAgency).length,
+    agencies: users.filter(u => u.isAgency).length,
+    users_pending: users.filter(u => !u.emailConfirmed && !u.isAgency).length,
+  }), [users]);
+
   const filteredUsers = useMemo(() => {
     let filtered = users;
     
@@ -383,6 +391,10 @@ export function AdminUsersView() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+        
+        <p className="text-sm text-muted-foreground">
+          {tabCounts[activeTab]} Total
+        </p>
       </div>
 
       {loading ? (
