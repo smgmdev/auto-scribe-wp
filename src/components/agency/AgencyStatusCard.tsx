@@ -167,8 +167,8 @@ export function AgencyStatusCard({
         <Button
           size="sm"
           variant="outline"
-          className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-default"
-          disabled
+          className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/30 hover:text-gray-300"
+          onClick={onNavigateToApplication}
         >
           <Clock className="h-4 w-4 mr-2" />
           Pending Review
