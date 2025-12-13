@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -211,46 +212,69 @@ export function DashboardView() {
                 Add New Media Site
               </Button>}
             
-            {/* Recent Articles */}
+            {/* Recent Articles with Tabs */}
             <div className="pt-4 border-t border-border/50">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">My Recent Articles</h3>
-              {articles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No articles yet. Start by scanning headlines or writing a new article.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {articles.slice(0, 3).map(article => {
-                    const siteName = getSiteName(article.publishedTo);
-                    return (
-                      <li key={article.id}>
-                        {article.wpLink ? (
-                          <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatRelativeTime(article.createdAt)}
-                                {siteName && <span> • {siteName}</span>}
-                              </p>
+              <Tabs defaultValue="published" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-8 mb-3">
+                  <TabsTrigger value="published" className="text-xs">Published</TabsTrigger>
+                  <TabsTrigger value="drafts" className="text-xs">Drafts</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="published" className="mt-0">
+                  {articles.filter(a => a.status === 'published').length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No published articles yet.
+                    </p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {articles.filter(a => a.status === 'published').slice(0, 3).map(article => {
+                        const siteName = getSiteName(article.publishedTo);
+                        return (
+                          <li key={article.id}>
+                            <a href={article.wpLink || '#'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatRelativeTime(article.createdAt)}
+                                  {siteName && <span> • {siteName}</span>}
+                                </p>
+                              </div>
+                              <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="drafts" className="mt-0">
+                  {articles.filter(a => a.status === 'draft').length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No draft articles yet.
+                    </p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {articles.filter(a => a.status === 'draft').slice(0, 3).map(article => {
+                        const siteName = getSiteName(article.publishedTo);
+                        return (
+                          <li key={article.id}>
+                            <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors cursor-pointer" onClick={() => setCurrentView('compose')}>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatRelativeTime(article.createdAt)}
+                                </p>
+                              </div>
+                              <Badge variant="outline" className="text-xs">Draft</Badge>
                             </div>
-                            <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
-                          </a>
-                        ) : (
-                          <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatRelativeTime(article.createdAt)}
-                                {siteName && <span> • {siteName}</span>}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           </CardContent>
         </Card>
