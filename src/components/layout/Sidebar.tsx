@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ClipboardList, ChevronDown, Zap, ShoppingBag, Building2 } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2 } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -48,12 +48,8 @@ const getNavigation = (isAdmin: boolean) => {
       icon: MessageSquare
     }, {
       id: 'admin-agencies',
-      label: 'Agency Payouts',
+      label: 'Agencies',
       icon: Building2
-    }, {
-      id: 'admin-applications',
-      label: 'Applications',
-      icon: ClipboardList
     }, {
       id: 'settings',
       label: 'Global Settings',
