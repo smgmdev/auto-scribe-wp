@@ -692,8 +692,8 @@ export function AdminAgenciesView() {
 
       {/* Website Viewer Dialog */}
       <Dialog open={websiteDialogOpen} onOpenChange={(open) => { setWebsiteDialogOpen(open); if (!open) setWebsiteLoading(true); }}>
-         <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-2 gap-2 [&>button]:hidden" overlayClassName="bg-transparent">
-          <DialogHeader className="px-2 pb-0">
+         <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+          <DialogHeader className="px-3 pb-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
@@ -735,7 +735,7 @@ export function AdminAgenciesView() {
           {websiteUrl && (
             <div className="w-full h-[75vh] relative">
               {websiteLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg z-50">
+                <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Loading website...</p>
@@ -744,7 +744,7 @@ export function AdminAgenciesView() {
               )}
               <iframe
                 src={websiteUrl}
-                className="w-full h-full border-0 rounded overflow-hidden"
+                className="w-full h-full border-0"
                 title="Website viewer"
                 sandbox="allow-scripts allow-same-origin allow-popups"
                 onLoad={() => setWebsiteLoading(false)}
