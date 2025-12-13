@@ -203,106 +203,77 @@ export function AgencyStatusCard({
     );
   }
 
-  // Has application but not yet approved/rejected or no Stripe account yet
-  if (applicationStatus) {
-    const statusConfig = {
-      pending: {
-        icon: Clock,
-        color: 'yellow',
-        title: 'Application Under Review',
-        description: 'We are reviewing your agency application. This typically takes 1-2 business days.',
-        badge: 'Pending'
-      },
-      approved: {
-        icon: CheckCircle,
-        color: 'green',
-        title: 'Application Approved',
-        description: 'Your application was approved! Please check your email for the onboarding link.',
-        badge: 'Approved'
-      },
-      rejected: {
-        icon: AlertTriangle,
-        color: 'red',
-        title: 'Application Rejected',
-        description: 'Your application was not approved. You can resubmit with updated information.',
-        badge: 'Rejected'
-      }
-    };
-
-    const config = statusConfig[applicationStatus as keyof typeof statusConfig];
-    if (!config) return null;
-
-    const Icon = config.icon;
-    const colorClasses = {
-      yellow: {
-        border: 'border-yellow-500/30',
-        bg: 'bg-yellow-500/10',
-        iconBg: 'bg-yellow-500/20',
-        iconColor: 'text-yellow-500',
-        titleColor: 'text-yellow-400',
-        badgeBg: 'bg-yellow-500/20',
-        badgeText: 'text-yellow-400',
-        badgeBorder: 'border-yellow-500/30'
-      },
-      green: {
-        border: 'border-green-500/30',
-        bg: 'bg-green-500/10',
-        iconBg: 'bg-green-500/20',
-        iconColor: 'text-green-500',
-        titleColor: 'text-green-400',
-        badgeBg: 'bg-green-500/20',
-        badgeText: 'text-green-400',
-        badgeBorder: 'border-green-500/30'
-      },
-      red: {
-        border: 'border-red-500/30',
-        bg: 'bg-red-500/10',
-        iconBg: 'bg-red-500/20',
-        iconColor: 'text-red-500',
-        titleColor: 'text-red-400',
-        badgeBg: 'bg-red-500/20',
-        badgeText: 'text-red-400',
-        badgeBorder: 'border-red-500/30'
-      }
-    };
-
-    const colors = colorClasses[config.color as keyof typeof colorClasses];
-
+  // Pending application - show grey Pending Review button
+  if (applicationStatus === 'pending') {
     return (
-      <div className={cn("rounded-lg border p-3", colors.border, colors.bg)}>
+      <div className="rounded-lg border border-gray-500/30 bg-gray-500/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-500/20">
+            <Clock className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-400">Application Under Review</span>
+              <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs">Pending</Badge>
+            </div>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">We are reviewing your agency application</p>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-default"
+          disabled
+        >
+          <Clock className="h-4 w-4 mr-2" />
+          Pending Review
+        </Button>
+      </div>
+    );
+  }
+
+  // Approved application but no Stripe account yet
+  if (applicationStatus === 'approved') {
+    return (
+      <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
         <div className="flex items-start gap-3">
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0", colors.iconBg)}>
-            <Icon className={cn("h-5 w-5", colors.iconColor)} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0 bg-green-500/20">
+            <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={cn("font-medium", colors.titleColor)}>{config.title}</span>
-              <Badge className={cn("text-xs", colors.badgeBg, colors.badgeText, colors.badgeBorder)}>{config.badge}</Badge>
+              <span className="font-medium text-green-400">Application Approved</span>
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Approved</Badge>
             </div>
-            <p className="text-xs text-sidebar-foreground/60 mt-1">{config.description}</p>
-            
-            {applicationStatus === 'pending' && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-default"
-                disabled
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                Pending Review
-              </Button>
-            )}
-            
-            {applicationStatus === 'rejected' && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-3 border-red-500/50 text-red-400 hover:bg-red-500/10"
-                onClick={onNavigateToApplication}
-              >
-                Resubmit Application
-              </Button>
-            )}
+            <p className="text-xs text-sidebar-foreground/60 mt-1">Your application was approved! Please check your email for the onboarding link.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Rejected application - can resubmit
+  if (applicationStatus === 'rejected') {
+    return (
+      <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0 bg-red-500/20">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-red-400">Application Rejected</span>
+              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Rejected</Badge>
+            </div>
+            <p className="text-xs text-sidebar-foreground/60 mt-1">Your application was not approved. You can resubmit with updated information.</p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3 border-red-500/50 text-red-400 hover:bg-red-500/10"
+              onClick={onNavigateToApplication}
+            >
+              Resubmit Application
+            </Button>
           </div>
         </div>
       </div>
@@ -310,29 +281,26 @@ export function AgencyStatusCard({
   }
 
   // No application yet - show Apply Now button
-  // OR pending application - show Pending Review button
-  if (!applicationStatus) {
-    return (
-      <div className="rounded-lg border border-[#3872e0]/30 bg-[#3872e0]/10 p-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3872e0]/20">
-            <Building2 className="h-5 w-5 text-[#3872e0]" />
-          </div>
-          <div className="flex-1">
-            <span className="font-medium text-[#3872e0]">Become an Agency</span>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
-          </div>
+  return (
+    <div className="rounded-lg border border-[#3872e0]/30 bg-[#3872e0]/10 p-3">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3872e0]/20">
+          <Building2 className="h-5 w-5 text-[#3872e0]" />
         </div>
-        <Button
-          size="sm"
-          className="w-full mt-3 bg-[#3872e0] hover:bg-[#2b59b4]"
-          onClick={onNavigateToApplication}
-        >
-          Apply Now
-        </Button>
+        <div className="flex-1">
+          <span className="font-medium text-[#3872e0]">Become an Agency</span>
+          <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
+        </div>
       </div>
-    );
-  }
+      <Button
+        size="sm"
+        className="w-full mt-3 bg-[#3872e0] hover:bg-[#2b59b4]"
+        onClick={onNavigateToApplication}
+      >
+        Apply Now
+      </Button>
+    </div>
+  );
 
   return null;
 }
