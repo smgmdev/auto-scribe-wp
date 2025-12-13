@@ -51,17 +51,21 @@ serve(async (req) => {
       });
     }
 
-    // Fetch all users with their email confirmation status
+    // Fetch all users with their details
     const { data: { users }, error: usersError } = await supabaseClient.auth.admin.listUsers();
 
     if (usersError) {
       throw usersError;
     }
 
-    // Return only the necessary fields
+    // Return user details including login info
     const usersAuthStatus = users.map((user) => ({
       id: user.id,
       email_confirmed_at: user.email_confirmed_at,
+      created_at: user.created_at,
+      last_sign_in_at: user.last_sign_in_at,
+      // Get IP and location from user_metadata if available
+      last_sign_in_ip: user.user_metadata?.last_sign_in_ip || null,
     }));
 
     return new Response(JSON.stringify({ users: usersAuthStatus }), {
