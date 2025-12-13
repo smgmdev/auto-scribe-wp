@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send, Upload, X, FileText } from 'lucide-react';
+import { Loader2, Send, Upload, X, FileText, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -33,37 +33,79 @@ export function BriefSubmissionDialog({
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total
+  const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    const validFiles = selectedFiles.filter(file => {
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          variant: 'destructive',
-          title: 'File too large',
-          description: `${file.name} exceeds 10MB limit.`,
-        });
-        return false;
-      }
+  const getTotalSize = (fileList: File[]) => {
+    return fileList.reduce((sum, file) => sum + file.size, 0);
+  };
+
+  const validateAndAddFiles = (selectedFiles: File[]) => {
+    const currentTotal = getTotalSize(files);
+    const validFiles: File[] = [];
+
+    for (const file of selectedFiles) {
       const ext = file.name.toLowerCase().split('.').pop();
-      if (!['pdf', 'doc', 'docx'].includes(ext || '')) {
+      if (!ALLOWED_EXTENSIONS.includes(ext || '')) {
         toast({
           variant: 'destructive',
           title: 'Invalid file type',
-          description: `${file.name} must be PDF or Word document.`,
+          description: `${file.name} must be PDF, Word, or image file.`,
         });
-        return false;
+        continue;
       }
-      return true;
-    });
-    setFiles(prev => [...prev, ...validFiles]);
+
+      const newTotal = currentTotal + getTotalSize(validFiles) + file.size;
+      if (newTotal > MAX_TOTAL_SIZE) {
+        toast({
+          variant: 'destructive',
+          title: 'Size limit exceeded',
+          description: 'Total file size cannot exceed 10MB.',
+        });
+        break;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > 0) {
+      setFiles(prev => [...prev, ...validFiles]);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    validateAndAddFiles(selectedFiles);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    validateAndAddFiles(droppedFiles);
   };
 
   const removeFile = (index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const isImageFile = (filename: string) => {
+    const ext = filename.toLowerCase().split('.').pop();
+    return ['png', 'jpg', 'jpeg'].includes(ext || '');
   };
 
   const handleSubmit = async () => {
@@ -178,18 +220,25 @@ export function BriefSubmissionDialog({
           <div className="space-y-2">
             <Label>Upload your materials (optional)</Label>
             <div 
-              className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+                isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary'
+              }`}
               onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
               <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
-                Click to upload PDF or Word documents
+                Drag & drop or click to upload
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Max 10MB per file</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                PDF, Word, PNG, JPG • Max 10MB total
+              </p>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
                 multiple
                 className="hidden"
                 onChange={handleFileChange}
@@ -201,8 +250,15 @@ export function BriefSubmissionDialog({
               <div className="space-y-2 mt-2">
                 {files.map((file, index) => (
                   <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    {isImageFile(file.name) ? (
+                      <Image className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    )}
                     <span className="text-sm flex-1 truncate">{file.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {(file.size / 1024).toFixed(0)}KB
+                    </span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -214,6 +270,9 @@ export function BriefSubmissionDialog({
                     </Button>
                   </div>
                 ))}
+                <p className="text-xs text-muted-foreground text-right">
+                  Total: {(getTotalSize(files) / 1024 / 1024).toFixed(2)}MB / 10MB
+                </p>
               </div>
             )}
           </div>
