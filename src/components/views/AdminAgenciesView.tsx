@@ -40,6 +40,8 @@ interface AgencyPayout {
   user_id: string | null;
 }
 
+import { useAppStore } from '@/stores/appStore';
+
 export function AdminAgenciesView() {
   const [applications, setApplications] = useState<AgencyApplication[]>([]);
   const [agencies, setAgencies] = useState<AgencyPayout[]>([]);
@@ -51,6 +53,7 @@ export function AdminAgenciesView() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [cleaningUp, setCleaningUp] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const { decrementUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
     fetchData();
@@ -103,6 +106,9 @@ export function AdminAgenciesView() {
       setApplications(prev => 
         prev.map(a => a.id === app.id ? { ...a, read: true } : a)
       );
+      
+      // Decrement global count
+      decrementUnreadAgencyApplicationsCount();
     }
   };
 
