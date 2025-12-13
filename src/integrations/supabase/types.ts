@@ -25,6 +25,7 @@ export type Database = {
           full_name: string
           id: string
           incorporation_document_url: string
+          logo_url: string | null
           read: boolean
           reviewed_at: string | null
           status: string
@@ -42,6 +43,7 @@ export type Database = {
           full_name: string
           id?: string
           incorporation_document_url: string
+          logo_url?: string | null
           read?: boolean
           reviewed_at?: string | null
           status?: string
@@ -59,6 +61,7 @@ export type Database = {
           full_name?: string
           id?: string
           incorporation_document_url?: string
+          logo_url?: string | null
           read?: boolean
           reviewed_at?: string | null
           status?: string
