@@ -692,7 +692,7 @@ export function AdminAgenciesView() {
 
       {/* Website Viewer Dialog */}
       <Dialog open={websiteDialogOpen} onOpenChange={(open) => { setWebsiteDialogOpen(open); if (!open) setWebsiteLoading(true); }}>
-         <DialogContent className="max-w-[95vw] w-[95vw] max-h-[95vh] p-2 gap-2 [&>button]:hidden">
+         <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-2 gap-2 [&>button]:hidden">
           <DialogHeader className="px-2 pb-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -733,7 +733,7 @@ export function AdminAgenciesView() {
             </div>
           </DialogHeader>
           {websiteUrl && (
-            <div className="w-full h-[85vh] relative">
+            <div className="w-full h-[75vh] relative">
               {websiteLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg z-50">
                   <div className="flex flex-col items-center gap-2">
