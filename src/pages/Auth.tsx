@@ -79,7 +79,25 @@ export default function Auth() {
     
     setIsLoading(true);
 
-    // First check if email is verified using RPC function (bypasses RLS)
+    // First check if user is suspended
+    const { data: isSuspended, error: suspendedError } = await supabase
+      .rpc('check_user_suspended', { check_email: email });
+
+    if (suspendedError) {
+      console.error('Error checking suspension status:', suspendedError);
+    }
+
+    if (isSuspended) {
+      setIsLoading(false);
+      toast({
+        variant: 'destructive',
+        title: 'Account Suspended',
+        description: 'Your account has been suspended. Contact support for details.',
+      });
+      return;
+    }
+
+    // Check if email is verified using RPC function (bypasses RLS)
     const { data: isVerified, error: rpcError } = await supabase
       .rpc('check_email_verified', { check_email: email });
 
