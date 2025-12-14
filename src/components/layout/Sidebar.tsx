@@ -158,18 +158,21 @@ export function Sidebar({
       }
       
       // Regular user: check their own application status (most recent)
-      const { data: appData } = await supabase
-        .from('agency_applications')
-        .select('id, status, rejection_seen')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (appData) {
-        setUserApplicationStatus(appData.status);
-        setApplicationId(appData.id);
-        setRejectionSeen(appData.rejection_seen || false);
+      // Only fetch from DB if store doesn't have a status yet (initial load)
+      if (!userApplicationStatus) {
+        const { data: appData } = await supabase
+          .from('agency_applications')
+          .select('id, status, rejection_seen')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (appData) {
+          setUserApplicationStatus(appData.status);
+          setApplicationId(appData.id);
+          setRejectionSeen(appData.rejection_seen || false);
+        }
       }
 
       // Check if user has agency payout record and onboarding status
