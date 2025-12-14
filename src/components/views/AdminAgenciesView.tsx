@@ -623,7 +623,20 @@ export function AdminAgenciesView() {
               {selectedApp.media_channels && (
                 <div className="text-sm">
                   <p className="text-muted-foreground mb-1">Media Channels</p>
-                  <p className="font-medium whitespace-pre-wrap">{selectedApp.media_channels}</p>
+                  <div className="flex flex-col gap-1">
+                    {selectedApp.media_channels.split(', ').map((channel, i) => (
+                      <a 
+                        key={i}
+                        href={channel}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-primary hover:underline flex items-center gap-1"
+                      >
+                        {channel}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
 
