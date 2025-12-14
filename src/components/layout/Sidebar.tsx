@@ -140,10 +140,13 @@ export function Sidebar({
     }
   }, [userApplicationStatus]);
 
+  // Fetch application data only on initial mount
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchApplicationStatus = async () => {
       if (!user) {
-        setAgencyDataLoaded(true);
+        if (isMounted) setAgencyDataLoaded(true);
         return;
       }
       
@@ -155,8 +158,10 @@ export function Sidebar({
           .in('status', ['pending', 'cancelled'])
           .eq('read', false);
         
-        setUnreadAgencyApplicationsCount(count || 0);
-        setAgencyDataLoaded(true);
+        if (isMounted) {
+          setUnreadAgencyApplicationsCount(count || 0);
+          setAgencyDataLoaded(true);
+        }
         return;
       }
       
@@ -169,15 +174,15 @@ export function Sidebar({
         .limit(1)
         .maybeSingle();
       
-      if (appData) {
-        // Only update from DB if store doesn't have a status yet (prevents overwriting fresh submissions)
+      if (isMounted && appData) {
+        // Only update from DB if store doesn't already have a status set
+        // This prevents overwriting a fresh submission status with stale DB data
         if (!userApplicationStatus) {
           setUserApplicationStatus(appData.status);
         }
         setApplicationId(appData.id);
         setRejectionSeen(appData.rejection_seen || false);
-        // Get payout method from application if not yet in agency_payouts
-        if (appData.payout_method && !payoutMethod) {
+        if (appData.payout_method) {
           setPayoutMethod(appData.payout_method);
         }
       }
@@ -189,14 +194,15 @@ export function Sidebar({
         .eq('user_id', user.id)
         .maybeSingle();
       
-      if (agencyData) {
+      if (isMounted && agencyData) {
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
         setHasStripeAccount(!!agencyData.stripe_account_id);
         setPayoutMethod(agencyData.payout_method);
       }
 
       // Check custom verification status for custom payout users
-      if (payoutMethod === 'custom' || appData?.payout_method === 'custom') {
+      const payoutMethodToCheck = agencyData?.payout_method || appData?.payout_method;
+      if (payoutMethodToCheck === 'custom') {
         const { data: verificationData } = await supabase
           .from('agency_custom_verifications')
           .select('status')
@@ -205,16 +211,20 @@ export function Sidebar({
           .limit(1)
           .maybeSingle();
         
-        if (verificationData) {
+        if (isMounted && verificationData) {
           setCustomVerificationStatus(verificationData.status);
         }
       }
       
-      setAgencyDataLoaded(true);
+      if (isMounted) setAgencyDataLoaded(true);
     };
 
     fetchApplicationStatus();
-  }, [user?.id, isAdmin, userApplicationStatus]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, isAdmin]); // Remove userApplicationStatus from dependencies to prevent re-fetch loops
 
   const handleNavClick = (viewId: string) => {
     setCurrentView(viewId as typeof currentView);
