@@ -524,6 +524,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   <p className="text-xs text-red-500">Please enter a valid URL</p>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-3">
               <Label>What is your focus media niche? (select up to 3) *</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {MEDIA_NICHES.map((niche) => {
