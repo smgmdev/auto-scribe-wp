@@ -363,10 +363,15 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger type="button">
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
                       </TooltipTrigger>
-                      <TooltipContent className="max-w-[250px]">
-                        <p>Agency Name doesn't have to be identical to the official company name. Agency Name can refer to a name of the brand.</p>
+                      <TooltipContent 
+                        side="right" 
+                        align="start"
+                        className="max-w-[280px] text-xs bg-popover text-popover-foreground border shadow-md"
+                        sideOffset={5}
+                      >
+                        <p>Agency Name doesn't have to be identical to the official company name. Agency Name can refer to a name of the brand. For example if your company name is "The Company Limited" or "The Company LLC", then your brand name can be "The Company".</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
