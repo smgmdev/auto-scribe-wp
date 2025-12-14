@@ -115,6 +115,7 @@ interface CustomVerification {
   created_at: string;
   submitted_at: string | null;
   reviewed_at: string | null;
+  read: boolean;
 }
 
 import { useAppStore } from '@/stores/appStore';
@@ -207,9 +208,9 @@ export function AdminAgenciesView() {
       if (verificationError) throw verificationError;
       setCustomVerifications(verificationData || []);
       
-      // Update count of pending custom verifications
-      const pendingCount = (verificationData || []).filter(v => v.status === 'pending_review').length;
-      setUnreadCustomVerificationsCount(pendingCount);
+      // Update count of unread pending custom verifications
+      const unreadPendingCount = (verificationData || []).filter(v => v.status === 'pending_review' && !v.read).length;
+      setUnreadCustomVerificationsCount(unreadPendingCount);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
@@ -543,6 +544,23 @@ export function AdminAgenciesView() {
   const handleOpenVerification = async (verification: CustomVerification, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSelectedVerification(verification);
+    
+    // Mark as read if not already
+    if (!verification.read) {
+      const { error } = await supabase
+        .from('agency_custom_verifications')
+        .update({ read: true })
+        .eq('id', verification.id);
+      
+      if (!error) {
+        // Update local state
+        setCustomVerifications(prev => 
+          prev.map(v => v.id === verification.id ? { ...v, read: true } : v)
+        );
+        // Decrement notification count
+        decrementUnreadCustomVerificationsCount();
+      }
+    }
     
     // Fetch signed URLs for documents
     const urls: Record<string, string> = {};
@@ -990,7 +1008,7 @@ export function AdminAgenciesView() {
                                   </p>
                                 )}
                                 {verification?.submitted_at && (
-                                  <p className="text-xs text-green-500 mt-1">
+                                  <p className={`text-xs mt-1 ${verification.read ? 'text-muted-foreground' : 'text-green-500'}`}>
                                     Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                 )}
@@ -1000,7 +1018,11 @@ export function AdminAgenciesView() {
                             <div className="flex items-center gap-4">
                               <div className="flex gap-2">
                                 <Badge 
-                                  className="bg-green-600/20 text-green-600 cursor-pointer hover:bg-green-600/30 transition-colors"
+                                  className={`cursor-pointer transition-colors ${
+                                    verification?.read 
+                                      ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
+                                      : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                                  }`}
                                   onClick={(e) => {
                                     if (verification) {
                                       handleOpenVerification(verification, e);
