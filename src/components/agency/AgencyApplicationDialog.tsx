@@ -17,13 +17,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Upload, CheckCircle, Image } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, Image, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useAppStore } from '@/stores/appStore';
 import { COUNTRIES } from '@/constants/countries';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const MEDIA_NICHES = [
   "Mainstream",
@@ -352,7 +358,19 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="agency_name">Agency Name *</Label>
+                <div className="flex items-center gap-1.5">
+                  <Label htmlFor="agency_name">Agency Name *</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger type="button">
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[250px]">
+                        <p>Agency Name doesn't have to be identical to the official company name. Agency Name can refer to a name of the brand.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Input
                   id="agency_name"
                   placeholder="Your Agency Inc."
