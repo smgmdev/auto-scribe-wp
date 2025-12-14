@@ -690,7 +690,7 @@ export function AdminAgenciesView() {
                       placeholder="Provide a reason for rejection that will be visible to the applicant..."
                       value={adminNotes}
                       onChange={(e) => setAdminNotes(e.target.value)}
-                      rows={3}
+                      rows={2}
                     />
                   </div>
 
