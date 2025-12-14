@@ -736,7 +736,7 @@ export function AdminAgenciesView() {
                           {getOnboardingStatus(agency)}
 
                           <div className="flex gap-1">
-                            {agency.stripe_account_id && (
+                            {agency.stripe_account_id && agency.payout_method !== 'custom' && (
                               <>
                                 <Button
                                   variant="ghost"
