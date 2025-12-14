@@ -143,17 +143,20 @@ export function AdminAgenciesView() {
   };
 
   const cancelledApplications = applications.filter(app => app.status === 'cancelled');
-  const cancelledUserIds = new Set(cancelledApplications.map(app => app.user_id));
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
   const unreadCancelledCount = cancelledApplications.filter(app => !app.read).length;
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
   const approvedApplications = applications.filter(app => app.status === 'approved');
   
-  // Filter agencies under verification - exclude those with cancelled applications
-  const agenciesUnderVerification = agencies.filter(a => 
-    !a.onboarding_complete && !cancelledUserIds.has(a.user_id || '')
-  );
+  // Filter agencies under verification - only include those with approved applications
+  // An agency is under verification if: not onboarding complete AND has an approved application for this user
+  const agenciesUnderVerification = agencies.filter(a => {
+    if (a.onboarding_complete) return false;
+    // Check if this agency has an approved application
+    const hasApprovedApp = approvedApplications.some(app => app.user_id === a.user_id);
+    return hasApprovedApp;
+  });
 
   const handleOpenApplication = async (app: AgencyApplication) => {
     setSelectedApp(app);
