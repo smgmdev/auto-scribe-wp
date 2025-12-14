@@ -10,6 +10,7 @@ interface AgencyStatusCardProps {
   applicationId: string | null;
   rejectionSeen: boolean;
   hasStripeAccount: boolean;
+  payoutMethod: string | null;
   isAgencyOnboarded: boolean;
   onNavigateToApplication: () => void;
   onStatusUpdate: (onboarded: boolean) => void;
@@ -31,6 +32,7 @@ export function AgencyStatusCard({
   applicationId,
   rejectionSeen,
   hasStripeAccount,
+  payoutMethod,
   isAgencyOnboarded,
   onNavigateToApplication,
   onStatusUpdate,
@@ -162,6 +164,31 @@ export function AgencyStatusCard({
             {missingCount} item{missingCount > 1 ? 's' : ''} remaining
           </div>
         )}
+        
+        <Button
+          size="sm"
+          className="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-black"
+          onClick={onNavigateToApplication}
+        >
+          Continue Verification
+        </Button>
+      </div>
+    );
+  }
+
+  // Custom payout method - needs custom verification
+  if (payoutMethod === 'custom' && applicationStatus === 'approved') {
+    return (
+      <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium text-yellow-400">Verification Required</span>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your custom payout verification</p>
+          </div>
+        </div>
         
         <Button
           size="sm"
