@@ -373,14 +373,14 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <Card className="border-muted-foreground/30 bg-muted/50">
+          <Card className="border-gray-500/30 bg-gray-500/10">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted-foreground/20">
-                  <FileText className="h-6 w-6 text-muted-foreground" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-500/20">
+                  <FileText className="h-6 w-6 text-gray-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-muted-foreground">Verification Under Review</h3>
+                  <h3 className="text-lg font-semibold text-gray-400">Verification Under Review</h3>
                   <p className="text-sm text-muted-foreground">
                     Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
                   </p>
