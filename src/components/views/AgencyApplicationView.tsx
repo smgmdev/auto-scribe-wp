@@ -129,7 +129,7 @@ function AgencyFAQ() {
 
 export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
-  const { setUserApplicationStatus } = useAppStore();
+  const { setUserApplicationStatus, setUserCustomVerificationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
@@ -260,6 +260,8 @@ export function AgencyApplicationView() {
   };
 
   const handleCustomVerificationSubmit = () => {
+    // Update store immediately so sidebar reflects the new status
+    setUserCustomVerificationStatus('pending_review');
     fetchAgencyData();
   };
 

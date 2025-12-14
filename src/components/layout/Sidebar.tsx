@@ -81,7 +81,9 @@ export function Sidebar({
     unreadCustomVerificationsCount,
     setUnreadCustomVerificationsCount,
     userApplicationStatus,
-    setUserApplicationStatus
+    setUserApplicationStatus,
+    userCustomVerificationStatus,
+    setUserCustomVerificationStatus
   } = useAppStore();
   const {
     signOut,
@@ -115,7 +117,6 @@ export function Sidebar({
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
-  const [customVerificationStatus, setCustomVerificationStatus] = useState<string | null>(null);
 
   // Reset agency data when user changes
   useEffect(() => {
@@ -126,7 +127,7 @@ export function Sidebar({
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
-      setCustomVerificationStatus(null);
+      setUserCustomVerificationStatus(null);
     }
   }, [user?.id]);
 
@@ -137,7 +138,7 @@ export function Sidebar({
       setHasStripeAccount(false);
       setPayoutMethod(null);
       setIsAgencyOnboarded(false);
-      setCustomVerificationStatus(null);
+      setUserCustomVerificationStatus(null);
       setAgencyDataLoaded(true);
     }
   }, [userApplicationStatus]);
@@ -226,7 +227,7 @@ export function Sidebar({
           .maybeSingle();
         
         if (isMounted && verificationData) {
-          setCustomVerificationStatus(verificationData.status);
+          setUserCustomVerificationStatus(verificationData.status);
         }
       }
       
@@ -367,7 +368,7 @@ export function Sidebar({
                 hasStripeAccount={hasStripeAccount}
                 payoutMethod={payoutMethod}
                 isAgencyOnboarded={isAgencyOnboarded}
-                customVerificationStatus={customVerificationStatus}
+                customVerificationStatus={userCustomVerificationStatus}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
                 onStatusUpdate={setIsAgencyOnboarded}
                 onRejectionSeen={() => setRejectionSeen(true)}
