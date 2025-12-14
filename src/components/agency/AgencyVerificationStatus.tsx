@@ -164,7 +164,7 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
         .update({ 
           status: 'cancelled', 
           read: false,
-          admin_notes: cancellationReason ? `User cancelled: ${cancellationReason}` : 'User cancelled without reason'
+          admin_notes: cancellationReason.trim()
         })
         .eq('user_id', user.id)
         .eq('status', 'approved');
