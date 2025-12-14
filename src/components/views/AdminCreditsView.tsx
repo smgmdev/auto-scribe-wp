@@ -20,8 +20,11 @@ export function AdminCreditsView() {
   const [packs, setPacks] = useState<CreditPack[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [packToDelete, setPackToDelete] = useState<CreditPack | null>(null);
   const [editingPack, setEditingPack] = useState<CreditPack | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const {
     toast
   } = useToast();
@@ -124,11 +127,18 @@ export function AdminCreditsView() {
       fetchPacks();
     }
   };
-  const handleDelete = async (pack: CreditPack) => {
-    if (!confirm(`Are you sure you want to delete "${pack.name}"?`)) return;
+  const openDeleteDialog = (pack: CreditPack) => {
+    setPackToDelete(pack);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!packToDelete) return;
+    setDeleting(true);
     const {
       error
-    } = await supabase.from('credit_packs').delete().eq('id', pack.id);
+    } = await supabase.from('credit_packs').delete().eq('id', packToDelete.id);
+    setDeleting(false);
     if (error) {
       toast({
         variant: 'destructive',
@@ -138,8 +148,10 @@ export function AdminCreditsView() {
     } else {
       toast({
         title: 'Pack deleted',
-        description: `${pack.name} has been deleted.`
+        description: `${packToDelete.name} has been deleted.`
       });
+      setDeleteDialogOpen(false);
+      setPackToDelete(null);
       fetchPacks();
     }
   };
@@ -198,7 +210,7 @@ export function AdminCreditsView() {
                   <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white" onClick={() => openEditDialog(pack)}>
                     <Edit2 className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white" onClick={() => handleDelete(pack)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white" onClick={() => openDeleteDialog(pack)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -272,6 +284,27 @@ export function AdminCreditsView() {
                 {editingPack ? 'Update' : 'Create'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Credit Pack</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{packToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="hover:bg-black hover:text-white">
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="hover:bg-black">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Delete
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
