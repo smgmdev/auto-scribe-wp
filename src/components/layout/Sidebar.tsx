@@ -113,6 +113,20 @@ export function Sidebar({
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
+  const [customVerificationStatus, setCustomVerificationStatus] = useState<string | null>(null);
+
+  // Reset agency data when user changes
+  useEffect(() => {
+    if (!user?.id) {
+      setAgencyDataLoaded(false);
+      setIsAgencyOnboarded(false);
+      setHasStripeAccount(false);
+      setPayoutMethod(null);
+      setApplicationId(null);
+      setRejectionSeen(false);
+      setCustomVerificationStatus(null);
+    }
+  }, [user?.id]);
 
   // Track userApplicationStatus changes to reset agency data immediately
   useEffect(() => {
@@ -121,7 +135,7 @@ export function Sidebar({
       setHasStripeAccount(false);
       setPayoutMethod(null);
       setIsAgencyOnboarded(false);
-      // Force data loaded to be true so we don't show loading state
+      setCustomVerificationStatus(null);
       setAgencyDataLoaded(true);
     }
   }, [userApplicationStatus]);
@@ -146,23 +160,26 @@ export function Sidebar({
         return;
       }
       
-      // Regular user: fetch application data from DB on initial load only
+      // Regular user: fetch application data from DB
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, status, rejection_seen')
+        .select('id, status, rejection_seen, payout_method')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
       
       if (appData) {
-        // Only set from DB if we don't already have a status in store
-        // This prevents DB overwriting a fresh submission status
+        // Only update from DB if store doesn't have a status yet (prevents overwriting fresh submissions)
         if (!userApplicationStatus) {
           setUserApplicationStatus(appData.status);
         }
         setApplicationId(appData.id);
         setRejectionSeen(appData.rejection_seen || false);
+        // Get payout method from application if not yet in agency_payouts
+        if (appData.payout_method && !payoutMethod) {
+          setPayoutMethod(appData.payout_method);
+        }
       }
 
       // Check if user has agency payout record and onboarding status
@@ -176,17 +193,28 @@ export function Sidebar({
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
         setHasStripeAccount(!!agencyData.stripe_account_id);
         setPayoutMethod(agencyData.payout_method);
-      } else {
-        setIsAgencyOnboarded(false);
-        setHasStripeAccount(false);
-        setPayoutMethod(null);
+      }
+
+      // Check custom verification status for custom payout users
+      if (payoutMethod === 'custom' || appData?.payout_method === 'custom') {
+        const { data: verificationData } = await supabase
+          .from('agency_custom_verifications')
+          .select('status')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (verificationData) {
+          setCustomVerificationStatus(verificationData.status);
+        }
       }
       
       setAgencyDataLoaded(true);
     };
 
     fetchApplicationStatus();
-  }, [user?.id, isAdmin]);
+  }, [user?.id, isAdmin, userApplicationStatus]);
 
   const handleNavClick = (viewId: string) => {
     setCurrentView(viewId as typeof currentView);
@@ -315,6 +343,7 @@ export function Sidebar({
                 hasStripeAccount={hasStripeAccount}
                 payoutMethod={payoutMethod}
                 isAgencyOnboarded={isAgencyOnboarded}
+                customVerificationStatus={customVerificationStatus}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
                 onStatusUpdate={setIsAgencyOnboarded}
                 onRejectionSeen={() => setRejectionSeen(true)}
