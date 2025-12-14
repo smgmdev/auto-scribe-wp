@@ -207,10 +207,6 @@ export function DashboardView() {
               <Library className="mr-2 h-4 w-4" />
               Instant Publishing Library
             </Button>
-            {isAdmin && <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
-                <Globe className="mr-2 h-4 w-4" />
-                Add New Media Site
-              </Button>}
           </CardContent>
         </Card>
 
