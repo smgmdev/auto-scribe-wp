@@ -16,7 +16,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   const [copied, setCopied] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastUrlRef = useRef<string>('');
+  const loadedRef = useRef<boolean>(false);
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
 
@@ -26,16 +26,13 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
 
   useEffect(() => {
     if (open) {
-      // Only reset if URL actually changed
-      if (lastUrlRef.current !== normalizedUrl) {
-        setStatus('loading');
-        lastUrlRef.current = normalizedUrl;
-      }
+      setStatus('loading');
+      loadedRef.current = false;
       
       clearTimers();
       // Fallback timeout - if nothing loads in 15s, show blocked
       timeoutRef.current = setTimeout(() => {
-        if (status === 'loading') {
+        if (!loadedRef.current) {
           setStatus('blocked');
         }
       }, 15000);
@@ -46,9 +43,12 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
 
   const handleRefresh = () => {
     setStatus('loading');
+    loadedRef.current = false;
     clearTimers();
     timeoutRef.current = setTimeout(() => {
-      setStatus('blocked');
+      if (!loadedRef.current) {
+        setStatus('blocked');
+      }
     }, 15000);
     if (iframeRef.current) {
       iframeRef.current.src = '';
@@ -62,13 +62,16 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
     onOpenChange(newOpen);
     if (!newOpen) {
       clearTimers();
-      // Reset on close for next open
-      lastUrlRef.current = '';
+      loadedRef.current = false;
     }
   };
 
   const handleIframeLoad = () => {
+    // Only handle load once to prevent blinking from multiple load events
+    if (loadedRef.current) return;
+    
     clearTimers();
+    loadedRef.current = true;
     
     // Small delay to let content render, then mark as loaded
     setTimeout(() => {
