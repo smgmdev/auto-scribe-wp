@@ -603,7 +603,7 @@ export function AdminAgenciesView() {
 
         {/* Under Verification Tab */}
         <TabsContent value="verification" className="mt-6">
-          <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing further verification</p>
+          <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
           {agenciesUnderVerification.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
