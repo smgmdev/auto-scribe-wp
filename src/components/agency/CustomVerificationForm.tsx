@@ -82,6 +82,16 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   ) => {
     if (!user) return;
 
+    // Only allow PDF files
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file type',
+        description: 'Only PDF files are allowed'
+      });
+      return;
+    }
+
     const maxSizes: Record<string, number> = {
       passport: 2 * 1024 * 1024,
       company: 5 * 1024 * 1024,
@@ -450,8 +460,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               file={passportFile}
               url={passportUrl}
               uploading={uploadingPassport}
-              accept=".pdf,.jpg,.jpeg,.png"
-              maxSizeLabel="Max 2MB"
+              accept=".pdf,application/pdf"
+              maxSizeLabel="PDF only, max 2MB"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
@@ -540,8 +550,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 file={companyDocsFile}
                 url={companyDocsUrl}
                 uploading={uploadingCompanyDocs}
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                maxSizeLabel="Max 5MB"
+                accept=".pdf,application/pdf"
+                maxSizeLabel="PDF only, max 5MB"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -560,8 +570,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 file={articlesFile}
                 url={articlesUrl}
                 uploading={uploadingArticles}
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                maxSizeLabel="Max 5MB"
+                accept=".pdf,application/pdf"
+                maxSizeLabel="PDF only, max 5MB"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -581,8 +591,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               file={licenseFile}
               url={licenseUrl}
               uploading={uploadingLicense}
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              maxSizeLabel="Max 5MB"
+              accept=".pdf,application/pdf"
+              maxSizeLabel="PDF only, max 5MB"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
