@@ -147,6 +147,7 @@ export function AdminAgenciesView() {
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
+  const [loadingLogoIds, setLoadingLogoIds] = useState<Set<string>>(new Set());
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [documentLoading, setDocumentLoading] = useState(true);
@@ -162,15 +163,32 @@ export function AdminAgenciesView() {
   useEffect(() => {
     const fetchLogoUrls = async () => {
       const urls: Record<string, string> = {};
+      const idsToLoad = applications
+        .filter(app => app.logo_url && !logoUrls[app.id])
+        .map(app => app.id);
+      
+      if (idsToLoad.length === 0) return;
+      
+      // Mark logos as loading
+      setLoadingLogoIds(prev => new Set([...prev, ...idsToLoad]));
+      
       for (const app of applications) {
         if (app.logo_url && !logoUrls[app.id]) {
           const url = await getSignedUrl(app.logo_url);
           if (url) urls[app.id] = url;
         }
       }
+      
       if (Object.keys(urls).length > 0) {
         setLogoUrls(prev => ({ ...prev, ...urls }));
       }
+      
+      // Remove from loading state
+      setLoadingLogoIds(prev => {
+        const newSet = new Set(prev);
+        idsToLoad.forEach(id => newSet.delete(id));
+        return newSet;
+      });
     };
     if (applications.length > 0) {
       fetchLogoUrls();
@@ -761,6 +779,10 @@ export function AdminAgenciesView() {
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
+                        ) : loadingLogoIds.has(app.id) ? (
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                          </div>
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
                             <Clock className="h-5 w-5 text-yellow-500" />
@@ -821,6 +843,10 @@ export function AdminAgenciesView() {
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
+                        ) : loadingLogoIds.has(app.id) ? (
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                          </div>
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                             <XCircle className="h-5 w-5 text-red-500" />
@@ -908,6 +934,10 @@ export function AdminAgenciesView() {
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
+                              ) : application && loadingLogoIds.has(application.id) ? (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
                               ) : (
                                 <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
                                   <AlertTriangle className="h-5 w-5 text-yellow-500" />
@@ -1007,6 +1037,10 @@ export function AdminAgenciesView() {
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
+                              ) : application && loadingLogoIds.has(application.id) ? (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
                               ) : (
                                 <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
                                   <FileText className="h-5 w-5 text-green-500" />
@@ -1088,6 +1122,10 @@ export function AdminAgenciesView() {
                               alt={agency.agency_name}
                               className="w-10 h-10 rounded-full object-cover"
                             />
+                          ) : application && loadingLogoIds.has(application.id) ? (
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                            </div>
                           ) : (
                             <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
                               <CheckCircle className="h-5 w-5 text-green-500" />
@@ -1166,6 +1204,10 @@ export function AdminAgenciesView() {
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
+                        ) : loadingLogoIds.has(app.id) ? (
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                          </div>
                         ) : (
                           <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
                             <XCircle className="h-5 w-5 text-red-500" />
