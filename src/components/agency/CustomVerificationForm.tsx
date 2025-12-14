@@ -171,6 +171,21 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
 
       if (error) throw error;
 
+      // Notify admin about the submission
+      try {
+        await supabase.functions.invoke('notify-admin-custom-verification', {
+          body: {
+            agency_name: agencyName,
+            full_name: formData.full_name,
+            company_name: formData.company_name,
+            country: formData.country,
+          }
+        });
+      } catch (notifyError) {
+        console.error('Failed to notify admin:', notifyError);
+        // Non-blocking - continue even if notification fails
+      }
+
       toast({
         title: 'Verification submitted!',
         description: 'Your verification documents are under review. We will notify you once approved.',
