@@ -51,6 +51,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     company_name: agencyName || '',
     country: '',
     phone: '',
+    company_address: '',
     // Bank details
     bank_account_holder: '',
     bank_account_number: '',
@@ -58,6 +59,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     bank_swift_code: '',
     bank_iban: '',
     bank_country: '',
+    bank_address: '',
     // Crypto details
     usdt_wallet_address: '',
     usdt_network: '',
@@ -199,6 +201,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         bank_swift_code: formData.bank_swift_code || null,
         bank_iban: formData.bank_iban || null,
         bank_country: formData.bank_country || null,
+        bank_address: formData.bank_address || null,
+        company_address: formData.company_address || null,
         usdt_wallet_address: formData.usdt_wallet_address || null,
         usdt_network: formData.usdt_network || null,
         status: 'pending_review',
@@ -549,7 +553,9 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bank_country">Bank Country</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="bank_country">Bank Country</Label>
+                </div>
                 <Select
                   value={formData.bank_country}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, bank_country: value }))}
@@ -564,6 +570,32 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="company_address">Company Address</Label>
+                </div>
+                <Input
+                  id="company_address"
+                  placeholder="123 Business St, City, Country"
+                  value={formData.company_address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="bank_address">Bank Address</Label>
+                </div>
+                <Input
+                  id="bank_address"
+                  placeholder="Bank branch address"
+                  value={formData.bank_address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bank_address: e.target.value }))}
+                  disabled={submitting}
+                />
               </div>
             </div>
           </CardContent>
