@@ -117,6 +117,7 @@ export function AdminAgenciesView() {
   const [loadingStripeAccounts, setLoadingStripeAccounts] = useState(false);
   const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
@@ -205,6 +206,27 @@ export function AdminAgenciesView() {
     // Check if this agency has an approved application
     const hasApprovedApp = approvedApplications.some(app => app.user_id === a.user_id);
     return hasApprovedApp;
+  });
+
+  // Split into sub-categories:
+  // Pending Verification: user hasn't submitted verification yet (Stripe Connect OR Custom without submission)
+  const agenciesPendingVerification = agenciesUnderVerification.filter(a => {
+    if (a.payout_method === 'custom') {
+      const verification = customVerifications.find(v => v.agency_payout_id === a.id);
+      // No verification submitted yet
+      return !verification || !verification.submitted_at;
+    }
+    // Stripe Connect - always pending verification until complete
+    return true;
+  });
+
+  // Pending Approval Review: Custom payout agencies where user HAS submitted verification
+  const agenciesPendingApprovalReview = agenciesUnderVerification.filter(a => {
+    if (a.payout_method === 'custom') {
+      const verification = customVerifications.find(v => v.agency_payout_id === a.id);
+      return verification && verification.submitted_at && verification.status === 'pending_review';
+    }
+    return false;
   });
 
   const handleOpenApplication = async (app: AgencyApplication) => {
@@ -728,100 +750,197 @@ export function AdminAgenciesView() {
         {/* Under Verification Tab */}
         <TabsContent value="verification" className="mt-6">
           <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
-          {agenciesUnderVerification.length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <AlertTriangle className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No agencies under verification</h3>
-                <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Agencies pending verification will appear here
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {agenciesUnderVerification.map(agency => {
-                const application = getAgencyWithApplication(agency);
-                return (
-                  <Card 
-                    key={agency.id} 
-                    className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
-                    onClick={() => {
-                      if (application) {
-                        handleOpenApplication(application);
-                      }
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          {application && logoUrls[application.id] ? (
-                            <img 
-                              src={logoUrls[application.id]} 
-                              alt={agency.agency_name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+          
+          {/* Sub-tabs for verification stages */}
+          <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab} className="mb-4">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="pending-verification" className="relative">
+                Pending Verification ({agenciesPendingVerification.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending-approval" className="relative">
+                Pending Approval Review ({agenciesPendingApprovalReview.length})
+                {agenciesPendingApprovalReview.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
+                    {agenciesPendingApprovalReview.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Pending Verification Sub-Tab */}
+            <TabsContent value="pending-verification" className="mt-4">
+              {agenciesPendingVerification.length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Clock className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No pending verifications</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Agencies awaiting user verification will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {agenciesPendingVerification.map(agency => {
+                    const application = getAgencyWithApplication(agency);
+                    return (
+                      <Card 
+                        key={agency.id} 
+                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
+                        onClick={() => {
+                          if (application) {
+                            handleOpenApplication(application);
+                          }
+                        }}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              {application && logoUrls[application.id] ? (
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt={agency.agency_name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                  <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                                </div>
+                              )}
+                              <div>
+                                <h3 className="font-semibold">{agency.agency_name}</h3>
+                                <p className="text-sm text-muted-foreground">{agency.email}</p>
+                                {application && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {application.full_name} • {application.country}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                          )}
-                          <div>
-                            <h3 className="font-semibold">{agency.agency_name}</h3>
-                            <p className="text-sm text-muted-foreground">{agency.email}</p>
-                            {application && (
-                              <p className="text-xs text-muted-foreground">
-                                {application.full_name} • {application.country}
-                              </p>
-                            )}
-                          </div>
-                        </div>
 
-                        <div className="flex items-center gap-4">
-                          {getOnboardingStatus(agency)}
+                            <div className="flex items-center gap-4">
+                              {getOnboardingStatus(agency)}
 
-                          <div className="flex gap-1">
-                            {agency.stripe_account_id && agency.payout_method !== 'custom' && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                                  onClick={(e) => { e.stopPropagation(); handleResendInvite(agency); }}
-                                  disabled={sendingInvite === agency.id}
-                                  title="Resend onboarding email"
-                                >
-                                  {sendingInvite === agency.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Mail className="h-4 w-4" />
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                                  onClick={(e) => { e.stopPropagation(); handleOpenOnboardingLink(agency); }}
-                                  disabled={openingLink === agency.id}
-                                  title="Open onboarding link"
-                                >
-                                  {openingLink === agency.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <ExternalLink className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </>
-                            )}
+                              <div className="flex gap-1">
+                                {agency.stripe_account_id && agency.payout_method !== 'custom' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                                      onClick={(e) => { e.stopPropagation(); handleResendInvite(agency); }}
+                                      disabled={sendingInvite === agency.id}
+                                      title="Resend onboarding email"
+                                    >
+                                      {sendingInvite === agency.id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <Mail className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                                      onClick={(e) => { e.stopPropagation(); handleOpenOnboardingLink(agency); }}
+                                      disabled={openingLink === agency.id}
+                                      title="Open onboarding link"
+                                    >
+                                      {openingLink === agency.id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <ExternalLink className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Pending Approval Review Sub-Tab */}
+            <TabsContent value="pending-approval" className="mt-4">
+              {agenciesPendingApprovalReview.length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <FileText className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No submissions to review</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Custom payout verifications submitted by users will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {agenciesPendingApprovalReview.map(agency => {
+                    const application = getAgencyWithApplication(agency);
+                    const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
+                    return (
+                      <Card 
+                        key={agency.id} 
+                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
+                        onClick={() => {
+                          if (application) {
+                            handleOpenApplication(application);
+                          }
+                        }}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              {application && logoUrls[application.id] ? (
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt={agency.agency_name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                                  <FileText className="h-5 w-5 text-green-500" />
+                                </div>
+                              )}
+                              <div>
+                                <h3 className="font-semibold">{agency.agency_name}</h3>
+                                <p className="text-sm text-muted-foreground">{agency.email}</p>
+                                {application && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {application.full_name} • {application.country}
+                                  </p>
+                                )}
+                                {verification?.submitted_at && (
+                                  <p className="text-xs text-green-500 mt-1">
+                                    Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <div className="flex gap-2">
+                                <Badge className="bg-green-600/20 text-green-600">
+                                  <Clock className="h-3 w-3 mr-1" />Pending Review
+                                </Badge>
+                                <Badge className="bg-black text-white">
+                                  Custom Payout
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* Active Agencies Tab */}
