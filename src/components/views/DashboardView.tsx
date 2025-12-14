@@ -220,13 +220,13 @@ export function DashboardView() {
               <Library className="mr-2 h-4 w-4" />
               Global Library
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('orders')}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView(isAdmin ? 'admin-orders' : 'orders')}>
               <Package className="mr-2 h-4 w-4" />
-              My Orders
+              {isAdmin ? 'Order Management' : 'My Orders'}
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('my-requests')}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView(isAdmin ? 'admin-engagements' : 'my-requests')}>
               <MessageSquare className="mr-2 h-4 w-4" />
-              My Engagements
+              {isAdmin ? 'Engagements' : 'My Engagements'}
             </Button>
           </CardContent>
         </Card>
