@@ -567,7 +567,7 @@ export function AdminAgenciesView() {
                 <Card 
                   key={app.id} 
                   className={cn(
-                    "cursor-pointer hover:bg-muted/50 transition-colors",
+                    "cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors",
                     !app.read ? "border-yellow-500/50 bg-yellow-500/5" : "border-yellow-500/20"
                   )}
                   onClick={() => handleOpenApplication(app)}
@@ -627,7 +627,7 @@ export function AdminAgenciesView() {
                 <Card 
                   key={app.id} 
                   className={cn(
-                    "cursor-pointer hover:bg-muted/50 transition-colors",
+                    "cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors",
                     !app.read ? "border-red-500/50 bg-red-500/5" : "border-red-500/20"
                   )}
                   onClick={() => handleOpenApplication(app)}
@@ -693,7 +693,7 @@ export function AdminAgenciesView() {
                 return (
                   <Card 
                     key={agency.id} 
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
                     onClick={() => {
                       if (application) {
                         handleOpenApplication(application);
@@ -863,7 +863,7 @@ export function AdminAgenciesView() {
               {rejectedApplications.map((app) => (
                 <Card 
                   key={app.id} 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors border-red-500/30"
+                  className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-red-500/30"
                   onClick={() => {
                     setSelectedApp(app);
                     setAdminNotes(app.admin_notes || '');
