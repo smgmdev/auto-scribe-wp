@@ -327,7 +327,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
           <form onSubmit={handleSubmit} className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name *</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="full_name">Full Name *</Label>
+                </div>
                 <Input
                   id="full_name"
                   placeholder="John Doe"
@@ -337,7 +339,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="email">Email *</Label>
+                </div>
                 <Input
                   id="email"
                   type="email"
@@ -348,7 +352,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="whatsapp_phone">WhatsApp Phone *</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="whatsapp_phone">WhatsApp Phone *</Label>
+                </div>
                 <Input
                   id="whatsapp_phone"
                   placeholder="+1 234 567 8900"
@@ -358,7 +364,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
+                <div className="h-5 flex items-center gap-1.5">
                   <Label htmlFor="agency_name">Agency Name *</Label>
                   <TooltipProvider>
                     <Tooltip>
@@ -387,7 +393,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="country">Country *</Label>
+                </div>
                 <Select
                   value={formData.country}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
@@ -406,7 +414,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="agency_website">Agency Website *</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="agency_website">Agency Website *</Label>
+                </div>
                 <div className="flex">
                   <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
                     https://
