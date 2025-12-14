@@ -455,7 +455,12 @@ export function AdminAgenciesView() {
     
     // Stripe Connect agencies
     if (agency.stripe_account_id) {
-      return <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><AlertTriangle className="h-3 w-3 mr-1" />Pending Verification</Badge>;
+      return (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><AlertTriangle className="h-3 w-3 mr-1" />Pending Verification</Badge>
+          <Badge className="bg-black text-white">Stripe Connect</Badge>
+        </div>
+      );
     }
     return <Badge variant="secondary" className="bg-red-600/20 text-red-600"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
   };
@@ -673,7 +678,7 @@ export function AdminAgenciesView() {
                                 {sendingInvite === agency.id ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
-                                  <Send className="h-4 w-4" />
+                                  <ExternalLink className="h-4 w-4" />
                                 )}
                               </Button>
                             )}
