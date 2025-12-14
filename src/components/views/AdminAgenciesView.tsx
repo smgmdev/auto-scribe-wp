@@ -675,18 +675,6 @@ export function AdminAgenciesView() {
                   variant="outline" 
                   size="sm" 
                   className="hover:bg-black hover:text-white"
-                  onClick={() => {
-                    setWebViewUrl(selectedApp.agency_website);
-                    setWebViewTitle('Agency Website');
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4 mr-1" />
-                  Website
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hover:bg-black hover:text-white"
                   onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
                 >
                   <FileText className="h-4 w-4 mr-1" />
