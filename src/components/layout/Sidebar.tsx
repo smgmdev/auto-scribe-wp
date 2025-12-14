@@ -126,17 +126,6 @@ export function Sidebar({
     }
   }, [userApplicationStatus]);
 
-  // Reset agency data when user changes
-  useEffect(() => {
-    setAgencyDataLoaded(false);
-    setIsAgencyOnboarded(false);
-    setHasStripeAccount(false);
-    setPayoutMethod(null);
-    setUserApplicationStatus(null);
-    setApplicationId(null);
-    setRejectionSeen(false);
-  }, [user?.id]);
-
   useEffect(() => {
     const fetchApplicationStatus = async () => {
       if (!user) {
@@ -157,22 +146,23 @@ export function Sidebar({
         return;
       }
       
-      // Regular user: check their own application status (most recent)
-      // Only fetch from DB if store doesn't have a status yet (initial load)
-      if (!userApplicationStatus) {
-        const { data: appData } = await supabase
-          .from('agency_applications')
-          .select('id, status, rejection_seen')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        if (appData) {
+      // Regular user: fetch application data from DB on initial load only
+      const { data: appData } = await supabase
+        .from('agency_applications')
+        .select('id, status, rejection_seen')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (appData) {
+        // Only set from DB if we don't already have a status in store
+        // This prevents DB overwriting a fresh submission status
+        if (!userApplicationStatus) {
           setUserApplicationStatus(appData.status);
-          setApplicationId(appData.id);
-          setRejectionSeen(appData.rejection_seen || false);
         }
+        setApplicationId(appData.id);
+        setRejectionSeen(appData.rejection_seen || false);
       }
 
       // Check if user has agency payout record and onboarding status
@@ -187,7 +177,6 @@ export function Sidebar({
         setHasStripeAccount(!!agencyData.stripe_account_id);
         setPayoutMethod(agencyData.payout_method);
       } else {
-        // No agency_payouts record found - reset states
         setIsAgencyOnboarded(false);
         setHasStripeAccount(false);
         setPayoutMethod(null);
@@ -197,7 +186,7 @@ export function Sidebar({
     };
 
     fetchApplicationStatus();
-  }, [user, isAdmin]);
+  }, [user?.id, isAdmin]);
 
   const handleNavClick = (viewId: string) => {
     setCurrentView(viewId as typeof currentView);
