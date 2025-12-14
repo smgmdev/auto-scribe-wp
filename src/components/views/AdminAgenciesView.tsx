@@ -925,7 +925,7 @@ export function AdminAgenciesView() {
                   onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
                 >
                   <FileText className="h-4 w-4 mr-1" />
-                  View Document
+                  Company Incorporation Document
                 </Button>
               </div>
 
