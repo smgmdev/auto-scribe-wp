@@ -694,14 +694,9 @@ export function AdminAgenciesView() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <Badge variant="destructive">
-                            <XCircle className="h-3 w-3 mr-1" />Rejected
-                          </Badge>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {app.reviewed_at && format(new Date(app.reviewed_at), 'MMM d, yyyy')}
-                          </p>
-                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {app.reviewed_at && format(new Date(app.reviewed_at), 'MMM d, yyyy')}
+                        </p>
                         <Button
                           variant="outline"
                           size="sm"
