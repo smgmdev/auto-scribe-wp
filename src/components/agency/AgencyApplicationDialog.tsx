@@ -65,6 +65,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
 
+  // Field validation errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -238,110 +241,87 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !documentUrl || !logoUrl) return;
+    if (!user) return;
 
     const { full_name, email, whatsapp_phone, agency_name, country, agency_website, media_channel_1, media_channel_2, media_channel_3 } = formData;
 
-    if (!full_name || !email || !whatsapp_phone || !agency_name || !country || !agency_website) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please fill in all required fields'
-      });
-      return;
+    // Reset and collect field errors
+    const errors: Record<string, boolean> = {};
+    let hasError = false;
+
+    // Check required fields
+    if (!full_name) errors.full_name = true;
+    if (!email) errors.email = true;
+    if (!whatsapp_phone) errors.whatsapp_phone = true;
+    if (!agency_name) errors.agency_name = true;
+    if (!country) errors.country = true;
+    if (!agency_website) errors.agency_website = true;
+    if (!documentUrl) errors.document = true;
+    if (!logoUrl) errors.logo = true;
+    if (selectedNiches.length === 0) errors.niches = true;
+    if (selectedNiches.includes('Other') && !otherNiche.trim()) errors.otherNiche = true;
+    if (!media_channel_1.trim()) errors.media_channel_1 = true;
+    if (!media_channel_2.trim()) errors.media_channel_2 = true;
+    if (!media_channel_3.trim()) errors.media_channel_3 = true;
+
+    // Validate email format
+    if (email && !isValidEmail(email)) {
+      errors.email = true;
     }
 
-    // Validate email
-    if (!isValidEmail(email)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid email',
-        description: 'Please enter a valid email address'
-      });
-      return;
+    // Validate phone format
+    if (whatsapp_phone && !isValidPhone(whatsapp_phone)) {
+      errors.whatsapp_phone = true;
     }
 
-    // Validate phone
-    if (!isValidPhone(whatsapp_phone)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid phone number',
-        description: 'Please enter a valid WhatsApp phone number (e.g., +1 234 567 8900)'
-      });
-      return;
+    // Validate URL formats
+    if (agency_website && !isValidUrl(agency_website)) {
+      errors.agency_website = true;
+    }
+    if (media_channel_1 && !isValidUrl(media_channel_1)) {
+      errors.media_channel_1 = true;
+    }
+    if (media_channel_2 && !isValidUrl(media_channel_2)) {
+      errors.media_channel_2 = true;
+    }
+    if (media_channel_3 && !isValidUrl(media_channel_3)) {
+      errors.media_channel_3 = true;
     }
 
-    // Validate agency website
-    if (!isValidUrl(agency_website)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid website URL',
-        description: 'Please enter a valid website URL (e.g., youragency.com)'
-      });
-      return;
-    }
+    setFieldErrors(errors);
+    hasError = Object.keys(errors).length > 0;
 
-    if (!logoUrl) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please upload your agency logo'
-      });
-      return;
-    }
-
-    if (selectedNiches.length === 0) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please select at least one media niche'
-      });
-      return;
-    }
-
-    if (selectedNiches.includes('Other') && !otherNiche.trim()) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please specify your other niche'
-      });
-      return;
-    }
-
-    if (!media_channel_1.trim() || !media_channel_2.trim() || !media_channel_3.trim()) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please fill in all 3 media channels'
-      });
-      return;
-    }
-
-    // Validate media channel URLs
-    if (!isValidUrl(media_channel_1)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid URL',
-        description: 'Please enter a valid URL for the first media channel'
-      });
-      return;
-    }
-
-    if (!isValidUrl(media_channel_2)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid URL',
-        description: 'Please enter a valid URL for the second media channel'
-      });
-      return;
-    }
-
-    if (!isValidUrl(media_channel_3)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid URL',
-        description: 'Please enter a valid URL for the third media channel'
-      });
+    if (hasError) {
+      // Show specific error messages
+      if (errors.email && email && !isValidEmail(email)) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid email',
+          description: 'Please enter a valid email address'
+        });
+      } else if (errors.whatsapp_phone && whatsapp_phone && !isValidPhone(whatsapp_phone)) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid phone number',
+          description: 'Please enter a valid WhatsApp phone number (e.g., +1 234 567 8900)'
+        });
+      } else if ((errors.agency_website || errors.media_channel_1 || errors.media_channel_2 || errors.media_channel_3) && 
+                 ((agency_website && !isValidUrl(agency_website)) || 
+                  (media_channel_1 && !isValidUrl(media_channel_1)) ||
+                  (media_channel_2 && !isValidUrl(media_channel_2)) ||
+                  (media_channel_3 && !isValidUrl(media_channel_3)))) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid URL',
+          description: 'Please enter valid URLs (e.g., example.com)'
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Missing fields',
+          description: 'Please fill in all required fields highlighted in red'
+        });
+      }
       return;
     }
 
@@ -432,28 +412,42 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               </div>
               <div className="space-y-2">
                 <div className="h-5 flex items-center">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email" className={fieldErrors.email ? 'text-red-500' : ''}>Email *</Label>
                 </div>
                 <Input
                   id="email"
                   type="email"
                   placeholder="john@agency.com"
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, email: e.target.value }));
+                    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: false }));
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
                 />
+                {fieldErrors.email && formData.email && !isValidEmail(formData.email) && (
+                  <p className="text-xs text-red-500">Please enter a valid email address</p>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="h-5 flex items-center">
-                  <Label htmlFor="whatsapp_phone">WhatsApp Phone *</Label>
+                  <Label htmlFor="whatsapp_phone" className={fieldErrors.whatsapp_phone ? 'text-red-500' : ''}>WhatsApp Phone *</Label>
                 </div>
                 <Input
                   id="whatsapp_phone"
                   placeholder="+1 234 567 8900"
                   value={formData.whatsapp_phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, whatsapp_phone: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, whatsapp_phone: e.target.value }));
+                    if (fieldErrors.whatsapp_phone) setFieldErrors(prev => ({ ...prev, whatsapp_phone: false }));
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.whatsapp_phone ? 'border-red-500 focus-visible:ring-red-500' : ''}
                 />
+                {fieldErrors.whatsapp_phone && formData.whatsapp_phone && !isValidPhone(formData.whatsapp_phone) && (
+                  <p className="text-xs text-red-500">Please enter a valid phone number</p>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="h-5 flex items-center gap-1.5">
@@ -507,10 +501,10 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               </div>
               <div className="space-y-2">
                 <div className="h-5 flex items-center">
-                  <Label htmlFor="agency_website">Agency Website *</Label>
+                  <Label htmlFor="agency_website" className={fieldErrors.agency_website ? 'text-red-500' : ''}>Agency Website *</Label>
                 </div>
                 <div className="flex">
-                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                  <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.agency_website ? 'border-red-500' : 'border-input'}`}>
                     https://
                   </span>
                   <Input
@@ -518,15 +512,18 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     type="text"
                     placeholder="youragency.com"
                     value={formData.agency_website}
-                    onChange={(e) => setFormData(prev => ({ ...prev, agency_website: e.target.value }))}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, agency_website: e.target.value }));
+                      if (fieldErrors.agency_website) setFieldErrors(prev => ({ ...prev, agency_website: false }));
+                    }}
                     disabled={submitting}
-                    className="rounded-l-none"
+                    className={`rounded-l-none ${fieldErrors.agency_website ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                   />
                 </div>
+                {fieldErrors.agency_website && formData.agency_website && !isValidUrl(formData.agency_website) && (
+                  <p className="text-xs text-red-500">Please enter a valid URL</p>
+                )}
               </div>
-            </div>
-
-            <div className="space-y-3">
               <Label>What is your focus media niche? (select up to 3) *</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {MEDIA_NICHES.map((niche) => {
@@ -571,41 +568,65 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
             <div className="space-y-2">
               <Label>What are the 3 media channels you would list at the start? *</Label>
               <div className="flex flex-col gap-3">
-                <div className="flex w-full">
-                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
-                    https://
-                  </span>
-                  <Input
-                    placeholder="forbes.com"
-                    value={formData.media_channel_1}
-                    onChange={(e) => setFormData(prev => ({ ...prev, media_channel_1: e.target.value }))}
-                    disabled={submitting}
-                    className="rounded-l-none flex-1"
-                  />
+                <div>
+                  <div className="flex w-full">
+                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.media_channel_1 ? 'border-red-500' : 'border-input'}`}>
+                      https://
+                    </span>
+                    <Input
+                      placeholder="forbes.com"
+                      value={formData.media_channel_1}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, media_channel_1: e.target.value }));
+                        if (fieldErrors.media_channel_1) setFieldErrors(prev => ({ ...prev, media_channel_1: false }));
+                      }}
+                      disabled={submitting}
+                      className={`rounded-l-none flex-1 ${fieldErrors.media_channel_1 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    />
+                  </div>
+                  {fieldErrors.media_channel_1 && formData.media_channel_1 && !isValidUrl(formData.media_channel_1) && (
+                    <p className="text-xs text-red-500 mt-1">Please enter a valid URL</p>
+                  )}
                 </div>
-                <div className="flex w-full">
-                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
-                    https://
-                  </span>
-                  <Input
-                    placeholder="bloomberg.com"
-                    value={formData.media_channel_2}
-                    onChange={(e) => setFormData(prev => ({ ...prev, media_channel_2: e.target.value }))}
-                    disabled={submitting}
-                    className="rounded-l-none flex-1"
-                  />
+                <div>
+                  <div className="flex w-full">
+                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.media_channel_2 ? 'border-red-500' : 'border-input'}`}>
+                      https://
+                    </span>
+                    <Input
+                      placeholder="bloomberg.com"
+                      value={formData.media_channel_2}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, media_channel_2: e.target.value }));
+                        if (fieldErrors.media_channel_2) setFieldErrors(prev => ({ ...prev, media_channel_2: false }));
+                      }}
+                      disabled={submitting}
+                      className={`rounded-l-none flex-1 ${fieldErrors.media_channel_2 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    />
+                  </div>
+                  {fieldErrors.media_channel_2 && formData.media_channel_2 && !isValidUrl(formData.media_channel_2) && (
+                    <p className="text-xs text-red-500 mt-1">Please enter a valid URL</p>
+                  )}
                 </div>
-                <div className="flex w-full">
-                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
-                    https://
-                  </span>
-                  <Input
-                    placeholder="dailymail.co.uk"
-                    value={formData.media_channel_3}
-                    onChange={(e) => setFormData(prev => ({ ...prev, media_channel_3: e.target.value }))}
-                    disabled={submitting}
-                    className="rounded-l-none flex-1"
-                  />
+                <div>
+                  <div className="flex w-full">
+                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.media_channel_3 ? 'border-red-500' : 'border-input'}`}>
+                      https://
+                    </span>
+                    <Input
+                      placeholder="dailymail.co.uk"
+                      value={formData.media_channel_3}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, media_channel_3: e.target.value }));
+                        if (fieldErrors.media_channel_3) setFieldErrors(prev => ({ ...prev, media_channel_3: false }));
+                      }}
+                      disabled={submitting}
+                      className={`rounded-l-none flex-1 ${fieldErrors.media_channel_3 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    />
+                  </div>
+                  {fieldErrors.media_channel_3 && formData.media_channel_3 && !isValidUrl(formData.media_channel_3) && (
+                    <p className="text-xs text-red-500 mt-1">Please enter a valid URL</p>
+                  )}
                 </div>
               </div>
             </div>
