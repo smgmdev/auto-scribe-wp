@@ -182,22 +182,56 @@ serve(async (req) => {
 
     logStep("Onboarding link created", { url: accountLink.url });
 
-    // Save to database with user_id if provided
-    const insertData: any = {
-      agency_name,
-      email,
-      stripe_account_id: account.id,
-      commission_percentage: commission_percentage || 10,
-      invite_sent_at: new Date().toISOString(),
-    };
-    
+    // Check if agency_payouts record already exists for this user
+    let dbError = null;
     if (user_id) {
-      insertData.user_id = user_id;
-    }
+      const { data: existingPayout } = await supabaseClient
+        .from("agency_payouts")
+        .select("id")
+        .eq("user_id", user_id)
+        .maybeSingle();
 
-    const { error: dbError } = await supabaseClient
-      .from("agency_payouts")
-      .insert(insertData);
+      if (existingPayout) {
+        // Update existing record
+        const { error: updateError } = await supabaseClient
+          .from("agency_payouts")
+          .update({
+            agency_name,
+            email,
+            stripe_account_id: account.id,
+            commission_percentage: commission_percentage || 10,
+            invite_sent_at: new Date().toISOString(),
+            payout_method: 'stripe',
+          })
+          .eq("id", existingPayout.id);
+        dbError = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabaseClient
+          .from("agency_payouts")
+          .insert({
+            agency_name,
+            email,
+            stripe_account_id: account.id,
+            commission_percentage: commission_percentage || 10,
+            invite_sent_at: new Date().toISOString(),
+            user_id,
+          });
+        dbError = insertError;
+      }
+    } else {
+      // No user_id, just insert
+      const { error: insertError } = await supabaseClient
+        .from("agency_payouts")
+        .insert({
+          agency_name,
+          email,
+          stripe_account_id: account.id,
+          commission_percentage: commission_percentage || 10,
+          invite_sent_at: new Date().toISOString(),
+        });
+      dbError = insertError;
+    }
 
     if (dbError) {
       logStep("Database error", { error: dbError.message });

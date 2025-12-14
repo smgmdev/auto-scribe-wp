@@ -48,26 +48,58 @@ serve(async (req) => {
     
     logStep("Creating custom payout agency record", { agency_name, email, user_id });
 
-    // Create agency_payouts record without Stripe account
-    const { data: agencyPayout, error: dbError } = await supabaseClient
+    // Check if agency_payouts record already exists for this user
+    const { data: existingPayout } = await supabaseClient
       .from("agency_payouts")
-      .insert({
-        agency_name,
-        email,
-        commission_percentage: commission_percentage || 10,
-        user_id: user_id || null,
-        payout_method: 'custom',
-        onboarding_complete: false, // Will be set to true after admin reviews custom verification
-      })
-      .select()
-      .single();
+      .select("id")
+      .eq("user_id", user_id)
+      .maybeSingle();
 
-    if (dbError) {
-      logStep("Database error", { error: dbError.message });
-      throw new Error(`Database error: ${dbError.message}`);
+    let agencyPayout;
+    
+    if (existingPayout) {
+      // Update existing record
+      const { data: updatedPayout, error: updateError } = await supabaseClient
+        .from("agency_payouts")
+        .update({
+          agency_name,
+          email,
+          commission_percentage: commission_percentage || 10,
+          payout_method: 'custom',
+          onboarding_complete: false,
+        })
+        .eq("id", existingPayout.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        logStep("Update error", { error: updateError.message });
+        throw new Error(`Database error: ${updateError.message}`);
+      }
+      agencyPayout = updatedPayout;
+      logStep("Agency payout record updated", { id: agencyPayout.id });
+    } else {
+      // Create new agency_payouts record
+      const { data: newPayout, error: dbError } = await supabaseClient
+        .from("agency_payouts")
+        .insert({
+          agency_name,
+          email,
+          commission_percentage: commission_percentage || 10,
+          user_id: user_id || null,
+          payout_method: 'custom',
+          onboarding_complete: false,
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        logStep("Database error", { error: dbError.message });
+        throw new Error(`Database error: ${dbError.message}`);
+      }
+      agencyPayout = newPayout;
+      logStep("Agency payout record created", { id: agencyPayout.id });
     }
-
-    logStep("Agency payout record created", { id: agencyPayout.id });
 
     // Send email notification to agency
     const resendKey = Deno.env.get("RESEND_API_KEY");
