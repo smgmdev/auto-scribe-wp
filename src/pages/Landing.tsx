@@ -147,6 +147,12 @@ const Landing = () => {
     }
   }, [showSearchModal]);
 
+  // WP sites for landing page sections - not affected by search
+  const landingWpSites = useMemo(() => {
+    return wpSites;
+  }, [wpSites]);
+
+  // Filtered WP sites for search dropdown only
   const filteredWpSites = useMemo(() => {
     if (!searchQuery.trim()) return wpSites;
     const query = searchQuery.toLowerCase();
@@ -221,8 +227,8 @@ const Landing = () => {
   };
 
   const randomizedWpSites = useMemo(() => {
-    return shuffleArray(filteredWpSites);
-  }, [filteredWpSites]);
+    return shuffleArray(landingWpSites);
+  }, [landingWpSites]);
 
   const chinaSites = useMemo(() => {
     const filtered = mediaSites.filter(site => {
