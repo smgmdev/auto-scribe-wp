@@ -373,7 +373,7 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Keep Application</AlertDialogCancel>
+                <AlertDialogCancel className="hover:bg-black hover:text-white">Keep Application</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleCancelApplication}
                   className="bg-red-500 hover:bg-red-600"
