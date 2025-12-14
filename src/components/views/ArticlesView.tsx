@@ -31,9 +31,11 @@ export function ArticlesView() {
     if (article.publishedToName) {
       return { name: article.publishedToName, favicon: article.publishedToFavicon };
     }
-    if (!article.publishedTo) return { name: '', favicon: null };
+    if (!article.publishedTo) return null;
     const site = sites.find(s => s.id === article.publishedTo);
-    return { name: site?.name || 'Unknown site', favicon: site?.favicon || null };
+    // If site doesn't exist and no stored name, return null (site was deleted)
+    if (!site) return null;
+    return { name: site.name, favicon: site.favicon || null };
   };
 
   const handleEdit = (article: Article) => {
@@ -101,6 +103,7 @@ export function ArticlesView() {
               <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
               {article.publishedTo && (() => {
                 const siteInfo = getSiteInfo(article);
+                if (!siteInfo) return null; // Site was deleted and no stored name
                 return (
                   <>
                     <span>•</span>
