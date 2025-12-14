@@ -49,7 +49,7 @@ const getNavigation = (isAdmin: boolean) => {
       icon: ShoppingBag,
       submenu: [
         { id: 'admin-orders', label: 'Order Management', icon: Package },
-        { id: 'admin-engagements', label: 'Engagements', icon: MessageSquare }
+        { id: 'admin-engagements', label: 'Global Engagements', icon: MessageSquare }
       ]
     }, {
       id: 'admin-agencies',
