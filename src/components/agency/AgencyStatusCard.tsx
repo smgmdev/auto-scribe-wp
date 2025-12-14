@@ -126,8 +126,34 @@ export function AgencyStatusCard({
     );
   }
 
-  // Has Stripe account - check if all submitted or still needs more
-  if (hasStripeAccount) {
+  // Pending application - show grey Pending Review button (check BEFORE hasStripeAccount)
+  if (applicationStatus === 'pending') {
+    return (
+      <div className="rounded-lg border border-gray-500/30 bg-gray-500/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-500/20">
+            <Clock className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium text-gray-400">Application Under Review</span>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">We are reviewing your agency application</p>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/30 hover:text-gray-300"
+          onClick={onNavigateToApplication}
+        >
+          <Clock className="h-4 w-4 mr-2" />
+          Pending Review
+        </Button>
+      </div>
+    );
+  }
+
+  // Has Stripe account AND approved - check if all submitted or still needs more
+  if (hasStripeAccount && applicationStatus === 'approved') {
     // Loading state
     if (statusLoading && !stripeStatus) {
       return (
@@ -220,32 +246,6 @@ export function AgencyStatusCard({
           onClick={onNavigateToApplication}
         >
           Continue Verification
-        </Button>
-      </div>
-    );
-  }
-
-  // Pending application - show grey Pending Review button
-  if (applicationStatus === 'pending') {
-    return (
-      <div className="rounded-lg border border-gray-500/30 bg-gray-500/10 p-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-500/20">
-            <Clock className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="flex-1">
-            <span className="font-medium text-gray-400">Application Under Review</span>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">We are reviewing your agency application</p>
-          </div>
-        </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="w-full mt-3 bg-gray-500/20 border-gray-500/30 text-gray-400 hover:bg-gray-500/30 hover:text-gray-300"
-          onClick={onNavigateToApplication}
-        >
-          <Clock className="h-4 w-4 mr-2" />
-          Pending Review
         </Button>
       </div>
     );
