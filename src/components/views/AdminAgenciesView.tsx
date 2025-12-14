@@ -678,6 +678,7 @@ export function AdminAgenciesView() {
 
         {/* Active Agencies Tab */}
         <TabsContent value="active" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
           {agencies.filter(a => a.onboarding_complete).length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -742,6 +743,7 @@ export function AdminAgenciesView() {
 
         {/* Rejected Applications Tab */}
         <TabsContent value="rejected" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">Rejected agency applications</p>
           {rejectedApplications.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
