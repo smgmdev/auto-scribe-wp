@@ -130,12 +130,12 @@ export function Sidebar({
         return;
       }
       
-      // Admin: fetch pending applications count only
+      // Admin: fetch unread applications count (pending + cancelled)
       if (isAdmin) {
         const { count } = await supabase
           .from('agency_applications')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending')
+          .in('status', ['pending', 'cancelled'])
           .eq('read', false);
         
         setUnreadAgencyApplicationsCount(count || 0);
