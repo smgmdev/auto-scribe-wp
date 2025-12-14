@@ -623,20 +623,6 @@ export function AdminAgenciesView() {
                                 )}
                               </Button>
                             )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
-                              onClick={(e) => { e.stopPropagation(); handleDelete(agency); }}
-                              disabled={deleting === agency.id}
-                              title="Delete agency"
-                            >
-                              {deleting === agency.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </Button>
                           </div>
                         </div>
                       </div>
