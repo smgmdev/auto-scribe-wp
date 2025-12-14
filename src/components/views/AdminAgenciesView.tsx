@@ -791,10 +791,15 @@ export function AdminAgenciesView() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="text-right flex flex-col items-end gap-1">
                         <p className="text-xs text-muted-foreground">
-                          {app.reviewed_at && format(new Date(app.reviewed_at), 'MMM d, yyyy')}
+                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
+                        {app.reviewed_at && (
+                          <p className="text-xs text-red-500">
+                            Rejected {format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
