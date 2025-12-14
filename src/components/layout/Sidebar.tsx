@@ -114,12 +114,15 @@ export function Sidebar({
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
 
-  // Track userApplicationStatus changes to reset agency data
+  // Track userApplicationStatus changes to reset agency data immediately
   useEffect(() => {
     if (userApplicationStatus === 'cancelled') {
-      // Reset agency states when application is cancelled
+      // Reset all agency states immediately when application is cancelled
       setHasStripeAccount(false);
       setPayoutMethod(null);
+      setIsAgencyOnboarded(false);
+      // Force data loaded to be true so we don't show loading state
+      setAgencyDataLoaded(true);
     }
   }, [userApplicationStatus]);
 
