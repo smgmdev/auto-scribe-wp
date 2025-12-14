@@ -415,6 +415,7 @@ export function AgencyApplicationView() {
           agencyPayoutId={agencyPayout.id}
           agencyName={agencyPayout.agency_name}
           onSubmitSuccess={handleCustomVerificationSubmit}
+          onCancel={handleCancelled}
         />
       </div>
     );
