@@ -113,6 +113,16 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    // Only allow PDF files
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file type',
+        description: 'Only PDF files are allowed'
+      });
+      return;
+    }
+
     if (file.size > 10 * 1024 * 1024) {
       toast({
         variant: 'destructive',
@@ -679,11 +689,11 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         Drag & drop or click to upload
                       </p>
                       <p className="text-[10px] text-muted-foreground/70 mb-1">
-                        PDF/DOC, max 10MB
+                        PDF only, max 10MB
                       </p>
                       <Input
                         type="file"
-                        accept=".pdf,.doc,.docx"
+                        accept=".pdf,application/pdf"
                         onChange={handleFileChange}
                         disabled={uploading || submitting}
                         className="w-full text-xs h-9 file:text-xs file:h-full file:px-4 file:mr-3 file:border-0 file:bg-muted file:rounded cursor-pointer"
