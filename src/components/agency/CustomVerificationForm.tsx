@@ -16,6 +16,7 @@ interface CustomVerificationFormProps {
   agencyPayoutId: string;
   agencyName: string;
   onSubmitSuccess: () => void;
+  onCancel?: () => void;
 }
 
 const USDT_NETWORKS = [
@@ -25,9 +26,10 @@ const USDT_NETWORKS = [
   { value: 'SOL', label: 'Solana' },
 ];
 
-export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuccess }: CustomVerificationFormProps) {
+export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuccess, onCancel }: CustomVerificationFormProps) {
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   
   // File upload states
   const [companyDocsFile, setCompanyDocsFile] = useState<File | null>(null);
@@ -263,6 +265,37 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
       });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!user || !onCancel) return;
+    
+    setCancelling(true);
+    try {
+      // Update the agency_applications status to cancelled
+      const { error } = await supabase
+        .from('agency_applications')
+        .update({ status: 'cancelled' })
+        .eq('user_id', user.id)
+        .eq('status', 'approved');
+
+      if (error) throw error;
+
+      toast({
+        title: 'Application Cancelled',
+        description: 'Your agency application has been cancelled. You can reapply at any time.',
+      });
+
+      onCancel();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to cancel',
+        description: error.message
+      });
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -736,20 +769,41 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
           </CardContent>
         </Card>
 
-        <Button
-          type="submit"
-          disabled={submitting || uploadingCompanyDocs || uploadingPassport || uploadingArticles || uploadingLicense}
-          className="w-full bg-black hover:bg-black/80 text-white"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Submitting...
-            </>
-          ) : (
-            'Submit Verification'
+        <div className="flex flex-col gap-3">
+          <Button
+            type="submit"
+            disabled={submitting || cancelling || uploadingCompanyDocs || uploadingPassport || uploadingArticles || uploadingLicense}
+            className="w-full bg-black hover:bg-black/80 text-white"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Submitting...
+              </>
+            ) : (
+              'Submit Verification'
+            )}
+          </Button>
+          
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={submitting || cancelling}
+              onClick={handleCancel}
+              className="w-full border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+            >
+              {cancelling ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Cancelling...
+                </>
+              ) : (
+                'Cancel Application'
+              )}
+            </Button>
           )}
-        </Button>
+        </div>
       </form>
     </div>
   );
