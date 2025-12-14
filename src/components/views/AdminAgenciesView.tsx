@@ -863,13 +863,13 @@ export function AdminAgenciesView() {
               <TabsTrigger value="pending-verification" className="relative">
                 Pending Verification ({agenciesPendingVerification.length})
               </TabsTrigger>
-              <TabsTrigger value="pending-approval" className="relative">
-                Pending Approval ({agenciesPendingApprovalReview.length})
-                {agenciesPendingApprovalReview.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
-                    {agenciesPendingApprovalReview.length}
-                  </span>
-                )}
+          <TabsTrigger value="pending-approval" className="relative">
+            Pending Approval ({agenciesPendingApprovalReview.length})
+            {unreadPendingApprovalCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
+                {unreadPendingApprovalCount}
+              </span>
+            )}
               </TabsTrigger>
             </TabsList>
 
