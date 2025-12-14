@@ -210,15 +210,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
       return;
     }
 
-    // Must have either bank details or crypto details
-    const hasBankDetails = formData.bank_account_holder && formData.bank_account_number && formData.bank_name;
-    const hasCryptoDetails = formData.usdt_wallet_address && formData.usdt_network;
-
-    if (!hasBankDetails && !hasCryptoDetails) {
+    // Bank details validation - all fields required except IBAN
+    if (!formData.bank_account_holder || !formData.bank_account_number || !formData.bank_name || 
+        !formData.bank_swift_code || !formData.bank_country || !formData.bank_address) {
       toast({
         variant: 'destructive',
-        title: 'Missing payout details',
-        description: 'Please provide either bank account details or USDT wallet address'
+        title: 'Missing bank details',
+        description: 'Please fill in all required bank account fields'
       });
       return;
     }
@@ -639,13 +637,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">Bank Account Details</CardTitle>
-            <CardDescription>For wire transfer payouts (provide either bank or crypto details)</CardDescription>
+            <CardDescription>For wire transfer payouts</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5 h-5">
-                  <Label htmlFor="bank_account_holder">Beneficiary Name</Label>
+                  <Label htmlFor="bank_account_holder">Beneficiary Name *</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Info className="h-3 w-3 text-muted-foreground/70 cursor-help" />
@@ -672,7 +670,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               </div>
               <div className="space-y-2">
                 <div className="h-5 flex items-center">
-                  <Label htmlFor="bank_name">Bank Name</Label>
+                  <Label htmlFor="bank_name">Bank Name *</Label>
                 </div>
                 <Input
                   id="bank_name"
@@ -683,7 +681,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bank_account_number">Account Number</Label>
+                <Label htmlFor="bank_account_number">Account Number *</Label>
                 <Input
                   id="bank_account_number"
                   placeholder="1234567890"
@@ -703,7 +701,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bank_swift_code">SWIFT/BIC Code</Label>
+                <Label htmlFor="bank_swift_code">SWIFT/BIC Code *</Label>
                 <Input
                   id="bank_swift_code"
                   placeholder="EXAMPLEXXX"
@@ -714,7 +712,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               </div>
               <div className="space-y-2">
                 <div className="h-5 flex items-center">
-                  <Label htmlFor="bank_country">Bank Country</Label>
+                  <Label htmlFor="bank_country">Bank Country *</Label>
                 </div>
                 <Select
                   value={formData.bank_country}
@@ -732,31 +730,17 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="h-5 flex items-center">
-                  <Label htmlFor="company_address">Company Address</Label>
-                </div>
-                <Input
-                  id="company_address"
-                  placeholder="123 Business St, City, Country"
-                  value={formData.company_address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
-                  disabled={submitting}
-                />
+            <div className="space-y-2">
+              <div className="h-5 flex items-center">
+                <Label htmlFor="bank_address">Bank Address *</Label>
               </div>
-              <div className="space-y-2">
-                <div className="h-5 flex items-center">
-                  <Label htmlFor="bank_address">Bank Address</Label>
-                </div>
-                <Input
-                  id="bank_address"
-                  placeholder="Bank branch address"
-                  value={formData.bank_address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bank_address: e.target.value }))}
-                  disabled={submitting}
-                />
-              </div>
+              <Input
+                id="bank_address"
+                placeholder="Bank branch address"
+                value={formData.bank_address}
+                onChange={(e) => setFormData(prev => ({ ...prev, bank_address: e.target.value }))}
+                disabled={submitting}
+              />
             </div>
           </CardContent>
         </Card>
@@ -764,7 +748,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         {/* Crypto Payout Details */}
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">USDT Wallet Details</CardTitle>
+            <CardTitle className="text-lg">USDT Wallet Details (Optional)</CardTitle>
             <CardDescription>For cryptocurrency payouts</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
