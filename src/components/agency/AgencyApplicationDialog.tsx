@@ -495,13 +495,19 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="stripe" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Automatic payout via Stripe Connect (Recommended)</SelectItem>
-                  <SelectItem value="usdt" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">USDT payout</SelectItem>
-                  <SelectItem value="wire" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Wire payout</SelectItem>
+                  <SelectItem value="custom" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Custom Payout</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Stripe Connect is recommended allowing your customers to pay by credit card directly which makes it easier for clients to perform payments. You will have to pass KYC verification to be onboarded on Stripe Connect.
-              </p>
+              {formData.payout_method === 'stripe' && (
+                <p className="text-xs text-muted-foreground">
+                  Stripe Connect is recommended allowing your customers to pay by credit card directly which makes it easier for clients to perform payments. You will have to pass KYC verification to be onboarded on Stripe Connect.
+                </p>
+              )}
+              {formData.payout_method === 'custom' && (
+                <p className="text-xs text-muted-foreground">
+                  Custom Payouts are manual payouts by wire transfer or USDT. If you choose Custom Payout option you will be assigned an account manager to handle your payouts in a custom manner. Custom Payouts can take up to 7 days or more.
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
