@@ -52,7 +52,7 @@ export function AdminCreditsView() {
     if (error) {
       toast({
         variant: 'destructive',
-        title: 'Error loading credit packs',
+        title: 'Error loading credit offers',
         description: error.message
       });
     } else {
@@ -115,7 +115,7 @@ export function AdminCreditsView() {
     if (error) {
       toast({
         variant: 'destructive',
-        title: 'Error saving credit pack',
+        title: 'Error saving credit offer',
         description: error.message
       });
     } else {
@@ -172,9 +172,9 @@ export function AdminCreditsView() {
         </div> : packs.length === 0 ? <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <DollarSign className="h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-xl font-semibold">No credit packs</h3>
+            <h3 className="mt-4 text-xl font-semibold">No credit offers</h3>
             <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-              Create credit packs for users to purchase
+              Create credit offers for users to purchase
             </p>
             <Button className="mt-4" onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
@@ -223,10 +223,10 @@ export function AdminCreditsView() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingPack ? 'Edit Credit Pack' : 'Create Credit Pack'}
+              {editingPack ? 'Edit Credit Offer' : 'Create Credit Offer'}
             </DialogTitle>
             <DialogDescription>
-              Configure the credit pack details
+              Configure the credit offer details
             </DialogDescription>
           </DialogHeader>
 
@@ -292,7 +292,7 @@ export function AdminCreditsView() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Credit Pack</DialogTitle>
+            <DialogTitle>Delete Credit Offer</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete "{packToDelete?.name}"? This action cannot be undone.
             </DialogDescription>
