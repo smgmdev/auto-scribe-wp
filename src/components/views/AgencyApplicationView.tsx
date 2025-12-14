@@ -3,13 +3,14 @@ import { Loader2, ChevronDown, Send, RefreshCw } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { AgencyVerificationStatus, AgencyVerificationStatusRef } from '@/components/agency/AgencyVerificationStatus';
+import { CustomVerificationForm } from '@/components/agency/CustomVerificationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { CheckCircle, Clock, XCircle, ChevronUp } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, ChevronUp, FileText } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -39,6 +40,21 @@ interface AgencyApplication {
   status: string;
   admin_notes: string | null;
   created_at: string;
+}
+
+interface AgencyPayout {
+  id: string;
+  agency_name: string;
+  stripe_account_id: string | null;
+  onboarding_complete: boolean;
+  payout_method: string;
+}
+
+interface CustomVerification {
+  id: string;
+  status: string;
+  submitted_at: string | null;
+  admin_notes: string | null;
 }
 
 function AgencyFAQ() {
@@ -84,8 +100,8 @@ function AgencyFAQ() {
 export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [hasStripeAccount, setHasStripeAccount] = useState(false);
-  const [isOnboarded, setIsOnboarded] = useState(false);
+  const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
+  const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -95,43 +111,42 @@ export function AgencyApplicationView() {
 
   useEffect(() => {
     if (user && !isAdmin) {
-      checkAgencyStatus();
-      checkExistingApplication();
+      fetchAgencyData();
     } else {
       setLoading(false);
     }
   }, [user, isAdmin]);
 
-  const checkAgencyStatus = async () => {
+  const fetchAgencyData = async () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      // Fetch agency payout record
+      const { data: payoutData } = await supabase
         .from('agency_payouts')
-        .select('stripe_account_id, onboarding_complete')
+        .select('id, agency_name, stripe_account_id, onboarding_complete, payout_method')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (data) {
-        setHasStripeAccount(!!data.stripe_account_id);
-        setIsOnboarded(data.onboarding_complete);
-      } else {
-        // No agency_payouts record found - reset states
-        setHasStripeAccount(false);
-        setIsOnboarded(false);
+      if (payoutData) {
+        setAgencyPayout(payoutData as AgencyPayout);
+        
+        // If custom payout, check for custom verification
+        if (payoutData.payout_method === 'custom') {
+          const { data: verificationData } = await supabase
+            .from('agency_custom_verifications')
+            .select('id, status, submitted_at, admin_notes')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          setCustomVerification(verificationData as CustomVerification | null);
+        }
       }
-    } catch (error) {
-      console.error('Error checking agency status:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const checkExistingApplication = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
+      // Fetch existing application
+      const { data: appData } = await supabase
         .from('agency_applications')
         .select('id, agency_name, country, agency_website, status, admin_notes, created_at')
         .eq('user_id', user.id)
@@ -139,32 +154,37 @@ export function AgencyApplicationView() {
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
-      setExistingApplication(data);
-    } catch (error: any) {
-      console.error('Error checking application:', error);
+      setExistingApplication(appData);
+    } catch (error) {
+      console.error('Error fetching agency data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleStatusUpdate = (onboarded: boolean) => {
-    setIsOnboarded(onboarded);
+    if (agencyPayout) {
+      setAgencyPayout({ ...agencyPayout, onboarding_complete: onboarded });
+    }
   };
 
   const handleCancelled = () => {
-    // Immediately reset all states to prevent AgencyVerificationStatus from rendering
-    setHasStripeAccount(false);
-    setIsOnboarded(false);
+    setAgencyPayout(null);
+    setCustomVerification(null);
     setExistingApplication(null);
-    // Re-fetch application status after a short delay to allow DB changes to propagate
     setTimeout(() => {
-      checkExistingApplication();
-      checkAgencyStatus();
+      fetchAgencyData();
     }, 500);
+  };
+
+  const handleCustomVerificationSubmit = () => {
+    fetchAgencyData();
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
+      case 'pending_review':
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
       case 'approved':
         return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
@@ -177,7 +197,7 @@ export function AgencyApplicationView() {
     }
   };
 
-  // Admin users should not see this view - redirect message
+  // Admin users should not see this view
   if (isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -197,8 +217,8 @@ export function AgencyApplicationView() {
     );
   }
 
-  // Show verification status if user has Stripe account but not fully onboarded
-  if (hasStripeAccount && !isOnboarded) {
+  // CASE 1: Stripe Connect verification (has stripe account but not onboarded)
+  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete) {
     const handleRefresh = async () => {
       setRefreshing(true);
       if (verificationRef.current?.refresh) {
@@ -241,8 +261,81 @@ export function AgencyApplicationView() {
     );
   }
 
-  // Show fully verified status
-  if (isOnboarded) {
+  // CASE 2: Custom Payout verification needed (has agency payout with custom method, not onboarded)
+  if (agencyPayout?.payout_method === 'custom' && !agencyPayout?.onboarding_complete) {
+    // Check if custom verification was already submitted
+    if (customVerification?.submitted_at) {
+      return (
+        <div className="space-y-8 animate-fade-in">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">
+              Custom Verification
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Your verification is under review
+            </p>
+          </div>
+
+          <Card className="border-amber-500/30 bg-amber-500/10">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
+                  <FileText className="h-6 w-6 text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-amber-400">Verification Under Review</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
+                  </p>
+                </div>
+                {getStatusBadge(customVerification.status)}
+              </div>
+              {customVerification.status === 'rejected' && customVerification.admin_notes && (
+                <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                  <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
+                  <p className="text-sm">{customVerification.admin_notes}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <p className="text-sm text-muted-foreground text-center">
+            We'll notify you via email once your verification is approved. This usually takes 1-3 business days.
+          </p>
+        </div>
+      );
+    }
+
+    // Show custom verification form
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Custom Verification
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Complete your verification to start receiving payouts
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
+          <p className="text-sm text-muted-foreground">
+            Since you selected Custom Payout, please complete the verification form below. 
+            Your submission will be reviewed by our team and you'll be notified once approved.
+          </p>
+        </div>
+
+        <CustomVerificationForm
+          agencyPayoutId={agencyPayout.id}
+          agencyName={agencyPayout.agency_name}
+          onSubmitSuccess={handleCustomVerificationSubmit}
+        />
+      </div>
+    );
+  }
+
+  // CASE 3: Fully verified (either Stripe or Custom)
+  if (agencyPayout?.onboarding_complete) {
     return (
       <div className="space-y-8 animate-fade-in">
         <div>
@@ -271,7 +364,7 @@ export function AgencyApplicationView() {
     );
   }
 
-  // Show application form for new applicants
+  // CASE 4: No agency record yet - show application form
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-start justify-between gap-4">
@@ -378,7 +471,7 @@ export function AgencyApplicationView() {
       <AgencyApplicationDialog 
         open={dialogOpen} 
         onOpenChange={setDialogOpen}
-        onSubmitSuccess={checkExistingApplication}
+        onSubmitSuccess={fetchAgencyData}
       />
 
       <WebViewDialog
