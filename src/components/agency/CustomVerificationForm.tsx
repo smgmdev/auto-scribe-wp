@@ -480,7 +480,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 h-5">
                   <Label htmlFor="bank_account_holder">Beneficiary Name</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -507,7 +507,9 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bank_name">Bank Name</Label>
+                <div className="h-5 flex items-center">
+                  <Label htmlFor="bank_name">Bank Name</Label>
+                </div>
                 <Input
                   id="bank_name"
                   placeholder="Bank of Example"
