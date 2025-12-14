@@ -109,6 +109,7 @@ export function Sidebar({
 
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
+  const [payoutMethod, setPayoutMethod] = useState<string | null>(null);
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
@@ -118,6 +119,7 @@ export function Sidebar({
     setAgencyDataLoaded(false);
     setIsAgencyOnboarded(false);
     setHasStripeAccount(false);
+    setPayoutMethod(null);
     setUserApplicationStatus(null);
     setApplicationId(null);
     setRejectionSeen(false);
@@ -161,17 +163,19 @@ export function Sidebar({
       // Check if user has agency payout record and onboarding status
       const { data: agencyData } = await supabase
         .from('agency_payouts')
-        .select('onboarding_complete, stripe_account_id')
+        .select('onboarding_complete, stripe_account_id, payout_method')
         .eq('user_id', user.id)
         .maybeSingle();
       
       if (agencyData) {
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
         setHasStripeAccount(!!agencyData.stripe_account_id);
+        setPayoutMethod(agencyData.payout_method);
       } else {
         // No agency_payouts record found - reset states
         setIsAgencyOnboarded(false);
         setHasStripeAccount(false);
+        setPayoutMethod(null);
       }
       
       setAgencyDataLoaded(true);
@@ -305,6 +309,7 @@ export function Sidebar({
                 applicationId={applicationId}
                 rejectionSeen={rejectionSeen}
                 hasStripeAccount={hasStripeAccount}
+                payoutMethod={payoutMethod}
                 isAgencyOnboarded={isAgencyOnboarded}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
                 onStatusUpdate={setIsAgencyOnboarded}
