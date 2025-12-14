@@ -148,6 +148,7 @@ serve(async (req) => {
     }
 
     // Create Stripe Connect Express account with pre-filled company data
+    // Note: Don't pass business_profile.url as Stripe has strict validation that may reject valid URLs
     const accountParams: any = {
       type: "express",
       country: countryCode,
@@ -159,7 +160,6 @@ serve(async (req) => {
       business_type: "company",
       business_profile: {
         name: agency_name,
-        url: normalizedWebsite,
       },
       company: {
         name: agency_name,
@@ -168,6 +168,7 @@ serve(async (req) => {
       metadata: {
         agency_name: agency_name,
         user_id: user_id || "",
+        website: normalizedWebsite || "", // Store in metadata instead
       },
     };
 
