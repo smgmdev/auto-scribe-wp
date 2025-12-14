@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "admin@arcanamace.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +28,42 @@ const handler = async (req: Request): Promise<Response> => {
     const data: ApplicationNotification = await req.json();
     console.log("Sending admin notification for new application:", data.agency_name);
 
+    // Fetch admin email from database
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    let adminEmail = "admin@arcanamace.com"; // fallback
+
+    // Get admin user_id from user_roles table
+    const { data: admins, error: adminsError } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin")
+      .limit(1);
+
+    if (adminsError) {
+      console.error("Error fetching admin role:", adminsError);
+    }
+
+    if (admins && admins.length > 0) {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", admins[0].user_id)
+        .single();
+      
+      if (profileError) {
+        console.error("Error fetching admin profile:", profileError);
+      }
+      
+      if (profile?.email) {
+        adminEmail = profile.email;
+      }
+    }
+
+    console.log("Sending notification to admin email:", adminEmail);
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -36,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Arcana Mace <noreply@arcanamace.com>",
-        to: [ADMIN_EMAIL],
+        to: [adminEmail],
         subject: `New Agency Application: ${data.agency_name}`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -100,7 +136,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await res.json();
-    console.log("Admin notification email sent successfully:", emailResponse);
+    console.log("Admin notification email sent successfully to:", adminEmail, emailResponse);
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
