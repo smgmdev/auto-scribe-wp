@@ -292,7 +292,8 @@ export function AgencyApplicationView() {
   }
 
   // CASE 2: Custom Payout verification needed (has agency payout with custom method, not onboarded)
-  if (agencyPayout?.payout_method === 'custom' && !agencyPayout?.onboarding_complete) {
+  // Only show if application is NOT cancelled
+  if (agencyPayout?.payout_method === 'custom' && !agencyPayout?.onboarding_complete && existingApplication?.status !== 'cancelled') {
     // Check if custom verification was already submitted
     if (customVerification?.submitted_at) {
       return (
