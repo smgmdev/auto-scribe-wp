@@ -41,6 +41,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   const [cancelling, setCancelling] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   
   // File upload states
   const [companyDocsFile, setCompanyDocsFile] = useState<File | null>(null);
@@ -84,6 +85,24 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     usdt_wallet_address: '',
     usdt_network: '',
   });
+
+  // Validation helpers
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    // E.164 format: starts with +, followed by 7-15 digits (spaces allowed)
+    const phoneRegex = /^\+[0-9\s]{7,20}$/;
+    return phoneRegex.test(phone.trim());
+  };
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: false }));
+    }
+  };
 
   const handleFileUpload = async (
     file: File,
@@ -154,69 +173,64 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     e.preventDefault();
     if (!user) return;
 
+    const errors: Record<string, boolean> = {};
+
     // Personal info validation
-    if (!formData.first_name || !formData.last_name || !formData.personal_country || !formData.email || !formData.phone) {
+    if (!formData.first_name.trim()) errors.first_name = true;
+    if (!formData.last_name.trim()) errors.last_name = true;
+    if (!formData.personal_country) errors.personal_country = true;
+    
+    // Email validation
+    if (!formData.email.trim()) {
+      errors.email = true;
+    } else if (!validateEmail(formData.email)) {
+      errors.email = true;
       toast({
         variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please fill in all required personal information fields'
+        title: 'Invalid email',
+        description: 'Please enter a valid email address'
       });
-      return;
+    }
+
+    // Phone validation
+    if (!formData.phone.trim()) {
+      errors.phone = true;
+    } else if (!validatePhone(formData.phone)) {
+      errors.phone = true;
+      toast({
+        variant: 'destructive',
+        title: 'Invalid phone number',
+        description: 'Please enter a valid phone number with country code (e.g., +1 234 567 8900)'
+      });
     }
 
     // Company info validation
-    if (!formData.company_name || !formData.company_country || !formData.company_address || !formData.company_id) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing fields',
-        description: 'Please fill in all required company information fields'
-      });
-      return;
-    }
+    if (!formData.company_name.trim()) errors.company_name = true;
+    if (!formData.company_country) errors.company_country = true;
+    if (!formData.company_address.trim()) errors.company_address = true;
+    if (!formData.company_id.trim()) errors.company_id = true;
 
-    if (!companyDocsUrl) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing documents',
-        description: 'Please upload your company incorporation file'
-      });
-      return;
-    }
-
-    if (!passportUrl) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing documents',
-        description: 'Please upload your passport for verification'
-      });
-      return;
-    }
-
-    if (!articlesUrl) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing documents',
-        description: 'Please upload your articles of association'
-      });
-      return;
-    }
-
-    if (!licenseUrl) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing documents',
-        description: 'Please upload your valid business license'
-      });
-      return;
-    }
+    // Document validation
+    if (!passportUrl) errors.passport = true;
+    if (!companyDocsUrl) errors.companyDocs = true;
+    if (!articlesUrl) errors.articles = true;
+    if (!licenseUrl) errors.license = true;
 
     // Bank details validation - all fields required except IBAN
-    if (!formData.bank_account_holder || !formData.bank_account_number || !formData.bank_name || 
-        !formData.bank_swift_code || !formData.bank_country || !formData.bank_address) {
+    if (!formData.bank_account_holder.trim()) errors.bank_account_holder = true;
+    if (!formData.bank_account_number.trim()) errors.bank_account_number = true;
+    if (!formData.bank_name.trim()) errors.bank_name = true;
+    if (!formData.bank_swift_code.trim()) errors.bank_swift_code = true;
+    if (!formData.bank_country) errors.bank_country = true;
+    if (!formData.bank_address.trim()) errors.bank_address = true;
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       toast({
         variant: 'destructive',
-        title: 'Missing bank details',
-        description: 'Please fill in all required bank account fields'
+        title: 'Missing or invalid fields',
+        description: 'Please fill in all required fields correctly'
       });
       return;
     }
@@ -342,6 +356,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     uploading,
     accept,
     maxSizeLabel,
+    hasError,
     onChange,
     onDrop,
   }: {
@@ -352,6 +367,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     uploading: boolean;
     accept: string;
     maxSizeLabel?: string;
+    hasError?: boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onDrop: (file: File) => void;
   }) => {
@@ -374,7 +390,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         <Label>{label} {required && '*'}</Label>
         <div 
           className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-            url ? 'border-green-500 bg-green-500/10' : 'border-border hover:border-primary/50'
+            url ? 'border-green-500 bg-green-500/10' : hasError ? 'border-red-500 bg-red-500/5' : 'border-border hover:border-primary/50'
           }`}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -426,8 +442,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="first_name"
                   placeholder="John"
                   value={formData.first_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, first_name: e.target.value }));
+                    clearFieldError('first_name');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.first_name ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -436,18 +456,25 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="last_name"
                   placeholder="Doe"
                   value={formData.last_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, last_name: e.target.value }));
+                    clearFieldError('last_name');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.last_name ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="personal_country">Country *</Label>
                 <Select
                   value={formData.personal_country}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, personal_country: value }))}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, personal_country: value }));
+                    clearFieldError('personal_country');
+                  }}
                   disabled={submitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={fieldErrors.personal_country ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Select your country" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
@@ -463,8 +490,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="phone"
                   placeholder="+1 234 567 8900"
                   value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, phone: e.target.value }));
+                    clearFieldError('phone');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.phone ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -474,8 +505,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   type="email"
                   placeholder="john@example.com"
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, email: e.target.value }));
+                    clearFieldError('email');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.email ? 'border-red-500' : ''}
                 />
               </div>
             </div>
@@ -487,16 +522,19 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               uploading={uploadingPassport}
               accept=".pdf,application/pdf"
               maxSizeLabel="PDF only, max 2MB"
+              hasError={fieldErrors.passport}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
                   setPassportFile(file);
                   handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
+                  clearFieldError('passport');
                 }
               }}
               onDrop={(file) => {
                 setPassportFile(file);
                 handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
+                clearFieldError('passport');
               }}
             />
           </CardContent>
@@ -516,18 +554,25 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="company_name"
                   placeholder="Your Agency Inc."
                   value={formData.company_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, company_name: e.target.value }));
+                    clearFieldError('company_name');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.company_name ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company_country">Country *</Label>
                 <Select
                   value={formData.company_country}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, company_country: value }))}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, company_country: value }));
+                    clearFieldError('company_country');
+                  }}
                   disabled={submitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={fieldErrors.company_country ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Select company country" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
@@ -543,8 +588,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="company_address"
                   placeholder="123 Business St, City, Country"
                   value={formData.company_address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, company_address: e.target.value }));
+                    clearFieldError('company_address');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.company_address ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -553,8 +602,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="company_id"
                   placeholder="Company registration number"
                   value={formData.company_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, company_id: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, company_id: e.target.value }));
+                    clearFieldError('company_id');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.company_id ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -577,16 +630,19 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 uploading={uploadingCompanyDocs}
                 accept=".pdf,application/pdf"
                 maxSizeLabel="PDF only, max 5MB"
+                hasError={fieldErrors.companyDocs}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
                     setCompanyDocsFile(file);
                     handleFileUpload(file, 'company', setUploadingCompanyDocs, setCompanyDocsUrl);
+                    clearFieldError('companyDocs');
                   }
                 }}
                 onDrop={(file) => {
                   setCompanyDocsFile(file);
                   handleFileUpload(file, 'company', setUploadingCompanyDocs, setCompanyDocsUrl);
+                  clearFieldError('companyDocs');
                 }}
               />
               <FileUploadBox
@@ -597,16 +653,19 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 uploading={uploadingArticles}
                 accept=".pdf,application/pdf"
                 maxSizeLabel="PDF only, max 5MB"
+                hasError={fieldErrors.articles}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
                     setArticlesFile(file);
                     handleFileUpload(file, 'articles', setUploadingArticles, setArticlesUrl);
+                    clearFieldError('articles');
                   }
                 }}
                 onDrop={(file) => {
                   setArticlesFile(file);
                   handleFileUpload(file, 'articles', setUploadingArticles, setArticlesUrl);
+                  clearFieldError('articles');
                 }}
               />
             </div>
@@ -618,16 +677,19 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               uploading={uploadingLicense}
               accept=".pdf,application/pdf"
               maxSizeLabel="PDF only, max 5MB"
+              hasError={fieldErrors.license}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
                   setLicenseFile(file);
                   handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
+                  clearFieldError('license');
                 }
               }}
               onDrop={(file) => {
                 setLicenseFile(file);
                 handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
+                clearFieldError('license');
               }}
             />
           </CardContent>
@@ -664,8 +726,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="bank_account_holder"
                   placeholder="Company Name Ltd."
                   value={formData.bank_account_holder}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bank_account_holder: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, bank_account_holder: e.target.value }));
+                    clearFieldError('bank_account_holder');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.bank_account_holder ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -676,8 +742,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="bank_name"
                   placeholder="Bank of Example"
                   value={formData.bank_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, bank_name: e.target.value }));
+                    clearFieldError('bank_name');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.bank_name ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -686,8 +756,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="bank_account_number"
                   placeholder="1234567890"
                   value={formData.bank_account_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bank_account_number: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, bank_account_number: e.target.value }));
+                    clearFieldError('bank_account_number');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.bank_account_number ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -706,8 +780,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   id="bank_swift_code"
                   placeholder="EXAMPLEXXX"
                   value={formData.bank_swift_code}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bank_swift_code: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, bank_swift_code: e.target.value }));
+                    clearFieldError('bank_swift_code');
+                  }}
                   disabled={submitting}
+                  className={fieldErrors.bank_swift_code ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -716,10 +794,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 </div>
                 <Select
                   value={formData.bank_country}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, bank_country: value }))}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, bank_country: value }));
+                    clearFieldError('bank_country');
+                  }}
                   disabled={submitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={fieldErrors.bank_country ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Select bank country" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
@@ -738,8 +819,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 id="bank_address"
                 placeholder="Bank branch address"
                 value={formData.bank_address}
-                onChange={(e) => setFormData(prev => ({ ...prev, bank_address: e.target.value }))}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, bank_address: e.target.value }));
+                  clearFieldError('bank_address');
+                }}
                 disabled={submitting}
+                className={fieldErrors.bank_address ? 'border-red-500' : ''}
               />
             </div>
           </CardContent>
