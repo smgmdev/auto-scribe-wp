@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -390,7 +391,7 @@ export function AdminAgenciesView() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="pending" className="relative">
-            Pending Review ({pendingApplications.length})
+            New Requests ({pendingApplications.length})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
                 {unreadPendingCount}
@@ -399,14 +400,23 @@ export function AdminAgenciesView() {
           </TabsTrigger>
           <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
           <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
-          <TabsTrigger value="cancelled" className="relative">
-            Cancelled by user ({cancelledApplications.length})
-            {unreadCancelledCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
-                {unreadCancelledCount}
-              </span>
-            )}
-          </TabsTrigger>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="cancelled" className="relative">
+                  Cancelled ({cancelledApplications.length})
+                  {unreadCancelledCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
+                      {unreadCancelledCount}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Cancelled by the user</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
         </TabsList>
 
