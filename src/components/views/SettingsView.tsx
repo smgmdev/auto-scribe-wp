@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -144,10 +144,7 @@ export function SettingsView() {
               Saving...
             </>
           ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save Settings
-            </>
+            'Save Settings'
           )}
         </Button>
       </div>
@@ -168,11 +165,11 @@ export function SettingsView() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeSourceTab} onValueChange={setActiveSourceTab}>
-              <TabsList className="grid w-full grid-cols-4 mb-4">
-                <TabsTrigger value="political">Political</TabsTrigger>
-                <TabsTrigger value="business">Business</TabsTrigger>
-                <TabsTrigger value="middleeast">Middle East</TabsTrigger>
-                <TabsTrigger value="asia">Asia</TabsTrigger>
+              <TabsList className="flex w-full gap-1 mb-4 h-auto p-1">
+                <TabsTrigger value="political" className="flex-1 px-3 py-2 text-xs">Political</TabsTrigger>
+                <TabsTrigger value="business" className="flex-1 px-3 py-2 text-xs">Business</TabsTrigger>
+                <TabsTrigger value="middleeast" className="flex-1 px-3 py-2 text-xs">Mid East</TabsTrigger>
+                <TabsTrigger value="asia" className="flex-1 px-3 py-2 text-xs">Asia</TabsTrigger>
               </TabsList>
 
               <TabsContent value="political" className="space-y-3">
