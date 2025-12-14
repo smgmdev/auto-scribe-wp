@@ -13,6 +13,8 @@ interface WebViewDialogProps {
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: WebViewDialogProps) {
   const [loading, setLoading] = useState(true);
 
+  const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
+
   const handleRefresh = () => {
     setLoading(true);
     const iframe = document.querySelector('iframe[title="WebView"]') as HTMLIFrameElement;
@@ -43,7 +45,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
             </div>
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => window.open(url, '_blank')}
+                onClick={() => window.open(normalizedUrl, '_blank')}
                 variant="outline"
                 size="sm"
                 className="hover:bg-black hover:text-white h-7 text-xs"
@@ -72,7 +74,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
             </div>
           )}
           <iframe
-            src={url}
+            src={normalizedUrl}
             className="w-full h-full border-0"
             title="WebView"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
