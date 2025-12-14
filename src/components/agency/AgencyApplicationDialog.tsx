@@ -248,7 +248,11 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       return;
     }
 
-    const media_channels = [media_channel_1, media_channel_2, media_channel_3].join(', ');
+    const media_channels = [
+      `https://${media_channel_1}`,
+      `https://${media_channel_2}`,
+      `https://${media_channel_3}`
+    ].join(', ');
 
     setSubmitting(true);
 
@@ -439,25 +443,43 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
             <div className="space-y-2">
               <Label>What 3 media channels would you list at the start? *</Label>
-              <div className="grid grid-cols-3 gap-3">
-                <Input
-                  placeholder="e.g., Forbes"
-                  value={formData.media_channel_1}
-                  onChange={(e) => setFormData(prev => ({ ...prev, media_channel_1: e.target.value }))}
-                  disabled={submitting}
-                />
-                <Input
-                  placeholder="e.g., Bloomberg"
-                  value={formData.media_channel_2}
-                  onChange={(e) => setFormData(prev => ({ ...prev, media_channel_2: e.target.value }))}
-                  disabled={submitting}
-                />
-                <Input
-                  placeholder="e.g., Daily Mail"
-                  value={formData.media_channel_3}
-                  onChange={(e) => setFormData(prev => ({ ...prev, media_channel_3: e.target.value }))}
-                  disabled={submitting}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                    https://
+                  </span>
+                  <Input
+                    placeholder="forbes.com"
+                    value={formData.media_channel_1}
+                    onChange={(e) => setFormData(prev => ({ ...prev, media_channel_1: e.target.value }))}
+                    disabled={submitting}
+                    className="rounded-l-none"
+                  />
+                </div>
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                    https://
+                  </span>
+                  <Input
+                    placeholder="bloomberg.com"
+                    value={formData.media_channel_2}
+                    onChange={(e) => setFormData(prev => ({ ...prev, media_channel_2: e.target.value }))}
+                    disabled={submitting}
+                    className="rounded-l-none"
+                  />
+                </div>
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                    https://
+                  </span>
+                  <Input
+                    placeholder="dailymail.co.uk"
+                    value={formData.media_channel_3}
+                    onChange={(e) => setFormData(prev => ({ ...prev, media_channel_3: e.target.value }))}
+                    disabled={submitting}
+                    className="rounded-l-none"
+                  />
+                </div>
               </div>
             </div>
 
