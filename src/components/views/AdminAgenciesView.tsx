@@ -389,38 +389,27 @@ export function AdminAgenciesView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TooltipProvider>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="pending" className="relative">
-              New Requests ({pendingApplications.length})
-              {unreadPendingCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
-                  {unreadPendingCount}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
-            <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="w-full">
-                  <TabsTrigger value="cancelled" className="relative w-full">
-                    Cancelled ({cancelledApplications.length})
-                    {unreadCancelledCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
-                        {unreadCancelledCount}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Cancelled by the user</p>
-              </TooltipContent>
-            </Tooltip>
-            <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
-          </TabsList>
-        </TooltipProvider>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="pending" className="relative">
+            New Requests ({pendingApplications.length})
+            {unreadPendingCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
+                {unreadPendingCount}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
+          <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
+          <TabsTrigger value="cancelled" className="relative">
+            Cancelled ({cancelledApplications.length})
+            {unreadCancelledCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
+                {unreadCancelledCount}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
+        </TabsList>
 
         {/* Pending Applications Tab */}
         <TabsContent value="pending" className="mt-6">
