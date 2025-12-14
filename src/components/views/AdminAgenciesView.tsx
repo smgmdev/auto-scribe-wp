@@ -608,27 +608,23 @@ export function AdminAgenciesView() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Email</p>
-                  <div className="flex items-center gap-1">
-                    <p className="font-medium">{selectedApp.email}</p>
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast({ title: 'Email copied' }); }}
-                      className="p-1 hover:bg-muted rounded"
-                    >
-                      <Copy className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast({ title: 'Email copied' }); }}
+                    className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
+                  >
+                    {selectedApp.email}
+                    <Copy className="h-3 w-3 text-muted-foreground" />
+                  </button>
                 </div>
                 <div>
                   <p className="text-muted-foreground">WhatsApp Phone</p>
-                  <div className="flex items-center gap-1">
-                    <p className="font-medium">{selectedApp.whatsapp_phone}</p>
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast({ title: 'Phone copied' }); }}
-                      className="p-1 hover:bg-muted rounded"
-                    >
-                      <Copy className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast({ title: 'Phone copied' }); }}
+                    className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
+                  >
+                    {selectedApp.whatsapp_phone}
+                    <Copy className="h-3 w-3 text-muted-foreground" />
+                  </button>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Country</p>
