@@ -287,7 +287,6 @@ export function OrdersView() {
                   <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
                   <a 
                     href={selectedOrder.delivery_url} 
-                    target="_blank" 
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline flex items-center gap-1"
                   >

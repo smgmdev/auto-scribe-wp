@@ -622,7 +622,6 @@ export function AdminAgenciesView() {
                   <p className="text-muted-foreground">Agency Website</p>
                   <a 
                     href={selectedApp.agency_website}
-                    target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-primary hover:underline flex items-center gap-1"
                   >
@@ -651,7 +650,6 @@ export function AdminAgenciesView() {
                       <a 
                         key={i}
                         href={channel}
-                        target="_blank"
                         rel="noopener noreferrer"
                         className="font-medium text-primary hover:underline flex items-center gap-1"
                       >

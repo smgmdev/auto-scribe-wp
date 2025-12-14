@@ -253,7 +253,7 @@ export function DashboardView() {
                 return (
                   <li key={article.id}>
                     {article.wpLink ? (
-                      <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
+                      <a href={article.wpLink} rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
