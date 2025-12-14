@@ -3,6 +3,7 @@ import { Building2, CheckCircle, Clock, AlertTriangle, Loader2 } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AgencyStatusCardProps {
   applicationStatus: string | null;
@@ -29,9 +30,24 @@ export function AgencyStatusCard({
   onNavigateToApplication,
   onStatusUpdate
 }: AgencyStatusCardProps) {
+  const { user } = useAuth();
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
-  const [dismissedRejection, setDismissedRejection] = useState(false);
+  
+  // Check if rejection was already dismissed (persisted in localStorage)
+  const [dismissedRejection, setDismissedRejection] = useState(() => {
+    if (!user) return false;
+    const dismissed = localStorage.getItem(`agency_rejection_dismissed_${user.id}`);
+    return dismissed === 'true';
+  });
+
+  // Reset dismissed state when user changes
+  useEffect(() => {
+    if (user) {
+      const dismissed = localStorage.getItem(`agency_rejection_dismissed_${user.id}`);
+      setDismissedRejection(dismissed === 'true');
+    }
+  }, [user?.id]);
 
   // Fetch Stripe status on mount when user has Stripe account
   useEffect(() => {
@@ -55,6 +71,14 @@ export function AgencyStatusCard({
     } finally {
       setStatusLoading(false);
     }
+  };
+
+  const handleDismissRejection = () => {
+    if (user) {
+      localStorage.setItem(`agency_rejection_dismissed_${user.id}`, 'true');
+    }
+    setDismissedRejection(true);
+    onNavigateToApplication();
   };
 
   // Fully onboarded agency
@@ -211,10 +235,7 @@ export function AgencyStatusCard({
             <Button
               size="sm"
               className="mt-3 bg-red-500/20 hover:bg-red-500/30 text-white border border-red-500/50"
-              onClick={() => {
-                setDismissedRejection(true);
-                onNavigateToApplication();
-              }}
+              onClick={handleDismissRejection}
             >
               View Details
             </Button>

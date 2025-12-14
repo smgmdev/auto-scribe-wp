@@ -291,6 +291,10 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         className: 'bg-green-600 text-white border-green-600'
       });
 
+      // Clear rejection dismissed flag so new rejection would show
+      if (user) {
+        localStorage.removeItem(`agency_rejection_dismissed_${user.id}`);
+      }
       localStorage.removeItem('agency_new_application_mode');
       setUserApplicationStatus('pending');
       onOpenChange(false);
