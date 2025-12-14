@@ -36,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Arcana Mace <onboarding@resend.dev>",
+        from: "Arcana Mace <noreply@arcanamace.com>",
         to: [email],
         subject: "Agency Application Update - Arcana Mace",
         html: `
