@@ -26,11 +26,14 @@ export function ArticlesView() {
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
 
-  const getSiteName = (article: Article) => {
-    // Use stored name if available, otherwise try to look up from sites
-    if (article.publishedToName) return article.publishedToName;
-    if (!article.publishedTo) return '';
-    return sites.find(s => s.id === article.publishedTo)?.name || 'Unknown site';
+  const getSiteInfo = (article: Article) => {
+    // Use stored name/favicon if available, otherwise try to look up from sites
+    if (article.publishedToName) {
+      return { name: article.publishedToName, favicon: article.publishedToFavicon };
+    }
+    if (!article.publishedTo) return { name: '', favicon: null };
+    const site = sites.find(s => s.id === article.publishedTo);
+    return { name: site?.name || 'Unknown site', favicon: site?.favicon || null };
   };
 
   const handleEdit = (article: Article) => {
@@ -96,24 +99,35 @@ export function ArticlesView() {
               </span>
               <span>•</span>
               <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
-              {article.publishedTo && (
-                <>
-                  <span>•</span>
-                  {article.wpLink ? (
-                    <a 
-                      href={article.wpLink} 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-accent hover:underline cursor-pointer"
-                      onClick={(e) => handleLinkClick(e, article.wpLink!, article.title)}
-                    >
-                      Published on: {getSiteName(article)}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span>Published on: {getSiteName(article)}</span>
-                  )}
-                </>
-              )}
+              {article.publishedTo && (() => {
+                const siteInfo = getSiteInfo(article);
+                return (
+                  <>
+                    <span>•</span>
+                    {article.wpLink ? (
+                      <a 
+                        href={article.wpLink} 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-accent hover:underline cursor-pointer"
+                        onClick={(e) => handleLinkClick(e, article.wpLink!, article.title)}
+                      >
+                        {siteInfo.favicon && (
+                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                        )}
+                        Published on: {siteInfo.name}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        {siteInfo.favicon && (
+                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                        )}
+                        Published on: {siteInfo.name}
+                      </span>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
           
