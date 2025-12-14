@@ -548,17 +548,38 @@ export function AdminAgenciesView() {
     const urls: Record<string, string> = {};
     if (verification.company_documents_url) {
       const url = await getKycSignedUrl(verification.company_documents_url);
-      if (url) urls.company_documents = url;
+      if (url) urls.company_incorporation = url;
     }
     if (verification.passport_url) {
       const url = await getKycSignedUrl(verification.passport_url);
       if (url) urls.passport = url;
     }
+    
+    // Parse additional_documents_url which contains JSON with articles and license
     if (verification.additional_documents_url) {
-      const url = await getKycSignedUrl(verification.additional_documents_url);
-      if (url) urls.additional_documents = url;
+      try {
+        const additionalDocs = JSON.parse(verification.additional_documents_url);
+        if (additionalDocs.articles) {
+          const url = await getKycSignedUrl(additionalDocs.articles);
+          if (url) urls.memorandum = url;
+        }
+        if (additionalDocs.license) {
+          const url = await getKycSignedUrl(additionalDocs.license);
+          if (url) urls.license = url;
+        }
+      } catch (parseError) {
+        // If not JSON, treat as single file URL
+        const url = await getKycSignedUrl(verification.additional_documents_url);
+        if (url) urls.additional = url;
+      }
     }
     setVerificationDocUrls(urls);
+  };
+  
+  const handleViewKycDocument = async (url: string, title: string) => {
+    setDocViewerUrl(url);
+    setDocViewerTitle(title);
+    setDocViewerOpen(true);
   };
 
   const handleViewDocument = async (path: string) => {
@@ -1613,19 +1634,26 @@ export function AdminAgenciesView() {
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Uploaded Documents</h4>
                 <div className="flex flex-wrap gap-2">
-                  {verificationDocUrls.company_documents && (
+                  {verificationDocUrls.company_incorporation && (
                     <Button
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => {
-                        setDocViewerUrl(verificationDocUrls.company_documents);
-                        setDocViewerTitle('Company Documents');
-                        setDocViewerOpen(true);
-                      }}
+                      onClick={() => handleViewKycDocument(verificationDocUrls.company_incorporation, 'Company Incorporation')}
                     >
                       <FileText className="h-4 w-4 mr-2" />
-                      Company Documents
+                      Company Incorporation
+                    </Button>
+                  )}
+                  {verificationDocUrls.license && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-black hover:text-white"
+                      onClick={() => handleViewKycDocument(verificationDocUrls.license, 'Business License')}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Business License
                     </Button>
                   )}
                   {verificationDocUrls.passport && (
@@ -1633,32 +1661,35 @@ export function AdminAgenciesView() {
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => {
-                        setDocViewerUrl(verificationDocUrls.passport);
-                        setDocViewerTitle('Passport/ID');
-                        setDocViewerOpen(true);
-                      }}
+                      onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport/ID')}
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Passport/ID
                     </Button>
                   )}
-                  {verificationDocUrls.additional_documents && (
+                  {verificationDocUrls.memorandum && (
                     <Button
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => {
-                        setDocViewerUrl(verificationDocUrls.additional_documents);
-                        setDocViewerTitle('Additional Documents');
-                        setDocViewerOpen(true);
-                      }}
+                      onClick={() => handleViewKycDocument(verificationDocUrls.memorandum, 'Memorandum of Association')}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Memorandum of Association
+                    </Button>
+                  )}
+                  {verificationDocUrls.additional && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-black hover:text-white"
+                      onClick={() => handleViewKycDocument(verificationDocUrls.additional, 'Additional Documents')}
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Additional Documents
                     </Button>
                   )}
-                  {!verificationDocUrls.company_documents && !verificationDocUrls.passport && !verificationDocUrls.additional_documents && (
+                  {!verificationDocUrls.company_incorporation && !verificationDocUrls.passport && !verificationDocUrls.memorandum && !verificationDocUrls.license && !verificationDocUrls.additional && (
                     <p className="text-sm text-muted-foreground">No documents uploaded</p>
                   )}
                 </div>
@@ -1677,31 +1708,75 @@ export function AdminAgenciesView() {
         </DialogContent>
       </Dialog>
 
-      {/* Document Viewer Dialog */}
-      <Dialog open={docViewerOpen} onOpenChange={setDocViewerOpen}>
-        <DialogContent className="max-w-5xl max-h-[95vh] p-0">
-          <DialogHeader className="p-4 border-b flex flex-row items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              {docViewerTitle}
-            </DialogTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-black hover:text-white"
-              onClick={() => window.open(docViewerUrl, '_blank')}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open in New Tab
-            </Button>
+      {/* KYC Document Viewer Dialog */}
+      <Dialog open={docViewerOpen} onOpenChange={(open) => { setDocViewerOpen(open); if (!open) setDocumentLoading(true); }}>
+        <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+          <DialogHeader className="px-3 pb-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => {
+                    setDocumentLoading(true);
+                    const iframe = document.querySelector('iframe[title="KYC Document viewer"]') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  disabled={documentLoading}
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
+                >
+                  <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
+                </Button>
+                <DialogTitle className="text-sm">{docViewerTitle}</DialogTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => window.open(docViewerUrl, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="hover:bg-black hover:text-white h-7 text-xs"
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  Download
+                </Button>
+                <Button
+                  onClick={() => window.open(docViewerUrl, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="hover:bg-black hover:text-white h-7 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Open in New Tab
+                </Button>
+                <Button
+                  onClick={() => setDocViewerOpen(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="w-full h-[80vh]">
-            <iframe
-              src={`https://docs.google.com/viewer?url=${encodeURIComponent(docViewerUrl)}&embedded=true`}
-              className="w-full h-full border-0"
-              title={docViewerTitle}
-            />
-          </div>
+          {docViewerUrl && (
+            <div className="w-full h-[75vh] relative">
+              {documentLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Loading document...</p>
+                  </div>
+                </div>
+              )}
+              <iframe
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(docViewerUrl)}&embedded=true`}
+                className="w-full h-full border-0"
+                title="KYC Document viewer"
+                onLoad={() => setDocumentLoading(false)}
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
