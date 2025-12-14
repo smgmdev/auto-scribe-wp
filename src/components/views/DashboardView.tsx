@@ -107,9 +107,14 @@ export function DashboardView() {
     fetchGlobalLibraryCount();
   }, []);
 
-  const getSiteInfo = (siteId: string | undefined): { name: string; favicon: string | null } | null => {
-    if (!siteId) return null;
-    const site = sites.find(s => s.id === siteId);
+  const getSiteInfo = (article: { publishedTo?: string; publishedToName?: string | null; publishedToFavicon?: string | null }): { name: string; favicon: string | null } | null => {
+    // Use stored article data first (persists after site deletion)
+    if (article.publishedToName) {
+      return { name: article.publishedToName, favicon: article.publishedToFavicon || null };
+    }
+    // Fallback to looking up from current sites
+    if (!article.publishedTo) return null;
+    const site = sites.find(s => s.id === article.publishedTo);
     if (!site) return null;
     return { name: site.name, favicon: site.favicon || null };
   };
@@ -252,7 +257,7 @@ export function DashboardView() {
           ) : (
             <ul className="space-y-2">
               {articles.slice(0, 3).map(article => {
-                const siteInfo = getSiteInfo(article.publishedTo);
+                const siteInfo = getSiteInfo(article);
                 return (
                   <li key={article.id}>
                     {article.wpLink ? (
