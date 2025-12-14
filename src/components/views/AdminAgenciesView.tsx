@@ -90,11 +90,31 @@ interface CustomVerification {
   agency_payout_id: string | null;
   company_name: string;
   full_name: string;
+  first_name: string | null;
+  last_name: string | null;
   email: string | null;
+  phone: string | null;
   country: string;
+  company_address: string | null;
+  company_id: string | null;
+  tax_number: string | null;
+  company_documents_url: string | null;
+  passport_url: string | null;
+  additional_documents_url: string | null;
+  bank_name: string | null;
+  bank_country: string | null;
+  bank_address: string | null;
+  bank_account_holder: string | null;
+  bank_account_number: string | null;
+  bank_iban: string | null;
+  bank_swift_code: string | null;
+  usdt_wallet_address: string | null;
+  usdt_network: string | null;
   status: string;
+  admin_notes: string | null;
   created_at: string;
   submitted_at: string | null;
+  reviewed_at: string | null;
 }
 
 import { useAppStore } from '@/stores/appStore';
@@ -118,6 +138,8 @@ export function AdminAgenciesView() {
   const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
+  const [selectedVerification, setSelectedVerification] = useState<CustomVerification | null>(null);
+  const [verificationDocUrls, setVerificationDocUrls] = useState<Record<string, string>>({});
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
@@ -505,6 +527,35 @@ export function AdminAgenciesView() {
       .createSignedUrl(path, 3600); // 1 hour expiry
     if (error || !data) return null;
     return data.signedUrl;
+  };
+
+  const getKycSignedUrl = async (path: string) => {
+    const { data, error } = await supabase.storage
+      .from('agency-kyc-documents')
+      .createSignedUrl(path, 3600); // 1 hour expiry
+    if (error || !data) return null;
+    return data.signedUrl;
+  };
+
+  const handleOpenVerification = async (verification: CustomVerification, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedVerification(verification);
+    
+    // Fetch signed URLs for documents
+    const urls: Record<string, string> = {};
+    if (verification.company_documents_url) {
+      const url = await getKycSignedUrl(verification.company_documents_url);
+      if (url) urls.company_documents = url;
+    }
+    if (verification.passport_url) {
+      const url = await getKycSignedUrl(verification.passport_url);
+      if (url) urls.passport = url;
+    }
+    if (verification.additional_documents_url) {
+      const url = await getKycSignedUrl(verification.additional_documents_url);
+      if (url) urls.additional_documents = url;
+    }
+    setVerificationDocUrls(urls);
   };
 
   const handleViewDocument = async (path: string) => {
@@ -924,7 +975,14 @@ export function AdminAgenciesView() {
 
                             <div className="flex items-center gap-4">
                               <div className="flex gap-2">
-                                <Badge className="bg-green-600/20 text-green-600">
+                                <Badge 
+                                  className="bg-green-600/20 text-green-600 cursor-pointer hover:bg-green-600/30 transition-colors"
+                                  onClick={(e) => {
+                                    if (verification) {
+                                      handleOpenVerification(verification, e);
+                                    }
+                                  }}
+                                >
                                   <Clock className="h-3 w-3 mr-1" />Pending Review
                                 </Badge>
                                 <Badge className="bg-black text-white">
@@ -1434,6 +1492,172 @@ export function AdminAgenciesView() {
                 </Button>
               </div>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Verification Details Dialog */}
+      <Dialog open={!!selectedVerification} onOpenChange={() => { setSelectedVerification(null); setVerificationDocUrls({}); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Custom Verification Details
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedVerification && (
+            <div className="space-y-6">
+              {/* Personal Information */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3">Personal Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Full Name</p>
+                    <p className="font-medium">{selectedVerification.full_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <p className="font-medium">{selectedVerification.email || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone</p>
+                    <p className="font-medium">{selectedVerification.phone || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Country</p>
+                    <p className="font-medium">{selectedVerification.country}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Company Information */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3">Company Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Company Name</p>
+                    <p className="font-medium">{selectedVerification.company_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Company ID</p>
+                    <p className="font-medium">{selectedVerification.company_id || '-'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">Company Address</p>
+                    <p className="font-medium">{selectedVerification.company_address || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Tax Number</p>
+                    <p className="font-medium">{selectedVerification.tax_number || '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bank Details */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3">Bank Details</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Bank Name</p>
+                    <p className="font-medium">{selectedVerification.bank_name || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Bank Country</p>
+                    <p className="font-medium">{selectedVerification.bank_country || '-'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">Bank Address</p>
+                    <p className="font-medium">{selectedVerification.bank_address || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Account Holder</p>
+                    <p className="font-medium">{selectedVerification.bank_account_holder || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Account Number</p>
+                    <p className="font-medium">{selectedVerification.bank_account_number || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">IBAN</p>
+                    <p className="font-medium">{selectedVerification.bank_iban || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">SWIFT/BIC Code</p>
+                    <p className="font-medium">{selectedVerification.bank_swift_code || '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Crypto Wallet */}
+              {(selectedVerification.usdt_wallet_address || selectedVerification.usdt_network) && (
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-3">Crypto Wallet (USDT)</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Network</p>
+                      <p className="font-medium">{selectedVerification.usdt_network || '-'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground">Wallet Address</p>
+                      <p className="font-medium break-all">{selectedVerification.usdt_wallet_address || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Documents */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3">Uploaded Documents</h4>
+                <div className="flex flex-wrap gap-2">
+                  {verificationDocUrls.company_documents && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-black hover:text-white"
+                      onClick={() => window.open(verificationDocUrls.company_documents, '_blank')}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Company Documents
+                    </Button>
+                  )}
+                  {verificationDocUrls.passport && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-black hover:text-white"
+                      onClick={() => window.open(verificationDocUrls.passport, '_blank')}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Passport/ID
+                    </Button>
+                  )}
+                  {verificationDocUrls.additional_documents && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-black hover:text-white"
+                      onClick={() => window.open(verificationDocUrls.additional_documents, '_blank')}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Additional Documents
+                    </Button>
+                  )}
+                  {!verificationDocUrls.company_documents && !verificationDocUrls.passport && !verificationDocUrls.additional_documents && (
+                    <p className="text-sm text-muted-foreground">No documents uploaded</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Submission Date */}
+              <div className="pt-4 border-t">
+                <p className="text-xs text-muted-foreground">
+                  Submitted: {selectedVerification.submitted_at 
+                    ? format(new Date(selectedVerification.submitted_at), 'MMM d, yyyy h:mm a') 
+                    : 'Not submitted'}
+                </p>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
