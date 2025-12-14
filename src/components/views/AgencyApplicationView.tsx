@@ -171,8 +171,18 @@ export function AgencyApplicationView() {
 
       let validatedPayout = payoutData as AgencyPayout | null;
 
+      // Fetch existing application first to check status
+      const { data: appData } = await supabase
+        .from('agency_applications')
+        .select('id, agency_name, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
       // If there's a Stripe account that's not onboarded, verify it still exists
-      if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete) {
+      // BUT only do this if the application is already approved - don't do Stripe checks for pending applications
+      if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete && appData?.status === 'approved') {
         console.log('[AgencyView] Found unverified Stripe account, checking if still valid...');
         try {
           const response = await supabase.functions.invoke('get-agency-onboarding-link');
@@ -211,16 +221,7 @@ export function AgencyApplicationView() {
         setAgencyPayout(null);
         setCustomVerification(null);
       }
-
-      // Fetch existing application
-      const { data: appData } = await supabase
-        .from('agency_applications')
-        .select('id, agency_name, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      // Set existing application from the already fetched data
       setExistingApplication(appData);
     } catch (error) {
       console.error('Error fetching agency data:', error);
