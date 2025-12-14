@@ -2,10 +2,19 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Upload, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -30,6 +39,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
   
   // File upload states
   const [companyDocsFile, setCompanyDocsFile] = useState<File | null>(null);
@@ -284,19 +295,35 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     setCancelling(true);
     try {
       // Update the agency_applications status to cancelled and reset read to false for admin notification
+      // Also save the cancellation reason in admin_notes
       const { error } = await supabase
         .from('agency_applications')
-        .update({ status: 'cancelled', read: false })
+        .update({ 
+          status: 'cancelled', 
+          read: false,
+          admin_notes: cancellationReason ? `User cancelled: ${cancellationReason}` : 'User cancelled without reason'
+        })
         .eq('user_id', user.id)
         .eq('status', 'approved');
 
       if (error) throw error;
+
+      // Delete the agency_payouts record
+      const { error: deleteError } = await supabase
+        .from('agency_payouts')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        console.error('Error deleting agency payout:', deleteError);
+      }
 
       toast({
         title: 'Application Cancelled',
         description: 'Your agency application has been cancelled. You can reapply at any time.',
       });
 
+      setCancelDialogOpen(false);
       onCancel();
     } catch (error: any) {
       toast({
@@ -800,21 +827,48 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
               type="button"
               variant="outline"
               disabled={submitting || cancelling}
-              onClick={handleCancel}
+              onClick={() => setCancelDialogOpen(true)}
               className="w-full border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
             >
-              {cancelling ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Cancelling...
-                </>
-              ) : (
-                'Cancel Application'
-              )}
+              <XCircle className="h-4 w-4 mr-2" />
+              Cancel Application
             </Button>
           )}
         </div>
       </form>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Agency Application?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel your agency application? You will need to reapply if you want to become an agency in the future.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="text-sm font-medium mb-2 block">Reason for cancellation (optional)</label>
+            <Textarea
+              placeholder="Please let us know why you're cancelling..."
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)} className="hover:bg-black hover:text-white">
+              Keep Application
+            </Button>
+            <Button
+              onClick={handleCancel}
+              className="bg-red-500 hover:bg-red-600"
+              disabled={cancelling}
+            >
+              {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, Cancel Application
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

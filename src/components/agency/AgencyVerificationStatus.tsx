@@ -1,19 +1,17 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Loader2, ExternalLink, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface StripeStatus {
   chargesEnabled: boolean;
@@ -41,6 +39,8 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
 
   useImperativeHandle(ref, () => ({
     refresh: fetchStripeStatus
@@ -158,9 +158,14 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
       }
 
       // Update the application status to cancelled and reset read to false for admin notification
+      // Also save the cancellation reason in admin_notes
       const { error: updateError } = await supabase
         .from('agency_applications')
-        .update({ status: 'cancelled', read: false })
+        .update({ 
+          status: 'cancelled', 
+          read: false,
+          admin_notes: cancellationReason ? `User cancelled: ${cancellationReason}` : 'User cancelled without reason'
+        })
         .eq('user_id', user.id)
         .eq('status', 'approved');
 
@@ -376,41 +381,57 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
               If you no longer wish to proceed with agency verification
             </p>
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="bg-white text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white hover:border-red-500"
-                disabled={cancelling}
-              >
-                {cancelling ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <XCircle className="h-4 w-4 mr-2" />
-                )}
-                Cancel Application
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Cancel Agency Application?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to cancel your agency application? This will remove your Stripe Connect setup and you will need to reapply if you want to become an agency in the future.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="hover:bg-black hover:text-white">Keep Application</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleCancelApplication}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  Yes, Cancel Application
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button 
+            variant="outline" 
+            className="bg-white text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white hover:border-red-500"
+            disabled={cancelling}
+            onClick={() => setCancelDialogOpen(true)}
+          >
+            {cancelling ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <XCircle className="h-4 w-4 mr-2" />
+            )}
+            Cancel Application
+          </Button>
         </div>
       </div>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Agency Application?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel your agency application? This will remove your Stripe Connect setup and you will need to reapply if you want to become an agency in the future.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="text-sm font-medium mb-2 block">Reason for cancellation (optional)</label>
+            <Textarea
+              placeholder="Please let us know why you're cancelling..."
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)} className="hover:bg-black hover:text-white">
+              Keep Application
+            </Button>
+            <Button
+              onClick={() => {
+                setCancelDialogOpen(false);
+                handleCancelApplication();
+              }}
+              className="bg-red-500 hover:bg-red-600"
+              disabled={cancelling}
+            >
+              {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, Cancel Application
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });
