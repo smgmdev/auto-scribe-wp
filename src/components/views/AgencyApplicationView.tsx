@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Loader2, ChevronDown, Send } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, ChevronDown, Send, RefreshCw } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
-import { AgencyVerificationStatus } from '@/components/agency/AgencyVerificationStatus';
+import { AgencyVerificationStatus, AgencyVerificationStatusRef } from '@/components/agency/AgencyVerificationStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -172,18 +172,47 @@ export function AgencyApplicationView() {
 
   // Show verification status if user has Stripe account but not fully onboarded
   if (hasStripeAccount && !isOnboarded) {
+    const [refreshing, setRefreshing] = useState(false);
+    const verificationRef = useRef<AgencyVerificationStatusRef>(null);
+
+    const handleRefresh = async () => {
+      setRefreshing(true);
+      if (verificationRef.current?.refresh) {
+        await verificationRef.current.refresh();
+      }
+      setRefreshing(false);
+    };
+
     return (
       <div className="space-y-8 animate-fade-in">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">
-            Stripe Connect Verification
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Complete your verification to start receiving payments
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">
+              Stripe Connect Verification
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Complete your verification to start receiving payments
+            </p>
+          </div>
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="bg-black hover:bg-black/80 text-white"
+          >
+            {refreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh
+          </Button>
         </div>
 
-        <AgencyVerificationStatus onStatusUpdate={handleStatusUpdate} onCancelled={handleCancelled} />
+        <AgencyVerificationStatus 
+          ref={verificationRef}
+          onStatusUpdate={handleStatusUpdate} 
+          onCancelled={handleCancelled} 
+        />
       </div>
     );
   }

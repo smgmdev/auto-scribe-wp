@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Loader2, ExternalLink, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,11 +30,20 @@ interface AgencyVerificationStatusProps {
   onCancelled?: () => void;
 }
 
-export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: AgencyVerificationStatusProps) {
+export interface AgencyVerificationStatusRef {
+  refresh: () => Promise<void>;
+}
+
+export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, AgencyVerificationStatusProps>(
+  function AgencyVerificationStatus({ onStatusUpdate, onCancelled }, ref) {
   const [loading, setLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [cancelling, setCancelling] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchStripeStatus
+  }));
 
   useEffect(() => {
     fetchStripeStatus();
@@ -345,7 +354,7 @@ export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: Agency
             <AlertDialogTrigger asChild>
               <Button 
                 variant="outline" 
-                className="border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
+                className="bg-white text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white hover:border-red-500"
                 disabled={cancelling}
               >
                 {cancelling ? (
@@ -378,4 +387,4 @@ export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: Agency
       </div>
     </div>
   );
-}
+});
