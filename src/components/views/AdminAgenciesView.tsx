@@ -586,7 +586,7 @@ export function AdminAgenciesView() {
       {/* Application Review Dialog */}
       <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader className="flex flex-row items-center justify-between gap-3 pr-8">
+          <DialogHeader>
             <div className="flex items-center gap-3">
               {logoUrl && (
                 <img 
@@ -597,31 +597,6 @@ export function AdminAgenciesView() {
               )}
               <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
             </div>
-            {selectedApp && (
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hover:bg-black hover:text-white"
-                  onClick={() => {
-                    setWebViewUrl(selectedApp.agency_website);
-                    setWebViewTitle('Agency Website');
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4 mr-1" />
-                  Website
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hover:bg-black hover:text-white"
-                  onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Document
-                </Button>
-              </div>
-            )}
           </DialogHeader>
 
           {selectedApp && (
@@ -694,6 +669,30 @@ export function AdminAgenciesView() {
                   </Badge>
                 </div>
               )}
+
+              <div className="flex gap-2 flex-wrap">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-black hover:text-white"
+                  onClick={() => {
+                    setWebViewUrl(selectedApp.agency_website);
+                    setWebViewTitle('Agency Website');
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Website
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-black hover:text-white"
+                  onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
+                >
+                  <FileText className="h-4 w-4 mr-1" />
+                  View Document
+                </Button>
+              </div>
 
               {selectedApp.status === 'pending' && (
                 <>
