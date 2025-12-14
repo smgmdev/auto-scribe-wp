@@ -165,11 +165,43 @@ export function AgencyApplicationView() {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (payoutData) {
-        setAgencyPayout(payoutData as AgencyPayout);
+      let validatedPayout = payoutData as AgencyPayout | null;
+
+      // If there's a Stripe account that's not onboarded, verify it still exists
+      if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete) {
+        try {
+          const response = await supabase.functions.invoke('get-agency-onboarding-link');
+          
+          // If Stripe account was deleted, clean up and treat as no payout
+          if (response.data?.error === 'account_deleted') {
+            console.log('Stripe account was deleted, cleaning up...');
+            
+            // Delete the agency_payouts record since Stripe account is gone
+            await supabase
+              .from('agency_payouts')
+              .delete()
+              .eq('id', payoutData.id);
+            
+            // Update application status to cancelled
+            await supabase
+              .from('agency_applications')
+              .update({ status: 'cancelled', read: false })
+              .eq('user_id', user.id)
+              .eq('status', 'approved');
+            
+            validatedPayout = null;
+            setUserApplicationStatus('cancelled');
+          }
+        } catch (error) {
+          console.error('Error verifying Stripe account:', error);
+        }
+      }
+
+      if (validatedPayout) {
+        setAgencyPayout(validatedPayout);
         
         // If custom payout, check for custom verification
-        if (payoutData.payout_method === 'custom') {
+        if (validatedPayout.payout_method === 'custom') {
           const { data: verificationData } = await supabase
             .from('agency_custom_verifications')
             .select('id, status, submitted_at, admin_notes')
