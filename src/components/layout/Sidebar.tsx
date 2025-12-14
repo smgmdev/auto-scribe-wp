@@ -175,9 +175,14 @@ export function Sidebar({
         .maybeSingle();
       
       if (isMounted && appData) {
-        // Only update from DB if store doesn't already have a status set
-        // This prevents overwriting a fresh submission status with stale DB data
-        if (!userApplicationStatus) {
+        // Update status from DB if:
+        // 1. Store doesn't have a status yet, OR
+        // 2. DB status is different and represents a progression (e.g., pending -> approved)
+        // This ensures admin approval is reflected while preserving fresh submission status
+        const shouldUpdateStatus = !userApplicationStatus || 
+          (userApplicationStatus === 'pending' && appData.status !== 'pending');
+        
+        if (shouldUpdateStatus) {
           setUserApplicationStatus(appData.status);
         }
         setApplicationId(appData.id);
