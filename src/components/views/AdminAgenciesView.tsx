@@ -715,7 +715,7 @@ export function AdminAgenciesView() {
                       disabled={processing}
                     >
                       {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
-                      Approve & Send Invite
+                      Approve and Continue
                     </Button>
                     <Button
                       variant="outline"
