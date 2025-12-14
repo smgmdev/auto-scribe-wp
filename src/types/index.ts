@@ -51,6 +51,8 @@ export interface Article {
   featuredImage?: FeaturedImage;
   status: 'draft' | 'published' | 'scheduled';
   publishedTo?: string;
+  publishedToName?: string;
+  publishedToFavicon?: string;
   wpPostId?: number;
   wpLink?: string;
   wpFeaturedMediaId?: number;
