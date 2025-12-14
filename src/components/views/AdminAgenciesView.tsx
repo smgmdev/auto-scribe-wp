@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X, RefreshCw } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X, RefreshCw, Copy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -608,11 +608,27 @@ export function AdminAgenciesView() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Email</p>
-                  <p className="font-medium">{selectedApp.email}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-medium">{selectedApp.email}</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast({ title: 'Email copied' }); }}
+                      className="p-1 hover:bg-muted rounded"
+                    >
+                      <Copy className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <p className="text-muted-foreground">WhatsApp Phone</p>
-                  <p className="font-medium">{selectedApp.whatsapp_phone}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-medium">{selectedApp.whatsapp_phone}</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast({ title: 'Phone copied' }); }}
+                      className="p-1 hover:bg-muted rounded"
+                    >
+                      <Copy className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Country</p>
