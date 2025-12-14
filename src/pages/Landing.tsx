@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Globe, ExternalLink, X, Heart, User, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { WebViewDialog } from '@/components/ui/WebViewDialog';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -64,8 +64,7 @@ const Landing = () => {
   // Brief submission dialog state
   const [briefDialogOpen, setBriefDialogOpen] = useState(false);
   const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
-  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
-  const [webViewTitle, setWebViewTitle] = useState('');
+  // WebView state removed - now using direct _blank links
 
   useEffect(() => {
     const fetchSites = async () => {
@@ -668,13 +667,15 @@ const Landing = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
                 <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => { setWebViewUrl((selectedSite as WPSite).url); setWebViewTitle((selectedSite as WPSite).name); }}
-                    className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
+                  <a 
+                    href={(selectedSite as WPSite).url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline flex items-center gap-1"
                   >
                     {extractDomain((selectedSite as WPSite).url)}
                     <ExternalLink className="h-3 w-3" />
-                  </button>
+                  </a>
                   <button
                     onClick={() => { navigator.clipboard.writeText((selectedSite as WPSite).url); toast({ title: 'Copied to clipboard' }); }}
                     className="text-muted-foreground hover:text-foreground"
@@ -717,13 +718,15 @@ const Landing = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
                 <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => { setWebViewUrl((selectedSite as MediaSite).link); setWebViewTitle((selectedSite as MediaSite).name); }}
-                    className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
+                  <a 
+                    href={(selectedSite as MediaSite).link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline flex items-center gap-1"
                   >
                     {extractDomain((selectedSite as MediaSite).link)}
                     <ExternalLink className="h-3 w-3" />
-                  </button>
+                  </a>
                   <button
                     onClick={() => { navigator.clipboard.writeText((selectedSite as MediaSite).link); toast({ title: 'Copied to clipboard' }); }}
                     className="text-muted-foreground hover:text-foreground"
@@ -853,12 +856,7 @@ const Landing = () => {
       </footer>
     </div>
 
-    <WebViewDialog
-      open={!!webViewUrl}
-      onOpenChange={(open) => !open && setWebViewUrl(null)}
-      url={webViewUrl || ''}
-      title={webViewTitle}
-    />
+    {/* WebView Dialog removed - using direct _blank links */}
   </>
   );
 };
