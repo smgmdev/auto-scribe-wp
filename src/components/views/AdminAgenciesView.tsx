@@ -255,6 +255,12 @@ export function AdminAgenciesView() {
     return false;
   });
 
+  // Count unread pending approvals (custom verifications that haven't been read)
+  const unreadPendingApprovalCount = agenciesPendingApprovalReview.filter(a => {
+    const verification = customVerifications.find(v => v.agency_payout_id === a.id);
+    return verification && !verification.read;
+  }).length;
+
   const handleOpenApplication = async (app: AgencyApplication) => {
     setSelectedApp(app);
     setAdminNotes(app.admin_notes || '');
@@ -702,7 +708,14 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="verification">Under Verification ({agenciesUnderVerification.length})</TabsTrigger>
+          <TabsTrigger value="verification" className="relative">
+            Under Verification ({agenciesUnderVerification.length})
+            {unreadPendingApprovalCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
+                {unreadPendingApprovalCount}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
           <TabsTrigger value="cancelled" className="relative">
             Cancelled ({cancelledApplications.length})
