@@ -157,10 +157,10 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
         }
       }
 
-      // Update the application status to cancelled
+      // Update the application status to cancelled and reset read to false for admin notification
       const { error: updateError } = await supabase
         .from('agency_applications')
-        .update({ status: 'cancelled' })
+        .update({ status: 'cancelled', read: false })
         .eq('user_id', user.id)
         .eq('status', 'approved');
 

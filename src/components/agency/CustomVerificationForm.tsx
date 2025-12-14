@@ -283,10 +283,10 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     
     setCancelling(true);
     try {
-      // Update the agency_applications status to cancelled
+      // Update the agency_applications status to cancelled and reset read to false for admin notification
       const { error } = await supabase
         .from('agency_applications')
-        .update({ status: 'cancelled' })
+        .update({ status: 'cancelled', read: false })
         .eq('user_id', user.id)
         .eq('status', 'approved');
 
