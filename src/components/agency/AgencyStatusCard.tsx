@@ -7,10 +7,13 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface AgencyStatusCardProps {
   applicationStatus: string | null;
+  applicationId: string | null;
+  rejectionSeen: boolean;
   hasStripeAccount: boolean;
   isAgencyOnboarded: boolean;
   onNavigateToApplication: () => void;
   onStatusUpdate: (onboarded: boolean) => void;
+  onRejectionSeen?: () => void;
 }
 
 interface StripeStatus {
@@ -25,29 +28,18 @@ interface StripeStatus {
 
 export function AgencyStatusCard({
   applicationStatus,
+  applicationId,
+  rejectionSeen,
   hasStripeAccount,
   isAgencyOnboarded,
   onNavigateToApplication,
-  onStatusUpdate
+  onStatusUpdate,
+  onRejectionSeen
 }: AgencyStatusCardProps) {
   const { user } = useAuth();
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
-  
-  // Check if rejection was already dismissed (persisted in localStorage)
-  const [dismissedRejection, setDismissedRejection] = useState(() => {
-    if (!user) return false;
-    const dismissed = localStorage.getItem(`agency_rejection_dismissed_${user.id}`);
-    return dismissed === 'true';
-  });
-
-  // Reset dismissed state when user changes
-  useEffect(() => {
-    if (user) {
-      const dismissed = localStorage.getItem(`agency_rejection_dismissed_${user.id}`);
-      setDismissedRejection(dismissed === 'true');
-    }
-  }, [user?.id]);
+  const [localDismissed, setLocalDismissed] = useState(false);
 
   // Fetch Stripe status on mount when user has Stripe account
   useEffect(() => {
@@ -73,11 +65,18 @@ export function AgencyStatusCard({
     }
   };
 
-  const handleDismissRejection = () => {
-    if (user) {
-      localStorage.setItem(`agency_rejection_dismissed_${user.id}`, 'true');
+  const handleDismissRejection = async () => {
+    setLocalDismissed(true);
+    
+    // Update database
+    if (applicationId) {
+      await supabase
+        .from('agency_applications')
+        .update({ rejection_seen: true })
+        .eq('id', applicationId);
     }
-    setDismissedRejection(true);
+    
+    onRejectionSeen?.();
     onNavigateToApplication();
   };
 
@@ -222,7 +221,7 @@ export function AgencyStatusCard({
   }
 
   // Rejected application - can view details
-  if (applicationStatus === 'rejected' && !dismissedRejection) {
+  if (applicationStatus === 'rejected' && !rejectionSeen && !localDismissed) {
     return (
       <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
         <div className="flex items-start gap-3">

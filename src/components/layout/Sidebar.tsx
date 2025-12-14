@@ -110,6 +110,8 @@ export function Sidebar({
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
+  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [rejectionSeen, setRejectionSeen] = useState(false);
 
   // Reset agency data when user changes
   useEffect(() => {
@@ -117,6 +119,8 @@ export function Sidebar({
     setIsAgencyOnboarded(false);
     setHasStripeAccount(false);
     setUserApplicationStatus(null);
+    setApplicationId(null);
+    setRejectionSeen(false);
   }, [user?.id]);
 
   useEffect(() => {
@@ -142,7 +146,7 @@ export function Sidebar({
       // Regular user: check their own application status (most recent)
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('status')
+        .select('id, status, rejection_seen')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -150,6 +154,8 @@ export function Sidebar({
       
       if (appData) {
         setUserApplicationStatus(appData.status);
+        setApplicationId(appData.id);
+        setRejectionSeen(appData.rejection_seen || false);
       }
 
       // Check if user has agency payout record and onboarding status
@@ -292,10 +298,13 @@ export function Sidebar({
             {!isAdmin && agencyDataLoaded && (
               <AgencyStatusCard
                 applicationStatus={userApplicationStatus}
+                applicationId={applicationId}
+                rejectionSeen={rejectionSeen}
                 hasStripeAccount={hasStripeAccount}
                 isAgencyOnboarded={isAgencyOnboarded}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
                 onStatusUpdate={setIsAgencyOnboarded}
+                onRejectionSeen={() => setRejectionSeen(true)}
               />
             )}
             
