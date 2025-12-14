@@ -624,7 +624,7 @@ export function AdminAgenciesView() {
                     onClick={() => { setWebViewUrl(selectedApp.agency_website); setWebViewTitle('Agency Website'); }}
                     className="font-medium text-primary hover:underline flex items-center gap-1"
                   >
-                    {selectedApp.agency_website}
+                    {selectedApp.agency_website.replace(/^https?:\/\//, '')}
                     <ExternalLink className="h-3 w-3" />
                   </button>
                 </div>
@@ -651,7 +651,7 @@ export function AdminAgenciesView() {
                         onClick={() => { setWebViewUrl(channel); setWebViewTitle('Media Channel'); }}
                         className="font-medium text-primary hover:underline flex items-center gap-1 text-left"
                       >
-                        {channel}
+                        {channel.replace(/^https?:\/\//, '')}
                         <ExternalLink className="h-3 w-3" />
                       </button>
                     ))}
