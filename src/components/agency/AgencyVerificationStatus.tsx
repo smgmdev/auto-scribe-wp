@@ -105,6 +105,30 @@ export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: Agency
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Get the agency_payouts record to find the Stripe account ID
+      const { data: agencyPayout } = await supabase
+        .from('agency_payouts')
+        .select('id, stripe_account_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // If there's a Stripe account, delete it first
+      if (agencyPayout?.stripe_account_id) {
+        try {
+          const response = await supabase.functions.invoke('delete-stripe-account', {
+            body: { account_id: agencyPayout.stripe_account_id }
+          });
+          
+          if (response.error) {
+            console.error('Failed to delete Stripe account:', response.error);
+          } else {
+            console.log('Stripe account deleted successfully:', agencyPayout.stripe_account_id);
+          }
+        } catch (stripeError) {
+          console.error('Error calling delete-stripe-account:', stripeError);
+        }
+      }
+
       // Update the application status to cancelled
       const { error: updateError } = await supabase
         .from('agency_applications')
@@ -114,14 +138,16 @@ export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: Agency
 
       if (updateError) throw updateError;
 
-      // Delete the agency_payouts record to remove Stripe connection
-      const { error: deleteError } = await supabase
-        .from('agency_payouts')
-        .delete()
-        .eq('user_id', user.id);
+      // Delete the agency_payouts record
+      if (agencyPayout) {
+        const { error: deleteError } = await supabase
+          .from('agency_payouts')
+          .delete()
+          .eq('id', agencyPayout.id);
 
-      if (deleteError) {
-        console.error('Error deleting agency payout:', deleteError);
+        if (deleteError) {
+          console.error('Error deleting agency payout:', deleteError);
+        }
       }
 
       toast({
