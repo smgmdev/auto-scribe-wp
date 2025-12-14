@@ -345,7 +345,7 @@ export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: Agency
             <AlertDialogTrigger asChild>
               <Button 
                 variant="outline" 
-                className="border-red-500/30 text-red-500 hover:bg-red-500/10"
+                className="border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
                 disabled={cancelling}
               >
                 {cancelling ? (
