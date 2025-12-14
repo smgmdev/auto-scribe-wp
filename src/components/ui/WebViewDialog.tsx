@@ -11,90 +11,114 @@ interface WebViewDialogProps {
 }
 
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: WebViewDialogProps) {
-  const [loading, setLoading] = useState(true);
-  const [blocked, setBlocked] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
 
+  const clearTimers = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+  };
+
   useEffect(() => {
     if (open) {
-      setLoading(true);
-      setBlocked(false);
+      setStatus('loading');
       
-      // Fallback timeout
+      // Fallback timeout - if nothing loads in 15s, show blocked
       timeoutRef.current = setTimeout(() => {
-        setBlocked(true);
-        setLoading(false);
-      }, 12000);
+        if (status === 'loading') {
+          setStatus('blocked');
+        }
+      }, 15000);
 
-      return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      };
+      return () => clearTimers();
     }
   }, [open, normalizedUrl]);
 
   const handleRefresh = () => {
-    setLoading(true);
-    setBlocked(false);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setStatus('loading');
+    clearTimers();
     timeoutRef.current = setTimeout(() => {
-      setBlocked(true);
-      setLoading(false);
-    }, 12000);
-    if (iframeRef.current) iframeRef.current.src = normalizedUrl;
+      if (status === 'loading') {
+        setStatus('blocked');
+      }
+    }, 15000);
+    if (iframeRef.current) {
+      iframeRef.current.src = '';
+      setTimeout(() => {
+        if (iframeRef.current) iframeRef.current.src = normalizedUrl;
+      }, 100);
+    }
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
     if (!newOpen) {
-      setLoading(true);
-      setBlocked(false);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setStatus('loading');
+      clearTimers();
     }
   };
 
   const handleIframeLoad = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    clearTimers();
     
-    // Give a short delay then check if content loaded properly
+    // Check if content is accessible and appears to be an error
     setTimeout(() => {
       try {
         const iframe = iframeRef.current;
-        if (iframe) {
-          // Try to access iframe content - this throws for successful cross-origin loads
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframe) {
+          setStatus('loaded');
+          return;
+        }
+
+        // Try to access content - throws for cross-origin (which means external site loaded)
+        const iframeWindow = iframe.contentWindow;
+        const iframeDoc = iframe.contentDocument;
+        
+        if (iframeDoc && iframeWindow) {
+          // If we CAN access the document, it's same-origin (likely browser error page)
+          const bodyText = iframeDoc.body?.innerText?.toLowerCase() || '';
+          const title = iframeDoc.title?.toLowerCase() || '';
           
-          if (iframeDoc) {
-            const bodyText = iframeDoc.body?.innerText?.toLowerCase() || '';
-            const bodyHtml = iframeDoc.body?.innerHTML || '';
-            
-            // Detect common browser error messages or empty/blocked content
-            const isError = 
-              bodyText.includes('refused to connect') ||
-              bodyText.includes('blocked') ||
-              bodyText.includes('not allowed') ||
-              bodyText.includes('refused to display') ||
-              bodyText.includes('x-frame-options') ||
-              bodyText.includes('content security policy') ||
-              bodyText.includes('connection refused') ||
-              bodyHtml === '' ||
-              bodyHtml === '<head></head><body></body>';
-            
-            if (isError) {
-              setBlocked(true);
-              setLoading(false);
+          // Check for common error indicators
+          const hasErrorContent = 
+            bodyText.includes('refused') ||
+            bodyText.includes('blocked') ||
+            bodyText.includes('denied') ||
+            bodyText.includes('not allowed') ||
+            bodyText.includes('x-frame-options') ||
+            bodyText.includes('content security policy') ||
+            bodyText.includes('cannot be displayed') ||
+            bodyText.includes('connection') ||
+            title.includes('error') ||
+            iframeDoc.body?.innerHTML === '';
+          
+          if (hasErrorContent) {
+            setStatus('blocked');
+            return;
+          }
+          
+          // If we can access it and URL is about:blank or similar, it's blocked
+          try {
+            const iframeLocation = iframeWindow.location.href;
+            if (iframeLocation === 'about:blank' || iframeLocation === '') {
+              setStatus('blocked');
               return;
             }
+          } catch (e) {
+            // Can't access location - proceed
           }
         }
+        
+        setStatus('loaded');
       } catch (e) {
-        // Cross-origin error = site loaded successfully (can't access content but that's fine)
+        // Cross-origin error means external content loaded successfully
+        setStatus('loaded');
       }
-      
-      setLoading(false);
-    }, 500);
+    }, 800);
   };
 
   return (
@@ -107,10 +131,10 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
                 onClick={handleRefresh}
                 variant="ghost"
                 size="sm"
-                disabled={loading}
+                disabled={status === 'loading'}
                 className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${status === 'loading' ? 'animate-spin' : ''}`} />
               </Button>
               <DialogTitle className="text-sm truncate max-w-[60vw]">{title}</DialogTitle>
             </div>
@@ -135,8 +159,8 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
             </div>
           </div>
         </DialogHeader>
-        <div className="w-full h-[80vh] relative">
-          {loading && !blocked && (
+        <div className="w-full h-[80vh] relative bg-muted">
+          {status === 'loading' && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -144,7 +168,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
               </div>
             </div>
           )}
-          {blocked && (
+          {status === 'blocked' && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
               <div className="flex flex-col items-center gap-4 text-center px-6">
                 <AlertCircle className="h-12 w-12 text-muted-foreground" />
@@ -168,11 +192,11 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
           <iframe
             ref={iframeRef}
             src={normalizedUrl}
-            className={`w-full h-full border-0 ${blocked ? 'hidden' : ''}`}
+            className={`w-full h-full border-0 ${status !== 'loaded' ? 'invisible' : ''}`}
             title="WebView"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             onLoad={handleIframeLoad}
-            onError={() => { setBlocked(true); setLoading(false); if (timeoutRef.current) clearTimeout(timeoutRef.current); }}
+            onError={() => { setStatus('blocked'); clearTimers(); }}
           />
         </div>
       </DialogContent>
