@@ -464,6 +464,7 @@ export function AdminAgenciesView() {
 
         {/* Cancelled by User Tab */}
         <TabsContent value="cancelled" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">Applications cancelled by the user</p>
           {cancelledApplications.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
