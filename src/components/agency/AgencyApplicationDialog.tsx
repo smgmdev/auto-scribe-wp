@@ -366,7 +366,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent 
-                        side="right" 
+                        side="bottom" 
                         align="start"
                         sideOffset={8}
                         collisionPadding={16}
