@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X, RefreshCw, Copy, Download } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -94,6 +94,7 @@ export function AdminAgenciesView() {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [sendingInvite, setSendingInvite] = useState<string | null>(null);
+  const [openingLink, setOpeningLink] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [cleaningUp, setCleaningUp] = useState(false);
   const [stripeAccountsDialogOpen, setStripeAccountsDialogOpen] = useState(false);
@@ -301,15 +302,33 @@ export function AdminAgenciesView() {
         description: `Onboarding link sent to ${agency.email}`
       });
 
-      if (response.data?.onboarding_url) {
-        window.open(response.data.onboarding_url, '_blank');
-      }
-
       fetchData();
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setSendingInvite(null);
+    }
+  };
+
+  const handleOpenOnboardingLink = async (agency: AgencyPayout) => {
+    if (!agency.stripe_account_id) return;
+
+    setOpeningLink(agency.id);
+    try {
+      const response = await supabase.functions.invoke('resend-agency-invite', {
+        body: { agency_id: agency.id }
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      if (response.data?.onboarding_url) {
+        window.open(response.data.onboarding_url, '_blank');
+      }
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setOpeningLink(null);
     }
   };
 
@@ -667,20 +686,36 @@ export function AdminAgenciesView() {
 
                           <div className="flex gap-1">
                             {agency.stripe_account_id && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                                onClick={(e) => { e.stopPropagation(); handleResendInvite(agency); }}
-                                disabled={sendingInvite === agency.id}
-                                title="Resend verification link"
-                              >
-                                {sendingInvite === agency.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <ExternalLink className="h-4 w-4" />
-                                )}
-                              </Button>
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                                  onClick={(e) => { e.stopPropagation(); handleResendInvite(agency); }}
+                                  disabled={sendingInvite === agency.id}
+                                  title="Resend onboarding email"
+                                >
+                                  {sendingInvite === agency.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Mail className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                                  onClick={(e) => { e.stopPropagation(); handleOpenOnboardingLink(agency); }}
+                                  disabled={openingLink === agency.id}
+                                  title="Open onboarding link"
+                                >
+                                  {openingLink === agency.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <ExternalLink className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>
