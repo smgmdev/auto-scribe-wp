@@ -577,7 +577,15 @@ export function AdminAgenciesView() {
               {agencies.filter(a => !a.onboarding_complete).map(agency => {
                 const application = getAgencyWithApplication(agency);
                 return (
-                  <Card key={agency.id}>
+                  <Card 
+                    key={agency.id} 
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      if (application) {
+                        handleOpenApplication(application);
+                      }
+                    }}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -604,7 +612,7 @@ export function AdminAgenciesView() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                                onClick={() => handleResendInvite(agency)}
+                                onClick={(e) => { e.stopPropagation(); handleResendInvite(agency); }}
                                 disabled={sendingInvite === agency.id}
                                 title="Resend verification link"
                               >
@@ -619,7 +627,7 @@ export function AdminAgenciesView() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
-                              onClick={() => handleDelete(agency)}
+                              onClick={(e) => { e.stopPropagation(); handleDelete(agency); }}
                               disabled={deleting === agency.id}
                               title="Delete agency"
                             >
