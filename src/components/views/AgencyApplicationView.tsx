@@ -142,6 +142,11 @@ export function AgencyApplicationView() {
     setIsOnboarded(onboarded);
   };
 
+  const handleCancelled = () => {
+    setHasStripeAccount(false);
+    checkExistingApplication();
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -150,6 +155,8 @@ export function AgencyApplicationView() {
         return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
       case 'rejected':
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -176,7 +183,7 @@ export function AgencyApplicationView() {
           </p>
         </div>
 
-        <AgencyVerificationStatus onStatusUpdate={handleStatusUpdate} />
+        <AgencyVerificationStatus onStatusUpdate={handleStatusUpdate} onCancelled={handleCancelled} />
       </div>
     );
   }

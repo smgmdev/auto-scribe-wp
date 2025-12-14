@@ -112,8 +112,10 @@ export function AdminAgenciesView() {
     }
   };
 
+  const cancelledApplications = applications.filter(app => app.status === 'cancelled');
   const pendingApplications = applications.filter(app => app.status === 'pending');
-  const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
+  const allPendingReview = [...pendingApplications, ...cancelledApplications];
+  const unreadPendingCount = allPendingReview.filter(app => !app.read).length;
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
   const approvedApplications = applications.filter(app => app.status === 'approved');
 
@@ -387,7 +389,7 @@ export function AdminAgenciesView() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending" className="relative">
-            Pending Review
+            Pending Review ({allPendingReview.length})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
                 {unreadPendingCount}
@@ -401,7 +403,7 @@ export function AdminAgenciesView() {
 
         {/* Pending Applications Tab */}
         <TabsContent value="pending" className="mt-6">
-          {pendingApplications.length === 0 ? (
+          {allPendingReview.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Clock className="h-12 w-12 text-muted-foreground/50" />
@@ -413,20 +415,29 @@ export function AdminAgenciesView() {
             </Card>
           ) : (
             <div className="grid gap-3">
-              {pendingApplications.map((app) => (
+              {allPendingReview.map((app) => (
                 <Card 
                   key={app.id} 
                   className={cn(
                     "cursor-pointer hover:bg-muted/50 transition-colors",
-                    !app.read ? "border-yellow-500/50 bg-yellow-500/5" : "border-yellow-500/20"
+                    app.status === 'cancelled' 
+                      ? (!app.read ? "border-red-500/50 bg-red-500/5" : "border-red-500/20")
+                      : (!app.read ? "border-yellow-500/50 bg-yellow-500/5" : "border-yellow-500/20")
                   )}
                   onClick={() => handleOpenApplication(app)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                          <Clock className="h-5 w-5 text-yellow-500" />
+                        <div className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center",
+                          app.status === 'cancelled' ? "bg-red-500/20" : "bg-yellow-500/20"
+                        )}>
+                          {app.status === 'cancelled' ? (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          )}
                         </div>
                         <div>
                           <h3 className="font-medium">{app.agency_name}</h3>
@@ -435,9 +446,15 @@ export function AdminAgenciesView() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
-                          <Clock className="h-3 w-3 mr-1" />Pending
-                        </Badge>
+                        {app.status === 'cancelled' ? (
+                          <Badge variant="destructive">
+                            <XCircle className="h-3 w-3 mr-1" />Cancelled
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
+                            <Clock className="h-3 w-3 mr-1" />Pending
+                          </Badge>
+                        )}
                         <p className="text-xs text-muted-foreground mt-2">
                           Applied {format(new Date(app.created_at), 'MMM d, yyyy')}
                         </p>

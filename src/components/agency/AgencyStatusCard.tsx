@@ -244,6 +244,30 @@ export function AgencyStatusCard({
     );
   }
 
+  // Cancelled application - show blue box to reapply
+  if (applicationStatus === 'cancelled') {
+    return (
+      <div className="rounded-lg border border-[#3872e0]/30 bg-[#3872e0]/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3872e0]/20">
+            <Building2 className="h-5 w-5 text-[#3872e0]" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium text-[#3872e0]">Become an Agency</span>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          className="w-full mt-3 bg-[#3872e0] hover:bg-[#2b59b4]"
+          onClick={onNavigateToApplication}
+        >
+          Apply Now
+        </Button>
+      </div>
+    );
+  }
+
   // No application yet - show Apply Now button
   return (
     <div className="rounded-lg border border-[#3872e0]/30 bg-[#3872e0]/10 p-3">

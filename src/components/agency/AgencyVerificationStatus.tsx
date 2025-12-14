@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, Loader2, ExternalLink } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Loader2, ExternalLink, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface StripeStatus {
   chargesEnabled: boolean;
@@ -16,12 +27,14 @@ interface StripeStatus {
 
 interface AgencyVerificationStatusProps {
   onStatusUpdate: (onboarded: boolean) => void;
+  onCancelled?: () => void;
 }
 
-export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationStatusProps) {
+export function AgencyVerificationStatus({ onStatusUpdate, onCancelled }: AgencyVerificationStatusProps) {
   const [loading, setLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchStripeStatus();
@@ -82,6 +95,49 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelApplication = async () => {
+    setCancelling(true);
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Update the application status to cancelled
+      const { error: updateError } = await supabase
+        .from('agency_applications')
+        .update({ status: 'cancelled' })
+        .eq('user_id', user.id)
+        .eq('status', 'approved');
+
+      if (updateError) throw updateError;
+
+      // Delete the agency_payouts record to remove Stripe connection
+      const { error: deleteError } = await supabase
+        .from('agency_payouts')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        console.error('Error deleting agency payout:', deleteError);
+      }
+
+      toast({
+        title: 'Application Cancelled',
+        description: 'Your agency application has been cancelled.',
+      });
+
+      onCancelled?.();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message
+      });
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -249,6 +305,51 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
           </div>
         </div>
       )}
+
+      {/* Cancel Application */}
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-medium text-foreground">Cancel Application</h4>
+            <p className="text-sm text-muted-foreground mt-1">
+              If you no longer wish to proceed with agency verification
+            </p>
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="border-red-500/30 text-red-500 hover:bg-red-500/10"
+                disabled={cancelling}
+              >
+                {cancelling ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <XCircle className="h-4 w-4 mr-2" />
+                )}
+                Cancel Application
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancel Agency Application?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to cancel your agency application? This will remove your Stripe Connect setup and you will need to reapply if you want to become an agency in the future.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Keep Application</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleCancelApplication}
+                  className="bg-red-500 hover:bg-red-600"
+                >
+                  Yes, Cancel Application
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
     </div>
   );
 }
