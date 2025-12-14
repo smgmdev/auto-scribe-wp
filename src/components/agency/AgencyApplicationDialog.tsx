@@ -123,11 +123,11 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       toast({
         variant: 'destructive',
         title: 'File too large',
-        description: 'Maximum file size is 10MB'
+        description: 'Maximum file size is 5MB'
       });
       return;
     }
@@ -163,11 +163,11 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 1 * 1024 * 1024) {
       toast({
         variant: 'destructive',
         title: 'File too large',
-        description: 'Maximum logo size is 5MB'
+        description: 'Maximum logo size is 1MB'
       });
       return;
     }
@@ -618,7 +618,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         Drag & drop or click to upload
                       </p>
                       <p className="text-[10px] text-muted-foreground/70 mb-1">
-                        PNG/JPG, max 5MB
+                        PNG/JPG, max 1MB
                       </p>
                       <Input
                         type="file"
@@ -689,7 +689,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         Drag & drop or click to upload
                       </p>
                       <p className="text-[10px] text-muted-foreground/70 mb-1">
-                        PDF only, max 10MB
+                        PDF only, max 5MB
                       </p>
                       <Input
                         type="file"
