@@ -407,7 +407,7 @@ export function AgencyApplicationView() {
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
           <p className="text-sm text-muted-foreground">
             Since you selected Custom Payout, please complete the verification form below. 
-            Your submission will be reviewed by our team and you'll be notified once approved.
+            Your submission will be reviewed by our team and you'll be notified.
           </p>
         </div>
 
