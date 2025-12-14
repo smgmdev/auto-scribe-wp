@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Heart } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Heart, Copy } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -2055,14 +2055,22 @@ export function SitesView() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Website</p>
-                  <a 
-                    href={selectedMediaSite.link} 
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline flex items-center gap-1"
-                  >
-                    {selectedMediaSite.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <a 
+                      href={selectedMediaSite.link} 
+                      rel="noopener noreferrer"
+                      className="text-accent hover:underline flex items-center gap-1"
+                    >
+                      {selectedMediaSite.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(selectedMediaSite.link); toast({ title: 'Copied to clipboard' }); }}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Show price and format only for non-agency sites */}
