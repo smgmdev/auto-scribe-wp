@@ -227,8 +227,17 @@ export function AgencyApplicationView() {
           onClick={() => setDialogOpen(true)}
           disabled={existingApplication?.status === 'pending'}
         >
-          <Send className="h-4 w-4 mr-2" />
-          Submit New Application
+          {existingApplication?.status === 'pending' ? (
+            <>
+              <Clock className="h-4 w-4 mr-2" />
+              In Review
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 mr-2" />
+              Submit New Application
+            </>
+          )}
         </Button>
       </div>
 
