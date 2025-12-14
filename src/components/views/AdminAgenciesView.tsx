@@ -220,7 +220,7 @@ export function AdminAgenciesView() {
     return true;
   });
 
-  // Pending Approval Review: Custom payout agencies where user HAS submitted verification
+  // Pending Approval: Custom payout agencies where user HAS submitted verification
   const agenciesPendingApprovalReview = agenciesUnderVerification.filter(a => {
     if (a.payout_method === 'custom') {
       const verification = customVerifications.find(v => v.agency_payout_id === a.id);
@@ -758,7 +758,7 @@ export function AdminAgenciesView() {
                 Pending Verification ({agenciesPendingVerification.length})
               </TabsTrigger>
               <TabsTrigger value="pending-approval" className="relative">
-                Pending Approval Review ({agenciesPendingApprovalReview.length})
+                Pending Approval ({agenciesPendingApprovalReview.length})
                 {agenciesPendingApprovalReview.length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
                     {agenciesPendingApprovalReview.length}
@@ -865,7 +865,7 @@ export function AdminAgenciesView() {
               )}
             </TabsContent>
 
-            {/* Pending Approval Review Sub-Tab */}
+            {/* Pending Approval Sub-Tab */}
             <TabsContent value="pending-approval" className="mt-4">
               {agenciesPendingApprovalReview.length === 0 ? (
                 <Card className="border-dashed border-2">
