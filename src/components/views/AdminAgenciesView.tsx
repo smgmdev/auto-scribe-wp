@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Send, Trash2, AlertTriangle, X, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,9 +77,8 @@ export function AdminAgenciesView() {
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [documentLoading, setDocumentLoading] = useState(true);
-  const [websiteDialogOpen, setWebsiteDialogOpen] = useState(false);
-  const [websiteUrl, setWebsiteUrl] = useState<string | null>(null);
-  const [websiteLoading, setWebsiteLoading] = useState(true);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewTitle, setWebViewTitle] = useState('');
   const { decrementUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
@@ -620,14 +620,13 @@ export function AdminAgenciesView() {
                 </div>
                 <div className="col-span-2">
                   <p className="text-muted-foreground">Agency Website</p>
-                  <a 
-                    href={selectedApp.agency_website}
-                    rel="noopener noreferrer"
+                  <button 
+                    onClick={() => { setWebViewUrl(selectedApp.agency_website); setWebViewTitle('Agency Website'); }}
                     className="font-medium text-primary hover:underline flex items-center gap-1"
                   >
                     {selectedApp.agency_website}
                     <ExternalLink className="h-3 w-3" />
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -647,15 +646,14 @@ export function AdminAgenciesView() {
                   <p className="text-muted-foreground mb-1">3 Media Channels to List</p>
                   <div className="flex flex-col gap-1">
                     {selectedApp.media_channels.split(', ').map((channel, i) => (
-                      <a 
+                      <button 
                         key={i}
-                        href={channel}
-                        rel="noopener noreferrer"
-                        className="font-medium text-primary hover:underline flex items-center gap-1"
+                        onClick={() => { setWebViewUrl(channel); setWebViewTitle('Media Channel'); }}
+                        className="font-medium text-primary hover:underline flex items-center gap-1 text-left"
                       >
                         {channel}
                         <ExternalLink className="h-3 w-3" />
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -678,8 +676,8 @@ export function AdminAgenciesView() {
                   size="sm" 
                   className="hover:bg-black hover:text-white"
                   onClick={() => {
-                    setWebsiteUrl(selectedApp.agency_website);
-                    setWebsiteDialogOpen(true);
+                    setWebViewUrl(selectedApp.agency_website);
+                    setWebViewTitle('Agency Website');
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-1" />
@@ -810,69 +808,13 @@ export function AdminAgenciesView() {
         </DialogContent>
       </Dialog>
 
-      {/* Website Viewer Dialog */}
-      <Dialog open={websiteDialogOpen} onOpenChange={(open) => { setWebsiteDialogOpen(open); if (!open) setWebsiteLoading(true); }}>
-         <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
-          <DialogHeader className="px-3 pb-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    setWebsiteLoading(true);
-                    const iframe = document.querySelector('iframe[title="Website viewer"]') as HTMLIFrameElement;
-                    if (iframe) iframe.src = iframe.src;
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  disabled={websiteLoading}
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
-                >
-                  <RefreshCw className={`h-4 w-4 ${websiteLoading ? 'animate-spin' : ''}`} />
-                </Button>
-                <DialogTitle className="text-sm">Agency Website</DialogTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => window.open(websiteUrl!, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-black hover:text-white h-7 text-xs"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Open in New Tab
-                </Button>
-                <Button
-                  onClick={() => setWebsiteDialogOpen(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </DialogHeader>
-          {websiteUrl && (
-            <div className="w-full h-[75vh] relative">
-              {websiteLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Loading website...</p>
-                  </div>
-                </div>
-              )}
-              <iframe
-                src={websiteUrl}
-                className="w-full h-full border-0"
-                title="Website viewer"
-                sandbox="allow-scripts allow-same-origin allow-popups"
-                onLoad={() => setWebsiteLoading(false)}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* WebView Dialog */}
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => { if (!open) setWebViewUrl(null); }}
+        url={webViewUrl || ''}
+        title={webViewTitle}
+      />
 
       {/* Stripe Accounts Management Dialog */}
       <Dialog open={stripeAccountsDialogOpen} onOpenChange={setStripeAccountsDialogOpen}>
