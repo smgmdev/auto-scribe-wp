@@ -202,18 +202,22 @@ export function AgencyApplicationView() {
     }
   };
 
-  const handleCancelled = async () => {
+  const handleCancelled = () => {
     // Set cancelling flag to prevent loading spinner during transition
     setIsCancelling(true);
-    // Clear local state immediately to prevent blinking
+    // Clear local state immediately to show the application form
     setAgencyPayout(null);
     setCustomVerification(null);
-    // Update global store immediately
+    // Ensure loading is false so content renders
+    setLoading(false);
+    // Update global store immediately - this triggers sidebar to update
     setUserApplicationStatus('cancelled');
-    // Refetch data after a brief delay to get updated state
-    await new Promise(resolve => setTimeout(resolve, 300));
-    await fetchAgencyData(true);
-    setIsCancelling(false);
+    // Reset cancelling flag after state updates
+    setTimeout(() => {
+      setIsCancelling(false);
+      // Optionally refetch to get updated application data
+      fetchAgencyData(true);
+    }, 100);
   };
 
   const handleCustomVerificationSubmit = () => {
