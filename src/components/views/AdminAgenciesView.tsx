@@ -184,6 +184,17 @@ export function AdminAgenciesView() {
         if (response.data?.error) throw new Error(response.data.error);
       }
 
+      if (status === 'rejected') {
+        // Send rejection email
+        supabase.functions.invoke('send-rejection-email', {
+          body: {
+            email: selectedApp.email,
+            full_name: selectedApp.full_name,
+            agency_name: selectedApp.agency_name
+          }
+        }).catch(err => console.error('Failed to send rejection email:', err));
+      }
+
       toast({
         title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
         description: status === 'approved' 
