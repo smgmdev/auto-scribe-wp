@@ -510,7 +510,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               )}
               {formData.payout_method === 'custom' && (
                 <p className="text-xs text-muted-foreground">
-                  Custom Payouts are manual payouts by wire transfer or USDT. If you choose Custom Payout option you will be assigned an account manager to handle your payouts in a custom manner. Custom Payouts can take up to 7 days or more.
+                  Custom Payouts are manual payouts by wire transfer or USDT. If you choose Custom Payout option you will be assigned an account manager to handle your payouts in a custom manner. Custom Payouts can take up to 3-7 days or more.
                 </p>
               )}
             </div>
