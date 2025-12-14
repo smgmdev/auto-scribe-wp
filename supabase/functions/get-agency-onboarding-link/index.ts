@@ -58,7 +58,24 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     // Get Stripe account details to check requirements
-    const account = await stripe.accounts.retrieve(agencyData.stripe_account_id);
+    let account;
+    try {
+      account = await stripe.accounts.retrieve(agencyData.stripe_account_id);
+    } catch (stripeError: any) {
+      // If Stripe account doesn't exist or was deleted, return appropriate response
+      if (stripeError.code === 'account_invalid' || stripeError.message?.includes('does not exist')) {
+        logStep("Stripe account no longer exists", { stripeAccountId: agencyData.stripe_account_id });
+        return new Response(JSON.stringify({ 
+          error: "account_deleted",
+          message: "Stripe account no longer exists. Please contact support or reapply."
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200, // Return 200 so frontend can handle gracefully
+        });
+      }
+      throw stripeError;
+    }
+    
     logStep("Stripe account retrieved", { 
       chargesEnabled: account.charges_enabled,
       payoutsEnabled: account.payouts_enabled,
