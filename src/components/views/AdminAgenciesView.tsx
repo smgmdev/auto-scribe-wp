@@ -989,7 +989,9 @@ export function AdminAgenciesView() {
 
               {selectedApp.status !== 'pending' && selectedApp.admin_notes && (
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {selectedApp.status === 'cancelled' ? 'Cancellation Reason' : 'Rejection Reason'}
+                  </p>
                   <p className="text-sm">{selectedApp.admin_notes}</p>
                 </div>
               )}
