@@ -166,3 +166,26 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+/* Disable default focus highlights and outlines */
+a:focus,
+a:focus-visible,
+button:focus,
+button:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove text selection highlight on interactive elements in dialogs */
+[role="dialog"] a,
+[role="dialog"] button,
+[data-radix-dialog-content] a,
+[data-radix-dialog-content] button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
