@@ -170,7 +170,7 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
-              <h4 className="font-medium text-foreground">Still Required</h4>
+              <h4 className="font-medium text-foreground">Required Information</h4>
               <span className="ml-auto text-xs text-muted-foreground">
                 {missingCount} item{missingCount !== 1 ? 's' : ''}
               </span>
