@@ -1033,12 +1033,25 @@ export function AdminAgenciesView() {
                   </div>
                 </div>
               )}
-              <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+              <object
+                data={documentUrl}
+                type="application/pdf"
                 className="w-full h-full border-0"
                 title="Document viewer"
                 onLoad={() => setDocumentLoading(false)}
-              />
+              >
+                <div className="flex flex-col items-center justify-center h-full gap-4">
+                  <p className="text-muted-foreground">Unable to display PDF in browser.</p>
+                  <Button
+                    onClick={() => window.open(documentUrl, '_blank')}
+                    variant="outline"
+                    className="hover:bg-black hover:text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open PDF in New Tab
+                  </Button>
+                </div>
+              </object>
             </div>
           )}
         </DialogContent>
