@@ -676,7 +676,8 @@ export function AdminAgenciesView() {
 
                   <div className="flex gap-2">
                     <Button
-                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      variant="outline"
+                      className="flex-1 hover:bg-black hover:text-white"
                       onClick={() => handleDecision('approved')}
                       disabled={processing}
                     >
@@ -684,8 +685,8 @@ export function AdminAgenciesView() {
                       Approve & Send Invite
                     </Button>
                     <Button
-                      variant="destructive"
-                      className="flex-1"
+                      variant="outline"
+                      className="flex-1 hover:bg-black hover:text-white"
                       onClick={() => {
                         if (!adminNotes.trim()) {
                           toast({ variant: 'destructive', title: 'Reason required', description: 'Please provide a rejection reason' });
