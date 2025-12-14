@@ -100,16 +100,21 @@ export type Database = {
           bank_swift_code: string | null
           company_address: string | null
           company_documents_url: string | null
+          company_id: string | null
           company_name: string
           country: string
           created_at: string
+          email: string | null
+          first_name: string | null
           full_name: string
           id: string
+          last_name: string | null
           passport_url: string | null
           phone: string | null
           reviewed_at: string | null
           status: string
           submitted_at: string | null
+          tax_number: string | null
           updated_at: string
           usdt_network: string | null
           usdt_wallet_address: string | null
@@ -128,16 +133,21 @@ export type Database = {
           bank_swift_code?: string | null
           company_address?: string | null
           company_documents_url?: string | null
+          company_id?: string | null
           company_name: string
           country: string
           created_at?: string
+          email?: string | null
+          first_name?: string | null
           full_name: string
           id?: string
+          last_name?: string | null
           passport_url?: string | null
           phone?: string | null
           reviewed_at?: string | null
           status?: string
           submitted_at?: string | null
+          tax_number?: string | null
           updated_at?: string
           usdt_network?: string | null
           usdt_wallet_address?: string | null
@@ -156,16 +166,21 @@ export type Database = {
           bank_swift_code?: string | null
           company_address?: string | null
           company_documents_url?: string | null
+          company_id?: string | null
           company_name?: string
           country?: string
           created_at?: string
+          email?: string | null
+          first_name?: string | null
           full_name?: string
           id?: string
+          last_name?: string | null
           passport_url?: string | null
           phone?: string | null
           reviewed_at?: string | null
           status?: string
           submitted_at?: string | null
+          tax_number?: string | null
           updated_at?: string
           usdt_network?: string | null
           usdt_wallet_address?: string | null

@@ -47,11 +47,18 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   const [uploadingLicense, setUploadingLicense] = useState(false);
 
   const [formData, setFormData] = useState({
-    full_name: '',
-    company_name: agencyName || '',
-    country: '',
+    // Personal info
+    first_name: '',
+    last_name: '',
+    personal_country: '',
     phone: '',
+    email: '',
+    // Company info
+    company_name: agencyName || '',
+    company_country: '',
     company_address: '',
+    company_id: '',
+    tax_number: '',
     // Bank details
     bank_account_holder: '',
     bank_account_number: '',
@@ -124,12 +131,22 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     e.preventDefault();
     if (!user) return;
 
-    // Validation
-    if (!formData.full_name || !formData.company_name || !formData.country) {
+    // Personal info validation
+    if (!formData.first_name || !formData.last_name || !formData.personal_country || !formData.email) {
       toast({
         variant: 'destructive',
         title: 'Missing fields',
         description: 'Please fill in all required personal information fields'
+      });
+      return;
+    }
+
+    // Company info validation
+    if (!formData.company_name || !formData.company_country) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing fields',
+        description: 'Please fill in all required company information fields'
       });
       return;
     }
@@ -188,10 +205,16 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
       const { error } = await supabase.from('agency_custom_verifications').insert({
         user_id: user.id,
         agency_payout_id: agencyPayoutId,
-        full_name: formData.full_name,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        full_name: `${formData.first_name} ${formData.last_name}`,
+        email: formData.email,
         company_name: formData.company_name,
-        country: formData.country,
+        country: formData.company_country,
         phone: formData.phone || null,
+        company_address: formData.company_address || null,
+        company_id: formData.company_id || null,
+        tax_number: formData.tax_number || null,
         company_documents_url: companyDocsUrl,
         passport_url: passportUrl,
         additional_documents_url: JSON.stringify({ articles: articlesUrl, license: licenseUrl }),
@@ -202,7 +225,6 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         bank_iban: formData.bank_iban || null,
         bank_country: formData.bank_country || null,
         bank_address: formData.bank_address || null,
-        company_address: formData.company_address || null,
         usdt_wallet_address: formData.usdt_wallet_address || null,
         usdt_network: formData.usdt_network || null,
         status: 'pending_review',
@@ -216,9 +238,9 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         await supabase.functions.invoke('notify-admin-custom-verification', {
           body: {
             agency_name: agencyName,
-            full_name: formData.full_name,
+            full_name: `${formData.first_name} ${formData.last_name}`,
             company_name: formData.company_name,
-            country: formData.country,
+            country: formData.company_country,
           }
         });
       } catch (notifyError) {
@@ -326,35 +348,35 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">Personal Information</CardTitle>
-            <CardDescription>Provide your personal and company details</CardDescription>
+            <CardDescription>Provide your personal details</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="full_name">Full Legal Name *</Label>
+                <Label htmlFor="first_name">First Name *</Label>
                 <Input
-                  id="full_name"
-                  placeholder="John Doe"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                  id="first_name"
+                  placeholder="John"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
                   disabled={submitting}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company_name">Full Legal Company Name *</Label>
+                <Label htmlFor="last_name">Last Name *</Label>
                 <Input
-                  id="company_name"
-                  placeholder="Your Agency Inc."
-                  value={formData.company_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+                  id="last_name"
+                  placeholder="Doe"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
                   disabled={submitting}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
+                <Label htmlFor="personal_country">Country *</Label>
                 <Select
-                  value={formData.country}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                  value={formData.personal_country}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, personal_country: value }))}
                   disabled={submitting}
                 >
                   <SelectTrigger>
@@ -377,18 +399,108 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   disabled={submitting}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
             </div>
+            <FileUploadBox
+              label="Passport"
+              required
+              file={passportFile}
+              url={passportUrl}
+              uploading={uploadingPassport}
+              accept=".pdf,.jpg,.jpeg,.png"
+              maxSizeLabel="Max 2MB"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setPassportFile(file);
+                  handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
+                }
+              }}
+              onDrop={(file) => {
+                setPassportFile(file);
+                handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
+              }}
+            />
           </CardContent>
         </Card>
 
-        {/* Document Uploads */}
+        {/* Company Information */}
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Document Verification</CardTitle>
-            <CardDescription>Upload required verification documents</CardDescription>
+            <CardTitle className="text-lg">Company Information</CardTitle>
+            <CardDescription>Provide your company details and documents</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="company_name">Full Legal Company Name *</Label>
+                <Input
+                  id="company_name"
+                  placeholder="Your Agency Inc."
+                  value={formData.company_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company_country">Country *</Label>
+                <Select
+                  value={formData.company_country}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, company_country: value }))}
+                  disabled={submitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company country" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country} value={country}>{country}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="company_address">Address</Label>
+                <Input
+                  id="company_address"
+                  placeholder="123 Business St, City, Country"
+                  value={formData.company_address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company_id">Company ID</Label>
+                <Input
+                  id="company_id"
+                  placeholder="Company registration number"
+                  value={formData.company_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, company_id: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tax_number">Tax Number (if any)</Label>
+                <Input
+                  id="tax_number"
+                  placeholder="Tax identification number"
+                  value={formData.tax_number}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tax_number: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <FileUploadBox
                 label="Company Incorporation File"
                 required
@@ -410,28 +522,6 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 }}
               />
               <FileUploadBox
-                label="Passport"
-                required
-                file={passportFile}
-                url={passportUrl}
-                uploading={uploadingPassport}
-                accept=".pdf,.jpg,.jpeg,.png"
-                maxSizeLabel="Max 2MB"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setPassportFile(file);
-                    handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
-                  }
-                }}
-                onDrop={(file) => {
-                  setPassportFile(file);
-                  handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
-                }}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FileUploadBox
                 label="Articles of Association"
                 required
                 file={articlesFile}
@@ -451,27 +541,27 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                   handleFileUpload(file, 'articles', setUploadingArticles, setArticlesUrl);
                 }}
               />
-              <FileUploadBox
-                label="Valid Business License"
-                required
-                file={licenseFile}
-                url={licenseUrl}
-                uploading={uploadingLicense}
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                maxSizeLabel="Max 5MB"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setLicenseFile(file);
-                    handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
-                  }
-                }}
-                onDrop={(file) => {
+            </div>
+            <FileUploadBox
+              label="Valid Business License"
+              required
+              file={licenseFile}
+              url={licenseUrl}
+              uploading={uploadingLicense}
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              maxSizeLabel="Max 5MB"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
                   setLicenseFile(file);
                   handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
-                }}
-              />
-            </div>
+                }
+              }}
+              onDrop={(file) => {
+                setLicenseFile(file);
+                handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
+              }}
+            />
           </CardContent>
         </Card>
 
