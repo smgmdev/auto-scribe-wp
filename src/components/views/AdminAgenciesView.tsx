@@ -140,6 +140,9 @@ export function AdminAgenciesView() {
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
   const [selectedVerification, setSelectedVerification] = useState<CustomVerification | null>(null);
   const [verificationDocUrls, setVerificationDocUrls] = useState<Record<string, string>>({});
+  const [docViewerOpen, setDocViewerOpen] = useState(false);
+  const [docViewerUrl, setDocViewerUrl] = useState('');
+  const [docViewerTitle, setDocViewerTitle] = useState('');
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
@@ -1615,9 +1618,13 @@ export function AdminAgenciesView() {
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => window.open(verificationDocUrls.company_documents, '_blank')}
+                      onClick={() => {
+                        setDocViewerUrl(verificationDocUrls.company_documents);
+                        setDocViewerTitle('Company Documents');
+                        setDocViewerOpen(true);
+                      }}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2" />
                       Company Documents
                     </Button>
                   )}
@@ -1626,9 +1633,13 @@ export function AdminAgenciesView() {
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => window.open(verificationDocUrls.passport, '_blank')}
+                      onClick={() => {
+                        setDocViewerUrl(verificationDocUrls.passport);
+                        setDocViewerTitle('Passport/ID');
+                        setDocViewerOpen(true);
+                      }}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2" />
                       Passport/ID
                     </Button>
                   )}
@@ -1637,9 +1648,13 @@ export function AdminAgenciesView() {
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => window.open(verificationDocUrls.additional_documents, '_blank')}
+                      onClick={() => {
+                        setDocViewerUrl(verificationDocUrls.additional_documents);
+                        setDocViewerTitle('Additional Documents');
+                        setDocViewerOpen(true);
+                      }}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2" />
                       Additional Documents
                     </Button>
                   )}
@@ -1659,6 +1674,34 @@ export function AdminAgenciesView() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Viewer Dialog */}
+      <Dialog open={docViewerOpen} onOpenChange={setDocViewerOpen}>
+        <DialogContent className="max-w-5xl max-h-[95vh] p-0">
+          <DialogHeader className="p-4 border-b flex flex-row items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {docViewerTitle}
+            </DialogTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-black hover:text-white"
+              onClick={() => window.open(docViewerUrl, '_blank')}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open in New Tab
+            </Button>
+          </DialogHeader>
+          <div className="w-full h-[80vh]">
+            <iframe
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(docViewerUrl)}&embedded=true`}
+              className="w-full h-full border-0"
+              title={docViewerTitle}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
