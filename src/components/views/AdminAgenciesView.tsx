@@ -611,18 +611,30 @@ export function AdminAgenciesView() {
                   <p className="font-medium">{selectedApp.email}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">WhatsApp</p>
+                  <p className="text-muted-foreground">WhatsApp Phone</p>
                   <p className="font-medium">{selectedApp.whatsapp_phone}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Country</p>
                   <p className="font-medium">{selectedApp.country}</p>
                 </div>
+                <div className="col-span-2">
+                  <p className="text-muted-foreground">Agency Website</p>
+                  <a 
+                    href={selectedApp.agency_website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-primary hover:underline flex items-center gap-1"
+                  >
+                    {selectedApp.agency_website}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
               </div>
 
               {selectedApp.media_niches && selectedApp.media_niches.length > 0 && (
                 <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">Media Niches</p>
+                  <p className="text-muted-foreground mb-1">Focus Media Niche</p>
                   <div className="flex flex-wrap gap-1">
                     {selectedApp.media_niches.map((niche, i) => (
                       <Badge key={i} variant="secondary">{niche}</Badge>
@@ -633,7 +645,7 @@ export function AdminAgenciesView() {
 
               {selectedApp.media_channels && (
                 <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">Media Channels</p>
+                  <p className="text-muted-foreground mb-1">3 Media Channels to List</p>
                   <div className="flex flex-col gap-1">
                     {selectedApp.media_channels.split(', ').map((channel, i) => (
                       <a 
@@ -655,7 +667,7 @@ export function AdminAgenciesView() {
                 <div className="text-sm">
                   <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
                   <Badge variant="outline" className="font-medium">
-                    {selectedApp.payout_method === 'stripe' && 'Stripe Connect (Automatic)'}
+                    {selectedApp.payout_method === 'stripe' && 'Automatic payout via Stripe Connect'}
                     {selectedApp.payout_method === 'usdt' && 'USDT Payout'}
                     {selectedApp.payout_method === 'wire' && 'Wire Payout'}
                   </Badge>
