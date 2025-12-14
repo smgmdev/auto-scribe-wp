@@ -90,6 +90,8 @@ export function AgencyApplicationView() {
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const verificationRef = useRef<AgencyVerificationStatusRef>(null);
 
   useEffect(() => {
     if (user) {
@@ -172,9 +174,6 @@ export function AgencyApplicationView() {
 
   // Show verification status if user has Stripe account but not fully onboarded
   if (hasStripeAccount && !isOnboarded) {
-    const [refreshing, setRefreshing] = useState(false);
-    const verificationRef = useRef<AgencyVerificationStatusRef>(null);
-
     const handleRefresh = async () => {
       setRefreshing(true);
       if (verificationRef.current?.refresh) {
