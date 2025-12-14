@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/constants/countries';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface CustomVerificationFormProps {
   agencyPayoutId: string;
@@ -257,8 +257,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   );
 
   return (
-    <ScrollArea className="max-h-[70vh]">
-      <form onSubmit={handleSubmit} className="space-y-6 pr-4">
+    <div className="pb-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
         <Card>
           <CardHeader className="pb-4">
@@ -513,6 +513,6 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
           )}
         </Button>
       </form>
-    </ScrollArea>
+    </div>
   );
 }
