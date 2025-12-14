@@ -378,7 +378,7 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
           <div>
             <h4 className="font-medium text-foreground">Cancel Application</h4>
             <p className="text-sm text-muted-foreground mt-1">
-              If you no longer wish to proceed with agency verification
+              If you no longer wish to proceed with agency verification for Stripe Connect
             </p>
           </div>
           <Button 
