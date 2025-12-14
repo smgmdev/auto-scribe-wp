@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye } from 'lucide-react';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -43,6 +44,7 @@ export function OrdersView() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [releasing, setReleasing] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -285,14 +287,13 @@ export function OrdersView() {
               {selectedOrder.delivery_url && (
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
-                  <a 
-                    href={selectedOrder.delivery_url} 
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline flex items-center gap-1"
+                  <button 
+                    onClick={() => setWebViewUrl(selectedOrder.delivery_url!)}
+                    className="text-sm text-primary hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     {selectedOrder.delivery_url}
                     <ExternalLink className="h-3 w-3" />
-                  </a>
+                  </button>
                 </div>
               )}
 
@@ -334,6 +335,13 @@ export function OrdersView() {
           )}
         </DialogContent>
       </Dialog>
+
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        url={webViewUrl || ''}
+        title="Delivery"
+      />
     </div>
   );
 }

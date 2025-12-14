@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow, isYesterday, format } from 'date-fns';
 import { useSites } from '@/hooks/useSites';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 
 interface GlobalArticle {
   id: string;
@@ -37,6 +38,8 @@ export function LatestGlobalArticles() {
   const [articles, setArticles] = useState<GlobalArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const { sites } = useSites();
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewTitle, setWebViewTitle] = useState('');
 
   useEffect(() => {
     const fetchGlobalArticles = async () => {
@@ -63,6 +66,12 @@ export function LatestGlobalArticles() {
     return { name: site.name, favicon: site.favicon || null };
   };
 
+  const handleLinkClick = (e: React.MouseEvent, url: string, title: string) => {
+    e.preventDefault();
+    setWebViewUrl(url);
+    setWebViewTitle(title);
+  };
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading...</p>;
   }
@@ -72,56 +81,66 @@ export function LatestGlobalArticles() {
   }
 
   return (
-    <ul className="space-y-3">
-      {articles.map(article => {
-        const siteInfo = getSiteInfo(article.published_to);
-        return (
-          <li key={article.id}>
-            {article.wp_link ? (
-              <a 
-                href={article.wp_link} 
-                rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {siteInfo && (
-                      <>
-                        {siteInfo.favicon && (
-                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
-                        )}
-                        <span>{siteInfo.name}</span>
-                        <span>•</span>
-                      </>
-                    )}
-                    <span>{formatRelativeTime(article.created_at)}</span>
+    <>
+      <ul className="space-y-3">
+        {articles.map(article => {
+          const siteInfo = getSiteInfo(article.published_to);
+          return (
+            <li key={article.id}>
+              {article.wp_link ? (
+                <a 
+                  href={article.wp_link} 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group cursor-pointer"
+                  onClick={(e) => handleLinkClick(e, article.wp_link!, article.title)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {siteInfo && (
+                        <>
+                          {siteInfo.favicon && (
+                            <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                          )}
+                          <span>{siteInfo.name}</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      <span>{formatRelativeTime(article.created_at)}</span>
+                    </div>
+                  </div>
+                  <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
+                </a>
+              ) : (
+                <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm line-clamp-1">{article.title}</p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {siteInfo && (
+                        <>
+                          {siteInfo.favicon && (
+                            <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                          )}
+                          <span>{siteInfo.name}</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      <span>{formatRelativeTime(article.created_at)}</span>
+                    </div>
                   </div>
                 </div>
-                <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
-              </a>
-            ) : (
-              <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {siteInfo && (
-                      <>
-                        {siteInfo.favicon && (
-                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
-                        )}
-                        <span>{siteInfo.name}</span>
-                        <span>•</span>
-                      </>
-                    )}
-                    <span>{formatRelativeTime(article.created_at)}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        url={webViewUrl || ''}
+        title={webViewTitle}
+      />
+    </>
   );
 }

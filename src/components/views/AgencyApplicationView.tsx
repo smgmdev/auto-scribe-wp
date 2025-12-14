@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Loader2, ChevronDown, Send } from 'lucide-react';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { AgencyVerificationStatus } from '@/components/agency/AgencyVerificationStatus';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,6 +89,7 @@ export function AgencyApplicationView() {
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -268,9 +270,9 @@ export function AgencyApplicationView() {
               </div>
               <div>
                 <p className="text-muted-foreground">Website</p>
-                <a href={existingApplication.agency_website} rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                <button onClick={() => setWebViewUrl(existingApplication.agency_website)} className="font-medium text-primary hover:underline cursor-pointer">
                   {existingApplication.agency_website}
-                </a>
+                </button>
               </div>
             </div>
             
@@ -311,6 +313,13 @@ export function AgencyApplicationView() {
         open={dialogOpen} 
         onOpenChange={setDialogOpen}
         onSubmitSuccess={checkExistingApplication}
+      />
+
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        url={webViewUrl || ''}
+        title="Agency Website"
       />
     </div>
   );
