@@ -383,6 +383,23 @@ export function AdminUsersView() {
       ));
       setSelectedUser({ ...selectedUser, suspended: newSuspendedStatus });
       
+      // Send suspension email if user is being suspended (not unsuspended)
+      if (newSuspendedStatus && selectedUser.email) {
+        try {
+          const { error: emailError } = await supabase.functions.invoke('send-suspension-email', {
+            body: { email: selectedUser.email }
+          });
+          
+          if (emailError) {
+            console.error('Failed to send suspension email:', emailError);
+          } else {
+            console.log('Suspension email sent to:', selectedUser.email);
+          }
+        } catch (emailErr) {
+          console.error('Error invoking suspension email function:', emailErr);
+        }
+      }
+      
       toast({
         title: newSuspendedStatus ? 'User suspended' : 'Suspension removed',
         description: `${selectedUser.email} has been ${newSuspendedStatus ? 'suspended' : 'unsuspended'}.`,

@@ -81,3 +81,6 @@ verify_jwt = false
 
 [functions.notify-admin-application]
 verify_jwt = true
+
+[functions.send-suspension-email]
+verify_jwt = true
