@@ -226,7 +226,7 @@ export function DashboardView() {
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView(isAdmin ? 'admin-engagements' : 'my-requests')}>
               <MessageSquare className="mr-2 h-4 w-4" />
-              {isAdmin ? 'Engagements' : 'My Engagements'}
+              {isAdmin ? 'Global Engagements' : 'My Engagements'}
             </Button>
           </CardContent>
         </Card>
