@@ -604,7 +604,7 @@ export function AdminAgenciesView() {
                           <Clock className="h-3 w-3 mr-1" />Pending
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-2">
-                          Applied {format(new Date(app.created_at), 'MMM d, yyyy')}
+                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
                     </div>
