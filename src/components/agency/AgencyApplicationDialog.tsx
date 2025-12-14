@@ -443,8 +443,8 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
             <div className="space-y-2">
               <Label>What are the 3 media channels you would list at the start? *</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="flex">
+              <div className="flex flex-col gap-3">
+                <div className="flex w-full">
                   <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
                     https://
                   </span>
@@ -453,10 +453,10 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     value={formData.media_channel_1}
                     onChange={(e) => setFormData(prev => ({ ...prev, media_channel_1: e.target.value }))}
                     disabled={submitting}
-                    className="rounded-l-none"
+                    className="rounded-l-none flex-1"
                   />
                 </div>
-                <div className="flex">
+                <div className="flex w-full">
                   <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
                     https://
                   </span>
@@ -465,10 +465,10 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     value={formData.media_channel_2}
                     onChange={(e) => setFormData(prev => ({ ...prev, media_channel_2: e.target.value }))}
                     disabled={submitting}
-                    className="rounded-l-none"
+                    className="rounded-l-none flex-1"
                   />
                 </div>
-                <div className="flex">
+                <div className="flex w-full">
                   <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
                     https://
                   </span>
@@ -477,7 +477,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     value={formData.media_channel_3}
                     onChange={(e) => setFormData(prev => ({ ...prev, media_channel_3: e.target.value }))}
                     disabled={submitting}
-                    className="rounded-l-none"
+                    className="rounded-l-none flex-1"
                   />
                 </div>
               </div>
