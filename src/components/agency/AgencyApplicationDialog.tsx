@@ -368,10 +368,12 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                       <TooltipContent 
                         side="right" 
                         align="start"
-                        className="max-w-[280px] text-xs bg-popover text-popover-foreground border shadow-md"
-                        sideOffset={5}
+                        sideOffset={8}
+                        collisionPadding={16}
+                        avoidCollisions={true}
+                        className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
                       >
-                        <p>Agency Name doesn't have to be identical to the official company name. Agency Name can refer to a name of the brand. For example if your company name is "The Company Limited" or "The Company LLC", then your brand name can be "The Company".</p>
+                        <p>The Agency Name does not need to match the official registered company name. The Agency Name may instead reflect your brand name. For example, if your company is legally registered as 'The Company Limited' or 'The Company LLC,' your brand name and therefore your Agency Name can simply be 'The Company.'</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
