@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ExternalLink, X, Loader2 } from 'lucide-react';
+import { RefreshCw, ExternalLink, X, Loader2, AlertCircle } from 'lucide-react';
 
 interface WebViewDialogProps {
   open: boolean;
@@ -12,18 +12,44 @@ interface WebViewDialogProps {
 
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: WebViewDialogProps) {
   const [loading, setLoading] = useState(true);
+  const [blocked, setBlocked] = useState(false);
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
 
+  useEffect(() => {
+    if (open) {
+      setLoading(true);
+      setBlocked(false);
+      
+      // Timeout to detect if iframe is blocked (most blocked sites won't trigger onLoad)
+      const timeout = setTimeout(() => {
+        if (loading) {
+          setBlocked(true);
+          setLoading(false);
+        }
+      }, 8000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [open, normalizedUrl]);
+
   const handleRefresh = () => {
     setLoading(true);
+    setBlocked(false);
     const iframe = document.querySelector('iframe[title="WebView"]') as HTMLIFrameElement;
     if (iframe) iframe.src = iframe.src;
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
-    if (!newOpen) setLoading(true);
+    if (!newOpen) {
+      setLoading(true);
+      setBlocked(false);
+    }
+  };
+
+  const handleIframeLoad = () => {
+    setLoading(false);
   };
 
   return (
@@ -65,7 +91,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
           </div>
         </DialogHeader>
         <div className="w-full h-[80vh] relative">
-          {loading && (
+          {loading && !blocked && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -73,12 +99,33 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
               </div>
             </div>
           )}
+          {blocked && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+              <div className="flex flex-col items-center gap-4 text-center px-6">
+                <AlertCircle className="h-12 w-12 text-muted-foreground" />
+                <div>
+                  <p className="text-foreground font-medium mb-1">Page not accessible</p>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    This page is not accessible through Arcana Mace terminal view.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => window.open(normalizedUrl, '_blank')}
+                  variant="outline"
+                  className="hover:bg-black hover:text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in New Tab
+                </Button>
+              </div>
+            </div>
+          )}
           <iframe
             src={normalizedUrl}
-            className="w-full h-full border-0"
+            className={`w-full h-full border-0 ${blocked ? 'hidden' : ''}`}
             title="WebView"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-            onLoad={() => setLoading(false)}
+            onLoad={handleIframeLoad}
           />
         </div>
       </DialogContent>
