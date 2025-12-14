@@ -93,10 +93,12 @@ export type Database = {
           agency_payout_id: string | null
           bank_account_holder: string | null
           bank_account_number: string | null
+          bank_address: string | null
           bank_country: string | null
           bank_iban: string | null
           bank_name: string | null
           bank_swift_code: string | null
+          company_address: string | null
           company_documents_url: string | null
           company_name: string
           country: string
@@ -119,10 +121,12 @@ export type Database = {
           agency_payout_id?: string | null
           bank_account_holder?: string | null
           bank_account_number?: string | null
+          bank_address?: string | null
           bank_country?: string | null
           bank_iban?: string | null
           bank_name?: string | null
           bank_swift_code?: string | null
+          company_address?: string | null
           company_documents_url?: string | null
           company_name: string
           country: string
@@ -145,10 +149,12 @@ export type Database = {
           agency_payout_id?: string | null
           bank_account_holder?: string | null
           bank_account_number?: string | null
+          bank_address?: string | null
           bank_country?: string | null
           bank_iban?: string | null
           bank_name?: string | null
           bank_swift_code?: string | null
+          company_address?: string | null
           company_documents_url?: string | null
           company_name?: string
           country?: string
