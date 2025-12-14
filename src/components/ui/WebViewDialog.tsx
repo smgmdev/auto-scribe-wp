@@ -26,7 +26,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-black/50">
+      <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden z-[300]" overlayClassName="bg-black/50 z-[299]">
         <DialogHeader className="px-3 pb-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
