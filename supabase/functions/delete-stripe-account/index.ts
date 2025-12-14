@@ -22,7 +22,7 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Verify admin
+    // Get user from auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
     
@@ -30,19 +30,35 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Auth error: ${userError.message}`);
     
+    const userId = userData.user.id;
+    const { account_id } = await req.json();
+    if (!account_id) throw new Error("account_id is required");
+
+    // Check if user is admin
     const { data: roleData } = await supabaseClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", userData.user.id)
+      .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
 
-    if (!roleData) {
-      throw new Error("Unauthorized: Admin access required");
+    const isAdmin = !!roleData;
+
+    // If not admin, verify user owns this Stripe account
+    if (!isAdmin) {
+      const { data: payoutData } = await supabaseClient
+        .from("agency_payouts")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("stripe_account_id", account_id)
+        .maybeSingle();
+
+      if (!payoutData) {
+        throw new Error("Unauthorized: You can only delete your own Stripe account");
+      }
     }
 
-    const { account_id } = await req.json();
-    if (!account_id) throw new Error("account_id is required");
+    console.log(`[DELETE-STRIPE-ACCOUNT] User ${userId} deleting account ${account_id}, isAdmin: ${isAdmin}`);
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
