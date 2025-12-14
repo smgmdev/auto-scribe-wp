@@ -36,6 +36,10 @@ const publicViews: Record<string, React.ComponentType> = {
   account: AccountView,
   orders: OrdersView,
   'my-requests': MyRequestsView,
+};
+
+// Views for non-admin users only (agency application is user-facing only)
+const userOnlyViews: Record<string, React.ComponentType> = {
   'agency-application': AgencyApplicationView,
 };
 
@@ -89,25 +93,31 @@ const Index = () => {
   
   // Determine which view to render based on role
   const getAuthorizedView = () => {
-    // Admin can access everything
+    // Admin can access everything EXCEPT user-only views
     if (isAdmin) {
       if (publicViews[currentView]) return publicViews[currentView];
       if (agencyOnlyViews[currentView]) return agencyOnlyViews[currentView];
       if (adminOnlyViews[currentView]) return adminOnlyViews[currentView];
+      // Admin should not see user-only views, redirect to dashboard
+      if (userOnlyViews[currentView]) return DashboardView;
       return DashboardView;
     }
     
-    // Approved agency can access public + agency views
+    // Approved agency can access public + agency + user-only views
     if (isApprovedAgency) {
       if (publicViews[currentView]) return publicViews[currentView];
       if (agencyOnlyViews[currentView]) return agencyOnlyViews[currentView];
+      if (userOnlyViews[currentView]) return userOnlyViews[currentView];
       // Agency cannot access admin views - redirect to dashboard
       return DashboardView;
     }
     
-    // Regular user can only access public views
+    // Regular user can only access public + user-only views
     if (publicViews[currentView]) {
       return publicViews[currentView];
+    }
+    if (userOnlyViews[currentView]) {
+      return userOnlyViews[currentView];
     }
     
     // Unauthorized access - redirect to dashboard
@@ -122,9 +132,16 @@ const Index = () => {
     
     const isAdminView = !!adminOnlyViews[currentView];
     const isAgencyView = !!agencyOnlyViews[currentView];
+    const isUserOnlyView = !!userOnlyViews[currentView];
     
     // Block admin views for non-admins
     if (isAdminView && !isAdmin) {
+      setCurrentView('dashboard');
+      return;
+    }
+    
+    // Block user-only views for admins
+    if (isUserOnlyView && isAdmin) {
       setCurrentView('dashboard');
       return;
     }
