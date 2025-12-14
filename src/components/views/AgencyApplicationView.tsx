@@ -82,7 +82,7 @@ function AgencyFAQ() {
 }
 
 export function AgencyApplicationView() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
   const [isOnboarded, setIsOnboarded] = useState(false);
@@ -94,11 +94,13 @@ export function AgencyApplicationView() {
   const verificationRef = useRef<AgencyVerificationStatusRef>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isAdmin) {
       checkAgencyStatus();
       checkExistingApplication();
+    } else {
+      setLoading(false);
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const checkAgencyStatus = async () => {
     if (!user) return;
@@ -174,6 +176,18 @@ export function AgencyApplicationView() {
         return <Badge>{status}</Badge>;
     }
   };
+
+  // Admin users should not see this view - redirect message
+  if (isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <h2 className="text-xl font-semibold text-foreground mb-2">Admin Access</h2>
+        <p className="text-muted-foreground">
+          Admins manage agency applications through the Agencies panel in the sidebar.
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
