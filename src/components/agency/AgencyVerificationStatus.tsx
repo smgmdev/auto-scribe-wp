@@ -406,7 +406,7 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <label className="text-sm font-medium mb-2 block">Reason for cancellation (optional)</label>
+            <label className="text-sm font-medium mb-2 block">Reason for cancellation <span className="text-destructive">*</span></label>
             <Textarea
               placeholder="Please let us know why you're cancelling..."
               value={cancellationReason}
@@ -424,7 +424,7 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
                 handleCancelApplication();
               }}
               className="bg-red-500 hover:bg-red-600"
-              disabled={cancelling}
+              disabled={cancelling || !cancellationReason.trim()}
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, Cancel Application
