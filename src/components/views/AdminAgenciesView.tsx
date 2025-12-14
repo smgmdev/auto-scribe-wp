@@ -34,6 +34,7 @@ interface AgencyApplication {
   logo_url: string | null;
   media_niches: string[] | null;
   media_channels: string | null;
+  payout_method: string | null;
   status: string;
   admin_notes: string | null;
   created_at: string;
@@ -623,6 +624,17 @@ export function AdminAgenciesView() {
                 <div className="text-sm">
                   <p className="text-muted-foreground mb-1">Media Channels</p>
                   <p className="font-medium whitespace-pre-wrap">{selectedApp.media_channels}</p>
+                </div>
+              )}
+
+              {selectedApp.payout_method && (
+                <div className="text-sm">
+                  <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
+                  <Badge variant="outline" className="font-medium">
+                    {selectedApp.payout_method === 'stripe' && 'Stripe Connect (Automatic)'}
+                    {selectedApp.payout_method === 'usdt' && 'USDT Payout'}
+                    {selectedApp.payout_method === 'wire' && 'Wire Payout'}
+                  </Badge>
                 </div>
               )}
 
