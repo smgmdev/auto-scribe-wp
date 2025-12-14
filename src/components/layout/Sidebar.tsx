@@ -161,11 +161,12 @@ export function Sidebar({
           .in('status', ['pending', 'cancelled'])
           .eq('read', false);
         
-        // Fetch unread custom verifications (pending_review status)
+        // Fetch unread custom verifications (pending_review status and not read)
         const { count: verificationCount } = await supabase
           .from('agency_custom_verifications')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending_review');
+          .eq('status', 'pending_review')
+          .eq('read', false);
         
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
