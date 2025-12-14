@@ -385,7 +385,7 @@ export function AdminAgenciesView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending" className="relative">
             Pending Review
             {unreadPendingCount > 0 && (
@@ -394,7 +394,8 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="active">Active Agencies ({agencies.length})</TabsTrigger>
+          <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
+          <TabsTrigger value="active">Active Agencies ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
           <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
         </TabsList>
 
@@ -449,29 +450,29 @@ export function AdminAgenciesView() {
           )}
         </TabsContent>
 
-        {/* Active Agencies Tab */}
-        <TabsContent value="active" className="mt-6">
-          {agencies.length === 0 ? (
+        {/* Under Verification Tab */}
+        <TabsContent value="verification" className="mt-6">
+          {agencies.filter(a => !a.onboarding_complete).length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Building2 className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No active agencies</h3>
+                <AlertTriangle className="h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mt-4 text-xl font-semibold">No agencies under verification</h3>
                 <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Approved agencies will appear here
+                  Agencies pending Stripe verification will appear here
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-3">
-              {agencies.map(agency => {
+              {agencies.filter(a => !a.onboarding_complete).map(agency => {
                 const application = getAgencyWithApplication(agency);
                 return (
                   <Card key={agency.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                            <Building2 className="h-5 w-5 text-muted-foreground" />
+                          <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                            <AlertTriangle className="h-5 w-5 text-yellow-500" />
                           </div>
                           <div>
                             <h3 className="font-semibold">{agency.agency_name}</h3>
@@ -488,7 +489,7 @@ export function AdminAgenciesView() {
                           {getOnboardingStatus(agency)}
 
                           <div className="flex gap-1">
-                            {!agency.onboarding_complete && agency.stripe_account_id && (
+                            {agency.stripe_account_id && (
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -504,6 +505,70 @@ export function AdminAgenciesView() {
                                 )}
                               </Button>
                             )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
+                              onClick={() => handleDelete(agency)}
+                              disabled={deleting === agency.id}
+                              title="Delete agency"
+                            >
+                              {deleting === agency.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Active Agencies Tab */}
+        <TabsContent value="active" className="mt-6">
+          {agencies.filter(a => a.onboarding_complete).length === 0 ? (
+            <Card className="border-dashed border-2">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mt-4 text-xl font-semibold">No active agencies</h3>
+                <p className="mt-2 text-sm text-muted-foreground text-center">
+                  Fully verified agencies will appear here
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {agencies.filter(a => a.onboarding_complete).map(agency => {
+                const application = getAgencyWithApplication(agency);
+                return (
+                  <Card key={agency.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{agency.agency_name}</h3>
+                            <p className="text-sm text-muted-foreground">{agency.email}</p>
+                            {application && (
+                              <p className="text-xs text-muted-foreground">
+                                {application.full_name} • {application.country}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-6">
+                          {getOnboardingStatus(agency)}
+
+                          <div className="flex gap-1">
                             <Button
                               variant="ghost"
                               size="icon"
