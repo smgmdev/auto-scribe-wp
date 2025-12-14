@@ -66,6 +66,7 @@ interface AgencyApplication {
   status: string;
   admin_notes: string | null;
   created_at: string;
+  updated_at: string;
   reviewed_at: string | null;
   read: boolean;
 }
@@ -596,8 +597,13 @@ export function AdminAgenciesView() {
                           <XCircle className="h-3 w-3 mr-1" />Cancelled
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-2">
-                          Applied {format(new Date(app.created_at), 'MMM d, yyyy')}
+                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
+                        {app.updated_at && (
+                          <p className="text-xs text-red-500">
+                            Cancelled {format(new Date(app.updated_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </CardContent>
