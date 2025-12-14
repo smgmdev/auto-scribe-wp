@@ -148,6 +148,7 @@ export function AdminAgenciesView() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
   const [loadingLogoIds, setLoadingLogoIds] = useState<Set<string>>(new Set());
+  const [loadedImageIds, setLoadedImageIds] = useState<Set<string>>(new Set());
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [documentLoading, setDocumentLoading] = useState(true);
@@ -773,12 +774,24 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        {logoUrls[app.id] ? (
+                        {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
                           <img 
                             src={logoUrls[app.id]} 
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
+                        ) : logoUrls[app.id] ? (
+                          <>
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                            </div>
+                            <img 
+                              src={logoUrls[app.id]} 
+                              alt=""
+                              className="hidden"
+                              onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                            />
+                          </>
                         ) : loadingLogoIds.has(app.id) ? (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -837,12 +850,24 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        {logoUrls[app.id] ? (
+                        {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
                           <img 
                             src={logoUrls[app.id]} 
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
+                        ) : logoUrls[app.id] ? (
+                          <>
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                            </div>
+                            <img 
+                              src={logoUrls[app.id]} 
+                              alt=""
+                              className="hidden"
+                              onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                            />
+                          </>
                         ) : loadingLogoIds.has(app.id) ? (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -928,12 +953,24 @@ export function AdminAgenciesView() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] ? (
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
+                              ) : application && logoUrls[application.id] ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                  </div>
+                                  <img 
+                                    src={logoUrls[application.id]} 
+                                    alt=""
+                                    className="hidden"
+                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  />
+                                </>
                               ) : application && loadingLogoIds.has(application.id) ? (
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1031,12 +1068,24 @@ export function AdminAgenciesView() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] ? (
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
+                              ) : application && logoUrls[application.id] ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                  </div>
+                                  <img 
+                                    src={logoUrls[application.id]} 
+                                    alt=""
+                                    className="hidden"
+                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  />
+                                </>
                               ) : application && loadingLogoIds.has(application.id) ? (
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1116,12 +1165,24 @@ export function AdminAgenciesView() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          {application && logoUrls[application.id] ? (
+                          {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
                             <img 
                               src={logoUrls[application.id]} 
                               alt={agency.agency_name}
                               className="w-10 h-10 rounded-full object-cover"
                             />
+                          ) : application && logoUrls[application.id] ? (
+                            <>
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                              </div>
+                              <img 
+                                src={logoUrls[application.id]} 
+                                alt=""
+                                className="hidden"
+                                onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                              />
+                            </>
                           ) : application && loadingLogoIds.has(application.id) ? (
                             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                               <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1198,12 +1259,24 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        {logoUrls[app.id] ? (
+                        {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
                           <img 
                             src={logoUrls[app.id]} 
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
+                        ) : logoUrls[app.id] ? (
+                          <>
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                            </div>
+                            <img 
+                              src={logoUrls[app.id]} 
+                              alt=""
+                              className="hidden"
+                              onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                            />
+                          </>
                         ) : loadingLogoIds.has(app.id) ? (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
