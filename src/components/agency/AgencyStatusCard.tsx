@@ -153,7 +153,7 @@ export function AgencyStatusCard({
           </div>
           <div className="flex-1">
             <span className="font-medium text-yellow-400">Verification Required</span>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your Stripe verification to receive payments</p>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your Stripe Connect verification to receive payments</p>
           </div>
         </div>
         

@@ -169,7 +169,7 @@ export function AgencyApplicationView() {
       <div className="space-y-8 animate-fade-in">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
-            Stripe Verification
+            Stripe Connect Verification
           </h1>
           <p className="mt-2 text-muted-foreground">
             Complete your verification to start receiving payments

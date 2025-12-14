@@ -126,7 +126,7 @@ export function AgencyVerificationStatus({ onStatusUpdate }: AgencyVerificationS
             <p className="text-sm text-muted-foreground mt-1">
               {allSubmitted 
                 ? 'All information has been submitted. Stripe is reviewing your account.'
-                : 'Complete your Stripe verification to receive payments.'}
+                : 'Complete your Stripe Connect verification to receive payments.'}
             </p>
           </div>
         </div>
