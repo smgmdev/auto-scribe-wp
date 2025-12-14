@@ -78,6 +78,8 @@ export function Sidebar({
     setCurrentView,
     unreadAgencyApplicationsCount,
     setUnreadAgencyApplicationsCount,
+    unreadCustomVerificationsCount,
+    setUnreadCustomVerificationsCount,
     userApplicationStatus,
     setUserApplicationStatus
   } = useAppStore();
@@ -150,16 +152,23 @@ export function Sidebar({
         return;
       }
       
-      // Admin: fetch unread applications count (pending + cancelled)
+      // Admin: fetch unread applications count (pending + cancelled) and custom verifications
       if (isAdmin) {
-        const { count } = await supabase
+        const { count: appCount } = await supabase
           .from('agency_applications')
           .select('*', { count: 'exact', head: true })
           .in('status', ['pending', 'cancelled'])
           .eq('read', false);
         
+        // Fetch unread custom verifications (pending_review status)
+        const { count: verificationCount } = await supabase
+          .from('agency_custom_verifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending_review');
+        
         if (isMounted) {
-          setUnreadAgencyApplicationsCount(count || 0);
+          setUnreadAgencyApplicationsCount(appCount || 0);
+          setUnreadCustomVerificationsCount(verificationCount || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -337,9 +346,9 @@ export function Sidebar({
                     <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                     <span className="truncate">{item.label}</span>
                   </div>
-                  {item.id === 'admin-agencies' && unreadAgencyApplicationsCount > 0 && (
+                  {item.id === 'admin-agencies' && (unreadAgencyApplicationsCount + unreadCustomVerificationsCount) > 0 && (
                     <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                      {unreadAgencyApplicationsCount}
+                      {unreadAgencyApplicationsCount + unreadCustomVerificationsCount}
                     </Badge>
                   )}
                 </Button>

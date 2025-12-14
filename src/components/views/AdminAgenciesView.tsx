@@ -84,11 +84,25 @@ interface AgencyPayout {
   payout_method: string | null;
 }
 
+interface CustomVerification {
+  id: string;
+  user_id: string;
+  agency_payout_id: string | null;
+  company_name: string;
+  full_name: string;
+  email: string | null;
+  country: string;
+  status: string;
+  created_at: string;
+  submitted_at: string | null;
+}
+
 import { useAppStore } from '@/stores/appStore';
 
 export function AdminAgenciesView() {
   const [applications, setApplications] = useState<AgencyApplication[]>([]);
   const [agencies, setAgencies] = useState<AgencyPayout[]>([]);
+  const [customVerifications, setCustomVerifications] = useState<CustomVerification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<AgencyApplication | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
@@ -111,7 +125,7 @@ export function AdminAgenciesView() {
   const [documentLoading, setDocumentLoading] = useState(true);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
-  const { decrementUnreadAgencyApplicationsCount } = useAppStore();
+  const { decrementUnreadAgencyApplicationsCount, decrementUnreadCustomVerificationsCount, setUnreadCustomVerificationsCount } = useAppStore();
 
   useEffect(() => {
     fetchData();
@@ -157,6 +171,19 @@ export function AdminAgenciesView() {
 
       if (agencyError) throw agencyError;
       setAgencies(agencyData || []);
+
+      // Fetch custom verifications
+      const { data: verificationData, error: verificationError } = await supabase
+        .from('agency_custom_verifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (verificationError) throw verificationError;
+      setCustomVerifications(verificationData || []);
+      
+      // Update count of pending custom verifications
+      const pendingCount = (verificationData || []).filter(v => v.status === 'pending_review').length;
+      setUnreadCustomVerificationsCount(pendingCount);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
@@ -478,8 +505,26 @@ export function AdminAgenciesView() {
       return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
     }
     
-    // Custom payout agencies - include countdown in single badge
+    // Custom payout agencies - check if verification has been submitted
     if (agency.payout_method === 'custom') {
+      // Check if this agency has a submitted custom verification
+      const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
+      
+      if (verification && verification.status === 'pending_review') {
+        // Verification submitted - show green "Pending Review" badge
+        return (
+          <div className="flex gap-2">
+            <Badge className="bg-green-600/20 text-green-600">
+              <Clock className="h-3 w-3 mr-1" />Pending Review
+            </Badge>
+            <Badge className="bg-black text-white">
+              Custom Payout
+            </Badge>
+          </div>
+        );
+      }
+      
+      // No verification submitted yet - show countdown
       const countdown = getCountdown(agency.created_at);
       return (
         <div className="flex gap-2">
