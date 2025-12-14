@@ -113,6 +113,10 @@ export function AgencyApplicationView() {
       if (data) {
         setHasStripeAccount(!!data.stripe_account_id);
         setIsOnboarded(data.onboarding_complete);
+      } else {
+        // No agency_payouts record found - reset states
+        setHasStripeAccount(false);
+        setIsOnboarded(false);
       }
     } catch (error) {
       console.error('Error checking agency status:', error);
