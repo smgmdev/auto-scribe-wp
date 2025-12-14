@@ -83,6 +83,95 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_custom_verifications: {
+        Row: {
+          additional_documents_url: string | null
+          admin_notes: string | null
+          agency_payout_id: string | null
+          bank_account_holder: string | null
+          bank_account_number: string | null
+          bank_country: string | null
+          bank_iban: string | null
+          bank_name: string | null
+          bank_swift_code: string | null
+          company_documents_url: string | null
+          company_name: string
+          country: string
+          created_at: string
+          full_name: string
+          id: string
+          passport_url: string | null
+          phone: string | null
+          reviewed_at: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          usdt_network: string | null
+          usdt_wallet_address: string | null
+          user_id: string
+        }
+        Insert: {
+          additional_documents_url?: string | null
+          admin_notes?: string | null
+          agency_payout_id?: string | null
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_country?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          bank_swift_code?: string | null
+          company_documents_url?: string | null
+          company_name: string
+          country: string
+          created_at?: string
+          full_name: string
+          id?: string
+          passport_url?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          usdt_network?: string | null
+          usdt_wallet_address?: string | null
+          user_id: string
+        }
+        Update: {
+          additional_documents_url?: string | null
+          admin_notes?: string | null
+          agency_payout_id?: string | null
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_country?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          bank_swift_code?: string | null
+          company_documents_url?: string | null
+          company_name?: string
+          country?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          passport_url?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          usdt_network?: string | null
+          usdt_wallet_address?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_custom_verifications_agency_payout_id_fkey"
+            columns: ["agency_payout_id"]
+            isOneToOne: false
+            referencedRelation: "agency_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_payouts: {
         Row: {
           agency_name: string
@@ -94,6 +183,7 @@ export type Database = {
           last_login_at: string | null
           onboarding_complete: boolean
           password_hash: string | null
+          payout_method: string | null
           stripe_account_id: string | null
           updated_at: string
           user_id: string | null
@@ -108,6 +198,7 @@ export type Database = {
           last_login_at?: string | null
           onboarding_complete?: boolean
           password_hash?: string | null
+          payout_method?: string | null
           stripe_account_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -122,6 +213,7 @@ export type Database = {
           last_login_at?: string | null
           onboarding_complete?: boolean
           password_hash?: string | null
+          payout_method?: string | null
           stripe_account_id?: string | null
           updated_at?: string
           user_id?: string | null

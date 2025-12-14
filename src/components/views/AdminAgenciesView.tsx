@@ -171,21 +171,53 @@ export function AdminAgenciesView() {
       if (updateError) throw updateError;
 
       if (status === 'approved') {
-        const response = await supabase.functions.invoke('create-connect-account', {
-          body: {
-            agency_name: selectedApp.agency_name,
-            email: selectedApp.email,
-            commission_percentage: 10,
-            country: selectedApp.country,
-            user_id: selectedApp.user_id,
-            phone: selectedApp.whatsapp_phone,
-            website: selectedApp.agency_website,
-            representative_name: selectedApp.full_name
-          }
-        });
+        // Check payout method to determine which flow to use
+        const payoutMethod = selectedApp.payout_method || 'stripe';
+        
+        if (payoutMethod === 'custom') {
+          // Custom payout - use the new edge function
+          const response = await supabase.functions.invoke('approve-custom-payout', {
+            body: {
+              agency_name: selectedApp.agency_name,
+              email: selectedApp.email,
+              commission_percentage: 10,
+              user_id: selectedApp.user_id,
+              full_name: selectedApp.full_name
+            }
+          });
 
-        if (response.error) throw new Error(response.error.message);
-        if (response.data?.error) throw new Error(response.data.error);
+          if (response.error) throw new Error(response.error.message);
+          if (response.data?.error) throw new Error(response.data.error);
+
+          toast({
+            title: 'Application Approved',
+            description: 'Custom verification email sent to agency.',
+            className: 'bg-green-600 text-white border-green-600'
+          });
+        } else {
+          // Stripe Connect flow
+          const response = await supabase.functions.invoke('create-connect-account', {
+            body: {
+              agency_name: selectedApp.agency_name,
+              email: selectedApp.email,
+              commission_percentage: 10,
+              country: selectedApp.country,
+              user_id: selectedApp.user_id,
+              phone: selectedApp.whatsapp_phone,
+              website: selectedApp.agency_website,
+              representative_name: selectedApp.full_name
+            }
+          });
+
+          if (response.error) throw new Error(response.error.message);
+          if (response.data?.error) throw new Error(response.data.error);
+
+          toast({
+            title: 'Application Approved',
+            description: 'Stripe Connect invite sent to user.',
+            className: 'bg-green-600 text-white border-green-600'
+          });
+        }
       }
 
       if (status === 'rejected') {
@@ -197,15 +229,12 @@ export function AdminAgenciesView() {
             agency_name: selectedApp.agency_name
           }
         }).catch(err => console.error('Failed to send rejection email:', err));
-      }
 
-      toast({
-        title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
-        description: status === 'approved' 
-          ? 'Stripe Connect invite sent to user.'
-          : 'The applicant has been notified.',
-        className: status === 'approved' ? 'bg-green-600 text-white border-green-600' : undefined
-      });
+        toast({
+          title: 'Application Rejected',
+          description: 'The applicant has been notified.'
+        });
+      }
 
       setSelectedApp(null);
       setAdminNotes('');
