@@ -400,7 +400,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
             </div>
 
             <div className="space-y-3">
-              <Label>What is your media niche? (select up to 3) *</Label>
+              <Label>What is your focus media niche? (select up to 3) *</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {MEDIA_NICHES.map((niche) => {
                   const isSelected = selectedNiches.includes(niche);
@@ -442,7 +442,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
             </div>
 
             <div className="space-y-2">
-              <Label>What 3 media channels would you list at the start? *</Label>
+              <Label>What are the 3 media channels you would list at the start? *</Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="flex">
                   <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
