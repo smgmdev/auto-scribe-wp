@@ -145,10 +145,15 @@ export function AgencyApplicationView() {
   };
 
   const handleCancelled = () => {
+    // Immediately reset all states to prevent AgencyVerificationStatus from rendering
     setHasStripeAccount(false);
     setIsOnboarded(false);
     setExistingApplication(null);
-    checkExistingApplication();
+    // Re-fetch application status after a short delay to allow DB changes to propagate
+    setTimeout(() => {
+      checkExistingApplication();
+      checkAgencyStatus();
+    }, 500);
   };
 
   const getStatusBadge = (status: string) => {

@@ -57,6 +57,15 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
     setStatusLoading(true);
     try {
       const response = await supabase.functions.invoke('get-agency-onboarding-link');
+      
+      // Handle deleted account case
+      if (response.data?.error === 'account_deleted') {
+        console.log('Stripe account was deleted, triggering cancellation');
+        setIsCancelled(true);
+        onCancelled?.();
+        return;
+      }
+      
       if (response.data?.error) {
         // Account may have been deleted or doesn't exist
         console.log('Stripe account error:', response.data.error);
