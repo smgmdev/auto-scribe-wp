@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Heart, Copy } from 'lucide-react';
-import { WebViewDialog } from '@/components/ui/WebViewDialog';
+
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -112,9 +112,7 @@ export function SitesView() {
   const [briefDialogOpen, setBriefDialogOpen] = useState(false);
   const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
 
-  // WebView dialog state
-  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
-  const [webViewTitle, setWebViewTitle] = useState('');
+  // WebView state removed - now using direct _blank links
 
   // Agency form
   const [editingAgencyId, setEditingAgencyId] = useState<string | null>(null);
@@ -1031,13 +1029,15 @@ export function SitesView() {
               </div>
 
               {/* Link below tags */}
-              <button 
-                onClick={() => { setWebViewUrl(site.url); setWebViewTitle(site.name); }}
+              <a 
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
               >
                 <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
                 <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </button>
+              </a>
             </div>
           )}
         </CardContent>
@@ -1151,13 +1151,15 @@ export function SitesView() {
                 </p>
               )}
               {/* Link at the bottom */}
-              <button 
-                onClick={() => { setWebViewUrl(site.link); setWebViewTitle(site.name); }}
+              <a 
+                href={site.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
               >
                 <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                 <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </button>
+              </a>
             </div>
           )}
         </CardContent>
@@ -1256,13 +1258,15 @@ export function SitesView() {
                 <p className="text-xs text-muted-foreground">{site.about}</p>
               )}
               {/* Link at the bottom */}
-              <button 
-                onClick={() => { setWebViewUrl(site.link); setWebViewTitle(site.name); }}
+              <a 
+                href={site.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
               >
                 <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                 <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </button>
+              </a>
             </div>
           )}
         </CardContent>
@@ -2074,13 +2078,15 @@ export function SitesView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Website</p>
                   <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => { setWebViewUrl(selectedMediaSite.link); setWebViewTitle(selectedMediaSite.name); }}
+                    <a 
+                      href={selectedMediaSite.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-accent hover:underline flex items-center gap-1"
                     >
                       {selectedMediaSite.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                       <ExternalLink className="h-3 w-3" />
-                    </button>
+                    </a>
                     <button
                       onClick={() => { navigator.clipboard.writeText(selectedMediaSite.link); toast({ title: 'Copied to clipboard' }); }}
                       className="text-muted-foreground hover:text-foreground"
@@ -2181,13 +2187,7 @@ export function SitesView() {
         }}
       />
 
-      {/* WebView Dialog */}
-      <WebViewDialog
-        open={!!webViewUrl}
-        onOpenChange={(open) => { if (!open) setWebViewUrl(null); }}
-        url={webViewUrl || ''}
-        title={webViewTitle}
-      />
+      {/* WebView Dialog removed - using direct _blank links */}
 
       {/* Delete WP Site Confirmation Dialog */}
       <Dialog open={deleteWPDialogOpen} onOpenChange={setDeleteWPDialogOpen}>
