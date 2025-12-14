@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, Heart, User } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, Heart, User, Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
 import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
-import { toast } from '@/hooks/use-toast';
 import amblack from '@/assets/amblack.png';
 
 interface SiteTag {
@@ -661,13 +661,21 @@ const Landing = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
-                <button 
-                  onClick={() => { setWebViewUrl((selectedSite as WPSite).url); setWebViewTitle((selectedSite as WPSite).name); }}
-                  className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  {extractDomain((selectedSite as WPSite).url)}
-                  <ExternalLink className="h-3 w-3" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => { setWebViewUrl((selectedSite as WPSite).url); setWebViewTitle((selectedSite as WPSite).name); }}
+                    className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {extractDomain((selectedSite as WPSite).url)}
+                    <ExternalLink className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText((selectedSite as WPSite).url); toast({ title: 'Copied to clipboard' }); }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Publication Type</p>
@@ -702,13 +710,21 @@ const Landing = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
-                <button 
-                  onClick={() => { setWebViewUrl((selectedSite as MediaSite).link); setWebViewTitle((selectedSite as MediaSite).name); }}
-                  className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  {extractDomain((selectedSite as MediaSite).link)}
-                  <ExternalLink className="h-3 w-3" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => { setWebViewUrl((selectedSite as MediaSite).link); setWebViewTitle((selectedSite as MediaSite).name); }}
+                    className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {extractDomain((selectedSite as MediaSite).link)}
+                    <ExternalLink className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText((selectedSite as MediaSite).link); toast({ title: 'Copied to clipboard' }); }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
               
               {/* Show price and format only for non-agency sites */}
