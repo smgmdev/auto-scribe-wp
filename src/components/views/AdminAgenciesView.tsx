@@ -230,6 +230,13 @@ export function AdminAgenciesView() {
       if (updateError) throw updateError;
 
       if (status === 'approved') {
+        // Show immediate pre-approval notification
+        toast({
+          title: 'Application Pre-Approved',
+          description: 'Processing agency setup...',
+          className: 'bg-blue-600 text-white border-blue-600'
+        });
+
         // Check payout method to determine which flow to use
         const payoutMethod = selectedApp.payout_method || 'stripe';
         
