@@ -199,14 +199,15 @@ export function AgencyApplicationView() {
     }
   };
 
-  const handleCancelled = () => {
+  const handleCancelled = async () => {
+    // Clear local state immediately to prevent blinking
     setAgencyPayout(null);
     setCustomVerification(null);
-    setExistingApplication(null);
+    // Update global store immediately
     setUserApplicationStatus('cancelled');
-    setTimeout(() => {
-      fetchAgencyData();
-    }, 500);
+    // Refetch data after a brief delay to get updated state
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await fetchAgencyData();
   };
 
   const handleCustomVerificationSubmit = () => {
