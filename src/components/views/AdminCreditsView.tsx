@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Loader2, DollarSign } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Loader2, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -264,11 +264,11 @@ export function AdminCreditsView() {
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-black hover:text-white">
                 Cancel
               </Button>
               <Button onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {editingPack ? 'Update' : 'Create'}
               </Button>
             </div>
