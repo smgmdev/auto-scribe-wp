@@ -75,7 +75,7 @@ export function AdminAgenciesView() {
   const [loadingStripeAccounts, setLoadingStripeAccounts] = useState(false);
   const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
-  const [hiddenRejectedIds, setHiddenRejectedIds] = useState<string[]>([]);
+  
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
@@ -91,10 +91,11 @@ export function AdminAgenciesView() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch applications
+      // Fetch applications (exclude hidden ones)
       const { data: appData, error: appError } = await supabase
         .from('agency_applications')
         .select('*')
+        .eq('hidden', false)
         .order('created_at', { ascending: false });
 
       if (appError) throw appError;
@@ -119,7 +120,7 @@ export function AdminAgenciesView() {
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
   const unreadCancelledCount = cancelledApplications.filter(app => !app.read).length;
-  const rejectedApplications = applications.filter(app => app.status === 'rejected' && !hiddenRejectedIds.includes(app.id));
+  const rejectedApplications = applications.filter(app => app.status === 'rejected');
   const approvedApplications = applications.filter(app => app.status === 'approved');
 
   const handleOpenApplication = async (app: AgencyApplication) => {
@@ -743,9 +744,21 @@ export function AdminAgenciesView() {
                           variant="outline"
                           size="sm"
                           className="hover:bg-destructive hover:text-white hover:border-destructive"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            setHiddenRejectedIds(prev => [...prev, app.id]);
+                            // Update database to hide the application
+                            const { error } = await supabase
+                              .from('agency_applications')
+                              .update({ hidden: true })
+                              .eq('id', app.id);
+                            
+                            if (error) {
+                              toast({ variant: 'destructive', title: 'Error', description: error.message });
+                              return;
+                            }
+                            
+                            // Remove from local state
+                            setApplications(prev => prev.filter(a => a.id !== app.id));
                             toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                           }}
                         >

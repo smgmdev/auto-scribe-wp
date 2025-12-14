@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           email: string
           full_name: string
+          hidden: boolean
           id: string
           incorporation_document_url: string
           logo_url: string | null
@@ -45,6 +46,7 @@ export type Database = {
           created_at?: string
           email: string
           full_name: string
+          hidden?: boolean
           id?: string
           incorporation_document_url: string
           logo_url?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           created_at?: string
           email?: string
           full_name?: string
+          hidden?: boolean
           id?: string
           incorporation_document_url?: string
           logo_url?: string | null
