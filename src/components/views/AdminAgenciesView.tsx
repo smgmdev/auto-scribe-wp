@@ -254,12 +254,6 @@ export function AdminAgenciesView() {
 
           if (response.error) throw new Error(response.error.message);
           if (response.data?.error) throw new Error(response.data.error);
-
-          toast({
-            title: 'Application Approved',
-            description: 'Custom verification email sent to agency.',
-            className: 'bg-green-600 text-white border-green-600'
-          });
         } else {
           // Stripe Connect flow
           const response = await supabase.functions.invoke('create-connect-account', {
@@ -277,12 +271,6 @@ export function AdminAgenciesView() {
 
           if (response.error) throw new Error(response.error.message);
           if (response.data?.error) throw new Error(response.data.error);
-
-          toast({
-            title: 'Application Approved',
-            description: 'Stripe Connect invite sent to user.',
-            className: 'bg-green-600 text-white border-green-600'
-          });
         }
       }
 
