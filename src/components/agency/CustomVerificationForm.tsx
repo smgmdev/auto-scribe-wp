@@ -37,9 +37,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   const [passportUrl, setPassportUrl] = useState<string | null>(null);
   const [uploadingPassport, setUploadingPassport] = useState(false);
   
-  const [additionalDocsFile, setAdditionalDocsFile] = useState<File | null>(null);
-  const [additionalDocsUrl, setAdditionalDocsUrl] = useState<string | null>(null);
-  const [uploadingAdditionalDocs, setUploadingAdditionalDocs] = useState(false);
+  const [articlesFile, setArticlesFile] = useState<File | null>(null);
+  const [articlesUrl, setArticlesUrl] = useState<string | null>(null);
+  const [uploadingArticles, setUploadingArticles] = useState(false);
+  
+  const [licenseFile, setLicenseFile] = useState<File | null>(null);
+  const [licenseUrl, setLicenseUrl] = useState<string | null>(null);
+  const [uploadingLicense, setUploadingLicense] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -60,13 +64,20 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
 
   const handleFileUpload = async (
     file: File,
-    type: 'company' | 'passport' | 'additional',
+    type: 'company' | 'passport' | 'articles' | 'license',
     setUploading: (val: boolean) => void,
     setUrl: (url: string | null) => void
   ) => {
     if (!user) return;
 
-    const maxSize = type === 'passport' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    const maxSizes: Record<string, number> = {
+      passport: 2 * 1024 * 1024,
+      company: 5 * 1024 * 1024,
+      articles: 5 * 1024 * 1024,
+      license: 5 * 1024 * 1024,
+    };
+    const maxSize = maxSizes[type] || 5 * 1024 * 1024;
+    
     if (file.size > maxSize) {
       toast({
         variant: 'destructive',
@@ -88,7 +99,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
       if (uploadError) throw uploadError;
 
       setUrl(fileName);
-      toast({ title: `${type === 'company' ? 'Company documents' : type === 'passport' ? 'Passport' : 'Additional documents'} uploaded successfully` });
+      const labels: Record<string, string> = {
+        company: 'Company incorporation file',
+        passport: 'Passport',
+        articles: 'Articles of association',
+        license: 'Business license',
+      };
+      toast({ title: `${labels[type]} uploaded successfully` });
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -118,7 +135,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
       toast({
         variant: 'destructive',
         title: 'Missing documents',
-        description: 'Please upload your company registration documents'
+        description: 'Please upload your company incorporation file'
       });
       return;
     }
@@ -127,7 +144,25 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
       toast({
         variant: 'destructive',
         title: 'Missing documents',
-        description: 'Please upload your ID/Passport for verification'
+        description: 'Please upload your passport for verification'
+      });
+      return;
+    }
+
+    if (!articlesUrl) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing documents',
+        description: 'Please upload your articles of association'
+      });
+      return;
+    }
+
+    if (!licenseUrl) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing documents',
+        description: 'Please upload your valid business license'
       });
       return;
     }
@@ -156,7 +191,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         phone: formData.phone || null,
         company_documents_url: companyDocsUrl,
         passport_url: passportUrl,
-        additional_documents_url: additionalDocsUrl || null,
+        additional_documents_url: JSON.stringify({ articles: articlesUrl, license: licenseUrl }),
         bank_account_holder: formData.bank_account_holder || null,
         bank_account_number: formData.bank_account_number || null,
         bank_name: formData.bank_name || null,
@@ -211,7 +246,9 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     url,
     uploading,
     accept,
+    maxSizeLabel,
     onChange,
+    onDrop,
   }: {
     label: string;
     required?: boolean;
@@ -219,42 +256,63 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     url: string | null;
     uploading: boolean;
     accept: string;
+    maxSizeLabel?: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  }) => (
-    <div className="space-y-2">
-      <Label>{label} {required && '*'}</Label>
-      <div 
-        className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-          url ? 'border-green-500 bg-green-500/10' : 'border-border hover:border-primary/50'
-        }`}
-      >
-        {uploading ? (
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span className="text-sm">Uploading...</span>
-          </div>
-        ) : url ? (
-          <div className="flex items-center justify-center gap-2 text-green-500">
-            <CheckCircle className="h-5 w-5" />
-            <span className="text-sm">{file?.name || 'Uploaded'}</span>
-          </div>
-        ) : (
-          <label className="cursor-pointer">
-            <input
-              type="file"
-              accept={accept}
-              onChange={onChange}
-              className="hidden"
-            />
-            <div className="flex flex-col items-center gap-2">
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Click to upload</span>
+    onDrop: (file: File) => void;
+  }) => {
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const droppedFile = e.dataTransfer.files?.[0];
+      if (droppedFile) {
+        onDrop(droppedFile);
+      }
+    };
+
+    return (
+      <div className="space-y-2">
+        <Label>{label} {required && '*'}</Label>
+        <div 
+          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+            url ? 'border-green-500 bg-green-500/10' : 'border-border hover:border-primary/50'
+          }`}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          {uploading ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span className="text-sm">Uploading...</span>
             </div>
-          </label>
-        )}
+          ) : url ? (
+            <div className="flex items-center justify-center gap-2 text-green-500">
+              <CheckCircle className="h-5 w-5" />
+              <span className="text-sm">{file?.name || 'Uploaded'}</span>
+            </div>
+          ) : (
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept={accept}
+                onChange={onChange}
+                className="hidden"
+              />
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="h-8 w-8 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Drag & drop or click to upload</span>
+                {maxSizeLabel && <span className="text-xs text-muted-foreground">{maxSizeLabel}</span>}
+              </div>
+            </label>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="pb-8">
@@ -278,7 +336,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company_name">Company Name *</Label>
+                <Label htmlFor="company_name">Full Legal Company Name *</Label>
                 <Input
                   id="company_name"
                   placeholder="Your Agency Inc."
@@ -327,12 +385,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FileUploadBox
-                label="Company Registration Documents"
+                label="Company Incorporation File"
                 required
                 file={companyDocsFile}
                 url={companyDocsUrl}
                 uploading={uploadingCompanyDocs}
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                maxSizeLabel="Max 5MB"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -340,14 +399,19 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                     handleFileUpload(file, 'company', setUploadingCompanyDocs, setCompanyDocsUrl);
                   }
                 }}
+                onDrop={(file) => {
+                  setCompanyDocsFile(file);
+                  handleFileUpload(file, 'company', setUploadingCompanyDocs, setCompanyDocsUrl);
+                }}
               />
               <FileUploadBox
-                label="ID/Passport"
+                label="Passport"
                 required
                 file={passportFile}
                 url={passportUrl}
                 uploading={uploadingPassport}
                 accept=".pdf,.jpg,.jpeg,.png"
+                maxSizeLabel="Max 2MB"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -355,22 +419,54 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                     handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
                   }
                 }}
+                onDrop={(file) => {
+                  setPassportFile(file);
+                  handleFileUpload(file, 'passport', setUploadingPassport, setPassportUrl);
+                }}
               />
             </div>
-            <FileUploadBox
-              label="Additional Documents (Optional)"
-              file={additionalDocsFile}
-              url={additionalDocsUrl}
-              uploading={uploadingAdditionalDocs}
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setAdditionalDocsFile(file);
-                  handleFileUpload(file, 'additional', setUploadingAdditionalDocs, setAdditionalDocsUrl);
-                }
-              }}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FileUploadBox
+                label="Articles of Association"
+                required
+                file={articlesFile}
+                url={articlesUrl}
+                uploading={uploadingArticles}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                maxSizeLabel="Max 5MB"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setArticlesFile(file);
+                    handleFileUpload(file, 'articles', setUploadingArticles, setArticlesUrl);
+                  }
+                }}
+                onDrop={(file) => {
+                  setArticlesFile(file);
+                  handleFileUpload(file, 'articles', setUploadingArticles, setArticlesUrl);
+                }}
+              />
+              <FileUploadBox
+                label="Valid Business License"
+                required
+                file={licenseFile}
+                url={licenseUrl}
+                uploading={uploadingLicense}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                maxSizeLabel="Max 5MB"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setLicenseFile(file);
+                    handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
+                  }
+                }}
+                onDrop={(file) => {
+                  setLicenseFile(file);
+                  handleFileUpload(file, 'license', setUploadingLicense, setLicenseUrl);
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -383,10 +479,10 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="bank_account_holder">Account Holder Name</Label>
+                <Label htmlFor="bank_account_holder">Company Account (must match company name as per license)</Label>
                 <Input
                   id="bank_account_holder"
-                  placeholder="John Doe or Company Name"
+                  placeholder="Company Name Ltd."
                   value={formData.bank_account_holder}
                   onChange={(e) => setFormData(prev => ({ ...prev, bank_account_holder: e.target.value }))}
                   disabled={submitting}
@@ -500,7 +596,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
 
         <Button
           type="submit"
-          disabled={submitting || uploadingCompanyDocs || uploadingPassport || uploadingAdditionalDocs}
+          disabled={submitting || uploadingCompanyDocs || uploadingPassport || uploadingArticles || uploadingLicense}
           className="w-full bg-black hover:bg-black/80 text-white"
         >
           {submitting ? (
