@@ -131,6 +131,7 @@ export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
   const { setUserApplicationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
   const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
@@ -148,7 +149,7 @@ export function AgencyApplicationView() {
     }
   }, [user, isAdmin]);
 
-  const fetchAgencyData = async () => {
+  const fetchAgencyData = async (skipLoadingReset = false) => {
     if (!user) return;
     
     try {
@@ -189,7 +190,9 @@ export function AgencyApplicationView() {
     } catch (error) {
       console.error('Error fetching agency data:', error);
     } finally {
-      setLoading(false);
+      if (!skipLoadingReset) {
+        setLoading(false);
+      }
     }
   };
 
@@ -200,6 +203,8 @@ export function AgencyApplicationView() {
   };
 
   const handleCancelled = async () => {
+    // Set cancelling flag to prevent loading spinner during transition
+    setIsCancelling(true);
     // Clear local state immediately to prevent blinking
     setAgencyPayout(null);
     setCustomVerification(null);
@@ -207,7 +212,8 @@ export function AgencyApplicationView() {
     setUserApplicationStatus('cancelled');
     // Refetch data after a brief delay to get updated state
     await new Promise(resolve => setTimeout(resolve, 300));
-    await fetchAgencyData();
+    await fetchAgencyData(true);
+    setIsCancelling(false);
   };
 
   const handleCustomVerificationSubmit = () => {
@@ -245,7 +251,8 @@ export function AgencyApplicationView() {
     );
   }
 
-  if (loading) {
+  // Don't show loading spinner if we're in the middle of cancellation transition
+  if (loading && !isCancelling) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
