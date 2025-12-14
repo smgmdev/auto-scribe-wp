@@ -7,10 +7,33 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { ArticleTone } from '@/types';
 
-const sources = ['euronews', 'bloomberg', 'fortune'] as const;
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
+
+const sourceLabels: Record<string, string> = {
+  euronews: 'Euronews',
+  'euronews-latest': 'Euronews Latest',
+  'euronews-economy': 'Euronews Economy',
+  bloomberg: 'Bloomberg (US Global)',
+  'bloomberg-middleeast': 'Bloomberg Middle East',
+  'bloomberg-asia': 'Bloomberg Asia',
+  'bloomberg-latest': 'Bloomberg Latest',
+  fortune: 'Fortune',
+  'fortune-latest': 'Fortune Latest',
+  'nikkei-asia': 'NIKKEI Asia',
+  'cnn-middleeast': 'CNN Middle East',
+};
+
+const categorySourcesMap: Record<string, SourceType[]> = {
+  political: ['euronews', 'euronews-economy'],
+  business: ['bloomberg', 'bloomberg-latest', 'fortune'],
+  middleeast: ['bloomberg-middleeast', 'cnn-middleeast'],
+  asia: ['bloomberg-asia', 'nikkei-asia'],
+};
 
 const tones: {
   value: ArticleTone;
@@ -26,12 +49,13 @@ const tones: {
 ];
 
 export function SettingsView() {
-  const { settings, updateSettings, isLoading } = useUserSettings();
+  const { settings, updateSettings, isLoading, toggleSource } = useUserSettings();
   const { sites } = useSites();
   const { toast } = useToast();
   
   const [localSettings, setLocalSettings] = useState(settings);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeSourceTab, setActiveSourceTab] = useState('political');
 
   // Sync local settings when settings load from DB
   useEffect(() => {
@@ -40,7 +64,7 @@ export function SettingsView() {
     }
   }, [settings, isLoading]);
 
-  const handleSourceToggle = (source: typeof sources[number]) => {
+  const handleSourceToggle = (source: SourceType) => {
     const newSources = localSettings.selectedSources.includes(source)
       ? localSettings.selectedSources.filter(s => s !== source)
       : [...localSettings.selectedSources, source];
@@ -73,6 +97,26 @@ export function SettingsView() {
     }
   };
 
+  const renderSourceCheckbox = (source: SourceType) => (
+    <label 
+      key={source}
+      className="flex items-center gap-2 cursor-pointer group"
+    >
+      <Checkbox 
+        checked={localSettings.selectedSources.includes(source)}
+        onCheckedChange={() => handleSourceToggle(source)}
+        className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+      />
+      <span className={`text-sm font-medium transition-colors ${
+        localSettings.selectedSources.includes(source) 
+          ? 'text-foreground' 
+          : 'text-muted-foreground'
+      }`}>
+        {sourceLabels[source]}
+      </span>
+    </label>
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -87,13 +131,13 @@ export function SettingsView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
-            Global Settings
+            Settings
           </h1>
           <p className="mt-2 text-muted-foreground">
             Configure AI article generation and publishing preferences
           </p>
         </div>
-        <Button variant="accent" onClick={handleSave} disabled={isSaving}>
+        <Button className="bg-black text-white hover:bg-black/90" onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
             <>
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -112,32 +156,53 @@ export function SettingsView() {
         {/* News Sources */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">News Sources</CardTitle>
+            <CardTitle className="text-xl flex items-center justify-between">
+              <span>News Sources</span>
+              <Badge variant="secondary" className="text-xs">
+                {localSettings.selectedSources.length} selected
+              </Badge>
+            </CardTitle>
             <CardDescription>
               Select which sources to scan for daily headlines
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {sources.map(source => (
-              <label
-                key={source}
-                className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
-              >
-                <div>
-                  <p className="font-medium capitalize">{source}.com</p>
-                  <p className="text-sm text-muted-foreground">
-                    {source === 'euronews' && 'European news and current affairs'}
-                    {source === 'bloomberg' && 'Business, markets, and financial news'}
-                    {source === 'fortune' && 'Business leaders and market insights'}
-                  </p>
+          <CardContent>
+            <Tabs value={activeSourceTab} onValueChange={setActiveSourceTab}>
+              <TabsList className="grid w-full grid-cols-4 mb-4">
+                <TabsTrigger value="political">Political</TabsTrigger>
+                <TabsTrigger value="business">Business</TabsTrigger>
+                <TabsTrigger value="middleeast">Middle East</TabsTrigger>
+                <TabsTrigger value="asia">Asia</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="political" className="space-y-3">
+                <p className="text-xs text-muted-foreground mb-3">Political & Current Affairs</p>
+                <div className="flex flex-wrap gap-6">
+                  {categorySourcesMap.political.map(renderSourceCheckbox)}
                 </div>
-                <Checkbox
-                  checked={localSettings.selectedSources.includes(source)}
-                  onCheckedChange={() => handleSourceToggle(source)}
-                  className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                />
-              </label>
-            ))}
+              </TabsContent>
+
+              <TabsContent value="business" className="space-y-3">
+                <p className="text-xs text-muted-foreground mb-3">Business & Finance</p>
+                <div className="flex flex-wrap gap-6">
+                  {categorySourcesMap.business.map(renderSourceCheckbox)}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="middleeast" className="space-y-3">
+                <p className="text-xs text-muted-foreground mb-3">Middle East News</p>
+                <div className="flex flex-wrap gap-6">
+                  {categorySourcesMap.middleeast.map(renderSourceCheckbox)}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="asia" className="space-y-3">
+                <p className="text-xs text-muted-foreground mb-3">Asia & Pacific</p>
+                <div className="flex flex-wrap gap-6">
+                  {categorySourcesMap.asia.map(renderSourceCheckbox)}
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
