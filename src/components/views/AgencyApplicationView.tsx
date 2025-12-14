@@ -266,7 +266,7 @@ export function AgencyApplicationView() {
               </div>
               <div>
                 <p className="text-muted-foreground">Submitted</p>
-                <p className="font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                <p className="font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy h:mm a')}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Website</p>
