@@ -667,9 +667,17 @@ export function AdminAgenciesView() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                            <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                          </div>
+                          {application?.logo_url ? (
+                            <img 
+                              src={application.logo_url} 
+                              alt={agency.agency_name}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                            </div>
+                          )}
                           <div>
                             <h3 className="font-semibold">{agency.agency_name}</h3>
                             <p className="text-sm text-muted-foreground">{agency.email}</p>
