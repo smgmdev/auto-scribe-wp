@@ -155,7 +155,7 @@ serve(async (req) => {
       business_type: "company",
       business_profile: {
         name: agency_name,
-        url: website || undefined,
+        url: website ? (website.startsWith('http') ? website : `https://${website}`) : undefined,
       },
       company: {
         name: agency_name,
