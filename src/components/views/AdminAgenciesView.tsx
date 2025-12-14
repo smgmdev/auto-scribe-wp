@@ -610,7 +610,7 @@ export function AdminAgenciesView() {
                 <AlertTriangle className="h-12 w-12 text-muted-foreground/50" />
                 <h3 className="mt-4 text-xl font-semibold">No agencies under verification</h3>
                 <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Agencies pending Stripe verification will appear here
+                  Agencies pending verification will appear here
                 </p>
               </CardContent>
             </Card>
