@@ -662,11 +662,11 @@ export function AdminAgenciesView() {
               {selectedApp.payout_method && (
                 <div className="text-sm">
                   <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
-                  <Badge variant="outline" className="font-medium">
+                  <p className="font-medium">
                     {selectedApp.payout_method === 'stripe' && 'Automatic payout via Stripe Connect'}
                     {selectedApp.payout_method === 'usdt' && 'USDT Payout'}
                     {selectedApp.payout_method === 'wire' && 'Wire Payout'}
-                  </Badge>
+                  </p>
                 </div>
               )}
 
