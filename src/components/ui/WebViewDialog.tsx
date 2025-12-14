@@ -23,11 +23,11 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
       setLoading(true);
       setBlocked(false);
       
-      // Timeout to detect if iframe is blocked
+      // Fallback timeout
       timeoutRef.current = setTimeout(() => {
         setBlocked(true);
         setLoading(false);
-      }, 10000);
+      }, 12000);
 
       return () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -42,7 +42,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
     timeoutRef.current = setTimeout(() => {
       setBlocked(true);
       setLoading(false);
-    }, 10000);
+    }, 12000);
     if (iframeRef.current) iframeRef.current.src = normalizedUrl;
   };
 
@@ -56,30 +56,45 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   };
 
   const handleIframeLoad = () => {
-    // Clear the timeout since something loaded
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     
-    // Try to detect if the iframe is actually accessible
-    try {
-      const iframe = iframeRef.current;
-      if (iframe) {
-        // This will throw an error for cross-origin frames that loaded successfully
-        // But blocked frames might not throw - they just have no content
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        
-        // If we can access the document and it's empty/blocked, show blocked message
-        if (iframeDoc && (iframeDoc.body?.innerHTML === '' || iframeDoc.documentElement?.innerHTML === '<head></head><body></body>')) {
-          setBlocked(true);
-          setLoading(false);
-          return;
+    // Give a short delay then check if content loaded properly
+    setTimeout(() => {
+      try {
+        const iframe = iframeRef.current;
+        if (iframe) {
+          // Try to access iframe content - this throws for successful cross-origin loads
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          
+          if (iframeDoc) {
+            const bodyText = iframeDoc.body?.innerText?.toLowerCase() || '';
+            const bodyHtml = iframeDoc.body?.innerHTML || '';
+            
+            // Detect common browser error messages or empty/blocked content
+            const isError = 
+              bodyText.includes('refused to connect') ||
+              bodyText.includes('blocked') ||
+              bodyText.includes('not allowed') ||
+              bodyText.includes('refused to display') ||
+              bodyText.includes('x-frame-options') ||
+              bodyText.includes('content security policy') ||
+              bodyText.includes('connection refused') ||
+              bodyHtml === '' ||
+              bodyHtml === '<head></head><body></body>';
+            
+            if (isError) {
+              setBlocked(true);
+              setLoading(false);
+              return;
+            }
+          }
         }
+      } catch (e) {
+        // Cross-origin error = site loaded successfully (can't access content but that's fine)
       }
-    } catch (e) {
-      // Cross-origin error means the site loaded successfully (just can't access content)
-      // This is actually good - means the site is displaying
-    }
-    
-    setLoading(false);
+      
+      setLoading(false);
+    }, 500);
   };
 
   return (
@@ -157,7 +172,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
             title="WebView"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             onLoad={handleIframeLoad}
-            onError={() => { setBlocked(true); setLoading(false); }}
+            onError={() => { setBlocked(true); setLoading(false); if (timeoutRef.current) clearTimeout(timeoutRef.current); }}
           />
         </div>
       </DialogContent>
