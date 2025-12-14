@@ -54,6 +54,7 @@ interface AgencyPayout {
   invite_sent_at: string | null;
   created_at: string;
   user_id: string | null;
+  payout_method: string | null;
 }
 
 import { useAppStore } from '@/stores/appStore';
@@ -390,6 +391,22 @@ export function AdminAgenciesView() {
     if (agency.onboarding_complete) {
       return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
     }
+    
+    // Custom payout agencies
+    if (agency.payout_method === 'custom') {
+      return (
+        <div className="flex gap-2">
+          <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
+            <Clock className="h-3 w-3 mr-1" />Pending Verification
+          </Badge>
+          <Badge variant="secondary" className="bg-purple-600/20 text-purple-600">
+            Custom Payout
+          </Badge>
+        </div>
+      );
+    }
+    
+    // Stripe Connect agencies
     if (agency.stripe_account_id) {
       return <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><AlertTriangle className="h-3 w-3 mr-1" />Pending Verification</Badge>;
     }
