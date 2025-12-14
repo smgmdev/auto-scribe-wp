@@ -182,6 +182,7 @@ export function AgencyApplicationView() {
 
       // If there's a Stripe account that's not onboarded, verify it still exists
       // BUT only do this if the application is already approved - don't do Stripe checks for pending applications
+      // This prevents stale payout records from affecting new pending applications
       if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete && appData?.status === 'approved') {
         console.log('[AgencyView] Found unverified Stripe account, checking if still valid...');
         try {
@@ -200,6 +201,9 @@ export function AgencyApplicationView() {
         } catch (error) {
           console.error('[AgencyView] Error verifying Stripe account:', error);
         }
+      } else if (appData?.status === 'pending') {
+        // For pending applications, don't touch the payout data - just let it be
+        console.log('[AgencyView] Application is pending, skipping Stripe verification check');
       }
 
       if (validatedPayout) {
@@ -293,9 +297,14 @@ export function AgencyApplicationView() {
       </div>
     );
   }
+  // CASE 0: If application is still pending, show the application form (not Stripe verification)
+  // This prevents showing Stripe verification UI for pending applications that have stale payout records
+  const currentAppStatus = existingApplication?.status;
+  const isPending = currentAppStatus === 'pending';
 
   // CASE 1: Stripe Connect verification (has stripe account but not onboarded)
-  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete) {
+  // BUT only show this if the application is APPROVED, not if it's still pending
+  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete && !isPending) {
     const handleRefresh = async () => {
       setRefreshing(true);
       if (verificationRef.current?.refresh) {
