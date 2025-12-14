@@ -172,9 +172,22 @@ serve(async (req) => {
       },
     };
 
-    const account = await stripe.accounts.create(accountParams);
-
-    logStep("Stripe account created", { accountId: account.id });
+    logStep("Creating Stripe account with params", { accountParams });
+    
+    let account;
+    try {
+      account = await stripe.accounts.create(accountParams);
+      logStep("Stripe account created", { accountId: account.id });
+    } catch (stripeError: any) {
+      logStep("Stripe API error details", { 
+        type: stripeError.type,
+        code: stripeError.code,
+        param: stripeError.param,
+        message: stripeError.message,
+        raw: stripeError.raw
+      });
+      throw stripeError;
+    }
 
     // Create onboarding link - redirect back to user's dashboard
     const origin = req.headers.get("origin") || "http://localhost:5173";
