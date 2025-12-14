@@ -94,10 +94,10 @@ serve(async (req) => {
                 You will need to provide:
               </p>
               <ul style="color: #4a4a4a; font-size: 16px; line-height: 1.8; margin-bottom: 24px;">
-                <li>Company registration documents</li>
-                <li>ID/Passport verification</li>
-                <li>Bank account details</li>
-                <li>USDT wallet address (optional)</li>
+                <li>Personal information and passport copy</li>
+                <li>Company information and registration documents</li>
+                <li>Bank account details (for wire payout)</li>
+                <li>USDT wallet address (for crypto payout)</li>
               </ul>
               <a href="${origin}/dashboard" style="display: inline-block; background-color: #3872e0; color: white; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                 Complete Verification
