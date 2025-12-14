@@ -111,6 +111,7 @@ export type Database = {
           last_name: string | null
           passport_url: string | null
           phone: string | null
+          read: boolean
           reviewed_at: string | null
           status: string
           submitted_at: string | null
@@ -144,6 +145,7 @@ export type Database = {
           last_name?: string | null
           passport_url?: string | null
           phone?: string | null
+          read?: boolean
           reviewed_at?: string | null
           status?: string
           submitted_at?: string | null
@@ -177,6 +179,7 @@ export type Database = {
           last_name?: string | null
           passport_url?: string | null
           phone?: string | null
+          read?: boolean
           reviewed_at?: string | null
           status?: string
           submitted_at?: string | null
