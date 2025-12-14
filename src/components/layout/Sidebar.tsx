@@ -114,6 +114,15 @@ export function Sidebar({
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
 
+  // Track userApplicationStatus changes to reset agency data
+  useEffect(() => {
+    if (userApplicationStatus === 'cancelled') {
+      // Reset agency states when application is cancelled
+      setHasStripeAccount(false);
+      setPayoutMethod(null);
+    }
+  }, [userApplicationStatus]);
+
   // Reset agency data when user changes
   useEffect(() => {
     setAgencyDataLoaded(false);
