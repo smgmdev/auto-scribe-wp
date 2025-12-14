@@ -6,6 +6,7 @@ import { AgencyVerificationStatus, AgencyVerificationStatusRef } from '@/compone
 import { CustomVerificationForm } from '@/components/agency/CustomVerificationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -126,6 +127,7 @@ function AgencyFAQ() {
 
 export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
+  const { setUserApplicationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
   const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
@@ -199,6 +201,7 @@ export function AgencyApplicationView() {
     setAgencyPayout(null);
     setCustomVerification(null);
     setExistingApplication(null);
+    setUserApplicationStatus('cancelled');
     setTimeout(() => {
       fetchAgencyData();
     }, 500);
