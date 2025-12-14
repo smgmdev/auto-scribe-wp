@@ -28,6 +28,7 @@ export type Database = {
           logo_url: string | null
           media_channels: string | null
           media_niches: string[] | null
+          payout_method: string | null
           read: boolean
           rejection_seen: boolean
           reviewed_at: string | null
@@ -49,6 +50,7 @@ export type Database = {
           logo_url?: string | null
           media_channels?: string | null
           media_niches?: string[] | null
+          payout_method?: string | null
           read?: boolean
           rejection_seen?: boolean
           reviewed_at?: string | null
@@ -70,6 +72,7 @@ export type Database = {
           logo_url?: string | null
           media_channels?: string | null
           media_niches?: string[] | null
+          payout_method?: string | null
           read?: boolean
           rejection_seen?: boolean
           reviewed_at?: string | null
