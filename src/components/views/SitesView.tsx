@@ -126,6 +126,11 @@ export function SitesView() {
     about: ''
   });
 
+  // Delete confirmation state
+  const [deleteWPDialogOpen, setDeleteWPDialogOpen] = useState(false);
+  const [siteToDelete, setSiteToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const toggleExpand = (siteId: string) => {
     setExpandedSites(prev => {
       const next = new Set(prev);
@@ -541,22 +546,33 @@ export function SitesView() {
     }
   };
 
-  const handleRemoveWPSite = async (id: string, name: string) => {
+  const openDeleteWPDialog = (id: string, name: string) => {
+    setSiteToDelete({ id, name });
+    setDeleteWPDialogOpen(true);
+  };
+
+  const handleRemoveWPSite = async () => {
+    if (!siteToDelete) return;
+    setIsDeleting(true);
     try {
-      await removeSite(id);
-      await supabase.from('site_credits').delete().eq('site_id', id);
-      await supabase.from('site_tags').delete().eq('site_id', id);
+      await removeSite(siteToDelete.id);
+      await supabase.from('site_credits').delete().eq('site_id', siteToDelete.id);
+      await supabase.from('site_tags').delete().eq('site_id', siteToDelete.id);
       
       toast({
         title: "Site removed",
-        description: `${name} has been disconnected`
+        description: `${siteToDelete.name} has been disconnected`
       });
+      setDeleteWPDialogOpen(false);
+      setSiteToDelete(null);
     } catch (error) {
       toast({
         title: "Failed to remove site",
         description: error instanceof Error ? error.message : "Could not remove the site",
         variant: "destructive"
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -895,7 +911,7 @@ export function SitesView() {
                   className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleRemoveWPSite(site.id, site.name);
+                    openDeleteWPDialog(site.id, site.name);
                   }}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -2172,6 +2188,27 @@ export function SitesView() {
         url={webViewUrl || ''}
         title={webViewTitle}
       />
+
+      {/* Delete WP Site Confirmation Dialog */}
+      <Dialog open={deleteWPDialogOpen} onOpenChange={setDeleteWPDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Site</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{siteToDelete?.name}"? This will remove all associated credits and tags. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setDeleteWPDialogOpen(false)} className="hover:bg-black hover:text-white">
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRemoveWPSite} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
