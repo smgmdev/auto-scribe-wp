@@ -1007,14 +1007,7 @@ export function AdminAgenciesView() {
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = documentUrl!;
-                    link.download = 'incorporation-document.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
+                  onClick={() => window.open(documentUrl!, '_blank')}
                   variant="outline"
                   size="sm"
                   className="hover:bg-black hover:text-white h-7 text-xs"
@@ -1052,9 +1045,8 @@ export function AdminAgenciesView() {
                   </div>
                 </div>
               )}
-              <embed
-                src={`${documentUrl}#toolbar=1&navpanes=0`}
-                type="application/pdf"
+              <iframe
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
                 className="w-full h-full border-0"
                 title="Document viewer"
                 onLoad={() => setDocumentLoading(false)}
