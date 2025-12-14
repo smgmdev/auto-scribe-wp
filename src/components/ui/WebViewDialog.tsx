@@ -16,6 +16,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   const [copied, setCopied] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastUrlRef = useRef<string>('');
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
 
@@ -25,11 +26,18 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
 
   useEffect(() => {
     if (open) {
-      setStatus('loading');
+      // Only reset if URL actually changed
+      if (lastUrlRef.current !== normalizedUrl) {
+        setStatus('loading');
+        lastUrlRef.current = normalizedUrl;
+      }
       
+      clearTimers();
       // Fallback timeout - if nothing loads in 15s, show blocked
       timeoutRef.current = setTimeout(() => {
-        setStatus('blocked');
+        if (status === 'loading') {
+          setStatus('blocked');
+        }
       }, 15000);
 
       return () => clearTimers();
@@ -53,8 +61,9 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
     if (!newOpen) {
-      setStatus('loading');
       clearTimers();
+      // Reset on close for next open
+      lastUrlRef.current = '';
     }
   };
 
