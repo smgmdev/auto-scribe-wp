@@ -54,9 +54,11 @@ export function useSites() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isAdmin, loading: authLoading } = useAuth();
+  const [hasFetched, setHasFetched] = useState(false);
   const [lastIsAdmin, setLastIsAdmin] = useState<boolean | null>(null);
 
   const fetchSites = useCallback(async () => {
+    console.log('[useSites] fetchSites called, isAdmin:', isAdmin);
     setLoading(true);
     setError(null);
     
@@ -72,6 +74,7 @@ export function useSites() {
         setError(fetchError.message);
         setSites([]);
       } else {
+        console.log('[useSites] Admin sites fetched:', data?.length);
         setSites((data as DbSite[]).map(mapDbSiteToSite));
       }
     } else {
@@ -84,20 +87,36 @@ export function useSites() {
         setError(fetchError.message);
         setSites([]);
       } else {
+        console.log('[useSites] Public sites fetched:', data?.length);
         setSites((data as PublicSite[]).map(mapPublicSiteToSite));
       }
     }
     setLoading(false);
+    setHasFetched(true);
   }, [isAdmin]);
 
   useEffect(() => {
-    // Only refetch if auth is loaded and isAdmin actually changed
-    if (authLoading) return;
-    if (lastIsAdmin === isAdmin) return;
+    // Wait for auth to load before fetching
+    if (authLoading) {
+      console.log('[useSites] Auth still loading, waiting...');
+      return;
+    }
     
-    setLastIsAdmin(isAdmin);
-    fetchSites();
-  }, [fetchSites, authLoading, isAdmin, lastIsAdmin]);
+    // Fetch on first load after auth is ready
+    if (!hasFetched) {
+      console.log('[useSites] Initial fetch, isAdmin:', isAdmin);
+      setLastIsAdmin(isAdmin);
+      fetchSites();
+      return;
+    }
+    
+    // Refetch if isAdmin status changes
+    if (lastIsAdmin !== isAdmin) {
+      console.log('[useSites] isAdmin changed from', lastIsAdmin, 'to', isAdmin, ', refetching');
+      setLastIsAdmin(isAdmin);
+      fetchSites();
+    }
+  }, [fetchSites, authLoading, isAdmin, lastIsAdmin, hasFetched]);
 
   const addSite = async (site: Omit<WordPressSite, 'id' | 'connected'>) => {
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
