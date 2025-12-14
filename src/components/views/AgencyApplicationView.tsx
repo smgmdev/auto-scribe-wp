@@ -373,7 +373,7 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <Card className="border-gray-700 bg-black">
+          <Card className="border-0 bg-black">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
