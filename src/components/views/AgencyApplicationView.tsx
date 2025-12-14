@@ -146,6 +146,8 @@ export function AgencyApplicationView() {
 
   const handleCancelled = () => {
     setHasStripeAccount(false);
+    setIsOnboarded(false);
+    setExistingApplication(null);
     checkExistingApplication();
   };
 
@@ -269,6 +271,11 @@ export function AgencyApplicationView() {
               <Clock className="h-4 w-4 mr-2" />
               In Review
             </>
+          ) : existingApplication?.status === 'cancelled' || existingApplication?.status === 'rejected' || !existingApplication ? (
+            <>
+              <Send className="h-4 w-4 mr-2" />
+              Submit New Application
+            </>
           ) : (
             <>
               <Send className="h-4 w-4 mr-2" />
@@ -280,8 +287,8 @@ export function AgencyApplicationView() {
 
       <AgencyFAQ />
 
-      {/* Show existing application status card */}
-      {existingApplication && (
+      {/* Show existing application status card (except for cancelled) */}
+      {existingApplication && existingApplication.status !== 'cancelled' && (
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
