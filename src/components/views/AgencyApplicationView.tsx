@@ -181,9 +181,12 @@ export function AgencyApplicationView() {
         .maybeSingle();
 
       // If there's a Stripe account that's not onboarded, verify it still exists
-      // BUT only do this if the application is already approved - don't do Stripe checks for pending applications
-      // This prevents stale payout records from affecting new pending applications
-      if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete && appData?.status === 'approved') {
+      // BUT only do this if:
+      // 1. The application is already approved (not pending, cancelled, or rejected)
+      // 2. The payout method is NOT custom (custom payout doesn't use Stripe verification)
+      // This prevents stale payout records from affecting new pending applications or custom payouts
+      const isStripePayout = payoutData?.payout_method !== 'custom';
+      if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete && appData?.status === 'approved' && isStripePayout) {
         console.log('[AgencyView] Found unverified Stripe account, checking if still valid...');
         try {
           const response = await supabase.functions.invoke('get-agency-onboarding-link');
@@ -204,6 +207,8 @@ export function AgencyApplicationView() {
       } else if (appData?.status === 'pending') {
         // For pending applications, don't touch the payout data - just let it be
         console.log('[AgencyView] Application is pending, skipping Stripe verification check');
+      } else if (payoutData?.payout_method === 'custom') {
+        console.log('[AgencyView] Custom payout method, skipping Stripe verification check');
       }
 
       if (validatedPayout) {
@@ -303,8 +308,11 @@ export function AgencyApplicationView() {
   const isPending = currentAppStatus === 'pending';
 
   // CASE 1: Stripe Connect verification (has stripe account but not onboarded)
-  // BUT only show this if the application is APPROVED, not if it's still pending
-  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete && !isPending) {
+  // BUT only show this if:
+  // - The application is APPROVED (not pending)
+  // - The payout method is NOT custom (custom payout has its own verification flow)
+  const isCustomPayout = agencyPayout?.payout_method === 'custom';
+  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete && !isPending && !isCustomPayout) {
     const handleRefresh = async () => {
       setRefreshing(true);
       if (verificationRef.current?.refresh) {
