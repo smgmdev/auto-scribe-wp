@@ -296,9 +296,10 @@ export function AgencyApplicationView() {
 
       <AgencyFAQ />
 
-      {/* Show existing application status card (except for cancelled) */}
-      {existingApplication && existingApplication.status !== 'cancelled' && (
-        <Card>
+      {/* Show existing application status card */}
+      {existingApplication && (
+        <Card className={existingApplication.status === 'cancelled' ? 'border-muted' : ''}>
+
           <CardHeader>
             <div className="flex items-start justify-between">
               <CardTitle className="text-lg">Your Latest Application</CardTitle>
