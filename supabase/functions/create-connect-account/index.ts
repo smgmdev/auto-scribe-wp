@@ -248,15 +248,18 @@ serve(async (req) => {
         await resend.emails.send({
           from: "Arcana Mace <noreply@arcanamace.com>",
           to: [email],
-          subject: `${agency_name} - Complete Your Stripe Connect Setup`,
+          subject: `${agency_name} - Application Pre-Approved! Complete Your Stripe Connect Setup`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-              <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">Welcome to Arcana Mace!</h1>
+              <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">Congratulations! Your Application is Pre-Approved</h1>
+              <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+                Great news! Your agency application for <strong>${agency_name}</strong> has been pre-approved.
+              </p>
               <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-                You've been invited to join Arcana Mace as an agency partner. To receive payouts for your media placements, please complete your Stripe Connect setup.
+                To complete your onboarding and start receiving payouts for your media placements, please complete your Stripe Connect setup by clicking the button below.
               </p>
               <a href="${accountLink.url}" style="display: inline-block; background-color: #3872e0; color: white; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                Complete Setup
+                Complete Stripe Connect Setup
               </a>
               <p style="color: #888; font-size: 14px; margin-top: 32px;">
                 This link will expire in 24 hours. If you have any questions, please contact our support team.
