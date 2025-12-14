@@ -920,12 +920,12 @@ export function AdminAgenciesView() {
               {selectedApp.payout_method && (
                 <div className="text-sm">
                   <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
-                  <Badge variant={selectedApp.payout_method === 'stripe' ? 'default' : 'secondary'} className={selectedApp.payout_method === 'stripe' ? 'bg-green-600' : ''}>
+                  <p className="font-medium">
                     {selectedApp.payout_method === 'stripe' && 'Automatic Payout via Stripe Connect'}
                     {selectedApp.payout_method === 'custom' && 'Custom Payout'}
                     {selectedApp.payout_method === 'usdt' && 'USDT Payout (Legacy)'}
                     {selectedApp.payout_method === 'wire' && 'Wire Payout (Legacy)'}
-                  </Badge>
+                  </p>
                 </div>
               )}
 
