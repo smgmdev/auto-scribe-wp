@@ -105,6 +105,7 @@ export function AdminAgenciesView() {
   const [activeTab, setActiveTab] = useState('pending');
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [documentLoading, setDocumentLoading] = useState(true);
@@ -115,6 +116,25 @@ export function AdminAgenciesView() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Fetch logo URLs for all applications
+  useEffect(() => {
+    const fetchLogoUrls = async () => {
+      const urls: Record<string, string> = {};
+      for (const app of applications) {
+        if (app.logo_url && !logoUrls[app.id]) {
+          const url = await getSignedUrl(app.logo_url);
+          if (url) urls[app.id] = url;
+        }
+      }
+      if (Object.keys(urls).length > 0) {
+        setLogoUrls(prev => ({ ...prev, ...urls }));
+      }
+    };
+    if (applications.length > 0) {
+      fetchLogoUrls();
+    }
+  }, [applications]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -555,9 +575,17 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                          <Clock className="h-5 w-5 text-yellow-500" />
-                        </div>
+                        {logoUrls[app.id] ? (
+                          <img 
+                            src={logoUrls[app.id]} 
+                            alt={app.agency_name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          </div>
+                        )}
                         <div>
                           <h3 className="font-medium">{app.agency_name}</h3>
                           <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
@@ -607,9 +635,17 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        </div>
+                        {logoUrls[app.id] ? (
+                          <img 
+                            src={logoUrls[app.id]} 
+                            alt={app.agency_name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          </div>
+                        )}
                         <div>
                           <h3 className="font-medium">{app.agency_name}</h3>
                           <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
@@ -667,9 +703,9 @@ export function AdminAgenciesView() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          {application?.logo_url ? (
+                          {application && logoUrls[application.id] ? (
                             <img 
-                              src={application.logo_url} 
+                              src={logoUrls[application.id]} 
                               alt={agency.agency_name}
                               className="w-10 h-10 rounded-full object-cover"
                             />
@@ -758,9 +794,17 @@ export function AdminAgenciesView() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                            <CheckCircle className="h-5 w-5 text-green-500" />
-                          </div>
+                          {application && logoUrls[application.id] ? (
+                            <img 
+                              src={logoUrls[application.id]} 
+                              alt={agency.agency_name}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                              <CheckCircle className="h-5 w-5 text-green-500" />
+                            </div>
+                          )}
                           <div>
                             <h3 className="font-semibold">{agency.agency_name}</h3>
                             <p className="text-sm text-muted-foreground">{agency.email}</p>
@@ -828,9 +872,17 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        </div>
+                        {logoUrls[app.id] ? (
+                          <img 
+                            src={logoUrls[app.id]} 
+                            alt={app.agency_name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          </div>
+                        )}
                         <div>
                           <h3 className="font-medium">{app.agency_name}</h3>
                           <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
