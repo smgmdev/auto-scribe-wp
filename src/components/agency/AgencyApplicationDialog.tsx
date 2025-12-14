@@ -394,9 +394,10 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       });
 
       localStorage.removeItem('agency_new_application_mode');
+      // Update store status first, then call success callback, then close dialog
       setUserApplicationStatus('pending');
-      onOpenChange(false);
       onSubmitSuccess?.();
+      onOpenChange(false);
     } catch (error: any) {
       toast({
         variant: 'destructive',
