@@ -14,6 +14,8 @@ interface DBArticle {
   source_headline: any;
   featured_image: any;
   published_to: string | null;
+  published_to_name: string | null;
+  published_to_favicon: string | null;
   wp_post_id: number | null;
   wp_link: string | null;
   wp_featured_media_id: number | null;
@@ -33,6 +35,8 @@ const mapDBToArticle = (db: DBArticle): Article => ({
   sourceHeadline: db.source_headline as Headline | undefined,
   featuredImage: db.featured_image as FeaturedImage | undefined,
   publishedTo: db.published_to || undefined,
+  publishedToName: db.published_to_name || undefined,
+  publishedToFavicon: db.published_to_favicon || undefined,
   wpPostId: db.wp_post_id || undefined,
   wpLink: db.wp_link || undefined,
   wpFeaturedMediaId: db.wp_featured_media_id || undefined,
@@ -125,6 +129,8 @@ export function useArticles() {
       source_headline: article.sourceHeadline || null,
       featured_image: article.featuredImage || null,
       published_to: article.publishedTo || null,
+      published_to_name: article.publishedToName || null,
+      published_to_favicon: article.publishedToFavicon || null,
       wp_post_id: article.wpPostId || null,
       wp_link: article.wpLink || null,
       wp_featured_media_id: article.wpFeaturedMediaId || null,
@@ -164,6 +170,8 @@ export function useArticles() {
     if (updates.sourceHeadline !== undefined) updateData.source_headline = updates.sourceHeadline;
     if (updates.featuredImage !== undefined) updateData.featured_image = updates.featuredImage;
     if (updates.publishedTo !== undefined) updateData.published_to = updates.publishedTo;
+    if (updates.publishedToName !== undefined) updateData.published_to_name = updates.publishedToName;
+    if (updates.publishedToFavicon !== undefined) updateData.published_to_favicon = updates.publishedToFavicon;
     if (updates.wpPostId !== undefined) updateData.wp_post_id = updates.wpPostId;
     if (updates.wpLink !== undefined) updateData.wp_link = updates.wpLink;
     if (updates.wpFeaturedMediaId !== undefined) updateData.wp_featured_media_id = updates.wpFeaturedMediaId;

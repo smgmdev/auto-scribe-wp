@@ -136,6 +136,8 @@ export type Database = {
           featured_image: Json | null
           id: string
           published_to: string | null
+          published_to_favicon: string | null
+          published_to_name: string | null
           source_headline: Json | null
           status: string
           tag_ids: number[] | null
@@ -155,6 +157,8 @@ export type Database = {
           featured_image?: Json | null
           id?: string
           published_to?: string | null
+          published_to_favicon?: string | null
+          published_to_name?: string | null
           source_headline?: Json | null
           status?: string
           tag_ids?: number[] | null
@@ -174,6 +178,8 @@ export type Database = {
           featured_image?: Json | null
           id?: string
           published_to?: string | null
+          published_to_favicon?: string | null
+          published_to_name?: string | null
           source_headline?: Json | null
           status?: string
           tag_ids?: number[] | null

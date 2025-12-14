@@ -26,9 +26,11 @@ export function ArticlesView() {
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
 
-  const getSiteName = (siteId?: string) => {
-    if (!siteId) return '';
-    return sites.find(s => s.id === siteId)?.name || 'Unknown site';
+  const getSiteName = (article: Article) => {
+    // Use stored name if available, otherwise try to look up from sites
+    if (article.publishedToName) return article.publishedToName;
+    if (!article.publishedTo) return '';
+    return sites.find(s => s.id === article.publishedTo)?.name || 'Unknown site';
   };
 
   const handleEdit = (article: Article) => {
@@ -104,11 +106,11 @@ export function ArticlesView() {
                       className="flex items-center gap-1 text-accent hover:underline cursor-pointer"
                       onClick={(e) => handleLinkClick(e, article.wpLink!, article.title)}
                     >
-                      Published on: {getSiteName(article.publishedTo)}
+                      Published on: {getSiteName(article)}
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   ) : (
-                    <span>Published on: {getSiteName(article.publishedTo)}</span>
+                    <span>Published on: {getSiteName(article)}</span>
                   )}
                 </>
               )}

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow, isYesterday, format } from 'date-fns';
-import { useSites } from '@/hooks/useSites';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 
 interface GlobalArticle {
@@ -11,6 +10,8 @@ interface GlobalArticle {
   created_at: string;
   wp_link: string | null;
   published_to: string | null;
+  published_to_name: string | null;
+  published_to_favicon: string | null;
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -37,7 +38,6 @@ function formatRelativeTime(dateString: string): string {
 export function LatestGlobalArticles() {
   const [articles, setArticles] = useState<GlobalArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sites } = useSites();
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
 
@@ -45,7 +45,7 @@ export function LatestGlobalArticles() {
     const fetchGlobalArticles = async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select('id, title, created_at, wp_link, published_to')
+        .select('id, title, created_at, wp_link, published_to, published_to_name, published_to_favicon')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(5);
@@ -58,13 +58,6 @@ export function LatestGlobalArticles() {
 
     fetchGlobalArticles();
   }, []);
-
-  const getSiteInfo = (siteId: string | null): { name: string; favicon: string | null } | null => {
-    if (!siteId) return null;
-    const site = sites.find(s => s.id === siteId);
-    if (!site) return null;
-    return { name: site.name, favicon: site.favicon || null };
-  };
 
   const handleLinkClick = (e: React.MouseEvent, url: string, title: string) => {
     e.preventDefault();
@@ -84,7 +77,8 @@ export function LatestGlobalArticles() {
     <>
       <ul className="space-y-3">
         {articles.map(article => {
-          const siteInfo = getSiteInfo(article.published_to);
+          const siteName = article.published_to_name;
+          const siteFavicon = article.published_to_favicon;
           return (
             <li key={article.id}>
               {article.wp_link ? (
@@ -97,12 +91,12 @@ export function LatestGlobalArticles() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      {siteInfo && (
+                      {siteName && (
                         <>
-                          {siteInfo.favicon && (
-                            <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                          {siteFavicon && (
+                            <img src={siteFavicon} alt="" className="h-3 w-3 rounded-sm" />
                           )}
-                          <span>{siteInfo.name}</span>
+                          <span>{siteName}</span>
                           <span>•</span>
                         </>
                       )}
@@ -116,12 +110,12 @@ export function LatestGlobalArticles() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      {siteInfo && (
+                      {siteName && (
                         <>
-                          {siteInfo.favicon && (
-                            <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                          {siteFavicon && (
+                            <img src={siteFavicon} alt="" className="h-3 w-3 rounded-sm" />
                           )}
-                          <span>{siteInfo.name}</span>
+                          <span>{siteName}</span>
                           <span>•</span>
                         </>
                       )}
