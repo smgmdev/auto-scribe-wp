@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ExternalLink, X, Loader2, AlertCircle } from 'lucide-react';
+import { RefreshCw, ExternalLink, X, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface WebViewDialogProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface WebViewDialogProps {
 
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: WebViewDialogProps) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
+  const [copied, setCopied] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -93,17 +95,30 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
       <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden z-[300]" overlayClassName="bg-black/50 z-[299]">
         <DialogHeader className="px-3 pb-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <Button
                 onClick={handleRefresh}
                 variant="ghost"
                 size="sm"
                 disabled={status === 'loading'}
-                className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
+                className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
               >
                 <RefreshCw className={`h-4 w-4 ${status === 'loading' ? 'animate-spin' : ''}`} />
               </Button>
-              <DialogTitle className="text-sm truncate max-w-[60vw]">{title}</DialogTitle>
+              <span className="text-xs text-muted-foreground truncate max-w-[50vw]">{normalizedUrl}</span>
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(normalizedUrl);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                  toast({ title: 'URL copied', description: normalizedUrl });
+                }}
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 hover:bg-black hover:text-white flex-shrink-0"
+              >
+                {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               <Button
