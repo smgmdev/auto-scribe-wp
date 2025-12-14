@@ -14,13 +14,11 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
 
   const clearTimers = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
   };
 
   useEffect(() => {
@@ -29,9 +27,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
       
       // Fallback timeout - if nothing loads in 15s, show blocked
       timeoutRef.current = setTimeout(() => {
-        if (status === 'loading') {
-          setStatus('blocked');
-        }
+        setStatus('blocked');
       }, 15000);
 
       return () => clearTimers();
@@ -42,9 +38,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
     setStatus('loading');
     clearTimers();
     timeoutRef.current = setTimeout(() => {
-      if (status === 'loading') {
-        setStatus('blocked');
-      }
+      setStatus('blocked');
     }, 15000);
     if (iframeRef.current) {
       iframeRef.current.src = '';
@@ -65,7 +59,8 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   const handleIframeLoad = () => {
     clearTimers();
     
-    // Check if content is accessible and appears to be an error
+    // Check if content is accessible - if YES, it's likely a browser error page (blocked)
+    // If we get cross-origin error, the external site actually loaded
     setTimeout(() => {
       try {
         const iframe = iframeRef.current;
@@ -74,51 +69,23 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
           return;
         }
 
-        // Try to access content - throws for cross-origin (which means external site loaded)
-        const iframeWindow = iframe.contentWindow;
+        // Try to access content - this throws for successfully loaded cross-origin sites
         const iframeDoc = iframe.contentDocument;
+        const iframeWindow = iframe.contentWindow;
         
         if (iframeDoc && iframeWindow) {
-          // If we CAN access the document, it's same-origin (likely browser error page)
-          const bodyText = iframeDoc.body?.innerText?.toLowerCase() || '';
-          const title = iframeDoc.title?.toLowerCase() || '';
-          
-          // Check for common error indicators
-          const hasErrorContent = 
-            bodyText.includes('refused') ||
-            bodyText.includes('blocked') ||
-            bodyText.includes('denied') ||
-            bodyText.includes('not allowed') ||
-            bodyText.includes('x-frame-options') ||
-            bodyText.includes('content security policy') ||
-            bodyText.includes('cannot be displayed') ||
-            bodyText.includes('connection') ||
-            title.includes('error') ||
-            iframeDoc.body?.innerHTML === '';
-          
-          if (hasErrorContent) {
-            setStatus('blocked');
-            return;
-          }
-          
-          // If we can access it and URL is about:blank or similar, it's blocked
-          try {
-            const iframeLocation = iframeWindow.location.href;
-            if (iframeLocation === 'about:blank' || iframeLocation === '') {
-              setStatus('blocked');
-              return;
-            }
-          } catch (e) {
-            // Can't access location - proceed
-          }
+          // If we CAN access the document, it's same-origin = browser error page
+          // Real external sites would throw cross-origin error
+          setStatus('blocked');
+          return;
         }
         
         setStatus('loaded');
       } catch (e) {
-        // Cross-origin error means external content loaded successfully
+        // Cross-origin error = external site loaded successfully (can't access but that's expected)
         setStatus('loaded');
       }
-    }, 800);
+    }, 500);
   };
 
   return (
