@@ -584,7 +584,7 @@ export function ComposeView() {
         title: "Article published!",
         description: <div>
             Successfully published to {currentSite.name}.{' '}
-            <a href={result.link} target="_blank" rel="noopener noreferrer" className="underline font-medium">
+            <a href={result.link} rel="noopener noreferrer" className="underline font-medium">
               View article
             </a>
           </div>

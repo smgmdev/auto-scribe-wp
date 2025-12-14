@@ -1012,7 +1012,6 @@ export function SitesView() {
               {/* Link below tags */}
               <a 
                 href={site.url} 
-                target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
               >
@@ -1134,7 +1133,6 @@ export function SitesView() {
               {/* Link at the bottom */}
               <a 
                 href={site.link} 
-                target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
               >
@@ -1241,7 +1239,6 @@ export function SitesView() {
               {/* Link at the bottom */}
               <a 
                 href={site.link} 
-                target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
               >
@@ -2060,7 +2057,6 @@ export function SitesView() {
                   <p className="text-sm text-muted-foreground">Website</p>
                   <a 
                     href={selectedMediaSite.link} 
-                    target="_blank" 
                     rel="noopener noreferrer"
                     className="text-accent hover:underline flex items-center gap-1"
                   >

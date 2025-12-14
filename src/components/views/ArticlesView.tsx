@@ -91,7 +91,6 @@ export function ArticlesView() {
                   {article.wpLink ? (
                     <a 
                       href={article.wpLink} 
-                      target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-accent hover:underline"
                     >

@@ -306,7 +306,6 @@ export function HeadlinesView() {
                   <div className="flex items-center gap-2">
                     <a 
                       href={headline.url}
-                      target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-md hover:bg-muted transition-colors"
                       onClick={(e) => e.stopPropagation()}

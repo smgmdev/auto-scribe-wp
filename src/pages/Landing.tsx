@@ -659,7 +659,6 @@ const Landing = () => {
                 <p className="text-sm text-muted-foreground">Website</p>
                 <a 
                   href={(selectedSite as WPSite).url} 
-                  target="_blank" 
                   rel="noopener noreferrer"
                   className="text-accent hover:underline flex items-center gap-1"
                 >
@@ -702,7 +701,6 @@ const Landing = () => {
                 <p className="text-sm text-muted-foreground">Website</p>
                 <a 
                   href={(selectedSite as MediaSite).link} 
-                  target="_blank" 
                   rel="noopener noreferrer"
                   className="text-accent hover:underline flex items-center gap-1"
                 >

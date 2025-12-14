@@ -80,7 +80,6 @@ export function LatestGlobalArticles() {
             {article.wp_link ? (
               <a 
                 href={article.wp_link} 
-                target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group"
               >

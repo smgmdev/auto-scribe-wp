@@ -268,7 +268,7 @@ export function AgencyApplicationView() {
               </div>
               <div>
                 <p className="text-muted-foreground">Website</p>
-                <a href={existingApplication.agency_website} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                <a href={existingApplication.agency_website} rel="noopener noreferrer" className="font-medium text-primary hover:underline">
                   {existingApplication.agency_website}
                 </a>
               </div>
