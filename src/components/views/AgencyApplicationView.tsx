@@ -41,6 +41,8 @@ interface AgencyApplication {
   status: string;
   admin_notes: string | null;
   created_at: string;
+  updated_at: string;
+  reviewed_at: string | null;
 }
 
 interface AgencyPayout {
@@ -177,7 +179,7 @@ export function AgencyApplicationView() {
       // Fetch existing application
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, agency_name, country, agency_website, status, admin_notes, created_at')
+        .select('id, agency_name, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -527,6 +529,18 @@ export function AgencyApplicationView() {
                   {existingApplication.agency_website}
                 </button>
               </div>
+              {(existingApplication.status === 'cancelled' || existingApplication.status === 'rejected') && (
+                <div>
+                  <p className="text-muted-foreground">
+                    {existingApplication.status === 'cancelled' ? 'Cancelled' : 'Rejected'}
+                  </p>
+                  <p className="font-medium">
+                    {format(new Date(existingApplication.status === 'rejected' && existingApplication.reviewed_at 
+                      ? existingApplication.reviewed_at 
+                      : existingApplication.updated_at), 'MMM d, yyyy h:mm a')}
+                  </p>
+                </div>
+              )}
             </div>
             
             {existingApplication.status === 'rejected' && (
