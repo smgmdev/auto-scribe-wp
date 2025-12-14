@@ -240,6 +240,10 @@ export function AgencyApplicationView() {
     // Clear local state immediately - this will cause the view to render the application form
     setAgencyPayout(null);
     setCustomVerification(null);
+    // Also update the existing application status immediately for proper UI display
+    if (existingApplication) {
+      setExistingApplication({ ...existingApplication, status: 'cancelled' });
+    }
     setLoading(false);
     // Update global store immediately - this triggers sidebar to update
     setUserApplicationStatus('cancelled');
