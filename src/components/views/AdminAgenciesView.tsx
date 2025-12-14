@@ -1037,7 +1037,7 @@ export function AdminAgenciesView() {
                 </div>
               )}
               <iframe
-                src={documentUrl}
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
                 className="w-full h-full border-0"
                 title="Document viewer"
                 onLoad={() => setDocumentLoading(false)}
