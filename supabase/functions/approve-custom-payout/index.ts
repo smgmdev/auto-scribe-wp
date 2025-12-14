@@ -79,16 +79,16 @@ serve(async (req) => {
         await resend.emails.send({
           from: "Arcana Mace <noreply@arcanamace.com>",
           to: [email],
-          subject: `${agency_name} - Complete Your Verification`,
+          subject: `${agency_name} - Pre-Approved: Complete Your Verification`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-              <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">Your Agency Application is Approved!</h1>
+              <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">Your Agency Application is Pre-Approved!</h1>
               <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                 Hi ${full_name || 'there'},
               </p>
               <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-                Great news! Your agency application for <strong>${agency_name}</strong> has been approved. 
-                Since you selected Custom Payout, please log in to complete your verification process.
+                Great news! Your agency application for <strong>${agency_name}</strong> has been pre-approved. 
+                Since you selected Custom Payout, please log in to complete your verification process to receive full approval.
               </p>
               <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                 You will need to provide:
