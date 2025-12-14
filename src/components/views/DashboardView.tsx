@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, Info, ArrowRight } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, HelpCircle, ArrowRight } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -161,7 +161,7 @@ export function DashboardView() {
                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                           {stat.label}
                         </CardTitle>
-                        <Info className="h-3 w-3 text-muted-foreground/70" />
+                        <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent 
