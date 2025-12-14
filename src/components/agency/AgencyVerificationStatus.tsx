@@ -40,19 +40,29 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
   const [statusLoading, setStatusLoading] = useState(true);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
 
   useImperativeHandle(ref, () => ({
     refresh: fetchStripeStatus
   }));
 
   useEffect(() => {
-    fetchStripeStatus();
-  }, []);
+    if (!isCancelled) {
+      fetchStripeStatus();
+    }
+  }, [isCancelled]);
 
   const fetchStripeStatus = async () => {
+    if (isCancelled) return;
     setStatusLoading(true);
     try {
       const response = await supabase.functions.invoke('get-agency-onboarding-link');
+      if (response.data?.error) {
+        // Account may have been deleted or doesn't exist
+        console.log('Stripe account error:', response.data.error);
+        setStatusLoading(false);
+        return;
+      }
       if (response.data?.status) {
         setStripeStatus(response.data.status);
       }
@@ -159,6 +169,8 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
         }
       }
 
+      setIsCancelled(true);
+      
       toast({
         title: 'Application Cancelled',
         description: 'Your agency application has been cancelled.',
@@ -175,6 +187,11 @@ export const AgencyVerificationStatus = forwardRef<AgencyVerificationStatusRef, 
       setCancelling(false);
     }
   };
+
+  // Don't render if cancelled
+  if (isCancelled) {
+    return null;
+  }
 
   if (statusLoading) {
     return (
