@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Upload, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Loader2, Upload, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -480,18 +480,23 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <Label htmlFor="bank_account_holder">Beneficiary Name</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Beneficiary Name should be the official company name as per incorporation file.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3 w-3 text-muted-foreground/70 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="right" 
+                      align="start"
+                      sideOffset={8}
+                      collisionPadding={16}
+                      avoidCollisions={true}
+                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                    >
+                      <p>Beneficiary Name should be the official company name as per incorporation file.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
                 <Input
                   id="bank_account_holder"
