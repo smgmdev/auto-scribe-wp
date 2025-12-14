@@ -605,7 +605,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">USDT Wallet Details</CardTitle>
-            <CardDescription>For cryptocurrency payouts (provide either bank or crypto details)</CardDescription>
+            <CardDescription>For cryptocurrency payouts</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
