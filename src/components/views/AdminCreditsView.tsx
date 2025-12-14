@@ -301,7 +301,7 @@ export function AdminCreditsView() {
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="hover:bg-black hover:text-white">
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="hover:bg-black">
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Delete
             </Button>
