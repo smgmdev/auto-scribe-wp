@@ -168,6 +168,10 @@ export function Sidebar({
       if (agencyData) {
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
         setHasStripeAccount(!!agencyData.stripe_account_id);
+      } else {
+        // No agency_payouts record found - reset states
+        setIsAgencyOnboarded(false);
+        setHasStripeAccount(false);
       }
       
       setAgencyDataLoaded(true);
