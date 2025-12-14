@@ -29,6 +29,7 @@ export type Database = {
           media_channels: string | null
           media_niches: string[] | null
           read: boolean
+          rejection_seen: boolean
           reviewed_at: string | null
           status: string
           updated_at: string
@@ -49,6 +50,7 @@ export type Database = {
           media_channels?: string | null
           media_niches?: string[] | null
           read?: boolean
+          rejection_seen?: boolean
           reviewed_at?: string | null
           status?: string
           updated_at?: string
@@ -69,6 +71,7 @@ export type Database = {
           media_channels?: string | null
           media_niches?: string[] | null
           read?: boolean
+          rejection_seen?: boolean
           reviewed_at?: string | null
           status?: string
           updated_at?: string
