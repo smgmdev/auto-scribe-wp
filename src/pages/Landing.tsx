@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Globe, ExternalLink, X, Heart, User } from 'lucide-react';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -63,6 +64,8 @@ const Landing = () => {
   // Brief submission dialog state
   const [briefDialogOpen, setBriefDialogOpen] = useState(false);
   const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewTitle, setWebViewTitle] = useState('');
 
   useEffect(() => {
     const fetchSites = async () => {
@@ -395,6 +398,7 @@ const Landing = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -657,14 +661,13 @@ const Landing = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
-                <a 
-                  href={(selectedSite as WPSite).url} 
-                  rel="noopener noreferrer"
-                  className="text-accent hover:underline flex items-center gap-1"
+                <button 
+                  onClick={() => { setWebViewUrl((selectedSite as WPSite).url); setWebViewTitle((selectedSite as WPSite).name); }}
+                  className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   {extractDomain((selectedSite as WPSite).url)}
                   <ExternalLink className="h-3 w-3" />
-                </a>
+                </button>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Publication Type</p>
@@ -699,14 +702,13 @@ const Landing = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
-                <a 
-                  href={(selectedSite as MediaSite).link} 
-                  rel="noopener noreferrer"
-                  className="text-accent hover:underline flex items-center gap-1"
+                <button 
+                  onClick={() => { setWebViewUrl((selectedSite as MediaSite).link); setWebViewTitle((selectedSite as MediaSite).name); }}
+                  className="text-accent hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   {extractDomain((selectedSite as MediaSite).link)}
                   <ExternalLink className="h-3 w-3" />
-                </a>
+                </button>
               </div>
               
               {/* Show price and format only for non-agency sites */}
@@ -828,6 +830,14 @@ const Landing = () => {
         </div>
       </footer>
     </div>
+
+    <WebViewDialog
+      open={!!webViewUrl}
+      onOpenChange={(open) => !open && setWebViewUrl(null)}
+      url={webViewUrl || ''}
+      title={webViewTitle}
+    />
+  </>
   );
 };
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Newspaper, RefreshCw, ExternalLink, ArrowRight, Clock } from 'lucide-react';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { useAppStore } from '@/stores/appStore';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,6 +67,8 @@ export function HeadlinesView() {
   const [isScanning, setIsScanning] = useState(false);
   const [displayedHeadlines, setDisplayedHeadlines] = useState<Headline[]>(headlines);
   const [activeTab, setActiveTab] = useState('political');
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewTitle, setWebViewTitle] = useState('');
 
   const handleScan = async () => {
     if (settings.selectedSources.length === 0) {
@@ -304,15 +307,13 @@ export function HeadlinesView() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a 
-                      href={headline.url}
-                      rel="noopener noreferrer"
+                    <button 
                       className="p-2 rounded-md hover:bg-muted transition-colors"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
                       title={headline.url}
                     >
                       <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                    </a>
+                    </button>
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -327,6 +328,13 @@ export function HeadlinesView() {
           </>
         )}
       </div>
+
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        url={webViewUrl || ''}
+        title={webViewTitle}
+      />
     </div>
   );
 }

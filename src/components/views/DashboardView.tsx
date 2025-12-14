@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, Info, ArrowRight } from 'lucide-react';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -67,6 +68,8 @@ export function DashboardView() {
   const [isAgency, setIsAgency] = useState(false);
   const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
   const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewTitle, setWebViewTitle] = useState('');
 
   const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
 
@@ -253,7 +256,7 @@ export function DashboardView() {
                 return (
                   <li key={article.id}>
                     {article.wpLink ? (
-                      <a href={article.wpLink} rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group">
+                      <a href={article.wpLink} rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group cursor-pointer" onClick={(e) => { e.preventDefault(); setWebViewUrl(article.wpLink!); setWebViewTitle(article.title); }}>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -308,5 +311,12 @@ export function DashboardView() {
           <LatestGlobalArticles />
         </CardContent>
       </Card>
+
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        url={webViewUrl || ''}
+        title={webViewTitle}
+      />
     </div>;
 }
