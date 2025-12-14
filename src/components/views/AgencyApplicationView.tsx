@@ -131,7 +131,6 @@ export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
   const { setUserApplicationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
-  const [isCancelling, setIsCancelling] = useState(false);
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
   const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
@@ -149,7 +148,7 @@ export function AgencyApplicationView() {
     }
   }, [user, isAdmin]);
 
-  const fetchAgencyData = async (skipLoadingReset = false) => {
+  const fetchAgencyData = async () => {
     if (!user) return;
     
     try {
@@ -190,9 +189,7 @@ export function AgencyApplicationView() {
     } catch (error) {
       console.error('Error fetching agency data:', error);
     } finally {
-      if (!skipLoadingReset) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
@@ -203,21 +200,12 @@ export function AgencyApplicationView() {
   };
 
   const handleCancelled = () => {
-    // Set cancelling flag to prevent loading spinner during transition
-    setIsCancelling(true);
-    // Clear local state immediately to show the application form
+    // Clear local state immediately - this will cause the view to render the application form
     setAgencyPayout(null);
     setCustomVerification(null);
-    // Ensure loading is false so content renders
     setLoading(false);
     // Update global store immediately - this triggers sidebar to update
     setUserApplicationStatus('cancelled');
-    // Reset cancelling flag after state updates
-    setTimeout(() => {
-      setIsCancelling(false);
-      // Optionally refetch to get updated application data
-      fetchAgencyData(true);
-    }, 100);
   };
 
   const handleCustomVerificationSubmit = () => {
@@ -255,8 +243,7 @@ export function AgencyApplicationView() {
     );
   }
 
-  // Don't show loading spinner if we're in the middle of cancellation transition
-  if (loading && !isCancelling) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
