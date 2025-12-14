@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, ChevronDown, Send } from 'lucide-react';
+import { Loader2, ChevronDown, Rocket } from 'lucide-react';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { AgencyVerificationStatus } from '@/components/agency/AgencyVerificationStatus';
 import { supabase } from '@/integrations/supabase/client';
@@ -226,7 +226,7 @@ export function AgencyApplicationView() {
           className="hover:bg-black hover:text-white shrink-0"
           onClick={() => setDialogOpen(true)}
         >
-          <Send className="h-4 w-4 mr-2" />
+          <Rocket className="h-4 w-4 mr-2" />
           Submit New Application
         </Button>
       </div>
