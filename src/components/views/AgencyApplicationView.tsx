@@ -373,15 +373,15 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <Card className="border-gray-500/30 bg-gray-500/10">
+          <Card className="border-gray-600 bg-gray-800">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-500/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-700">
                   <FileText className="h-6 w-6 text-gray-400" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-400">Verification Under Review</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
@@ -397,7 +397,7 @@ export function AgencyApplicationView() {
           </Card>
 
           <p className="text-sm text-muted-foreground text-center">
-            We'll notify you via email once your verification is approved. This usually takes 1-3 business days.
+            We'll notify you by email with updates. This process usually takes 1–3 business days.
           </p>
         </div>
       );
