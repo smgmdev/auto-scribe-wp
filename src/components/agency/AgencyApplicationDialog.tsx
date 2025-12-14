@@ -66,7 +66,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     agency_name: '',
     country: '',
     agency_website: '',
-    media_channels: '',
+    media_channel_1: '',
+    media_channel_2: '',
+    media_channel_3: '',
     payout_method: ''
   });
 
@@ -86,7 +88,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         agency_name: '',
         country: '',
         agency_website: '',
-        media_channels: '',
+        media_channel_1: '',
+        media_channel_2: '',
+        media_channel_3: '',
         payout_method: ''
       });
       setSelectedNiches([]);
@@ -197,7 +201,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     e.preventDefault();
     if (!user || !documentUrl || !logoUrl) return;
 
-    const { full_name, email, whatsapp_phone, agency_name, country, agency_website, media_channels } = formData;
+    const { full_name, email, whatsapp_phone, agency_name, country, agency_website, media_channel_1, media_channel_2, media_channel_3 } = formData;
 
     if (!full_name || !email || !whatsapp_phone || !agency_name || !country || !agency_website) {
       toast({
@@ -235,14 +239,16 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       return;
     }
 
-    if (!media_channels.trim()) {
+    if (!media_channel_1.trim() || !media_channel_2.trim() || !media_channel_3.trim()) {
       toast({
         variant: 'destructive',
         title: 'Missing fields',
-        description: 'Please list your media channels'
+        description: 'Please fill in all 3 media channels'
       });
       return;
     }
+
+    const media_channels = [media_channel_1, media_channel_2, media_channel_3].join(', ');
 
     setSubmitting(true);
 
@@ -362,7 +368,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
                     {COUNTRIES.map((country) => (
-                      <SelectItem key={country} value={country}>
+                      <SelectItem key={country} value={country} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
                         {country}
                       </SelectItem>
                     ))}
@@ -431,15 +437,27 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="media_channels">What 10 media channels would you list at the start? *</Label>
-              <Textarea
-                id="media_channels"
-                placeholder="List the media channels you would offer (e.g., Forbes, Bloomberg, TechCrunch...)"
-                value={formData.media_channels}
-                onChange={(e) => setFormData(prev => ({ ...prev, media_channels: e.target.value }))}
-                disabled={submitting}
-                rows={3}
-              />
+              <Label>What 3 media channels would you list at the start? *</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <Input
+                  placeholder="e.g., Forbes"
+                  value={formData.media_channel_1}
+                  onChange={(e) => setFormData(prev => ({ ...prev, media_channel_1: e.target.value }))}
+                  disabled={submitting}
+                />
+                <Input
+                  placeholder="e.g., Bloomberg"
+                  value={formData.media_channel_2}
+                  onChange={(e) => setFormData(prev => ({ ...prev, media_channel_2: e.target.value }))}
+                  disabled={submitting}
+                />
+                <Input
+                  placeholder="e.g., Daily Mail"
+                  value={formData.media_channel_3}
+                  onChange={(e) => setFormData(prev => ({ ...prev, media_channel_3: e.target.value }))}
+                  disabled={submitting}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
