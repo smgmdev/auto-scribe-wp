@@ -130,7 +130,11 @@ serve(async (req) => {
     
     // Convert country name to ISO code for Stripe
     const countryCode = getCountryCode(country);
-    logStep("Creating Connect account for agency", { agency_name, email, country, countryCode, user_id });
+    
+    // Validate and normalize website URL
+    const normalizedWebsite = website ? (website.startsWith('http') ? website : `https://${website}`) : undefined;
+    
+    logStep("Creating Connect account for agency", { agency_name, email, country, countryCode, user_id, website, normalizedWebsite });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -155,7 +159,7 @@ serve(async (req) => {
       business_type: "company",
       business_profile: {
         name: agency_name,
-        url: website ? (website.startsWith('http') ? website : `https://${website}`) : undefined,
+        url: normalizedWebsite,
       },
       company: {
         name: agency_name,
