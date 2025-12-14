@@ -396,6 +396,8 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
+          <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
           <TabsTrigger value="cancelled" className="relative">
             Cancelled by user ({cancelledApplications.length})
             {unreadCancelledCount > 0 && (
@@ -404,8 +406,6 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
-          <TabsTrigger value="active">Active Agencies ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
           <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
         </TabsList>
 
