@@ -169,7 +169,7 @@ export function AgencyApplicationView() {
       case 'rejected':
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled by User</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
