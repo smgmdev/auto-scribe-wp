@@ -446,7 +446,7 @@ export function AdminAgenciesView() {
               <Clock className="h-3 w-3 mr-1" />Pending Verification • {countdown.text}
             </Badge>
           )}
-          <Badge variant="secondary" className="bg-purple-600/20 text-purple-600">
+          <Badge className="bg-black text-white">
             Custom Payout
           </Badge>
         </div>
