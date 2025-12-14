@@ -73,6 +73,7 @@ export function AdminAgenciesView() {
   const [loadingStripeAccounts, setLoadingStripeAccounts] = useState(false);
   const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const [hiddenRejectedIds, setHiddenRejectedIds] = useState<string[]>([]);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
@@ -116,7 +117,7 @@ export function AdminAgenciesView() {
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
   const unreadCancelledCount = cancelledApplications.filter(app => !app.read).length;
-  const rejectedApplications = applications.filter(app => app.status === 'rejected');
+  const rejectedApplications = applications.filter(app => app.status === 'rejected' && !hiddenRejectedIds.includes(app.id));
   const approvedApplications = applications.filter(app => app.status === 'approved');
 
   const handleOpenApplication = async (app: AgencyApplication) => {
@@ -692,13 +693,27 @@ export function AdminAgenciesView() {
                           )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <Badge variant="destructive">
-                          <XCircle className="h-3 w-3 mr-1" />Rejected
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {app.reviewed_at && format(new Date(app.reviewed_at), 'MMM d, yyyy')}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <Badge variant="destructive">
+                            <XCircle className="h-3 w-3 mr-1" />Rejected
+                          </Badge>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {app.reviewed_at && format(new Date(app.reviewed_at), 'MMM d, yyyy')}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-destructive hover:text-white hover:border-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHiddenRejectedIds(prev => [...prev, app.id]);
+                            toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
+                          }}
+                        >
+                          Remove
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
