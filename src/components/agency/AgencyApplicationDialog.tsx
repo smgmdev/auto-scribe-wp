@@ -172,11 +172,15 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    
+    if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
       toast({
         variant: 'destructive',
         title: 'Invalid file type',
-        description: 'Please upload an image file (PNG, JPG, etc.)'
+        description: 'Only JPG and PNG files are allowed'
       });
       return;
     }
@@ -622,7 +626,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                       </p>
                       <Input
                         type="file"
-                        accept="image/*"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                         onChange={handleLogoChange}
                         disabled={uploadingLogo || submitting}
                         className="w-full text-xs h-9 file:text-xs file:h-full file:px-4 file:mr-3 file:border-0 file:bg-muted file:rounded cursor-pointer"
