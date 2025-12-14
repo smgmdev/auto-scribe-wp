@@ -70,33 +70,10 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
   const handleIframeLoad = () => {
     clearTimers();
     
-    // Check if content is accessible - if YES, it's likely a browser error page (blocked)
-    // If we get cross-origin error, the external site actually loaded
+    // Small delay to let content render, then mark as loaded
     setTimeout(() => {
-      try {
-        const iframe = iframeRef.current;
-        if (!iframe) {
-          setStatus('loaded');
-          return;
-        }
-
-        // Try to access content - this throws for successfully loaded cross-origin sites
-        const iframeDoc = iframe.contentDocument;
-        const iframeWindow = iframe.contentWindow;
-        
-        if (iframeDoc && iframeWindow) {
-          // If we CAN access the document, it's same-origin = browser error page
-          // Real external sites would throw cross-origin error
-          setStatus('blocked');
-          return;
-        }
-        
-        setStatus('loaded');
-      } catch (e) {
-        // Cross-origin error = external site loaded successfully (can't access but that's expected)
-        setStatus('loaded');
-      }
-    }, 500);
+      setStatus('loaded');
+    }, 300);
   };
 
   return (
@@ -182,8 +159,9 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
           )}
           <iframe
             ref={iframeRef}
+            key={normalizedUrl}
             src={normalizedUrl}
-            className={`w-full h-full border-0 ${status !== 'loaded' ? 'invisible' : ''}`}
+            className={`w-full h-full border-0 transition-opacity duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
             title="WebView"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             onLoad={handleIframeLoad}
