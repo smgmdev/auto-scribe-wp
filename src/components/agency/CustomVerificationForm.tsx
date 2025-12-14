@@ -155,7 +155,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     if (!user) return;
 
     // Personal info validation
-    if (!formData.first_name || !formData.last_name || !formData.personal_country || !formData.email) {
+    if (!formData.first_name || !formData.last_name || !formData.personal_country || !formData.email || !formData.phone) {
       toast({
         variant: 'destructive',
         title: 'Missing fields',
@@ -165,7 +165,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
     }
 
     // Company info validation
-    if (!formData.company_name || !formData.company_country) {
+    if (!formData.company_name || !formData.company_country || !formData.company_address || !formData.company_id) {
       toast({
         variant: 'destructive',
         title: 'Missing fields',
@@ -460,7 +460,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
                   placeholder="+1 234 567 8900"
@@ -540,7 +540,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 </Select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="company_address">Address</Label>
+                <Label htmlFor="company_address">Address *</Label>
                 <Input
                   id="company_address"
                   placeholder="123 Business St, City, Country"
@@ -550,7 +550,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company_id">Company ID</Label>
+                <Label htmlFor="company_id">Company ID *</Label>
                 <Input
                   id="company_id"
                   placeholder="Company registration number"
