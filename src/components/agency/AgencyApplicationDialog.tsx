@@ -217,6 +217,25 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     }
   };
 
+  // Validation helpers
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    // Allow formats: +1234567890, +1 234 567 8900, (123) 456-7890, etc.
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+    const cleanedPhone = phone.replace(/[\s\-\.\(\)]/g, '');
+    return cleanedPhone.length >= 7 && cleanedPhone.length <= 15 && /^[\+]?[0-9]+$/.test(cleanedPhone);
+  };
+
+  const isValidUrl = (url: string) => {
+    // URL without https:// prefix (already added)
+    const urlRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+([\/\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/;
+    return urlRegex.test(url);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !documentUrl || !logoUrl) return;
@@ -228,6 +247,36 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         variant: 'destructive',
         title: 'Missing fields',
         description: 'Please fill in all required fields'
+      });
+      return;
+    }
+
+    // Validate email
+    if (!isValidEmail(email)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid email',
+        description: 'Please enter a valid email address'
+      });
+      return;
+    }
+
+    // Validate phone
+    if (!isValidPhone(whatsapp_phone)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid phone number',
+        description: 'Please enter a valid WhatsApp phone number (e.g., +1 234 567 8900)'
+      });
+      return;
+    }
+
+    // Validate agency website
+    if (!isValidUrl(agency_website)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid website URL',
+        description: 'Please enter a valid website URL (e.g., youragency.com)'
       });
       return;
     }
@@ -264,6 +313,34 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         variant: 'destructive',
         title: 'Missing fields',
         description: 'Please fill in all 3 media channels'
+      });
+      return;
+    }
+
+    // Validate media channel URLs
+    if (!isValidUrl(media_channel_1)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: 'Please enter a valid URL for the first media channel'
+      });
+      return;
+    }
+
+    if (!isValidUrl(media_channel_2)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: 'Please enter a valid URL for the second media channel'
+      });
+      return;
+    }
+
+    if (!isValidUrl(media_channel_3)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: 'Please enter a valid URL for the third media channel'
       });
       return;
     }
