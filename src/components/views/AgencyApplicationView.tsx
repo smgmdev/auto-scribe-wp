@@ -131,6 +131,7 @@ export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
   const { setUserApplicationStatus } = useAppStore();
   const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
   const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
@@ -141,10 +142,15 @@ export function AgencyApplicationView() {
   const verificationRef = useRef<AgencyVerificationStatusRef>(null);
 
   useEffect(() => {
+    // Reset dataLoaded when component mounts to prevent stale data flash
+    setDataLoaded(false);
+    setLoading(true);
+    
     if (user && !isAdmin) {
       fetchAgencyData();
     } else {
       setLoading(false);
+      setDataLoaded(true);
     }
   }, [user, isAdmin]);
 
@@ -174,6 +180,9 @@ export function AgencyApplicationView() {
           
           setCustomVerification(verificationData as CustomVerification | null);
         }
+      } else {
+        setAgencyPayout(null);
+        setCustomVerification(null);
       }
 
       // Fetch existing application
@@ -190,6 +199,7 @@ export function AgencyApplicationView() {
       console.error('Error fetching agency data:', error);
     } finally {
       setLoading(false);
+      setDataLoaded(true);
     }
   };
 
@@ -243,7 +253,8 @@ export function AgencyApplicationView() {
     );
   }
 
-  if (loading) {
+  // Show loading until data is fully loaded to prevent flash of wrong view
+  if (loading || !dataLoaded) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
