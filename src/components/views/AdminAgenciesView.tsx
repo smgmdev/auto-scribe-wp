@@ -419,13 +419,20 @@ export function AdminAgenciesView() {
       return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
     }
     
-    // Custom payout agencies
+    // Custom payout agencies - include countdown in single badge
     if (agency.payout_method === 'custom') {
+      const countdown = getCountdown(agency.created_at);
       return (
         <div className="flex gap-2">
-          <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
-            <Clock className="h-3 w-3 mr-1" />Pending Verification
-          </Badge>
+          {countdown.expired ? (
+            <Badge className="bg-red-600">
+              <XCircle className="h-3 w-3 mr-1" />Expired
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
+              <Clock className="h-3 w-3 mr-1" />Pending Verification • {countdown.text}
+            </Badge>
+          )}
           <Badge variant="secondary" className="bg-purple-600/20 text-purple-600">
             Custom Payout
           </Badge>
@@ -632,20 +639,6 @@ export function AdminAgenciesView() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                          {/* Countdown Timer */}
-                          {agency.payout_method === 'custom' && (() => {
-                            const countdown = getCountdown(agency.created_at);
-                            return countdown.expired ? (
-                              <Badge className="bg-red-600">
-                                <XCircle className="h-3 w-3 mr-1" />Expired
-                              </Badge>
-                            ) : (
-                              <Badge variant="secondary" className="bg-amber-600/20 text-amber-500">
-                                <Clock className="h-3 w-3 mr-1" />{countdown.text}
-                              </Badge>
-                            );
-                          })()}
-                          
                           {getOnboardingStatus(agency)}
 
                           <div className="flex gap-1">
