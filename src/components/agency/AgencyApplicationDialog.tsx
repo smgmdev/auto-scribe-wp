@@ -494,10 +494,15 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   <SelectValue placeholder="Select payout method" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="stripe" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Automatic payout via Stripe Connect (Recommended)</SelectItem>
+                  <SelectItem value="stripe" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Automatic Payout via Stripe Connect (Recommended)</SelectItem>
                   <SelectItem value="custom" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Custom Payout</SelectItem>
                 </SelectContent>
               </Select>
+              {!formData.payout_method && (
+                <p className="text-xs text-muted-foreground">
+                  Please select payout option to see details.
+                </p>
+              )}
               {formData.payout_method === 'stripe' && (
                 <p className="text-xs text-muted-foreground">
                   Stripe Connect is recommended allowing your customers to pay by credit card directly which makes it easier for clients to perform payments. You will have to pass KYC verification to be onboarded on Stripe Connect.
