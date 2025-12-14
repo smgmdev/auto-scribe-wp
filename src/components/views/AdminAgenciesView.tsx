@@ -438,7 +438,7 @@ export function AdminAgenciesView() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="pending" className="relative">
-            New Requests ({pendingApplications.length})
+            New ({pendingApplications.length})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
                 {unreadPendingCount}
@@ -460,6 +460,7 @@ export function AdminAgenciesView() {
 
         {/* Pending Applications Tab */}
         <TabsContent value="pending" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">New agency applications</p>
           {pendingApplications.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
