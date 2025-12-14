@@ -143,11 +143,17 @@ export function AdminAgenciesView() {
   };
 
   const cancelledApplications = applications.filter(app => app.status === 'cancelled');
+  const cancelledUserIds = new Set(cancelledApplications.map(app => app.user_id));
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
   const unreadCancelledCount = cancelledApplications.filter(app => !app.read).length;
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
   const approvedApplications = applications.filter(app => app.status === 'approved');
+  
+  // Filter agencies under verification - exclude those with cancelled applications
+  const agenciesUnderVerification = agencies.filter(a => 
+    !a.onboarding_complete && !cancelledUserIds.has(a.user_id || '')
+  );
 
   const handleOpenApplication = async (app: AgencyApplication) => {
     setSelectedApp(app);
@@ -478,7 +484,7 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="verification">Under Verification ({agencies.filter(a => !a.onboarding_complete).length})</TabsTrigger>
+          <TabsTrigger value="verification">Under Verification ({agenciesUnderVerification.length})</TabsTrigger>
           <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
           <TabsTrigger value="cancelled" className="relative">
             Cancelled ({cancelledApplications.length})
@@ -597,7 +603,7 @@ export function AdminAgenciesView() {
 
         {/* Under Verification Tab */}
         <TabsContent value="verification" className="mt-6">
-          {agencies.filter(a => !a.onboarding_complete).length === 0 ? (
+          {agenciesUnderVerification.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <AlertTriangle className="h-12 w-12 text-muted-foreground/50" />
@@ -609,7 +615,7 @@ export function AdminAgenciesView() {
             </Card>
           ) : (
             <div className="space-y-3">
-              {agencies.filter(a => !a.onboarding_complete).map(agency => {
+              {agenciesUnderVerification.map(agency => {
                 const application = getAgencyWithApplication(agency);
                 return (
                   <Card 
