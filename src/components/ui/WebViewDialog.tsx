@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, ExternalLink, X, Loader2, AlertCircle } from 'lucide-react';
@@ -13,6 +13,8 @@ interface WebViewDialogProps {
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: WebViewDialogProps) {
   const [loading, setLoading] = useState(true);
   const [blocked, setBlocked] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
 
@@ -21,23 +23,27 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
       setLoading(true);
       setBlocked(false);
       
-      // Timeout to detect if iframe is blocked (most blocked sites won't trigger onLoad)
-      const timeout = setTimeout(() => {
-        if (loading) {
-          setBlocked(true);
-          setLoading(false);
-        }
-      }, 8000);
+      // Timeout to detect if iframe is blocked
+      timeoutRef.current = setTimeout(() => {
+        setBlocked(true);
+        setLoading(false);
+      }, 10000);
 
-      return () => clearTimeout(timeout);
+      return () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
     }
   }, [open, normalizedUrl]);
 
   const handleRefresh = () => {
     setLoading(true);
     setBlocked(false);
-    const iframe = document.querySelector('iframe[title="WebView"]') as HTMLIFrameElement;
-    if (iframe) iframe.src = iframe.src;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setBlocked(true);
+      setLoading(false);
+    }, 10000);
+    if (iframeRef.current) iframeRef.current.src = normalizedUrl;
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -45,10 +51,34 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
     if (!newOpen) {
       setLoading(true);
       setBlocked(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
   };
 
   const handleIframeLoad = () => {
+    // Clear the timeout since something loaded
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    // Try to detect if the iframe is actually accessible
+    try {
+      const iframe = iframeRef.current;
+      if (iframe) {
+        // This will throw an error for cross-origin frames that loaded successfully
+        // But blocked frames might not throw - they just have no content
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        
+        // If we can access the document and it's empty/blocked, show blocked message
+        if (iframeDoc && (iframeDoc.body?.innerHTML === '' || iframeDoc.documentElement?.innerHTML === '<head></head><body></body>')) {
+          setBlocked(true);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (e) {
+      // Cross-origin error means the site loaded successfully (just can't access content)
+      // This is actually good - means the site is displaying
+    }
+    
     setLoading(false);
   };
 
@@ -121,11 +151,13 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website' }: We
             </div>
           )}
           <iframe
+            ref={iframeRef}
             src={normalizedUrl}
             className={`w-full h-full border-0 ${blocked ? 'hidden' : ''}`}
             title="WebView"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             onLoad={handleIframeLoad}
+            onError={() => { setBlocked(true); setLoading(false); }}
           />
         </div>
       </DialogContent>
