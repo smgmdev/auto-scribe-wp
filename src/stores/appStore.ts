@@ -27,6 +27,11 @@ interface AppState {
   setUnreadAgencyApplicationsCount: (count: number) => void;
   decrementUnreadAgencyApplicationsCount: () => void;
   
+  // Custom verification notifications for admin
+  unreadCustomVerificationsCount: number;
+  setUnreadCustomVerificationsCount: (count: number) => void;
+  decrementUnreadCustomVerificationsCount: () => void;
+  
   // User agency application status
   userApplicationStatus: string | null;
   setUserApplicationStatus: (status: string | null) => void;
@@ -58,6 +63,13 @@ export const useAppStore = create<AppState>()((set) => ({
   setUnreadAgencyApplicationsCount: (count) => set({ unreadAgencyApplicationsCount: count }),
   decrementUnreadAgencyApplicationsCount: () => set((state) => ({ 
     unreadAgencyApplicationsCount: Math.max(0, state.unreadAgencyApplicationsCount - 1) 
+  })),
+  
+  // Custom verification notifications
+  unreadCustomVerificationsCount: 0,
+  setUnreadCustomVerificationsCount: (count) => set({ unreadCustomVerificationsCount: count }),
+  decrementUnreadCustomVerificationsCount: () => set((state) => ({ 
+    unreadCustomVerificationsCount: Math.max(0, state.unreadCustomVerificationsCount - 1) 
   })),
   
   // User agency application status
