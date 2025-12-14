@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2 } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2 } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -359,7 +359,12 @@ export function Sidebar({
 
           {/* Agency Status & Account */}
           <div className="border-t border-sidebar-border p-4 space-y-3">
-            {/* Agency Status Card - Only for non-admin users after data is loaded */}
+            {/* Agency Status Card - Only for non-admin users */}
+            {!isAdmin && !agencyDataLoaded && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-sidebar-foreground/50" />
+              </div>
+            )}
             {!isAdmin && agencyDataLoaded && (
               <AgencyStatusCard
                 applicationStatus={userApplicationStatus}
