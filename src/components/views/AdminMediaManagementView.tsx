@@ -25,8 +25,9 @@ import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { publishArticle } from '@/lib/wordpress-api';
-import type { ArticleTone, WordPressSite as WPSiteType } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { publishArticle, fetchCategories, fetchTags, createTag, uploadMedia } from '@/lib/wordpress-api';
+import type { ArticleTone, WordPressSite as WPSiteType, WPCategory, WPTag, FeaturedImage } from '@/types';
 
 interface WordPressSiteSubmission {
   id: string;
@@ -139,9 +140,29 @@ export function AdminMediaManagementView() {
   const [testArticleImagePreview, setTestArticleImagePreview] = useState<string | null>(null);
   const testArticleFileInputRef = useRef<HTMLInputElement>(null);
   
+  // Test Article categories, tags, SEO state
+  const [testAvailableCategories, setTestAvailableCategories] = useState<WPCategory[]>([]);
+  const [testAvailableTags, setTestAvailableTags] = useState<WPTag[]>([]);
+  const [testSelectedCategories, setTestSelectedCategories] = useState<number[]>([]);
+  const [testSelectedTagIds, setTestSelectedTagIds] = useState<number[]>([]);
+  const [testNewTagInput, setTestNewTagInput] = useState('');
+  const [isLoadingTestCategories, setIsLoadingTestCategories] = useState(false);
+  const [isLoadingTestTags, setIsLoadingTestTags] = useState(false);
+  const [isAddingTestTag, setIsAddingTestTag] = useState(false);
+  const [testFocusKeyword, setTestFocusKeyword] = useState('');
+  const [testMetaDescription, setTestMetaDescription] = useState('');
+  const [testFeaturedImage, setTestFeaturedImage] = useState<FeaturedImage>({
+    file: null,
+    title: '',
+    caption: '',
+    altText: '',
+    description: ''
+  });
+  const [isDraggingTestImage, setIsDraggingTestImage] = useState(false);
+  
   // Test Article Success dialog state
   const [isTestSuccessDialogOpen, setIsTestSuccessDialogOpen] = useState(false);
-  const [testArticleResult, setTestArticleResult] = useState<{ wpPostId: number; wpLink: string; siteId: string } | null>(null);
+  const [testArticleResult, setTestArticleResult] = useState<{ wpPostId: number; wpLink: string; siteId: string; wpFeaturedMediaId?: number } | null>(null);
   const [isDeletingTestArticle, setIsDeletingTestArticle] = useState(false);
   
   // Expanded approved submissions state
@@ -597,28 +618,168 @@ export function AdminMediaManagementView() {
   const handleTestArticleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload an image file",
-          variant: "destructive"
-        });
-        return;
-      }
-      setTestArticleImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTestArticleImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      processTestImageFile(file);
+    }
+  };
+
+  const processTestImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive"
+      });
+      return;
+    }
+    setTestFeaturedImage(prev => ({ ...prev, file }));
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setTestArticleImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleTestImageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingTestImage(true);
+  };
+
+  const handleTestImageDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingTestImage(false);
+  };
+
+  const handleTestImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingTestImage(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processTestImageFile(file);
     }
   };
 
   const removeTestArticleImage = () => {
-    setTestArticleImageFile(null);
+    setTestFeaturedImage({
+      file: null,
+      title: '',
+      caption: '',
+      altText: '',
+      description: ''
+    });
     setTestArticleImagePreview(null);
     if (testArticleFileInputRef.current) {
       testArticleFileInputRef.current.value = '';
+    }
+  };
+
+  // Toggle test category
+  const toggleTestCategory = (categoryId: number) => {
+    setTestSelectedCategories(prev => {
+      if (prev.includes(categoryId)) {
+        return prev.filter(id => id !== categoryId);
+      }
+      if (prev.length >= 2) return prev;
+      return [...prev, categoryId];
+    });
+  };
+
+  // Toggle test tag
+  const toggleTestTag = (tagId: number) => {
+    setTestSelectedTagIds(prev => {
+      if (prev.includes(tagId)) {
+        return prev.filter(id => id !== tagId);
+      }
+      if (prev.length >= 3) return prev;
+      return [...prev, tagId];
+    });
+  };
+
+  // Add new test tag
+  const addNewTestTag = async () => {
+    const trimmedTag = testNewTagInput.trim();
+    if (!trimmedTag || !selectedSubmission) return;
+
+    const existingTag = testAvailableTags.find(t => t.name.toLowerCase() === trimmedTag.toLowerCase());
+    if (existingTag) {
+      if (!testSelectedTagIds.includes(existingTag.id)) {
+        setTestSelectedTagIds(prev => [...prev, existingTag.id]);
+      }
+      setTestNewTagInput('');
+      return;
+    }
+
+    setIsAddingTestTag(true);
+    try {
+      const tempSite: WPSiteType = {
+        id: selectedSubmission.id,
+        name: selectedSubmission.name,
+        url: ensureHttps(selectedSubmission.url),
+        username: selectedSubmission.username,
+        applicationPassword: selectedSubmission.app_password,
+        seoPlugin: selectedSubmission.seo_plugin as 'aioseo' | 'rankmath',
+        connected: false,
+      };
+      const newTag = await createTag(tempSite, trimmedTag);
+      setTestAvailableTags(prev => [...prev, newTag]);
+      setTestSelectedTagIds(prev => [...prev, newTag.id]);
+      setTestNewTagInput('');
+      toast({
+        title: "Tag created",
+        description: `"${newTag.name}" has been added`
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to create tag",
+        description: "Could not create the tag on WordPress",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingTestTag(false);
+    }
+  };
+
+  // Fetch categories and tags when test dialog opens
+  const fetchTestCategoriesAndTags = async () => {
+    if (!selectedSubmission) return;
+    
+    const tempSite: WPSiteType = {
+      id: selectedSubmission.id,
+      name: selectedSubmission.name,
+      url: ensureHttps(selectedSubmission.url),
+      username: selectedSubmission.username,
+      applicationPassword: selectedSubmission.app_password,
+      seoPlugin: selectedSubmission.seo_plugin as 'aioseo' | 'rankmath',
+      connected: false,
+    };
+
+    // Fetch categories
+    setIsLoadingTestCategories(true);
+    try {
+      const categories = await fetchCategories(tempSite);
+      setTestAvailableCategories(categories);
+    } catch (error) {
+      console.error('Failed to fetch test categories:', error);
+      toast({
+        title: "Warning",
+        description: "Could not fetch categories from WordPress site",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingTestCategories(false);
+    }
+
+    // Fetch tags
+    setIsLoadingTestTags(true);
+    try {
+      const tags = await fetchTags(tempSite);
+      setTestAvailableTags(tags);
+    } catch (error) {
+      console.error('Failed to fetch test tags:', error);
+    } finally {
+      setIsLoadingTestTags(false);
     }
   };
 
@@ -681,6 +842,51 @@ export function AdminMediaManagementView() {
       return;
     }
 
+    if (testSelectedCategories.length === 0) {
+      toast({
+        title: "Category required",
+        description: "Please select at least 1 category",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (testSelectedTagIds.length === 0) {
+      toast({
+        title: "Tag required",
+        description: "Please add at least 1 tag",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!testFocusKeyword.trim()) {
+      toast({
+        title: "Focus keyword required",
+        description: "Please enter a focus keyword for SEO",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (selectedSubmission.seo_plugin === 'aioseo' && !testMetaDescription.trim()) {
+      toast({
+        title: "Meta description required",
+        description: "Please enter a meta description for SEO",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!testArticleImagePreview) {
+      toast({
+        title: "Featured image required",
+        description: "Please upload a featured image",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsPublishingTestArticle(true);
     try {
       // Create a temporary site object from the submission credentials
@@ -694,14 +900,36 @@ export function AdminMediaManagementView() {
         connected: false,
       };
 
+      let featuredMediaId: number | undefined;
+
+      // Upload featured image if exists
+      if (testFeaturedImage.file) {
+        toast({
+          title: "Uploading image...",
+          description: "Please wait while we upload your featured image"
+        });
+        const mediaResult = await uploadMedia(tempSite, testFeaturedImage.file, {
+          title: testFeaturedImage.title,
+          alt_text: testFeaturedImage.altText,
+          caption: testFeaturedImage.caption,
+          description: testFeaturedImage.description
+        });
+        featuredMediaId = mediaResult.id;
+      }
+
       // Publish to WordPress
       const result = await publishArticle({
         site: tempSite,
         title: testArticleTitle,
         content: testArticleContent,
         status: 'publish',
-        categories: [],
-        tags: [],
+        categories: testSelectedCategories,
+        tags: testSelectedTagIds,
+        featuredMediaId,
+        seo: {
+          focusKeyword: testFocusKeyword,
+          metaDescription: testMetaDescription
+        }
       });
 
       // Store result and show success dialog
@@ -709,6 +937,7 @@ export function AdminMediaManagementView() {
         wpPostId: result.id,
         wpLink: result.link,
         siteId: selectedSubmission.id,
+        wpFeaturedMediaId: featuredMediaId
       });
       
       setIsTestArticleDialogOpen(false);
@@ -740,7 +969,7 @@ export function AdminMediaManagementView() {
         body: {
           siteId: selectedSubmission.id,
           wpPostId: testArticleResult.wpPostId,
-          wpFeaturedMediaId: null,
+          wpFeaturedMediaId: testArticleResult.wpFeaturedMediaId || null,
           // Pass credentials directly since site isn't in DB yet
           siteUrl: ensureHttps(selectedSubmission.url),
           username: selectedSubmission.username,
@@ -776,14 +1005,31 @@ export function AdminMediaManagementView() {
     setTestArticleTitle('');
     setTestArticleContent('');
     setTestArticleTone('neutral');
-    setTestArticleImageFile(null);
+    setTestFeaturedImage({
+      file: null,
+      title: '',
+      caption: '',
+      altText: '',
+      description: ''
+    });
     setTestArticleImagePreview(null);
+    setTestAvailableCategories([]);
+    setTestAvailableTags([]);
+    setTestSelectedCategories([]);
+    setTestSelectedTagIds([]);
+    setTestNewTagInput('');
+    setTestFocusKeyword('');
+    setTestMetaDescription('');
   };
 
   // Open test article dialog
   const openTestArticleDialog = () => {
     resetTestArticleForm();
     setIsTestArticleDialogOpen(true);
+    // Fetch categories and tags after dialog opens
+    setTimeout(() => {
+      fetchTestCategoriesAndTags();
+    }, 100);
   };
 
   // Toggle expanded approved submission
@@ -2224,7 +2470,7 @@ export function AdminMediaManagementView() {
 
       {/* Test Article Compose Dialog */}
       <Dialog open={isTestArticleDialogOpen} onOpenChange={setIsTestArticleDialogOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Test Article Publishing</DialogTitle>
             <DialogDescription>
@@ -2285,7 +2531,7 @@ export function AdminMediaManagementView() {
                 placeholder="Write or generate article content..."
                 value={testArticleContent}
                 onChange={(e) => setTestArticleContent(e.target.value)}
-                rows={10}
+                rows={8}
                 className="resize-none"
               />
               {testArticleContent && (
@@ -2295,8 +2541,202 @@ export function AdminMediaManagementView() {
               )}
             </div>
 
+            {/* Categories */}
+            <div className="space-y-2">
+              <Label>Categories (select up to 2)</Label>
+              {isLoadingTestCategories ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading categories...
+                </div>
+              ) : testAvailableCategories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {testAvailableCategories.map(cat => (
+                    <div key={cat.id} className="flex items-center gap-1.5">
+                      <Checkbox
+                        id={`test-cat-${cat.id}`}
+                        checked={testSelectedCategories.includes(cat.id)}
+                        onCheckedChange={() => toggleTestCategory(cat.id)}
+                        disabled={!testSelectedCategories.includes(cat.id) && testSelectedCategories.length >= 2}
+                      />
+                      <label htmlFor={`test-cat-${cat.id}`} className="text-sm cursor-pointer">
+                        {cat.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No categories found</p>
+              )}
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label>Tags (select up to 3)</Label>
+              {isLoadingTestTags ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading tags...
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {testAvailableTags.map(tag => (
+                      <Badge
+                        key={tag.id}
+                        variant={testSelectedTagIds.includes(tag.id) ? "default" : "outline"}
+                        className={`cursor-pointer ${testSelectedTagIds.includes(tag.id) ? '' : 'opacity-70'} ${!testSelectedTagIds.includes(tag.id) && testSelectedTagIds.length >= 3 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        onClick={() => toggleTestTag(tag.id)}
+                      >
+                        {tag.name}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add new tag..."
+                      value={testNewTagInput}
+                      onChange={(e) => setTestNewTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addNewTestTag();
+                        }
+                      }}
+                      className="max-w-xs"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addNewTestTag}
+                      disabled={isAddingTestTag || !testNewTagInput.trim()}
+                    >
+                      {isAddingTestTag ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* SEO Settings */}
+            <div className="space-y-3 border-t pt-4">
+              <Label className="text-base font-semibold">SEO Settings ({selectedSubmission?.seo_plugin === 'aioseo' ? 'AIOSEO Pro' : 'RankMath'})</Label>
+              
+              <div className="space-y-2">
+                <Label htmlFor="test-focus-keyword">Focus Keyword</Label>
+                <Input
+                  id="test-focus-keyword"
+                  placeholder="Enter focus keyword..."
+                  value={testFocusKeyword}
+                  onChange={(e) => setTestFocusKeyword(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {selectedSubmission?.seo_plugin === 'rankmath' 
+                    ? 'Title should contain the Focus Keyword to maximize SEO'
+                    : 'Title and Meta Description should contain the same Focus Keyword to maximize SEO'}
+                </p>
+              </div>
+
+              {selectedSubmission?.seo_plugin === 'aioseo' && (
+                <div className="space-y-2">
+                  <Label htmlFor="test-meta-description">Meta Description</Label>
+                  <Textarea
+                    id="test-meta-description"
+                    placeholder="Enter meta description..."
+                    value={testMetaDescription}
+                    onChange={(e) => setTestMetaDescription(e.target.value)}
+                    rows={2}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {testMetaDescription.length}/160 characters
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Featured Image */}
+            <div className="space-y-2 border-t pt-4">
+              <Label>Featured Image</Label>
+              <input
+                ref={testArticleFileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleTestArticleImageUpload}
+              />
+              {testArticleImagePreview ? (
+                <div className="relative">
+                  <img
+                    src={testArticleImagePreview}
+                    alt="Preview"
+                    className="w-full h-40 object-cover rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={removeTestArticleImage}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDraggingTestImage ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'}`}
+                  onClick={() => testArticleFileInputRef.current?.click()}
+                  onDragOver={handleTestImageDragOver}
+                  onDragLeave={handleTestImageDragLeave}
+                  onDrop={handleTestImageDrop}
+                >
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Drag & drop or click to upload
+                  </p>
+                </div>
+              )}
+
+              {testArticleImagePreview && (
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Image Title</Label>
+                    <Input
+                      placeholder="Image title..."
+                      value={testFeaturedImage.title}
+                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, title: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Alt Text</Label>
+                    <Input
+                      placeholder="Alt text..."
+                      value={testFeaturedImage.altText}
+                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, altText: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Caption</Label>
+                    <Input
+                      placeholder="Caption..."
+                      value={testFeaturedImage.caption}
+                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, caption: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Description</Label>
+                    <Input
+                      placeholder="Description..."
+                      value={testFeaturedImage.description}
+                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -2312,7 +2752,7 @@ export function AdminMediaManagementView() {
               <Button 
                 type="button"
                 onClick={handlePublishTestArticle}
-                disabled={isPublishingTestArticle || !testArticleTitle.trim() || !testArticleContent.trim()}
+                disabled={isPublishingTestArticle || !testArticleTitle.trim() || !testArticleContent.trim() || testSelectedCategories.length === 0 || testSelectedTagIds.length === 0 || !testFocusKeyword.trim() || (selectedSubmission?.seo_plugin === 'aioseo' && !testMetaDescription.trim()) || !testArticleImagePreview}
               >
                 {isPublishingTestArticle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Publish Test Article
