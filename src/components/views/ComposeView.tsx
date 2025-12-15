@@ -848,7 +848,7 @@ export function ComposeView() {
                         key={site.id} 
                         value={site.id}
                         disabled={!canAfford}
-                        className={`${!canAfford ? "opacity-50" : ""} [&>span]:w-full`}
+                        className={`${!canAfford ? "opacity-50" : ""} [&>span]:w-full group`}
                       >
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
@@ -859,7 +859,7 @@ export function ComposeView() {
                             />
                             <span>{site.name}</span>
                           </div>
-                          <div className={`flex items-center gap-1 text-xs ml-auto ${canAfford ? 'text-muted-foreground' : 'text-destructive'}`}>
+                          <div className={`flex items-center gap-1 text-xs ml-auto ${canAfford ? 'text-muted-foreground group-hover:text-white group-data-[highlighted]:text-white' : 'text-destructive'}`}>
                             {!canAfford && <Lock className="h-3 w-3" />}
                             <Coins className="h-3 w-3" />
                             <span>{creditCost}</span>
