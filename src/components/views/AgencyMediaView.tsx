@@ -665,9 +665,6 @@ export function AgencyMediaView() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 ml-auto">
-                              <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
-                                Approved
-                              </Badge>
                               <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
@@ -931,11 +928,7 @@ export function AgencyMediaView() {
                                 : `${new Date(submission.created_at).toLocaleDateString()} ${new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0 ml-auto">
-                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                              Rejected
-                            </Badge>
-                          </div>
+                          <div className="flex items-center gap-2 shrink-0 ml-auto" />
                         </div>
                       </CardContent>
                     </Card>
