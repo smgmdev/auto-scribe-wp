@@ -411,28 +411,14 @@ export function AdminMediaManagementView() {
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="approved" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Approved & Connected
-                {approvedSites.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-green-500/20 text-green-600">
-                    {approvedSites.length}
-                  </Badge>
-                )}
+              <TabsTrigger value="approved">
+                Approved & Connected ({approvedSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Pending Review
-                <Badge variant="secondary" className={`ml-1 ${pendingSubmissions.length > 0 ? 'bg-yellow-500/20 text-yellow-600' : 'bg-muted text-muted-foreground'}`}>
-                  {pendingSubmissions.length}
-                </Badge>
+              <TabsTrigger value="pending">
+                Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                Rejected
-                <Badge variant="secondary" className={`ml-1 ${rejectedSubmissions.length > 0 ? 'bg-red-500/20 text-red-600' : 'bg-muted text-muted-foreground'}`}>
-                  {rejectedSubmissions.length}
-                </Badge>
+              <TabsTrigger value="rejected">
+                Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
 
@@ -607,28 +593,14 @@ export function AdminMediaManagementView() {
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="added" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Added Media Sites
-                {mediaSites.filter(s => s.category !== 'Agencies/People').length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-green-500/20 text-green-600">
-                    {mediaSites.filter(s => s.category !== 'Agencies/People').length}
-                  </Badge>
-                )}
+              <TabsTrigger value="added">
+                Added Media Sites ({mediaSites.filter(s => s.category !== 'Agencies/People').length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Pending Review
-                <Badge variant="secondary" className={`ml-1 ${pendingMediaSubmissions.length > 0 ? 'bg-yellow-500/20 text-yellow-600' : 'bg-muted text-muted-foreground'}`}>
-                  {pendingMediaSubmissions.length}
-                </Badge>
+              <TabsTrigger value="pending">
+                Pending Review ({pendingMediaSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                Rejected
-                <Badge variant="secondary" className={`ml-1 ${rejectedMediaSubmissions.length > 0 ? 'bg-red-500/20 text-red-600' : 'bg-muted text-muted-foreground'}`}>
-                  {rejectedMediaSubmissions.length}
-                </Badge>
+              <TabsTrigger value="rejected">
+                Rejected ({rejectedMediaSubmissions.length})
               </TabsTrigger>
             </TabsList>
 
