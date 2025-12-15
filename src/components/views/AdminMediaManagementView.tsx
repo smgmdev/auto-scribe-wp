@@ -1206,7 +1206,7 @@ export function AdminMediaManagementView() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="bg-popover z-50">
                                 <DropdownMenuItem 
-                                  className="hover:bg-foreground hover:text-background cursor-pointer"
+                                  className="focus:bg-foreground focus:text-background cursor-pointer"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedMediaSubmission(submission);
@@ -1217,7 +1217,7 @@ export function AdminMediaManagementView() {
                                   Reply
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                  className="text-destructive hover:bg-foreground hover:text-background cursor-pointer"
+                                  className="text-destructive focus:bg-foreground focus:text-background cursor-pointer"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleMediaReject(submission);
