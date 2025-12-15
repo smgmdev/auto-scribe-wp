@@ -124,7 +124,7 @@ export function AddMediaSiteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Library className="h-5 w-5" />
@@ -135,14 +135,14 @@ export function AddMediaSiteDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+        <form onSubmit={handleSubmit} className="w-full max-w-full space-y-6 pt-4">
           <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg border border-border/50 space-y-3">
+            <div className="w-full max-w-full p-4 bg-muted/50 rounded-lg border border-border/50 space-y-3 overflow-hidden">
               <p className="text-sm text-foreground">
                 Submit your media list via Google Sheet. Please use the sample template below as a reference for setting up your own sheet.
               </p>
               
-              <div className="flex items-center gap-2">
+              <div className="flex w-full max-w-full items-center gap-2 overflow-hidden">
                 <div className="flex-1 min-w-0 text-xs text-muted-foreground bg-background rounded px-3 py-2 border border-border overflow-hidden">
                   <span className="block truncate">{SAMPLE_SHEET_URL}</span>
                 </div>
@@ -171,7 +171,7 @@ export function AddMediaSiteDialog({
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 w-full max-w-full">
               <Label htmlFor="googleSheetUrl">Your Google Sheet URL</Label>
               <Input
                 id="googleSheetUrl"
@@ -179,12 +179,13 @@ export function AddMediaSiteDialog({
                 placeholder="https://docs.google.com/spreadsheets/d/..."
                 value={googleSheetUrl}
                 onChange={(e) => setGoogleSheetUrl(e.target.value)}
+                className="w-full max-w-full"
                 required
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-wrap justify-end gap-3 pt-4">
             <Button 
               type="button" 
               variant="outline" 
