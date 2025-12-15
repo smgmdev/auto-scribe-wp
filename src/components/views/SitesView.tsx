@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { getFaviconUrl, extractDomain } from '@/lib/favicon';
+import { getFaviconUrl, extractDomain, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
 import type { SEOPlugin } from '@/types';
@@ -1195,7 +1195,7 @@ export function SitesView() {
               )}
               {/* Link at the bottom */}
               <a 
-                href={site.link}
+                href={ensureHttps(site.link)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
@@ -1302,7 +1302,7 @@ export function SitesView() {
               )}
               {/* Link at the bottom */}
               <a 
-                href={site.link}
+                href={ensureHttps(site.link)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"

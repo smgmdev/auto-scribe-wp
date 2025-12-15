@@ -18,3 +18,14 @@ export const getFaviconUrl = (siteUrl: string, size: number = 64): string => {
   const domain = extractDomain(siteUrl);
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
 };
+
+/**
+ * Ensure a URL has https:// prefix
+ */
+export const ensureHttps = (url: string): string => {
+  if (!url) return url;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+};

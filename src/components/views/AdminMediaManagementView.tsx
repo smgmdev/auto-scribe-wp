@@ -22,7 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { getFaviconUrl } from '@/lib/favicon';
+import { getFaviconUrl, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 
 interface WordPressSiteSubmission {
@@ -1078,7 +1078,7 @@ export function AdminMediaManagementView() {
                                           )}
                                           {/* Link at the bottom */}
                                           <a 
-                                            href={site.link}
+                                            href={ensureHttps(site.link)}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"

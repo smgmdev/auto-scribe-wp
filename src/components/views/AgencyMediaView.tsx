@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
+import { ensureHttps } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
 import { AddWordPressSiteDialog } from '@/components/agency/AddWordPressSiteDialog';
 import { AddMediaSiteDialog } from '@/components/agency/AddMediaSiteDialog';
@@ -447,7 +448,7 @@ export function AgencyMediaView() {
                         <Badge variant="outline" className="text-xs">{site.publication_format}</Badge>
                         <Badge variant="outline" className="text-xs">{site.publishing_time}</Badge>
                         <a 
-                          href={site.link} 
+                          href={ensureHttps(site.link)} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-muted-foreground hover:text-foreground"
