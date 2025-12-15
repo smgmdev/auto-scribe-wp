@@ -15,6 +15,7 @@ import { OrdersView } from '@/components/views/OrdersView';
 import { AdminOrdersView } from '@/components/views/AdminOrdersView';
 import { MyRequestsView } from '@/components/views/MyRequestsView';
 import { AdminEngagementsView } from '@/components/views/AdminEngagementsView';
+import { AdminMediaManagementView } from '@/components/views/AdminMediaManagementView';
 import { AgencyApplicationView } from '@/components/views/AgencyApplicationView';
 import { AgencyRequestsView } from '@/components/views/AgencyRequestsView';
 import { AgencyPayoutsView } from '@/components/views/AgencyPayoutsView';
@@ -62,6 +63,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-agencies': AdminAgenciesView,
   'admin-orders': AdminOrdersView,
   'admin-engagements': AdminEngagementsView,
+  'admin-media-management': AdminMediaManagementView,
 };
 
 const Index = () => {
