@@ -574,7 +574,7 @@ export function AdminMediaManagementView() {
         const favicon = values[headerIndices['favicon']] || (link ? getFaviconUrl(link) : null);
         const category = values[headerIndices['category']] || 'Global';
         const subcategory = values[headerIndices['subcategory']] || null;
-        const agency = values[headerIndices['agency']] || selectedMediaSubmission.agency_name;
+        const agency = selectedMediaSubmission.agency_name; // Always use submission's agency name
         const about = values[headerIndices['about']] || null;
         const publication_format = values[headerIndices['publication_format']] || 'Article';
 
