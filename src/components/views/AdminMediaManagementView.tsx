@@ -1199,7 +1199,7 @@ export function AdminMediaManagementView() {
                           {submission.read && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button variant="outline" size="sm" className="h-7 px-2 gap-1 text-xs">
+                                <Button variant="outline" size="sm" className="h-7 px-2 gap-1 text-xs hover:bg-foreground hover:text-background">
                                   Action
                                   <ChevronDown className="h-3 w-3" />
                                 </Button>
