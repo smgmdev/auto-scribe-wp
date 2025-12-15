@@ -87,7 +87,7 @@ export function AgencyMediaView() {
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState<string | null>(null);
   const [agencyLogo, setAgencyLogo] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('wordpress');
+  const [activeTab, setActiveTab] = useState('media');
   const [wpSubTab, setWpSubTab] = useState('connected');
   const [mediaSubTab, setMediaSubTab] = useState('added');
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
@@ -342,7 +342,6 @@ export function AgencyMediaView() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="wordpress">WordPress Sites</TabsTrigger>
           <TabsTrigger value="media" className="relative">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
@@ -351,6 +350,7 @@ export function AgencyMediaView() {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="wordpress">WordPress Sites</TabsTrigger>
         </TabsList>
 
         {/* WordPress Sites Tab */}
