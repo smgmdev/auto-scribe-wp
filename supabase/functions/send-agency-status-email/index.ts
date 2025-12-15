@@ -44,9 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; border-top: none;">
             <p style="font-size: 16px; margin-bottom: 20px;">Hello <strong>${agency_name}</strong>,</p>
-            <p style="font-size: 16px; margin-bottom: 20px;">Your agency account on Arcana Mace has been downgraded to a regular user account.</p>
-            <p style="font-size: 16px; margin-bottom: 20px;">All your existing data remains in the system, but you will no longer have access to agency features until your account is restored.</p>
-            <p style="font-size: 16px; margin-bottom: 20px;">If you believe this was done in error or have any questions, please contact our support team.</p>
+            <p style="font-size: 16px; margin-bottom: 20px;">Your agency account has been downgraded to a regular user account. For more details, please contact support.</p>
             <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">Best regards,<br>The Arcana Mace Team</p>
           </div>
         </body>
