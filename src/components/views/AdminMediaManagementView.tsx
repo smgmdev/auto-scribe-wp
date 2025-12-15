@@ -1064,9 +1064,6 @@ export function AdminMediaManagementView() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 ml-auto">
-                              <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
-                                Approved
-                              </Badge>
                               <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
