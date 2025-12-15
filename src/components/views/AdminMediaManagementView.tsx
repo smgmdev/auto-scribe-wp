@@ -142,16 +142,22 @@ export function AdminMediaManagementView() {
     });
   };
 
-  // Handle logo load start
-  const handleLogoLoadStart = (agencyName: string) => {
-    if (!loadedLogos.has(agencyName)) {
+  // Initialize loading state when agencyLogos are set
+  useEffect(() => {
+    const agencyNamesWithLogos = Object.keys(agencyLogos);
+    if (agencyNamesWithLogos.length > 0) {
       setLoadingLogos(prev => {
         const next = new Set(prev);
-        next.add(agencyName);
+        agencyNamesWithLogos.forEach(name => {
+          if (!loadedLogos.has(name)) {
+            next.add(name);
+          }
+        });
         return next;
       });
     }
-  };
+  }, [agencyLogos, loadedLogos]);
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -741,11 +747,6 @@ export function AdminMediaManagementView() {
                                 className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
                                 onLoad={() => handleLogoLoad(submission.agency_name)}
                                 onError={() => handleLogoLoad(submission.agency_name)}
-                                ref={(el) => {
-                                  if (el && !isLogoLoaded) {
-                                    handleLogoLoadStart(submission.agency_name);
-                                  }
-                                }}
                               />
                             </>
                           ) : (
@@ -835,11 +836,6 @@ export function AdminMediaManagementView() {
                                 className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
                                 onLoad={() => handleLogoLoad(submission.agency_name)}
                                 onError={() => handleLogoLoad(submission.agency_name)}
-                                ref={(el) => {
-                                  if (el && !isLogoLoaded) {
-                                    handleLogoLoadStart(submission.agency_name);
-                                  }
-                                }}
                               />
                             </>
                           ) : (
