@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, Clock } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,7 @@ interface WordPressSiteSubmission {
   seo_plugin: string;
   status: string;
   created_at: string;
+  admin_notes: string | null;
 }
 
 export function AgencyMediaView() {
@@ -50,9 +51,11 @@ export function AgencyMediaView() {
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [wordpressSites, setWordpressSites] = useState<WordPressSite[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = useState<WordPressSiteSubmission[]>([]);
+  const [rejectedSubmissions, setRejectedSubmissions] = useState<WordPressSiteSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('wordpress');
+  const [wpSubTab, setWpSubTab] = useState('connected');
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
 
   const fetchData = async () => {
@@ -95,15 +98,27 @@ export function AgencyMediaView() {
     }
 
     // Fetch pending WordPress site submissions
-    const { data: submissionsData } = await supabase
+    const { data: pendingData } = await supabase
       .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at')
+      .select('id, name, url, seo_plugin, status, created_at, admin_notes')
       .eq('user_id', user.id)
-      .in('status', ['pending', 'rejected'])
+      .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (submissionsData) {
-      setPendingSubmissions(submissionsData);
+    if (pendingData) {
+      setPendingSubmissions(pendingData);
+    }
+
+    // Fetch rejected WordPress site submissions
+    const { data: rejectedData } = await supabase
+      .from('wordpress_site_submissions')
+      .select('id, name, url, seo_plugin, status, created_at, admin_notes')
+      .eq('user_id', user.id)
+      .eq('status', 'rejected')
+      .order('created_at', { ascending: false });
+
+    if (rejectedData) {
+      setRejectedSubmissions(rejectedData);
     }
 
     setLoading(false);
@@ -172,127 +187,200 @@ export function AgencyMediaView() {
         </TabsList>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-6 space-y-6">
-          {/* Pending Submissions Section */}
-          {pendingSubmissions.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <TabsContent value="wordpress" className="mt-6 space-y-4">
+          {/* WordPress Sub-tabs */}
+          <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
+              <TabsTrigger value="connected" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Connected ({wordpressSites.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Pending Approval ({pendingSubmissions.length})
-              </h3>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {pendingSubmissions.map((submission) => (
-                  <Card key={submission.id} className="border-border/50 border-dashed">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                          <Clock className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{submission.name}</CardTitle>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {submission.url}
-                          </p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge variant="outline" className="text-xs">
-                          {submission.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
-                        </Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${submission.status === 'pending' ? 'border-yellow-500 text-yellow-500' : 'border-red-500 text-red-500'}`}
-                        >
-                          {submission.status === 'pending' ? 'Pending Review' : 'Rejected'}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Submitted {new Date(submission.created_at).toLocaleDateString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+                Pending Review ({pendingSubmissions.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Rejected ({rejectedSubmissions.length})
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Approved Sites Section */}
-          {wordpressSites.length === 0 && pendingSubmissions.length === 0 ? (
-            <Card className="border-border/50">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Globe className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground text-center mb-4">
-                  You haven't added any WordPress sites yet.
-                </p>
-                <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add WordPress Site
-                </Button>
-              </CardContent>
-            </Card>
-          ) : wordpressSites.length > 0 && (
-            <div className="space-y-3">
-              {pendingSubmissions.length > 0 && (
-                <h3 className="text-sm font-medium text-muted-foreground">Approved Sites</h3>
-              )}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {wordpressSites.map((site) => (
-                  <Card key={site.id} className="border-border/50 hover:border-border transition-colors">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        {site.favicon ? (
-                          <img 
-                            src={site.favicon} 
-                            alt="" 
-                            className="h-10 w-10 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                            <Globe className="h-5 w-5 text-muted-foreground" />
+            {/* Connected Sites */}
+            <TabsContent value="connected" className="mt-6">
+              {wordpressSites.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Globe className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center mb-4">
+                      No approved WordPress sites yet.
+                    </p>
+                    <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add WordPress Site
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {wordpressSites.map((site) => (
+                    <Card key={site.id} className="border-border/50 hover:border-border transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          {site.favicon ? (
+                            <img 
+                              src={site.favicon} 
+                              alt="" 
+                              className="h-10 w-10 rounded object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                              <Globe className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{site.name}</CardTitle>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {site.url}
+                            </p>
                           </div>
-                        )}
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{site.name}</CardTitle>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {site.url}
-                          </p>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge variant="outline" className="text-xs">
-                          {site.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
-                        </Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${site.connected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
-                        >
-                          {site.connected ? 'Connected' : 'Disconnected'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <a 
-                          href={site.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          Visit Site
-                        </a>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs">
+                            {site.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs ${site.connected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
+                          >
+                            {site.connected ? 'Connected' : 'Disconnected'}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <a 
+                            href={site.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Visit Site
+                          </a>
+                          <Button variant="outline" size="sm">
+                            Edit
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Pending Review Sites */}
+            <TabsContent value="pending" className="mt-6">
+              {pendingSubmissions.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Clock className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center mb-4">
+                      No pending submissions.
+                    </p>
+                    <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Submit WordPress Site
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {pendingSubmissions.map((submission) => (
+                    <Card key={submission.id} className="border-border/50 border-dashed border-yellow-500/50">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <div className="h-10 w-10 rounded bg-yellow-500/10 flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          </div>
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{submission.name}</CardTitle>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {submission.url}
+                            </p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs">
+                            {submission.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                            Pending Review
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Submitted {new Date(submission.created_at).toLocaleDateString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Rejected Sites */}
+            <TabsContent value="rejected" className="mt-6">
+              {rejectedSubmissions.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      No rejected submissions.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {rejectedSubmissions.map((submission) => (
+                    <Card key={submission.id} className="border-border/50 border-dashed border-red-500/50">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <div className="h-10 w-10 rounded bg-red-500/10 flex items-center justify-center">
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          </div>
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{submission.name}</CardTitle>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {submission.url}
+                            </p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs">
+                            {submission.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                            Rejected
+                          </Badge>
+                        </div>
+                        {submission.admin_notes && (
+                          <p className="text-xs text-red-500 mb-2">
+                            Reason: {submission.admin_notes}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Submitted {new Date(submission.created_at).toLocaleDateString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* Media Sites Tab */}
