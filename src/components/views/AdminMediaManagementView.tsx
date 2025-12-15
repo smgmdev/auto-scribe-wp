@@ -209,40 +209,32 @@ export function AdminMediaManagementView() {
     }
   };
 
-  // Fetch agency logos by user_id (for WP submissions)
+  // Fetch agency logos by user_id (for WP submissions) - only from approved applications
   const fetchWpAgencyLogos = async (userIds: string[]) => {
     if (userIds.length === 0) return;
 
     const uniqueUserIds = [...new Set(userIds)];
 
-    // Get the most recent approved or pending application for each user
+    // Get only approved applications (each user can only have 1 approved application)
     const { data, error } = await supabase
       .from('agency_applications')
-      .select('user_id, logo_url, status, created_at')
+      .select('user_id, logo_url')
       .in('user_id', uniqueUserIds)
       .not('logo_url', 'is', null)
-      .in('status', ['approved', 'pending'])
-      .order('created_at', { ascending: false });
+      .eq('status', 'approved');
 
     if (error || !data || data.length === 0) return;
-
-    // Get only the most recent application per user_id
-    const latestByUser: Record<string, string> = {};
-    data.forEach((row) => {
-      if (row?.user_id && row?.logo_url && !latestByUser[row.user_id]) {
-        latestByUser[row.user_id] = row.logo_url;
-      }
-    });
 
     // Create signed URLs for each logo
     const logos: Record<string, string> = {};
     await Promise.all(
-      Object.entries(latestByUser).map(async ([userId, logoUrl]) => {
+      data.map(async (row) => {
+        if (!row?.user_id || !row?.logo_url) return;
         const { data: signed, error: signError } = await supabase.storage
           .from('agency-documents')
-          .createSignedUrl(logoUrl, 3600);
+          .createSignedUrl(row.logo_url, 3600);
         if (!signError && signed?.signedUrl) {
-          logos[userId] = signed.signedUrl;
+          logos[row.user_id] = signed.signedUrl;
         }
       })
     );
