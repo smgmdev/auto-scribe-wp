@@ -1890,10 +1890,10 @@ export function AdminAgenciesView() {
                       variant="outline"
                       size="sm"
                       className="hover:bg-black hover:text-white"
-                      onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport/ID')}
+                      onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport')}
                     >
                       <FileText className="h-4 w-4 mr-2" />
-                      Passport/ID
+                      Passport
                     </Button>
                   )}
                   {verificationDocUrls.memorandum && (
