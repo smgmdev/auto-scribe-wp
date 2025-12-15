@@ -117,6 +117,10 @@ export function AdminMediaManagementView() {
   const [replySheetUrl, setReplySheetUrl] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   
+  // Reject dialog state
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  
   // Expanded approved submissions state
   const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
   
@@ -503,16 +507,18 @@ export function AdminMediaManagementView() {
   };
 
   // Handle media submission reject
-  const handleMediaReject = async (submission: MediaSiteSubmission) => {
+  const handleMediaReject = async () => {
+    if (!selectedMediaSubmission) return;
     setIsProcessing(true);
     try {
       const { error } = await supabase
         .from('media_site_submissions')
         .update({
           status: 'rejected',
+          admin_notes: rejectReason.trim() || null,
           reviewed_at: new Date().toISOString(),
         })
-        .eq('id', submission.id);
+        .eq('id', selectedMediaSubmission.id);
 
       if (error) throw error;
 
@@ -522,8 +528,17 @@ export function AdminMediaManagementView() {
       });
 
       // Update local state
-      setPendingMediaSubmissions(prev => prev.filter(s => s.id !== submission.id));
-      setRejectedMediaSubmissions(prev => [{ ...submission, status: 'rejected', reviewed_at: new Date().toISOString() }, ...prev]);
+      setPendingMediaSubmissions(prev => prev.filter(s => s.id !== selectedMediaSubmission.id));
+      setRejectedMediaSubmissions(prev => [{ 
+        ...selectedMediaSubmission, 
+        status: 'rejected', 
+        admin_notes: rejectReason.trim() || null,
+        reviewed_at: new Date().toISOString() 
+      }, ...prev]);
+      
+      setIsRejectDialogOpen(false);
+      setSelectedMediaSubmission(null);
+      setRejectReason('');
     } catch (error: any) {
       console.error('Error rejecting media submission:', error);
       toast({
@@ -1281,7 +1296,9 @@ export function AdminMediaManagementView() {
                                   className="text-destructive focus:bg-foreground focus:text-background cursor-pointer"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleMediaReject(submission);
+                                    setSelectedMediaSubmission(submission);
+                                    setRejectReason('');
+                                    setIsRejectDialogOpen(true);
                                   }}
                                 >
                                   Reject
@@ -1680,6 +1697,58 @@ export function AdminMediaManagementView() {
               >
                 {isImporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Import & Approve
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Dialog for Media Submissions */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Reject Submission</DialogTitle>
+            <DialogDescription>
+              Reject the media submission from {selectedMediaSubmission?.agency_name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="reject-reason">Reason (optional)</Label>
+              <Textarea
+                id="reject-reason"
+                placeholder="Provide a reason for rejection..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                This reason will be visible to the agency.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setIsRejectDialogOpen(false);
+                  setSelectedMediaSubmission(null);
+                  setRejectReason('');
+                }}
+                disabled={isProcessing}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button"
+                variant="destructive"
+                onClick={handleMediaReject}
+                disabled={isProcessing}
+              >
+                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Reject
               </Button>
             </div>
           </div>
