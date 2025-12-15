@@ -201,6 +201,37 @@ export function useArticles() {
   };
 
   const deleteArticle = async (id: string) => {
+    // Find the article to get WordPress info
+    const article = articles.find(a => a.id === id);
+    
+    // If article was published to WordPress, delete from WordPress first
+    if (article?.publishedTo && article?.wpPostId) {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const { data, error: wpError } = await supabase.functions.invoke('delete-wordpress-post', {
+          body: {
+            siteId: article.publishedTo,
+            wpPostId: article.wpPostId,
+            wpFeaturedMediaId: article.wpFeaturedMediaId || null,
+          },
+        });
+
+        if (wpError) {
+          console.error('Error deleting from WordPress:', wpError);
+          toast({
+            variant: 'destructive',
+            title: 'WordPress deletion failed',
+            description: 'Could not delete the post from WordPress. The local article will still be removed.',
+          });
+        } else if (data?.deleted) {
+          console.log('WordPress post and media deleted successfully');
+        }
+      } catch (err) {
+        console.error('Error calling delete-wordpress-post:', err);
+      }
+    }
+
+    // Delete from local database
     const { error } = await supabase
       .from('articles')
       .delete()
