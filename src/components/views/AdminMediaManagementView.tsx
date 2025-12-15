@@ -1574,6 +1574,7 @@ export function AdminMediaManagementView() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="text-[10px] text-red-500">Rejected WordPress Site</p>
+                                <p className="text-xs text-muted-foreground">{submission.username}</p>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
