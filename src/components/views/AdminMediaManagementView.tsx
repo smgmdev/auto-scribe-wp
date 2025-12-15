@@ -438,8 +438,18 @@ export function AdminMediaManagementView() {
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="wordpress">WordPress Sites</TabsTrigger>
-          <TabsTrigger value="media">Media Sites</TabsTrigger>
+          <TabsTrigger value="wordpress" className="relative">
+            WordPress Sites ({unreadWpCount > 0 ? unreadWpCount : ''})
+            {unreadWpCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="media" className="relative">
+            Media Sites ({unreadMediaCount > 0 ? unreadMediaCount : ''})
+            {unreadMediaCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* WordPress Sites Tab */}
@@ -635,10 +645,12 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="added">
                 Added Media Sites ({mediaSites.filter(s => s.category !== 'Agencies/People').length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative">
+              <TabsTrigger value="pending">
                 Pending Review ({pendingMediaSubmissions.length})
                 {unreadMediaCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+                  <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-medium bg-red-500 text-white rounded-full">
+                    {unreadMediaCount}
+                  </span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="rejected">
@@ -792,7 +804,10 @@ export function AdminMediaManagementView() {
                           }
                         }}
                       >
-                        <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                        <div className="relative h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          {!submission.read && (
+                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
+                          )}
                           {logoUrl ? (
                             <>
                               {(!isLogoLoaded || isLogoLoading) && (
