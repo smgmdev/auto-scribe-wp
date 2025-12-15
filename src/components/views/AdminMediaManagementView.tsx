@@ -1554,11 +1554,6 @@ export function AdminMediaManagementView() {
                               : 'N/A'}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0 ml-auto">
-                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                            Rejected
-                          </Badge>
-                        </div>
                       </div>
                     );
                   })}
