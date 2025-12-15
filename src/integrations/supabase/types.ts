@@ -373,6 +373,42 @@ export type Database = {
         }
         Relationships: []
       }
+      media_site_submissions: {
+        Row: {
+          admin_notes: string | null
+          agency_name: string
+          created_at: string
+          google_sheet_url: string
+          id: string
+          reviewed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          agency_name: string
+          created_at?: string
+          google_sheet_url: string
+          id?: string
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          agency_name?: string
+          created_at?: string
+          google_sheet_url?: string
+          id?: string
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       media_sites: {
         Row: {
           about: string | null

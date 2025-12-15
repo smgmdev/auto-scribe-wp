@@ -13,6 +13,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { AddWordPressSiteDialog } from '@/components/agency/AddWordPressSiteDialog';
+import { AddMediaSiteDialog } from '@/components/agency/AddMediaSiteDialog';
 
 interface MediaSite {
   id: string;
@@ -46,17 +47,27 @@ interface WordPressSiteSubmission {
   admin_notes: string | null;
 }
 
+interface MediaSiteSubmission {
+  id: string;
+  google_sheet_url: string;
+  status: string;
+  created_at: string;
+  admin_notes: string | null;
+}
+
 export function AgencyMediaView() {
   const { user } = useAuth();
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [wordpressSites, setWordpressSites] = useState<WordPressSite[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = useState<WordPressSiteSubmission[]>([]);
   const [rejectedSubmissions, setRejectedSubmissions] = useState<WordPressSiteSubmission[]>([]);
+  const [mediaSiteSubmissions, setMediaSiteSubmissions] = useState<MediaSiteSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('wordpress');
   const [wpSubTab, setWpSubTab] = useState('connected');
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
+  const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
 
   const fetchData = async () => {
     if (!user) return;
@@ -121,6 +132,17 @@ export function AgencyMediaView() {
       setRejectedSubmissions(rejectedData);
     }
 
+    // Fetch media site submissions
+    const { data: mediaSubmissionData } = await supabase
+      .from('media_site_submissions')
+      .select('id, google_sheet_url, status, created_at, admin_notes')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (mediaSubmissionData) {
+      setMediaSiteSubmissions(mediaSubmissionData);
+    }
+
     setLoading(false);
   };
 
@@ -132,8 +154,7 @@ export function AgencyMediaView() {
     if (type === 'wordpress') {
       setIsWPDialogOpen(true);
     } else {
-      // TODO: Implement media site dialog
-      console.log('Add media site');
+      setIsMediaDialogOpen(true);
     }
   };
 
@@ -467,6 +488,14 @@ export function AgencyMediaView() {
       <AddWordPressSiteDialog 
         open={isWPDialogOpen} 
         onOpenChange={setIsWPDialogOpen}
+        onSuccess={fetchData}
+      />
+
+      {/* Add Media Site Dialog */}
+      <AddMediaSiteDialog
+        open={isMediaDialogOpen}
+        onOpenChange={setIsMediaDialogOpen}
+        agencyName={agencyName}
         onSuccess={fetchData}
       />
     </div>
