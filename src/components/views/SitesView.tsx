@@ -1542,18 +1542,11 @@ export function SitesView() {
                           (site.agency && site.agency.toLowerCase().includes(searchQuery.toLowerCase()))
                         );
                       
-                      // For non-admin, search through activeAgencies for Agencies/People
-                      const agencyResults = !isAdmin 
-                        ? activeAgencies.filter(agency =>
-                            agency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            agency.link.toLowerCase().includes(searchQuery.toLowerCase())
-                          )
-                        : mediaSites
-                            .filter(site => site.category === 'Agencies/People')
-                            .filter(site => 
-                              site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              site.link.toLowerCase().includes(searchQuery.toLowerCase())
-                            );
+                      // Search through activeAgencies for Agencies/People
+                      const agencyResults = activeAgencies.filter(agency =>
+                        agency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        agency.link.toLowerCase().includes(searchQuery.toLowerCase())
+                      );
                       
                       const hasResults = mediaSiteResults.length > 0 || agencyResults.length > 0;
                       
@@ -1619,7 +1612,7 @@ export function SitesView() {
                             </div>
                           ))}
                           {/* Active agencies search results */}
-                          {!isAdmin && agencyResults.map((agency) => (
+                          {agencyResults.map((agency) => (
                             <div
                               key={agency.id}
                               className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
@@ -1652,43 +1645,6 @@ export function SitesView() {
                               </div>
                               <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
                                 {agency.country && <span>{agency.country}</span>}
-                                <Badge variant="outline" className="text-xs">Agency</Badge>
-                              </div>
-                            </div>
-                          ))}
-                          {/* Admin agencies search results */}
-                          {isAdmin && (agencyResults as MediaSite[]).map((site) => (
-                            <div
-                              key={site.id}
-                              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
-                              onClick={() => {
-                                setSelectedMediaSite(site);
-                                setSearchQuery('');
-                                setShowSearchDropdown(false);
-                              }}
-                            >
-                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
-                                {site.favicon ? (
-                                  <img 
-                                    src={site.favicon} 
-                                    alt={`${site.name} logo`} 
-                                    className="h-6 w-6 object-contain"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                ) : (
-                                  <Globe className="h-4 w-4 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{site.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {site.link.replace(/^https?:\/\//, '')}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
-                                {site.country && <span>{site.country}</span>}
                                 <Badge variant="outline" className="text-xs">Agency</Badge>
                               </div>
                             </div>
@@ -1757,8 +1713,8 @@ export function SitesView() {
 
                     {/* Filter and render media sites */}
                     {(() => {
-                      // For Agencies/People category, show active agencies from agency_payouts (for non-admins)
-                      if (category === 'Agencies/People' && !isAdmin) {
+                      // For Agencies/People category, always show active agencies from agency_payouts
+                      if (category === 'Agencies/People') {
                         if (activeAgencies.length === 0) {
                           return (
                             <Card className="border-dashed border-2">
