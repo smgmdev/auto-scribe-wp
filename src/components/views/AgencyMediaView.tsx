@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, Clock, CheckCircle, XCircle, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -484,7 +485,32 @@ export function AgencyMediaView() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">Media Sheet Submission</p>
-                        <p className="text-xs text-muted-foreground truncate">{submission.google_sheet_url}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {submission.google_sheet_url.length > 40 
+                              ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                              : submission.google_sheet_url}
+                          </p>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(submission.google_sheet_url);
+                              toast.success('Link copied to clipboard');
+                            }}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Copy link"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <a
+                            href={submission.google_sheet_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Open link"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
