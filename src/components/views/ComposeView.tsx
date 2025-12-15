@@ -110,6 +110,7 @@ export function ComposeView() {
   // SEO Settings state
   const [focusKeyword, setFocusKeyword] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
+  const [isLoadingSEO, setIsLoadingSEO] = useState(false);
 
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
@@ -174,7 +175,6 @@ export function ComposeView() {
 
   // Fetch categories and tags when site is selected
   useEffect(() => {
-    console.log('[ComposeView] Site effect running - currentSite:', currentSite?.name, 'editingArticle:', editingArticle?.id, 'wpPostId:', editingArticle?.wpPostId);
     
     if (currentSite) {
       setFetchError(null);
@@ -182,7 +182,6 @@ export function ComposeView() {
       // Fetch categories
       setIsLoadingCategories(true);
       fetchCategories(currentSite).then(categories => {
-        console.log('[ComposeView] Categories fetched:', categories.length);
         setAvailableCategories(categories);
         setIsLoadingCategories(false);
       }).catch(error => {
@@ -195,7 +194,6 @@ export function ComposeView() {
       // Fetch tags
       setIsLoadingTags(true);
       fetchTags(currentSite).then(tags => {
-        console.log('[ComposeView] Tags fetched:', tags.length);
         setAvailableTags(tags);
         setIsLoadingTags(false);
       }).catch(error => {
@@ -206,16 +204,15 @@ export function ComposeView() {
 
       // Fetch SEO data if editing an existing WP post
       if (editingArticle?.wpPostId) {
-        console.log('[ComposeView] Fetching SEO data for wpPostId:', editingArticle.wpPostId);
+        setIsLoadingSEO(true);
         fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
-          console.log('[ComposeView] SEO data fetched:', seoData);
           setFocusKeyword(seoData.focusKeyword);
           setMetaDescription(seoData.metaDescription);
         }).catch(error => {
           console.error('Failed to fetch SEO data:', error);
+        }).finally(() => {
+          setIsLoadingSEO(false);
         });
-      } else {
-        console.log('[ComposeView] No wpPostId to fetch SEO data for');
       }
     } else if (!editingArticle) {
       // Only reset when not editing (prevents race condition)
@@ -226,8 +223,6 @@ export function ComposeView() {
       setFocusKeyword('');
       setMetaDescription('');
       setFetchError(null);
-    } else {
-      console.log('[ComposeView] Waiting for currentSite - editingArticle exists but currentSite is undefined');
     }
   }, [currentSite?.id, editingArticle]);
 
@@ -984,10 +979,17 @@ export function ComposeView() {
               {imagePreview && <div className="space-y-3">
                   <div className="space-y-1">
                     <Label htmlFor="img-caption" className="text-xs">Caption</Label>
-                    <Input id="img-caption" placeholder="Image caption (optional)" value={featuredImage.caption} onChange={e => setFeaturedImage({
-                  ...featuredImage,
-                  caption: e.target.value
-                })} className="h-8 text-sm" />
+                    {editingArticle && isLoadingCategories ? (
+                      <div className="flex items-center gap-2 h-8 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Loading image data...</span>
+                      </div>
+                    ) : (
+                      <Input id="img-caption" placeholder="Image caption (optional)" value={featuredImage.caption} onChange={e => setFeaturedImage({
+                        ...featuredImage,
+                        caption: e.target.value
+                      })} className="h-8 text-sm" />
+                    )}
                   </div>
                 </div>}
             </CardContent>
@@ -1004,61 +1006,70 @@ export function ComposeView() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Focus Keyword - Both plugins */}
-                <div className="space-y-1">
-                  <Label htmlFor="focus-keyword" className="text-xs">Focus Keyword</Label>
-                  {focusKeyword ? (
-                    <div className="flex items-center gap-2 min-h-8">
-                      <Badge variant="secondary" className="flex items-center gap-1 px-2 py-1">
-                        {focusKeyword}
-                        <button
-                          type="button"
-                          onClick={() => setFocusKeyword('')}
-                          className="ml-1 rounded-full hover:bg-muted p-0.5"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
+                {isLoadingSEO ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Fetching SEO settings from the selected media site...
+                  </div>
+                ) : (
+                  <>
+                    {/* Focus Keyword - Both plugins */}
+                    <div className="space-y-1">
+                      <Label htmlFor="focus-keyword" className="text-xs">Focus Keyword</Label>
+                      {focusKeyword ? (
+                        <div className="flex items-center gap-2 min-h-8">
+                          <Badge variant="secondary" className="flex items-center gap-1 px-2 py-1">
+                            {focusKeyword}
+                            <button
+                              type="button"
+                              onClick={() => setFocusKeyword('')}
+                              className="ml-1 rounded-full hover:bg-muted p-0.5"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        </div>
+                      ) : (
+                        <Input 
+                          id="focus-keyword" 
+                          placeholder="Enter focus keyword and press Enter..." 
+                          className="h-8 text-sm"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const value = (e.target as HTMLInputElement).value.trim();
+                              if (value) {
+                                setFocusKeyword(value);
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = e.target.value.trim();
+                            if (value) {
+                              setFocusKeyword(value);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {currentSite?.seoPlugin === 'rankmath' 
+                          ? "Title should contain the Focus Keyword to maximize SEO"
+                          : "Title and Meta Description should contain the same Focus Keyword to maximize SEO"}
+                      </p>
                     </div>
-                  ) : (
-                    <Input 
-                      id="focus-keyword" 
-                      placeholder="Enter focus keyword and press Enter..." 
-                      className="h-8 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const value = (e.target as HTMLInputElement).value.trim();
-                          if (value) {
-                            setFocusKeyword(value);
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const value = e.target.value.trim();
-                        if (value) {
-                          setFocusKeyword(value);
-                          e.target.value = '';
-                        }
-                      }}
-                    />
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {currentSite?.seoPlugin === 'rankmath' 
-                      ? "Title should contain the Focus Keyword to maximize SEO"
-                      : "Title and Meta Description should contain the same Focus Keyword to maximize SEO"}
-                  </p>
-                </div>
-                
-                {/* Meta Description - AIO SEO PRO only */}
-                {currentSite.seoPlugin === 'aioseo' && <div className="space-y-1">
-                    <Label htmlFor="meta-description" className="text-xs">Meta Description</Label>
-                    <Textarea id="meta-description" placeholder="Enter meta description..." value={metaDescription} onChange={e => setMetaDescription(e.target.value)} className="min-h-[80px] text-sm resize-none" />
-                    <p className={`text-xs text-right ${metaDescription.length > 160 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-                      {metaDescription.length}/160 characters (160 recommended)
-                    </p>
-                  </div>}
+                    
+                    {/* Meta Description - AIO SEO PRO only */}
+                    {currentSite.seoPlugin === 'aioseo' && <div className="space-y-1">
+                        <Label htmlFor="meta-description" className="text-xs">Meta Description</Label>
+                        <Textarea id="meta-description" placeholder="Enter meta description..." value={metaDescription} onChange={e => setMetaDescription(e.target.value)} className="min-h-[80px] text-sm resize-none" />
+                        <p className={`text-xs text-right ${metaDescription.length > 160 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                          {metaDescription.length}/160 characters (160 recommended)
+                        </p>
+                      </div>}
+                  </>
+                )}
               </CardContent>
             </Card>}
         </div>

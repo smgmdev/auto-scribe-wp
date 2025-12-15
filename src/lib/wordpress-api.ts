@@ -333,71 +333,36 @@ export async function fetchPostSEOData(
     let focusKeyword = '';
     let metaDescription = '';
     
+    // Fetch post with meta context
+    const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
+      method: 'GET',
+      headers: {
+        'Authorization': createAuthHeader(site),
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Failed to fetch post SEO data:', response.status);
+      return { focusKeyword: '', metaDescription: '' };
+    }
+
+    const data = await response.json();
+    
     if (site.seoPlugin === 'rankmath') {
-      // Try RankMath REST API endpoint first
-      try {
-        const rankMathResponse = await fetch(`${baseUrl}/wp-json/rankmath/v1/getHead?url=${encodeURIComponent(baseUrl)}/?p=${postId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': createAuthHeader(site),
-          },
-        });
-        
-        if (rankMathResponse.ok) {
-          const rankMathData = await rankMathResponse.json();
-          console.log('[fetchPostSEOData] RankMath head API response:', rankMathData);
-        }
-      } catch (rmError) {
-        console.log('[fetchPostSEOData] RankMath head API not available');
-      }
-      
-      // Fetch post with meta context
-      const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
-        method: 'GET',
-        headers: {
-          'Authorization': createAuthHeader(site),
-        },
-      });
-
-      if (!response.ok) {
-        console.error('Failed to fetch post SEO data:', response.status);
-        return { focusKeyword: '', metaDescription: '' };
-      }
-
-      const data = await response.json();
-      console.log('[fetchPostSEOData] RankMath - Full post meta:', JSON.stringify(data.meta, null, 2));
-      console.log('[fetchPostSEOData] RankMath - rank_math keys:', Object.keys(data.meta || {}).filter(k => k.includes('rank_math')));
-      
       // RankMath exposes data via rank_math_meta object when REST API addon is enabled
       if (data.rank_math_meta) {
-        console.log('[fetchPostSEOData] Found rank_math_meta:', data.rank_math_meta);
         focusKeyword = data.rank_math_meta.rank_math_focus_keyword || '';
         metaDescription = data.rank_math_meta.rank_math_description || '';
       }
       
-      // Also check direct meta fields
+      // Also check direct meta fields (requires server-side registration)
       if (!focusKeyword) {
         focusKeyword = data.meta?.rank_math_focus_keyword || '';
       }
       if (!metaDescription) {
         metaDescription = data.meta?.rank_math_description || '';
       }
-      
     } else if (site.seoPlugin === 'aioseo') {
-      const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
-        method: 'GET',
-        headers: {
-          'Authorization': createAuthHeader(site),
-        },
-      });
-
-      if (!response.ok) {
-        console.error('Failed to fetch post SEO data:', response.status);
-        return { focusKeyword: '', metaDescription: '' };
-      }
-
-      const data = await response.json();
-      
       // AIOSEO stores data in aioseo_meta_data or meta
       const aioseoData = data.aioseo_meta_data || data.meta?.aioseo_meta_data;
       if (aioseoData) {
