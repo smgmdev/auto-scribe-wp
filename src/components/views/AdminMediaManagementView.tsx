@@ -341,56 +341,50 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {approvedSites.map((site) => (
-                    <Card key={site.id} className="border-border/50 hover:border-border transition-colors">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          {site.favicon ? (
-                            <img 
-                              src={site.favicon} 
-                              alt="" 
-                              className="h-10 w-10 rounded object-cover"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded bg-green-500/20 flex items-center justify-center">
-                              <CheckCircle className="h-5 w-5 text-green-600" />
+                <div className="space-y-2">
+                  {approvedSites.map((site, index) => (
+                    <Card 
+                      key={site.id} 
+                      className="group hover:shadow-md transition-all duration-300"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                              {site.favicon ? (
+                                <img 
+                                  src={site.favicon} 
+                                  alt={`${site.name} favicon`} 
+                                  className="h-5 w-5 object-contain"
+                                />
+                              ) : (
+                                <Globe className="h-4 w-4 text-muted-foreground" />
+                              )}
                             </div>
-                          )}
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{site.name}</CardTitle>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {site.url}
-                            </p>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm truncate">{site.name}</h3>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs">
-                            {site.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
-                          </Badge>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${site.connected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
-                          >
-                            {site.connected ? 'Connected' : 'Disconnected'}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <a 
-                            href={site.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Visit Site
-                          </a>
-                          <p className="text-xs text-muted-foreground">
-                            Added {new Date(site.created_at).toLocaleDateString()}
-                          </p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Badge variant="outline" className="text-xs">
+                              {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                            </Badge>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${site.connected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
+                            >
+                              {site.connected ? 'Connected' : 'Disconnected'}
+                            </Badge>
+                            <a 
+                              href={site.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -411,38 +405,36 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {pendingSubmissions.map((submission) => (
+                <div className="space-y-2">
+                  {pendingSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="border-border/50 hover:border-[#4771d9] transition-colors cursor-pointer"
+                      className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer"
+                      style={{ animationDelay: `${index * 50}ms` }}
                       onClick={() => handleOpenReview(submission)}
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded bg-yellow-500/20 flex items-center justify-center">
-                            <Clock className="h-5 w-5 text-yellow-600" />
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded">
+                              <Clock className="h-4 w-4 text-yellow-500" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm truncate">{submission.name}</h3>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{submission.name}</CardTitle>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {submission.url}
-                            </p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Badge variant="outline" className="text-xs">
+                              {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                              Pending
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(submission.created_at).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs">
-                            {submission.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                            Pending Review
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Submitted {new Date(submission.created_at).toLocaleDateString()}
-                        </p>
                       </CardContent>
                     </Card>
                   ))}
@@ -462,42 +454,38 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {rejectedSubmissions.map((submission) => (
+                <div className="space-y-2">
+                  {rejectedSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="border-border/50 hover:border-border transition-colors"
+                      className="group hover:shadow-md transition-all duration-300"
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded bg-red-500/20 flex items-center justify-center">
-                            <XCircle className="h-5 w-5 text-red-600" />
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm truncate">{submission.name}</h3>
+                              {submission.admin_notes && (
+                                <p className="text-xs text-red-500 truncate">Reason: {submission.admin_notes}</p>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{submission.name}</CardTitle>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {submission.url}
-                            </p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Badge variant="outline" className="text-xs">
+                              {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                              Rejected
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                            </span>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs">
-                            {submission.seo_plugin === 'aioseo' ? 'AIOSEO' : 'RankMath'}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                            Rejected
-                          </Badge>
-                        </div>
-                        {submission.admin_notes && (
-                          <p className="text-xs text-muted-foreground mb-2">
-                            <span className="font-medium">Reason:</span> {submission.admin_notes}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          Rejected {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                        </p>
                       </CardContent>
                     </Card>
                   ))}
@@ -544,37 +532,55 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {mediaSites.map((site) => (
-                    <div key={site.id} className="flex items-center gap-4 p-4 rounded-lg border border-border/50 hover:border-border transition-colors bg-card">
-                      {site.favicon ? (
-                        <img src={site.favicon} alt="" className="h-8 w-8 rounded object-cover shrink-0" />
-                      ) : (
-                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center shrink-0">
-                          <Globe className="h-4 w-4 text-muted-foreground" />
+                  {mediaSites.map((site, index) => (
+                    <Card 
+                      key={site.id} 
+                      className="group hover:shadow-md transition-all duration-300"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                              {site.favicon ? (
+                                <img 
+                                  src={site.favicon} 
+                                  alt={`${site.name} favicon`} 
+                                  className="h-5 w-5 object-contain"
+                                />
+                              ) : (
+                                <Globe className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm break-words">{site.name}</h3>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-1 justify-end">
+                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                              {site.price > 0 ? `${site.price} USD` : 'Free'}
+                            </Badge>
+                            <div className="w-[100px] flex justify-start">
+                              <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                            </div>
+                            {site.agency && (
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span>via</span>
+                                <span className="text-foreground">{site.agency}</span>
+                              </div>
+                            )}
+                            <a 
+                              href={site.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{site.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {site.category}{site.subcategory && ` → ${site.subcategory}`}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-xs">${site.price}</Badge>
-                        <Badge variant="outline" className="text-xs">{site.publication_format}</Badge>
-                        {site.agency && (
-                          <Badge variant="outline" className="text-xs">{site.agency}</Badge>
-                        )}
-                        <a 
-                          href={site.link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
@@ -593,36 +599,46 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {pendingMediaSubmissions.map((submission) => (
-                    <div key={submission.id} className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-yellow-500/50 hover:border-[#4771d9] transition-colors bg-card">
-                      <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
-                        <Clock className="h-4 w-4 text-yellow-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{submission.agency_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {submission.google_sheet_url.length > 50 
-                            ? `${submission.google_sheet_url.substring(0, 50)}...` 
-                            : submission.google_sheet_url}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                          Pending
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(submission.created_at).toLocaleDateString()}
-                        </span>
-                        <a 
-                          href={submission.google_sheet_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </div>
+                  {pendingMediaSubmissions.map((submission, index) => (
+                    <Card 
+                      key={submission.id} 
+                      className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded">
+                              <Clock className="h-4 w-4 text-yellow-500" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm break-words">{submission.agency_name}</h3>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-1 justify-end">
+                            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {submission.google_sheet_url.length > 40 
+                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                : submission.google_sheet_url}
+                            </span>
+                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                              Pending
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(submission.created_at).toLocaleDateString()}
+                            </span>
+                            <a 
+                              href={submission.google_sheet_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
@@ -641,39 +657,49 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {rejectedMediaSubmissions.map((submission) => (
-                    <div key={submission.id} className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card">
-                      <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{submission.agency_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {submission.google_sheet_url.length > 50 
-                            ? `${submission.google_sheet_url.substring(0, 50)}...` 
-                            : submission.google_sheet_url}
-                        </p>
-                        {submission.admin_notes && (
-                          <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                          Rejected
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                        </span>
-                        <a 
-                          href={submission.google_sheet_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </div>
+                  {rejectedMediaSubmissions.map((submission, index) => (
+                    <Card 
+                      key={submission.id} 
+                      className="group hover:shadow-md transition-all duration-300"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm break-words">{submission.agency_name}</h3>
+                              {submission.admin_notes && (
+                                <p className="text-xs text-red-500 truncate">Reason: {submission.admin_notes}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-1 justify-end">
+                            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {submission.google_sheet_url.length > 40 
+                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                : submission.google_sheet_url}
+                            </span>
+                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                              Rejected
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                            </span>
+                            <a 
+                              href={submission.google_sheet_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
