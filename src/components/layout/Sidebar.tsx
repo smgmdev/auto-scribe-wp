@@ -71,7 +71,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       label: 'Agencies',
       icon: Building2,
       submenu: [
-        { id: 'admin-agencies', label: 'Applications', icon: ClipboardList },
+        { id: 'admin-agencies', label: 'Agency Management', icon: ClipboardList },
         { id: 'admin-media-management', label: 'Media Management', icon: Library }
       ]
     }, {
