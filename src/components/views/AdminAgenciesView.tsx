@@ -482,6 +482,17 @@ export function AdminAgenciesView() {
 
       if (error) throw error;
 
+      // Send email notification
+      if (agencyToDowngrade.email) {
+        await supabase.functions.invoke('send-agency-status-email', {
+          body: {
+            email: agencyToDowngrade.email,
+            agency_name: agencyToDowngrade.agency_name,
+            is_downgraded: true
+          }
+        });
+      }
+
       toast({
         title: 'Agency downgraded',
         description: `${agencyToDowngrade.agency_name} has been downgraded to a regular user account.`
@@ -509,6 +520,17 @@ export function AdminAgenciesView() {
         .eq('id', agency.id);
 
       if (error) throw error;
+
+      // Send email notification
+      if (agency.email) {
+        await supabase.functions.invoke('send-agency-status-email', {
+          body: {
+            email: agency.email,
+            agency_name: agency.agency_name,
+            is_downgraded: false
+          }
+        });
+      }
 
       toast({
         title: 'Agency restored',

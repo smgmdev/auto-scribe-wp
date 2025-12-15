@@ -90,3 +90,6 @@ verify_jwt = true
 
 [functions.notify-admin-custom-verification]
 verify_jwt = true
+
+[functions.send-agency-status-email]
+verify_jwt = true
