@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { formatDistanceToNow, isYesterday, format } from 'date-fns';
-import { WebViewDialog } from '@/components/ui/WebViewDialog';
+import { isYesterday, format } from 'date-fns';
 
 interface GlobalArticle {
   id: string;
@@ -38,8 +37,6 @@ function formatRelativeTime(dateString: string): string {
 export function LatestGlobalArticles() {
   const [articles, setArticles] = useState<GlobalArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
-  const [webViewTitle, setWebViewTitle] = useState('');
 
   useEffect(() => {
     const fetchGlobalArticles = async () => {
@@ -59,11 +56,6 @@ export function LatestGlobalArticles() {
     fetchGlobalArticles();
   }, []);
 
-  const handleLinkClick = (e: React.MouseEvent, url: string, title: string) => {
-    e.preventDefault();
-    setWebViewUrl(url);
-    setWebViewTitle(title);
-  };
 
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading...</p>;
@@ -84,9 +76,9 @@ export function LatestGlobalArticles() {
               {article.wp_link ? (
                 <a 
                   href={article.wp_link} 
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group cursor-pointer"
-                  onClick={(e) => handleLinkClick(e, article.wp_link!, article.title)}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm line-clamp-1">{article.title}</p>
@@ -128,13 +120,6 @@ export function LatestGlobalArticles() {
           );
         })}
       </ul>
-      
-      <WebViewDialog
-        open={!!webViewUrl}
-        onOpenChange={(open) => !open && setWebViewUrl(null)}
-        url={webViewUrl || ''}
-        title={webViewTitle}
-      />
     </>
   );
 }
