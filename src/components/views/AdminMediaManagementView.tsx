@@ -761,7 +761,7 @@ export function AdminMediaManagementView() {
                               <img 
                                 src={logoUrl} 
                                 alt={`${submission.agency_name} logo`}
-                                className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
                                 onLoad={() => handleLogoLoad(submission.agency_name)}
                                 onError={() => handleLogoLoad(submission.agency_name)}
                               />
