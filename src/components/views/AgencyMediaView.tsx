@@ -138,7 +138,7 @@ export function AgencyMediaView() {
       .from('media_sites')
       .select('*')
       .eq('agency', agencyData.agency_name)
-      .order('name', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (!mediaError && mediaData) {
       setMediaSites(mediaData);
