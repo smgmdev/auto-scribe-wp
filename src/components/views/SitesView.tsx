@@ -50,6 +50,15 @@ interface MediaSite {
   country: string | null;
 }
 
+interface ActiveAgency {
+  id: string;
+  name: string;
+  link: string;
+  favicon: string | null;
+  country: string | null;
+  about: string | null;
+}
+
 const MEDIA_CATEGORIES = ['Global', 'Focused', 'Epic', 'Agencies/People'];
 const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
 
@@ -97,7 +106,7 @@ export function SitesView() {
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
-  const [activeAgencyNames, setActiveAgencyNames] = useState<Set<string>>(new Set());
+  const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -210,14 +219,49 @@ export function SitesView() {
       }
     }
     
-    // Fetch active agencies (onboarding_complete = true)
+    // Fetch active agencies from agency_payouts + agency_applications
     const { data: activeAgenciesData } = await supabase
       .from('agency_payouts')
-      .select('agency_name')
-      .eq('onboarding_complete', true);
+      .select('id, agency_name, user_id')
+      .eq('onboarding_complete', true)
+      .eq('downgraded', false);
     
-    if (activeAgenciesData) {
-      setActiveAgencyNames(new Set(activeAgenciesData.map(a => a.agency_name)));
+    if (activeAgenciesData && activeAgenciesData.length > 0) {
+      // Fetch application data for these agencies
+      const agencyNames = activeAgenciesData.map(a => a.agency_name);
+      const { data: appData } = await supabase
+        .from('agency_applications')
+        .select('agency_name, agency_website, country, logo_url')
+        .in('agency_name', agencyNames)
+        .eq('status', 'approved');
+      
+      // Create signed URLs for logos and build active agencies list
+      const agencies: ActiveAgency[] = [];
+      if (appData) {
+        for (const app of appData) {
+          let logoUrl: string | null = null;
+          if (app.logo_url) {
+            const { data: signed } = await supabase.storage
+              .from('agency-documents')
+              .createSignedUrl(app.logo_url, 3600);
+            if (signed?.signedUrl) {
+              logoUrl = signed.signedUrl;
+            }
+          }
+          const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
+          agencies.push({
+            id: payoutRecord?.id || app.agency_name,
+            name: app.agency_name,
+            link: app.agency_website || '',
+            favicon: logoUrl,
+            country: app.country || null,
+            about: null
+          });
+        }
+      }
+      setActiveAgencies(agencies);
+    } else {
+      setActiveAgencies([]);
     }
     
     setMediaSitesLoading(false);
@@ -1617,12 +1661,95 @@ export function SitesView() {
 
                     {/* Filter and render media sites */}
                     {(() => {
+                      // For Agencies/People category, show active agencies from agency_payouts (for non-admins)
+                      if (category === 'Agencies/People' && !isAdmin) {
+                        if (activeAgencies.length === 0) {
+                          return (
+                            <Card className="border-dashed border-2">
+                              <CardContent className="flex flex-col items-center justify-center py-16">
+                                <Globe className="h-12 w-12 text-muted-foreground/50" />
+                                <h3 className="mt-4 text-xl font-semibold">No agencies or people</h3>
+                                <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
+                                  No agencies or people available.
+                                </p>
+                              </CardContent>
+                            </Card>
+                          );
+                        }
+                        return (
+                          <div className="space-y-2">
+                            {activeAgencies.map((agency, index) => (
+                              <Card 
+                                key={agency.id} 
+                                className="group hover:shadow-md transition-all duration-300 cursor-pointer" 
+                                style={{ animationDelay: `${index * 50}ms` }}
+                                onClick={() => toggleExpand(agency.id)}
+                              >
+                                <CardContent className="p-3">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                                      <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                        {agency.favicon ? (
+                                          <img 
+                                            src={agency.favicon} 
+                                            alt={`${agency.name} logo`} 
+                                            className="h-5 w-5 object-contain" 
+                                            onError={e => {
+                                              e.currentTarget.style.display = 'none';
+                                              (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                                            }} 
+                                          />
+                                        ) : null}
+                                        <Globe className={`h-4 w-4 text-accent ${agency.favicon ? 'hidden' : ''}`} />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <h3 className="text-sm break-words">{agency.name}</h3>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-1 justify-end">
+                                      {agency.country && (
+                                        <Badge variant="outline" className="text-xs">
+                                          {agency.country}
+                                        </Badge>
+                                      )}
+                                      <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                        {expandedSites.has(agency.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Expanded Section */}
+                                  {expandedSites.has(agency.id) && (
+                                    <div 
+                                      className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {agency.about && (
+                                        <p className="text-xs text-muted-foreground">{agency.about}</p>
+                                      )}
+                                      {agency.link && (
+                                        <a 
+                                          href={ensureHttps(agency.link)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                        >
+                                          <span className="truncate">{agency.link.replace(/^https?:\/\//, '')}</span>
+                                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                        </a>
+                                      )}
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        );
+                      }
+
+                      // For other categories or admin viewing Agencies/People, filter media_sites
                       const filtered = mediaSites.filter(site => {
                         if (site.category !== category) return false;
-                        // For Agencies/People, only show active agencies (unless admin)
-                        if (category === 'Agencies/People' && !isAdmin) {
-                          if (!activeAgencyNames.has(site.name)) return false;
-                        }
                         if (category === 'Global' && activeSubcategory) {
                           if (!site.subcategory) return false;
                           const subcats = site.subcategory.split(',').map(s => s.trim());
