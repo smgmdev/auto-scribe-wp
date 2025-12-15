@@ -79,10 +79,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
   };
 
   const processLogoFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
       toast({
         title: 'Invalid file type',
-        description: 'Please upload an image file.',
+        description: 'Please upload a PNG or JPG image.',
         variant: 'destructive',
       });
       return;
@@ -338,7 +339,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               <input
                 ref={logoInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/jpg"
                 onChange={handleLogoUpload}
                 className="hidden"
               />
