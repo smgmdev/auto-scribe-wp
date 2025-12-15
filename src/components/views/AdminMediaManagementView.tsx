@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,7 @@ interface MediaSite {
   google_index: string;
   publishing_time: string;
   agency: string | null;
+  about: string | null;
 }
 
 interface MediaSiteSubmission {
@@ -84,6 +85,21 @@ export function AdminMediaManagementView() {
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [pendingMediaSubmissions, setPendingMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
   const [rejectedMediaSubmissions, setRejectedMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
+  
+  // Expanded sites state
+  const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (siteId: string) => {
+    setExpandedSites(prev => {
+      const next = new Set(prev);
+      if (next.has(siteId)) {
+        next.delete(siteId);
+      } else {
+        next.add(siteId);
+      }
+      return next;
+    });
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -532,56 +548,97 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {mediaSites.map((site, index) => (
-                    <Card 
-                      key={site.id} 
-                      className="group hover:shadow-md transition-all duration-300"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                              {site.favicon ? (
-                                <img 
-                                  src={site.favicon} 
-                                  alt={`${site.name} favicon`} 
-                                  className="h-5 w-5 object-contain"
-                                />
-                              ) : (
-                                <Globe className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm break-words">{site.name}</h3>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 flex-1 justify-end">
-                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                              {site.price > 0 ? `${site.price} USD` : 'Free'}
-                            </Badge>
-                            <div className="w-[100px] flex justify-start">
-                              <span className="text-xs text-muted-foreground">{site.publication_format}</span>
-                            </div>
-                            {site.agency && (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <span>via</span>
-                                <span className="text-foreground">{site.agency}</span>
+                  {mediaSites.map((site, index) => {
+                    const isExpanded = expandedSites.has(site.id);
+                    const agencySite = site.agency ? mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency) : null;
+                    
+                    return (
+                      <Card 
+                        key={site.id} 
+                        className="group hover:shadow-md transition-all duration-300 cursor-pointer"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                        onClick={() => toggleExpand(site.id)}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                {site.favicon ? (
+                                  <img 
+                                    src={site.favicon} 
+                                    alt={`${site.name} favicon`} 
+                                    className="h-5 w-5 object-contain"
+                                    onError={e => {
+                                      e.currentTarget.style.display = 'none';
+                                      (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                                    }}
+                                  />
+                                ) : null}
+                                <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
                               </div>
-                            )}
-                            <a 
-                              href={site.link} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-foreground"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-sm break-words">{site.name}</h3>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 flex-1 justify-end">
+                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                {site.price > 0 ? `${site.price} USD` : 'Free'}
+                              </Badge>
+                              <div className="w-[100px] flex justify-start">
+                                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                              </div>
+                              {site.agency && (
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <span>via</span>
+                                  <span className="text-foreground">{site.agency}</span>
+                                  {agencySite?.favicon && (
+                                    <img 
+                                      src={agencySite.favicon} 
+                                      alt={site.agency} 
+                                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                    />
+                                  )}
+                                </div>
+                              )}
+                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          
+                          {/* Expanded Section with Details */}
+                          {isExpanded && (
+                            <div 
+                              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {site.about && (
+                                <div>
+                                  <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
+                                  <p className="text-xs text-foreground">{site.about}</p>
+                                </div>
+                              )}
+                              {(site.category || site.subcategory) && (
+                                <p className="text-xs text-muted-foreground">
+                                  {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                                </p>
+                              )}
+                              {/* Link at the bottom */}
+                              <a 
+                                href={site.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                              >
+                                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                              </a>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
