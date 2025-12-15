@@ -381,9 +381,23 @@ export async function uploadMedia(
   try {
     const baseUrl = normalizeUrl(site.url);
     
+    // Sanitize and truncate filename to prevent guid errors
+    const originalName = file.name;
+    const extension = originalName.includes('.') ? originalName.split('.').pop() || '' : '';
+    let baseName = originalName.includes('.') ? originalName.slice(0, originalName.lastIndexOf('.')) : originalName;
+    
+    // Remove special characters and replace spaces with hyphens
+    baseName = baseName.replace(/[^a-zA-Z0-9\-_]/g, '-').replace(/-+/g, '-').slice(0, 50);
+    
+    // Create sanitized filename
+    const sanitizedName = extension ? `${baseName}.${extension}` : baseName;
+    
+    // Create new file with sanitized name
+    const sanitizedFile = new File([file], sanitizedName, { type: file.type });
+    
     // Upload the file with all metadata in FormData
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', sanitizedFile);
     
     // WordPress ignores empty strings for title and uses filename as default
     // Use a single space ' ' to actually clear the title, but only if explicitly set to empty
@@ -405,6 +419,8 @@ export async function uploadMedia(
       alt_text: altValue,
       caption: captionValue,
       description: descValue,
+      originalFilename: originalName,
+      sanitizedFilename: sanitizedName,
     });
 
     const uploadResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
