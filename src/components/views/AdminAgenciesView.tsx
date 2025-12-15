@@ -1939,7 +1939,8 @@ export function AdminAgenciesView() {
                   <Button
                     onClick={handleApproveVerification}
                     disabled={processingVerification}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    variant="outline"
+                    className="flex-1 hover:bg-black hover:text-white"
                   >
                     {processingVerification ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1951,10 +1952,9 @@ export function AdminAgenciesView() {
                   <Button
                     onClick={() => setShowVerificationRejectDialog(true)}
                     disabled={processingVerification}
-                    variant="destructive"
-                    className="flex-1"
+                    variant="outline"
+                    className="flex-1 hover:bg-black hover:text-white"
                   >
-                    <XCircle className="h-4 w-4 mr-2" />
                     Reject
                   </Button>
                 </div>
