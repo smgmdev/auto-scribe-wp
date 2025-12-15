@@ -759,8 +759,7 @@ export function AdminMediaManagementView() {
         </div>
         <Button
           variant="outline"
-          size="icon"
-          className="bg-black text-white hover:bg-black/80 border-black"
+          className="bg-black text-white hover:bg-black/80 border-black gap-2"
           onClick={() => fetchData()}
           disabled={loading}
         >
@@ -769,6 +768,7 @@ export function AdminMediaManagementView() {
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
+          Refresh
         </Button>
       </div>
 
