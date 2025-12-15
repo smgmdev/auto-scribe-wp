@@ -2702,37 +2702,13 @@ export function AdminMediaManagementView() {
               )}
 
               {testArticleImagePreview && (
-                <div className="grid grid-cols-2 gap-3 mt-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Image Title</Label>
-                    <Input
-                      placeholder="Image title..."
-                      value={testFeaturedImage.title}
-                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, title: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Alt Text</Label>
-                    <Input
-                      placeholder="Alt text..."
-                      value={testFeaturedImage.altText}
-                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, altText: e.target.value }))}
-                    />
-                  </div>
+                <div className="mt-3">
                   <div className="space-y-1">
                     <Label className="text-xs">Caption</Label>
                     <Input
                       placeholder="Caption..."
                       value={testFeaturedImage.caption}
                       onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, caption: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Description</Label>
-                    <Input
-                      placeholder="Description..."
-                      value={testFeaturedImage.description}
-                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, description: e.target.value }))}
                     />
                   </div>
                 </div>
