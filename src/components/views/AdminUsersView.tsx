@@ -616,7 +616,6 @@ export function AdminUsersView() {
                           <Badge 
                             className="bg-black text-white hover:bg-black w-[72px] justify-center"
                           >
-                            <Building2 className="h-3 w-3 mr-1" />
                             Agency
                           </Badge>
                         ) : (
