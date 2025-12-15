@@ -1767,7 +1767,20 @@ export function AdminAgenciesView() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Full Name</p>
-                    <p className="font-medium">{selectedVerification.full_name}</p>
+                    <div 
+                      className="flex items-center gap-1 cursor-pointer hover:text-primary"
+                      onClick={() => {
+                        if (selectedVerification.full_name) {
+                          navigator.clipboard.writeText(selectedVerification.full_name);
+                          toast({ title: 'Copied', description: 'Full name copied to clipboard' });
+                        }
+                      }}
+                    >
+                      <p className="font-medium">{selectedVerification.full_name}</p>
+                      {selectedVerification.full_name && (
+                        <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Email</p>
@@ -1830,7 +1843,20 @@ export function AdminAgenciesView() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Company Name</p>
-                    <p className="font-medium">{selectedVerification.company_name}</p>
+                    <div 
+                      className="flex items-center gap-1 cursor-pointer hover:text-primary"
+                      onClick={() => {
+                        if (selectedVerification.company_name) {
+                          navigator.clipboard.writeText(selectedVerification.company_name);
+                          toast({ title: 'Copied', description: 'Company name copied to clipboard' });
+                        }
+                      }}
+                    >
+                      <p className="font-medium">{selectedVerification.company_name}</p>
+                      {selectedVerification.company_name && (
+                        <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Company ID</p>
@@ -1838,7 +1864,20 @@ export function AdminAgenciesView() {
                   </div>
                   <div className="col-span-2">
                     <p className="text-muted-foreground">Company Address</p>
-                    <p className="font-medium">{selectedVerification.company_address || '-'}</p>
+                    <div 
+                      className="flex items-center gap-1 cursor-pointer hover:text-primary"
+                      onClick={() => {
+                        if (selectedVerification.company_address) {
+                          navigator.clipboard.writeText(selectedVerification.company_address);
+                          toast({ title: 'Copied', description: 'Company address copied to clipboard' });
+                        }
+                      }}
+                    >
+                      <p className="font-medium">{selectedVerification.company_address || '-'}</p>
+                      {selectedVerification.company_address && (
+                        <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Tax Number</p>
@@ -2033,9 +2072,22 @@ export function AdminAgenciesView() {
                       <p className="text-muted-foreground">Network</p>
                       <p className="font-medium">{selectedVerification.usdt_network || '-'}</p>
                     </div>
-                    <div className="col-span-2">
+                  <div className="col-span-2">
                       <p className="text-muted-foreground">Wallet Address</p>
-                      <p className="font-medium break-all">{selectedVerification.usdt_wallet_address || '-'}</p>
+                      <div 
+                        className="flex items-center gap-1 cursor-pointer hover:text-primary"
+                        onClick={() => {
+                          if (selectedVerification.usdt_wallet_address) {
+                            navigator.clipboard.writeText(selectedVerification.usdt_wallet_address);
+                            toast({ title: 'Copied', description: 'Wallet address copied to clipboard' });
+                          }
+                        }}
+                      >
+                        <p className="font-medium break-all">{selectedVerification.usdt_wallet_address || '-'}</p>
+                        {selectedVerification.usdt_wallet_address && (
+                          <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
