@@ -595,16 +595,16 @@ export function AgencyMediaView() {
                             <div className="h-8 w-8 rounded bg-green-500/10 flex items-center justify-center shrink-0">
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 max-w-[400px]">
                               <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-sm">
+                                <p className="font-medium text-sm truncate">
                                   {submission.rejected_media && submission.rejected_media.length > 0 
                                     ? 'Partially Approved Media Sheet' 
                                     : 'Approved Media Sheet'}
                                 </p>
                                 <Tooltip delayDuration={100}>
                                   <TooltipTrigger asChild>
-                                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
+                                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
                                   </TooltipTrigger>
                                   <TooltipContent 
                                     side="right" 
@@ -649,14 +649,14 @@ export function AgencyMediaView() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <Badge variant="outline" className="text-xs border-green-500 text-green-500">
+                            <div className="flex items-center gap-2 shrink-0 ml-auto">
+                              <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
                                 Approved
                               </Badge>
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs w-[60px] justify-center">
                                 {submission.imported_sites?.length || 0} sites
                               </Badge>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-muted-foreground w-[140px] text-right">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                   : 'N/A'}
