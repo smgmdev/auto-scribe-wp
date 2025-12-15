@@ -62,10 +62,13 @@ export function AgencyMediaView() {
   const [pendingSubmissions, setPendingSubmissions] = useState<WordPressSiteSubmission[]>([]);
   const [rejectedSubmissions, setRejectedSubmissions] = useState<WordPressSiteSubmission[]>([]);
   const [mediaSiteSubmissions, setMediaSiteSubmissions] = useState<MediaSiteSubmission[]>([]);
+  const [pendingMediaSubmissions, setPendingMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
+  const [rejectedMediaSubmissions, setRejectedMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('wordpress');
   const [wpSubTab, setWpSubTab] = useState('connected');
+  const [mediaSubTab, setMediaSubTab] = useState('added');
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
 
@@ -132,15 +135,28 @@ export function AgencyMediaView() {
       setRejectedSubmissions(rejectedData);
     }
 
-    // Fetch media site submissions
-    const { data: mediaSubmissionData } = await supabase
+    // Fetch pending media site submissions
+    const { data: pendingMediaData } = await supabase
       .from('media_site_submissions')
       .select('id, google_sheet_url, status, created_at, admin_notes')
       .eq('user_id', user.id)
+      .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (mediaSubmissionData) {
-      setMediaSiteSubmissions(mediaSubmissionData);
+    if (pendingMediaData) {
+      setPendingMediaSubmissions(pendingMediaData);
+    }
+
+    // Fetch rejected media site submissions
+    const { data: rejectedMediaData } = await supabase
+      .from('media_site_submissions')
+      .select('id, google_sheet_url, status, created_at, admin_notes')
+      .eq('user_id', user.id)
+      .eq('status', 'rejected')
+      .order('created_at', { ascending: false });
+
+    if (rejectedMediaData) {
+      setRejectedMediaSubmissions(rejectedMediaData);
     }
 
     setLoading(false);
@@ -411,76 +427,194 @@ export function AgencyMediaView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-6">
-          {mediaSites.length === 0 ? (
-            <Card className="border-border/50">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Library className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground text-center mb-4">
-                  You haven't listed any media sites yet. Add your media channels to start receiving client requests.
-                </p>
-                <Button variant="outline" onClick={() => handleAddMedia('media')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Your First Media Site
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {mediaSites.map((site) => (
-                <Card key={site.id} className="border-border/50 hover:border-border transition-colors">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start gap-3">
-                      {site.favicon ? (
-                        <img 
-                          src={site.favicon} 
-                          alt="" 
-                          className="h-10 w-10 rounded object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                          <Globe className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{site.name}</CardTitle>
-                        <p className="text-xs text-muted-foreground">
-                          {site.category}{site.subcategory && ` → ${site.subcategory}`}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge variant="outline" className="text-xs">
-                        ${site.price}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {site.publication_format}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {site.publishing_time}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <a 
-                        href={site.link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        Visit Site
-                      </a>
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                    </div>
+        <TabsContent value="media" className="mt-6 space-y-4">
+          {/* Media Sub-tabs */}
+          <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
+              <TabsTrigger value="added" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                Added ({mediaSites.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="flex items-center gap-2">
+                <Clock className="h-4 w-4 shrink-0" />
+                Pending Review ({pendingMediaSubmissions.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="flex items-center gap-2">
+                <XCircle className="h-4 w-4 shrink-0" />
+                Rejected ({rejectedMediaSubmissions.length})
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Added Media Sites */}
+            <TabsContent value="added" className="mt-6">
+              {mediaSites.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Library className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center mb-4">
+                      No approved media sites yet.
+                    </p>
+                    <Button variant="outline" onClick={() => handleAddMedia('media')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Media Site
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {mediaSites.map((site) => (
+                    <Card key={site.id} className="border-border/50 hover:border-border transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          {site.favicon ? (
+                            <img 
+                              src={site.favicon} 
+                              alt="" 
+                              className="h-10 w-10 rounded object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                              <Globe className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{site.name}</CardTitle>
+                            <p className="text-xs text-muted-foreground">
+                              {site.category}{site.subcategory && ` → ${site.subcategory}`}
+                            </p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs">
+                            ${site.price}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {site.publication_format}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {site.publishing_time}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <a 
+                            href={site.link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Visit Site
+                          </a>
+                          <Button variant="outline" size="sm">
+                            Edit
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Pending Review */}
+            <TabsContent value="pending" className="mt-6">
+              {pendingMediaSubmissions.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Clock className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center mb-4">
+                      No pending submissions.
+                    </p>
+                    <Button variant="outline" onClick={() => handleAddMedia('media')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Media Site
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {pendingMediaSubmissions.map((submission) => (
+                    <Card key={submission.id} className="border-border/50 border-dashed border-yellow-500/50">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <div className="h-10 w-10 rounded bg-yellow-500/10 flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-lg">Media Sheet Submission</CardTitle>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {submission.google_sheet_url}
+                            </p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                            Pending Review
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Submitted {new Date(submission.created_at).toLocaleDateString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Rejected */}
+            <TabsContent value="rejected" className="mt-6">
+              {rejectedMediaSubmissions.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      No rejected submissions.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {rejectedMediaSubmissions.map((submission) => (
+                    <Card key={submission.id} className="border-border/50 border-dashed border-red-500/50">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <div className="h-10 w-10 rounded bg-red-500/10 flex items-center justify-center">
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-lg">Media Sheet Submission</CardTitle>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {submission.google_sheet_url}
+                            </p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                            Rejected
+                          </Badge>
+                        </div>
+                        {submission.admin_notes && (
+                          <p className="text-xs text-red-500 mb-2">
+                            Reason: {submission.admin_notes}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Submitted {new Date(submission.created_at).toLocaleDateString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 
