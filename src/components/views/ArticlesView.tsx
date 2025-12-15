@@ -8,6 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import type { Article } from '@/types';
 
 const statusColors: Record<string, string> = {
@@ -22,6 +32,8 @@ export function ArticlesView() {
   const { articles, loading, deleteArticle } = useArticles();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('published');
+  const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const getSiteInfo = (article: Article) => {
     // Use stored name/favicon if available, otherwise try to look up from sites
@@ -40,14 +52,24 @@ export function ArticlesView() {
     setCurrentView('compose');
   };
 
-  const handleDelete = async (articleId: string, articleTitle: string) => {
-    const success = await deleteArticle(articleId);
+  const handleDeleteClick = (article: Article) => {
+    setArticleToDelete(article);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!articleToDelete) return;
+    
+    setIsDeleting(true);
+    const success = await deleteArticle(articleToDelete.id);
+    setIsDeleting(false);
+    
     if (success) {
       toast({
         title: "Article deleted",
-        description: `"${articleTitle}" has been removed`,
+        description: `"${articleToDelete.title}" has been removed`,
       });
     }
+    setArticleToDelete(null);
   };
 
   const filteredArticles = articles.filter(article => {
@@ -138,7 +160,7 @@ export function ArticlesView() {
               variant="ghost" 
               size="icon" 
               className="hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-              onClick={() => handleDelete(article.id, article.title)}
+              onClick={() => handleDeleteClick(article)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -217,6 +239,33 @@ export function ArticlesView() {
           </>
         )}
       </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!articleToDelete} onOpenChange={(open) => !open && setArticleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Article</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{articleToDelete?.title}"?
+              {articleToDelete?.status === 'published' && articleToDelete?.wpPostId && (
+                <span className="block mt-2 text-destructive font-medium">
+                  This will permanently remove the post and featured image from WordPress.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
