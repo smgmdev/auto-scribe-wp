@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -50,6 +50,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       label: 'Agency Management',
       icon: Briefcase,
       submenu: [
+        { id: 'agency-media', label: 'My Media', icon: Library },
         { id: 'agency-requests', label: 'Service Requests', icon: ClipboardList },
         { id: 'agency-payouts', label: 'Payout History', icon: Wallet }
       ]
@@ -119,7 +120,7 @@ export function Sidebar({
   useEffect(() => {
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
-    const agencyManagementIds = ['agency-requests', 'agency-payouts'];
+    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
