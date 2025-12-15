@@ -1552,9 +1552,9 @@ export function AdminMediaManagementView() {
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <CardContent className="p-3">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3 min-w-0 flex-1">
+                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded mt-0.5">
                                 {logoUrl ? (
                                   <>
                                     {(!isLogoLoaded || isLogoLoading) && (
@@ -1572,23 +1572,47 @@ export function AdminMediaManagementView() {
                                   <XCircle className="h-4 w-4 text-red-500" />
                                 )}
                               </div>
-                              <div className="min-w-0 flex-1">
-                                <h3 className="text-sm truncate">{submission.name}</h3>
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <p className="text-[10px] uppercase tracking-wide text-red-500 font-medium">Rejected WordPress Site</p>
+                                <h3 className="text-sm font-medium">{submission.name}</h3>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {submission.url.replace(/^https?:\/\//, '')}
+                                  </span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(submission.url);
+                                      toast({ title: "Copied", description: "URL copied to clipboard" });
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </button>
+                                  <a
+                                    href={ensureHttps(submission.url)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
                                 {submission.admin_notes && (
-                                  <p className="text-xs text-red-500 truncate">Reason: {submission.admin_notes}</p>
+                                  <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
                                 )}
+                                <p className="text-xs text-muted-foreground">
+                                  {submission.reviewed_at 
+                                    ? new Date(submission.reviewed_at).toLocaleDateString() + ' at ' + new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                    : 'N/A'}
+                                </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               <Badge variant="outline" className="text-xs">
                                 {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                               </Badge>
-                              <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                                Rejected
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                              </span>
                             </div>
                           </div>
                         </CardContent>
