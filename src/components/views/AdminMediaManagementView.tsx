@@ -1059,10 +1059,10 @@ export function AdminMediaManagementView() {
                               )}
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <Badge variant="outline" className="text-xs border-green-500 text-green-500">
+                              <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
                                 Approved
                               </Badge>
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs w-[60px] justify-center">
                                 {submission.imported_sites?.length || 0} sites
                               </Badge>
                               <span className="text-xs text-muted-foreground">
