@@ -229,16 +229,8 @@ export function Sidebar({
         .maybeSingle();
       
       if (isMounted && appData) {
-        // Update status from DB if:
-        // 1. Store doesn't have a status yet, OR
-        // 2. DB status is different and represents a progression (e.g., pending -> approved)
-        // This ensures admin approval is reflected while preserving fresh submission status
-        const shouldUpdateStatus = !userApplicationStatus || 
-          (userApplicationStatus === 'pending' && appData.status !== 'pending');
-        
-        if (shouldUpdateStatus) {
-          setUserApplicationStatus(appData.status);
-        }
+        // Always update status and rejection_seen from DB to ensure accuracy on refresh
+        setUserApplicationStatus(appData.status);
         setApplicationId(appData.id);
         setRejectionSeen(appData.rejection_seen || false);
         if (appData.payout_method) {
