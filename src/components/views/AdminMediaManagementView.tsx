@@ -97,6 +97,7 @@ export function AdminMediaManagementView() {
   const [wpSubTab, setWpSubTab] = useState('approved');
   const [mediaSubTab, setMediaSubTab] = useState('added');
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingSubmissions, setPendingSubmissions] = useState<WordPressSiteSubmission[]>([]);
   const [approvedSites, setApprovedSites] = useState<ApprovedWordPressSite[]>([]);
   const [rejectedSubmissions, setRejectedSubmissions] = useState<WordPressSiteSubmission[]>([]);
@@ -229,8 +230,12 @@ export function AdminMediaManagementView() {
   }, [agencyLogos]);
 
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
     // Fetch pending WordPress submissions
     const { data: pending } = await supabase
@@ -353,6 +358,7 @@ export function AdminMediaManagementView() {
     setUnreadMediaSubmissionsCount(totalUnread);
 
     setLoading(false);
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
@@ -760,15 +766,15 @@ export function AdminMediaManagementView() {
         <Button
           variant="outline"
           className="bg-black text-white hover:bg-black/80 border-black gap-2"
-          onClick={() => fetchData()}
-          disabled={loading}
+          onClick={() => fetchData(true)}
+          disabled={isRefreshing}
         >
-          {loading ? (
+          {isRefreshing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
-          Refresh
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
       </div>
 
