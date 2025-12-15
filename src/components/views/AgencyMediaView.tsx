@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -584,11 +585,28 @@ export function AgencyMediaView() {
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm">
-                                {submission.rejected_media && submission.rejected_media.length > 0 
-                                  ? 'Partially Approved Media Sheet' 
-                                  : 'Approved Media Sheet'}
-                              </p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-medium text-sm">
+                                  {submission.rejected_media && submission.rejected_media.length > 0 
+                                    ? 'Partially Approved Media Sheet' 
+                                    : 'Approved Media Sheet'}
+                                </p>
+                                <Tooltip delayDuration={100}>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent 
+                                    side="right" 
+                                    align="start"
+                                    sideOffset={8}
+                                    collisionPadding={16}
+                                    avoidCollisions={true}
+                                    className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                                  >
+                                    <p>Approved media sites are now available in Global Library under Media Network.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
                               {submission.reply_sheet_url && (
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
