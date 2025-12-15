@@ -132,6 +132,21 @@ export function AdminMediaManagementView() {
 
       if (updateError) throw updateError;
 
+      // Send email notification to agency
+      try {
+        await supabase.functions.invoke('notify-wp-site-status', {
+          body: {
+            submissionId: selectedSubmission.id,
+            status: 'approved',
+            adminNotes: adminNotes || null,
+            siteName: selectedSubmission.name,
+            siteUrl: selectedSubmission.url,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send approval email:', emailError);
+      }
+
       toast({
         title: 'Site Approved',
         description: 'The WordPress site has been approved and is now visible in the library.',
@@ -168,6 +183,21 @@ export function AdminMediaManagementView() {
         .eq('id', selectedSubmission.id);
 
       if (error) throw error;
+
+      // Send email notification to agency
+      try {
+        await supabase.functions.invoke('notify-wp-site-status', {
+          body: {
+            submissionId: selectedSubmission.id,
+            status: 'rejected',
+            adminNotes: adminNotes || null,
+            siteName: selectedSubmission.name,
+            siteUrl: selectedSubmission.url,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send rejection email:', emailError);
+      }
 
       toast({
         title: 'Site Rejected',

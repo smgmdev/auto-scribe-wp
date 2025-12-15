@@ -113,6 +113,21 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
 
       if (error) throw error;
 
+      // Notify admin about new submission
+      try {
+        await supabase.functions.invoke('notify-admin-wp-submission', {
+          body: {
+            siteName: formData.name.trim(),
+            siteUrl: siteUrl,
+            username: formData.username.trim(),
+            seoPlugin: formData.seoPlugin,
+            agencyEmail: user.email || 'N/A',
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to notify admin:', emailError);
+      }
+
       toast({
         title: 'Submission Successful',
         description: 'Your WordPress site has been submitted for approval. You will be notified once reviewed.',
