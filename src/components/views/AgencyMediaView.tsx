@@ -192,15 +192,15 @@ export function AgencyMediaView() {
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <TabsList className="grid w-full max-w-lg grid-cols-3">
               <TabsTrigger value="connected" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
+                <CheckCircle className="h-4 w-4 shrink-0" />
                 Connected ({wordpressSites.length})
               </TabsTrigger>
               <TabsTrigger value="pending" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+                <Clock className="h-4 w-4 shrink-0" style={{ minWidth: '16px', minHeight: '16px' }} />
                 Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
               <TabsTrigger value="rejected" className="flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
+                <XCircle className="h-4 w-4 shrink-0" />
                 Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
