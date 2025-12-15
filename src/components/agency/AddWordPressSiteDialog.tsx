@@ -47,6 +47,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{ aioseoSettings?: boolean; testPublishing?: boolean }>({});
+  const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -77,26 +78,60 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
     setValidationErrors({});
   };
 
+  const processLogoFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image file.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (file.size > 1 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Logo must be less than 1MB.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({
+        ...prev,
+        logo: file,
+        logoPreview: reader.result as string,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: 'File too large',
-          description: 'Logo must be less than 5MB.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          logo: file,
-          logoPreview: reader.result as string,
-        }));
-      };
-      reader.readAsDataURL(file);
+      processLogoFile(file);
+    }
+  };
+
+  const handleLogoDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingLogo(true);
+  };
+
+  const handleLogoDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingLogo(false);
+  };
+
+  const handleLogoDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingLogo(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processLogoFile(file);
     }
   };
 
@@ -288,9 +323,16 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               ) : (
                 <div
                   onClick={() => logoInputRef.current?.click()}
-                  className="w-16 h-16 border-2 border-dashed border-border rounded-md flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
+                  onDragOver={handleLogoDragOver}
+                  onDragLeave={handleLogoDragLeave}
+                  onDrop={handleLogoDrop}
+                  className={`w-16 h-16 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                    isDraggingLogo 
+                      ? 'border-primary bg-primary/10' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
                 >
-                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <Upload className={`h-5 w-5 ${isDraggingLogo ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
               )}
               <input
@@ -301,7 +343,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
                 className="hidden"
               />
               <p className="text-xs text-muted-foreground">
-                Upload site logo (max 5MB)
+                Drag & drop or click to upload (max 1MB)
               </p>
             </div>
           </div>
