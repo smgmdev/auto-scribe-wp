@@ -286,6 +286,16 @@ export function AgencyMediaView() {
   const totalRejectedCount = rejectedMediaSubmissions.length + partiallyRejectedSubmissions.length;
   const totalAddedSites = approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0);
 
+  // Combine and sort all rejected submissions by date (most recent first)
+  const allRejectedSubmissions = [
+    ...rejectedMediaSubmissions.map(s => ({ ...s, type: 'full' as const })),
+    ...partiallyRejectedSubmissions.map(s => ({ ...s, type: 'partial' as const })),
+  ].sort((a, b) => {
+    const dateA = new Date(a.reviewed_at || a.created_at).getTime();
+    const dateB = new Date(b.reviewed_at || b.created_at).getTime();
+    return dateB - dateA; // Most recent first
+  });
+
   // Calculate unread counts for Added and Rejected tabs (notifications after admin action)
   const unreadAddedCount = approvedMediaSubmissions.filter(s => !s.read).length;
   const unreadRejectedMediaCount = rejectedMediaSubmissions.filter(s => !s.read).length;
@@ -879,164 +889,166 @@ export function AgencyMediaView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {/* Fully rejected submissions */}
-                  {rejectedMediaSubmissions.map((submission, index) => (
-                    <Card 
-                      key={submission.id} 
-                      className="group hover:shadow-md transition-all duration-300 border-dashed border-red-500/50"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
-                            <XCircle className="h-4 w-4 text-red-500" />
-                          </div>
-                          <div className="flex-1 min-w-0 max-w-[400px]">
-                            <p className="font-medium text-sm">Rejected Media Sheet</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                {submission.google_sheet_url.length > 40 
-                                  ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                  : submission.google_sheet_url}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(submission.google_sheet_url);
-                                  toast.success('Link copied to clipboard');
-                                }}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Copy link"
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </button>
-                              <a
-                                href={submission.google_sheet_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Open link"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            </div>
-                            {submission.admin_notes && (
-                              <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {submission.reviewed_at 
-                                ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                                : `${new Date(submission.created_at).toLocaleDateString()} ${new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0 ml-auto" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  {/* Partially rejected submissions */}
-                  {partiallyRejectedSubmissions.map((submission, index) => {
-                    const isExpanded = expandedRejectedSubmissions.has(submission.id);
-                    
-                    return (
-                      <Card 
-                        key={`partial-${submission.id}`}
-                        className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-red-500/30"
-                        style={{ animationDelay: `${(rejectedMediaSubmissions.length + index) * 50}ms` }}
-                        onClick={() => toggleExpandedRejectedSubmission(submission.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
-                              <XCircle className="h-4 w-4 text-red-500" />
-                            </div>
-                            <div className="flex-1 min-w-0 max-w-[400px]">
-                              <p className="font-medium text-sm">Partially Rejected Media Sheet</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                  {submission.google_sheet_url.length > 40 
-                                    ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                    : submission.google_sheet_url}
+                  {allRejectedSubmissions.map((submission, index) => {
+                    if (submission.type === 'full') {
+                      // Fully rejected submission
+                      return (
+                        <Card 
+                          key={submission.id} 
+                          className="group hover:shadow-md transition-all duration-300 border-dashed border-red-500/50"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              </div>
+                              <div className="flex-1 min-w-0 max-w-[400px]">
+                                <p className="font-medium text-sm">Rejected Media Sheet</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {submission.google_sheet_url.length > 40 
+                                      ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                      : submission.google_sheet_url}
+                                  </p>
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(submission.google_sheet_url);
+                                      toast.success('Link copied to clipboard');
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Copy link"
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </button>
+                                  <a
+                                    href={submission.google_sheet_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Open link"
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                </div>
+                                {submission.admin_notes && (
+                                  <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {submission.reviewed_at 
+                                    ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                    : `${new Date(submission.created_at).toLocaleDateString()} ${new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                                 </p>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigator.clipboard.writeText(submission.google_sheet_url);
-                                    toast.success('Link copied to clipboard');
-                                  }}
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                  title="Copy original sheet"
-                                >
-                                  <Copy className="h-3.5 w-3.5" />
-                                </button>
-                                <a
-                                  href={submission.google_sheet_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                  title="Open original sheet"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <ExternalLink className="h-3.5 w-3.5" />
-                                </a>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {submission.reviewed_at 
-                                  ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                                  : 'N/A'}
-                              </p>
+                              <div className="flex items-center gap-2 shrink-0 ml-auto" />
                             </div>
-                            <div className="flex items-center gap-2 shrink-0 ml-auto">
-                              <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 whitespace-nowrap">
-                                Partially Rejected ({submission.rejected_media?.length || 0})
-                              </Badge>
-                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
-                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </CardContent>
+                        </Card>
+                      );
+                    } else {
+                      // Partially rejected submission
+                      const isExpanded = expandedRejectedSubmissions.has(submission.id);
+                      
+                      return (
+                        <Card 
+                          key={`partial-${submission.id}`}
+                          className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-red-500/30"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                          onClick={() => toggleExpandedRejectedSubmission(submission.id)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              </div>
+                              <div className="flex-1 min-w-0 max-w-[400px]">
+                                <p className="font-medium text-sm">Partially Rejected Media Sheet</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {submission.google_sheet_url.length > 40 
+                                      ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                      : submission.google_sheet_url}
+                                  </p>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(submission.google_sheet_url);
+                                      toast.success('Link copied to clipboard');
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Copy original sheet"
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </button>
+                                  <a
+                                    href={submission.google_sheet_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Open original sheet"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {submission.reviewed_at 
+                                    ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                    : 'N/A'}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 ml-auto">
+                                <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 whitespace-nowrap">
+                                  Partially Rejected ({submission.rejected_media?.length || 0})
+                                </Badge>
+                                <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          
-                          {/* Expanded Section with Rejected Items */}
-                          {isExpanded && submission.rejected_media && submission.rejected_media.length > 0 && (
-                            <div 
-                              className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <p className="text-xs font-medium text-muted-foreground mb-3">Items Not Imported ({submission.rejected_media.length}):</p>
-                              {submission.rejected_media.map((item, itemIndex) => (
-                                <div 
-                                  key={itemIndex}
-                                  className="flex items-center gap-4 p-3 rounded-lg border border-red-500/20 bg-red-500/5"
-                                >
-                                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                                    <XCircle className="h-4 w-4 text-red-500" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <h3 className="text-sm">{item.title}</h3>
-                                    {item.link && (
-                                      <a 
-                                        href={ensureHttps(item.link)}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit mt-1"
-                                      >
-                                        <span className="truncate">{item.link.replace(/^https?:\/\//, '')}</span>
-                                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                      </a>
+                            
+                            {/* Expanded Section with Rejected Items */}
+                            {isExpanded && submission.rejected_media && submission.rejected_media.length > 0 && (
+                              <div 
+                                className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <p className="text-xs font-medium text-muted-foreground mb-3">Items Not Imported ({submission.rejected_media.length}):</p>
+                                {submission.rejected_media.map((item, itemIndex) => (
+                                  <div 
+                                    key={itemIndex}
+                                    className="flex items-center gap-4 p-3 rounded-lg border border-red-500/20 bg-red-500/5"
+                                  >
+                                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                      <XCircle className="h-4 w-4 text-red-500" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="text-sm">{item.title}</h3>
+                                      {item.link && (
+                                        <a 
+                                          href={ensureHttps(item.link)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit mt-1"
+                                        >
+                                          <span className="truncate">{item.link.replace(/^https?:\/\//, '')}</span>
+                                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                        </a>
+                                      )}
+                                    </div>
+                                    {item.price !== undefined && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {item.price > 0 ? `${item.price} USD` : 'Free'}
+                                      </Badge>
                                     )}
                                   </div>
-                                  {item.price !== undefined && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {item.price > 0 ? `${item.price} USD` : 'Free'}
-                                    </Badge>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
+                                ))}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    }
                   })}
                 </div>
               )}
