@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2 } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -657,45 +657,55 @@ export function AdminMediaManagementView() {
               ) : (
                 <div className="space-y-2">
                   {pendingMediaSubmissions.map((submission, index) => (
-                    <Card 
+                    <div 
                       key={submission.id} 
-                      className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300"
+                      className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-yellow-500/50 bg-card hover:border-[#4771d9] transition-all duration-300"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded">
-                              <Clock className="h-4 w-4 text-yellow-500" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm break-words">{submission.agency_name}</h3>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 flex-1 justify-end">
-                            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                              {submission.google_sheet_url.length > 40 
-                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                : submission.google_sheet_url}
-                            </span>
-                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                              Pending
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(submission.created_at).toLocaleDateString()}
-                            </span>
-                            <a 
-                              href={submission.google_sheet_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-foreground"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </div>
+                      <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{submission.agency_name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {submission.google_sheet_url.length > 40 
+                              ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                              : submission.google_sheet_url}
+                          </p>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(submission.google_sheet_url);
+                              toast({
+                                title: 'Copied',
+                                description: 'Link copied to clipboard',
+                              });
+                            }}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Copy link"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <a
+                            href={submission.google_sheet_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Open link"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                          Pending
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(submission.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -715,48 +725,58 @@ export function AdminMediaManagementView() {
               ) : (
                 <div className="space-y-2">
                   {rejectedMediaSubmissions.map((submission, index) => (
-                    <Card 
+                    <div 
                       key={submission.id} 
-                      className="group hover:shadow-md transition-all duration-300"
+                      className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
-                              <XCircle className="h-4 w-4 text-red-500" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm break-words">{submission.agency_name}</h3>
-                              {submission.admin_notes && (
-                                <p className="text-xs text-red-500 truncate">Reason: {submission.admin_notes}</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 flex-1 justify-end">
-                            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                              {submission.google_sheet_url.length > 40 
-                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                : submission.google_sheet_url}
-                            </span>
-                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                              Rejected
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                            </span>
-                            <a 
-                              href={submission.google_sheet_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-foreground"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </div>
+                      <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{submission.agency_name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {submission.google_sheet_url.length > 40 
+                              ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                              : submission.google_sheet_url}
+                          </p>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(submission.google_sheet_url);
+                              toast({
+                                title: 'Copied',
+                                description: 'Link copied to clipboard',
+                              });
+                            }}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Copy link"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <a
+                            href={submission.google_sheet_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Open link"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
                         </div>
-                      </CardContent>
-                    </Card>
+                        {submission.admin_notes && (
+                          <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                          Rejected
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
