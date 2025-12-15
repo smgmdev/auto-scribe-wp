@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import type { Article } from '@/types';
 
 const statusColors: Record<string, string> = {
@@ -23,8 +22,6 @@ export function ArticlesView() {
   const { articles, loading, deleteArticle } = useArticles();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('published');
-  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
-  const [webViewTitle, setWebViewTitle] = useState('');
 
   const getSiteInfo = (article: Article) => {
     // Use stored name/favicon if available, otherwise try to look up from sites
@@ -51,12 +48,6 @@ export function ArticlesView() {
         description: `"${articleTitle}" has been removed`,
       });
     }
-  };
-
-  const handleLinkClick = (e: React.MouseEvent, url: string, title: string) => {
-    e.preventDefault();
-    setWebViewUrl(url);
-    setWebViewTitle(title);
   };
 
   const filteredArticles = articles.filter(article => {
@@ -110,9 +101,9 @@ export function ArticlesView() {
                     {article.wpLink ? (
                       <a 
                         href={article.wpLink} 
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-accent hover:underline cursor-pointer"
-                        onClick={(e) => handleLinkClick(e, article.wpLink!, article.title)}
                       >
                         {siteInfo.favicon && (
                           <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
@@ -226,13 +217,6 @@ export function ArticlesView() {
           </>
         )}
       </Tabs>
-
-      <WebViewDialog
-        open={!!webViewUrl}
-        onOpenChange={(open) => !open && setWebViewUrl(null)}
-        url={webViewUrl || ''}
-        title={webViewTitle}
-      />
     </div>
   );
 }
