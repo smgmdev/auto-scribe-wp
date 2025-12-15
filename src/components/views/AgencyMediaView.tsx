@@ -15,6 +15,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { ensureHttps } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 import { AddWordPressSiteDialog } from '@/components/agency/AddWordPressSiteDialog';
 import { AddMediaSiteDialog } from '@/components/agency/AddMediaSiteDialog';
 
@@ -79,6 +80,7 @@ interface ApprovedMediaSubmission extends MediaSiteSubmission {
 
 export function AgencyMediaView() {
   const { user } = useAuth();
+  const { decrementAgencyUnreadWpSubmissionsCount, agencyUnreadWpSubmissionsCount, setAgencyUnreadWpSubmissionsCount } = useAppStore();
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [wordpressSites, setWordpressSites] = useState<WordPressSite[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = useState<WordPressSiteSubmission[]>([]);
@@ -294,6 +296,8 @@ export function AgencyMediaView() {
           .update({ read: true })
           .in('id', unreadSiteIds);
         setWordpressSites(prev => prev.map(s => ({ ...s, read: true })));
+        // Update store count by decrementing by the number of unread sites
+        setAgencyUnreadWpSubmissionsCount(Math.max(0, agencyUnreadWpSubmissionsCount - unreadSiteIds.length));
       }
     }
   };
@@ -309,6 +313,8 @@ export function AgencyMediaView() {
       setRejectedSubmissions(prev => prev.map(s => 
         s.id === submissionId ? { ...s, read: true } : s
       ));
+      // Decrement sidebar notification count
+      decrementAgencyUnreadWpSubmissionsCount();
     }
   };
 
