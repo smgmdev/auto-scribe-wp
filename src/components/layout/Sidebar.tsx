@@ -101,6 +101,10 @@ export function Sidebar({
     setUnreadCustomVerificationsCount,
     unreadMediaSubmissionsCount,
     setUnreadMediaSubmissionsCount,
+    agencyUnreadWpSubmissionsCount,
+    setAgencyUnreadWpSubmissionsCount,
+    agencyUnreadMediaSubmissionsCount,
+    setAgencyUnreadMediaSubmissionsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -253,6 +257,28 @@ export function Sidebar({
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
         setHasStripeAccount(!!agencyData.stripe_account_id);
         setPayoutMethod(agencyData.payout_method);
+        
+        // Fetch agency media notification counts if onboarded
+        if (agencyData.onboarding_complete === true) {
+          // Count pending WP submissions for this agency user
+          const { count: wpPendingCount } = await supabase
+            .from('wordpress_site_submissions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('status', 'pending');
+          
+          // Count pending media site submissions for this agency user
+          const { count: mediaPendingCount } = await supabase
+            .from('media_site_submissions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('status', 'pending');
+          
+          if (isMounted) {
+            setAgencyUnreadWpSubmissionsCount(wpPendingCount || 0);
+            setAgencyUnreadMediaSubmissionsCount(mediaPendingCount || 0);
+          }
+        }
       }
 
       // Check custom verification status for custom payout users
@@ -330,9 +356,13 @@ export function Sidebar({
 
               if (hasSubmenu) {
                 const isExpanded = expandedMenus[item.id] || false;
-                // Calculate combined notification count for Agencies dropdown header
+                // Calculate combined notification count for Agencies dropdown header (admin)
                 const agencyDropdownCount = item.id === 'admin-agencies' 
                   ? (unreadAgencyApplicationsCount + unreadCustomVerificationsCount + unreadMediaSubmissionsCount) 
+                  : 0;
+                // Calculate notification count for Agency Management dropdown (agency user)
+                const agencyManagementCount = item.id === 'agency-management'
+                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount)
                   : 0;
                 return (
                   <div key={item.id}>
@@ -354,6 +384,11 @@ export function Sidebar({
                             {agencyDropdownCount}
                           </Badge>
                         )}
+                        {agencyManagementCount > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                            {agencyManagementCount}
+                          </Badge>
+                        )}
                         <ChevronDown className={cn(
                           "h-4 w-4 transition-transform duration-200",
                           isExpanded && "rotate-180"
@@ -365,11 +400,14 @@ export function Sidebar({
                         {item.submenu?.map(subItem => {
                           const SubIcon = subItem.icon;
                           const isSubActive = currentView === subItem.id;
-                          // Agency Management shows agency application notifications
+                          // Admin Agency Management shows agency application notifications
                           const showAgencyBadge = subItem.id === 'admin-agencies' && (unreadAgencyApplicationsCount + unreadCustomVerificationsCount) > 0;
                           const agencyBadgeCount = unreadAgencyApplicationsCount + unreadCustomVerificationsCount;
-                          // Media Management shows media submission notifications
+                          // Admin Media Management shows media submission notifications
                           const showMediaBadge = subItem.id === 'admin-media-management' && unreadMediaSubmissionsCount > 0;
+                          // Agency user My Media shows pending submission notifications
+                          const showAgencyMediaBadge = subItem.id === 'agency-media' && (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount) > 0;
+                          const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
                           return (
                             <Button
                               key={subItem.id}
@@ -392,6 +430,11 @@ export function Sidebar({
                               {showMediaBadge && (
                                 <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {unreadMediaSubmissionsCount}
+                                </Badge>
+                              )}
+                              {showAgencyMediaBadge && (
+                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                  {agencyMediaBadgeCount}
                                 </Badge>
                               )}
                             </Button>

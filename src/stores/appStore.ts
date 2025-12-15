@@ -37,6 +37,12 @@ interface AppState {
   setUnreadMediaSubmissionsCount: (count: number) => void;
   decrementUnreadMediaSubmissionsCount: () => void;
   
+  // Agency media notifications (for agency users)
+  agencyUnreadWpSubmissionsCount: number;
+  setAgencyUnreadWpSubmissionsCount: (count: number) => void;
+  agencyUnreadMediaSubmissionsCount: number;
+  setAgencyUnreadMediaSubmissionsCount: (count: number) => void;
+  
   // User agency application status
   userApplicationStatus: string | null;
   setUserApplicationStatus: (status: string | null) => void;
@@ -87,6 +93,12 @@ export const useAppStore = create<AppState>()((set) => ({
   decrementUnreadMediaSubmissionsCount: () => set((state) => ({ 
     unreadMediaSubmissionsCount: Math.max(0, state.unreadMediaSubmissionsCount - 1) 
   })),
+  
+  // Agency media notifications
+  agencyUnreadWpSubmissionsCount: 0,
+  setAgencyUnreadWpSubmissionsCount: (count) => set({ agencyUnreadWpSubmissionsCount: count }),
+  agencyUnreadMediaSubmissionsCount: 0,
+  setAgencyUnreadMediaSubmissionsCount: (count) => set({ agencyUnreadMediaSubmissionsCount: count }),
   
   // User agency application status
   userApplicationStatus: null,
