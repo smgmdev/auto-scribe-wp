@@ -890,308 +890,206 @@ export function AdminMediaManagementView() {
 
             {/* Added Media Sites */}
             <TabsContent value="added">
-              {mediaSites.length === 0 && approvedMediaSubmissions.length === 0 ? (
+              {approvedMediaSubmissions.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Library className="h-12 w-12 text-muted-foreground/50 mb-4" />
                     <p className="text-muted-foreground text-center">
-                      No media sites in the system yet.
+                      No approved media site submissions yet.
+                    </p>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Media sites will appear here once you import them via the "Reply" action in Pending Review.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
-                  {/* Approved Submissions with Imported Sites */}
-                  {approvedMediaSubmissions.length > 0 && (
-                    <div className="space-y-2">
-                      {approvedMediaSubmissions.map((submission, index) => {
-                        const logoUrl = agencyLogos[submission.agency_name];
-                        const isLogoLoading = loadingLogos.has(submission.agency_name);
-                        const isLogoLoaded = loadedLogos.has(submission.agency_name);
-                        const isExpanded = expandedApprovedSubmissions.has(submission.id);
-                        
-                        return (
-                          <Card 
-                            key={submission.id} 
-                            className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-green-500/50"
-                            style={{ animationDelay: `${index * 50}ms` }}
-                            onClick={() => toggleExpandedApprovedSubmission(submission.id)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-center gap-4">
-                                <div className="h-8 w-8 rounded bg-green-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                                  {logoUrl ? (
-                                    <>
-                                      {(!isLogoLoaded || isLogoLoading) && (
-                                        <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
-                                      )}
-                                      <img 
-                                        src={logoUrl} 
-                                        alt={`${submission.agency_name} logo`}
-                                        className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                        onLoad={() => handleLogoLoad(submission.agency_name)}
-                                        onError={() => handleLogoLoad(submission.agency_name)}
-                                      />
-                                    </>
-                                  ) : (
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                <div className="space-y-2">
+                  {approvedMediaSubmissions.map((submission, index) => {
+                    const logoUrl = agencyLogos[submission.agency_name];
+                    const isLogoLoading = loadingLogos.has(submission.agency_name);
+                    const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                    const isExpanded = expandedApprovedSubmissions.has(submission.id);
+                    
+                    return (
+                      <Card 
+                        key={submission.id} 
+                        className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-green-500/50"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                        onClick={() => toggleExpandedApprovedSubmission(submission.id)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            <div className="h-8 w-8 rounded bg-green-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                              {logoUrl ? (
+                                <>
+                                  {(!isLogoLoaded || isLogoLoading) && (
+                                    <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
                                   )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-sm">{submission.agency_name}</p>
-                                  {submission.reply_sheet_url && (
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                        {submission.reply_sheet_url.length > 40 
-                                          ? `${submission.reply_sheet_url.substring(0, 40)}...` 
-                                          : submission.reply_sheet_url}
-                                      </p>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          navigator.clipboard.writeText(submission.reply_sheet_url || '');
-                                          toast({
-                                            title: 'Copied',
-                                            description: 'Link copied to clipboard',
-                                          });
-                                        }}
-                                        className="text-muted-foreground hover:text-foreground transition-colors"
-                                        title="Copy link"
-                                      >
-                                        <Copy className="h-3.5 w-3.5" />
-                                      </button>
-                                      <a
-                                        href={submission.reply_sheet_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-muted-foreground hover:text-foreground transition-colors"
-                                        title="Open link"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <ExternalLink className="h-3.5 w-3.5" />
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <Badge variant="outline" className="text-xs border-green-500 text-green-500">
-                                    Approved
-                                  </Badge>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {submission.imported_sites?.length || 0} sites
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground">
-                                    {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                                  </span>
-                                  <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
-                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Expanded Section with Imported Sites - Global Library Style */}
-                              {isExpanded && submission.imported_sites && submission.imported_sites.length > 0 && (
-                                <div 
-                                  className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <p className="text-xs font-medium text-muted-foreground mb-3">Imported Media Sites ({submission.imported_sites.length}):</p>
-                                  {submission.imported_sites.map((site) => {
-                                    const isSiteExpanded = expandedSites.has(`imported-${site.id}`);
-                                    
-                                    return (
-                                      <Card 
-                                        key={site.id}
-                                        className="group hover:shadow-md transition-all duration-300 cursor-pointer"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setExpandedSites(prev => {
-                                            const next = new Set(prev);
-                                            const key = `imported-${site.id}`;
-                                            if (next.has(key)) {
-                                              next.delete(key);
-                                            } else {
-                                              next.add(key);
-                                            }
-                                            return next;
-                                          });
-                                        }}
-                                      >
-                                        <CardContent className="p-3">
-                                          <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                                                {site.favicon ? (
-                                                  <img 
-                                                    src={site.favicon} 
-                                                    alt={`${site.name} favicon`} 
-                                                    className="h-5 w-5 object-contain"
-                                                    onError={e => {
-                                                      e.currentTarget.style.display = 'none';
-                                                      (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                                                    }}
-                                                  />
-                                                ) : null}
-                                                <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
-                                              </div>
-                                              <div className="min-w-0 flex-1">
-                                                <h3 className="text-sm break-words">{site.name}</h3>
-                                              </div>
-                                            </div>
-                                            <div className="flex items-center gap-3 flex-1 justify-end">
-                                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                                {site.price > 0 ? `${site.price} USD` : 'Free'}
-                                              </Badge>
-                                              <div className="w-[100px] flex justify-start">
-                                                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
-                                              </div>
-                                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
-                                                {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                                              </div>
-                                            </div>
-                                          </div>
-                                          
-                                          {/* Expanded Section with Details */}
-                                          {isSiteExpanded && (
-                                            <div 
-                                              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
-                                              onClick={(e) => e.stopPropagation()}
-                                            >
-                                              {site.about && (
-                                                <div>
-                                                  <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
-                                                  <p className="text-xs text-foreground">{site.about}</p>
-                                                </div>
-                                              )}
-                                              {(site.category || site.subcategory) && (
-                                                <p className="text-xs text-muted-foreground">
-                                                  {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
-                                                </p>
-                                              )}
-                                              {/* Link at the bottom */}
-                                              <a 
-                                                href={site.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
-                                              >
-                                                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                              </a>
-                                            </div>
-                                          )}
-                                        </CardContent>
-                                      </Card>
-                                    );
-                                  })}
-                                </div>
+                                  <img 
+                                    src={logoUrl} 
+                                    alt={`${submission.agency_name} logo`}
+                                    className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                    onLoad={() => handleLogoLoad(submission.agency_name)}
+                                    onError={() => handleLogoLoad(submission.agency_name)}
+                                  />
+                                </>
+                              ) : (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
                               )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Regular Media Sites */}
-                  {mediaSites.length > 0 && (
-                    <div className="space-y-2">
-                      {approvedMediaSubmissions.length > 0 && (
-                        <p className="text-xs font-medium text-muted-foreground mt-4 mb-2">All Media Sites:</p>
-                      )}
-                      {mediaSites.map((site, index) => {
-                        const isExpanded = expandedSites.has(site.id);
-                        const agencySite = site.agency ? mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency) : null;
-                        
-                        return (
-                          <Card 
-                            key={site.id} 
-                            className="group hover:shadow-md transition-all duration-300 cursor-pointer"
-                            style={{ animationDelay: `${index * 50}ms` }}
-                            onClick={() => toggleExpand(site.id)}
-                          >
-                            <CardContent className="p-3">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                                    {site.favicon ? (
-                                      <img 
-                                        src={site.favicon} 
-                                        alt={`${site.name} favicon`} 
-                                        className="h-5 w-5 object-contain"
-                                        onError={e => {
-                                          e.currentTarget.style.display = 'none';
-                                          (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                                        }}
-                                      />
-                                    ) : null}
-                                    <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <h3 className="text-sm break-words">{site.name}</h3>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-3 flex-1 justify-end">
-                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                    {site.price > 0 ? `${site.price} USD` : 'Free'}
-                                  </Badge>
-                                  <div className="w-[100px] flex justify-start">
-                                    <span className="text-xs text-muted-foreground">{site.publication_format}</span>
-                                  </div>
-                                  {site.agency && (
-                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                      <span>via</span>
-                                      <span className="text-foreground">{site.agency}</span>
-                                      {agencySite?.favicon && (
-                                        <img 
-                                          src={agencySite.favicon} 
-                                          alt={site.agency} 
-                                          className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                        />
-                                      )}
-                                    </div>
-                                  )}
-                                  <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
-                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Expanded Section with Details */}
-                              {isExpanded && (
-                                <div 
-                                  className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {site.about && (
-                                    <div>
-                                      <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
-                                      <p className="text-xs text-foreground">{site.about}</p>
-                                    </div>
-                                  )}
-                                  {(site.category || site.subcategory) && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
-                                    </p>
-                                  )}
-                                  {/* Link at the bottom */}
-                                  <a 
-                                    href={site.link}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm">{submission.agency_name}</p>
+                              {submission.reply_sheet_url && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {submission.reply_sheet_url.length > 40 
+                                      ? `${submission.reply_sheet_url.substring(0, 40)}...` 
+                                      : submission.reply_sheet_url}
+                                  </p>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(submission.reply_sheet_url || '');
+                                      toast({
+                                        title: 'Copied',
+                                        description: 'Link copied to clipboard',
+                                      });
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Copy link"
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </button>
+                                  <a
+                                    href={submission.reply_sheet_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Open link"
+                                    onClick={(e) => e.stopPropagation()}
                                   >
-                                    <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                    <ExternalLink className="h-3.5 w-3.5" />
                                   </a>
                                 </div>
                               )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Badge variant="outline" className="text-xs border-green-500 text-green-500">
+                                Approved
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {submission.imported_sites?.length || 0} sites
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                              </span>
+                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Expanded Section with Imported Sites - Global Library Style */}
+                          {isExpanded && submission.imported_sites && submission.imported_sites.length > 0 && (
+                            <div 
+                              className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <p className="text-xs font-medium text-muted-foreground mb-3">Imported Media Sites ({submission.imported_sites.length}):</p>
+                              {submission.imported_sites.map((site) => {
+                                const isSiteExpanded = expandedSites.has(`imported-${site.id}`);
+                                
+                                return (
+                                  <Card 
+                                    key={site.id}
+                                    className="group hover:shadow-md transition-all duration-300 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSites(prev => {
+                                        const next = new Set(prev);
+                                        const key = `imported-${site.id}`;
+                                        if (next.has(key)) {
+                                          next.delete(key);
+                                        } else {
+                                          next.add(key);
+                                        }
+                                        return next;
+                                      });
+                                    }}
+                                  >
+                                    <CardContent className="p-3">
+                                      <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                                          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                            {site.favicon ? (
+                                              <img 
+                                                src={site.favicon} 
+                                                alt={`${site.name} favicon`} 
+                                                className="h-5 w-5 object-contain"
+                                                onError={e => {
+                                                  e.currentTarget.style.display = 'none';
+                                                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                                                }}
+                                              />
+                                            ) : null}
+                                            <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <h3 className="text-sm break-words">{site.name}</h3>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 flex-1 justify-end">
+                                          <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                            {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                          </Badge>
+                                          <div className="w-[100px] flex justify-start">
+                                            <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                                          </div>
+                                          <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                            {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Expanded Section with Details */}
+                                      {isSiteExpanded && (
+                                        <div 
+                                          className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          {site.about && (
+                                            <div>
+                                              <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
+                                              <p className="text-xs text-foreground">{site.about}</p>
+                                            </div>
+                                          )}
+                                          {(site.category || site.subcategory) && (
+                                            <p className="text-xs text-muted-foreground">
+                                              {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                                            </p>
+                                          )}
+                                          {/* Link at the bottom */}
+                                          <a 
+                                            href={site.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                          >
+                                            <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                          </a>
+                                        </div>
+                                      )}
+                                    </CardContent>
+                                  </Card>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
