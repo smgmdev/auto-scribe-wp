@@ -1781,6 +1781,20 @@ export function AdminAgenciesView() {
                     <p className="text-muted-foreground">Country</p>
                     <p className="font-medium">{selectedVerification.country}</p>
                   </div>
+                  {verificationDocUrls.passport && (
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground mb-1">Passport</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="hover:bg-black hover:text-white"
+                        onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport')}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        View Passport
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1804,6 +1818,57 @@ export function AdminAgenciesView() {
                     <p className="text-muted-foreground">Tax Number</p>
                     <p className="font-medium">{selectedVerification.tax_number || '-'}</p>
                   </div>
+                  {(verificationDocUrls.company_incorporation || verificationDocUrls.license || verificationDocUrls.memorandum || verificationDocUrls.additional) && (
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground mb-1">Attached Uploads</p>
+                      <div className="flex flex-wrap gap-2">
+                        {verificationDocUrls.company_incorporation && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white"
+                            onClick={() => handleViewKycDocument(verificationDocUrls.company_incorporation, 'Company Incorporation')}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Company Incorporation
+                          </Button>
+                        )}
+                        {verificationDocUrls.license && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white"
+                            onClick={() => handleViewKycDocument(verificationDocUrls.license, 'Business License')}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Business License
+                          </Button>
+                        )}
+                        {verificationDocUrls.memorandum && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white"
+                            onClick={() => handleViewKycDocument(verificationDocUrls.memorandum, 'Memorandum of Association')}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Memorandum of Association
+                          </Button>
+                        )}
+                        {verificationDocUrls.additional && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white"
+                            onClick={() => handleViewKycDocument(verificationDocUrls.additional, 'Additional Documents')}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Additional Documents
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1858,71 +1923,6 @@ export function AdminAgenciesView() {
                   </div>
                 </div>
               )}
-
-              {/* Documents */}
-              <div>
-                <h4 className="text-sm font-semibold text-muted-foreground mb-3">Uploaded Documents</h4>
-                <div className="flex flex-wrap gap-2">
-                  {verificationDocUrls.company_incorporation && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-black hover:text-white"
-                      onClick={() => handleViewKycDocument(verificationDocUrls.company_incorporation, 'Company Incorporation')}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Company Incorporation
-                    </Button>
-                  )}
-                  {verificationDocUrls.license && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-black hover:text-white"
-                      onClick={() => handleViewKycDocument(verificationDocUrls.license, 'Business License')}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Business License
-                    </Button>
-                  )}
-                  {verificationDocUrls.passport && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-black hover:text-white"
-                      onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport')}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Passport
-                    </Button>
-                  )}
-                  {verificationDocUrls.memorandum && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-black hover:text-white"
-                      onClick={() => handleViewKycDocument(verificationDocUrls.memorandum, 'Memorandum of Association')}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Memorandum of Association
-                    </Button>
-                  )}
-                  {verificationDocUrls.additional && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-black hover:text-white"
-                      onClick={() => handleViewKycDocument(verificationDocUrls.additional, 'Additional Documents')}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Additional Documents
-                    </Button>
-                  )}
-                  {!verificationDocUrls.company_incorporation && !verificationDocUrls.passport && !verificationDocUrls.memorandum && !verificationDocUrls.license && !verificationDocUrls.additional && (
-                    <p className="text-sm text-muted-foreground">No documents uploaded</p>
-                  )}
-                </div>
-              </div>
 
               {/* Submission Date */}
               <div className="pt-4 border-t">
