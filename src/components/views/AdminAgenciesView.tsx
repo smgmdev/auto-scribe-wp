@@ -2612,16 +2612,14 @@ export function AdminAgenciesView() {
                 Cancel
               </Button>
               <Button
-                variant="default"
-                className="flex-1 bg-black hover:bg-black/90 text-white"
+                variant="outline"
+                className="flex-1 hover:bg-black hover:text-white"
                 onClick={handleDowngradeAgency}
                 disabled={deleting === agencyToDowngrade?.id}
               >
                 {deleting === agencyToDowngrade?.id ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <X className="h-4 w-4 mr-2" />
-                )}
+                ) : null}
                 Downgrade
               </Button>
             </div>
