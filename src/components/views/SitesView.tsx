@@ -1534,13 +1534,30 @@ export function SitesView() {
                 {showSearchDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto">
                     {(() => {
-                      const searchResults = mediaSites.filter(site => 
-                        site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        site.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (site.agency && site.agency.toLowerCase().includes(searchQuery.toLowerCase()))
-                      );
+                      const mediaSiteResults = mediaSites
+                        .filter(site => site.category !== 'Agencies/People') // Exclude agencies from mediaSites
+                        .filter(site => 
+                          site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          site.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (site.agency && site.agency.toLowerCase().includes(searchQuery.toLowerCase()))
+                        );
                       
-                      if (searchResults.length === 0) {
+                      // For non-admin, search through activeAgencies for Agencies/People
+                      const agencyResults = !isAdmin 
+                        ? activeAgencies.filter(agency =>
+                            agency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            agency.link.toLowerCase().includes(searchQuery.toLowerCase())
+                          )
+                        : mediaSites
+                            .filter(site => site.category === 'Agencies/People')
+                            .filter(site => 
+                              site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              site.link.toLowerCase().includes(searchQuery.toLowerCase())
+                            );
+                      
+                      const hasResults = mediaSiteResults.length > 0 || agencyResults.length > 0;
+                      
+                      if (!hasResults) {
                         return (
                           <div className="p-4 text-center text-muted-foreground text-sm">
                             No media sites found for "{searchQuery}"
@@ -1548,57 +1565,136 @@ export function SitesView() {
                         );
                       }
                       
-                      return searchResults.map((site) => (
-                        <div
-                          key={site.id}
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
-                          onClick={() => {
-                            setSelectedMediaSite(site);
-                            setSearchQuery('');
-                            setShowSearchDropdown(false);
-                          }}
-                        >
-                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
-                            {site.favicon ? (
-                              <img 
-                                src={site.favicon} 
-                                alt={`${site.name} logo`} 
-                                className="h-6 w-6 object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <Globe className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{site.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {site.link.replace(/^https?:\/\//, '')}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
-                            {site.price > 0 && (
-                              <span>{site.price} USD</span>
-                            )}
-                            <span>{site.publication_format}</span>
-                            {site.agency && (
-                              <div className="flex items-center gap-1.5">
-                                <span>via</span>
-                                <span className="text-foreground">{site.agency}</span>
-                                {agencyLogos[site.agency] && (
+                      return (
+                        <>
+                          {mediaSiteResults.map((site) => (
+                            <div
+                              key={site.id}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
+                              onClick={() => {
+                                setSelectedMediaSite(site);
+                                setSearchQuery('');
+                                setShowSearchDropdown(false);
+                              }}
+                            >
+                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
+                                {site.favicon ? (
                                   <img 
-                                    src={agencyLogos[site.agency]} 
-                                    alt={site.agency} 
-                                    className="h-4 w-4 object-contain rounded-full"
+                                    src={site.favicon} 
+                                    alt={`${site.name} logo`} 
+                                    className="h-6 w-6 object-contain"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
                                   />
+                                ) : (
+                                  <Globe className="h-4 w-4 text-muted-foreground" />
                                 )}
                               </div>
-                            )}
-                          </div>
-                        </div>
-                      ));
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{site.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {site.link.replace(/^https?:\/\//, '')}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
+                                {site.price > 0 && (
+                                  <span>{site.price} USD</span>
+                                )}
+                                <span>{site.publication_format}</span>
+                                {site.agency && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span>via</span>
+                                    <span className="text-foreground">{site.agency}</span>
+                                    {agencyLogos[site.agency] && (
+                                      <img 
+                                        src={agencyLogos[site.agency]} 
+                                        alt={site.agency} 
+                                        className="h-4 w-4 object-contain rounded-full"
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          {/* Active agencies search results */}
+                          {!isAdmin && agencyResults.map((agency) => (
+                            <div
+                              key={agency.id}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
+                              onClick={() => {
+                                toggleExpand(agency.id);
+                                setActiveMediaCategory('Agencies/People');
+                                setSearchQuery('');
+                                setShowSearchDropdown(false);
+                              }}
+                            >
+                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
+                                {agency.favicon ? (
+                                  <img 
+                                    src={agency.favicon} 
+                                    alt={`${agency.name} logo`} 
+                                    className="h-6 w-6 object-contain"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <Globe className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{agency.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {agency.link.replace(/^https?:\/\//, '')}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
+                                {agency.country && <span>{agency.country}</span>}
+                                <Badge variant="outline" className="text-xs">Agency</Badge>
+                              </div>
+                            </div>
+                          ))}
+                          {/* Admin agencies search results */}
+                          {isAdmin && (agencyResults as MediaSite[]).map((site) => (
+                            <div
+                              key={site.id}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
+                              onClick={() => {
+                                setSelectedMediaSite(site);
+                                setSearchQuery('');
+                                setShowSearchDropdown(false);
+                              }}
+                            >
+                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
+                                {site.favicon ? (
+                                  <img 
+                                    src={site.favicon} 
+                                    alt={`${site.name} logo`} 
+                                    className="h-6 w-6 object-contain"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <Globe className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{site.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {site.link.replace(/^https?:\/\//, '')}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
+                                {site.country && <span>{site.country}</span>}
+                                <Badge variant="outline" className="text-xs">Agency</Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      );
                     })()}
                   </div>
                 )}
