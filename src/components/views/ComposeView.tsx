@@ -174,12 +174,15 @@ export function ComposeView() {
 
   // Fetch categories and tags when site is selected
   useEffect(() => {
+    console.log('[ComposeView] Site effect running - currentSite:', currentSite?.name, 'editingArticle:', editingArticle?.id, 'wpPostId:', editingArticle?.wpPostId);
+    
     if (currentSite) {
       setFetchError(null);
 
       // Fetch categories
       setIsLoadingCategories(true);
       fetchCategories(currentSite).then(categories => {
+        console.log('[ComposeView] Categories fetched:', categories.length);
         setAvailableCategories(categories);
         setIsLoadingCategories(false);
       }).catch(error => {
@@ -192,6 +195,7 @@ export function ComposeView() {
       // Fetch tags
       setIsLoadingTags(true);
       fetchTags(currentSite).then(tags => {
+        console.log('[ComposeView] Tags fetched:', tags.length);
         setAvailableTags(tags);
         setIsLoadingTags(false);
       }).catch(error => {
@@ -202,12 +206,16 @@ export function ComposeView() {
 
       // Fetch SEO data if editing an existing WP post
       if (editingArticle?.wpPostId) {
+        console.log('[ComposeView] Fetching SEO data for wpPostId:', editingArticle.wpPostId);
         fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
+          console.log('[ComposeView] SEO data fetched:', seoData);
           setFocusKeyword(seoData.focusKeyword);
           setMetaDescription(seoData.metaDescription);
         }).catch(error => {
           console.error('Failed to fetch SEO data:', error);
         });
+      } else {
+        console.log('[ComposeView] No wpPostId to fetch SEO data for');
       }
     } else if (!editingArticle) {
       // Only reset when not editing (prevents race condition)
@@ -218,6 +226,8 @@ export function ComposeView() {
       setFocusKeyword('');
       setMetaDescription('');
       setFetchError(null);
+    } else {
+      console.log('[ComposeView] Waiting for currentSite - editingArticle exists but currentSite is undefined');
     }
   }, [currentSite?.id, editingArticle]);
 
