@@ -144,7 +144,7 @@ export function AddMediaSiteDialog({
               
               <div className="flex w-full max-w-full items-center gap-2 overflow-hidden">
                 <div className="flex-1 min-w-0 text-xs text-muted-foreground bg-background rounded px-3 py-2 border border-border overflow-hidden">
-                  <span className="block truncate">{SAMPLE_SHEET_URL}</span>
+                  <span className="block truncate">docs.google.com/spreadsheets/d/1NrwNb...</span>
                 </div>
                 <Button
                   type="button"
