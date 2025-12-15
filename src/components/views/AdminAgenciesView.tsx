@@ -860,6 +860,14 @@ export function AdminAgenciesView() {
           <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleOpenStripeAccountsDialog}
+            className="hover:bg-black hover:text-white"
+          >
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Manage Stripe Accounts
+          </Button>
           <Button
             variant="outline"
             className="bg-black text-white hover:bg-black/80 border-black gap-2"
@@ -872,14 +880,6 @@ export function AdminAgenciesView() {
               <RefreshCw className="h-4 w-4" />
             )}
             {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleOpenStripeAccountsDialog}
-            className="hover:bg-black hover:text-white"
-          >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Manage Stripe Accounts
           </Button>
         </div>
       </div>
