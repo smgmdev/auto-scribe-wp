@@ -968,8 +968,8 @@ export function AgencyMediaView() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <Badge className="text-xs bg-red-500 text-white">
-                                {submission.rejected_media?.length || 0} not imported
+                              <Badge variant="outline" className="text-xs border-orange-500 text-orange-500">
+                                Partially Rejected ({submission.rejected_media?.length || 0})
                               </Badge>
                               <span className="text-xs text-muted-foreground">
                                 {submission.reviewed_at 
