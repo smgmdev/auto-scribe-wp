@@ -873,7 +873,7 @@ export function AdminMediaManagementView() {
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="added">
-                Added Media Sites ({mediaSites.filter(s => s.category !== 'Agencies/People').length})
+                Added Media Sites ({approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0)})
               </TabsTrigger>
               <TabsTrigger value="pending" className="relative">
                 Pending Review ({pendingMediaSubmissions.length})
