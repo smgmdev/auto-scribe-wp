@@ -41,6 +41,15 @@ interface MediaSite {
   about: string | null;
 }
 
+interface ActiveAgency {
+  id: string;
+  name: string;
+  link: string;
+  favicon: string | null;
+  country: string | null;
+  about: string | null;
+}
+
 type SelectedSite = WPSite | MediaSite | null;
 
 const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
@@ -51,7 +60,7 @@ const Landing = () => {
   const { user, loading: authLoading } = useAuth();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
-  const [activeAgencyNames, setActiveAgencyNames] = useState<Set<string>>(new Set());
+  const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,14 +124,47 @@ const Landing = () => {
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
 
-        // Fetch active agencies (onboarding_complete = true)
+        // Fetch active agencies from agency_payouts + agency_applications
         const { data: activeAgenciesData } = await supabase
           .from('agency_payouts')
-          .select('agency_name')
-          .eq('onboarding_complete', true);
+          .select('id, agency_name, user_id')
+          .eq('onboarding_complete', true)
+          .eq('downgraded', false);
         
-        if (activeAgenciesData) {
-          setActiveAgencyNames(new Set(activeAgenciesData.map(a => a.agency_name)));
+        if (activeAgenciesData && activeAgenciesData.length > 0) {
+          const agencyNames = activeAgenciesData.map(a => a.agency_name);
+          const { data: appData } = await supabase
+            .from('agency_applications')
+            .select('agency_name, agency_website, country, logo_url')
+            .in('agency_name', agencyNames)
+            .eq('status', 'approved');
+          
+          const agencies: ActiveAgency[] = [];
+          if (appData) {
+            for (const app of appData) {
+              let logoUrl: string | null = null;
+              if (app.logo_url) {
+                const { data: signed } = await supabase.storage
+                  .from('agency-documents')
+                  .createSignedUrl(app.logo_url, 3600);
+                if (signed?.signedUrl) {
+                  logoUrl = signed.signedUrl;
+                }
+              }
+              const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
+              agencies.push({
+                id: payoutRecord?.id || app.agency_name,
+                name: app.agency_name,
+                link: app.agency_website || '',
+                favicon: logoUrl,
+                country: app.country || null,
+                about: null
+              });
+            }
+          }
+          setActiveAgencies(agencies);
+        } else {
+          setActiveAgencies([]);
         }
 
         // Fetch agency logos from agency_applications table
@@ -231,12 +273,34 @@ const Landing = () => {
   }, [mediaSites, activeTab]);
 
   const modalMediaSites = useMemo(() => {
-    let filtered = mediaSites.filter(site => site.category === activeTab);
-    
-    // For Agencies/People tab, only show active agencies
+    // For Agencies/People tab, use activeAgencies directly
     if (activeTab === 'Agencies/People') {
-      filtered = filtered.filter(site => activeAgencyNames.has(site.name));
+      let filtered = activeAgencies.map(agency => ({
+        id: agency.id,
+        name: agency.name,
+        link: agency.link,
+        favicon: agency.favicon,
+        price: 0,
+        publication_format: '',
+        category: 'Agencies/People' as string,
+        subcategory: null,
+        agency: null,
+        about: agency.about,
+        country: agency.country
+      } as MediaSite & { country?: string | null }));
+      
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(site => 
+          site.name.toLowerCase().includes(query) ||
+          site.link.toLowerCase().includes(query)
+        );
+      }
+      
+      return filtered;
     }
+    
+    let filtered = mediaSites.filter(site => site.category === activeTab);
     
     if (activeSubcategory) {
       filtered = filtered.filter(site => {
@@ -256,7 +320,7 @@ const Landing = () => {
     }
     
     return filtered;
-  }, [mediaSites, activeTab, activeSubcategory, searchQuery, activeAgencyNames]);
+  }, [mediaSites, activeTab, activeSubcategory, searchQuery, activeAgencies]);
 
   // Helper function to shuffle array randomly
   const shuffleArray = <T,>(array: T[]): T[] => {
