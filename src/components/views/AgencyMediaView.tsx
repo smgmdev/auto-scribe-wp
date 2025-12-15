@@ -85,6 +85,7 @@ export function AgencyMediaView() {
   const [approvedMediaSubmissions, setApprovedMediaSubmissions] = useState<ApprovedMediaSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState<string | null>(null);
+  const [agencyLogo, setAgencyLogo] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('wordpress');
   const [wpSubTab, setWpSubTab] = useState('connected');
   const [mediaSubTab, setMediaSubTab] = useState('added');
@@ -113,7 +114,25 @@ export function AgencyMediaView() {
 
     setAgencyName(agencyData.agency_name);
 
-    // Fetch media sites associated with this agency
+    // Fetch agency logo from agency_applications
+    const { data: appData } = await supabase
+      .from('agency_applications')
+      .select('logo_url')
+      .eq('user_id', user.id)
+      .eq('status', 'approved')
+      .maybeSingle();
+
+    if (appData?.logo_url) {
+      // Generate signed URL for the logo
+      const { data: signedUrlData } = await supabase.storage
+        .from('agency-documents')
+        .createSignedUrl(appData.logo_url.replace('agency-documents/', ''), 3600);
+      
+      if (signedUrlData?.signedUrl) {
+        setAgencyLogo(signedUrlData.signedUrl);
+      }
+    }
+
     const { data: mediaData, error: mediaError } = await supabase
       .from('media_sites')
       .select('*')
@@ -675,6 +694,20 @@ export function AgencyMediaView() {
                                           <div className="w-[100px] flex justify-start">
                                             <span className="text-xs text-muted-foreground">{site.publication_format}</span>
                                           </div>
+                                          {/* Agency info */}
+                                          {agencyName && (
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                              <span>via</span>
+                                              <span className="text-foreground">{agencyName}</span>
+                                              {agencyLogo && (
+                                                <img 
+                                                  src={agencyLogo} 
+                                                  alt={agencyName} 
+                                                  className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                />
+                                              )}
+                                            </div>
+                                          )}
                                           <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                             {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                           </div>
