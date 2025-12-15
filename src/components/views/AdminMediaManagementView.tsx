@@ -1017,13 +1017,13 @@ export function AdminMediaManagementView() {
                                 <CheckCircle className="h-4 w-4 text-green-500" />
                               )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-muted-foreground">
+                            <div className="flex-1 min-w-0 max-w-[400px]">
+                              <p className="text-xs text-muted-foreground truncate">
                                 {submission.rejected_media && submission.rejected_media.length > 0 
                                   ? 'Partially Approved Media Sheet' 
                                   : 'Approved Media Sheet'}
                               </p>
-                              <p className="font-medium text-sm">{submission.agency_name}</p>
+                              <p className="font-medium text-sm truncate">{submission.agency_name}</p>
                               {submission.reply_sheet_url && (
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -1058,7 +1058,7 @@ export function AdminMediaManagementView() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-2 shrink-0 ml-auto">
                               <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
                                 Approved
                               </Badge>
