@@ -79,21 +79,27 @@ export function ComposeView() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedSite, setSelectedSite] = useState<string>(editingArticle?.publishedTo || '');
-  const [featuredImage, setFeaturedImage] = useState<FeaturedImage>({
-    file: null,
-    title: '',
-    caption: '',
-    altText: '',
-    description: ''
+  const [featuredImage, setFeaturedImage] = useState<FeaturedImage>(() => {
+    if (editingArticle?.featuredImage?.url) {
+      return {
+        file: null,
+        url: editingArticle.featuredImage.url,
+        title: editingArticle.featuredImage.title || '',
+        caption: editingArticle.featuredImage.caption || '',
+        altText: editingArticle.featuredImage.altText || '',
+        description: editingArticle.featuredImage.description || ''
+      };
+    }
+    return { file: null, title: '', caption: '', altText: '', description: '' };
   });
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(editingArticle?.featuredImage?.url || null);
   const [isDragging, setIsDragging] = useState(false);
 
   // Categories and Tags state
   const [availableCategories, setAvailableCategories] = useState<WPCategory[]>([]);
   const [availableTags, setAvailableTags] = useState<WPTag[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>(editingArticle?.categories || []);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>(editingArticle?.tagIds || []);
   const [newTagInput, setNewTagInput] = useState('');
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
