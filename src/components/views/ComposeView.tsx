@@ -194,6 +194,9 @@ export function ComposeView() {
       // Fetch tags
       setIsLoadingTags(true);
       fetchTags(currentSite).then(tags => {
+        console.log('Fetched tags:', tags);
+        console.log('Selected tag IDs:', selectedTagIds);
+        console.log('Matching tags:', tags.filter(t => selectedTagIds.includes(t.id)));
         setAvailableTags(tags);
         setIsLoadingTags(false);
       }).catch(error => {
