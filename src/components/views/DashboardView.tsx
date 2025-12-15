@@ -139,20 +139,7 @@ export function DashboardView() {
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {isAgency ? (
-          <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-green-400">Agency Verified</span>
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">Your agency account is fully verified</p>
-              </div>
-            </div>
-          </div>
+          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Active</Badge>
         ) : (
           <Badge className="bg-black text-white border-black hover:bg-black">
             {isAdmin ? 'Corporate' : 'Regular user'}
