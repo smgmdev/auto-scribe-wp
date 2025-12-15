@@ -310,7 +310,7 @@ export function AgencyMediaView() {
           <TabsTrigger value="media" className="relative">
             Media Sites
             {pendingMediaSubmissions.length > 0 && (
-              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-yellow-500 text-white rounded-full flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                 {pendingMediaSubmissions.length}
               </span>
             )}
@@ -328,7 +328,7 @@ export function AgencyMediaView() {
               <TabsTrigger value="pending" className="relative">
                 Pending Review ({pendingSubmissions.length})
                 {pendingSubmissions.length > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-yellow-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {pendingSubmissions.length}
                   </span>
                 )}
@@ -522,7 +522,7 @@ export function AgencyMediaView() {
               <TabsTrigger value="pending" className="relative">
                 Pending Review ({pendingMediaSubmissions.length})
                 {pendingMediaSubmissions.length > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-yellow-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {pendingMediaSubmissions.length}
                   </span>
                 )}
