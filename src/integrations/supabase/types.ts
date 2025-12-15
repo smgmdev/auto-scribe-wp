@@ -816,6 +816,51 @@ export type Database = {
         }
         Relationships: []
       }
+      wordpress_site_submissions: {
+        Row: {
+          admin_notes: string | null
+          app_password: string
+          created_at: string
+          id: string
+          name: string
+          reviewed_at: string | null
+          seo_plugin: string
+          status: string
+          updated_at: string
+          url: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          app_password: string
+          created_at?: string
+          id?: string
+          name: string
+          reviewed_at?: string | null
+          seo_plugin?: string
+          status?: string
+          updated_at?: string
+          url: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          admin_notes?: string | null
+          app_password?: string
+          created_at?: string
+          id?: string
+          name?: string
+          reviewed_at?: string | null
+          seo_plugin?: string
+          status?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
       wordpress_sites: {
         Row: {
           app_password: string
