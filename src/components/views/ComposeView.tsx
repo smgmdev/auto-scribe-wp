@@ -69,9 +69,6 @@ export function ComposeView() {
     toast
   } = useToast();
   
-  // Debug logging
-  console.log('[ComposeView] Mount/render, editingArticle:', editingArticle?.id, 'categories:', editingArticle?.categories, 'tagIds:', editingArticle?.tagIds);
-  
   // Site credits state
   const [siteCredits, setSiteCredits] = useState<SiteCredit[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,8 +113,6 @@ export function ComposeView() {
 
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
-  
-  console.log('[ComposeView] State after init - selectedSite:', selectedSite, 'currentSite:', currentSite?.name, 'selectedCategories:', selectedCategories, 'selectedTagIds:', selectedTagIds);
 
   // Fetch site credits on mount
   useEffect(() => {
@@ -226,12 +221,8 @@ export function ComposeView() {
     }
   }, [currentSite?.id, editingArticle]);
 
-  // Clear editing article on unmount
-  useEffect(() => {
-    return () => {
-      setEditingArticle(null);
-    };
-  }, [setEditingArticle]);
+  // Don't clear editingArticle on unmount - it causes issues with remounting
+  // The article should be cleared when user explicitly creates a new article
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
