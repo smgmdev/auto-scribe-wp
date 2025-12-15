@@ -436,9 +436,9 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
                   <li>Title → Title Format (delete everything)</li>
                   <li>Alt Tag → Alt Tag Format (delete everything)</li>
                   <li>Caption → Caption Format (delete everything)</li>
-                  <li>Autogenerate Caption on Upload (disabled)</li>
+                  <li>Caption → Autogenerate Caption on Upload (disabled)</li>
                   <li>Description → Description Format (delete everything)</li>
-                  <li>Autogenerate Description on Upload (disabled)</li>
+                  <li>Description → Autogenerate Description on Upload (disabled)</li>
                 </ul>
                 
                 {/* AIOSEO Settings Checkbox */}
