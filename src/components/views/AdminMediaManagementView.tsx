@@ -1414,8 +1414,8 @@ export function AdminMediaManagementView() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
-                                <Badge variant="outline" className="text-xs border-red-500 text-red-500 bg-red-500/10">
-                                  Rejected ({rejectedItems.length})
+                                <Badge variant="outline" className="text-xs border-orange-500 text-orange-500">
+                                  Partially Rejected ({rejectedItems.length})
                                 </Badge>
                                 <span className="text-xs text-muted-foreground">
                                   {submission.reviewed_at 
