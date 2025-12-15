@@ -1008,6 +1008,11 @@ export function AdminMediaManagementView() {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
+                              <p className="text-xs text-muted-foreground">
+                                {submission.rejected_media && submission.rejected_media.length > 0 
+                                  ? 'Partially Approved Media Sheet' 
+                                  : 'Approved Media Sheet'}
+                              </p>
                               <p className="font-medium text-sm">{submission.agency_name}</p>
                               {submission.reply_sheet_url && (
                                 <div className="flex items-center gap-2 mt-1">
@@ -1240,6 +1245,7 @@ export function AdminMediaManagementView() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground">Media Sheet Submitted</p>
                           <p className="font-medium text-sm">{submission.agency_name}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -1373,6 +1379,7 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
+                                <p className="text-xs text-muted-foreground">Partially Rejected Media Sheet</p>
                                 <p className="font-medium text-sm">{submission.agency_name}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -1498,6 +1505,7 @@ export function AdminMediaManagementView() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
                           <p className="font-medium text-sm">{submission.agency_name}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-muted-foreground truncate max-w-[200px]">
