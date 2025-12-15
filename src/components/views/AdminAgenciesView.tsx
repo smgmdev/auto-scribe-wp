@@ -1488,7 +1488,7 @@ export function AdminAgenciesView() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-orange-500/20 hover:text-orange-500"
+                                  className="h-8 w-8 hover:bg-black hover:text-white"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleOpenDowngradeDialog(agency);
@@ -1499,7 +1499,7 @@ export function AdminAgenciesView() {
                                   {deleting === agency.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <ArrowDownCircle className="h-4 w-4" />
+                                    <X className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
@@ -1608,7 +1608,7 @@ export function AdminAgenciesView() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-orange-500/20 hover:text-orange-500"
+                                  className="h-8 w-8 hover:bg-black hover:text-white"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleOpenDowngradeDialog(agency);
@@ -1619,7 +1619,7 @@ export function AdminAgenciesView() {
                                   {deleting === agency.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <ArrowDownCircle className="h-4 w-4" />
+                                    <X className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
