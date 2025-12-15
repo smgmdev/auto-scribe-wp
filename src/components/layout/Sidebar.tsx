@@ -258,27 +258,37 @@ export function Sidebar({
         setHasStripeAccount(!!agencyData.stripe_account_id);
         setPayoutMethod(agencyData.payout_method);
         
-        // Fetch agency media notification counts if onboarded
-        if (agencyData.onboarding_complete === true) {
-          // Count pending WP submissions for this agency user
-          const { count: wpPendingCount } = await supabase
-            .from('wordpress_site_submissions')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('status', 'pending');
-          
-          // Count pending media site submissions for this agency user
-          const { count: mediaPendingCount } = await supabase
-            .from('media_site_submissions')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('status', 'pending');
-          
-          if (isMounted) {
-            setAgencyUnreadWpSubmissionsCount(wpPendingCount || 0);
-            setAgencyUnreadMediaSubmissionsCount(mediaPendingCount || 0);
+          // Fetch agency media notification counts if onboarded
+          // Count unread submissions after admin action (approved/rejected with read: false)
+          if (agencyData.onboarding_complete === true) {
+            // Count unread rejected WP submissions for this agency user
+            const { count: wpRejectedCount } = await supabase
+              .from('wordpress_site_submissions')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', user.id)
+              .eq('status', 'rejected')
+              .eq('read', false);
+            
+            // Count unread approved + rejected media site submissions for this agency user
+            const { count: mediaApprovedCount } = await supabase
+              .from('media_site_submissions')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', user.id)
+              .eq('status', 'approved')
+              .eq('read', false);
+            
+            const { count: mediaRejectedCount } = await supabase
+              .from('media_site_submissions')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', user.id)
+              .eq('status', 'rejected')
+              .eq('read', false);
+            
+            if (isMounted) {
+              setAgencyUnreadWpSubmissionsCount(wpRejectedCount || 0);
+              setAgencyUnreadMediaSubmissionsCount((mediaApprovedCount || 0) + (mediaRejectedCount || 0));
+            }
           }
-        }
       }
 
       // Check custom verification status for custom payout users
