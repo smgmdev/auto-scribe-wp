@@ -864,7 +864,9 @@ export type Database = {
           app_password: string
           created_at: string
           id: string
+          logo_url: string | null
           name: string
+          price: number | null
           read: boolean
           reviewed_at: string | null
           seo_plugin: string
@@ -879,7 +881,9 @@ export type Database = {
           app_password: string
           created_at?: string
           id?: string
+          logo_url?: string | null
           name: string
+          price?: number | null
           read?: boolean
           reviewed_at?: string | null
           seo_plugin?: string
@@ -894,7 +898,9 @@ export type Database = {
           app_password?: string
           created_at?: string
           id?: string
+          logo_url?: string | null
           name?: string
+          price?: number | null
           read?: boolean
           reviewed_at?: string | null
           seo_plugin?: string
