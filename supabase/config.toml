@@ -99,3 +99,9 @@ verify_jwt = true
 
 [functions.notify-admin-wp-submission]
 verify_jwt = true
+
+[functions.delete-wordpress-post]
+verify_jwt = true
+
+[functions.send-rejection-email]
+verify_jwt = true
