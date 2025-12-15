@@ -204,6 +204,7 @@ export type Database = {
           agency_name: string
           commission_percentage: number
           created_at: string
+          downgraded: boolean
           email: string | null
           id: string
           invite_sent_at: string | null
@@ -219,6 +220,7 @@ export type Database = {
           agency_name: string
           commission_percentage?: number
           created_at?: string
+          downgraded?: boolean
           email?: string | null
           id?: string
           invite_sent_at?: string | null
@@ -234,6 +236,7 @@ export type Database = {
           agency_name?: string
           commission_percentage?: number
           created_at?: string
+          downgraded?: boolean
           email?: string | null
           id?: string
           invite_sent_at?: string | null
