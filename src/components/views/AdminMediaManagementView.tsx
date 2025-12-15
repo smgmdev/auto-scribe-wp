@@ -1065,7 +1065,7 @@ export function AdminMediaManagementView() {
                               <Badge variant="secondary" className="text-xs w-[60px] justify-center">
                                 {submission.imported_sites?.length || 0} sites
                               </Badge>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-muted-foreground w-[140px] text-right">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                   : 'N/A'}
