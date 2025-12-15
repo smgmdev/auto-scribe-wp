@@ -135,8 +135,10 @@ export function AdminMediaManagementView() {
   // Expanded sites state
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   
-  // Agency logos state
+  // Agency logos state (keyed by agency_name for media sites)
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
+  // WP logos state (keyed by user_id for WP submissions)
+  const [wpAgencyLogos, setWpAgencyLogos] = useState<Record<string, string>>({});
   const [loadingLogos, setLoadingLogos] = useState<Set<string>>(new Set());
   const [loadedLogos, setLoadedLogos] = useState<Set<string>>(new Set());
 
@@ -207,6 +209,39 @@ export function AdminMediaManagementView() {
     }
   };
 
+  // Fetch agency logos by user_id (for WP submissions)
+  const fetchWpAgencyLogos = async (userIds: string[]) => {
+    if (userIds.length === 0) return;
+
+    const uniqueUserIds = [...new Set(userIds)];
+
+    const { data, error } = await supabase
+      .from('agency_applications')
+      .select('user_id, logo_url')
+      .in('user_id', uniqueUserIds)
+      .not('logo_url', 'is', null);
+
+    if (error || !data || data.length === 0) return;
+
+    // Create signed URLs for each logo
+    const logos: Record<string, string> = {};
+    await Promise.all(
+      data.map(async (row) => {
+        if (!row?.user_id || !row?.logo_url) return;
+        const { data: signed, error: signError } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(row.logo_url, 3600);
+        if (!signError && signed?.signedUrl) {
+          logos[row.user_id] = signed.signedUrl;
+        }
+      })
+    );
+
+    if (Object.keys(logos).length > 0) {
+      setWpAgencyLogos((prev) => ({ ...prev, ...logos }));
+    }
+  };
+
   // Handle logo load completion
   const handleLogoLoad = (agencyName: string) => {
     setLoadingLogos(prev => {
@@ -260,6 +295,15 @@ export function AdminMediaManagementView() {
 
     if (rejected) setRejectedSubmissions(rejected);
 
+    // Fetch agency logos for WP submissions by user_id
+    const allWpUserIds = [
+      ...(pending || []).map((s: any) => s.user_id),
+      ...(rejected || []).map((s: any) => s.user_id),
+    ];
+    if (allWpUserIds.length > 0) {
+      fetchWpAgencyLogos(allWpUserIds);
+    }
+
     // Fetch approved/connected WordPress sites (those with user_id = agency sites)
     const { data: approved } = await supabase
       .from('wordpress_sites')
@@ -267,7 +311,14 @@ export function AdminMediaManagementView() {
       .not('user_id', 'is', null)
       .order('created_at', { ascending: false });
 
-    if (approved) setApprovedSites(approved);
+    if (approved) {
+      setApprovedSites(approved);
+      // Also fetch logos for approved sites
+      const approvedUserIds = approved.map((s: any) => s.user_id).filter(Boolean);
+      if (approvedUserIds.length > 0) {
+        fetchWpAgencyLogos(approvedUserIds);
+      }
+    }
 
     // Fetch all media sites (added/approved)
     const { data: mediaData } = await supabase
@@ -833,30 +884,48 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {approvedSites.map((site, index) => (
-                    <Card 
-                      key={site.id} 
-                      className="group hover:shadow-md transition-all duration-300"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                              {site.favicon ? (
-                                <img 
-                                  src={site.favicon} 
-                                  alt={`${site.name} favicon`} 
-                                  className="h-5 w-5 object-contain"
-                                />
-                              ) : (
-                                <Globe className="h-4 w-4 text-muted-foreground" />
-                              )}
+                  {approvedSites.map((site, index) => {
+                    const logoUrl = site.user_id ? wpAgencyLogos[site.user_id] : null;
+                    const isLogoLoading = site.user_id ? loadingLogos.has(site.user_id) : false;
+                    const isLogoLoaded = site.user_id ? loadedLogos.has(site.user_id) : false;
+                    
+                    return (
+                      <Card 
+                        key={site.id} 
+                        className="group hover:shadow-md transition-all duration-300"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10">
+                                {logoUrl ? (
+                                  <>
+                                    {(!isLogoLoaded || isLogoLoading) && (
+                                      <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
+                                    )}
+                                    <img 
+                                      src={logoUrl} 
+                                      alt="Agency logo"
+                                      className={`h-9 w-9 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                      onLoad={() => handleLogoLoad(site.user_id!)}
+                                      onError={() => handleLogoLoad(site.user_id!)}
+                                    />
+                                  </>
+                                ) : site.favicon ? (
+                                  <img 
+                                    src={site.favicon} 
+                                    alt={`${site.name} favicon`} 
+                                    className="h-5 w-5 object-contain"
+                                  />
+                                ) : (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-sm truncate">{site.name}</h3>
+                              </div>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm truncate">{site.name}</h3>
-                            </div>
-                          </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <Badge variant="outline" className="text-xs">
                               {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
@@ -879,7 +948,8 @@ export function AdminMediaManagementView() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
@@ -897,19 +967,39 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {pendingSubmissions.map((submission, index) => (
-                    <div 
-                      key={submission.id} 
-                      className={`relative flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
-                      style={{ animationDelay: `${index * 50}ms` }}
-                      onClick={() => handleOpenReview(submission)}
-                    >
-                      {!submission.read && (
-                        <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
-                      )}
-                      <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
-                        <Clock className="h-4 w-4 text-yellow-500" />
-                      </div>
+                  {pendingSubmissions.map((submission, index) => {
+                    const logoUrl = wpAgencyLogos[submission.user_id];
+                    const isLogoLoading = loadingLogos.has(submission.user_id);
+                    const isLogoLoaded = loadedLogos.has(submission.user_id);
+                    
+                    return (
+                      <div 
+                        key={submission.id} 
+                        className={`relative flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
+                        style={{ animationDelay: `${index * 50}ms` }}
+                        onClick={() => handleOpenReview(submission)}
+                      >
+                        {!submission.read && (
+                          <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
+                        )}
+                        <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          {logoUrl ? (
+                            <>
+                              {(!isLogoLoaded || isLogoLoading) && (
+                                <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
+                              )}
+                              <img 
+                                src={logoUrl} 
+                                alt="Agency logo"
+                                className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                onLoad={() => handleLogoLoad(submission.user_id)}
+                                onError={() => handleLogoLoad(submission.user_id)}
+                              />
+                            </>
+                          ) : (
+                            <Clock className="h-4 w-4 text-yellow-500" />
+                          )}
+                        </div>
                       <div className="flex-1 min-w-0 max-w-[400px]">
                         <p className="text-xs text-muted-foreground">WordPress Site Submitted</p>
                         <p className="font-medium text-sm">{submission.name}</p>
@@ -959,7 +1049,8 @@ export function AdminMediaManagementView() {
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
@@ -977,40 +1068,61 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {rejectedSubmissions.map((submission, index) => (
-                    <Card 
-                      key={submission.id} 
-                      className="group hover:shadow-md transition-all duration-300"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
-                              <XCircle className="h-4 w-4 text-red-500" />
+                  {rejectedSubmissions.map((submission, index) => {
+                    const logoUrl = wpAgencyLogos[submission.user_id];
+                    const isLogoLoading = loadingLogos.has(submission.user_id);
+                    const isLogoLoaded = loadedLogos.has(submission.user_id);
+                    
+                    return (
+                      <Card 
+                        key={submission.id} 
+                        className="group hover:shadow-md transition-all duration-300"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
+                                {logoUrl ? (
+                                  <>
+                                    {(!isLogoLoaded || isLogoLoading) && (
+                                      <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                                    )}
+                                    <img 
+                                      src={logoUrl} 
+                                      alt="Agency logo"
+                                      className={`h-9 w-9 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                      onLoad={() => handleLogoLoad(submission.user_id)}
+                                      onError={() => handleLogoLoad(submission.user_id)}
+                                    />
+                                  </>
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-red-500" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-sm truncate">{submission.name}</h3>
+                                {submission.admin_notes && (
+                                  <p className="text-xs text-red-500 truncate">Reason: {submission.admin_notes}</p>
+                                )}
+                              </div>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm truncate">{submission.name}</h3>
-                              {submission.admin_notes && (
-                                <p className="text-xs text-red-500 truncate">Reason: {submission.admin_notes}</p>
-                              )}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Badge variant="outline" className="text-xs">
+                                {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                                Rejected
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                              </span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Badge variant="outline" className="text-xs">
-                              {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                              Rejected
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
