@@ -2583,7 +2583,7 @@ export function AdminAgenciesView() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserMinus className="h-5 w-5 text-orange-500" />
+              <X className="h-5 w-5" />
               Downgrade Agency
             </DialogTitle>
           </DialogHeader>
@@ -2597,12 +2597,13 @@ export function AdminAgenciesView() {
               <p>• The account will be downgraded to a normal user account</p>
               <p>• All data will stay in the system</p>
               <p>• The user can re-apply to become an agency later</p>
+              <p>• Agency account can still be restored</p>
             </div>
             
             <div className="flex gap-3 pt-2">
               <Button
                 variant="outline"
-                className="flex-1"
+                className="flex-1 hover:bg-black hover:text-white"
                 onClick={() => {
                   setShowDowngradeDialog(false);
                   setAgencyToDowngrade(null);
@@ -2612,14 +2613,14 @@ export function AdminAgenciesView() {
               </Button>
               <Button
                 variant="default"
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                className="flex-1 bg-black hover:bg-black/90 text-white"
                 onClick={handleDowngradeAgency}
                 disabled={deleting === agencyToDowngrade?.id}
               >
                 {deleting === agencyToDowngrade?.id ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
-                  <UserMinus className="h-4 w-4 mr-2" />
+                  <X className="h-4 w-4 mr-2" />
                 )}
                 Downgrade
               </Button>
