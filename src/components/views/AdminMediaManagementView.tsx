@@ -215,24 +215,34 @@ export function AdminMediaManagementView() {
 
     const uniqueUserIds = [...new Set(userIds)];
 
+    // Get the most recent approved or pending application for each user
     const { data, error } = await supabase
       .from('agency_applications')
-      .select('user_id, logo_url')
+      .select('user_id, logo_url, status, created_at')
       .in('user_id', uniqueUserIds)
-      .not('logo_url', 'is', null);
+      .not('logo_url', 'is', null)
+      .in('status', ['approved', 'pending'])
+      .order('created_at', { ascending: false });
 
     if (error || !data || data.length === 0) return;
+
+    // Get only the most recent application per user_id
+    const latestByUser: Record<string, string> = {};
+    data.forEach((row) => {
+      if (row?.user_id && row?.logo_url && !latestByUser[row.user_id]) {
+        latestByUser[row.user_id] = row.logo_url;
+      }
+    });
 
     // Create signed URLs for each logo
     const logos: Record<string, string> = {};
     await Promise.all(
-      data.map(async (row) => {
-        if (!row?.user_id || !row?.logo_url) return;
+      Object.entries(latestByUser).map(async ([userId, logoUrl]) => {
         const { data: signed, error: signError } = await supabase.storage
           .from('agency-documents')
-          .createSignedUrl(row.logo_url, 3600);
+          .createSignedUrl(logoUrl, 3600);
         if (!signError && signed?.signedUrl) {
-          logos[row.user_id] = signed.signedUrl;
+          logos[userId] = signed.signedUrl;
         }
       })
     );
