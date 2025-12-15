@@ -88,6 +88,11 @@ export function AdminMediaManagementView() {
   
   // Expanded sites state
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
+  
+  // Agency logos state
+  const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
+  const [loadingLogos, setLoadingLogos] = useState<Set<string>>(new Set());
+  const [loadedLogos, setLoadedLogos] = useState<Set<string>>(new Set());
 
   const toggleExpand = (siteId: string) => {
     setExpandedSites(prev => {
@@ -99,6 +104,53 @@ export function AdminMediaManagementView() {
       }
       return next;
     });
+  };
+
+  // Fetch agency logos based on agency names
+  const fetchAgencyLogos = async (agencyNames: string[]) => {
+    if (agencyNames.length === 0) return;
+    
+    const uniqueNames = [...new Set(agencyNames)];
+    const { data } = await supabase
+      .from('agency_applications')
+      .select('agency_name, logo_url')
+      .in('agency_name', uniqueNames)
+      .not('logo_url', 'is', null);
+    
+    if (data) {
+      const logos: Record<string, string> = {};
+      data.forEach(app => {
+        if (app.logo_url) {
+          logos[app.agency_name] = app.logo_url;
+        }
+      });
+      setAgencyLogos(prev => ({ ...prev, ...logos }));
+    }
+  };
+
+  // Handle logo load completion
+  const handleLogoLoad = (agencyName: string) => {
+    setLoadingLogos(prev => {
+      const next = new Set(prev);
+      next.delete(agencyName);
+      return next;
+    });
+    setLoadedLogos(prev => {
+      const next = new Set(prev);
+      next.add(agencyName);
+      return next;
+    });
+  };
+
+  // Handle logo load start
+  const handleLogoLoadStart = (agencyName: string) => {
+    if (!loadedLogos.has(agencyName)) {
+      setLoadingLogos(prev => {
+        const next = new Set(prev);
+        next.add(agencyName);
+        return next;
+      });
+    }
   };
 
   const fetchData = async () => {
@@ -146,7 +198,12 @@ export function AdminMediaManagementView() {
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (pendingMedia) setPendingMediaSubmissions(pendingMedia);
+    if (pendingMedia) {
+      setPendingMediaSubmissions(pendingMedia);
+      // Fetch logos for pending submissions
+      const agencyNames = pendingMedia.map(s => s.agency_name);
+      fetchAgencyLogos(agencyNames);
+    }
 
     // Fetch rejected media site submissions
     const { data: rejectedMedia } = await supabase
@@ -155,7 +212,12 @@ export function AdminMediaManagementView() {
       .eq('status', 'rejected')
       .order('reviewed_at', { ascending: false });
 
-    if (rejectedMedia) setRejectedMediaSubmissions(rejectedMedia);
+    if (rejectedMedia) {
+      setRejectedMediaSubmissions(rejectedMedia);
+      // Fetch logos for rejected submissions
+      const agencyNames = rejectedMedia.map(s => s.agency_name);
+      fetchAgencyLogos(agencyNames);
+    }
 
     setLoading(false);
   };
@@ -656,57 +718,83 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {pendingMediaSubmissions.map((submission, index) => (
-                    <div 
-                      key={submission.id} 
-                      className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-yellow-500/50 bg-card hover:border-[#4771d9] transition-all duration-300"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
-                        <Clock className="h-4 w-4 text-yellow-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{submission.agency_name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                            {submission.google_sheet_url.length > 40 
-                              ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                              : submission.google_sheet_url}
-                          </p>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(submission.google_sheet_url);
-                              toast({
-                                title: 'Copied',
-                                description: 'Link copied to clipboard',
-                              });
-                            }}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Copy link"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </button>
-                          <a
-                            href={submission.google_sheet_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Open link"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
+                  {pendingMediaSubmissions.map((submission, index) => {
+                    const logoUrl = agencyLogos[submission.agency_name];
+                    const isLogoLoading = loadingLogos.has(submission.agency_name);
+                    const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                    
+                    return (
+                      <div 
+                        key={submission.id} 
+                        className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-yellow-500/50 bg-card hover:border-[#4771d9] transition-all duration-300"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          {logoUrl ? (
+                            <>
+                              {(!isLogoLoaded || isLogoLoading) && (
+                                <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
+                              )}
+                              <img 
+                                src={logoUrl} 
+                                alt={`${submission.agency_name} logo`}
+                                className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                onLoad={() => handleLogoLoad(submission.agency_name)}
+                                onError={() => handleLogoLoad(submission.agency_name)}
+                                ref={(el) => {
+                                  if (el && !isLogoLoaded) {
+                                    handleLogoLoadStart(submission.agency_name);
+                                  }
+                                }}
+                              />
+                            </>
+                          ) : (
+                            <Clock className="h-4 w-4 text-yellow-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{submission.agency_name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {submission.google_sheet_url.length > 40 
+                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                : submission.google_sheet_url}
+                            </p>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(submission.google_sheet_url);
+                                toast({
+                                  title: 'Copied',
+                                  description: 'Link copied to clipboard',
+                                });
+                              }}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Copy link"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                            <a
+                              href={submission.google_sheet_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Open link"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                            Pending
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(submission.created_at).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                          Pending
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(submission.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
@@ -724,60 +812,86 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {rejectedMediaSubmissions.map((submission, index) => (
-                    <div 
-                      key={submission.id} 
-                      className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{submission.agency_name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                            {submission.google_sheet_url.length > 40 
-                              ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                              : submission.google_sheet_url}
-                          </p>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(submission.google_sheet_url);
-                              toast({
-                                title: 'Copied',
-                                description: 'Link copied to clipboard',
-                              });
-                            }}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Copy link"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </button>
-                          <a
-                            href={submission.google_sheet_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Open link"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
+                  {rejectedMediaSubmissions.map((submission, index) => {
+                    const logoUrl = agencyLogos[submission.agency_name];
+                    const isLogoLoading = loadingLogos.has(submission.agency_name);
+                    const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                    
+                    return (
+                      <div 
+                        key={submission.id} 
+                        className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          {logoUrl ? (
+                            <>
+                              {(!isLogoLoaded || isLogoLoading) && (
+                                <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                              )}
+                              <img 
+                                src={logoUrl} 
+                                alt={`${submission.agency_name} logo`}
+                                className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                onLoad={() => handleLogoLoad(submission.agency_name)}
+                                onError={() => handleLogoLoad(submission.agency_name)}
+                                ref={(el) => {
+                                  if (el && !isLogoLoaded) {
+                                    handleLogoLoadStart(submission.agency_name);
+                                  }
+                                }}
+                              />
+                            </>
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-500" />
+                          )}
                         </div>
-                        {submission.admin_notes && (
-                          <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{submission.agency_name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {submission.google_sheet_url.length > 40 
+                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                : submission.google_sheet_url}
+                            </p>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(submission.google_sheet_url);
+                                toast({
+                                  title: 'Copied',
+                                  description: 'Link copied to clipboard',
+                                });
+                              }}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Copy link"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                            <a
+                              href={submission.google_sheet_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Open link"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                          {submission.admin_notes && (
+                            <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                            Rejected
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                          Rejected
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
