@@ -199,11 +199,26 @@ export function ComposeView() {
     }
   }, [currentSite?.id, editingArticle]);
 
-  // Pre-populate image preview if editing
+  // Sync all form fields when editingArticle changes
   useEffect(() => {
-    if (editingArticle?.featuredImage?.url) {
-      setImagePreview(editingArticle.featuredImage.url);
-      setFeaturedImage(editingArticle.featuredImage);
+    if (editingArticle) {
+      setTitle(editingArticle.title || '');
+      setContent(editingArticle.content || '');
+      setTone(editingArticle.tone || 'neutral');
+      setSelectedSite(editingArticle.publishedTo || '');
+      
+      // Set featured image with all metadata
+      if (editingArticle.featuredImage?.url) {
+        setImagePreview(editingArticle.featuredImage.url);
+        setFeaturedImage({
+          file: null,
+          url: editingArticle.featuredImage.url,
+          title: editingArticle.featuredImage.title || '',
+          caption: editingArticle.featuredImage.caption || '',
+          altText: editingArticle.featuredImage.altText || '',
+          description: editingArticle.featuredImage.description || ''
+        });
+      }
     }
   }, [editingArticle]);
 
