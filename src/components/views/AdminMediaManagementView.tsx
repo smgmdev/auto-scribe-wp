@@ -423,20 +423,16 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="pending" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Pending Review
-                {pendingSubmissions.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-yellow-500/20 text-yellow-600">
-                    {pendingSubmissions.length}
-                  </Badge>
-                )}
+                <Badge variant="secondary" className={`ml-1 ${pendingSubmissions.length > 0 ? 'bg-yellow-500/20 text-yellow-600' : 'bg-muted text-muted-foreground'}`}>
+                  {pendingSubmissions.length}
+                </Badge>
               </TabsTrigger>
               <TabsTrigger value="rejected" className="flex items-center gap-2">
                 <XCircle className="h-4 w-4" />
                 Rejected
-                {rejectedSubmissions.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-red-500/20 text-red-600">
-                    {rejectedSubmissions.length}
-                  </Badge>
-                )}
+                <Badge variant="secondary" className={`ml-1 ${rejectedSubmissions.length > 0 ? 'bg-red-500/20 text-red-600' : 'bg-muted text-muted-foreground'}`}>
+                  {rejectedSubmissions.length}
+                </Badge>
               </TabsTrigger>
             </TabsList>
 
@@ -623,20 +619,16 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="pending" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Pending Review
-                {pendingMediaSubmissions.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-yellow-500/20 text-yellow-600">
-                    {pendingMediaSubmissions.length}
-                  </Badge>
-                )}
+                <Badge variant="secondary" className={`ml-1 ${pendingMediaSubmissions.length > 0 ? 'bg-yellow-500/20 text-yellow-600' : 'bg-muted text-muted-foreground'}`}>
+                  {pendingMediaSubmissions.length}
+                </Badge>
               </TabsTrigger>
               <TabsTrigger value="rejected" className="flex items-center gap-2">
                 <XCircle className="h-4 w-4" />
                 Rejected
-                {rejectedMediaSubmissions.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-red-500/20 text-red-600">
-                    {rejectedMediaSubmissions.length}
-                  </Badge>
-                )}
+                <Badge variant="secondary" className={`ml-1 ${rejectedMediaSubmissions.length > 0 ? 'bg-red-500/20 text-red-600' : 'bg-muted text-muted-foreground'}`}>
+                  {rejectedMediaSubmissions.length}
+                </Badge>
               </TabsTrigger>
             </TabsList>
 
