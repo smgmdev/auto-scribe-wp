@@ -146,17 +146,9 @@ export function AdminMediaManagementView() {
   useEffect(() => {
     const agencyNamesWithLogos = Object.keys(agencyLogos);
     if (agencyNamesWithLogos.length > 0) {
-      setLoadingLogos(prev => {
-        const next = new Set(prev);
-        agencyNamesWithLogos.forEach(name => {
-          if (!loadedLogos.has(name)) {
-            next.add(name);
-          }
-        });
-        return next;
-      });
+      setLoadingLogos(new Set(agencyNamesWithLogos));
     }
-  }, [agencyLogos, loadedLogos]);
+  }, [agencyLogos]);
 
 
   const fetchData = async () => {
