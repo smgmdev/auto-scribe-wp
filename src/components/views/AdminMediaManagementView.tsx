@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -747,14 +747,29 @@ export function AdminMediaManagementView() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <Library className="h-8 w-8" />
-          Media Management
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Review and manage agency media site submissions
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <Library className="h-8 w-8" />
+            Media Management
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Review and manage agency media site submissions
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-black text-white hover:bg-black/80 border-black"
+          onClick={() => fetchData()}
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       {/* Main Tabs */}
