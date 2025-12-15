@@ -1771,11 +1771,33 @@ export function AdminAgenciesView() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Email</p>
-                    <p className="font-medium">{selectedVerification.email || '-'}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{selectedVerification.email || '-'}</p>
+                      {selectedVerification.email && (
+                        <Copy 
+                          className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-foreground" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedVerification.email!);
+                            toast({ title: 'Copied', description: 'Email copied to clipboard' });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Phone</p>
-                    <p className="font-medium">{selectedVerification.phone || '-'}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{selectedVerification.phone || '-'}</p>
+                      {selectedVerification.phone && (
+                        <Copy 
+                          className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-foreground" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedVerification.phone!);
+                            toast({ title: 'Copied', description: 'Phone copied to clipboard' });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Country</p>
@@ -1886,7 +1908,18 @@ export function AdminAgenciesView() {
                   </div>
                   <div className="col-span-2">
                     <p className="text-muted-foreground">Bank Address</p>
-                    <p className="font-medium">{selectedVerification.bank_address || '-'}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{selectedVerification.bank_address || '-'}</p>
+                      {selectedVerification.bank_address && (
+                        <Copy 
+                          className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-foreground flex-shrink-0" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedVerification.bank_address!);
+                            toast({ title: 'Copied', description: 'Bank address copied to clipboard' });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Account Holder</p>
@@ -1894,15 +1927,48 @@ export function AdminAgenciesView() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Account Number</p>
-                    <p className="font-medium">{selectedVerification.bank_account_number || '-'}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{selectedVerification.bank_account_number || '-'}</p>
+                      {selectedVerification.bank_account_number && (
+                        <Copy 
+                          className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-foreground" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedVerification.bank_account_number!);
+                            toast({ title: 'Copied', description: 'Account number copied to clipboard' });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">IBAN</p>
-                    <p className="font-medium">{selectedVerification.bank_iban || '-'}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{selectedVerification.bank_iban || '-'}</p>
+                      {selectedVerification.bank_iban && (
+                        <Copy 
+                          className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-foreground" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedVerification.bank_iban!);
+                            toast({ title: 'Copied', description: 'IBAN copied to clipboard' });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">SWIFT/BIC Code</p>
-                    <p className="font-medium">{selectedVerification.bank_swift_code || '-'}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-medium">{selectedVerification.bank_swift_code || '-'}</p>
+                      {selectedVerification.bank_swift_code && (
+                        <Copy 
+                          className="h-3 w-3 text-muted-foreground cursor-pointer hover:text-foreground" 
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedVerification.bank_swift_code!);
+                            toast({ title: 'Copied', description: 'SWIFT code copied to clipboard' });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
