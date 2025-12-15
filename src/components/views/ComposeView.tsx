@@ -69,6 +69,9 @@ export function ComposeView() {
     toast
   } = useToast();
   
+  // Debug logging
+  console.log('[ComposeView] Mount/render, editingArticle:', editingArticle?.id, 'categories:', editingArticle?.categories, 'tagIds:', editingArticle?.tagIds);
+  
   // Site credits state
   const [siteCredits, setSiteCredits] = useState<SiteCredit[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -113,6 +116,8 @@ export function ComposeView() {
 
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
+  
+  console.log('[ComposeView] State after init - selectedSite:', selectedSite, 'currentSite:', currentSite?.name, 'selectedCategories:', selectedCategories, 'selectedTagIds:', selectedTagIds);
 
   // Fetch site credits on mount
   useEffect(() => {
