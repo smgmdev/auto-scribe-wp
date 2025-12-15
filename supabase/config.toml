@@ -93,3 +93,9 @@ verify_jwt = true
 
 [functions.send-agency-status-email]
 verify_jwt = true
+
+[functions.notify-wp-site-status]
+verify_jwt = true
+
+[functions.notify-admin-wp-submission]
+verify_jwt = true
