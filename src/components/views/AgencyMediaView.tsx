@@ -49,6 +49,7 @@ interface WordPressSiteSubmission {
   seo_plugin: string;
   status: string;
   created_at: string;
+  reviewed_at: string | null;
   admin_notes: string | null;
   read: boolean;
 }
@@ -158,7 +159,7 @@ export function AgencyMediaView() {
     // Fetch pending WordPress site submissions
     const { data: pendingData } = await supabase
       .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read')
+      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at')
       .eq('user_id', user.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
@@ -170,10 +171,10 @@ export function AgencyMediaView() {
     // Fetch rejected WordPress site submissions
     const { data: rejectedData } = await supabase
       .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read')
+      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at')
       .eq('user_id', user.id)
       .eq('status', 'rejected')
-      .order('created_at', { ascending: false });
+      .order('reviewed_at', { ascending: false });
 
     if (rejectedData) {
       setRejectedSubmissions(rejectedData);
