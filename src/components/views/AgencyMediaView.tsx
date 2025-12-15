@@ -298,6 +298,20 @@ export function AgencyMediaView() {
     }
   };
 
+  // Mark rejected WordPress submission as read when clicked
+  const handleRejectedWpClick = async (submissionId: string) => {
+    const submission = rejectedSubmissions.find(s => s.id === submissionId);
+    if (submission && !submission.read) {
+      await supabase
+        .from('wordpress_site_submissions')
+        .update({ read: true })
+        .eq('id', submissionId);
+      setRejectedSubmissions(prev => prev.map(s => 
+        s.id === submissionId ? { ...s, read: true } : s
+      ));
+    }
+  };
+
   // Calculate counts for partial rejections
   const partiallyRejectedSubmissions = approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0);
   const totalRejectedCount = rejectedMediaSubmissions.length + partiallyRejectedSubmissions.length;
@@ -571,8 +585,9 @@ export function AgencyMediaView() {
                   {rejectedSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="group hover:shadow-md transition-all duration-300 border-dashed border-red-500/50"
+                      className="group hover:shadow-md transition-all duration-300 border-dashed border-red-500/50 cursor-pointer"
                       style={{ animationDelay: `${index * 50}ms` }}
+                      onClick={() => handleRejectedWpClick(submission.id)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
