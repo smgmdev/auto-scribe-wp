@@ -2574,50 +2574,52 @@ export function AdminMediaManagementView() {
 
             {/* Tags */}
             <div className="space-y-2">
-              <Label>Tags (select up to 3)</Label>
-              {isLoadingTestTags ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading tags...
-                </div>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {testAvailableTags.map(tag => (
+              <Label>Tags (add up to 3)</Label>
+              {/* Show selected tags */}
+              {testSelectedTagIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {testAvailableTags
+                    .filter(tag => testSelectedTagIds.includes(tag.id))
+                    .map(tag => (
                       <Badge
                         key={tag.id}
-                        variant={testSelectedTagIds.includes(tag.id) ? "default" : "outline"}
-                        className={`cursor-pointer ${testSelectedTagIds.includes(tag.id) ? '' : 'opacity-70'} ${!testSelectedTagIds.includes(tag.id) && testSelectedTagIds.length >= 3 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        variant="default"
+                        className="cursor-pointer"
                         onClick={() => toggleTestTag(tag.id)}
                       >
                         {tag.name}
+                        <X className="h-3 w-3 ml-1" />
                       </Badge>
                     ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add new tag..."
-                      value={testNewTagInput}
-                      onChange={(e) => setTestNewTagInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addNewTestTag();
-                        }
-                      }}
-                      className="max-w-xs"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addNewTestTag}
-                      disabled={isAddingTestTag || !testNewTagInput.trim()}
-                    >
-                      {isAddingTestTag ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
-                    </Button>
-                  </div>
-                </>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add new tag..."
+                  value={testNewTagInput}
+                  onChange={(e) => setTestNewTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addNewTestTag();
+                    }
+                  }}
+                  className="max-w-xs"
+                  disabled={testSelectedTagIds.length >= 3}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addNewTestTag}
+                  disabled={isAddingTestTag || !testNewTagInput.trim() || testSelectedTagIds.length >= 3}
+                  className="hover:bg-black hover:text-white"
+                >
+                  {isAddingTestTag ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
+                </Button>
+              </div>
+              {testSelectedTagIds.length >= 3 && (
+                <p className="text-xs text-muted-foreground">Maximum 3 tags reached</p>
               )}
             </div>
 
