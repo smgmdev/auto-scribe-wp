@@ -359,16 +359,16 @@ export function AgencyMediaView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="media" className="relative">
+        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible">
+          <TabsTrigger value="media" className="relative overflow-visible">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
-              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+              <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                 {unreadAddedCount + unreadRejectedMediaCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress">WordPress Sites</TabsTrigger>
+          <TabsTrigger value="wordpress" className="overflow-visible">WordPress Sites</TabsTrigger>
         </TabsList>
 
         {/* WordPress Sites Tab */}
@@ -382,10 +382,10 @@ export function AgencyMediaView() {
               <TabsTrigger value="pending">
                 Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative">
+              <TabsTrigger value="rejected" className="relative overflow-visible">
                 Rejected ({rejectedSubmissions.length})
                 {unreadRejectedWpCount > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                     {unreadRejectedWpCount}
                   </span>
                 )}
@@ -569,11 +569,11 @@ export function AgencyMediaView() {
         <TabsContent value="media" className="mt-6 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="added" className="relative">
+            <TabsList className="mb-6 overflow-visible">
+              <TabsTrigger value="added" className="relative overflow-visible">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                     {unreadAddedCount}
                   </span>
                 )}
@@ -581,10 +581,10 @@ export function AgencyMediaView() {
               <TabsTrigger value="pending">
                 Pending Review ({pendingMediaSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative">
+              <TabsTrigger value="rejected" className="relative overflow-visible">
                 Rejected ({totalRejectedCount})
                 {unreadRejectedMediaCount > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                     {unreadRejectedMediaCount}
                   </span>
                 )}
