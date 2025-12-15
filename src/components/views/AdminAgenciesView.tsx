@@ -144,6 +144,9 @@ export function AdminAgenciesView() {
   const [docViewerOpen, setDocViewerOpen] = useState(false);
   const [docViewerUrl, setDocViewerUrl] = useState('');
   const [docViewerTitle, setDocViewerTitle] = useState('');
+  const [verificationRejectionReason, setVerificationRejectionReason] = useState('');
+  const [showVerificationRejectDialog, setShowVerificationRejectDialog] = useState(false);
+  const [processingVerification, setProcessingVerification] = useState(false);
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
@@ -623,6 +626,82 @@ export function AdminAgenciesView() {
     setDocViewerUrl(url);
     setDocViewerTitle(title);
     setDocViewerOpen(true);
+  };
+
+  const handleApproveVerification = async () => {
+    if (!selectedVerification) return;
+    
+    setProcessingVerification(true);
+    try {
+      // Update custom verification status to approved
+      const { error: verificationError } = await supabase
+        .from('agency_custom_verifications')
+        .update({ 
+          status: 'approved',
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', selectedVerification.id);
+      
+      if (verificationError) throw verificationError;
+      
+      // Mark agency as onboarding complete
+      if (selectedVerification.agency_payout_id) {
+        const { error: agencyError } = await supabase
+          .from('agency_payouts')
+          .update({ onboarding_complete: true })
+          .eq('id', selectedVerification.agency_payout_id);
+        
+        if (agencyError) throw agencyError;
+      }
+      
+      toast({
+        title: 'Agency Onboarded',
+        description: 'Custom verification approved and agency is now active.',
+        className: 'bg-green-600 text-white border-green-600'
+      });
+      
+      setSelectedVerification(null);
+      setVerificationDocUrls({});
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setProcessingVerification(false);
+    }
+  };
+
+  const handleRejectVerification = async () => {
+    if (!selectedVerification || !verificationRejectionReason.trim()) return;
+    
+    setProcessingVerification(true);
+    try {
+      // Update custom verification status to rejected with reason
+      const { error: verificationError } = await supabase
+        .from('agency_custom_verifications')
+        .update({ 
+          status: 'rejected',
+          admin_notes: verificationRejectionReason.trim(),
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', selectedVerification.id);
+      
+      if (verificationError) throw verificationError;
+      
+      toast({
+        title: 'Verification Rejected',
+        description: 'The agency has been notified of the rejection.',
+      });
+      
+      setSelectedVerification(null);
+      setVerificationDocUrls({});
+      setShowVerificationRejectDialog(false);
+      setVerificationRejectionReason('');
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setProcessingVerification(false);
+    }
   };
 
   const handleViewDocument = async (path: string) => {
@@ -1853,8 +1932,84 @@ export function AdminAgenciesView() {
                     : 'Not submitted'}
                 </p>
               </div>
+
+              {/* Action Buttons */}
+              {selectedVerification.status === 'pending_review' && (
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    onClick={handleApproveVerification}
+                    disabled={processingVerification}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {processingVerification ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Approve and Onboard Agency
+                  </Button>
+                  <Button
+                    onClick={() => setShowVerificationRejectDialog(true)}
+                    disabled={processingVerification}
+                    variant="destructive"
+                    className="flex-1"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Reject
+                  </Button>
+                </div>
+              )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Verification Rejection Reason Dialog */}
+      <Dialog open={showVerificationRejectDialog} onOpenChange={(open) => { 
+        setShowVerificationRejectDialog(open); 
+        if (!open) setVerificationRejectionReason(''); 
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <XCircle className="h-5 w-5" />
+              Reject Verification
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Please provide a reason for rejecting this verification. This will be recorded in the admin notes.
+            </p>
+            <Textarea
+              placeholder="Enter rejection reason..."
+              value={verificationRejectionReason}
+              onChange={(e) => setVerificationRejectionReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowVerificationRejectDialog(false);
+                  setVerificationRejectionReason('');
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRejectVerification}
+                disabled={!verificationRejectionReason.trim() || processingVerification}
+                variant="destructive"
+                className="flex-1"
+              >
+                {processingVerification ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : null}
+                Confirm Rejection
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
