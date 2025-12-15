@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl } from '@/lib/favicon';
+import { useAppStore } from '@/stores/appStore';
 
 interface WordPressSiteSubmission {
   id: string;
@@ -29,6 +30,7 @@ interface WordPressSiteSubmission {
   admin_notes: string | null;
   created_at: string;
   reviewed_at: string | null;
+  read: boolean;
 }
 
 interface ApprovedWordPressSite {
@@ -66,9 +68,12 @@ interface MediaSiteSubmission {
   admin_notes: string | null;
   created_at: string;
   reviewed_at: string | null;
+  read: boolean;
 }
 
 export function AdminMediaManagementView() {
+  const { decrementUnreadMediaSubmissionsCount, setUnreadMediaSubmissionsCount } = useAppStore();
+  
   const [activeTab, setActiveTab] = useState('wordpress');
   const [wpSubTab, setWpSubTab] = useState('approved');
   const [mediaSubTab, setMediaSubTab] = useState('added');
@@ -85,6 +90,10 @@ export function AdminMediaManagementView() {
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [pendingMediaSubmissions, setPendingMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
   const [rejectedMediaSubmissions, setRejectedMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
+  
+  // Unread counts for notification dots
+  const [unreadWpCount, setUnreadWpCount] = useState(0);
+  const [unreadMediaCount, setUnreadMediaCount] = useState(0);
   
   // Expanded sites state
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
@@ -188,7 +197,12 @@ export function AdminMediaManagementView() {
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (pending) setPendingSubmissions(pending);
+    if (pending) {
+      setPendingSubmissions(pending);
+      // Track unread count
+      const wpUnread = pending.filter((s: any) => !s.read).length;
+      setUnreadWpCount(wpUnread);
+    }
 
     // Fetch rejected WordPress submissions
     const { data: rejected } = await supabase
@@ -225,6 +239,9 @@ export function AdminMediaManagementView() {
 
     if (pendingMedia) {
       setPendingMediaSubmissions(pendingMedia);
+      // Track unread count
+      const mediaUnread = pendingMedia.filter((s: any) => !s.read).length;
+      setUnreadMediaCount(mediaUnread);
       // Fetch logos for pending submissions
       fetchAgencyLogos(pendingMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
     }
@@ -241,6 +258,10 @@ export function AdminMediaManagementView() {
       // Fetch logos for rejected submissions
       fetchAgencyLogos(rejectedMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
     }
+    
+    // Update global unread count in store
+    const totalUnread = (pending?.filter((s: any) => !s.read).length || 0) + (pendingMedia?.filter((s: any) => !s.read).length || 0);
+    setUnreadMediaSubmissionsCount(totalUnread);
 
     setLoading(false);
   };
@@ -249,10 +270,25 @@ export function AdminMediaManagementView() {
     fetchData();
   }, []);
 
-  const handleOpenReview = (submission: WordPressSiteSubmission) => {
+  const handleOpenReview = async (submission: WordPressSiteSubmission) => {
     setSelectedSubmission(submission);
     setAdminNotes(submission.admin_notes || '');
     setIsReviewDialogOpen(true);
+    
+    // Mark as read if not already
+    if (!submission.read) {
+      await supabase
+        .from('wordpress_site_submissions')
+        .update({ read: true })
+        .eq('id', submission.id);
+      
+      // Update local state
+      setPendingSubmissions(prev => 
+        prev.map(s => s.id === submission.id ? { ...s, read: true } : s)
+      );
+      setUnreadWpCount(prev => Math.max(0, prev - 1));
+      decrementUnreadMediaSubmissionsCount();
+    }
   };
 
   const handleApprove = async () => {
@@ -414,8 +450,11 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="approved">
                 Approved & Connected ({approvedSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending">
+              <TabsTrigger value="pending" className="relative">
                 Pending Review ({pendingSubmissions.length})
+                {unreadWpCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+                )}
               </TabsTrigger>
               <TabsTrigger value="rejected">
                 Rejected ({rejectedSubmissions.length})
@@ -596,8 +635,11 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="added">
                 Added Media Sites ({mediaSites.filter(s => s.category !== 'Agencies/People').length})
               </TabsTrigger>
-              <TabsTrigger value="pending">
+              <TabsTrigger value="pending" className="relative">
                 Pending Review ({pendingMediaSubmissions.length})
+                {unreadMediaCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+                )}
               </TabsTrigger>
               <TabsTrigger value="rejected">
                 Rejected ({rejectedMediaSubmissions.length})
@@ -733,8 +775,22 @@ export function AdminMediaManagementView() {
                     return (
                       <div 
                         key={submission.id} 
-                        className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-yellow-500/50 bg-card hover:border-[#4771d9] transition-all duration-300"
+                        className={`flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
                         style={{ animationDelay: `${index * 50}ms` }}
+                        onClick={async () => {
+                          if (!submission.read) {
+                            await supabase
+                              .from('media_site_submissions')
+                              .update({ read: true })
+                              .eq('id', submission.id);
+                            
+                            setPendingMediaSubmissions(prev => 
+                              prev.map(s => s.id === submission.id ? { ...s, read: true } : s)
+                            );
+                            setUnreadMediaCount(prev => Math.max(0, prev - 1));
+                            decrementUnreadMediaSubmissionsCount();
+                          }
+                        }}
                       >
                         <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
                           {logoUrl ? (
@@ -763,7 +819,8 @@ export function AdminMediaManagementView() {
                                 : submission.google_sheet_url}
                             </p>
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 navigator.clipboard.writeText(submission.google_sheet_url);
                                 toast({
                                   title: 'Copied',
@@ -781,14 +838,15 @@ export function AdminMediaManagementView() {
                               rel="noopener noreferrer"
                               className="text-muted-foreground hover:text-foreground transition-colors"
                               title="Open link"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                            Pending
+                          <Badge variant="outline" className={`text-xs ${!submission.read ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' : 'border-yellow-500/50 text-yellow-500/70'}`}>
+                            {!submission.read ? 'New' : 'Pending'}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {new Date(submission.created_at).toLocaleDateString()}

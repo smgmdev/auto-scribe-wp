@@ -99,6 +99,8 @@ export function Sidebar({
     setUnreadAgencyApplicationsCount,
     unreadCustomVerificationsCount,
     setUnreadCustomVerificationsCount,
+    unreadMediaSubmissionsCount,
+    setUnreadMediaSubmissionsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -191,9 +193,23 @@ export function Sidebar({
           .eq('status', 'pending_review')
           .eq('read', false);
         
+        // Fetch unread media submissions (WordPress + Media sites pending)
+        const { count: wpSubmissionsCount } = await supabase
+          .from('wordpress_site_submissions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+          .eq('read', false);
+        
+        const { count: mediaSubmissionsCount } = await supabase
+          .from('media_site_submissions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+          .eq('read', false);
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
+          setUnreadMediaSubmissionsCount((wpSubmissionsCount || 0) + (mediaSubmissionsCount || 0));
           setAgencyDataLoaded(true);
         }
         return;
@@ -336,18 +352,26 @@ export function Sidebar({
                         {item.submenu?.map(subItem => {
                           const SubIcon = subItem.icon;
                           const isSubActive = currentView === subItem.id;
+                          const showMediaBadge = subItem.id === 'admin-media-management' && unreadMediaSubmissionsCount > 0;
                           return (
                             <Button
                               key={subItem.id}
                               variant="ghost"
                               className={cn(
-                                "w-full justify-start gap-3 px-3 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                "w-full justify-between px-3 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                                 isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                               )}
                               onClick={() => handleNavClick(subItem.id)}
                             >
-                              <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
-                              <span className="truncate">{subItem.label}</span>
+                              <div className="flex items-center gap-3">
+                                <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
+                                <span className="truncate">{subItem.label}</span>
+                              </div>
+                              {showMediaBadge && (
+                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                  {unreadMediaSubmissionsCount}
+                                </Badge>
+                              )}
                             </Button>
                           );
                         })}
