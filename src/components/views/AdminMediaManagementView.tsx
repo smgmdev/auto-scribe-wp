@@ -614,9 +614,9 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="added" className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Added Media Sites
-                {mediaSites.length > 0 && (
+                {mediaSites.filter(s => s.category !== 'Agencies/People').length > 0 && (
                   <Badge variant="secondary" className="ml-1 bg-green-500/20 text-green-600">
-                    {mediaSites.length}
+                    {mediaSites.filter(s => s.category !== 'Agencies/People').length}
                   </Badge>
                 )}
               </TabsTrigger>
