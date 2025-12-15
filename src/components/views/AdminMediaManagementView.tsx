@@ -1233,9 +1233,6 @@ export function AdminMediaManagementView() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant="outline" className={`text-xs ${!submission.read ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' : 'border-yellow-500/50 text-yellow-500/70'}`}>
-                            {!submission.read ? 'New' : 'Pending'}
-                          </Badge>
                           {submission.read && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -1267,6 +1264,9 @@ export function AdminMediaManagementView() {
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
+                          <Badge variant="outline" className={`text-xs ${!submission.read ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' : 'border-yellow-500/50 text-yellow-500/70'}`}>
+                            {!submission.read ? 'New' : 'Pending'}
+                          </Badge>
                           <span className="text-xs text-muted-foreground">
                             {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
