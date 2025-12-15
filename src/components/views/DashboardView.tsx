@@ -139,7 +139,7 @@ export function DashboardView() {
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {isAgency ? (
-          <Badge className="bg-zinc-700 text-green-400 border-zinc-600">Active Agency</Badge>
+          <Badge className="bg-black text-green-400 border-green-500">Active Agency</Badge>
         ) : (
           <Badge className="bg-black text-white border-black hover:bg-black">
             {isAdmin ? 'Corporate' : 'Regular user'}
