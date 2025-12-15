@@ -1808,6 +1808,7 @@ export function AdminMediaManagementView() {
                   variant="outline" 
                   onClick={() => setIsReviewDialogOpen(false)}
                   disabled={isProcessing}
+                  className="hover:bg-black hover:text-white"
                 >
                   Cancel
                 </Button>
