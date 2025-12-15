@@ -143,8 +143,8 @@ export function AddMediaSiteDialog({
               </p>
               
               <div className="flex items-center gap-2">
-                <div className="flex-1 text-xs text-muted-foreground truncate bg-background rounded px-3 py-2 border border-border">
-                  {SAMPLE_SHEET_URL}
+                <div className="flex-1 min-w-0 text-xs text-muted-foreground bg-background rounded px-3 py-2 border border-border overflow-hidden">
+                  <span className="block truncate">{SAMPLE_SHEET_URL}</span>
                 </div>
                 <Button
                   type="button"
