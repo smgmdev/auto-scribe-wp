@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2 } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
 import { Badge } from '@/components/ui/badge';
 
-const getNavigation = (isAdmin: boolean) => {
+const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
     id: 'dashboard',
     label: 'Dashboard',
@@ -42,6 +42,20 @@ const getNavigation = (isAdmin: boolean) => {
       { id: 'my-requests', label: 'My Engagements', icon: MessageSquare }
     ]
   }];
+
+  // Add Agency Management for onboarded agencies
+  if (isAgencyOnboarded && !isAdmin) {
+    base.push({
+      id: 'agency-management',
+      label: 'Agency Management',
+      icon: Briefcase,
+      submenu: [
+        { id: 'agency-requests', label: 'Service Requests', icon: ClipboardList },
+        { id: 'agency-payouts', label: 'Payout History', icon: Wallet }
+      ]
+    });
+  }
+
   if (isAdmin) {
     return [...base.filter(item => item.id !== 'b2b-media-buying'), {
       id: 'b2b-media-buying',
@@ -92,12 +106,20 @@ export function Sidebar({
   } = useAuth();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
-  const navigation = getNavigation(isAdmin);
+  const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
+  const [hasStripeAccount, setHasStripeAccount] = useState(false);
+  const [payoutMethod, setPayoutMethod] = useState<string | null>(null);
+  const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
+  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [rejectionSeen, setRejectionSeen] = useState(false);
+
+  const navigation = getNavigation(isAdmin, isAgencyOnboarded);
 
   // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
+    const agencyManagementIds = ['agency-requests', 'agency-payouts'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
@@ -105,18 +127,14 @@ export function Sidebar({
     if (b2bMediaBuyingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'b2b-media-buying': true }));
     }
+    if (agencyManagementIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'agency-management': true }));
+    }
   }, [currentView]);
 
   const toggleMenu = (menuId: string) => {
     setExpandedMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
   };
-
-  const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
-  const [hasStripeAccount, setHasStripeAccount] = useState(false);
-  const [payoutMethod, setPayoutMethod] = useState<string | null>(null);
-  const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
-  const [applicationId, setApplicationId] = useState<string | null>(null);
-  const [rejectionSeen, setRejectionSeen] = useState(false);
 
   // Reset agency data when user changes
   useEffect(() => {
