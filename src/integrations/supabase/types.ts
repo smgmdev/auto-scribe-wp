@@ -381,6 +381,7 @@ export type Database = {
           google_sheet_url: string
           id: string
           read: boolean
+          rejected_media: Json | null
           reviewed_at: string | null
           status: string
           updated_at: string
@@ -393,6 +394,7 @@ export type Database = {
           google_sheet_url: string
           id?: string
           read?: boolean
+          rejected_media?: Json | null
           reviewed_at?: string | null
           status?: string
           updated_at?: string
@@ -405,6 +407,7 @@ export type Database = {
           google_sheet_url?: string
           id?: string
           read?: boolean
+          rejected_media?: Json | null
           reviewed_at?: string | null
           status?: string
           updated_at?: string
