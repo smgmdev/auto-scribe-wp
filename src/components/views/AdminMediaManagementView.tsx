@@ -461,29 +461,19 @@ export function AdminMediaManagementView() {
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="approved" className="relative">
-                Approved & Connected
-                {approvedSites.length > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-muted-foreground/20 text-foreground rounded-full flex items-center justify-center">
-                    {approvedSites.length}
-                  </span>
-                )}
+              <TabsTrigger value="approved">
+                Approved & Connected ({approvedSites.length})
               </TabsTrigger>
               <TabsTrigger value="pending" className="relative">
-                Pending Review
-                {pendingSubmissions.length > 0 && (
-                  <span className={`absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium rounded-full flex items-center justify-center ${unreadWpCount > 0 ? 'bg-red-500 text-white' : 'bg-muted-foreground/20 text-foreground'}`}>
-                    {pendingSubmissions.length}
+                Pending Review ({pendingSubmissions.length})
+                {unreadWpCount > 0 && (
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {unreadWpCount}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative">
-                Rejected
-                {rejectedSubmissions.length > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-muted-foreground/20 text-foreground rounded-full flex items-center justify-center">
-                    {rejectedSubmissions.length}
-                  </span>
-                )}
+              <TabsTrigger value="rejected">
+                Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
 
@@ -658,29 +648,19 @@ export function AdminMediaManagementView() {
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="added" className="relative">
-                Added Media Sites
-                {mediaSites.filter(s => s.category !== 'Agencies/People').length > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-muted-foreground/20 text-foreground rounded-full flex items-center justify-center">
-                    {mediaSites.filter(s => s.category !== 'Agencies/People').length}
-                  </span>
-                )}
+              <TabsTrigger value="added">
+                Added Media Sites ({mediaSites.filter(s => s.category !== 'Agencies/People').length})
               </TabsTrigger>
               <TabsTrigger value="pending" className="relative">
-                Pending Review
-                {pendingMediaSubmissions.length > 0 && (
-                  <span className={`absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium rounded-full flex items-center justify-center ${unreadMediaCount > 0 ? 'bg-red-500 text-white' : 'bg-muted-foreground/20 text-foreground'}`}>
-                    {pendingMediaSubmissions.length}
+                Pending Review ({pendingMediaSubmissions.length})
+                {unreadMediaCount > 0 && (
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {unreadMediaCount}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative">
-                Rejected
-                {rejectedMediaSubmissions.length > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-muted-foreground/20 text-foreground rounded-full flex items-center justify-center">
-                    {rejectedMediaSubmissions.length}
-                  </span>
-                )}
+              <TabsTrigger value="rejected">
+                Rejected ({rejectedMediaSubmissions.length})
               </TabsTrigger>
             </TabsList>
 
