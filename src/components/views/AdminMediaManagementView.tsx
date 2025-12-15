@@ -414,6 +414,11 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="approved" className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Approved & Connected
+                {approvedSites.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 bg-green-500/20 text-green-600">
+                    {approvedSites.length}
+                  </Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="pending" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
@@ -427,6 +432,11 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="rejected" className="flex items-center gap-2">
                 <XCircle className="h-4 w-4" />
                 Rejected
+                {rejectedSubmissions.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 bg-red-500/20 text-red-600">
+                    {rejectedSubmissions.length}
+                  </Badge>
+                )}
               </TabsTrigger>
             </TabsList>
 
@@ -604,6 +614,11 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="added" className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Added Media Sites
+                {mediaSites.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 bg-green-500/20 text-green-600">
+                    {mediaSites.length}
+                  </Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="pending" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
@@ -617,6 +632,11 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="rejected" className="flex items-center gap-2">
                 <XCircle className="h-4 w-4" />
                 Rejected
+                {rejectedMediaSubmissions.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 bg-red-500/20 text-red-600">
+                    {rejectedMediaSubmissions.length}
+                  </Badge>
+                )}
               </TabsTrigger>
             </TabsList>
 
