@@ -1327,9 +1327,11 @@ export function AdminMediaManagementView() {
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
-                          <Badge variant="outline" className={`text-xs ${!submission.read ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' : 'border-yellow-500/50 text-yellow-500/70'}`}>
-                            {!submission.read ? 'New' : 'Pending'}
-                          </Badge>
+                          {!submission.read && (
+                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500 bg-yellow-500/10">
+                              New
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     );
