@@ -81,6 +81,7 @@ export async function createTag(site: WordPressSite, tagName: string): Promise<W
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('Create tag response error:', response.status, response.statusText, errorData);
       
       // Tag already exists - WordPress returns the existing tag ID in the error response
       if (response.status === 400 && errorData.code === 'term_exists' && errorData.data?.term_id) {
@@ -102,7 +103,7 @@ export async function createTag(site: WordPressSite, tagName: string): Promise<W
           };
         }
       }
-      throw new Error(`Failed to create tag: ${response.statusText}`);
+      throw new Error(`Failed to create tag: ${response.status} ${response.statusText || errorData.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
