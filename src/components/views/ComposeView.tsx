@@ -135,70 +135,6 @@ export function ComposeView() {
     return credits >= cost;
   };
 
-  // Fetch categories and tags when site is selected
-  useEffect(() => {
-    if (currentSite) {
-      setFetchError(null);
-
-      // Only reset if not editing or site changed
-      if (!editingArticle) {
-        setSelectedCategories([]);
-        setSelectedTagIds([]);
-        setFocusKeyword('');
-        setMetaDescription('');
-      }
-
-      // Fetch categories
-      setIsLoadingCategories(true);
-      fetchCategories(currentSite).then(categories => {
-        setAvailableCategories(categories);
-        setIsLoadingCategories(false);
-        // Pre-select categories if editing
-        if (editingArticle?.categories) {
-          setSelectedCategories(editingArticle.categories);
-        }
-      }).catch(error => {
-        console.error('Failed to fetch categories:', error);
-        setFetchError('Failed to fetch categories. Check site connection.');
-        setIsLoadingCategories(false);
-        setAvailableCategories([]);
-      });
-
-      // Fetch tags
-      setIsLoadingTags(true);
-      fetchTags(currentSite).then(tags => {
-        setAvailableTags(tags);
-        setIsLoadingTags(false);
-        // Pre-select tags if editing
-        if (editingArticle?.tagIds) {
-          setSelectedTagIds(editingArticle.tagIds);
-        }
-      }).catch(error => {
-        console.error('Failed to fetch tags:', error);
-        setIsLoadingTags(false);
-        setAvailableTags([]);
-      });
-
-      // Fetch SEO data if editing an existing WP post
-      if (editingArticle?.wpPostId) {
-        fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
-          setFocusKeyword(seoData.focusKeyword);
-          setMetaDescription(seoData.metaDescription);
-        }).catch(error => {
-          console.error('Failed to fetch SEO data:', error);
-        });
-      }
-    } else {
-      setAvailableCategories([]);
-      setAvailableTags([]);
-      setSelectedCategories([]);
-      setSelectedTagIds([]);
-      setFocusKeyword('');
-      setMetaDescription('');
-      setFetchError(null);
-    }
-  }, [currentSite?.id, editingArticle]);
-
   // Sync all form fields when editingArticle changes
   useEffect(() => {
     if (editingArticle) {
@@ -206,6 +142,14 @@ export function ComposeView() {
       setContent(editingArticle.content || '');
       setTone(editingArticle.tone || 'neutral');
       setSelectedSite(editingArticle.publishedTo || '');
+      
+      // Set categories and tags directly from editingArticle
+      if (editingArticle.categories) {
+        setSelectedCategories(editingArticle.categories);
+      }
+      if (editingArticle.tagIds) {
+        setSelectedTagIds(editingArticle.tagIds);
+      }
       
       // Set featured image with all metadata
       if (editingArticle.featuredImage?.url) {
@@ -221,6 +165,55 @@ export function ComposeView() {
       }
     }
   }, [editingArticle]);
+
+  // Fetch categories and tags when site is selected
+  useEffect(() => {
+    if (currentSite) {
+      setFetchError(null);
+
+      // Fetch categories
+      setIsLoadingCategories(true);
+      fetchCategories(currentSite).then(categories => {
+        setAvailableCategories(categories);
+        setIsLoadingCategories(false);
+      }).catch(error => {
+        console.error('Failed to fetch categories:', error);
+        setFetchError('Failed to fetch categories. Check site connection.');
+        setIsLoadingCategories(false);
+        setAvailableCategories([]);
+      });
+
+      // Fetch tags
+      setIsLoadingTags(true);
+      fetchTags(currentSite).then(tags => {
+        setAvailableTags(tags);
+        setIsLoadingTags(false);
+      }).catch(error => {
+        console.error('Failed to fetch tags:', error);
+        setIsLoadingTags(false);
+        setAvailableTags([]);
+      });
+
+      // Fetch SEO data if editing an existing WP post
+      if (editingArticle?.wpPostId) {
+        fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
+          setFocusKeyword(seoData.focusKeyword);
+          setMetaDescription(seoData.metaDescription);
+        }).catch(error => {
+          console.error('Failed to fetch SEO data:', error);
+        });
+      }
+    } else if (!editingArticle) {
+      // Only reset when not editing (prevents race condition)
+      setAvailableCategories([]);
+      setAvailableTags([]);
+      setSelectedCategories([]);
+      setSelectedTagIds([]);
+      setFocusKeyword('');
+      setMetaDescription('');
+      setFetchError(null);
+    }
+  }, [currentSite?.id, editingArticle]);
 
   // Clear editing article on unmount
   useEffect(() => {
