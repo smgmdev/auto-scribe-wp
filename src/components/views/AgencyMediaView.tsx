@@ -658,8 +658,8 @@ export function AgencyMediaView() {
                               <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
                                 Approved
                               </Badge>
-                              <Badge variant="secondary" className="text-xs w-[60px] justify-center">
-                                {submission.imported_sites?.length || 0} sites
+                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                {submission.imported_sites?.length || 0} sites added
                               </Badge>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -814,7 +814,7 @@ export function AgencyMediaView() {
                           <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
                             <Clock className="h-4 w-4 text-yellow-500" />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 max-w-[400px]">
                             <p className="font-medium text-sm">Media Sheet Submitted</p>
                             <div className="flex items-center gap-2 mt-1">
                               <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -842,14 +842,14 @@ export function AgencyMediaView() {
                                 <ExternalLink className="h-3.5 w-3.5" />
                               </a>
                             </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0 ml-auto">
                             <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
                               Pending
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
                           </div>
                         </div>
                       </CardContent>
@@ -884,7 +884,7 @@ export function AgencyMediaView() {
                           <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
                             <XCircle className="h-4 w-4 text-red-500" />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 max-w-[400px]">
                             <p className="font-medium text-sm">Rejected Media Sheet</p>
                             <div className="flex items-center gap-2 mt-1">
                               <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -915,16 +915,16 @@ export function AgencyMediaView() {
                             {submission.admin_notes && (
                               <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
                             )}
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                              Rejected
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-1">
                               {submission.reviewed_at 
                                 ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                 : `${new Date(submission.created_at).toLocaleDateString()} ${new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                            </span>
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 ml-auto">
+                            <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                              Rejected
+                            </Badge>
                           </div>
                         </div>
                       </CardContent>
@@ -947,7 +947,7 @@ export function AgencyMediaView() {
                             <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
                               <XCircle className="h-4 w-4 text-red-500" />
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 max-w-[400px]">
                               <p className="font-medium text-sm">Partially Rejected Media Sheet</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -977,16 +977,16 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <Badge variant="outline" className="text-xs border-orange-500 text-orange-500">
-                                Partially Rejected ({submission.rejected_media?.length || 0})
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                   : 'N/A'}
-                              </span>
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 ml-auto">
+                              <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 whitespace-nowrap">
+                                Partially Rejected ({submission.rejected_media?.length || 0})
+                              </Badge>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                               </div>
