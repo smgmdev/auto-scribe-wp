@@ -93,7 +93,7 @@ interface ApprovedMediaSubmission extends MediaSiteSubmission {
 export function AdminMediaManagementView() {
   const { decrementUnreadMediaSubmissionsCount, setUnreadMediaSubmissionsCount } = useAppStore();
   
-  const [activeTab, setActiveTab] = useState('wordpress');
+  const [activeTab, setActiveTab] = useState('media');
   const [wpSubTab, setWpSubTab] = useState('approved');
   const [mediaSubTab, setMediaSubTab] = useState('added');
   const [loading, setLoading] = useState(true);
@@ -742,19 +742,19 @@ export function AdminMediaManagementView() {
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="wordpress" className="relative">
-            WordPress Sites
-            {unreadWpCount > 0 && (
-              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
-                {unreadWpCount}
-              </span>
-            )}
-          </TabsTrigger>
           <TabsTrigger value="media" className="relative">
             Media Sites
             {unreadMediaCount > 0 && (
               <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                 {unreadMediaCount}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="wordpress" className="relative">
+            WordPress Sites
+            {unreadWpCount > 0 && (
+              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                {unreadWpCount}
               </span>
             )}
           </TabsTrigger>
