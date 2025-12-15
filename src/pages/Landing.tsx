@@ -51,6 +51,7 @@ const Landing = () => {
   const { user, loading: authLoading } = useAuth();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [activeAgencyNames, setActiveAgencyNames] = useState<Set<string>>(new Set());
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,6 +114,16 @@ const Landing = () => {
 
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
+
+        // Fetch active agencies (onboarding_complete = true)
+        const { data: activeAgenciesData } = await supabase
+          .from('agency_payouts')
+          .select('agency_name')
+          .eq('onboarding_complete', true);
+        
+        if (activeAgenciesData) {
+          setActiveAgencyNames(new Set(activeAgenciesData.map(a => a.agency_name)));
+        }
 
         // Fetch agency logos from agency_applications table
         const uniqueAgencies = [...new Set((mediaData || []).filter(s => s.agency).map(s => s.agency as string))];
@@ -222,6 +233,11 @@ const Landing = () => {
   const modalMediaSites = useMemo(() => {
     let filtered = mediaSites.filter(site => site.category === activeTab);
     
+    // For Agencies/People tab, only show active agencies
+    if (activeTab === 'Agencies/People') {
+      filtered = filtered.filter(site => activeAgencyNames.has(site.name));
+    }
+    
     if (activeSubcategory) {
       filtered = filtered.filter(site => {
         if (!site.subcategory) return false;
@@ -240,7 +256,7 @@ const Landing = () => {
     }
     
     return filtered;
-  }, [mediaSites, activeTab, activeSubcategory, searchQuery]);
+  }, [mediaSites, activeTab, activeSubcategory, searchQuery, activeAgencyNames]);
 
   // Helper function to shuffle array randomly
   const shuffleArray = <T,>(array: T[]): T[] => {
