@@ -137,49 +137,43 @@ export function AdminMediaManagementView() {
     });
   };
 
-  // Fetch agency logos based on user IDs (matching by user_id to agency_applications)
+  // Fetch agency logos based on agency names (matching by agency_name to agency_applications)
   // Note: logo_url is a private storage path, so we must create a signed URL before using it in <img src />
-  // We use the FIRST application submission logo per user_id (oldest created_at).
   const fetchAgencyLogos = async (submissions: { user_id: string; agency_name: string }[]) => {
     if (submissions.length === 0) return;
 
-    const userIds = [...new Set(submissions.map((s) => s.user_id))];
+    const agencyNames = [...new Set(submissions.map((s) => s.agency_name))];
 
     const { data, error } = await supabase
       .from('agency_applications')
-      .select('user_id, logo_url, created_at')
-      .in('user_id', userIds)
+      .select('agency_name, logo_url, created_at')
+      .in('agency_name', agencyNames)
       .not('logo_url', 'is', null)
       .order('created_at', { ascending: true });
 
     if (error || !data || data.length === 0) return;
 
-    // Earliest logo path per user_id
-    const earliestLogoPathByUserId: Record<string, string> = {};
+    // Get logo path per agency_name (first/earliest if duplicates)
+    const logoPathByAgency: Record<string, string> = {};
     for (const row of data) {
-      if (!row?.user_id || !row?.logo_url) continue;
-      if (!earliestLogoPathByUserId[row.user_id]) {
-        earliestLogoPathByUserId[row.user_id] = row.logo_url;
+      if (!row?.agency_name || !row?.logo_url) continue;
+      if (!logoPathByAgency[row.agency_name]) {
+        logoPathByAgency[row.agency_name] = row.logo_url;
       }
     }
 
-    const signedByUserId: Record<string, string> = {};
+    // Create signed URLs for each logo
+    const logos: Record<string, string> = {};
     await Promise.all(
-      Object.entries(earliestLogoPathByUserId).map(async ([userId, path]) => {
+      Object.entries(logoPathByAgency).map(async ([agencyName, path]) => {
         const { data: signed, error: signError } = await supabase.storage
           .from('agency-documents')
           .createSignedUrl(path, 3600);
         if (!signError && signed?.signedUrl) {
-          signedByUserId[userId] = signed.signedUrl;
+          logos[agencyName] = signed.signedUrl;
         }
       })
     );
-
-    const logos: Record<string, string> = {};
-    submissions.forEach((sub) => {
-      const signedUrl = signedByUserId[sub.user_id];
-      if (signedUrl) logos[sub.agency_name] = signedUrl;
-    });
 
     if (Object.keys(logos).length > 0) {
       setAgencyLogos((prev) => ({ ...prev, ...logos }));
