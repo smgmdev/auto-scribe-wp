@@ -914,6 +914,7 @@ export type Database = {
           favicon: string | null
           id: string
           name: string
+          read: boolean
           seo_plugin: string
           updated_at: string
           url: string
@@ -927,6 +928,7 @@ export type Database = {
           favicon?: string | null
           id?: string
           name: string
+          read?: boolean
           seo_plugin?: string
           updated_at?: string
           url: string
@@ -940,6 +942,7 @@ export type Database = {
           favicon?: string | null
           id?: string
           name?: string
+          read?: boolean
           seo_plugin?: string
           updated_at?: string
           url?: string

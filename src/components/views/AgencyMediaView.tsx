@@ -40,6 +40,7 @@ interface WordPressSite {
   favicon: string | null;
   seo_plugin: string;
   connected: boolean;
+  read: boolean;
 }
 
 interface WordPressSiteSubmission {
@@ -148,7 +149,7 @@ export function AgencyMediaView() {
     // Fetch WordPress sites added by this agency user
     const { data: wpData, error: wpError } = await supabase
       .from('wordpress_sites')
-      .select('id, name, url, seo_plugin, favicon, connected')
+      .select('id, name, url, seo_plugin, favicon, connected, read')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -282,6 +283,21 @@ export function AgencyMediaView() {
     });
   };
 
+  // Mark connected WordPress sites as read when tab is selected
+  const handleWpSubTabChange = async (value: string) => {
+    setWpSubTab(value);
+    if (value === 'connected') {
+      const unreadSiteIds = wordpressSites.filter(s => !s.read).map(s => s.id);
+      if (unreadSiteIds.length > 0) {
+        await supabase
+          .from('wordpress_sites')
+          .update({ read: true })
+          .in('id', unreadSiteIds);
+        setWordpressSites(prev => prev.map(s => ({ ...s, read: true })));
+      }
+    }
+  };
+
   // Calculate counts for partial rejections
   const partiallyRejectedSubmissions = approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0);
   const totalRejectedCount = rejectedMediaSubmissions.length + partiallyRejectedSubmissions.length;
@@ -308,6 +324,7 @@ export function AgencyMediaView() {
   const unreadAddedCount = approvedMediaSubmissions.filter(s => !s.read).length;
   const unreadRejectedMediaCount = rejectedMediaSubmissions.filter(s => !s.read).length;
   const unreadRejectedWpCount = rejectedSubmissions.filter(s => !s.read).length;
+  const unreadConnectedWpCount = wordpressSites.filter(s => !s.read).length;
 
   if (loading) {
     return (
@@ -368,16 +385,28 @@ export function AgencyMediaView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="overflow-visible">WordPress Sites</TabsTrigger>
+          <TabsTrigger value="wordpress" className="relative overflow-visible">
+            WordPress Sites
+            {(unreadConnectedWpCount + unreadRejectedWpCount) > 0 && (
+              <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                {unreadConnectedWpCount + unreadRejectedWpCount}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* WordPress Sites Tab */}
         <TabsContent value="wordpress" className="mt-6 space-y-4">
           {/* WordPress Sub-tabs */}
-          <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
+          <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="connected">
+              <TabsTrigger value="connected" className="relative overflow-visible">
                 Connected ({wordpressSites.length})
+                {unreadConnectedWpCount > 0 && (
+                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                    {unreadConnectedWpCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="pending">
                 Pending Review ({pendingSubmissions.length})
