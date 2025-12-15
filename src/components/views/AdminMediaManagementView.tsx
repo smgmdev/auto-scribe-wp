@@ -543,49 +543,38 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
                   {mediaSites.map((site) => (
-                    <Card key={site.id} className="border-border/50 hover:border-border transition-colors">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          {site.favicon ? (
-                            <img 
-                              src={site.favicon} 
-                              alt="" 
-                              className="h-10 w-10 rounded object-cover"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                              <Globe className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{site.name}</CardTitle>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {site.category}{site.subcategory && ` → ${site.subcategory}`}
-                            </p>
-                          </div>
+                    <div key={site.id} className="flex items-center gap-4 p-4 rounded-lg border border-border/50 hover:border-border transition-colors bg-card">
+                      {site.favicon ? (
+                        <img src={site.favicon} alt="" className="h-8 w-8 rounded object-cover shrink-0" />
+                      ) : (
+                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center shrink-0">
+                          <Globe className="h-4 w-4 text-muted-foreground" />
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs">${site.price}</Badge>
-                          <Badge variant="outline" className="text-xs">{site.publication_format}</Badge>
-                          {site.agency && (
-                            <Badge variant="outline" className="text-xs">{site.agency}</Badge>
-                          )}
-                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{site.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {site.category}{site.subcategory && ` → ${site.subcategory}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs">${site.price}</Badge>
+                        <Badge variant="outline" className="text-xs">{site.publication_format}</Badge>
+                        {site.agency && (
+                          <Badge variant="outline" className="text-xs">{site.agency}</Badge>
+                        )}
                         <a 
                           href={site.link} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                          className="text-muted-foreground hover:text-foreground"
                         >
-                          <ExternalLink className="h-3 w-3" />
-                          Visit Site
+                          <ExternalLink className="h-4 w-4" />
                         </a>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -603,49 +592,37 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
                   {pendingMediaSubmissions.map((submission) => (
-                    <Card 
-                      key={submission.id} 
-                      className="border-border/50 hover:border-[#4771d9] transition-colors"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded bg-yellow-500/20 flex items-center justify-center">
-                            <Clock className="h-5 w-5 text-yellow-600" />
-                          </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{submission.agency_name}</CardTitle>
-                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                              {submission.google_sheet_url.length > 40 
-                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                : submission.google_sheet_url}
-                            </p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                            Pending Review
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <a 
-                            href={submission.google_sheet_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Open Sheet
-                          </a>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(submission.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div key={submission.id} className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-yellow-500/50 hover:border-[#4771d9] transition-colors bg-card">
+                      <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{submission.agency_name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {submission.google_sheet_url.length > 50 
+                            ? `${submission.google_sheet_url.substring(0, 50)}...` 
+                            : submission.google_sheet_url}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
+                          Pending
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(submission.created_at).toLocaleDateString()}
+                        </span>
+                        <a 
+                          href={submission.google_sheet_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -663,43 +640,40 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
                   {rejectedMediaSubmissions.map((submission) => (
-                    <Card 
-                      key={submission.id} 
-                      className="border-border/50 hover:border-border transition-colors"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded bg-red-500/20 flex items-center justify-center">
-                            <XCircle className="h-5 w-5 text-red-600" />
-                          </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{submission.agency_name}</CardTitle>
-                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                              {submission.google_sheet_url.length > 40 
-                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                : submission.google_sheet_url}
-                            </p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                            Rejected
-                          </Badge>
-                        </div>
-                        {submission.admin_notes && (
-                          <p className="text-xs text-muted-foreground mb-2">
-                            <span className="font-medium">Reason:</span> {submission.admin_notes}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          Rejected {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                    <div key={submission.id} className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card">
+                      <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{submission.agency_name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {submission.google_sheet_url.length > 50 
+                            ? `${submission.google_sheet_url.substring(0, 50)}...` 
+                            : submission.google_sheet_url}
                         </p>
-                      </CardContent>
-                    </Card>
+                        {submission.admin_notes && (
+                          <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                          Rejected
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                        </span>
+                        <a 
+                          href={submission.google_sheet_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
