@@ -138,9 +138,16 @@ export function DashboardView() {
           </h1>
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
-        <Badge className="bg-black text-white border-black hover:bg-black">
-          {isAdmin ? 'Corporate' : isAgency ? 'Agency' : 'Regular user'}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {isAgency && (
+            <Badge className="bg-green-600 text-white border-green-600 hover:bg-green-600">
+              Active Agency
+            </Badge>
+          )}
+          <Badge className="bg-black text-white border-black hover:bg-black">
+            {isAdmin ? 'Corporate' : isAgency ? 'Agency' : 'Regular user'}
+          </Badge>
+        </div>
       </div>
 
       {/* Stats Grid */}
