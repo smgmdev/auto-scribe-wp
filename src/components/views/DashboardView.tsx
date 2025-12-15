@@ -33,27 +33,32 @@ const stats = [{
   label: 'Local Library',
   icon: Library,
   key: 'sites',
-  tooltip: 'Local Library refers to media sites that are available for Instant Publishing.'
+  tooltip: 'Local Library refers to media sites that are available for Instant Publishing.',
+  clickable: true
 }, {
   label: 'Global Library',
   icon: Library,
   key: 'globalLibrary',
-  tooltip: 'Global Library refers to media sites that are available through agencies worldwide.'
+  tooltip: 'Global Library refers to media sites that are available through agencies worldwide.',
+  clickable: true
 }, {
   label: 'Published Articles',
   icon: FileText,
   key: 'published',
-  tooltip: null
+  tooltip: null,
+  clickable: true
 }, {
   label: 'Draft Articles',
   icon: Newspaper,
   key: 'drafts',
-  tooltip: null
+  tooltip: null,
+  clickable: false
 }];
 
 export function DashboardView() {
   const {
-    setCurrentView
+    setCurrentView,
+    setTargetTab
   } = useAppStore();
   const {
     isAdmin,
@@ -161,6 +166,24 @@ export function DashboardView() {
         return 0;
     }
   };
+
+  const handleStatClick = (key: string) => {
+    switch (key) {
+      case 'sites':
+        setTargetTab('instant');
+        setCurrentView('sites');
+        break;
+      case 'globalLibrary':
+        setTargetTab('custom');
+        setCurrentView('sites');
+        break;
+      case 'published':
+        setCurrentView('articles');
+        break;
+      default:
+        break;
+    }
+  };
   return <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -186,9 +209,12 @@ export function DashboardView() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => {
         const Icon = stat.icon;
-        return <Card key={stat.key} className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all hover:border-border/50 py-3" style={{
-          animationDelay: `${index * 100}ms`
-        }}>
+        return <Card 
+          key={stat.key} 
+          className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 ${stat.clickable ? 'cursor-pointer hover:border-[#4771d9]' : 'hover:border-border/50'}`}
+          style={{ animationDelay: `${index * 100}ms` }}
+          onClick={() => stat.clickable && handleStatClick(stat.key)}
+        >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 {stat.tooltip ? (
                   <Tooltip delayDuration={100}>
