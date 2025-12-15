@@ -162,7 +162,7 @@ export function AdminAgenciesView() {
   const [documentLoading, setDocumentLoading] = useState(true);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
-  const { decrementUnreadAgencyApplicationsCount, decrementUnreadCustomVerificationsCount, setUnreadCustomVerificationsCount } = useAppStore();
+  const { decrementUnreadAgencyApplicationsCount, decrementUnreadCustomVerificationsCount, setUnreadCustomVerificationsCount, setUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
     fetchData();
@@ -240,8 +240,12 @@ export function AdminAgenciesView() {
       setCustomVerifications(verificationData || []);
       
       // Update count of unread pending custom verifications
-      const unreadPendingCount = (verificationData || []).filter(v => v.status === 'pending_review' && !v.read).length;
-      setUnreadCustomVerificationsCount(unreadPendingCount);
+      const unreadPendingVerifications = (verificationData || []).filter(v => v.status === 'pending_review' && !v.read).length;
+      setUnreadCustomVerificationsCount(unreadPendingVerifications);
+      
+      // Update count of unread pending agency applications
+      const unreadPendingApps = (appData || []).filter(a => a.status === 'pending' && !a.read).length;
+      setUnreadAgencyApplicationsCount(unreadPendingApps);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
