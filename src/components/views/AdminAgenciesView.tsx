@@ -126,6 +126,7 @@ export function AdminAgenciesView() {
   const [agencies, setAgencies] = useState<AgencyPayout[]>([]);
   const [customVerifications, setCustomVerifications] = useState<CustomVerification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedApp, setSelectedApp] = useState<AgencyApplication | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -203,8 +204,12 @@ export function AdminAgenciesView() {
     }
   }, [applications]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     try {
       // Fetch applications (exclude hidden ones)
       const { data: appData, error: appError } = await supabase
@@ -241,6 +246,7 @@ export function AdminAgenciesView() {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -849,14 +855,29 @@ export function AdminAgenciesView() {
           <h1 className="text-4xl font-bold text-foreground">Agencies</h1>
           <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={handleOpenStripeAccountsDialog}
-          className="hover:bg-black hover:text-white"
-        >
-          <AlertTriangle className="h-4 w-4 mr-2" />
-          Manage Stripe Accounts
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="bg-black text-white hover:bg-black/80 border-black gap-2"
+            onClick={() => fetchData(true)}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleOpenStripeAccountsDialog}
+            className="hover:bg-black hover:text-white"
+          >
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Manage Stripe Accounts
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
