@@ -380,6 +380,7 @@ export type Database = {
           created_at: string
           google_sheet_url: string
           id: string
+          read: boolean
           reviewed_at: string | null
           status: string
           updated_at: string
@@ -391,6 +392,7 @@ export type Database = {
           created_at?: string
           google_sheet_url: string
           id?: string
+          read?: boolean
           reviewed_at?: string | null
           status?: string
           updated_at?: string
@@ -402,6 +404,7 @@ export type Database = {
           created_at?: string
           google_sheet_url?: string
           id?: string
+          read?: boolean
           reviewed_at?: string | null
           status?: string
           updated_at?: string
@@ -859,6 +862,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          read: boolean
           reviewed_at: string | null
           seo_plugin: string
           status: string
@@ -873,6 +877,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          read?: boolean
           reviewed_at?: string | null
           seo_plugin?: string
           status?: string
@@ -887,6 +892,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          read?: boolean
           reviewed_at?: string | null
           seo_plugin?: string
           status?: string

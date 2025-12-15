@@ -32,6 +32,11 @@ interface AppState {
   setUnreadCustomVerificationsCount: (count: number) => void;
   decrementUnreadCustomVerificationsCount: () => void;
   
+  // Media management notifications for admin
+  unreadMediaSubmissionsCount: number;
+  setUnreadMediaSubmissionsCount: (count: number) => void;
+  decrementUnreadMediaSubmissionsCount: () => void;
+  
   // User agency application status
   userApplicationStatus: string | null;
   setUserApplicationStatus: (status: string | null) => void;
@@ -74,6 +79,13 @@ export const useAppStore = create<AppState>()((set) => ({
   setUnreadCustomVerificationsCount: (count) => set({ unreadCustomVerificationsCount: count }),
   decrementUnreadCustomVerificationsCount: () => set((state) => ({ 
     unreadCustomVerificationsCount: Math.max(0, state.unreadCustomVerificationsCount - 1) 
+  })),
+  
+  // Media management notifications
+  unreadMediaSubmissionsCount: 0,
+  setUnreadMediaSubmissionsCount: (count) => set({ unreadMediaSubmissionsCount: count }),
+  decrementUnreadMediaSubmissionsCount: () => set((state) => ({ 
+    unreadMediaSubmissionsCount: Math.max(0, state.unreadMediaSubmissionsCount - 1) 
   })),
   
   // User agency application status
