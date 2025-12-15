@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -148,6 +148,8 @@ export function AdminAgenciesView() {
   const [verificationRejectionReason, setVerificationRejectionReason] = useState('');
   const [showVerificationRejectDialog, setShowVerificationRejectDialog] = useState(false);
   const [processingVerification, setProcessingVerification] = useState(false);
+  const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
+  const [agencyToDowngrade, setAgencyToDowngrade] = useState<AgencyPayout | null>(null);
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
@@ -463,28 +465,35 @@ export function AdminAgenciesView() {
     }
   };
 
-  const handleDelete = async (agency: AgencyPayout) => {
-    if (!confirm(`Are you sure you want to delete "${agency.agency_name}"? This will also delete the Stripe Connect account and cannot be undone.`)) return;
+  const handleDowngradeAgency = async () => {
+    if (!agencyToDowngrade) return;
 
-    setDeleting(agency.id);
+    setDeleting(agencyToDowngrade.id);
     try {
       const response = await supabase.functions.invoke('delete-connect-account', {
-        body: { agency_payout_id: agency.id }
+        body: { agency_payout_id: agencyToDowngrade.id }
       });
 
       if (response.error) throw new Error(response.error.message);
       if (response.data?.error) throw new Error(response.data.error);
 
       toast({
-        title: 'Agency deleted',
-        description: response.data?.message || `${agency.agency_name} has been deleted.`
+        title: 'Agency downgraded',
+        description: `${agencyToDowngrade.agency_name} has been downgraded to a regular user account.`
       });
+      setShowDowngradeDialog(false);
+      setAgencyToDowngrade(null);
       fetchData();
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setDeleting(null);
     }
+  };
+
+  const handleOpenDowngradeDialog = (agency: AgencyPayout) => {
+    setAgencyToDowngrade(agency);
+    setShowDowngradeDialog(true);
   };
 
   const handleOpenStripeAccountsDialog = async () => {
@@ -1317,18 +1326,18 @@ export function AdminAgenciesView() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
+                                  className="h-8 w-8 hover:bg-orange-500/20 hover:text-orange-500"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDelete(agency);
+                                    handleOpenDowngradeDialog(agency);
                                   }}
                                   disabled={deleting === agency.id}
-                                  title="Delete agency"
+                                  title="Downgrade agency"
                                 >
                                   {deleting === agency.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <Trash2 className="h-4 w-4" />
+                                    <UserMinus className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
@@ -1437,18 +1446,18 @@ export function AdminAgenciesView() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
+                                  className="h-8 w-8 hover:bg-orange-500/20 hover:text-orange-500"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDelete(agency);
+                                    handleOpenDowngradeDialog(agency);
                                   }}
                                   disabled={deleting === agency.id}
-                                  title="Delete agency"
+                                  title="Downgrade agency"
                                 >
                                   {deleting === agency.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <Trash2 className="h-4 w-4" />
+                                    <UserMinus className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
@@ -2404,6 +2413,56 @@ export function AdminAgenciesView() {
               />
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Downgrade Agency Confirmation Dialog */}
+      <Dialog open={showDowngradeDialog} onOpenChange={setShowDowngradeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserMinus className="h-5 w-5 text-orange-500" />
+              Downgrade Agency
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to downgrade <span className="font-semibold text-foreground">{agencyToDowngrade?.agency_name}</span>?
+            </p>
+            
+            <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-2">
+              <p>• The account will be downgraded to a normal user account</p>
+              <p>• All data will stay in the system</p>
+              <p>• The user can re-apply to become an agency later</p>
+            </div>
+            
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowDowngradeDialog(false);
+                  setAgencyToDowngrade(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                onClick={handleDowngradeAgency}
+                disabled={deleting === agencyToDowngrade?.id}
+              >
+                {deleting === agencyToDowngrade?.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <UserMinus className="h-4 w-4 mr-2" />
+                )}
+                Downgrade
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
