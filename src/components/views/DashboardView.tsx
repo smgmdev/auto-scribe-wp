@@ -233,7 +233,10 @@ export function DashboardView() {
 
       {/* Agency Earnings Widget - Only show for active agencies */}
       {isAgency && (
-        <Card className="border-green-500/30 bg-green-500/5 transition-colors hover:border-[#4771d9]">
+        <Card 
+          className="border-green-500/30 bg-green-500/5 transition-colors hover:border-[#4771d9] cursor-pointer"
+          onClick={() => setCurrentView('agency-payouts')}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-500" />
