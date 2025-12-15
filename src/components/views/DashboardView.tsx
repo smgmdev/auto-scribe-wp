@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, HelpCircle, ArrowRight } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, HelpCircle, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -138,16 +138,26 @@ export function DashboardView() {
           </h1>
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
-        <div className="flex items-center gap-2">
-          {isAgency && (
-            <Badge className="bg-green-600 text-white border-green-600 hover:bg-green-600">
-              Active Agency
-            </Badge>
-          )}
+        {isAgency ? (
+          <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-green-400">Agency Verified</span>
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">Your agency account is fully verified</p>
+              </div>
+            </div>
+          </div>
+        ) : (
           <Badge className="bg-black text-white border-black hover:bg-black">
-            {isAdmin ? 'Corporate' : isAgency ? 'Agency' : 'Regular user'}
+            {isAdmin ? 'Corporate' : 'Regular user'}
           </Badge>
-        </div>
+        )}
       </div>
 
       {/* Stats Grid */}
