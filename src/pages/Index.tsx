@@ -67,7 +67,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
 };
 
 const Index = () => {
-  const { currentView, setCurrentView, setTargetTab, setTargetSubcategory } = useAppStore();
+  const { currentView, setCurrentView, setTargetTab, setTargetSubcategory, editingArticle } = useAppStore();
   const { isAdmin, user } = useAuth();
   const location = useLocation();
   const [isApprovedAgency, setIsApprovedAgency] = useState(false);
@@ -177,7 +177,7 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <CurrentView />
+      <CurrentView key={currentView === 'compose' ? `compose-${editingArticle?.id || 'new'}` : currentView} />
     </MainLayout>
   );
 };
