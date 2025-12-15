@@ -221,7 +221,12 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
             </p>
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="hover:!bg-foreground hover:!text-background"
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
