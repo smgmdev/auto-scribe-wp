@@ -286,6 +286,11 @@ export function AgencyMediaView() {
   const totalRejectedCount = rejectedMediaSubmissions.length + partiallyRejectedSubmissions.length;
   const totalAddedSites = approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0);
 
+  // Calculate unread counts for Added and Rejected tabs (notifications after admin action)
+  const unreadAddedCount = approvedMediaSubmissions.filter(s => !s.read).length;
+  const unreadRejectedMediaCount = rejectedMediaSubmissions.filter(s => !s.read).length;
+  const unreadRejectedWpCount = rejectedSubmissions.filter(s => !s.read).length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -340,9 +345,9 @@ export function AgencyMediaView() {
           <TabsTrigger value="wordpress">WordPress Sites</TabsTrigger>
           <TabsTrigger value="media" className="relative">
             Media Sites
-            {pendingMediaSubmissions.length > 0 && (
+            {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
               <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
-                {pendingMediaSubmissions.length}
+                {unreadAddedCount + unreadRejectedMediaCount}
               </span>
             )}
           </TabsTrigger>
@@ -356,16 +361,16 @@ export function AgencyMediaView() {
               <TabsTrigger value="connected">
                 Connected ({wordpressSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative">
+              <TabsTrigger value="pending">
                 Pending Review ({pendingSubmissions.length})
-                {pendingSubmissions.length > 0 && (
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="relative">
+                Rejected ({rejectedSubmissions.length})
+                {unreadRejectedWpCount > 0 && (
                   <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
-                    {pendingSubmissions.length}
+                    {unreadRejectedWpCount}
                   </span>
                 )}
-              </TabsTrigger>
-              <TabsTrigger value="rejected">
-                Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
 
@@ -547,19 +552,24 @@ export function AgencyMediaView() {
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="added">
+              <TabsTrigger value="added" className="relative">
                 Added ({totalAddedSites})
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="relative">
-                Pending Review ({pendingMediaSubmissions.length})
-                {pendingMediaSubmissions.length > 0 && (
+                {unreadAddedCount > 0 && (
                   <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
-                    {pendingMediaSubmissions.length}
+                    {unreadAddedCount}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected">
+              <TabsTrigger value="pending">
+                Pending Review ({pendingMediaSubmissions.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="relative">
                 Rejected ({totalRejectedCount})
+                {unreadRejectedMediaCount > 0 && (
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {unreadRejectedMediaCount}
+                  </span>
+                )}
               </TabsTrigger>
             </TabsList>
 
