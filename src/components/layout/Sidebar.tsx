@@ -330,28 +330,45 @@ export function Sidebar({
 
               if (hasSubmenu) {
                 const isExpanded = expandedMenus[item.id] || false;
+                // Calculate combined notification count for Agencies dropdown header
+                const agencyDropdownCount = item.id === 'admin-agencies' 
+                  ? (unreadAgencyApplicationsCount + unreadCustomVerificationsCount + unreadMediaSubmissionsCount) 
+                  : 0;
                 return (
                   <div key={item.id}>
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        "w-full justify-between px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                         isActive && "text-[#3872e0] font-medium"
                       )}
                       onClick={() => toggleMenu(item.id)}
                     >
-                      <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
-                      <span className="truncate flex-1 text-left">{item.label}</span>
-                      <ChevronDown className={cn(
-                        "h-4 w-4 transition-transform duration-200",
-                        isExpanded && "rotate-180"
-                      )} />
+                      <div className="flex items-center gap-3">
+                        <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {agencyDropdownCount > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                            {agencyDropdownCount}
+                          </Badge>
+                        )}
+                        <ChevronDown className={cn(
+                          "h-4 w-4 transition-transform duration-200",
+                          isExpanded && "rotate-180"
+                        )} />
+                      </div>
                     </Button>
                     {isExpanded && (
                       <div className="ml-4 mt-1 space-y-1">
                         {item.submenu?.map(subItem => {
                           const SubIcon = subItem.icon;
                           const isSubActive = currentView === subItem.id;
+                          // Agency Management shows agency application notifications
+                          const showAgencyBadge = subItem.id === 'admin-agencies' && (unreadAgencyApplicationsCount + unreadCustomVerificationsCount) > 0;
+                          const agencyBadgeCount = unreadAgencyApplicationsCount + unreadCustomVerificationsCount;
+                          // Media Management shows media submission notifications
                           const showMediaBadge = subItem.id === 'admin-media-management' && unreadMediaSubmissionsCount > 0;
                           return (
                             <Button
@@ -367,6 +384,11 @@ export function Sidebar({
                                 <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
                                 <span className="truncate">{subItem.label}</span>
                               </div>
+                              {showAgencyBadge && (
+                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                  {agencyBadgeCount}
+                                </Badge>
+                              )}
                               {showMediaBadge && (
                                 <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {unreadMediaSubmissionsCount}
@@ -395,11 +417,6 @@ export function Sidebar({
                     <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                     <span className="truncate">{item.label}</span>
                   </div>
-                  {item.id === 'admin-agencies' && (unreadAgencyApplicationsCount + unreadCustomVerificationsCount) > 0 && (
-                    <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                      {unreadAgencyApplicationsCount + unreadCustomVerificationsCount}
-                    </Badge>
-                  )}
                 </Button>
               );
             })}
