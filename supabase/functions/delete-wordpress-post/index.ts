@@ -12,37 +12,57 @@ serve(async (req) => {
   }
 
   try {
-    const { siteId, wpPostId, wpFeaturedMediaId } = await req.json();
+    const { siteId, wpPostId, wpFeaturedMediaId, siteUrl, username: directUsername, appPassword } = await req.json();
 
-    console.log('Delete WordPress post request:', { siteId, wpPostId, wpFeaturedMediaId });
+    console.log('Delete WordPress post request:', { siteId, wpPostId, wpFeaturedMediaId, hasDirectCreds: !!siteUrl });
 
-    if (!siteId || !wpPostId) {
+    if (!wpPostId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: siteId, wpPostId' }),
+        JSON.stringify({ error: 'Missing required field: wpPostId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get WordPress site credentials
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    let url: string;
+    let username: string;
+    let app_password: string;
 
-    const { data: site, error: siteError } = await supabase
-      .from('wordpress_sites')
-      .select('url, username, app_password')
-      .eq('id', siteId)
-      .single();
+    // Check if direct credentials are provided (for testing submissions not yet in DB)
+    if (siteUrl && directUsername && appPassword) {
+      url = siteUrl;
+      username = directUsername;
+      app_password = appPassword;
+      console.log('Using direct credentials for deletion');
+    } else if (siteId) {
+      // Get WordPress site credentials from database
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    if (siteError || !site) {
-      console.error('Failed to fetch WordPress site:', siteError);
+      const { data: site, error: siteError } = await supabase
+        .from('wordpress_sites')
+        .select('url, username, app_password')
+        .eq('id', siteId)
+        .single();
+
+      if (siteError || !site) {
+        console.error('Failed to fetch WordPress site:', siteError);
+        return new Response(
+          JSON.stringify({ error: 'WordPress site not found', deleted: false }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      url = site.url;
+      username = site.username;
+      app_password = site.app_password;
+    } else {
       return new Response(
-        JSON.stringify({ error: 'WordPress site not found', deleted: false }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Missing required fields: siteId or direct credentials (siteUrl, username, appPassword)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { url, username, app_password } = site;
     const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
     const authHeader = 'Basic ' + btoa(`${username}:${app_password}`);
 
