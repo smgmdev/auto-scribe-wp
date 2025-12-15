@@ -182,24 +182,9 @@ export function AgencyStatusCard({
     );
   }
 
-  // STATE 4: Fully onboarded agency - Green box (no more agency section needed)
+  // STATE 4: Fully onboarded agency - Don't show any box, badge shown in dashboard
   if (isAgencyOnboarded) {
-    return (
-      <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
-            <CheckCircle className="h-5 w-5 text-green-500" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-green-400">Agency Verified</span>
-              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
-            </div>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Your agency account is fully verified</p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // STATE 5: Pre-approved (applicationStatus === 'approved') - Yellow box or Grey pending
