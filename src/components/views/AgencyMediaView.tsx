@@ -167,11 +167,17 @@ export function AgencyMediaView() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-popover border-border">
-            <DropdownMenuItem onClick={() => handleAddMedia('wordpress')}>
+            <DropdownMenuItem 
+              onClick={() => handleAddMedia('wordpress')}
+              className="hover:bg-foreground hover:text-background cursor-pointer"
+            >
               <Globe className="h-4 w-4 mr-2" />
               WordPress Site
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAddMedia('media')}>
+            <DropdownMenuItem 
+              onClick={() => handleAddMedia('media')}
+              className="hover:bg-foreground hover:text-background cursor-pointer"
+            >
               <Library className="h-4 w-4 mr-2" />
               Media Site
             </DropdownMenuItem>
@@ -216,7 +222,7 @@ export function AgencyMediaView() {
                     </p>
                     <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add WordPress Site
+                      Add New WordPress Site
                     </Button>
                   </CardContent>
                 </Card>
@@ -289,7 +295,7 @@ export function AgencyMediaView() {
                     </p>
                     <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Submit WordPress Site
+                      Add New WordPress Site
                     </Button>
                   </CardContent>
                 </Card>
