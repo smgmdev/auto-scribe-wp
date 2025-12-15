@@ -1057,6 +1057,11 @@ export function AdminMediaManagementView() {
                                   </a>
                                 </div>
                               )}
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {submission.reviewed_at 
+                                  ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                  : 'N/A'}
+                              </p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 ml-auto">
                               <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
@@ -1065,11 +1070,6 @@ export function AdminMediaManagementView() {
                               <Badge variant="secondary" className="text-xs w-[60px] justify-center">
                                 {submission.imported_sites?.length || 0} sites
                               </Badge>
-                              <span className="text-xs text-muted-foreground w-[140px] text-right">
-                                {submission.reviewed_at 
-                                  ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                                  : 'N/A'}
-                              </span>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                               </div>
