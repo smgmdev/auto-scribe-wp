@@ -989,44 +989,101 @@ export function AdminMediaManagementView() {
                                 </div>
                               </div>
                               
-                              {/* Expanded Section with Imported Sites */}
+                              {/* Expanded Section with Imported Sites - Global Library Style */}
                               {isExpanded && submission.imported_sites && submission.imported_sites.length > 0 && (
                                 <div 
                                   className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <p className="text-xs font-medium text-muted-foreground mb-2">Imported Media Sites:</p>
-                                  {submission.imported_sites.map((site) => (
-                                    <div 
-                                      key={site.id}
-                                      className="flex items-center gap-3 p-2 rounded-lg bg-muted/30"
-                                    >
-                                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden">
-                                        {site.favicon ? (
-                                          <img 
-                                            src={site.favicon} 
-                                            alt={`${site.name} favicon`} 
-                                            className="h-4 w-4 object-contain"
-                                          />
-                                        ) : (
-                                          <Globe className="h-3 w-3 text-muted-foreground" />
-                                        )}
-                                      </div>
-                                      <span className="text-xs flex-1 truncate">{site.name}</span>
-                                      <Badge variant="secondary" className="text-[10px]">
-                                        {site.price > 0 ? `${site.price} USD` : 'Free'}
-                                      </Badge>
-                                      <span className="text-[10px] text-muted-foreground">{site.publication_format}</span>
-                                      <a
-                                        href={site.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                  <p className="text-xs font-medium text-muted-foreground mb-3">Imported Media Sites ({submission.imported_sites.length}):</p>
+                                  {submission.imported_sites.map((site) => {
+                                    const isSiteExpanded = expandedSites.has(`imported-${site.id}`);
+                                    
+                                    return (
+                                      <Card 
+                                        key={site.id}
+                                        className="group hover:shadow-md transition-all duration-300 cursor-pointer"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedSites(prev => {
+                                            const next = new Set(prev);
+                                            const key = `imported-${site.id}`;
+                                            if (next.has(key)) {
+                                              next.delete(key);
+                                            } else {
+                                              next.add(key);
+                                            }
+                                            return next;
+                                          });
+                                        }}
                                       >
-                                        <ExternalLink className="h-3 w-3" />
-                                      </a>
-                                    </div>
-                                  ))}
+                                        <CardContent className="p-3">
+                                          <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                                {site.favicon ? (
+                                                  <img 
+                                                    src={site.favicon} 
+                                                    alt={`${site.name} favicon`} 
+                                                    className="h-5 w-5 object-contain"
+                                                    onError={e => {
+                                                      e.currentTarget.style.display = 'none';
+                                                      (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                                                    }}
+                                                  />
+                                                ) : null}
+                                                <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
+                                              </div>
+                                              <div className="min-w-0 flex-1">
+                                                <h3 className="text-sm break-words">{site.name}</h3>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 flex-1 justify-end">
+                                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                                {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                              </Badge>
+                                              <div className="w-[100px] flex justify-start">
+                                                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                                              </div>
+                                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                                {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Expanded Section with Details */}
+                                          {isSiteExpanded && (
+                                            <div 
+                                              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                              {site.about && (
+                                                <div>
+                                                  <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
+                                                  <p className="text-xs text-foreground">{site.about}</p>
+                                                </div>
+                                              )}
+                                              {(site.category || site.subcategory) && (
+                                                <p className="text-xs text-muted-foreground">
+                                                  {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                                                </p>
+                                              )}
+                                              {/* Link at the bottom */}
+                                              <a 
+                                                href={site.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                              >
+                                                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                              </a>
+                                            </div>
+                                          )}
+                                        </CardContent>
+                                      </Card>
+                                    );
+                                  })}
                                 </div>
                               )}
                             </CardContent>
