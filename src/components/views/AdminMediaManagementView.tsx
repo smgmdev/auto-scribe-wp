@@ -66,6 +66,12 @@ interface MediaSite {
   about: string | null;
 }
 
+interface RejectedMediaItem {
+  title: string;
+  price?: number;
+  link?: string;
+}
+
 interface MediaSiteSubmission {
   id: string;
   user_id: string;
@@ -76,6 +82,7 @@ interface MediaSiteSubmission {
   created_at: string;
   reviewed_at: string | null;
   read: boolean;
+  rejected_media?: RejectedMediaItem[] | null;
 }
 
 interface ApprovedMediaSubmission extends MediaSiteSubmission {
@@ -113,6 +120,9 @@ export function AdminMediaManagementView() {
   // Expanded approved submissions state
   const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
   
+  // Expanded rejected submissions state (for partially rejected)
+  const [expandedRejectedSubmissions, setExpandedRejectedSubmissions] = useState<Set<string>>(new Set());
+  
   // Unread counts for notification dots
   const [unreadWpCount, setUnreadWpCount] = useState(0);
   const [unreadMediaCount, setUnreadMediaCount] = useState(0);
@@ -132,6 +142,18 @@ export function AdminMediaManagementView() {
         next.delete(siteId);
       } else {
         next.add(siteId);
+      }
+      return next;
+    });
+  };
+
+  const toggleExpandedRejectedSubmission = (submissionId: string) => {
+    setExpandedRejectedSubmissions(prev => {
+      const next = new Set(prev);
+      if (next.has(submissionId)) {
+        next.delete(submissionId);
+      } else {
+        next.add(submissionId);
       }
       return next;
     });
@@ -254,7 +276,10 @@ export function AdminMediaManagementView() {
       .order('created_at', { ascending: false });
 
     if (pendingMedia) {
-      setPendingMediaSubmissions(pendingMedia);
+      setPendingMediaSubmissions(pendingMedia.map(s => ({
+        ...s,
+        rejected_media: (s.rejected_media as unknown) as RejectedMediaItem[] | null,
+      })));
       // Track unread count
       const mediaUnread = pendingMedia.filter((s: any) => !s.read).length;
       setUnreadMediaCount(mediaUnread);
@@ -270,7 +295,10 @@ export function AdminMediaManagementView() {
       .order('reviewed_at', { ascending: false });
 
     if (rejectedMedia) {
-      setRejectedMediaSubmissions(rejectedMedia);
+      setRejectedMediaSubmissions(rejectedMedia.map(s => ({
+        ...s,
+        rejected_media: (s.rejected_media as unknown) as RejectedMediaItem[] | null,
+      })));
       // Fetch logos for rejected submissions
       fetchAgencyLogos(rejectedMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
     }
@@ -297,6 +325,7 @@ export function AdminMediaManagementView() {
             ...sub,
             reply_sheet_url: sub.admin_notes || '',
             imported_sites: importedSites || [],
+            rejected_media: (sub.rejected_media as unknown) as RejectedMediaItem[] | null,
           } as ApprovedMediaSubmission;
         })
       );
@@ -513,107 +542,139 @@ export function AdminMediaManagementView() {
     setIsImporting(true);
 
     try {
-      // Fetch the Google Sheet as CSV
-      const csvUrl = replySheetUrl.includes('/edit') 
-        ? replySheetUrl.replace(/\/edit.*$/, '/export?format=csv')
-        : replySheetUrl.includes('/pub') 
-          ? replySheetUrl 
-          : `${replySheetUrl}/export?format=csv`;
+      // Helper function to parse CSV
+      const parseSheet = async (sheetUrl: string) => {
+        const csvUrl = sheetUrl.includes('/edit') 
+          ? sheetUrl.replace(/\/edit.*$/, '/export?format=csv')
+          : sheetUrl.includes('/pub') 
+            ? sheetUrl 
+            : `${sheetUrl}/export?format=csv`;
 
-      const response = await fetch(csvUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch Google Sheet. Make sure the sheet is published to the web.');
-      }
+        const response = await fetch(csvUrl);
+        if (!response.ok) {
+          throw new Error('Failed to fetch Google Sheet. Make sure the sheet is published to the web.');
+        }
 
-      const csvText = await response.text();
-      const lines = csvText.split('\n').filter(line => line.trim());
-      
-      if (lines.length < 2) {
-        throw new Error('The sheet appears to be empty or has no data rows.');
-      }
+        const csvText = await response.text();
+        const lines = csvText.split('\n').filter(line => line.trim());
+        
+        if (lines.length < 2) {
+          return [];
+        }
 
-      // Parse headers
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-      
-      // Column mapping
-      const columnMap: Record<string, string> = {
-        'title': 'name',
-        'usd price': 'price',
-        'logo': 'favicon',
-        'publication format': 'publication_format',
-        'url': 'link',
-        'tab': 'category',
-        'subcategory': 'subcategory',
-        'agencies/people': 'agency',
-        'good to know': 'about',
-        'details': 'about',
+        // Parse headers
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+        
+        // Column mapping
+        const columnMap: Record<string, string> = {
+          'title': 'name',
+          'usd price': 'price',
+          'logo': 'favicon',
+          'publication format': 'publication_format',
+          'url': 'link',
+          'tab': 'category',
+          'subcategory': 'subcategory',
+          'agencies/people': 'agency',
+          'good to know': 'about',
+          'details': 'about',
+        };
+
+        const headerIndices: Record<string, number> = {};
+        headers.forEach((h, i) => {
+          const mappedKey = columnMap[h] || h;
+          headerIndices[mappedKey] = i;
+        });
+
+        // Parse data rows
+        const sites: { name: string; price: number; link: string; favicon: string | null; category: string; subcategory: string | null; about: string | null; publication_format: string }[] = [];
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+          
+          const name = values[headerIndices['name']] || '';
+          if (!name) continue;
+
+          const link = values[headerIndices['link']] || '';
+          const price = parseInt(values[headerIndices['price']] || '0', 10) || 0;
+          const favicon = values[headerIndices['favicon']] || (link ? getFaviconUrl(link) : null);
+          const category = values[headerIndices['category']] || 'Global';
+          const subcategory = values[headerIndices['subcategory']] || null;
+          const about = values[headerIndices['about']] || null;
+          const publication_format = values[headerIndices['publication_format']] || 'Article';
+
+          sites.push({
+            name,
+            link,
+            price,
+            favicon,
+            category,
+            subcategory,
+            about,
+            publication_format,
+          });
+        }
+
+        return sites;
       };
 
-      const headerIndices: Record<string, number> = {};
-      headers.forEach((h, i) => {
-        const mappedKey = columnMap[h] || h;
-        headerIndices[mappedKey] = i;
-      });
-
-      // Parse data rows
-      const importedSites: any[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-        
-        const name = values[headerIndices['name']] || '';
-        if (!name) continue;
-
-        const link = values[headerIndices['link']] || '';
-        const price = parseInt(values[headerIndices['price']] || '0', 10) || 0;
-        const favicon = values[headerIndices['favicon']] || (link ? getFaviconUrl(link) : null);
-        const category = values[headerIndices['category']] || 'Global';
-        const subcategory = values[headerIndices['subcategory']] || null;
-        const agency = selectedMediaSubmission.agency_name; // Always use submission's agency name
-        const about = values[headerIndices['about']] || null;
-        const publication_format = values[headerIndices['publication_format']] || 'Article';
-
-        importedSites.push({
-          name,
-          link,
-          price,
-          favicon,
-          category,
-          subcategory,
-          agency,
-          about,
-          publication_format,
-          google_index: 'Regular',
-          marks: 'No',
-          publishing_time: '24h',
-        });
-      }
-
-      if (importedSites.length === 0) {
+      // Parse admin's reply sheet (sites to import)
+      const importedSitesData = await parseSheet(replySheetUrl);
+      
+      if (importedSitesData.length === 0) {
         throw new Error('No valid media sites found in the sheet.');
       }
+
+      // Parse original submission sheet to find rejected items
+      let rejectedMediaItems: RejectedMediaItem[] = [];
+      try {
+        const originalSites = await parseSheet(selectedMediaSubmission.google_sheet_url);
+        const importedTitles = new Set(importedSitesData.map(s => s.name.toLowerCase().trim()));
+        
+        // Find titles in original that are NOT in imported
+        rejectedMediaItems = originalSites
+          .filter(s => !importedTitles.has(s.name.toLowerCase().trim()))
+          .map(s => ({
+            title: s.name,
+            price: s.price,
+            link: s.link,
+          }));
+      } catch (parseError) {
+        console.warn('Could not parse original sheet for rejected items:', parseError);
+        // Continue with import even if we can't determine rejected items
+      }
+
+      // Prepare sites for insertion with agency name
+      const sitesToInsert = importedSitesData.map(site => ({
+        ...site,
+        agency: selectedMediaSubmission.agency_name,
+        google_index: 'Regular',
+        marks: 'No',
+        publishing_time: '24h',
+      }));
 
       // Insert all sites
       const { error: insertError } = await supabase
         .from('media_sites')
-        .insert(importedSites);
+        .insert(sitesToInsert);
 
       if (insertError) throw insertError;
 
-      // Update submission status to approved with reply sheet URL
+      // Update submission status to approved with reply sheet URL and rejected media
       const { error: updateError } = await supabase
         .from('media_site_submissions')
         .update({
           status: 'approved',
           admin_notes: replySheetUrl,
           reviewed_at: new Date().toISOString(),
+          rejected_media: rejectedMediaItems.length > 0 ? JSON.parse(JSON.stringify(rejectedMediaItems)) : null,
         })
         .eq('id', selectedMediaSubmission.id);
 
       if (updateError) throw updateError;
 
+      const rejectedCount = rejectedMediaItems.length;
       toast({
         title: 'Import Successful',
-        description: `Imported ${importedSites.length} media sites from the sheet.`,
+        description: `Imported ${importedSitesData.length} media sites${rejectedCount > 0 ? `, ${rejectedCount} item(s) not imported` : ''}.`,
       });
 
       setIsReplyDialogOpen(false);
@@ -878,7 +939,7 @@ export function AdminMediaManagementView() {
                 )}
               </TabsTrigger>
               <TabsTrigger value="rejected">
-                Rejected ({rejectedMediaSubmissions.length})
+                Rejected ({rejectedMediaSubmissions.length + approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0).length})
               </TabsTrigger>
             </TabsList>
 
@@ -1244,7 +1305,7 @@ export function AdminMediaManagementView() {
 
             {/* Rejected */}
             <TabsContent value="rejected">
-              {rejectedMediaSubmissions.length === 0 ? (
+              {rejectedMediaSubmissions.length === 0 && approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0).length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
@@ -1254,7 +1315,138 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-4">
+                  {/* Partially Rejected - Approved submissions with rejected items */}
+                  {approvedMediaSubmissions
+                    .filter(s => s.rejected_media && s.rejected_media.length > 0)
+                    .map((submission, index) => {
+                      const logoUrl = agencyLogos[submission.agency_name];
+                      const isLogoLoading = loadingLogos.has(submission.agency_name);
+                      const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                      const isExpanded = expandedRejectedSubmissions.has(submission.id);
+                      const rejectedItems = submission.rejected_media || [];
+                      
+                      return (
+                        <Card 
+                          key={submission.id} 
+                          className="group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer border-red-500/50"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                          onClick={() => toggleExpandedRejectedSubmission(submission.id)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                                {logoUrl ? (
+                                  <>
+                                    {(!isLogoLoaded || isLogoLoading) && (
+                                      <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                                    )}
+                                    <img 
+                                      src={logoUrl} 
+                                      alt={`${submission.agency_name} logo`}
+                                      className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                      onLoad={() => handleLogoLoad(submission.agency_name)}
+                                      onError={() => handleLogoLoad(submission.agency_name)}
+                                    />
+                                  </>
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-red-500" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm">{submission.agency_name}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {submission.google_sheet_url.length > 40 
+                                      ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                      : submission.google_sheet_url}
+                                  </p>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(submission.google_sheet_url);
+                                      toast({
+                                        title: 'Copied',
+                                        description: 'Link copied to clipboard',
+                                      });
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Copy link"
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </button>
+                                  <a
+                                    href={submission.google_sheet_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Open link"
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Badge variant="outline" className="text-xs border-red-500 text-red-500 bg-red-500/10">
+                                  Rejected ({rejectedItems.length})
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                                </span>
+                                {isExpanded ? (
+                                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Expanded: Show rejected media items */}
+                            {isExpanded && (
+                              <div 
+                                className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <p className="text-xs font-medium text-muted-foreground mb-2">
+                                  Rejected Media ({rejectedItems.length})
+                                </p>
+                                <div className="grid gap-2">
+                                  {rejectedItems.map((item, itemIndex) => (
+                                    <div 
+                                      key={itemIndex}
+                                      className="flex items-center gap-3 p-3 rounded-md bg-red-500/5 border border-red-500/20"
+                                    >
+                                      <XCircle className="h-4 w-4 text-red-500 shrink-0" />
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate">{item.title}</p>
+                                        {item.link && (
+                                          <a 
+                                            href={ensureHttps(item.link)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-muted-foreground hover:text-accent truncate block"
+                                          >
+                                            {item.link}
+                                          </a>
+                                        )}
+                                      </div>
+                                      {item.price !== undefined && item.price > 0 && (
+                                        <Badge variant="outline" className="text-xs shrink-0">
+                                          ${item.price} USD
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+
+                  {/* Fully Rejected Submissions */}
                   {rejectedMediaSubmissions.map((submission, index) => {
                     const logoUrl = agencyLogos[submission.agency_name];
                     const isLogoLoading = loadingLogos.has(submission.agency_name);
