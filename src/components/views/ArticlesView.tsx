@@ -249,7 +249,7 @@ export function ArticlesView() {
               Are you sure you want to delete "{articleToDelete?.title}"?
               {articleToDelete?.status === 'published' && articleToDelete?.wpPostId && (
                 <span className="block mt-2 text-destructive font-medium">
-                  This will permanently remove the post and featured image from WordPress.
+                  This will permanently remove the post from the published media channel.
                 </span>
               )}
             </AlertDialogDescription>
