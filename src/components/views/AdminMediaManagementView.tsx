@@ -1067,8 +1067,8 @@ export function AdminMediaManagementView() {
                               <Badge variant="outline" className="text-xs border-green-500 text-green-500 w-[90px] justify-center">
                                 Approved
                               </Badge>
-                              <Badge variant="secondary" className="text-xs w-[60px] justify-center">
-                                {submission.imported_sites?.length || 0} sites
+                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                {submission.imported_sites?.length || 0} sites added
                               </Badge>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -1254,7 +1254,7 @@ export function AdminMediaManagementView() {
                             <Clock className="h-4 w-4 text-yellow-500" />
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 max-w-[400px]">
                           <p className="text-xs text-muted-foreground">Media Sheet Submitted</p>
                           <p className="font-medium text-sm">{submission.agency_name}</p>
                           <div className="flex items-center gap-2 mt-1">
@@ -1288,6 +1288,9 @@ export function AdminMediaManagementView() {
                               <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {submission.read && (
@@ -1327,9 +1330,6 @@ export function AdminMediaManagementView() {
                           <Badge variant="outline" className={`text-xs ${!submission.read ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' : 'border-yellow-500/50 text-yellow-500/70'}`}>
                             {!submission.read ? 'New' : 'Pending'}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
                         </div>
                       </div>
                     );
@@ -1388,7 +1388,7 @@ export function AdminMediaManagementView() {
                                   <XCircle className="h-4 w-4 text-red-500" />
                                 )}
                               </div>
-                              <div className="flex-1 min-w-0">
+                              <div className="flex-1 min-w-0 max-w-[400px]">
                                 <p className="text-xs text-muted-foreground">Partially Rejected Media Sheet</p>
                                 <p className="font-medium text-sm">{submission.agency_name}</p>
                                 <div className="flex items-center gap-2 mt-1">
@@ -1422,16 +1422,16 @@ export function AdminMediaManagementView() {
                                     <ExternalLink className="h-3.5 w-3.5" />
                                   </a>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <Badge variant="outline" className="text-xs border-orange-500 text-orange-500">
-                                  Partially Rejected ({rejectedItems.length})
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground mt-1">
                                   {submission.reviewed_at 
                                     ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                     : 'N/A'}
-                                </span>
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 ml-auto">
+                                <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 whitespace-nowrap">
+                                  Partially Rejected ({rejectedItems.length})
+                                </Badge>
                                 {isExpanded ? (
                                   <ChevronUp className="h-4 w-4 text-muted-foreground" />
                                 ) : (
@@ -1514,7 +1514,7 @@ export function AdminMediaManagementView() {
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 max-w-[400px]">
                           <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
                           <p className="font-medium text-sm">{submission.agency_name}</p>
                           <div className="flex items-center gap-2 mt-1">
@@ -1549,16 +1549,16 @@ export function AdminMediaManagementView() {
                           {submission.admin_notes && (
                             <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
                           )}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
-                            Rejected
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {submission.reviewed_at 
                               ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                               : 'N/A'}
-                          </span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-auto">
+                          <Badge variant="outline" className="text-xs border-red-500 text-red-500">
+                            Rejected
+                          </Badge>
                         </div>
                       </div>
                     );
