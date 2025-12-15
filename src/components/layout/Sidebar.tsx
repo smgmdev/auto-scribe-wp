@@ -269,6 +269,13 @@ export function Sidebar({
               .eq('status', 'rejected')
               .eq('read', false);
             
+            // Count unread connected WP sites for this agency user
+            const { count: wpConnectedCount } = await supabase
+              .from('wordpress_sites')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', user.id)
+              .eq('read', false);
+            
             // Count unread approved + rejected media site submissions for this agency user
             const { count: mediaApprovedCount } = await supabase
               .from('media_site_submissions')
@@ -285,7 +292,7 @@ export function Sidebar({
               .eq('read', false);
             
             if (isMounted) {
-              setAgencyUnreadWpSubmissionsCount(wpRejectedCount || 0);
+              setAgencyUnreadWpSubmissionsCount((wpRejectedCount || 0) + (wpConnectedCount || 0));
               setAgencyUnreadMediaSubmissionsCount((mediaApprovedCount || 0) + (mediaRejectedCount || 0));
             }
           }
