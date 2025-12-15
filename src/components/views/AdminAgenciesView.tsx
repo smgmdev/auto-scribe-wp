@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck, ArrowDownCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1395,6 +1395,7 @@ export function AdminAgenciesView() {
 
         {/* Active Agencies Tab */}
         <TabsContent value="active" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
           <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="stripe-connect">
@@ -1498,7 +1499,7 @@ export function AdminAgenciesView() {
                                   {deleting === agency.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <UserMinus className="h-4 w-4" />
+                                    <ArrowDownCircle className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
@@ -1618,7 +1619,7 @@ export function AdminAgenciesView() {
                                   {deleting === agency.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <UserMinus className="h-4 w-4" />
+                                    <ArrowDownCircle className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
