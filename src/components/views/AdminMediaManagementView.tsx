@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl } from '@/lib/favicon';
@@ -71,6 +78,11 @@ interface MediaSiteSubmission {
   read: boolean;
 }
 
+interface ApprovedMediaSubmission extends MediaSiteSubmission {
+  reply_sheet_url?: string;
+  imported_sites?: MediaSite[];
+}
+
 export function AdminMediaManagementView() {
   const { decrementUnreadMediaSubmissionsCount, setUnreadMediaSubmissionsCount } = useAppStore();
   
@@ -90,6 +102,16 @@ export function AdminMediaManagementView() {
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [pendingMediaSubmissions, setPendingMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
   const [rejectedMediaSubmissions, setRejectedMediaSubmissions] = useState<MediaSiteSubmission[]>([]);
+  const [approvedMediaSubmissions, setApprovedMediaSubmissions] = useState<ApprovedMediaSubmission[]>([]);
+  
+  // Reply dialog state
+  const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false);
+  const [selectedMediaSubmission, setSelectedMediaSubmission] = useState<MediaSiteSubmission | null>(null);
+  const [replySheetUrl, setReplySheetUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  
+  // Expanded approved submissions state
+  const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
   
   // Unread counts for notification dots
   const [unreadWpCount, setUnreadWpCount] = useState(0);
@@ -259,6 +281,36 @@ export function AdminMediaManagementView() {
       fetchAgencyLogos(rejectedMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
     }
     
+    // Fetch approved media site submissions
+    const { data: approvedMedia } = await supabase
+      .from('media_site_submissions')
+      .select('*')
+      .eq('status', 'approved')
+      .order('reviewed_at', { ascending: false });
+
+    if (approvedMedia) {
+      // Map approved submissions with their imported sites
+      const approvedWithSites = await Promise.all(
+        approvedMedia.map(async (sub) => {
+          // Fetch media sites that were imported from this submission (matching agency)
+          const { data: importedSites } = await supabase
+            .from('media_sites')
+            .select('*')
+            .eq('agency', sub.agency_name)
+            .order('created_at', { ascending: false });
+          
+          return {
+            ...sub,
+            reply_sheet_url: sub.admin_notes || '',
+            imported_sites: importedSites || [],
+          } as ApprovedMediaSubmission;
+        })
+      );
+      setApprovedMediaSubmissions(approvedWithSites);
+      // Fetch logos for approved submissions
+      fetchAgencyLogos(approvedMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
+    }
+    
     // Update global unread count in store
     const totalUnread = (pending?.filter((s: any) => !s.read).length || 0) + (pendingMedia?.filter((s: any) => !s.read).length || 0);
     setUnreadMediaSubmissionsCount(totalUnread);
@@ -411,6 +463,178 @@ export function AdminMediaManagementView() {
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // Toggle expanded approved submission
+  const toggleExpandedApprovedSubmission = (submissionId: string) => {
+    setExpandedApprovedSubmissions(prev => {
+      const next = new Set(prev);
+      if (next.has(submissionId)) {
+        next.delete(submissionId);
+      } else {
+        next.add(submissionId);
+      }
+      return next;
+    });
+  };
+
+  // Handle media submission reject
+  const handleMediaReject = async (submission: MediaSiteSubmission) => {
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('media_site_submissions')
+        .update({
+          status: 'rejected',
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', submission.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Submission Rejected',
+        description: 'The media site submission has been rejected.',
+      });
+
+      // Update local state
+      setPendingMediaSubmissions(prev => prev.filter(s => s.id !== submission.id));
+      setRejectedMediaSubmissions(prev => [{ ...submission, status: 'rejected', reviewed_at: new Date().toISOString() }, ...prev]);
+    } catch (error: any) {
+      console.error('Error rejecting media submission:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to reject the submission.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle media submission reply - import from Google Sheet
+  const handleMediaReply = async () => {
+    if (!selectedMediaSubmission || !replySheetUrl) return;
+    setIsImporting(true);
+
+    try {
+      // Fetch the Google Sheet as CSV
+      const csvUrl = replySheetUrl.includes('/edit') 
+        ? replySheetUrl.replace(/\/edit.*$/, '/export?format=csv')
+        : replySheetUrl.includes('/pub') 
+          ? replySheetUrl 
+          : `${replySheetUrl}/export?format=csv`;
+
+      const response = await fetch(csvUrl);
+      if (!response.ok) {
+        throw new Error('Failed to fetch Google Sheet. Make sure the sheet is published to the web.');
+      }
+
+      const csvText = await response.text();
+      const lines = csvText.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error('The sheet appears to be empty or has no data rows.');
+      }
+
+      // Parse headers
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+      
+      // Column mapping
+      const columnMap: Record<string, string> = {
+        'title': 'name',
+        'usd price': 'price',
+        'logo': 'favicon',
+        'publication format': 'publication_format',
+        'url': 'link',
+        'tab': 'category',
+        'subcategory': 'subcategory',
+        'agencies/people': 'agency',
+        'good to know': 'about',
+        'details': 'about',
+      };
+
+      const headerIndices: Record<string, number> = {};
+      headers.forEach((h, i) => {
+        const mappedKey = columnMap[h] || h;
+        headerIndices[mappedKey] = i;
+      });
+
+      // Parse data rows
+      const importedSites: any[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+        
+        const name = values[headerIndices['name']] || '';
+        if (!name) continue;
+
+        const link = values[headerIndices['link']] || '';
+        const price = parseInt(values[headerIndices['price']] || '0', 10) || 0;
+        const favicon = values[headerIndices['favicon']] || (link ? getFaviconUrl(link) : null);
+        const category = values[headerIndices['category']] || 'Global';
+        const subcategory = values[headerIndices['subcategory']] || null;
+        const agency = values[headerIndices['agency']] || selectedMediaSubmission.agency_name;
+        const about = values[headerIndices['about']] || null;
+        const publication_format = values[headerIndices['publication_format']] || 'Article';
+
+        importedSites.push({
+          name,
+          link,
+          price,
+          favicon,
+          category,
+          subcategory,
+          agency,
+          about,
+          publication_format,
+          google_index: 'Regular',
+          marks: 'No',
+          publishing_time: '24h',
+        });
+      }
+
+      if (importedSites.length === 0) {
+        throw new Error('No valid media sites found in the sheet.');
+      }
+
+      // Insert all sites
+      const { error: insertError } = await supabase
+        .from('media_sites')
+        .insert(importedSites);
+
+      if (insertError) throw insertError;
+
+      // Update submission status to approved with reply sheet URL
+      const { error: updateError } = await supabase
+        .from('media_site_submissions')
+        .update({
+          status: 'approved',
+          admin_notes: replySheetUrl,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', selectedMediaSubmission.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: 'Import Successful',
+        description: `Imported ${importedSites.length} media sites from the sheet.`,
+      });
+
+      setIsReplyDialogOpen(false);
+      setSelectedMediaSubmission(null);
+      setReplySheetUrl('');
+      fetchData();
+    } catch (error: any) {
+      console.error('Error importing from sheet:', error);
+      toast({
+        title: 'Import Failed',
+        description: error.message || 'Failed to import from the Google Sheet.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -666,7 +890,7 @@ export function AdminMediaManagementView() {
 
             {/* Added Media Sites */}
             <TabsContent value="added">
-              {mediaSites.length === 0 ? (
+              {mediaSites.length === 0 && approvedMediaSubmissions.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Library className="h-12 w-12 text-muted-foreground/50 mb-4" />
@@ -676,98 +900,241 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
-                  {mediaSites.map((site, index) => {
-                    const isExpanded = expandedSites.has(site.id);
-                    const agencySite = site.agency ? mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency) : null;
-                    
-                    return (
-                      <Card 
-                        key={site.id} 
-                        className="group hover:shadow-md transition-all duration-300 cursor-pointer"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                        onClick={() => toggleExpand(site.id)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                                {site.favicon ? (
-                                  <img 
-                                    src={site.favicon} 
-                                    alt={`${site.name} favicon`} 
-                                    className="h-5 w-5 object-contain"
-                                    onError={e => {
-                                      e.currentTarget.style.display = 'none';
-                                      (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                                    }}
-                                  />
-                                ) : null}
-                                <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <h3 className="text-sm break-words">{site.name}</h3>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 flex-1 justify-end">
-                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                {site.price > 0 ? `${site.price} USD` : 'Free'}
-                              </Badge>
-                              <div className="w-[100px] flex justify-start">
-                                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
-                              </div>
-                              {site.agency && (
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                  <span>via</span>
-                                  <span className="text-foreground">{site.agency}</span>
-                                  {agencySite?.favicon && (
-                                    <img 
-                                      src={agencySite.favicon} 
-                                      alt={site.agency} 
-                                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                    />
+                <div className="space-y-4">
+                  {/* Approved Submissions with Imported Sites */}
+                  {approvedMediaSubmissions.length > 0 && (
+                    <div className="space-y-2">
+                      {approvedMediaSubmissions.map((submission, index) => {
+                        const logoUrl = agencyLogos[submission.agency_name];
+                        const isLogoLoading = loadingLogos.has(submission.agency_name);
+                        const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                        const isExpanded = expandedApprovedSubmissions.has(submission.id);
+                        
+                        return (
+                          <Card 
+                            key={submission.id} 
+                            className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-green-500/50"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                            onClick={() => toggleExpandedApprovedSubmission(submission.id)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="h-8 w-8 rounded bg-green-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                                  {logoUrl ? (
+                                    <>
+                                      {(!isLogoLoaded || isLogoLoading) && (
+                                        <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
+                                      )}
+                                      <img 
+                                        src={logoUrl} 
+                                        alt={`${submission.agency_name} logo`}
+                                        className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                        onLoad={() => handleLogoLoad(submission.agency_name)}
+                                        onError={() => handleLogoLoad(submission.agency_name)}
+                                      />
+                                    </>
+                                  ) : (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
                                   )}
                                 </div>
-                              )}
-                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
-                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm">{submission.agency_name}</p>
+                                  {submission.reply_sheet_url && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                        {submission.reply_sheet_url.length > 40 
+                                          ? `${submission.reply_sheet_url.substring(0, 40)}...` 
+                                          : submission.reply_sheet_url}
+                                      </p>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          navigator.clipboard.writeText(submission.reply_sheet_url || '');
+                                          toast({
+                                            title: 'Copied',
+                                            description: 'Link copied to clipboard',
+                                          });
+                                        }}
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                        title="Copy link"
+                                      >
+                                        <Copy className="h-3.5 w-3.5" />
+                                      </button>
+                                      <a
+                                        href={submission.reply_sheet_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                        title="Open link"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <ExternalLink className="h-3.5 w-3.5" />
+                                      </a>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <Badge variant="outline" className="text-xs border-green-500 text-green-500">
+                                    Approved
+                                  </Badge>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {submission.imported_sites?.length || 0} sites
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">
+                                    {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                                  </span>
+                                  <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                          
-                          {/* Expanded Section with Details */}
-                          {isExpanded && (
-                            <div 
-                              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {site.about && (
-                                <div>
-                                  <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
-                                  <p className="text-xs text-foreground">{site.about}</p>
+                              
+                              {/* Expanded Section with Imported Sites */}
+                              {isExpanded && submission.imported_sites && submission.imported_sites.length > 0 && (
+                                <div 
+                                  className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <p className="text-xs font-medium text-muted-foreground mb-2">Imported Media Sites:</p>
+                                  {submission.imported_sites.map((site) => (
+                                    <div 
+                                      key={site.id}
+                                      className="flex items-center gap-3 p-2 rounded-lg bg-muted/30"
+                                    >
+                                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden">
+                                        {site.favicon ? (
+                                          <img 
+                                            src={site.favicon} 
+                                            alt={`${site.name} favicon`} 
+                                            className="h-4 w-4 object-contain"
+                                          />
+                                        ) : (
+                                          <Globe className="h-3 w-3 text-muted-foreground" />
+                                        )}
+                                      </div>
+                                      <span className="text-xs flex-1 truncate">{site.name}</span>
+                                      <Badge variant="secondary" className="text-[10px]">
+                                        {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                      </Badge>
+                                      <span className="text-[10px] text-muted-foreground">{site.publication_format}</span>
+                                      <a
+                                        href={site.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
+                                    </div>
+                                  ))}
                                 </div>
                               )}
-                              {(site.category || site.subcategory) && (
-                                <p className="text-xs text-muted-foreground">
-                                  {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
-                                </p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Regular Media Sites */}
+                  {mediaSites.length > 0 && (
+                    <div className="space-y-2">
+                      {approvedMediaSubmissions.length > 0 && (
+                        <p className="text-xs font-medium text-muted-foreground mt-4 mb-2">All Media Sites:</p>
+                      )}
+                      {mediaSites.map((site, index) => {
+                        const isExpanded = expandedSites.has(site.id);
+                        const agencySite = site.agency ? mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency) : null;
+                        
+                        return (
+                          <Card 
+                            key={site.id} 
+                            className="group hover:shadow-md transition-all duration-300 cursor-pointer"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                            onClick={() => toggleExpand(site.id)}
+                          >
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                    {site.favicon ? (
+                                      <img 
+                                        src={site.favicon} 
+                                        alt={`${site.name} favicon`} 
+                                        className="h-5 w-5 object-contain"
+                                        onError={e => {
+                                          e.currentTarget.style.display = 'none';
+                                          (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                                        }}
+                                      />
+                                    ) : null}
+                                    <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <h3 className="text-sm break-words">{site.name}</h3>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-3 flex-1 justify-end">
+                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                    {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                  </Badge>
+                                  <div className="w-[100px] flex justify-start">
+                                    <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                                  </div>
+                                  {site.agency && (
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                      <span>via</span>
+                                      <span className="text-foreground">{site.agency}</span>
+                                      {agencySite?.favicon && (
+                                        <img 
+                                          src={agencySite.favicon} 
+                                          alt={site.agency} 
+                                          className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                        />
+                                      )}
+                                    </div>
+                                  )}
+                                  <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Expanded Section with Details */}
+                              {isExpanded && (
+                                <div 
+                                  className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {site.about && (
+                                    <div>
+                                      <p className="text-xs font-medium text-muted-foreground mb-1">Good to know</p>
+                                      <p className="text-xs text-foreground">{site.about}</p>
+                                    </div>
+                                  )}
+                                  {(site.category || site.subcategory) && (
+                                    <p className="text-xs text-muted-foreground">
+                                      {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                                    </p>
+                                  )}
+                                  {/* Link at the bottom */}
+                                  <a 
+                                    href={site.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                  >
+                                    <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                  </a>
+                                </div>
                               )}
-                              {/* Link at the bottom */}
-                              <a 
-                                href={site.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
-                              >
-                                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                              </a>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
@@ -869,6 +1236,37 @@ export function AdminMediaManagementView() {
                           <Badge variant="outline" className={`text-xs ${!submission.read ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' : 'border-yellow-500/50 text-yellow-500/70'}`}>
                             {!submission.read ? 'New' : 'Pending'}
                           </Badge>
+                          {submission.read && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button variant="outline" size="sm" className="h-7 px-2 gap-1 text-xs">
+                                  Action
+                                  <ChevronDown className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-popover z-50">
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedMediaSubmission(submission);
+                                    setReplySheetUrl('');
+                                    setIsReplyDialogOpen(true);
+                                  }}
+                                >
+                                  Reply
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMediaReject(submission);
+                                  }}
+                                >
+                                  Reject
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                           <span className="text-xs text-muted-foreground">
                             {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
@@ -1062,6 +1460,73 @@ export function AdminMediaManagementView() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reply Dialog for Media Submissions */}
+      <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Media Sites</DialogTitle>
+            <DialogDescription>
+              Enter the Google Sheet URL to import media sites for {selectedMediaSubmission?.agency_name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="reply-sheet-url">Google Sheet URL</Label>
+              <Input
+                id="reply-sheet-url"
+                placeholder="https://docs.google.com/spreadsheets/d/..."
+                value={replySheetUrl}
+                onChange={(e) => setReplySheetUrl(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Make sure the sheet is published to the web (File → Share → Publish to web)
+              </p>
+            </div>
+
+            {selectedMediaSubmission && (
+              <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Original submission sheet:</p>
+                <a
+                  href={selectedMediaSubmission.google_sheet_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  {selectedMediaSubmission.google_sheet_url.length > 50 
+                    ? `${selectedMediaSubmission.google_sheet_url.substring(0, 50)}...` 
+                    : selectedMediaSubmission.google_sheet_url}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setIsReplyDialogOpen(false);
+                  setSelectedMediaSubmission(null);
+                  setReplySheetUrl('');
+                }}
+                disabled={isImporting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button"
+                onClick={handleMediaReply}
+                disabled={isImporting || !replySheetUrl.trim()}
+              >
+                {isImporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Import & Approve
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
