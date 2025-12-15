@@ -182,6 +182,8 @@ export function AdminMediaManagementView() {
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   // WP logos state (keyed by user_id for WP submissions)
   const [wpAgencyLogos, setWpAgencyLogos] = useState<Record<string, string>>({});
+  // WP agency names state (keyed by user_id)
+  const [wpAgencyNames, setWpAgencyNames] = useState<Record<string, string>>({});
   const [loadingLogos, setLoadingLogos] = useState<Set<string>>(new Set());
   const [loadedLogos, setLoadedLogos] = useState<Set<string>>(new Set());
 
@@ -272,12 +274,22 @@ export function AdminMediaManagementView() {
     // Get only approved applications (each user can only have 1 approved application)
     const { data, error } = await supabase
       .from('agency_applications')
-      .select('user_id, logo_url')
+      .select('user_id, logo_url, agency_name')
       .in('user_id', uniqueUserIds)
-      .not('logo_url', 'is', null)
       .eq('status', 'approved');
 
     if (error || !data || data.length === 0) return;
+
+    // Store agency names by user_id
+    const names: Record<string, string> = {};
+    data.forEach((row) => {
+      if (row?.user_id && row?.agency_name) {
+        names[row.user_id] = row.agency_name;
+      }
+    });
+    if (Object.keys(names).length > 0) {
+      setWpAgencyNames((prev) => ({ ...prev, ...names }));
+    }
 
     // Create signed URLs for each logo
     const logos: Record<string, string> = {};
@@ -1573,8 +1585,7 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-[10px] text-red-500">Rejected WordPress Site</p>
-                                <p className="text-xs text-muted-foreground">{submission.username}</p>
+                                <p className="text-xs text-muted-foreground">{wpAgencyNames[submission.user_id] || 'Unknown Agency'}</p>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
