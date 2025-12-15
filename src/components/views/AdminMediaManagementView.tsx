@@ -268,7 +268,7 @@ export function AdminMediaManagementView() {
     const { data: mediaData } = await supabase
       .from('media_sites')
       .select('*')
-      .order('name', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (mediaData) setMediaSites(mediaData);
 
@@ -726,6 +726,24 @@ export function AdminMediaManagementView() {
     );
   }
 
+  // Combine and sort all rejected media submissions by date (most recent first)
+  const partiallyRejectedSubmissions = approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0);
+  const allRejectedMediaSubmissions = [
+    ...rejectedMediaSubmissions.map(s => ({ ...s, type: 'full' as const })),
+    ...partiallyRejectedSubmissions.map(s => ({ ...s, type: 'partial' as const })),
+  ].sort((a, b) => {
+    const dateA = new Date(a.reviewed_at || a.created_at).getTime();
+    const dateB = new Date(b.reviewed_at || b.created_at).getTime();
+    return dateB - dateA; // Most recent first
+  });
+
+  // Sort approved media submissions by date (most recent first)
+  const sortedApprovedMediaSubmissions = [...approvedMediaSubmissions].sort((a, b) => {
+    const dateA = new Date(a.reviewed_at || a.created_at).getTime();
+    const dateB = new Date(b.reviewed_at || b.created_at).getTime();
+    return dateB - dateA;
+  });
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -984,7 +1002,7 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {approvedMediaSubmissions.map((submission, index) => {
+                  {sortedApprovedMediaSubmissions.map((submission, index) => {
                     const logoUrl = agencyLogos[submission.agency_name];
                     const isLogoLoading = loadingLogos.has(submission.agency_name);
                     const isLogoLoaded = loadedLogos.has(submission.agency_name);
@@ -1339,7 +1357,7 @@ export function AdminMediaManagementView() {
 
             {/* Rejected */}
             <TabsContent value="rejected">
-              {rejectedMediaSubmissions.length === 0 && approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0).length === 0 ? (
+              {allRejectedMediaSubmissions.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
@@ -1350,13 +1368,13 @@ export function AdminMediaManagementView() {
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {/* Partially Rejected - Approved submissions with rejected items */}
-                  {approvedMediaSubmissions
-                    .filter(s => s.rejected_media && s.rejected_media.length > 0)
-                    .map((submission, index) => {
-                      const logoUrl = agencyLogos[submission.agency_name];
-                      const isLogoLoading = loadingLogos.has(submission.agency_name);
-                      const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                  {allRejectedMediaSubmissions.map((submission, index) => {
+                    const logoUrl = agencyLogos[submission.agency_name];
+                    const isLogoLoading = loadingLogos.has(submission.agency_name);
+                    const isLogoLoaded = loadedLogos.has(submission.agency_name);
+                    
+                    if (submission.type === 'partial') {
+                      // Partially rejected submission
                       const isExpanded = expandedRejectedSubmissions.has(submission.id);
                       const rejectedItems = submission.rejected_media || [];
                       
@@ -1482,81 +1500,76 @@ export function AdminMediaManagementView() {
                           </CardContent>
                         </Card>
                       );
-                    })}
-
-                  {/* Fully Rejected Submissions */}
-                  {rejectedMediaSubmissions.map((submission, index) => {
-                    const logoUrl = agencyLogos[submission.agency_name];
-                    const isLogoLoading = loadingLogos.has(submission.agency_name);
-                    const isLogoLoaded = loadedLogos.has(submission.agency_name);
-                    
-                    return (
-                      <div 
-                        key={submission.id} 
-                        className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                          {logoUrl ? (
-                            <>
-                              {(!isLogoLoaded || isLogoLoading) && (
-                                <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
-                              )}
-                              <img 
-                                src={logoUrl} 
-                                alt={`${submission.agency_name} logo`}
-                                className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                onLoad={() => handleLogoLoad(submission.agency_name)}
-                                onError={() => handleLogoLoad(submission.agency_name)}
-                              />
-                            </>
-                          ) : (
-                            <XCircle className="h-4 w-4 text-red-500" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 max-w-[400px]">
-                          <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
-                          <p className="font-medium text-sm">{submission.agency_name}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                              {submission.google_sheet_url.length > 40 
-                                ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                : submission.google_sheet_url}
-                            </p>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(submission.google_sheet_url);
-                                toast({
-                                  title: 'Copied',
-                                  description: 'Link copied to clipboard',
-                                });
-                              }}
-                              className="text-muted-foreground hover:text-foreground transition-colors"
-                              title="Copy link"
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                            </button>
-                            <a
-                              href={submission.google_sheet_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-foreground transition-colors"
-                              title="Open link"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
+                    } else {
+                      // Fully rejected submission
+                      return (
+                        <div 
+                          key={submission.id} 
+                          className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                            {logoUrl ? (
+                              <>
+                                {(!isLogoLoaded || isLogoLoading) && (
+                                  <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                                )}
+                                <img 
+                                  src={logoUrl} 
+                                  alt={`${submission.agency_name} logo`}
+                                  className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                  onLoad={() => handleLogoLoad(submission.agency_name)}
+                                  onError={() => handleLogoLoad(submission.agency_name)}
+                                />
+                              </>
+                            ) : (
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            )}
                           </div>
-                          {submission.admin_notes && (
-                            <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {submission.reviewed_at 
-                              ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                              : 'N/A'}
-                          </p>
+                          <div className="flex-1 min-w-0 max-w-[400px]">
+                            <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
+                            <p className="font-medium text-sm">{submission.agency_name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                {submission.google_sheet_url.length > 40 
+                                  ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                  : submission.google_sheet_url}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(submission.google_sheet_url);
+                                  toast({
+                                    title: 'Copied',
+                                    description: 'Link copied to clipboard',
+                                  });
+                                }}
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                title="Copy link"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </button>
+                              <a
+                                href={submission.google_sheet_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                title="Open link"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </div>
+                            {submission.admin_notes && (
+                              <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {submission.reviewed_at 
+                                ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                : 'N/A'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
+                    }
                   })}
                 </div>
               )}

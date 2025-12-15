@@ -296,6 +296,13 @@ export function AgencyMediaView() {
     return dateB - dateA; // Most recent first
   });
 
+  // Sort approved media submissions by date (most recent first)
+  const sortedApprovedMediaSubmissions = [...approvedMediaSubmissions].sort((a, b) => {
+    const dateA = new Date(a.reviewed_at || a.created_at).getTime();
+    const dateB = new Date(b.reviewed_at || b.created_at).getTime();
+    return dateB - dateA;
+  });
+
   // Calculate unread counts for Added and Rejected tabs (notifications after admin action)
   const unreadAddedCount = approvedMediaSubmissions.filter(s => !s.read).length;
   const unreadRejectedMediaCount = rejectedMediaSubmissions.filter(s => !s.read).length;
@@ -600,7 +607,7 @@ export function AgencyMediaView() {
                 </Card>
               ) : (
                 <div className="space-y-2">
-                  {approvedMediaSubmissions.map((submission, index) => {
+                  {sortedApprovedMediaSubmissions.map((submission, index) => {
                     const isExpanded = expandedApprovedSubmissions.has(submission.id);
                     
                     return (
