@@ -318,17 +318,27 @@ export function AdminMediaManagementView() {
       // Map approved submissions with their imported sites
       const approvedWithSites = await Promise.all(
         approvedMedia.map(async (sub) => {
-          // Fetch media sites that were imported from this submission (matching agency)
+          const reviewedAt = sub.reviewed_at ? new Date(sub.reviewed_at).getTime() : 0;
+          
+          // Fetch media sites that were imported from this submission
+          // Filter by agency name AND created_at close to reviewed_at time
           const { data: importedSites } = await supabase
             .from('media_sites')
             .select('*')
             .eq('agency', sub.agency_name)
             .order('created_at', { ascending: false });
           
+          // Filter sites that were created within 1 minute of the submission being reviewed
+          const filteredSites = (importedSites || []).filter(site => {
+            const siteCreatedAt = new Date(site.created_at).getTime();
+            const timeDiff = Math.abs(siteCreatedAt - reviewedAt);
+            return timeDiff < 60000; // Within 1 minute
+          });
+          
           return {
             ...sub,
             reply_sheet_url: sub.admin_notes || '',
-            imported_sites: importedSites || [],
+            imported_sites: filteredSites,
             rejected_media: (sub.rejected_media as unknown) as RejectedMediaItem[] | null,
           } as ApprovedMediaSubmission;
         })

@@ -219,8 +219,19 @@ export function AgencyMediaView() {
 
     if (approvedMediaData) {
       // Map approved submissions with their imported sites
+      // Filter sites by matching the created_at time close to the submission's reviewed_at time
       const approvedWithSites: ApprovedMediaSubmission[] = approvedMediaData.map(sub => {
-        const imported = mediaData?.filter(site => site.agency === agencyData.agency_name) || [];
+        const reviewedAt = sub.reviewed_at ? new Date(sub.reviewed_at).getTime() : 0;
+        
+        // Filter sites that were created within 1 minute of the submission being reviewed
+        // This links the imported sites to the specific submission
+        const imported = mediaData?.filter(site => {
+          if (site.agency !== agencyData.agency_name) return false;
+          const siteCreatedAt = new Date(site.created_at).getTime();
+          const timeDiff = Math.abs(siteCreatedAt - reviewedAt);
+          return timeDiff < 60000; // Within 1 minute
+        }) || [];
+        
         return {
           ...sub,
           rejected_media: sub.rejected_media as unknown as RejectedMediaItem[] | null,
