@@ -72,9 +72,14 @@ export function AgencyMediaView() {
         setMediaSites(mediaData);
       }
 
-      // Fetch WordPress sites (using RPC function for non-admin users)
-      const { data: wpData } = await supabase.rpc('get_public_sites');
-      if (wpData) {
+      // Fetch WordPress sites added by this agency user
+      const { data: wpData, error: wpError } = await supabase
+        .from('wordpress_sites')
+        .select('id, name, url, seo_plugin, favicon, connected')
+        .eq('user_id', user.id)
+        .order('name', { ascending: true });
+
+      if (!wpError && wpData) {
         setWordpressSites(wpData);
       }
 

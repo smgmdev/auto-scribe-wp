@@ -827,6 +827,7 @@ export type Database = {
           seo_plugin: string
           updated_at: string
           url: string
+          user_id: string | null
           username: string
         }
         Insert: {
@@ -839,6 +840,7 @@ export type Database = {
           seo_plugin?: string
           updated_at?: string
           url: string
+          user_id?: string | null
           username: string
         }
         Update: {
@@ -851,6 +853,7 @@ export type Database = {
           seo_plugin?: string
           updated_at?: string
           url?: string
+          user_id?: string | null
           username?: string
         }
         Relationships: []
