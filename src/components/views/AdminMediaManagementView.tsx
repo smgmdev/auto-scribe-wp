@@ -103,7 +103,6 @@ export function AdminMediaManagementView() {
   const [rejectedSubmissions, setRejectedSubmissions] = useState<WordPressSiteSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<WordPressSiteSubmission | null>(null);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
-  const [adminNotes, setAdminNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Media sites state
@@ -118,9 +117,13 @@ export function AdminMediaManagementView() {
   const [replySheetUrl, setReplySheetUrl] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   
-  // Reject dialog state
+  // Reject dialog state (for media submissions)
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  
+  // WP Reject dialog state
+  const [isWpRejectDialogOpen, setIsWpRejectDialogOpen] = useState(false);
+  const [wpRejectReason, setWpRejectReason] = useState('');
   
   // Expanded approved submissions state
   const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
@@ -420,7 +423,6 @@ export function AdminMediaManagementView() {
 
   const handleOpenReview = async (submission: WordPressSiteSubmission) => {
     setSelectedSubmission(submission);
-    setAdminNotes(submission.admin_notes || '');
     setIsReviewDialogOpen(true);
     
     // Mark as read if not already
@@ -467,7 +469,6 @@ export function AdminMediaManagementView() {
         .from('wordpress_site_submissions')
         .update({
           status: 'approved',
-          admin_notes: adminNotes || null,
           reviewed_at: new Date().toISOString(),
         })
         .eq('id', selectedSubmission.id);
@@ -480,7 +481,7 @@ export function AdminMediaManagementView() {
           body: {
             submissionId: selectedSubmission.id,
             status: 'approved',
-            adminNotes: adminNotes || null,
+            adminNotes: null,
             siteName: selectedSubmission.name,
             siteUrl: selectedSubmission.url,
           },
@@ -496,7 +497,6 @@ export function AdminMediaManagementView() {
 
       setIsReviewDialogOpen(false);
       setSelectedSubmission(null);
-      setAdminNotes('');
       fetchData();
     } catch (error: any) {
       console.error('Error approving site:', error);
@@ -511,7 +511,7 @@ export function AdminMediaManagementView() {
   };
 
   const handleReject = async () => {
-    if (!selectedSubmission) return;
+    if (!selectedSubmission || !wpRejectReason.trim()) return;
     setIsProcessing(true);
 
     try {
@@ -519,7 +519,7 @@ export function AdminMediaManagementView() {
         .from('wordpress_site_submissions')
         .update({
           status: 'rejected',
-          admin_notes: adminNotes || null,
+          admin_notes: wpRejectReason.trim(),
           reviewed_at: new Date().toISOString(),
         })
         .eq('id', selectedSubmission.id);
@@ -532,7 +532,7 @@ export function AdminMediaManagementView() {
           body: {
             submissionId: selectedSubmission.id,
             status: 'rejected',
-            adminNotes: adminNotes || null,
+            adminNotes: wpRejectReason.trim(),
             siteName: selectedSubmission.name,
             siteUrl: selectedSubmission.url,
           },
@@ -546,9 +546,10 @@ export function AdminMediaManagementView() {
         description: 'The WordPress site submission has been rejected.',
       });
 
+      setIsWpRejectDialogOpen(false);
       setIsReviewDialogOpen(false);
       setSelectedSubmission(null);
-      setAdminNotes('');
+      setWpRejectReason('');
       fetchData();
     } catch (error: any) {
       console.error('Error rejecting site:', error);
@@ -1791,17 +1792,6 @@ export function AdminMediaManagementView() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="admin-notes">Admin Notes (Optional)</Label>
-                <Textarea
-                  id="admin-notes"
-                  placeholder="Add notes about this submission..."
-                  value={adminNotes}
-                  onChange={(e) => setAdminNotes(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
               <div className="flex justify-end gap-3 pt-4">
                 <Button 
                   type="button" 
@@ -1814,12 +1804,14 @@ export function AdminMediaManagementView() {
                 </Button>
                 <Button 
                   type="button" 
-                  variant="destructive"
-                  onClick={handleReject}
+                  variant="outline"
+                  onClick={() => {
+                    window.open(ensureHttps(selectedSubmission.url), '_blank');
+                  }}
                   disabled={isProcessing}
+                  className="hover:bg-black hover:text-white"
                 >
-                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Reject
+                  Test
                 </Button>
                 <Button 
                   type="button"
@@ -1829,9 +1821,64 @@ export function AdminMediaManagementView() {
                   {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Approve
                 </Button>
+                <Button 
+                  type="button" 
+                  variant="destructive"
+                  onClick={() => setIsWpRejectDialogOpen(true)}
+                  disabled={isProcessing}
+                >
+                  Reject
+                </Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* WP Reject Confirmation Dialog */}
+      <Dialog open={isWpRejectDialogOpen} onOpenChange={setIsWpRejectDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reject WordPress Site</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for rejecting this submission.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="wp-reject-reason">Rejection Reason</Label>
+              <Textarea
+                id="wp-reject-reason"
+                placeholder="Enter the reason for rejection..."
+                value={wpRejectReason}
+                onChange={(e) => setWpRejectReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setIsWpRejectDialogOpen(false);
+                  setWpRejectReason('');
+                }}
+                disabled={isProcessing}
+                className="hover:bg-black hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                variant="destructive"
+                onClick={handleReject}
+                disabled={isProcessing || !wpRejectReason.trim()}
+              >
+                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Confirm Rejection
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
