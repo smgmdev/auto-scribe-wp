@@ -898,36 +898,67 @@ export function AdminMediaManagementView() {
               ) : (
                 <div className="space-y-2">
                   {pendingSubmissions.map((submission, index) => (
-                    <Card 
+                    <div 
                       key={submission.id} 
-                      className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer"
+                      className={`relative flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
                       style={{ animationDelay: `${index * 50}ms` }}
                       onClick={() => handleOpenReview(submission)}
                     >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded">
-                              <Clock className="h-4 w-4 text-yellow-500" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm truncate">{submission.name}</h3>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Badge variant="outline" className="text-xs">
-                              {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                              Pending
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(submission.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
+                      {!submission.read && (
+                        <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
+                      )}
+                      <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <div className="flex-1 min-w-0 max-w-[400px]">
+                        <p className="text-xs text-muted-foreground">WordPress Site Submitted</p>
+                        <p className="font-medium text-sm">{submission.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {submission.url.length > 40 
+                              ? `${submission.url.substring(0, 40)}...` 
+                              : submission.url}
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(submission.url);
+                              toast({
+                                title: 'Copied',
+                                description: 'URL copied to clipboard',
+                              });
+                            }}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Copy URL"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <a
+                            href={ensureHttps(submission.url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Open site"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-auto">
+                        <Badge variant="outline" className="text-xs">
+                          {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                        </Badge>
+                        {!submission.read && (
+                          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500 bg-yellow-500/10">
+                            New
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
