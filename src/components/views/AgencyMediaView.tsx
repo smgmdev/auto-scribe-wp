@@ -418,15 +418,21 @@ export function AgencyMediaView() {
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                              {site.favicon ? (
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10">
+                              {agencyLogo ? (
+                                <img 
+                                  src={agencyLogo} 
+                                  alt="Agency logo" 
+                                  className="h-9 w-9 object-cover"
+                                />
+                              ) : site.favicon ? (
                                 <img 
                                   src={site.favicon} 
                                   alt={`${site.name} favicon`} 
                                   className="h-5 w-5 object-contain"
                                 />
                               ) : (
-                                <Globe className="h-4 w-4 text-muted-foreground" />
+                                <CheckCircle className="h-4 w-4 text-green-500" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -487,7 +493,15 @@ export function AgencyMediaView() {
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded">
-                              <Clock className="h-4 w-4 text-yellow-500" />
+                              {agencyLogo ? (
+                                <img 
+                                  src={agencyLogo} 
+                                  alt="Agency logo" 
+                                  className="h-9 w-9 object-cover"
+                                />
+                              ) : (
+                                <Clock className="h-4 w-4 text-yellow-500" />
+                              )}
                             </div>
                             <div className="min-w-0 flex-1">
                               <h3 className="text-sm truncate">{submission.name}</h3>
@@ -535,7 +549,15 @@ export function AgencyMediaView() {
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded">
-                              <XCircle className="h-4 w-4 text-red-500" />
+                              {agencyLogo ? (
+                                <img 
+                                  src={agencyLogo} 
+                                  alt="Agency logo" 
+                                  className="h-9 w-9 object-cover"
+                                />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              )}
                             </div>
                             <div className="min-w-0 flex-1">
                               <h3 className="text-sm truncate">{submission.name}</h3>
