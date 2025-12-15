@@ -1045,21 +1045,18 @@ export function AdminMediaManagementView() {
                                           <div className="w-[100px] flex justify-start">
                                             <span className="text-xs text-muted-foreground">{site.publication_format}</span>
                                           </div>
-                                          {/* Agency info */}
+                                          {/* Agency info - use submission's agency logo */}
                                           {site.agency && (
                                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                               <span>via</span>
                                               <span className="text-foreground">{site.agency}</span>
-                                              {(() => {
-                                                const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
-                                                return agencySite?.favicon ? (
-                                                  <img 
-                                                    src={agencySite.favicon} 
-                                                    alt={site.agency} 
-                                                    className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                                  />
-                                                ) : null;
-                                              })()}
+                                              {agencyLogos[site.agency] && (
+                                                <img 
+                                                  src={agencyLogos[site.agency]} 
+                                                  alt={site.agency} 
+                                                  className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                />
+                                              )}
                                             </div>
                                           )}
                                           <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
