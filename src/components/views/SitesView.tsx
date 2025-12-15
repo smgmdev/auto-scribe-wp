@@ -97,6 +97,7 @@ export function SitesView() {
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
+  const [activeAgencyNames, setActiveAgencyNames] = useState<Set<string>>(new Set());
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -208,6 +209,17 @@ export function SitesView() {
         fetchAgencyLogos(uniqueAgencies);
       }
     }
+    
+    // Fetch active agencies (onboarding_complete = true)
+    const { data: activeAgenciesData } = await supabase
+      .from('agency_payouts')
+      .select('agency_name')
+      .eq('onboarding_complete', true);
+    
+    if (activeAgenciesData) {
+      setActiveAgencyNames(new Set(activeAgenciesData.map(a => a.agency_name)));
+    }
+    
     setMediaSitesLoading(false);
   };
 
@@ -1607,6 +1619,10 @@ export function SitesView() {
                     {(() => {
                       const filtered = mediaSites.filter(site => {
                         if (site.category !== category) return false;
+                        // For Agencies/People, only show active agencies (unless admin)
+                        if (category === 'Agencies/People' && !isAdmin) {
+                          if (!activeAgencyNames.has(site.name)) return false;
+                        }
                         if (category === 'Global' && activeSubcategory) {
                           if (!site.subcategory) return false;
                           const subcats = site.subcategory.split(',').map(s => s.trim());
