@@ -139,6 +139,7 @@ export function AdminAgenciesView() {
   const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
+  const [activeSubTab, setActiveSubTab] = useState('stripe-connect');
   const [selectedVerification, setSelectedVerification] = useState<CustomVerification | null>(null);
   const [verificationDocUrls, setVerificationDocUrls] = useState<Record<string, string>>({});
   const [docViewerOpen, setDocViewerOpen] = useState(false);
@@ -1224,91 +1225,221 @@ export function AdminAgenciesView() {
 
         {/* Active Agencies Tab */}
         <TabsContent value="active" className="mt-6">
-          <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
-          {agencies.filter(a => a.onboarding_complete).length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Building2 className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No active agencies</h3>
-                <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Fully verified agencies will appear here
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {agencies.filter(a => a.onboarding_complete).map(agency => {
-                const application = getAgencyWithApplication(agency);
-                return (
-                  <Card key={agency.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
-                            <img 
-                              src={logoUrls[application.id]} 
-                              alt={agency.agency_name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : application && logoUrls[application.id] ? (
-                            <>
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                              </div>
-                              <img 
-                                src={logoUrls[application.id]} 
-                                alt=""
-                                className="hidden"
-                                onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                              />
-                            </>
-                          ) : application && loadingLogoIds.has(application.id) ? (
-                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                              <CheckCircle className="h-5 w-5 text-green-500" />
-                            </div>
-                          )}
-                          <div>
-                            <h3 className="font-semibold">{agency.agency_name}</h3>
-                            <p className="text-sm text-muted-foreground">{agency.email}</p>
-                            {application && (
-                              <p className="text-xs text-muted-foreground">
-                                {application.full_name} • {application.country}
-                              </p>
-                            )}
-                          </div>
-                        </div>
+          <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="stripe-connect">
+                Stripe Connect ({agencies.filter(a => a.onboarding_complete && a.payout_method === 'stripe').length})
+              </TabsTrigger>
+              <TabsTrigger value="custom-payout">
+                Custom Payout ({agencies.filter(a => a.onboarding_complete && a.payout_method === 'custom').length})
+              </TabsTrigger>
+            </TabsList>
 
-                        <div className="flex items-center gap-6">
-                          {getOnboardingStatus(agency)}
-
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
-                              onClick={() => handleDelete(agency)}
-                              disabled={deleting === agency.id}
-                              title="Delete agency"
-                            >
-                              {deleting === agency.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+            {/* Stripe Connect Agencies */}
+            <TabsContent value="stripe-connect" className="mt-4">
+              {agencies.filter(a => a.onboarding_complete && a.payout_method === 'stripe').length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No Stripe Connect agencies</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Agencies using Stripe Connect will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {agencies.filter(a => a.onboarding_complete && a.payout_method === 'stripe').map(agency => {
+                    const application = getAgencyWithApplication(agency);
+                    return (
+                      <Card key={agency.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt={agency.agency_name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : application && logoUrls[application.id] ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                  </div>
+                                  <img 
+                                    src={logoUrls[application.id]} 
+                                    alt=""
+                                    className="hidden"
+                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  />
+                                </>
+                              ) : application && loadingLogoIds.has(application.id) ? (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
                               ) : (
-                                <Trash2 className="h-4 w-4" />
+                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                </div>
                               )}
-                            </Button>
+                              <div>
+                                <h3 className="font-semibold">{agency.agency_name}</h3>
+                                <p className="text-sm text-muted-foreground">{agency.email}</p>
+                                {application && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {application.full_name} • {application.country}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <div className="flex gap-2">
+                                <Badge className="bg-green-600 text-white">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Verified
+                                </Badge>
+                                <Badge className="bg-black text-white">
+                                  Stripe Connect
+                                </Badge>
+                              </div>
+
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
+                                  onClick={() => handleDelete(agency)}
+                                  disabled={deleting === agency.id}
+                                  title="Delete agency"
+                                >
+                                  {deleting === agency.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Custom Payout Agencies */}
+            <TabsContent value="custom-payout" className="mt-4">
+              {agencies.filter(a => a.onboarding_complete && a.payout_method === 'custom').length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No Custom Payout agencies</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Agencies using custom payouts will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {agencies.filter(a => a.onboarding_complete && a.payout_method === 'custom').map(agency => {
+                    const application = getAgencyWithApplication(agency);
+                    const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
+                    return (
+                      <Card key={agency.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt={agency.agency_name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : application && logoUrls[application.id] ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                  </div>
+                                  <img 
+                                    src={logoUrls[application.id]} 
+                                    alt=""
+                                    className="hidden"
+                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  />
+                                </>
+                              ) : application && loadingLogoIds.has(application.id) ? (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                </div>
+                              )}
+                              <div>
+                                <h3 className="font-semibold">{agency.agency_name}</h3>
+                                <p className="text-sm text-muted-foreground">{agency.email}</p>
+                                {application && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {application.full_name} • {application.country}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <div className="flex gap-2">
+                                <Badge className="bg-green-600 text-white">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Verified
+                                </Badge>
+                                {verification && (
+                                  <Badge 
+                                    className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenVerification(verification, e);
+                                    }}
+                                  >
+                                    <FileText className="h-3 w-3 mr-1" />
+                                    Details
+                                  </Badge>
+                                )}
+                                <Badge className="bg-black text-white">
+                                  Custom Payout
+                                </Badge>
+                              </div>
+
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
+                                  onClick={() => handleDelete(agency)}
+                                  disabled={deleting === agency.id}
+                                  title="Delete agency"
+                                >
+                                  {deleting === agency.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* Rejected Applications Tab */}
