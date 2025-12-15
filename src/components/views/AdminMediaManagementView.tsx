@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { publishArticle } from '@/lib/wordpress-api';
+import type { ArticleTone, WordPressSite as WPSiteType } from '@/types';
 
 interface WordPressSiteSubmission {
   id: string;
@@ -125,6 +128,22 @@ export function AdminMediaManagementView() {
   const [isWpRejectDialogOpen, setIsWpRejectDialogOpen] = useState(false);
   const [wpRejectReason, setWpRejectReason] = useState('');
   
+  // WP Test Article dialog state
+  const [isTestArticleDialogOpen, setIsTestArticleDialogOpen] = useState(false);
+  const [testArticleTitle, setTestArticleTitle] = useState('');
+  const [testArticleContent, setTestArticleContent] = useState('');
+  const [testArticleTone, setTestArticleTone] = useState<ArticleTone>('neutral');
+  const [isGeneratingTestArticle, setIsGeneratingTestArticle] = useState(false);
+  const [isPublishingTestArticle, setIsPublishingTestArticle] = useState(false);
+  const [testArticleImageFile, setTestArticleImageFile] = useState<File | null>(null);
+  const [testArticleImagePreview, setTestArticleImagePreview] = useState<string | null>(null);
+  const testArticleFileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Test Article Success dialog state
+  const [isTestSuccessDialogOpen, setIsTestSuccessDialogOpen] = useState(false);
+  const [testArticleResult, setTestArticleResult] = useState<{ wpPostId: number; wpLink: string; siteId: string } | null>(null);
+  const [isDeletingTestArticle, setIsDeletingTestArticle] = useState(false);
+  
   // Expanded approved submissions state
   const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
   
@@ -144,6 +163,17 @@ export function AdminMediaManagementView() {
   const [wpAgencyLogos, setWpAgencyLogos] = useState<Record<string, string>>({});
   const [loadingLogos, setLoadingLogos] = useState<Set<string>>(new Set());
   const [loadedLogos, setLoadedLogos] = useState<Set<string>>(new Set());
+
+  // Tone options for test article
+  const toneOptions: { value: ArticleTone; label: string }[] = [
+    { value: 'neutral', label: 'Neutral' },
+    { value: 'professional', label: 'Professional Corporate' },
+    { value: 'journalist', label: 'Journalist' },
+    { value: 'inspiring', label: 'Inspiring' },
+    { value: 'aggressive', label: 'Aggressive' },
+    { value: 'powerful', label: 'Powerful' },
+    { value: 'important', label: 'Important' },
+  ];
 
   const toggleExpand = (siteId: string) => {
     setExpandedSites(prev => {
@@ -561,6 +591,199 @@ export function AdminMediaManagementView() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // Handle test article image upload
+  const handleTestArticleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file",
+          variant: "destructive"
+        });
+        return;
+      }
+      setTestArticleImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTestArticleImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeTestArticleImage = () => {
+    setTestArticleImageFile(null);
+    setTestArticleImagePreview(null);
+    if (testArticleFileInputRef.current) {
+      testArticleFileInputRef.current.value = '';
+    }
+  };
+
+  // Generate test article content
+  const handleGenerateTestArticle = async () => {
+    if (!testArticleTitle.trim()) {
+      toast({
+        title: "Title required",
+        description: "Please enter an article title first",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsGeneratingTestArticle(true);
+    try {
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        throw new Error("Session expired. Please log in again.");
+      }
+
+      const { data, error } = await supabase.functions.invoke('generate-article', {
+        body: {
+          headline: testArticleTitle,
+          tone: testArticleTone,
+        }
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        setTestArticleTitle(data.title);
+        setTestArticleContent(data.content);
+        toast({
+          title: "Article generated",
+          description: `${data.content.split(/\s+/).length} words generated with AI`
+        });
+      } else {
+        throw new Error(data?.error || 'Failed to generate article');
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      toast({
+        title: "Generation failed",
+        description: error instanceof Error ? error.message : "Could not generate article",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingTestArticle(false);
+    }
+  };
+
+  // Publish test article to the submitted WordPress site
+  const handlePublishTestArticle = async () => {
+    if (!selectedSubmission) return;
+    if (!testArticleTitle.trim() || !testArticleContent.trim()) {
+      toast({
+        title: "Content required",
+        description: "Please enter both title and content",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsPublishingTestArticle(true);
+    try {
+      // Create a temporary site object from the submission credentials
+      const tempSite: WPSiteType = {
+        id: selectedSubmission.id,
+        name: selectedSubmission.name,
+        url: ensureHttps(selectedSubmission.url),
+        username: selectedSubmission.username,
+        applicationPassword: selectedSubmission.app_password,
+        seoPlugin: selectedSubmission.seo_plugin as 'aioseo' | 'rankmath',
+        connected: false,
+      };
+
+      // Publish to WordPress
+      const result = await publishArticle({
+        site: tempSite,
+        title: testArticleTitle,
+        content: testArticleContent,
+        status: 'publish',
+        categories: [],
+        tags: [],
+      });
+
+      // Store result and show success dialog
+      setTestArticleResult({
+        wpPostId: result.id,
+        wpLink: result.link,
+        siteId: selectedSubmission.id,
+      });
+      
+      setIsTestArticleDialogOpen(false);
+      setIsTestSuccessDialogOpen(true);
+
+      toast({
+        title: "Test article published!",
+        description: `Successfully published to ${selectedSubmission.name}`
+      });
+    } catch (error) {
+      console.error('Publish test article error:', error);
+      toast({
+        title: "Failed to publish",
+        description: error instanceof Error ? error.message : "Could not publish to WordPress",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPublishingTestArticle(false);
+    }
+  };
+
+  // Delete test article from WordPress
+  const handleDeleteTestArticle = async () => {
+    if (!testArticleResult || !selectedSubmission) return;
+    
+    setIsDeletingTestArticle(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-wordpress-post', {
+        body: {
+          siteId: selectedSubmission.id,
+          wpPostId: testArticleResult.wpPostId,
+          wpFeaturedMediaId: null,
+          // Pass credentials directly since site isn't in DB yet
+          siteUrl: ensureHttps(selectedSubmission.url),
+          username: selectedSubmission.username,
+          appPassword: selectedSubmission.app_password,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test article deleted",
+        description: "The test article has been removed from WordPress"
+      });
+
+      // Close success dialog and reset state
+      setIsTestSuccessDialogOpen(false);
+      setTestArticleResult(null);
+      resetTestArticleForm();
+    } catch (error) {
+      console.error('Delete test article error:', error);
+      toast({
+        title: "Failed to delete",
+        description: error instanceof Error ? error.message : "Could not delete from WordPress",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingTestArticle(false);
+    }
+  };
+
+  // Reset test article form
+  const resetTestArticleForm = () => {
+    setTestArticleTitle('');
+    setTestArticleContent('');
+    setTestArticleTone('neutral');
+    setTestArticleImageFile(null);
+    setTestArticleImagePreview(null);
+  };
+
+  // Open test article dialog
+  const openTestArticleDialog = () => {
+    resetTestArticleForm();
+    setIsTestArticleDialogOpen(true);
   };
 
   // Toggle expanded approved submission
@@ -1805,9 +2028,7 @@ export function AdminMediaManagementView() {
                 <Button 
                   type="button" 
                   variant="outline"
-                  onClick={() => {
-                    window.open(ensureHttps(selectedSubmission.url), '_blank');
-                  }}
+                  onClick={openTestArticleDialog}
                   disabled={isProcessing}
                   className="hover:bg-black hover:text-white"
                 >
@@ -1995,6 +2216,157 @@ export function AdminMediaManagementView() {
               >
                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Reject
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Article Compose Dialog */}
+      <Dialog open={isTestArticleDialogOpen} onOpenChange={setIsTestArticleDialogOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Test Article Publishing</DialogTitle>
+            <DialogDescription>
+              Create and publish a test article to {selectedSubmission?.name} to verify the WordPress connection
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            {/* Tone Selector */}
+            <div className="space-y-2">
+              <Label htmlFor="test-tone">Tone</Label>
+              <Select value={testArticleTone} onValueChange={(v) => setTestArticleTone(v as ArticleTone)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select tone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {toneOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="test-title">Title</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="test-title"
+                  placeholder="Enter article title..."
+                  value={testArticleTitle}
+                  onChange={(e) => setTestArticleTitle(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleGenerateTestArticle}
+                  disabled={isGeneratingTestArticle || !testArticleTitle.trim()}
+                  className="shrink-0"
+                >
+                  {isGeneratingTestArticle ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  <span className="ml-2">Generate</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-2">
+              <Label htmlFor="test-content">Content</Label>
+              <Textarea
+                id="test-content"
+                placeholder="Write or generate article content..."
+                value={testArticleContent}
+                onChange={(e) => setTestArticleContent(e.target.value)}
+                rows={10}
+                className="resize-none"
+              />
+              {testArticleContent && (
+                <p className="text-xs text-muted-foreground">
+                  {testArticleContent.split(/\s+/).filter(Boolean).length} words
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setIsTestArticleDialogOpen(false);
+                  resetTestArticleForm();
+                }}
+                disabled={isPublishingTestArticle}
+                className="hover:bg-black hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button"
+                onClick={handlePublishTestArticle}
+                disabled={isPublishingTestArticle || !testArticleTitle.trim() || !testArticleContent.trim()}
+              >
+                {isPublishingTestArticle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Publish Test Article
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Article Success Dialog */}
+      <Dialog open={isTestSuccessDialogOpen} onOpenChange={setIsTestSuccessDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Test Article Published
+            </DialogTitle>
+            <DialogDescription>
+              The test article has been successfully published to {selectedSubmission?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              You can now view the article on the WordPress site or delete it to clean up.
+            </p>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  if (testArticleResult?.wpLink) {
+                    window.open(testArticleResult.wpLink, '_blank');
+                  }
+                }}
+                disabled={!testArticleResult?.wpLink}
+                className="hover:bg-black hover:text-white"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Article
+              </Button>
+              <Button 
+                type="button"
+                variant="destructive"
+                onClick={handleDeleteTestArticle}
+                disabled={isDeletingTestArticle}
+              >
+                {isDeletingTestArticle ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="mr-2 h-4 w-4" />
+                )}
+                Delete
               </Button>
             </div>
           </div>
