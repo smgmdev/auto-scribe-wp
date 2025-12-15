@@ -114,14 +114,41 @@ const Landing = () => {
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
 
-        // Build agency logos map from Agencies/People category
-        const logosMap: Record<string, string> = {};
-        mediaData?.forEach(site => {
-          if (site.category === 'Agencies/People' && site.favicon) {
-            logosMap[site.name] = site.favicon;
+        // Fetch agency logos from agency_applications table
+        const uniqueAgencies = [...new Set((mediaData || []).filter(s => s.agency).map(s => s.agency as string))];
+        if (uniqueAgencies.length > 0) {
+          const { data: appData, error: appError } = await supabase
+            .from('agency_applications')
+            .select('agency_name, logo_url, created_at')
+            .in('agency_name', uniqueAgencies)
+            .not('logo_url', 'is', null)
+            .order('created_at', { ascending: true });
+
+          if (!appError && appData && appData.length > 0) {
+            // Get earliest logo per agency_name
+            const earliestLogoByAgency: Record<string, string> = {};
+            for (const row of appData) {
+              if (!row?.agency_name || !row?.logo_url) continue;
+              if (!earliestLogoByAgency[row.agency_name]) {
+                earliestLogoByAgency[row.agency_name] = row.logo_url;
+              }
+            }
+
+            // Create signed URLs for each logo
+            const logos: Record<string, string> = {};
+            await Promise.all(
+              Object.entries(earliestLogoByAgency).map(async ([agencyName, path]) => {
+                const { data: signed, error: signError } = await supabase.storage
+                  .from('agency-documents')
+                  .createSignedUrl(path, 3600);
+                if (!signError && signed?.signedUrl) {
+                  logos[agencyName] = signed.signedUrl;
+                }
+              })
+            );
+            setAgencyLogos(logos);
           }
-        });
-        setAgencyLogos(logosMap);
+        }
 
       } catch (error) {
         console.error('Error fetching sites:', error);

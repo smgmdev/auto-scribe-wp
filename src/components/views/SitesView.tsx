@@ -96,6 +96,7 @@ export function SitesView() {
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [mediaSitesLoading, setMediaSitesLoading] = useState(true);
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
+  const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -201,8 +202,53 @@ export function SitesView() {
 
     if (!error && data) {
       setMediaSites(data);
+      // Fetch agency logos for all unique agency names
+      const uniqueAgencies = [...new Set(data.filter(s => s.agency).map(s => s.agency as string))];
+      if (uniqueAgencies.length > 0) {
+        fetchAgencyLogos(uniqueAgencies);
+      }
     }
     setMediaSitesLoading(false);
+  };
+
+  // Fetch agency logos from agency_applications table
+  const fetchAgencyLogos = async (agencyNames: string[]) => {
+    if (agencyNames.length === 0) return;
+
+    const { data, error } = await supabase
+      .from('agency_applications')
+      .select('agency_name, logo_url, created_at')
+      .in('agency_name', agencyNames)
+      .not('logo_url', 'is', null)
+      .order('created_at', { ascending: true });
+
+    if (error || !data || data.length === 0) return;
+
+    // Get earliest logo per agency_name
+    const earliestLogoByAgency: Record<string, string> = {};
+    for (const row of data) {
+      if (!row?.agency_name || !row?.logo_url) continue;
+      if (!earliestLogoByAgency[row.agency_name]) {
+        earliestLogoByAgency[row.agency_name] = row.logo_url;
+      }
+    }
+
+    // Create signed URLs for each logo
+    const logos: Record<string, string> = {};
+    await Promise.all(
+      Object.entries(earliestLogoByAgency).map(async ([agencyName, path]) => {
+        const { data: signed, error: signError } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(path, 3600);
+        if (!signError && signed?.signedUrl) {
+          logos[agencyName] = signed.signedUrl;
+        }
+      })
+    );
+
+    if (Object.keys(logos).length > 0) {
+      setAgencyLogos(logos);
+    }
   };
 
   const fetchSiteCredits = async () => {
@@ -1102,16 +1148,13 @@ export function SitesView() {
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span>via</span>
                   <span className="text-foreground">{site.agency}</span>
-                  {(() => {
-                    const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
-                    return agencySite?.favicon ? (
-                      <img 
-                        src={agencySite.favicon} 
-                        alt={site.agency} 
-                        className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                      />
-                    ) : null;
-                  })()}
+                  {agencyLogos[site.agency] && (
+                    <img 
+                      src={agencyLogos[site.agency]} 
+                      alt={site.agency} 
+                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                    />
+                  )}
                 </div>
               )}
               {isAdmin && (
@@ -1488,16 +1531,13 @@ export function SitesView() {
                               <div className="flex items-center gap-1.5">
                                 <span>via</span>
                                 <span className="text-foreground">{site.agency}</span>
-                                {(() => {
-                                  const agencySite = mediaSites.find(s => s.category === 'Agencies/People' && s.name === site.agency);
-                                  return agencySite?.favicon ? (
-                                    <img 
-                                      src={agencySite.favicon} 
-                                      alt={site.agency} 
-                                      className="h-4 w-4 object-contain rounded-full"
-                                    />
-                                  ) : null;
-                                })()}
+                                {agencyLogos[site.agency] && (
+                                  <img 
+                                    src={agencyLogos[site.agency]} 
+                                    alt={site.agency} 
+                                    className="h-4 w-4 object-contain rounded-full"
+                                  />
+                                )}
                               </div>
                             )}
                           </div>
