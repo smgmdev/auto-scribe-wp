@@ -1462,9 +1462,10 @@ export function AdminMediaManagementView() {
                                             href={ensureHttps(item.link)}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-xs text-muted-foreground hover:text-accent truncate block"
+                                            className="text-xs text-muted-foreground hover:text-accent truncate flex items-center gap-1"
                                           >
-                                            {item.link}
+                                            <span className="truncate">{item.link}</span>
+                                            <ExternalLink className="h-3 w-3 shrink-0" />
                                           </a>
                                         )}
                                       </div>
