@@ -169,14 +169,14 @@ export function AgencyMediaView() {
           <DropdownMenuContent align="end" className="bg-popover border-border">
             <DropdownMenuItem 
               onClick={() => handleAddMedia('wordpress')}
-              className="hover:bg-foreground hover:text-background cursor-pointer"
+              className="hover:!bg-foreground hover:!text-background cursor-pointer"
             >
               <Globe className="h-4 w-4 mr-2" />
               WordPress Site
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleAddMedia('media')}
-              className="hover:bg-foreground hover:text-background cursor-pointer"
+              className="hover:!bg-foreground hover:!text-background cursor-pointer"
             >
               <Library className="h-4 w-4 mr-2" />
               Media Site
