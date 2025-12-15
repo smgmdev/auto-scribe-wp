@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,6 +82,7 @@ interface AgencyPayout {
   created_at: string;
   user_id: string | null;
   payout_method: string | null;
+  downgraded: boolean;
 }
 
 interface CustomVerification {
@@ -470,12 +471,16 @@ export function AdminAgenciesView() {
 
     setDeleting(agencyToDowngrade.id);
     try {
-      const response = await supabase.functions.invoke('delete-connect-account', {
-        body: { agency_payout_id: agencyToDowngrade.id }
-      });
+      // Update the agency_payout record to mark as downgraded
+      const { error } = await supabase
+        .from('agency_payouts')
+        .update({ 
+          downgraded: true,
+          onboarding_complete: false 
+        })
+        .eq('id', agencyToDowngrade.id);
 
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
+      if (error) throw error;
 
       toast({
         title: 'Agency downgraded',
@@ -483,6 +488,32 @@ export function AdminAgenciesView() {
       });
       setShowDowngradeDialog(false);
       setAgencyToDowngrade(null);
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const handleRestoreAgency = async (agency: AgencyPayout) => {
+    setDeleting(agency.id);
+    try {
+      // Update the agency_payout record to restore
+      const { error } = await supabase
+        .from('agency_payouts')
+        .update({ 
+          downgraded: false,
+          onboarding_complete: true 
+        })
+        .eq('id', agency.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Agency restored',
+        description: `${agency.agency_name} has been restored as an active agency.`
+      });
       fetchData();
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -999,17 +1030,20 @@ export function AdminAgenciesView() {
           
           {/* Sub-tabs for verification stages */}
           <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab} className="mb-4">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="grid w-full grid-cols-3 max-w-lg">
               <TabsTrigger value="pending-verification" className="relative">
                 Pending Verification ({agenciesPendingVerification.length})
               </TabsTrigger>
-          <TabsTrigger value="pending-approval" className="relative">
-            Pending Approval ({agenciesPendingApprovalReview.length})
-            {unreadPendingApprovalCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
-                {unreadPendingApprovalCount}
-              </span>
-            )}
+              <TabsTrigger value="pending-approval" className="relative">
+                Pending Approval ({agenciesPendingApprovalReview.length})
+                {unreadPendingApprovalCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
+                    {unreadPendingApprovalCount}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="downgraded" className="relative">
+                Downgraded ({agencies.filter(a => a.downgraded).length})
               </TabsTrigger>
             </TabsList>
 
@@ -1229,6 +1263,111 @@ export function AdminAgenciesView() {
                 </div>
               )}
             </TabsContent>
+
+            {/* Downgraded Sub-Tab */}
+            <TabsContent value="downgraded" className="mt-4">
+              {agencies.filter(a => a.downgraded).length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <UserMinus className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No downgraded agencies</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Downgraded agencies will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {agencies.filter(a => a.downgraded).map(agency => {
+                    const application = getAgencyWithApplication(agency);
+                    return (
+                      <Card 
+                        key={agency.id}
+                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-orange-500/30"
+                        onClick={() => {
+                          if (application) {
+                            handleOpenApplication(application);
+                          }
+                        }}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt={agency.agency_name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : application && logoUrls[application.id] ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                  </div>
+                                  <img 
+                                    src={logoUrls[application.id]} 
+                                    alt=""
+                                    className="hidden"
+                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  />
+                                </>
+                              ) : application && loadingLogoIds.has(application.id) ? (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                  <UserMinus className="h-5 w-5 text-orange-500" />
+                                </div>
+                              )}
+                              <div>
+                                <h3 className="font-semibold">{agency.agency_name}</h3>
+                                <p className="text-sm text-muted-foreground">{agency.email}</p>
+                                {application && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {application.full_name} • {application.country}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <div className="flex gap-2">
+                                <Badge className="bg-orange-500/20 text-orange-500">
+                                  <UserMinus className="h-3 w-3 mr-1" />
+                                  Downgraded
+                                </Badge>
+                                <Badge className="bg-black text-white">
+                                  {agency.payout_method === 'stripe' ? 'Stripe Connect' : 'Custom Payout'}
+                                </Badge>
+                              </div>
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="hover:bg-green-500 hover:text-white hover:border-green-500"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRestoreAgency(agency);
+                                }}
+                                disabled={deleting === agency.id}
+                              >
+                                {deleting === agency.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                ) : (
+                                  <UserCheck className="h-4 w-4 mr-1" />
+                                )}
+                                Restore
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
           </Tabs>
         </TabsContent>
 
@@ -1237,16 +1376,16 @@ export function AdminAgenciesView() {
           <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="stripe-connect">
-                Stripe Connect ({agencies.filter(a => a.onboarding_complete && a.payout_method === 'stripe').length})
+                Stripe Connect ({agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'stripe').length})
               </TabsTrigger>
               <TabsTrigger value="custom-payout">
-                Custom Payout ({agencies.filter(a => a.onboarding_complete && a.payout_method === 'custom').length})
+                Custom Payout ({agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'custom').length})
               </TabsTrigger>
             </TabsList>
 
             {/* Stripe Connect Agencies */}
             <TabsContent value="stripe-connect" className="mt-4">
-              {agencies.filter(a => a.onboarding_complete && a.payout_method === 'stripe').length === 0 ? (
+              {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'stripe').length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Building2 className="h-12 w-12 text-muted-foreground/50" />
@@ -1258,7 +1397,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="space-y-3">
-                  {agencies.filter(a => a.onboarding_complete && a.payout_method === 'stripe').map(agency => {
+                  {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'stripe').map(agency => {
                     const application = getAgencyWithApplication(agency);
                       return (
                       <Card 
@@ -1353,7 +1492,7 @@ export function AdminAgenciesView() {
 
             {/* Custom Payout Agencies */}
             <TabsContent value="custom-payout" className="mt-4">
-              {agencies.filter(a => a.onboarding_complete && a.payout_method === 'custom').length === 0 ? (
+              {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'custom').length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Building2 className="h-12 w-12 text-muted-foreground/50" />
@@ -1365,7 +1504,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="space-y-3">
-                  {agencies.filter(a => a.onboarding_complete && a.payout_method === 'custom').map(agency => {
+                  {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'custom').map(agency => {
                     const application = getAgencyWithApplication(agency);
                     const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
                     return (
