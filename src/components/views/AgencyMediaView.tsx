@@ -149,7 +149,7 @@ export function AgencyMediaView() {
       .from('wordpress_sites')
       .select('id, name, url, seo_plugin, favicon, connected')
       .eq('user_id', user.id)
-      .order('name', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (!wpError && wpData) {
       setWordpressSites(wpData);
