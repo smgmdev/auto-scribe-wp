@@ -517,7 +517,7 @@ export function AgencyMediaView() {
                           Pending
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {new Date(submission.created_at).toLocaleDateString()}
+                          {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>
