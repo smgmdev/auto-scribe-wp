@@ -106,22 +106,24 @@ export function AdminMediaManagementView() {
     });
   };
 
-  // Fetch agency logos based on agency names
-  const fetchAgencyLogos = async (agencyNames: string[]) => {
-    if (agencyNames.length === 0) return;
+  // Fetch agency logos based on user IDs (matching by user_id to agency_applications)
+  const fetchAgencyLogos = async (submissions: { user_id: string; agency_name: string }[]) => {
+    if (submissions.length === 0) return;
     
-    const uniqueNames = [...new Set(agencyNames)];
+    const userIds = [...new Set(submissions.map(s => s.user_id))];
     const { data } = await supabase
       .from('agency_applications')
-      .select('agency_name, logo_url')
-      .in('agency_name', uniqueNames)
+      .select('user_id, logo_url')
+      .in('user_id', userIds)
       .not('logo_url', 'is', null);
     
-    if (data) {
+    if (data && data.length > 0) {
       const logos: Record<string, string> = {};
-      data.forEach(app => {
-        if (app.logo_url) {
-          logos[app.agency_name] = app.logo_url;
+      // Map user_id to agency_name for display
+      submissions.forEach(sub => {
+        const app = data.find(d => d.user_id === sub.user_id);
+        if (app?.logo_url) {
+          logos[sub.agency_name] = app.logo_url;
         }
       });
       setAgencyLogos(prev => ({ ...prev, ...logos }));
@@ -199,8 +201,7 @@ export function AdminMediaManagementView() {
     if (pendingMedia) {
       setPendingMediaSubmissions(pendingMedia);
       // Fetch logos for pending submissions
-      const agencyNames = pendingMedia.map(s => s.agency_name);
-      fetchAgencyLogos(agencyNames);
+      fetchAgencyLogos(pendingMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
     }
 
     // Fetch rejected media site submissions
@@ -213,8 +214,7 @@ export function AdminMediaManagementView() {
     if (rejectedMedia) {
       setRejectedMediaSubmissions(rejectedMedia);
       // Fetch logos for rejected submissions
-      const agencyNames = rejectedMedia.map(s => s.agency_name);
-      fetchAgencyLogos(agencyNames);
+      fetchAgencyLogos(rejectedMedia.map(s => ({ user_id: s.user_id, agency_name: s.agency_name })));
     }
 
     setLoading(false);
