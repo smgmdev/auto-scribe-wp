@@ -1573,8 +1573,8 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1 space-y-1">
-                                <p className="text-[10px] uppercase tracking-wide text-red-500 font-medium">Rejected WordPress Site</p>
-                                <h3 className="text-sm font-medium">{submission.name}</h3>
+                                <p className="text-[10px] text-red-500">Rejected WordPress Site</p>
+                                <h3 className="text-sm font-medium -mt-1">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                     {submission.url.replace(/^https?:\/\//, '')}
