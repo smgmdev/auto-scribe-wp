@@ -921,7 +921,9 @@ export function AgencyMediaView() {
                                 {submission.rejected_media?.length || 0} not imported
                               </Badge>
                               <span className="text-xs text-muted-foreground">
-                                {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleDateString() : 'N/A'}
+                                {submission.reviewed_at 
+                                  ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                  : 'N/A'}
                               </span>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
