@@ -1820,7 +1820,7 @@ export function AdminAgenciesView() {
                   </div>
                   {(verificationDocUrls.company_incorporation || verificationDocUrls.license || verificationDocUrls.memorandum || verificationDocUrls.additional) && (
                     <div className="col-span-2">
-                      <p className="text-muted-foreground mb-1">Attached Uploads</p>
+                      <p className="text-muted-foreground mb-1">Company Uploads</p>
                       <div className="flex flex-wrap gap-2">
                         {verificationDocUrls.company_incorporation && (
                           <Button
