@@ -194,9 +194,6 @@ export function ComposeView() {
       // Fetch tags
       setIsLoadingTags(true);
       fetchTags(currentSite).then(tags => {
-        console.log('Fetched tags:', tags);
-        console.log('Selected tag IDs:', selectedTagIds);
-        console.log('Matching tags:', tags.filter(t => selectedTagIds.includes(t.id)));
         setAvailableTags(tags);
         setIsLoadingTags(false);
       }).catch(error => {
@@ -1152,10 +1149,17 @@ export function ComposeView() {
                   </div> : <>
                     {/* Selected Tags */}
                     {selectedTagIds.length > 0 && <div className="flex flex-wrap gap-1.5">
-                        {availableTags.filter(tag => selectedTagIds.includes(tag.id)).map(tag => <Badge key={tag.id} variant="secondary" className="cursor-pointer hover:bg-destructive/20" onClick={() => toggleTag(tag.id)}>
-                              {tag.name}
+                        {selectedTagIds.map((tagId, index) => {
+                          const tag = availableTags.find(t => t.id === tagId);
+                          // Use tag name from availableTags, or fallback to stored tag name from editingArticle
+                          const tagName = tag?.name || editingArticle?.tags?.[index] || `Tag #${tagId}`;
+                          return (
+                            <Badge key={tagId} variant="secondary" className="cursor-pointer hover:bg-destructive/20" onClick={() => toggleTag(tagId)}>
+                              {tagName}
                               <X className="ml-1 h-3 w-3" />
-                            </Badge>)}
+                            </Badge>
+                          );
+                        })}
                       </div>}
 
                     {/* Tag Input with Autocomplete */}
