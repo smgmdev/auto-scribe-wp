@@ -2282,8 +2282,10 @@ export function AdminMediaManagementView() {
                 </Button>
                 <Button 
                   type="button"
+                  variant="outline"
                   onClick={handleApprove}
                   disabled={isProcessing}
+                  className="hover:bg-black hover:text-white"
                 >
                   {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Approve
