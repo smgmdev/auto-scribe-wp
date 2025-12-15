@@ -747,7 +747,7 @@ export function AgencyMediaView() {
                             <Clock className="h-4 w-4 text-yellow-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">Media Sheet Submission</p>
+                            <p className="font-medium text-sm">Media Sheet Submitted</p>
                             <div className="flex items-center gap-2 mt-1">
                               <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                 {submission.google_sheet_url.length > 40 
@@ -817,7 +817,7 @@ export function AgencyMediaView() {
                             <XCircle className="h-4 w-4 text-red-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">Media Sheet Submission</p>
+                            <p className="font-medium text-sm">Rejected Media Sheet</p>
                             <div className="flex items-center gap-2 mt-1">
                               <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                 {submission.google_sheet_url.length > 40 
