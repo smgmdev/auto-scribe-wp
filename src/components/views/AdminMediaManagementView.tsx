@@ -1160,7 +1160,7 @@ export function AdminMediaManagementView() {
                     return (
                       <div 
                         key={submission.id} 
-                        className={`flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
+                        className={`relative flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={async () => {
                           if (!submission.read) {
@@ -1177,10 +1177,10 @@ export function AdminMediaManagementView() {
                           }
                         }}
                       >
-                        <div className="relative h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                          {!submission.read && (
-                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
-                          )}
+                        {!submission.read && (
+                          <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
+                        )}
+                        <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
                           {logoUrl ? (
                             <>
                               {(!isLogoLoaded || isLogoLoading) && (
