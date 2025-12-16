@@ -95,6 +95,18 @@ interface ApprovedMediaSubmission extends MediaSiteSubmission {
   imported_sites?: MediaSite[];
 }
 
+interface AgencyDetails {
+  agency_name: string;
+  full_name: string;
+  email: string;
+  agency_website: string;
+  country: string;
+  whatsapp_phone: string;
+  logo_url: string | null;
+  media_niches: string[] | null;
+  media_channels: string | null;
+}
+
 export function AdminMediaManagementView() {
   const { decrementUnreadMediaSubmissionsCount, setUnreadMediaSubmissionsCount } = useAppStore();
   
@@ -188,7 +200,12 @@ export function AdminMediaManagementView() {
   const [loadingLogos, setLoadingLogos] = useState<Set<string>>(new Set());
   const [loadedLogos, setLoadedLogos] = useState<Set<string>>(new Set());
 
-  // Tone options for test article
+  // Agency details popup state
+  const [selectedAgencyDetails, setSelectedAgencyDetails] = useState<AgencyDetails | null>(null);
+  const [isAgencyDetailsDialogOpen, setIsAgencyDetailsDialogOpen] = useState(false);
+  const [isLoadingAgencyDetails, setIsLoadingAgencyDetails] = useState(false);
+  const [agencyLogoSignedUrl, setAgencyLogoSignedUrl] = useState<string | null>(null);
+
   const toneOptions: { value: ArticleTone; label: string }[] = [
     { value: 'neutral', label: 'Neutral' },
     { value: 'professional', label: 'Professional Corporate' },
@@ -311,7 +328,45 @@ export function AdminMediaManagementView() {
     }
   };
 
-  // Handle logo load completion
+  // Fetch agency details by user_id
+  const fetchAgencyDetails = async (userId: string) => {
+    setIsLoadingAgencyDetails(true);
+    setAgencyLogoSignedUrl(null);
+    try {
+      const { data, error } = await supabase
+        .from('agency_applications')
+        .select('agency_name, full_name, email, agency_website, country, whatsapp_phone, logo_url, media_niches, media_channels')
+        .eq('user_id', userId)
+        .eq('status', 'approved')
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Agency not found');
+
+      setSelectedAgencyDetails(data as AgencyDetails);
+
+      // Get signed URL for logo if exists
+      if (data.logo_url) {
+        const { data: signed, error: signError } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(data.logo_url, 3600);
+        if (!signError && signed?.signedUrl) {
+          setAgencyLogoSignedUrl(signed.signedUrl);
+        }
+      }
+
+      setIsAgencyDetailsDialogOpen(true);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load agency details',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingAgencyDetails(false);
+    }
+  };
+
   const handleLogoLoad = (agencyName: string) => {
     setLoadingLogos(prev => {
       const next = new Set(prev);
@@ -1394,7 +1449,16 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs text-muted-foreground">{agencyName || 'Unknown Agency'}</p>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (site.user_id) fetchAgencyDetails(site.user_id);
+                                  }}
+                                  className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors text-left"
+                                  disabled={isLoadingAgencyDetails}
+                                >
+                                  {agencyName || 'Unknown Agency'}
+                                </button>
                                 <h3 className="text-sm font-medium">{site.name}</h3>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -1484,7 +1548,16 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs text-muted-foreground">{wpAgencyNames[submission.user_id] || 'Unknown Agency'}</p>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    fetchAgencyDetails(submission.user_id);
+                                  }}
+                                  className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors text-left"
+                                  disabled={isLoadingAgencyDetails}
+                                >
+                                  {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
+                                </button>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -1569,7 +1642,16 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs text-muted-foreground">{wpAgencyNames[submission.user_id] || 'Unknown Agency'}</p>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    fetchAgencyDetails(submission.user_id);
+                                  }}
+                                  className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors text-left"
+                                  disabled={isLoadingAgencyDetails}
+                                >
+                                  {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
+                                </button>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -2821,6 +2903,102 @@ export function AdminMediaManagementView() {
                 Delete
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agency Details Dialog */}
+      <Dialog open={isAgencyDetailsDialogOpen} onOpenChange={(open) => {
+        setIsAgencyDetailsDialogOpen(open);
+        if (!open) {
+          setSelectedAgencyDetails(null);
+          setAgencyLogoSignedUrl(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {agencyLogoSignedUrl && (
+                <img
+                  src={agencyLogoSignedUrl}
+                  alt={selectedAgencyDetails?.agency_name || 'Agency logo'}
+                  className="h-12 w-12 rounded-xl bg-muted object-cover"
+                />
+              )}
+              <span>{selectedAgencyDetails?.agency_name}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedAgencyDetails && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Contact Person</p>
+                <p className="text-foreground">{selectedAgencyDetails.full_name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="text-foreground">{selectedAgencyDetails.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">WhatsApp</p>
+                <p className="text-foreground">{selectedAgencyDetails.whatsapp_phone}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Website</p>
+                <div className="flex items-center gap-2">
+                  <a 
+                    href={ensureHttps(selectedAgencyDetails.agency_website)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline flex items-center gap-1"
+                  >
+                    {selectedAgencyDetails.agency_website.replace(/^https?:\/\//, '')}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedAgencyDetails.agency_website);
+                      toast({ title: 'Copied to clipboard' });
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Country</p>
+                <p className="text-foreground">{selectedAgencyDetails.country}</p>
+              </div>
+              {selectedAgencyDetails.media_niches && selectedAgencyDetails.media_niches.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Media Niches</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedAgencyDetails.media_niches.map((niche, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {niche}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selectedAgencyDetails.media_channels && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Media Channels</p>
+                  <p className="text-foreground text-sm">{selectedAgencyDetails.media_channels}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 mt-4">
+            <Button 
+              variant="outline"
+              onClick={() => setIsAgencyDetailsDialogOpen(false)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
