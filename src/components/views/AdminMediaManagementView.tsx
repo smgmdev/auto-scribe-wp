@@ -1808,7 +1808,17 @@ export function AdminMediaManagementView() {
                                   ? 'Partially Approved Media Sheet' 
                                   : 'Approved Media Sheet'}
                               </p>
-                              <p className="font-medium text-sm truncate">{submission.agency_name}</p>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  fetchAgencyDetails(submission.user_id);
+                                }}
+                                className="font-medium text-sm truncate hover:text-accent transition-colors flex items-center gap-1"
+                                disabled={isLoadingAgencyDetails}
+                              >
+                                {submission.agency_name}
+                                <ArrowUpRight className="h-3 w-3" />
+                              </button>
                               {submission.reply_sheet_url && (
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -2038,7 +2048,17 @@ export function AdminMediaManagementView() {
                         </div>
                         <div className="flex-1 min-w-0 max-w-[400px]">
                           <p className="text-xs text-muted-foreground">Media Sheet Submitted</p>
-                          <p className="font-medium text-sm">{submission.agency_name}</p>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchAgencyDetails(submission.user_id);
+                            }}
+                            className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
+                            disabled={isLoadingAgencyDetails}
+                          >
+                            {submission.agency_name}
+                            <ArrowUpRight className="h-3 w-3" />
+                          </button>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                               {submission.google_sheet_url.length > 40 
@@ -2174,7 +2194,17 @@ export function AdminMediaManagementView() {
                               </div>
                               <div className="flex-1 min-w-0 max-w-[400px]">
                                 <p className="text-xs text-muted-foreground">Partially Rejected Media Sheet</p>
-                                <p className="font-medium text-sm">{submission.agency_name}</p>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    fetchAgencyDetails(submission.user_id);
+                                  }}
+                                  className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
+                                  disabled={isLoadingAgencyDetails}
+                                >
+                                  {submission.agency_name}
+                                  <ArrowUpRight className="h-3 w-3" />
+                                </button>
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                     {submission.google_sheet_url.length > 40 
@@ -2295,7 +2325,17 @@ export function AdminMediaManagementView() {
                           </div>
                           <div className="flex-1 min-w-0 max-w-[400px]">
                             <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
-                            <p className="font-medium text-sm">{submission.agency_name}</p>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                fetchAgencyDetails(submission.user_id);
+                              }}
+                              className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
+                              disabled={isLoadingAgencyDetails}
+                            >
+                              {submission.agency_name}
+                              <ArrowUpRight className="h-3 w-3" />
+                            </button>
                             <div className="flex items-center gap-2 mt-1">
                               <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                 {submission.google_sheet_url.length > 40 
