@@ -330,8 +330,6 @@ export function SitesView() {
   };
 
   const fetchSiteCredits = async () => {
-    if (sites.length === 0) return;
-    
     const { data, error } = await supabase
       .from('site_credits')
       .select('site_id, credits_required');
