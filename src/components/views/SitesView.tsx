@@ -185,6 +185,28 @@ export function SitesView() {
     fetchSiteTags();
   }, [sites]);
 
+  // Subscribe to site_credits changes for real-time price updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('site_credits_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'site_credits',
+        },
+        () => {
+          fetchSiteCredits();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   useEffect(() => {
     fetchMediaSites();
   }, []);
