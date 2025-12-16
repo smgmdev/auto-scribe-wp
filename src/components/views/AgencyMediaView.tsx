@@ -579,8 +579,8 @@ export function AgencyMediaView() {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs text-muted-foreground">Pending Review</p>
-                              <h3 className="text-sm font-medium">{submission.name}</h3>
+                              <p className="font-medium text-sm truncate">Pending WordPress Site</p>
+                              <h3 className="text-sm">{submission.name}</h3>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {submission.url.replace(/^https?:\/\//, '')}
@@ -605,7 +605,7 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-1">
+                              <p className="text-xs text-muted-foreground">
                                 {new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                               </p>
                             </div>
