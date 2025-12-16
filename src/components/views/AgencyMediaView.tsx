@@ -54,6 +54,7 @@ interface WordPressSiteSubmission {
   reviewed_at: string | null;
   admin_notes: string | null;
   read: boolean;
+  logo_url: string | null;
 }
 
 interface RejectedMediaItem {
@@ -162,7 +163,7 @@ export function AgencyMediaView() {
     // Fetch pending WordPress site submissions
     const { data: pendingData } = await supabase
       .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at')
+      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at, logo_url')
       .eq('user_id', user.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
@@ -174,7 +175,7 @@ export function AgencyMediaView() {
     // Fetch rejected WordPress site submissions
     const { data: rejectedData } = await supabase
       .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at')
+      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at, logo_url')
       .eq('user_id', user.id)
       .eq('status', 'rejected')
       .order('reviewed_at', { ascending: false });
@@ -540,12 +541,12 @@ export function AgencyMediaView() {
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
-                          <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
-                            {agencyLogo ? (
+                          <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                            {submission.logo_url ? (
                               <img 
-                                src={agencyLogo} 
-                                alt="Agency logo" 
-                                className="h-8 w-8 object-cover rounded"
+                                src={submission.logo_url} 
+                                alt={`${submission.name} logo`} 
+                                className="h-8 w-8 object-cover"
                               />
                             ) : (
                               <Clock className="h-4 w-4 text-yellow-500" />
@@ -580,7 +581,7 @@ export function AgencyMediaView() {
                               </a>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {new Date(submission.created_at).toLocaleDateString()}
+                              {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0 ml-auto">
