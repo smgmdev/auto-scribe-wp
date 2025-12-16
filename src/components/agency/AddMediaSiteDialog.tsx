@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 
 interface AddMediaSiteDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ export function AddMediaSiteDialog({
 }: AddMediaSiteDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { setCurrentView, setAgencyMediaTargetTab, setAgencyMediaTargetSubTab } = useAppStore();
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -110,6 +112,11 @@ export function AddMediaSiteDialog({
       setGoogleSheetUrl('');
       onOpenChange(false);
       onSuccess();
+      
+      // Redirect to Media Sites > Pending Review tab
+      setAgencyMediaTargetTab('media');
+      setAgencyMediaTargetSubTab('pending');
+      setCurrentView('agency-media');
     } catch (error: any) {
       console.error('Error submitting media site:', error);
       toast({

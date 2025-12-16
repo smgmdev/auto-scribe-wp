@@ -21,6 +21,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useAppStore } from '@/stores/appStore';
 
 interface AddWordPressSiteDialogProps {
   open: boolean;
@@ -46,6 +47,7 @@ interface FormData {
 
 export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWordPressSiteDialogProps) {
   const { user } = useAuth();
+  const { setCurrentView, setAgencyMediaTargetTab, setAgencyMediaTargetSubTab } = useAppStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{ aioseoSettings?: boolean; testPublishing?: boolean }>({});
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
@@ -373,6 +375,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       resetForm();
       onOpenChange(false);
       onSuccess?.();
+      
+      // Redirect to WordPress Sites > Pending Review tab
+      setAgencyMediaTargetTab('wordpress');
+      setAgencyMediaTargetSubTab('pending');
+      setCurrentView('agency-media');
     } catch (error: any) {
       console.error('Error submitting WordPress site:', error);
       toast({
