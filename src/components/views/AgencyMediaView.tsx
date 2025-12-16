@@ -505,9 +505,9 @@ export function AgencyMediaView() {
                                 <CheckCircle className="h-5 w-5 text-green-500" />
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
+                            <div className="min-w-0 flex-1 space-y-0">
                               <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-sm truncate">Approved WordPress Site</p>
+                                <p className="font-medium text-sm truncate leading-tight">Approved WordPress Site</p>
                                 <Tooltip delayDuration={100}>
                                   <TooltipTrigger asChild>
                                     <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
@@ -524,8 +524,8 @@ export function AgencyMediaView() {
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
-                              <h3 className="text-sm -mt-0.5">{site.name}</h3>
-                              <div className="flex items-center gap-2 -mt-0.5">
+                              <h3 className="text-sm leading-tight">{site.name}</h3>
+                              <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {site.url.replace(/^https?:\/\//, '')}
                                 </span>
@@ -549,7 +549,7 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground leading-tight">
                                 {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                               </p>
                             </div>
@@ -604,10 +604,10 @@ export function AgencyMediaView() {
                                 <Clock className="h-5 w-5 text-yellow-500" />
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm truncate">Pending WordPress Site</p>
-                              <h3 className="text-sm">{submission.name}</h3>
-                              <div className="flex items-center gap-2 -mt-0.5">
+                            <div className="min-w-0 flex-1 space-y-0">
+                              <p className="font-medium text-sm truncate leading-tight">Pending WordPress Site</p>
+                              <h3 className="text-sm leading-tight">{submission.name}</h3>
+                              <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {submission.url.replace(/^https?:\/\//, '')}
                                 </span>
@@ -631,7 +631,7 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground leading-tight">
                                 {new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                               </p>
                             </div>
@@ -683,9 +683,9 @@ export function AgencyMediaView() {
                                 <XCircle className="h-5 w-5 text-red-500" />
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm truncate">Rejected WordPress Site</p>
-                              <h3 className="text-sm">{submission.name}</h3>
+                            <div className="min-w-0 flex-1 space-y-0">
+                              <p className="font-medium text-sm truncate leading-tight">Rejected WordPress Site</p>
+                              <h3 className="text-sm leading-tight">{submission.name}</h3>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {submission.url.replace(/^https?:\/\//, '')}
@@ -710,13 +710,13 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground leading-tight">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
                                   : `${new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
                               </p>
                               {submission.admin_notes && (
-                                <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
+                                <p className="text-xs text-red-500 leading-tight">Reason: {submission.admin_notes}</p>
                               )}
                             </div>
                           </div>
@@ -794,9 +794,9 @@ export function AgencyMediaView() {
                               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
                                 <CheckCircle className="h-5 w-5 text-green-500" />
                               </div>
-                              <div className="min-w-0 flex-1">
+                              <div className="min-w-0 flex-1 space-y-0">
                                 <div className="flex items-center gap-1.5">
-                                  <p className="font-medium text-sm truncate">
+                                  <p className="font-medium text-sm truncate leading-tight">
                                     {submission.rejected_media && submission.rejected_media.length > 0 
                                       ? 'Partially Approved Media Sheet' 
                                       : 'Approved Media Sheet'}
@@ -845,7 +845,7 @@ export function AgencyMediaView() {
                                     </a>
                                   </div>
                                 )}
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground leading-tight">
                                   {submission.reviewed_at 
                                     ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
                                     : 'N/A'}
@@ -1010,8 +1010,8 @@ export function AgencyMediaView() {
                             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-yellow-500/10 mt-0.5">
                               <Clock className="h-5 w-5 text-yellow-500" />
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm truncate">Pending Review</p>
+                            <div className="min-w-0 flex-1 space-y-0">
+                              <p className="font-medium text-sm truncate leading-tight">Pending Review</p>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {submission.google_sheet_url.length > 40 
@@ -1038,7 +1038,7 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground leading-tight">
                                 {new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                               </p>
                             </div>
@@ -1079,8 +1079,8 @@ export function AgencyMediaView() {
                                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-red-500/10 mt-0.5">
                                   <XCircle className="h-5 w-5 text-red-500" />
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-medium text-sm truncate">Rejected Media Sheet</p>
+                                <div className="min-w-0 flex-1 space-y-0">
+                                  <p className="font-medium text-sm truncate leading-tight">Rejected Media Sheet</p>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                       {submission.google_sheet_url.length > 40 
@@ -1107,13 +1107,13 @@ export function AgencyMediaView() {
                                       <ExternalLink className="h-3 w-3" />
                                     </a>
                                   </div>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-muted-foreground leading-tight">
                                     {submission.reviewed_at 
                                       ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
                                       : `${new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
                                   </p>
                                   {submission.admin_notes && (
-                                    <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
+                                    <p className="text-xs text-red-500 leading-tight">Reason: {submission.admin_notes}</p>
                                   )}
                                 </div>
                               </div>
@@ -1138,8 +1138,8 @@ export function AgencyMediaView() {
                                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-red-500/10 mt-0.5">
                                   <XCircle className="h-5 w-5 text-red-500" />
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-medium text-sm truncate">Partially Rejected Media Sheet</p>
+                                <div className="min-w-0 flex-1 space-y-0">
+                                  <p className="font-medium text-sm truncate leading-tight">Partially Rejected Media Sheet</p>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                       {submission.google_sheet_url.length > 40 
@@ -1166,7 +1166,7 @@ export function AgencyMediaView() {
                                       <ExternalLink className="h-3 w-3" />
                                     </a>
                                   </div>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-muted-foreground leading-tight">
                                     {submission.reviewed_at 
                                       ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
                                       : 'N/A'}
