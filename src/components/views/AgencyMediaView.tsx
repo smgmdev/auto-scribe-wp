@@ -499,7 +499,7 @@ export function AgencyMediaView() {
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
-                              <h3 className="text-sm">{site.name}</h3>
+                              <h3 className="text-sm -mt-0.5">{site.name}</h3>
                               <div className="flex items-center gap-2 -mt-0.5">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {site.url.replace(/^https?:\/\//, '')}
