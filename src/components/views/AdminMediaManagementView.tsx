@@ -2233,7 +2233,7 @@ export function AdminMediaManagementView() {
             <div>
               <DialogTitle>Review WordPress Site Submission</DialogTitle>
               <DialogDescription>
-                Review the submission details and approve or reject the site.
+                Review the submission details.
               </DialogDescription>
             </div>
           </DialogHeader>
