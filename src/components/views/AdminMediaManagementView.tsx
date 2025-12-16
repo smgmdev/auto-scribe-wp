@@ -1439,13 +1439,21 @@ export function AdminMediaManagementView() {
                         <CardContent className="p-3">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-green-500/10 rounded mt-0.5">
+                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-green-500/10 rounded mt-0.5 relative">
                                 {site.favicon ? (
-                                  <img 
-                                    src={site.favicon} 
-                                    alt={`${site.name} favicon`}
-                                    className="h-10 w-10 object-cover"
-                                  />
+                                  <>
+                                    <Loader2 className="h-4 w-4 text-green-500 animate-spin absolute" id={`loader-${site.id}`} />
+                                    <img 
+                                      src={site.favicon} 
+                                      alt={`${site.name} favicon`}
+                                      className="h-10 w-10 object-cover opacity-0 transition-opacity"
+                                      onLoad={(e) => {
+                                        e.currentTarget.classList.remove('opacity-0');
+                                        const loader = document.getElementById(`loader-${site.id}`);
+                                        if (loader) loader.style.display = 'none';
+                                      }}
+                                    />
+                                  </>
                                 ) : (
                                   <CheckCircle className="h-5 w-5 text-green-500" />
                                 )}
@@ -1539,13 +1547,21 @@ export function AdminMediaManagementView() {
                           )}
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded mt-0.5">
+                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded mt-0.5 relative">
                                 {submission.logo_url ? (
-                                  <img 
-                                    src={submission.logo_url} 
-                                    alt={`${submission.name} logo`}
-                                    className="h-10 w-10 object-cover"
-                                  />
+                                  <>
+                                    <Loader2 className="h-4 w-4 text-yellow-500 animate-spin absolute" id={`loader-pending-${submission.id}`} />
+                                    <img 
+                                      src={submission.logo_url} 
+                                      alt={`${submission.name} logo`}
+                                      className="h-10 w-10 object-cover opacity-0 transition-opacity"
+                                      onLoad={(e) => {
+                                        e.currentTarget.classList.remove('opacity-0');
+                                        const loader = document.getElementById(`loader-pending-${submission.id}`);
+                                        if (loader) loader.style.display = 'none';
+                                      }}
+                                    />
+                                  </>
                                 ) : (
                                   <Clock className="h-5 w-5 text-yellow-500" />
                                 )}
@@ -1634,13 +1650,21 @@ export function AdminMediaManagementView() {
                         <CardContent className="p-3">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded mt-0.5">
+                              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded mt-0.5 relative">
                                 {submission.logo_url ? (
-                                  <img 
-                                    src={submission.logo_url} 
-                                    alt={`${submission.name} logo`}
-                                    className="h-9 w-9 object-cover"
-                                  />
+                                  <>
+                                    <Loader2 className="h-4 w-4 text-red-500 animate-spin absolute" id={`loader-rejected-${submission.id}`} />
+                                    <img 
+                                      src={submission.logo_url} 
+                                      alt={`${submission.name} logo`}
+                                      className="h-9 w-9 object-cover opacity-0 transition-opacity"
+                                      onLoad={(e) => {
+                                        e.currentTarget.classList.remove('opacity-0');
+                                        const loader = document.getElementById(`loader-rejected-${submission.id}`);
+                                        if (loader) loader.style.display = 'none';
+                                      }}
+                                    />
+                                  </>
                                 ) : (
                                   <XCircle className="h-4 w-4 text-red-500" />
                                 )}
