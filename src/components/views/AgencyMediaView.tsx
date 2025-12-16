@@ -481,9 +481,7 @@ export function AgencyMediaView() {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs text-muted-foreground">
-                                Connected Site • {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                              </p>
+                              <p className="text-xs text-muted-foreground">Connected Site</p>
                               <h3 className="text-sm font-medium">{site.name}</h3>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -509,6 +507,9 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
