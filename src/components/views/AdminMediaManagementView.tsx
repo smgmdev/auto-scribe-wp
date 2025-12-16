@@ -97,14 +97,9 @@ interface ApprovedMediaSubmission extends MediaSiteSubmission {
 
 interface AgencyDetails {
   agency_name: string;
-  full_name: string;
-  email: string;
   agency_website: string;
   country: string;
-  whatsapp_phone: string;
   logo_url: string | null;
-  media_niches: string[] | null;
-  media_channels: string | null;
 }
 
 export function AdminMediaManagementView() {
@@ -335,13 +330,20 @@ export function AdminMediaManagementView() {
     try {
       const { data, error } = await supabase
         .from('agency_applications')
-        .select('agency_name, full_name, email, agency_website, country, whatsapp_phone, logo_url, media_niches, media_channels')
+        .select('agency_name, agency_website, country, logo_url')
         .eq('user_id', userId)
         .eq('status', 'approved')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error('Agency not found');
+      if (!data) {
+        toast({
+          title: 'Agency not found',
+          description: 'No approved agency found for this user',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       setSelectedAgencyDetails(data as AgencyDetails);
 
@@ -2932,18 +2934,6 @@ export function AdminMediaManagementView() {
           {selectedAgencyDetails && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Contact Person</p>
-                <p className="text-foreground">{selectedAgencyDetails.full_name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="text-foreground">{selectedAgencyDetails.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">WhatsApp</p>
-                <p className="text-foreground">{selectedAgencyDetails.whatsapp_phone}</p>
-              </div>
-              <div>
                 <p className="text-sm text-muted-foreground">Website</p>
                 <div className="flex items-center gap-2">
                   <a 
@@ -2970,24 +2960,6 @@ export function AdminMediaManagementView() {
                 <p className="text-sm text-muted-foreground">Country</p>
                 <p className="text-foreground">{selectedAgencyDetails.country}</p>
               </div>
-              {selectedAgencyDetails.media_niches && selectedAgencyDetails.media_niches.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Media Niches</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedAgencyDetails.media_niches.map((niche, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
-                        {niche}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selectedAgencyDetails.media_channels && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Media Channels</p>
-                  <p className="text-foreground text-sm">{selectedAgencyDetails.media_channels}</p>
-                </div>
-              )}
             </div>
           )}
 
