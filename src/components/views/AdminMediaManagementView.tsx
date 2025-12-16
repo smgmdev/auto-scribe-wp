@@ -1383,20 +1383,7 @@ export function AdminMediaManagementView() {
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10">
-                                {logoUrl ? (
-                                  <>
-                                    {(!isLogoLoaded || isLogoLoading) && (
-                                      <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
-                                    )}
-                                    <img 
-                                      src={logoUrl} 
-                                      alt="Agency logo"
-                                      className={`h-9 w-9 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                      onLoad={() => handleLogoLoad(site.user_id!)}
-                                      onError={() => handleLogoLoad(site.user_id!)}
-                                    />
-                                  </>
-                                ) : site.favicon ? (
+                                {site.favicon ? (
                                   <img 
                                     src={site.favicon} 
                                     alt={`${site.name} favicon`} 
