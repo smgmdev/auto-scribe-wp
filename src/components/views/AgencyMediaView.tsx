@@ -698,7 +698,11 @@ export function AgencyMediaView() {
                             <Badge variant="outline" className="text-xs">
                               {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
-                            {!site.connected && (
+                            {site.connected ? (
+                              <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-600 border-green-500/30">
+                                Connected
+                              </Badge>
+                            ) : (
                               <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-600 border-yellow-500/30">
                                 Disconnected
                               </Badge>
