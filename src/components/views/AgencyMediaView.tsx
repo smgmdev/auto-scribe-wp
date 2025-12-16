@@ -1464,10 +1464,14 @@ export function AgencyMediaView() {
                   <Label htmlFor="newPrice">New Price (credits)</Label>
                   <Input
                     id="newPrice"
-                    type="number"
-                    min="0"
+                    type="text"
+                    inputMode="numeric"
                     value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
+                    onChange={(e) => {
+                      // Only allow pure numbers (no commas, decimals, or other characters)
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setNewPrice(value);
+                    }}
                     placeholder="Enter new price"
                   />
                 </div>
