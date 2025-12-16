@@ -2438,6 +2438,7 @@ export function AdminMediaManagementView() {
                   setReplySheetUrl('');
                 }}
                 disabled={isImporting}
+                className="hover:!bg-foreground hover:!text-background"
               >
                 Cancel
               </Button>
