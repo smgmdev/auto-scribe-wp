@@ -1808,7 +1808,7 @@ export function AdminMediaManagementView() {
                                   e.stopPropagation();
                                   fetchAgencyDetails(submission.user_id);
                                 }}
-                                className="font-medium text-sm truncate hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
+                                className="text-sm truncate hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
                                 disabled={isLoadingAgencyDetails}
                               >
                                 {submission.agency_name}
@@ -2052,7 +2052,7 @@ export function AdminMediaManagementView() {
                               e.stopPropagation();
                               fetchAgencyDetails(submission.user_id);
                             }}
-                            className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
+                            className="text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
                             disabled={isLoadingAgencyDetails}
                           >
                             {submission.agency_name}
@@ -2202,7 +2202,7 @@ export function AdminMediaManagementView() {
                                       e.stopPropagation();
                                       fetchAgencyDetails(submission.user_id);
                                     }}
-                                    className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
+                                    className="text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
                                     disabled={isLoadingAgencyDetails}
                                   >
                                     {submission.agency_name}
@@ -2336,7 +2336,7 @@ export function AdminMediaManagementView() {
                                       e.stopPropagation();
                                       fetchAgencyDetails(submission.user_id);
                                     }}
-                                    className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
+                                    className="text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
                                     disabled={isLoadingAgencyDetails}
                                   >
                                     {submission.agency_name}
