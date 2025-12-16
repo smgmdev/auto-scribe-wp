@@ -1169,9 +1169,6 @@ export function AgencyMediaView() {
                                     key={itemIndex}
                                     className="flex items-center gap-4 p-3 rounded-lg border border-red-500/20 bg-red-500/5"
                                   >
-                                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
-                                      <XCircle className="h-4 w-4 text-red-500" />
-                                    </div>
                                     <div className="min-w-0 flex-1">
                                       <h3 className="text-sm">{item.title}</h3>
                                       {item.link && (
