@@ -42,6 +42,7 @@ interface WordPressSiteSubmission {
   created_at: string;
   reviewed_at: string | null;
   read: boolean;
+  logo_url: string | null;
 }
 
 interface ApprovedWordPressSite {
@@ -510,7 +511,8 @@ export function AdminMediaManagementView() {
 
     try {
       // Create the WordPress site in the wordpress_sites table
-      const favicon = getFaviconUrl(selectedSubmission.url);
+      // Use the uploaded logo from submission, fallback to generated favicon
+      const favicon = selectedSubmission.logo_url || getFaviconUrl(selectedSubmission.url);
       
       const { error: insertError } = await supabase
         .from('wordpress_sites')
@@ -1439,10 +1441,6 @@ export function AdminMediaManagementView() {
               ) : (
                 <div className="space-y-2">
                   {pendingSubmissions.map((submission, index) => {
-                    const logoUrl = wpAgencyLogos[submission.user_id];
-                    const isLogoLoading = loadingLogos.has(submission.user_id);
-                    const isLogoLoaded = loadedLogos.has(submission.user_id);
-                    
                     return (
                       <div 
                         key={submission.id} 
@@ -1454,19 +1452,12 @@ export function AdminMediaManagementView() {
                           <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
                         )}
                         <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                          {logoUrl ? (
-                            <>
-                              {(!isLogoLoaded || isLogoLoading) && (
-                                <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
-                              )}
-                              <img 
-                                src={logoUrl} 
-                                alt="Agency logo"
-                                className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                onLoad={() => handleLogoLoad(submission.user_id)}
-                                onError={() => handleLogoLoad(submission.user_id)}
-                              />
-                            </>
+                          {submission.logo_url ? (
+                            <img 
+                              src={submission.logo_url} 
+                              alt={`${submission.name} logo`}
+                              className="h-8 w-8 object-cover"
+                            />
                           ) : (
                             <Clock className="h-4 w-4 text-yellow-500" />
                           )}
@@ -1540,10 +1531,6 @@ export function AdminMediaManagementView() {
               ) : (
                 <div className="space-y-2">
                   {rejectedSubmissions.map((submission, index) => {
-                    const logoUrl = wpAgencyLogos[submission.user_id];
-                    const isLogoLoading = loadingLogos.has(submission.user_id);
-                    const isLogoLoaded = loadedLogos.has(submission.user_id);
-                    
                     return (
                       <Card 
                         key={submission.id} 
@@ -1554,19 +1541,12 @@ export function AdminMediaManagementView() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
                               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded mt-0.5">
-                                {logoUrl ? (
-                                  <>
-                                    {(!isLogoLoaded || isLogoLoading) && (
-                                      <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
-                                    )}
-                                    <img 
-                                      src={logoUrl} 
-                                      alt="Agency logo"
-                                      className={`h-9 w-9 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                      onLoad={() => handleLogoLoad(submission.user_id)}
-                                      onError={() => handleLogoLoad(submission.user_id)}
-                                    />
-                                  </>
+                                {submission.logo_url ? (
+                                  <img 
+                                    src={submission.logo_url} 
+                                    alt={`${submission.name} logo`}
+                                    className="h-9 w-9 object-cover"
+                                  />
                                 ) : (
                                   <XCircle className="h-4 w-4 text-red-500" />
                                 )}
