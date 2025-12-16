@@ -2007,11 +2007,28 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm truncate">
-                                {submission.rejected_media && submission.rejected_media.length > 0 
-                                  ? 'Partially Approved Media Sheet' 
-                                  : 'Approved Media Sheet'}
-                              </p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-medium text-sm truncate leading-tight">
+                                    {submission.rejected_media && submission.rejected_media.length > 0 
+                                      ? 'Partially Approved Media Sheet' 
+                                      : 'Approved Media Sheet'}
+                                  </p>
+                                  <Tooltip delayDuration={100}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
+                                    </TooltipTrigger>
+                                    <TooltipContent 
+                                      side="right" 
+                                      align="start"
+                                      sideOffset={8}
+                                      collisionPadding={16}
+                                      avoidCollisions={true}
+                                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                                    >
+                                      <p>Approved media sites are now available in Global Library under Media Network.</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
