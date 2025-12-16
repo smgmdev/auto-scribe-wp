@@ -634,16 +634,16 @@ export function AgencyMediaView() {
                             )}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
+                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-foreground hover:text-background">
                                   Action
                                   <ChevronDown className="h-3 w-3 ml-1" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="min-w-[120px]">
+                              <DropdownMenuContent align="end" className="min-w-[120px] bg-background">
                                 {site.connected ? (
                                   <DropdownMenuItem 
                                     onClick={() => handleDisconnectSite(site.id)}
-                                    className="cursor-pointer hover:bg-foreground hover:text-background"
+                                    className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
                                   >
                                     <Unplug className="h-4 w-4 mr-2" />
                                     Disconnect
@@ -651,7 +651,7 @@ export function AgencyMediaView() {
                                 ) : (
                                   <DropdownMenuItem 
                                     onClick={() => handleConnectSite(site.id)}
-                                    className="cursor-pointer hover:bg-foreground hover:text-background"
+                                    className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
                                   >
                                     <Plug className="h-4 w-4 mr-2" />
                                     Connect
@@ -659,7 +659,7 @@ export function AgencyMediaView() {
                                 )}
                                 <DropdownMenuItem 
                                   onClick={() => handleDeleteSite(site.id)}
-                                  className="cursor-pointer text-destructive hover:bg-foreground hover:text-background"
+                                  className="cursor-pointer text-destructive hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Delete
