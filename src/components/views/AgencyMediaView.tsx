@@ -470,11 +470,16 @@ export function AgencyMediaView() {
     const priceValue = parseInt(newPrice) || 0;
     
     try {
-      await supabase.from('site_credits').upsert({
-        site_id: priceEditSite.id,
-        credits_required: priceValue,
-        updated_at: new Date().toISOString(),
-      });
+      const { error } = await supabase.from('site_credits').upsert(
+        {
+          site_id: priceEditSite.id,
+          credits_required: priceValue,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'site_id' }
+      );
+      
+      if (error) throw error;
       
       // Update the displayed current price to reflect the change
       setCurrentSitePrice(priceValue);
