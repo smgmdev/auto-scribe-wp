@@ -1504,12 +1504,6 @@ export function AdminMediaManagementView() {
                               <Badge variant="outline" className="text-xs">
                                 {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                               </Badge>
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs ${site.connected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
-                              >
-                                {site.connected ? 'Connected' : 'Disconnected'}
-                              </Badge>
                             </div>
                           </div>
                         </CardContent>
