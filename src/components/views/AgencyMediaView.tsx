@@ -581,7 +581,7 @@ export function AgencyMediaView() {
                             <div className="min-w-0 flex-1">
                               <p className="font-medium text-sm truncate">Pending WordPress Site</p>
                               <h3 className="text-sm">{submission.name}</h3>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 -mt-0.5">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {submission.url.replace(/^https?:\/\//, '')}
                                 </span>
