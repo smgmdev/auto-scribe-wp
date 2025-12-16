@@ -538,34 +538,58 @@ export function AgencyMediaView() {
                       className="group hover:shadow-md transition-all duration-300 border-dashed border-yellow-500/50"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded">
-                              {agencyLogo ? (
-                                <img 
-                                  src={agencyLogo} 
-                                  alt="Agency logo" 
-                                  className="h-9 w-9 object-cover"
-                                />
-                              ) : (
-                                <Clock className="h-4 w-4 text-yellow-500" />
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-sm truncate">{submission.name}</h3>
-                            </div>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0">
+                            {agencyLogo ? (
+                              <img 
+                                src={agencyLogo} 
+                                alt="Agency logo" 
+                                className="h-8 w-8 object-cover rounded"
+                              />
+                            ) : (
+                              <Clock className="h-4 w-4 text-yellow-500" />
+                            )}
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex-1 min-w-0 max-w-[400px]">
+                            <p className="font-medium text-sm">{submission.name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                {submission.url.replace(/^https?:\/\//, '').length > 40 
+                                  ? `${submission.url.replace(/^https?:\/\//, '').substring(0, 40)}...` 
+                                  : submission.url.replace(/^https?:\/\//, '')}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(submission.url);
+                                  toast.success('Link copied to clipboard');
+                                }}
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                title="Copy link"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </button>
+                              <a
+                                href={ensureHttps(submission.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                title="Open link"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {new Date(submission.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 ml-auto">
                             <Badge variant="outline" className="text-xs">
                               {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
                             <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
                               Pending
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(submission.created_at).toLocaleDateString()}
-                            </span>
                           </div>
                         </div>
                       </CardContent>
