@@ -115,7 +115,7 @@ export function ComposeView() {
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
 
-  // Fetch site credits on mount
+  // Fetch site credits on mount and subscribe to changes
   useEffect(() => {
     const fetchSiteCredits = async () => {
       const { data, error } = await supabase
@@ -127,6 +127,26 @@ export function ComposeView() {
       }
     };
     fetchSiteCredits();
+
+    // Subscribe to site_credits changes for real-time price updates
+    const channel = supabase
+      .channel('site_credits_compose')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'site_credits',
+        },
+        () => {
+          fetchSiteCredits();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Helper to get credit cost for a site
