@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight, Plug, Unplug, DollarSign } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight, Plug, Unplug, DollarSign, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { publishArticle, fetchCategories, fetchTags, createTag, uploadMedia } from '@/lib/wordpress-api';
 import type { ArticleTone, WordPressSite as WPSiteType, WPCategory, WPTag, FeaturedImage } from '@/types';
@@ -1602,7 +1603,22 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="font-medium text-sm truncate">Approved WordPress Site</p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-medium text-sm truncate leading-tight">Approved WordPress Site</p>
+                                  <Tooltip delayDuration={100}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
+                                    </TooltipTrigger>
+                                    <TooltipContent 
+                                      side="right" 
+                                      align="start"
+                                      className="max-w-[220px] text-xs bg-background border border-border shadow-lg z-50"
+                                      sideOffset={5}
+                                    >
+                                      <p>Approved WordPress site is now available in Instant Publishing Library under Media Network.</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();
