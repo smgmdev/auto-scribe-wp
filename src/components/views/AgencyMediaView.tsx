@@ -481,7 +481,17 @@ export function AgencyMediaView() {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm truncate">Approved WordPress Site</p>
+                              <div className="flex items-center gap-1">
+                                <p className="font-medium text-sm truncate">Approved WordPress Site</p>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-[250px]">
+                                    <p>Approved WordPress site is now available in Instant Publishing Library under Media Network.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                   {site.url.replace(/^https?:\/\//, '')}
