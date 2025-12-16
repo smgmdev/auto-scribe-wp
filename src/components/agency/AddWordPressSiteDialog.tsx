@@ -28,7 +28,7 @@ interface AddWordPressSiteDialogProps {
   onSuccess?: () => void;
 }
 
-type SEOPlugin = 'aioseo' | 'rankmath' | '';
+type SEOPlugin = 'aioseo' | 'rankmath' | 'other' | '';
 
 interface FormData {
   name: string;
@@ -36,6 +36,7 @@ interface FormData {
   username: string;
   applicationPassword: string;
   seoPlugin: SEOPlugin;
+  seoPluginOther: string;
   price: string;
   logo: File | null;
   logoPreview: string | null;
@@ -55,6 +56,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
     username: '',
     applicationPassword: '',
     seoPlugin: '',
+    seoPluginOther: '',
     price: '',
     logo: null,
     logoPreview: null,
@@ -69,6 +71,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       username: '',
       applicationPassword: '',
       seoPlugin: '',
+      seoPluginOther: '',
       price: '',
       logo: null,
       logoPreview: null,
@@ -186,6 +189,15 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       return;
     }
 
+    if (formData.seoPlugin === 'other' && !formData.seoPluginOther.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter the SEO plugin name.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Validate checkboxes
     const errors: { aioseoSettings?: boolean; testPublishing?: boolean } = {};
     
@@ -255,7 +267,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
           url: siteUrl,
           username: formData.username.trim(),
           app_password: formData.applicationPassword.trim(),
-          seo_plugin: formData.seoPlugin,
+          seo_plugin: formData.seoPlugin === 'other' ? formData.seoPluginOther.trim() : formData.seoPlugin,
           status: 'pending',
           price: formData.price ? parseInt(formData.price, 10) : null,
           logo_url: logoUrl,
@@ -431,8 +443,20 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               <SelectContent className="bg-popover border border-border">
                 <SelectItem value="aioseo">AIO SEO PRO</SelectItem>
                 <SelectItem value="rankmath">Rank Math</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Other SEO Plugin Input */}
+            {formData.seoPlugin === 'other' && (
+              <div className="mt-2">
+                <Input 
+                  placeholder="Enter SEO plugin name"
+                  value={formData.seoPluginOther}
+                  onChange={e => setFormData({ ...formData, seoPluginOther: e.target.value })}
+                />
+              </div>
+            )}
             
             {/* AIOSEO Instructions */}
             {formData.seoPlugin === 'aioseo' && (
