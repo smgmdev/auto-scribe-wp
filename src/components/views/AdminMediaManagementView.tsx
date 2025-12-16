@@ -1410,7 +1410,7 @@ export function AdminMediaManagementView() {
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="approved">
-                Approved & Connected ({approvedSites.length})
+                Approved ({approvedSites.length})
               </TabsTrigger>
               <TabsTrigger value="pending" className="relative">
                 Pending Review ({pendingSubmissions.length})
@@ -1425,7 +1425,7 @@ export function AdminMediaManagementView() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Approved & Connected */}
+            {/* Approved */}
             <TabsContent value="approved">
               {approvedSites.length === 0 ? (
                 <Card className="border-border/50">
