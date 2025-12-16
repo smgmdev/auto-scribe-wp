@@ -49,7 +49,18 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
   const { user } = useAuth();
   const { setCurrentView, setAgencyMediaTargetTab, setAgencyMediaTargetSubTab } = useAppStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<{ aioseoSettings?: boolean; testPublishing?: boolean }>({});
+  const [validationErrors, setValidationErrors] = useState<{ 
+    name?: boolean; 
+    url?: boolean; 
+    username?: boolean; 
+    applicationPassword?: boolean; 
+    price?: boolean; 
+    logo?: boolean; 
+    seoPlugin?: boolean; 
+    seoPluginOther?: boolean;
+    aioseoSettings?: boolean; 
+    testPublishing?: boolean 
+  }>({});
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -193,58 +204,25 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       return;
     }
 
-    if (!formData.name.trim() || !formData.url.trim() || !formData.username.trim() || !formData.applicationPassword.trim() || !formData.price.trim()) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!formData.logo) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please upload a site logo.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!formData.seoPlugin) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please select an SEO plugin.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (formData.seoPlugin === 'other' && !formData.seoPluginOther.trim()) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please enter the SEO plugin name.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Validate checkboxes
-    const errors: { aioseoSettings?: boolean; testPublishing?: boolean } = {};
+    // Validate all required fields and track errors
+    const errors: typeof validationErrors = {};
     
-    if (formData.seoPlugin === 'aioseo' && !formData.aioseoSettingsConfirmed) {
-      errors.aioseoSettings = true;
-    }
-    
-    if (!formData.testPublishingApproved) {
-      errors.testPublishing = true;
-    }
+    if (!formData.name.trim()) errors.name = true;
+    if (!formData.url.trim()) errors.url = true;
+    if (!formData.username.trim()) errors.username = true;
+    if (!formData.applicationPassword.trim()) errors.applicationPassword = true;
+    if (!formData.price.trim()) errors.price = true;
+    if (!formData.logo) errors.logo = true;
+    if (!formData.seoPlugin) errors.seoPlugin = true;
+    if (formData.seoPlugin === 'other' && !formData.seoPluginOther.trim()) errors.seoPluginOther = true;
+    if (formData.seoPlugin === 'aioseo' && !formData.aioseoSettingsConfirmed) errors.aioseoSettings = true;
+    if (!formData.testPublishingApproved) errors.testPublishing = true;
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       toast({
-        title: 'Confirmation Required',
-        description: 'Please confirm the required checkboxes before submitting.',
+        title: 'Validation Error',
+        description: 'Please fill in all required fields.',
         variant: 'destructive',
       });
       return;
@@ -471,12 +449,14 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
                   onDragLeave={handleLogoDragLeave}
                   onDrop={handleLogoDrop}
                   className={`w-16 h-16 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer transition-colors ${
-                    isDraggingLogo 
-                      ? 'border-primary bg-primary/10' 
-                      : 'border-border hover:border-primary/50'
+                    validationErrors.logo
+                      ? 'border-red-500 bg-red-500/10'
+                      : isDraggingLogo 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <Upload className={`h-5 w-5 ${isDraggingLogo ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <Upload className={`h-5 w-5 ${validationErrors.logo ? 'text-red-500' : isDraggingLogo ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
               )}
               <input
@@ -498,21 +478,28 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               id="wp-name" 
               placeholder="My Blog" 
               value={formData.name} 
-              onChange={e => setFormData({ ...formData, name: e.target.value })} 
+              onChange={e => {
+                setFormData({ ...formData, name: e.target.value });
+                setValidationErrors(prev => ({ ...prev, name: false }));
+              }}
+              className={validationErrors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="wp-url">Site URL</Label>
             <div className="flex">
-              <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+              <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${validationErrors.url ? 'border-red-500' : 'border-input'}`}>
                 https://
               </span>
               <Input 
                 id="wp-url" 
                 placeholder="example.com" 
                 value={formData.url} 
-                onChange={e => setFormData({ ...formData, url: e.target.value })} 
-                className="rounded-l-none"
+                onChange={e => {
+                  setFormData({ ...formData, url: e.target.value });
+                  setValidationErrors(prev => ({ ...prev, url: false }));
+                }}
+                className={`rounded-l-none ${validationErrors.url ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
               />
             </div>
           </div>
@@ -522,7 +509,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               id="wp-username" 
               placeholder="admin" 
               value={formData.username} 
-              onChange={e => setFormData({ ...formData, username: e.target.value })} 
+              onChange={e => {
+                setFormData({ ...formData, username: e.target.value });
+                setValidationErrors(prev => ({ ...prev, username: false }));
+              }}
+              className={validationErrors.username ? 'border-red-500 focus-visible:ring-red-500' : ''}
             />
           </div>
           <div className="space-y-2">
@@ -532,7 +523,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               type="password" 
               placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" 
               value={formData.applicationPassword} 
-              onChange={e => setFormData({ ...formData, applicationPassword: e.target.value })} 
+              onChange={e => {
+                setFormData({ ...formData, applicationPassword: e.target.value });
+                setValidationErrors(prev => ({ ...prev, applicationPassword: false }));
+              }}
+              className={validationErrors.applicationPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}
             />
             <p className="text-xs text-muted-foreground">
               Generate this in WordPress under Users → Profile → Application Passwords
@@ -548,7 +543,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               min="0"
               placeholder="0" 
               value={formData.price} 
-              onChange={e => setFormData({ ...formData, price: e.target.value })} 
+              onChange={e => {
+                setFormData({ ...formData, price: e.target.value });
+                setValidationErrors(prev => ({ ...prev, price: false }));
+              }}
+              className={validationErrors.price ? 'border-red-500 focus-visible:ring-red-500' : ''}
             />
             <p className="text-xs text-muted-foreground">
               Set the price for publishing articles on this site
@@ -561,10 +560,10 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
               value={formData.seoPlugin} 
               onValueChange={(value: SEOPlugin) => {
                 setFormData({ ...formData, seoPlugin: value, aioseoSettingsConfirmed: false });
-                setValidationErrors(prev => ({ ...prev, aioseoSettings: false }));
+                setValidationErrors(prev => ({ ...prev, aioseoSettings: false, seoPlugin: false }));
               }}
             >
-              <SelectTrigger className="w-full focus:ring-border focus:ring-offset-0">
+              <SelectTrigger className={`w-full focus:ring-offset-0 ${validationErrors.seoPlugin ? 'border-red-500 focus:ring-red-500' : 'focus:ring-border'}`}>
                 <SelectValue placeholder="Select SEO Plugin" />
               </SelectTrigger>
               <SelectContent className="bg-popover border border-border">
@@ -580,7 +579,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
                 <Input 
                   placeholder="Enter SEO plugin name"
                   value={formData.seoPluginOther}
-                  onChange={e => setFormData({ ...formData, seoPluginOther: e.target.value })}
+                  onChange={e => {
+                    setFormData({ ...formData, seoPluginOther: e.target.value });
+                    setValidationErrors(prev => ({ ...prev, seoPluginOther: false }));
+                  }}
+                  className={validationErrors.seoPluginOther ? 'border-red-500 focus-visible:ring-red-500' : ''}
                 />
               </div>
             )}
