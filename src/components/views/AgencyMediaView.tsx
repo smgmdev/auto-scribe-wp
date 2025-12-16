@@ -462,45 +462,56 @@ export function AgencyMediaView() {
                   {wordpressSites.map((site, index) => (
                     <Card 
                       key={site.id} 
-                      className="group hover:shadow-md transition-all duration-300"
+                      className="group hover:shadow-md hover:border-green-500 transition-all duration-300"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <CardContent className="p-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 min-w-0 flex-1">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
                               {site.favicon ? (
                                 <img 
                                   src={site.favicon} 
                                   alt={`${site.name} logo`} 
-                                  className="h-9 w-9 object-cover"
+                                  className="h-10 w-10 object-cover"
                                 />
                               ) : (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <CheckCircle className="h-5 w-5 text-green-500" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 className="text-sm truncate">{site.name}</h3>
+                              <p className="text-xs text-muted-foreground">Connected Site</p>
+                              <h3 className="text-sm font-medium">{site.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                  {site.url.replace(/^https?:\/\//, '')}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(site.url);
+                                    toast.success('URL copied to clipboard');
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                                <a
+                                  href={ensureHttps(site.url)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <Badge variant="outline" className="text-xs">
                               {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${site.connected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}
-                            >
-                              {site.connected ? 'Connected' : 'Disconnected'}
-                            </Badge>
-                            <a 
-                              href={site.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-foreground"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
                           </div>
                         </div>
                       </CardContent>
