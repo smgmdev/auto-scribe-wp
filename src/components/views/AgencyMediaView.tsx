@@ -684,13 +684,13 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-1">
+                              <p className="text-xs text-muted-foreground">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
                                   : `${new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
                               </p>
                               {submission.admin_notes && (
-                                <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                                <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
                               )}
                             </div>
                           </div>
