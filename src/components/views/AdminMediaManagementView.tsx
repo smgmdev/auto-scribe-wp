@@ -2948,11 +2948,19 @@ export function AdminMediaManagementView() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {agencyLogoSignedUrl && (
-                <img
-                  src={agencyLogoSignedUrl}
-                  alt={selectedAgencyDetails?.agency_name || 'Agency logo'}
-                  className="h-12 w-12 rounded-xl bg-muted object-cover"
-                />
+                <div className="relative h-12 w-12 rounded-xl bg-muted overflow-hidden flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 text-muted-foreground animate-spin absolute" id="agency-popup-logo-loader" />
+                  <img
+                    src={agencyLogoSignedUrl}
+                    alt={selectedAgencyDetails?.agency_name || 'Agency logo'}
+                    className="h-12 w-12 object-cover opacity-0 transition-opacity"
+                    onLoad={(e) => {
+                      e.currentTarget.classList.remove('opacity-0');
+                      const loader = document.getElementById('agency-popup-logo-loader');
+                      if (loader) loader.style.display = 'none';
+                    }}
+                  />
+                </div>
               )}
               <span>{selectedAgencyDetails?.agency_name}</span>
             </DialogTitle>
