@@ -2270,7 +2270,7 @@ export function AdminMediaManagementView() {
                 <div>
                   <p className="text-muted-foreground">Submitted</p>
                   <p className="font-medium">
-                    {new Date(selectedSubmission.created_at).toLocaleDateString()}
+                    {new Date(selectedSubmission.created_at).toLocaleString()}
                   </p>
                 </div>
               </div>
