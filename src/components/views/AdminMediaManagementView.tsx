@@ -2273,7 +2273,6 @@ export function AdminMediaManagementView() {
                                       key={itemIndex}
                                       className="flex items-center gap-3 p-3 rounded-md bg-red-500/5 border border-red-500/20"
                                     >
-                                      <XCircle className="h-4 w-4 text-red-500 shrink-0" />
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{item.title}</p>
                                         {item.link && (
