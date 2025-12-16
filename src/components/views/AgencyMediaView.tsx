@@ -42,6 +42,7 @@ interface WordPressSite {
   seo_plugin: string;
   connected: boolean;
   read: boolean;
+  created_at: string;
 }
 
 interface WordPressSiteSubmission {
@@ -152,7 +153,7 @@ export function AgencyMediaView() {
     // Fetch WordPress sites added by this agency user
     const { data: wpData, error: wpError } = await supabase
       .from('wordpress_sites')
-      .select('id, name, url, seo_plugin, favicon, connected, read')
+      .select('id, name, url, seo_plugin, favicon, connected, read, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -480,7 +481,9 @@ export function AgencyMediaView() {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs text-muted-foreground">Connected Site</p>
+                              <p className="text-xs text-muted-foreground">
+                                Connected Site • {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                              </p>
                               <h3 className="text-sm font-medium">{site.name}</h3>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground truncate max-w-[200px]">
