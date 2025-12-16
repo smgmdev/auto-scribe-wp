@@ -1456,10 +1456,11 @@ export function AdminMediaManagementView() {
                                     e.stopPropagation();
                                     if (site.user_id) fetchAgencyDetails(site.user_id);
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors text-left"
+                                  className="text-xs text-muted-foreground hover:text-accent transition-colors text-left flex items-center gap-1"
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {agencyName || 'Unknown Agency'}
+                                  <ExternalLink className="h-3 w-3" />
                                 </button>
                                 <h3 className="text-sm font-medium">{site.name}</h3>
                                 <div className="flex items-center gap-2">
@@ -1555,10 +1556,11 @@ export function AdminMediaManagementView() {
                                     e.stopPropagation();
                                     fetchAgencyDetails(submission.user_id);
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors text-left"
+                                  className="text-xs text-muted-foreground hover:text-accent transition-colors text-left flex items-center gap-1"
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
+                                  <ExternalLink className="h-3 w-3" />
                                 </button>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
@@ -1649,10 +1651,11 @@ export function AdminMediaManagementView() {
                                     e.stopPropagation();
                                     fetchAgencyDetails(submission.user_id);
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-accent hover:underline transition-colors text-left"
+                                  className="text-xs text-muted-foreground hover:text-accent transition-colors text-left flex items-center gap-1"
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
+                                  <ExternalLink className="h-3 w-3" />
                                 </button>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
