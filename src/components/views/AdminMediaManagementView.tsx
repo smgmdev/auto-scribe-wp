@@ -2247,7 +2247,7 @@ export function AdminMediaManagementView() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
-                                <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 whitespace-nowrap">
+                                <Badge variant="outline" className="text-xs border-red-500 text-red-500 whitespace-nowrap">
                                   Partially Rejected ({rejectedItems.length})
                                 </Badge>
                                 {isExpanded ? (
