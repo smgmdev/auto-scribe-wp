@@ -264,6 +264,55 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
 
     setIsSubmitting(true);
 
+    // Validate WordPress credentials
+    try {
+      const credentials = btoa(`${formData.username.trim()}:${formData.applicationPassword.trim()}`);
+      const testResponse = await fetch(`${siteUrl}/wp-json/wp/v2/users/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+        },
+      });
+
+      if (!testResponse.ok) {
+        const errorText = await testResponse.text();
+        console.error('WordPress connection test failed:', testResponse.status, errorText);
+        
+        let errorMessage = 'Could not connect to WordPress site. ';
+        if (testResponse.status === 401) {
+          errorMessage += 'Invalid username or application password.';
+        } else if (testResponse.status === 403) {
+          errorMessage += 'Access forbidden. Check if REST API is enabled.';
+        } else if (testResponse.status === 404) {
+          errorMessage += 'WordPress REST API not found. Ensure it\'s enabled.';
+        } else {
+          errorMessage += `Server returned error ${testResponse.status}.`;
+        }
+        
+        toast({
+          title: 'Connection Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast({
+        title: 'Connection Verified',
+        description: 'WordPress credentials validated successfully.',
+      });
+    } catch (connectionError: any) {
+      console.error('WordPress connection error:', connectionError);
+      toast({
+        title: 'Connection Failed',
+        description: 'Could not connect to WordPress site. Please check the URL and ensure the site is accessible.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Upload logo if provided
       let logoUrl: string | null = null;
