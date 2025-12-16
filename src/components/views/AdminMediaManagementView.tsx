@@ -2330,7 +2330,7 @@ export function AdminMediaManagementView() {
                                   )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
+                                  <p className="font-medium text-sm truncate">Rejected Media Sheet</p>
                                   <button 
                                     onClick={(e) => {
                                       e.stopPropagation();
