@@ -2372,14 +2372,14 @@ export function AdminMediaManagementView() {
                                       <ExternalLink className="h-3 w-3" />
                                     </a>
                                   </div>
-                                  {submission.admin_notes && (
-                                    <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
-                                  )}
                                   <p className="text-xs text-muted-foreground">
                                     {submission.reviewed_at 
                                       ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                       : 'N/A'}
                                   </p>
+                                  {submission.admin_notes && (
+                                    <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
+                                  )}
                                 </div>
                               </div>
                             </div>
