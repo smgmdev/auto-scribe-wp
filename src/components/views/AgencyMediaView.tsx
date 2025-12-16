@@ -1499,12 +1499,16 @@ export function AgencyMediaView() {
           </DialogHeader>
           <div className="py-4 space-y-3">
             <p className="text-sm text-muted-foreground">
-              This will remove the site from the Instant Publishing Library. However:
+              This will permanently remove the site from the Instant Publishing Library.
             </p>
+            <p className="text-sm font-medium text-destructive">
+              Once deleted, users will no longer be able to find or publish to this site.
+            </p>
+            <p className="text-sm text-muted-foreground">However:</p>
             <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-              <li>All published articles will remain intact</li>
-              <li>Site logos and data will be preserved</li>
-              <li>You can add this site again later if needed</li>
+              <li>All previously published articles will remain intact</li>
+              <li>Site logos and historical data will be preserved</li>
+              <li>You can re-add this site again later if needed</li>
             </ul>
           </div>
           <DialogFooter>
