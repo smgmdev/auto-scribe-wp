@@ -469,17 +469,11 @@ export function AgencyMediaView() {
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10">
-                              {agencyLogo ? (
-                                <img 
-                                  src={agencyLogo} 
-                                  alt="Agency logo" 
-                                  className="h-9 w-9 object-cover"
-                                />
-                              ) : site.favicon ? (
+                              {site.favicon ? (
                                 <img 
                                   src={site.favicon} 
-                                  alt={`${site.name} favicon`} 
-                                  className="h-5 w-5 object-contain"
+                                  alt={`${site.name} logo`} 
+                                  className="h-9 w-9 object-cover"
                                 />
                               ) : (
                                 <CheckCircle className="h-4 w-4 text-green-500" />
@@ -622,8 +616,16 @@ export function AgencyMediaView() {
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
-                          <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0">
-                            <XCircle className="h-4 w-4 text-red-500" />
+                          <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                            {submission.logo_url ? (
+                              <img 
+                                src={submission.logo_url} 
+                                alt={`${submission.name} logo`} 
+                                className="h-8 w-8 object-cover"
+                              />
+                            ) : (
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0 max-w-[400px]">
                             <p className="font-medium text-sm">{submission.name}</p>
