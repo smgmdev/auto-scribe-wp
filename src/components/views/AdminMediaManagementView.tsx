@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight, Plug, Unplug, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -201,6 +201,16 @@ export function AdminMediaManagementView() {
   const [isAgencyDetailsDialogOpen, setIsAgencyDetailsDialogOpen] = useState(false);
   const [isLoadingAgencyDetails, setIsLoadingAgencyDetails] = useState(false);
   const [agencyLogoSignedUrl, setAgencyLogoSignedUrl] = useState<string | null>(null);
+
+  // WordPress site action state
+  const [wpSiteToDelete, setWpSiteToDelete] = useState<ApprovedWordPressSite | null>(null);
+  const [isWpDeleteDialogOpen, setIsWpDeleteDialogOpen] = useState(false);
+  const [isDeletingWpSite, setIsDeletingWpSite] = useState(false);
+  const [wpPriceEditSite, setWpPriceEditSite] = useState<ApprovedWordPressSite | null>(null);
+  const [isWpPriceDialogOpen, setIsWpPriceDialogOpen] = useState(false);
+  const [newWpPrice, setNewWpPrice] = useState('');
+  const [currentWpSitePrice, setCurrentWpSitePrice] = useState<number | null>(null);
+  const [isWpPriceLoading, setIsWpPriceLoading] = useState(false);
 
   const toneOptions: { value: ArticleTone; label: string }[] = [
     { value: 'neutral', label: 'Neutral' },
@@ -1104,6 +1114,128 @@ export function AdminMediaManagementView() {
     setTestMetaDescription('');
   };
 
+  // Handle disconnect approved WordPress site
+  const handleWpDisconnectSite = async (siteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .update({ connected: false })
+        .eq('id', siteId);
+
+      if (error) throw error;
+
+      setApprovedSites(prev => prev.map(s => 
+        s.id === siteId ? { ...s, connected: false } : s
+      ));
+      toast({ title: "Site disconnected", description: "Site disconnected from Instant Publishing Library" });
+    } catch (error: any) {
+      console.error('Error disconnecting site:', error);
+      toast({ title: "Error", description: "Failed to disconnect site", variant: "destructive" });
+    }
+  };
+
+  // Handle connect approved WordPress site
+  const handleWpConnectSite = async (siteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .update({ connected: true })
+        .eq('id', siteId);
+
+      if (error) throw error;
+
+      setApprovedSites(prev => prev.map(s => 
+        s.id === siteId ? { ...s, connected: true } : s
+      ));
+      toast({ title: "Site connected", description: "Site connected to Instant Publishing Library" });
+    } catch (error: any) {
+      console.error('Error connecting site:', error);
+      toast({ title: "Error", description: "Failed to connect site", variant: "destructive" });
+    }
+  };
+
+  // Open delete confirmation dialog for approved WP site
+  const handleWpDeleteSite = (site: ApprovedWordPressSite) => {
+    setWpSiteToDelete(site);
+    setIsWpDeleteDialogOpen(true);
+  };
+
+  // Confirm delete approved WordPress site
+  const confirmDeleteWpSite = async () => {
+    if (!wpSiteToDelete) return;
+    setIsDeletingWpSite(true);
+
+    try {
+      // Delete site credits first
+      await supabase.from('site_credits').delete().eq('site_id', wpSiteToDelete.id);
+      
+      // Delete site tags
+      await supabase.from('site_tags').delete().eq('site_id', wpSiteToDelete.id);
+      
+      // Delete the WordPress site
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .delete()
+        .eq('id', wpSiteToDelete.id);
+
+      if (error) throw error;
+
+      setApprovedSites(prev => prev.filter(s => s.id !== wpSiteToDelete.id));
+      toast({ title: "Site deleted", description: "Site removed successfully" });
+      setIsWpDeleteDialogOpen(false);
+      setWpSiteToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting site:', error);
+      toast({ title: "Error", description: "Failed to delete site", variant: "destructive" });
+    } finally {
+      setIsDeletingWpSite(false);
+    }
+  };
+
+  // Open price change dialog for approved WP site
+  const handleOpenWpPriceDialog = async (site: ApprovedWordPressSite) => {
+    setWpPriceEditSite(site);
+    setIsWpPriceLoading(true);
+    setIsWpPriceDialogOpen(true);
+    
+    // Fetch current price from site_credits
+    const { data } = await supabase
+      .from('site_credits')
+      .select('credits_required')
+      .eq('site_id', site.id)
+      .single();
+    
+    const price = data?.credits_required || 0;
+    setCurrentWpSitePrice(price);
+    setNewWpPrice(price.toString());
+    setIsWpPriceLoading(false);
+  };
+
+  // Save new price for approved WP site
+  const handleSaveWpPrice = async () => {
+    if (!wpPriceEditSite) return;
+    const priceValue = parseInt(newWpPrice) || 0;
+    
+    try {
+      const { error } = await supabase.from('site_credits').upsert(
+        {
+          site_id: wpPriceEditSite.id,
+          credits_required: priceValue,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'site_id' }
+      );
+      
+      if (error) throw error;
+      
+      setCurrentWpSitePrice(priceValue);
+      toast({ title: "Price updated", description: "Price updated successfully" });
+    } catch (error: any) {
+      console.error('Error updating price:', error);
+      toast({ title: "Error", description: "Failed to update price", variant: "destructive" });
+    }
+  };
+
   // Open test article dialog
   const openTestArticleDialog = () => {
     resetTestArticleForm();
@@ -1515,6 +1647,56 @@ export function AdminMediaManagementView() {
                               <Badge variant="outline" className="text-xs">
                                 {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                               </Badge>
+                              {site.connected ? (
+                                <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-600 border-green-500/30">
+                                  Connected
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-600 border-yellow-500/30">
+                                  Disconnected
+                                </Badge>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-foreground hover:text-background">
+                                    Action
+                                    <ChevronDown className="h-3 w-3 ml-1" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="min-w-[120px] bg-background">
+                                  {site.connected ? (
+                                    <DropdownMenuItem 
+                                      onClick={() => handleWpDisconnectSite(site.id)}
+                                      className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                    >
+                                      <Unplug className="h-4 w-4 mr-2" />
+                                      Disconnect
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem 
+                                      onClick={() => handleWpConnectSite(site.id)}
+                                      className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                    >
+                                      <Plug className="h-4 w-4 mr-2" />
+                                      Connect
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem 
+                                    onClick={() => handleOpenWpPriceDialog(site)}
+                                    className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                  >
+                                    <DollarSign className="h-4 w-4 mr-2" />
+                                    Change Price
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleWpDeleteSite(site)}
+                                    className="cursor-pointer text-destructive hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </div>
                         </CardContent>
@@ -3065,6 +3247,97 @@ export function AdminMediaManagementView() {
               className="hover:bg-black hover:text-white transition-colors"
             >
               Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete WP Site Confirmation Dialog */}
+      <Dialog open={isWpDeleteDialogOpen} onOpenChange={setIsWpDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete WordPress Site</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{wpSiteToDelete?.name}"? This will remove the site and all associated data. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button 
+              variant="outline"
+              onClick={() => setIsWpDeleteDialogOpen(false)}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={confirmDeleteWpSite}
+              disabled={isDeletingWpSite}
+            >
+              {isDeletingWpSite ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Site'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change WP Site Price Dialog */}
+      <Dialog open={isWpPriceDialogOpen} onOpenChange={setIsWpPriceDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Price</DialogTitle>
+            <DialogDescription>
+              Set the credit price for "{wpPriceEditSite?.name}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {isWpPriceLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label>Current Price</Label>
+                  <p className="text-sm text-muted-foreground">{currentWpSitePrice} credits</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newWpPrice">New Price (credits)</Label>
+                  <Input
+                    id="newWpPrice"
+                    type="text"
+                    inputMode="numeric"
+                    value={newWpPrice}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setNewWpPrice(value);
+                    }}
+                    placeholder="Enter new price"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsWpPriceDialogOpen(false)}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveWpPrice}
+              disabled={isWpPriceLoading}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Save Price
             </Button>
           </div>
         </DialogContent>
