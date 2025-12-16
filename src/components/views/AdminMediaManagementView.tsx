@@ -1782,27 +1782,28 @@ export function AdminMediaManagementView() {
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={() => toggleExpandedApprovedSubmission(submission.id)}
                       >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="h-8 w-8 rounded bg-green-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                              {logoUrl ? (
-                                <>
-                                  {(!isLogoLoaded || isLogoLoading) && (
-                                    <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
-                                  )}
-                                  <img 
-                                    src={logoUrl} 
-                                    alt={`${submission.agency_name} logo`}
-                                    className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                    onLoad={() => handleLogoLoad(submission.agency_name)}
-                                    onError={() => handleLogoLoad(submission.agency_name)}
-                                  />
-                                </>
-                              ) : (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0 max-w-[400px]">
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3 min-w-0 flex-1">
+                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-green-500/10 rounded mt-0.5">
+                                {logoUrl ? (
+                                  <>
+                                    {(!isLogoLoaded || isLogoLoading) && (
+                                      <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
+                                    )}
+                                    <img 
+                                      src={logoUrl} 
+                                      alt={`${submission.agency_name} logo`}
+                                      className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                      onLoad={() => handleLogoLoad(submission.agency_name)}
+                                      onError={() => handleLogoLoad(submission.agency_name)}
+                                    />
+                                  </>
+                                ) : (
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
                               <p className="text-xs text-muted-foreground truncate">
                                 {submission.rejected_media && submission.rejected_media.length > 0 
                                   ? 'Partially Approved Media Sheet' 
@@ -1857,8 +1858,9 @@ export function AdminMediaManagementView() {
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                   : 'N/A'}
                               </p>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0 ml-auto">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
@@ -2006,9 +2008,9 @@ export function AdminMediaManagementView() {
                     const isLogoLoaded = loadedLogos.has(submission.agency_name);
                     
                     return (
-                      <div 
+                      <Card 
                         key={submission.id} 
-                        className={`relative flex items-center gap-4 p-4 rounded-lg border border-dashed bg-card hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : 'border-yellow-500/50'}`}
+                        className={`group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={async () => {
                           if (!submission.read) {
@@ -2025,28 +2027,31 @@ export function AdminMediaManagementView() {
                           }
                         }}
                       >
-                        {!submission.read && (
-                          <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
-                        )}
-                        <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                          {logoUrl ? (
-                            <>
-                              {(!isLogoLoaded || isLogoLoading) && (
-                                <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
-                              )}
-                              <img 
-                                src={logoUrl} 
-                                alt={`${submission.agency_name} logo`}
-                                className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                onLoad={() => handleLogoLoad(submission.agency_name)}
-                                onError={() => handleLogoLoad(submission.agency_name)}
-                              />
-                            </>
-                          ) : (
-                            <Clock className="h-4 w-4 text-yellow-500" />
+                        <CardContent className="p-3 relative">
+                          {!submission.read && (
+                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-card z-10" />
                           )}
-                        </div>
-                        <div className="flex-1 min-w-0 max-w-[400px]">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3 min-w-0 flex-1">
+                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-yellow-500/10 rounded mt-0.5">
+                                {logoUrl ? (
+                                  <>
+                                    {(!isLogoLoaded || isLogoLoading) && (
+                                      <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
+                                    )}
+                                    <img 
+                                      src={logoUrl} 
+                                      alt={`${submission.agency_name} logo`}
+                                      className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                      onLoad={() => handleLogoLoad(submission.agency_name)}
+                                      onError={() => handleLogoLoad(submission.agency_name)}
+                                    />
+                                  </>
+                                ) : (
+                                  <Clock className="h-5 w-5 text-yellow-500" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
                           <p className="text-xs text-muted-foreground">Media Sheet Submitted</p>
                           <button 
                             onClick={(e) => {
@@ -2093,49 +2098,52 @@ export function AdminMediaManagementView() {
                           <p className="text-xs text-muted-foreground mt-1">
                             {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0 ml-auto">
-                          {submission.read && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button variant="outline" size="sm" className="h-7 px-2 gap-1 text-xs hover:bg-foreground hover:text-background">
-                                  Action
-                                  <ChevronDown className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-popover z-50">
-                                <DropdownMenuItem 
-                                  className="focus:bg-foreground focus:text-background cursor-pointer"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedMediaSubmission(submission);
-                                    setReplySheetUrl('');
-                                    setIsReplyDialogOpen(true);
-                                  }}
-                                >
-                                  Reply
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="text-destructive focus:bg-foreground focus:text-background cursor-pointer"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedMediaSubmission(submission);
-                                    setRejectReason('');
-                                    setIsRejectDialogOpen(true);
-                                  }}
-                                >
-                                  Reject
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
-                          {!submission.read && (
-                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500 bg-yellow-500/10">
-                              New
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {submission.read && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                    <Button variant="outline" size="sm" className="h-7 px-2 gap-1 text-xs hover:bg-foreground hover:text-background">
+                                      Action
+                                      <ChevronDown className="h-3 w-3" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-popover z-50">
+                                    <DropdownMenuItem 
+                                      className="focus:bg-foreground focus:text-background cursor-pointer"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedMediaSubmission(submission);
+                                        setReplySheetUrl('');
+                                        setIsReplyDialogOpen(true);
+                                      }}
+                                    >
+                                      Reply
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      className="text-destructive focus:bg-foreground focus:text-background cursor-pointer"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedMediaSubmission(submission);
+                                        setRejectReason('');
+                                        setIsRejectDialogOpen(true);
+                                      }}
+                                    >
+                                      Reject
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                              {!submission.read && (
+                                <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500 bg-yellow-500/10">
+                                  New
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     );
                   })}
                 </div>
@@ -2154,7 +2162,7 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {allRejectedMediaSubmissions.map((submission, index) => {
                     const logoUrl = agencyLogos[submission.agency_name];
                     const isLogoLoading = loadingLogos.has(submission.agency_name);
@@ -2172,77 +2180,79 @@ export function AdminMediaManagementView() {
                           style={{ animationDelay: `${index * 50}ms` }}
                           onClick={() => toggleExpandedRejectedSubmission(submission.id)}
                         >
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-4">
-                              <div className="h-10 w-10 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                                {logoUrl ? (
-                                  <>
-                                    {(!isLogoLoaded || isLogoLoading) && (
-                                      <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
-                                    )}
-                                    <img 
-                                      src={logoUrl} 
-                                      alt={`${submission.agency_name} logo`}
-                                      className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                      onLoad={() => handleLogoLoad(submission.agency_name)}
-                                      onError={() => handleLogoLoad(submission.agency_name)}
-                                    />
-                                  </>
-                                ) : (
-                                  <XCircle className="h-5 w-5 text-red-500" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0 max-w-[400px]">
-                                <p className="text-xs text-muted-foreground">Partially Rejected Media Sheet</p>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    fetchAgencyDetails(submission.user_id);
-                                  }}
-                                  className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
-                                  disabled={isLoadingAgencyDetails}
-                                >
-                                  {submission.agency_name}
-                                  <ArrowUpRight className="h-3 w-3" />
-                                </button>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                    {submission.google_sheet_url.length > 40 
-                                      ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                      : submission.google_sheet_url}
-                                  </p>
-                                  <button
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3 min-w-0 flex-1">
+                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded mt-0.5">
+                                  {logoUrl ? (
+                                    <>
+                                      {(!isLogoLoaded || isLogoLoading) && (
+                                        <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
+                                      )}
+                                      <img 
+                                        src={logoUrl} 
+                                        alt={`${submission.agency_name} logo`}
+                                        className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                        onLoad={() => handleLogoLoad(submission.agency_name)}
+                                        onError={() => handleLogoLoad(submission.agency_name)}
+                                      />
+                                    </>
+                                  ) : (
+                                    <XCircle className="h-5 w-5 text-red-500" />
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs text-muted-foreground">Partially Rejected Media Sheet</p>
+                                  <button 
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      navigator.clipboard.writeText(submission.google_sheet_url);
-                                      toast({
-                                        title: 'Copied',
-                                        description: 'Link copied to clipboard',
-                                      });
+                                      fetchAgencyDetails(submission.user_id);
                                     }}
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Copy link"
+                                    className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
+                                    disabled={isLoadingAgencyDetails}
                                   >
-                                    <Copy className="h-3.5 w-3.5" />
+                                    {submission.agency_name}
+                                    <ArrowUpRight className="h-3 w-3" />
                                   </button>
-                                  <a
-                                    href={submission.google_sheet_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Open link"
-                                  >
-                                    <ExternalLink className="h-3.5 w-3.5" />
-                                  </a>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                      {submission.google_sheet_url.length > 40 
+                                        ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                        : submission.google_sheet_url}
+                                    </p>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(submission.google_sheet_url);
+                                        toast({
+                                          title: 'Copied',
+                                          description: 'Link copied to clipboard',
+                                        });
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Copy link"
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                    </button>
+                                    <a
+                                      href={submission.google_sheet_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Open link"
+                                    >
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {submission.reviewed_at 
+                                      ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                      : 'N/A'}
+                                  </p>
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {submission.reviewed_at 
-                                    ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                                    : 'N/A'}
-                                </p>
                               </div>
-                              <div className="flex items-center gap-2 shrink-0 ml-auto">
+                              <div className="flex items-center gap-2 flex-shrink-0">
                                 <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 whitespace-nowrap">
                                   Partially Rejected ({rejectedItems.length})
                                 </Badge>
@@ -2300,81 +2310,87 @@ export function AdminMediaManagementView() {
                     } else {
                       // Fully rejected submission
                       return (
-                        <div 
+                        <Card 
                           key={submission.id} 
-                          className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
+                          className="group hover:shadow-md hover:border-red-500 transition-all duration-300 border-red-500/50"
                           style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          <div className="h-10 w-10 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                            {logoUrl ? (
-                              <>
-                                {(!isLogoLoaded || isLogoLoading) && (
-                                  <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
-                                )}
-                                <img 
-                                  src={logoUrl} 
-                                  alt={`${submission.agency_name} logo`}
-                                  className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
-                                  onLoad={() => handleLogoLoad(submission.agency_name)}
-                                  onError={() => handleLogoLoad(submission.agency_name)}
-                                />
-                              </>
-                            ) : (
-                              <XCircle className="h-5 w-5 text-red-500" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0 max-w-[400px]">
-                            <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                fetchAgencyDetails(submission.user_id);
-                              }}
-                              className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
-                              disabled={isLoadingAgencyDetails}
-                            >
-                              {submission.agency_name}
-                              <ArrowUpRight className="h-3 w-3" />
-                            </button>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                {submission.google_sheet_url.length > 40 
-                                  ? `${submission.google_sheet_url.substring(0, 40)}...` 
-                                  : submission.google_sheet_url}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(submission.google_sheet_url);
-                                  toast({
-                                    title: 'Copied',
-                                    description: 'Link copied to clipboard',
-                                  });
-                                }}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Copy link"
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </button>
-                              <a
-                                href={submission.google_sheet_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Open link"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3 min-w-0 flex-1">
+                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-red-500/10 rounded mt-0.5">
+                                  {logoUrl ? (
+                                    <>
+                                      {(!isLogoLoaded || isLogoLoading) && (
+                                        <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
+                                      )}
+                                      <img 
+                                        src={logoUrl} 
+                                        alt={`${submission.agency_name} logo`}
+                                        className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                        onLoad={() => handleLogoLoad(submission.agency_name)}
+                                        onError={() => handleLogoLoad(submission.agency_name)}
+                                      />
+                                    </>
+                                  ) : (
+                                    <XCircle className="h-5 w-5 text-red-500" />
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs text-muted-foreground">Rejected Media Sheet</p>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      fetchAgencyDetails(submission.user_id);
+                                    }}
+                                    className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
+                                    disabled={isLoadingAgencyDetails}
+                                  >
+                                    {submission.agency_name}
+                                    <ArrowUpRight className="h-3 w-3" />
+                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                      {submission.google_sheet_url.length > 40 
+                                        ? `${submission.google_sheet_url.substring(0, 40)}...` 
+                                        : submission.google_sheet_url}
+                                    </p>
+                                    <button
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(submission.google_sheet_url);
+                                        toast({
+                                          title: 'Copied',
+                                          description: 'Link copied to clipboard',
+                                        });
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Copy link"
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                    </button>
+                                    <a
+                                      href={submission.google_sheet_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Open link"
+                                    >
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  </div>
+                                  {submission.admin_notes && (
+                                    <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
+                                  )}
+                                  <p className="text-xs text-muted-foreground">
+                                    {submission.reviewed_at 
+                                      ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                      : 'N/A'}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
-                            {submission.admin_notes && (
-                              <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {submission.reviewed_at 
-                                ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                                : 'N/A'}
-                            </p>
-                          </div>
-                        </div>
+                          </CardContent>
+                        </Card>
                       );
                     }
                   })}
