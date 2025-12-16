@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -345,6 +345,75 @@ export function AgencyMediaView() {
     }
   };
 
+  // Handle disconnect WordPress site
+  const handleDisconnectSite = async (siteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .update({ connected: false })
+        .eq('id', siteId);
+
+      if (error) throw error;
+
+      setWordpressSites(prev => prev.map(s => 
+        s.id === siteId ? { ...s, connected: false } : s
+      ));
+      toast.success('Site disconnected from Instant Publishing Library');
+    } catch (error: any) {
+      console.error('Error disconnecting site:', error);
+      toast.error('Failed to disconnect site');
+    }
+  };
+
+  // Handle connect WordPress site
+  const handleConnectSite = async (siteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .update({ connected: true })
+        .eq('id', siteId);
+
+      if (error) throw error;
+
+      setWordpressSites(prev => prev.map(s => 
+        s.id === siteId ? { ...s, connected: true } : s
+      ));
+      toast.success('Site connected to Instant Publishing Library');
+    } catch (error: any) {
+      console.error('Error connecting site:', error);
+      toast.error('Failed to connect site');
+    }
+  };
+
+  // Handle delete WordPress site
+  const handleDeleteSite = async (siteId: string) => {
+    if (!confirm('Are you sure you want to delete this site? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Delete site credits first
+      await supabase.from('site_credits').delete().eq('site_id', siteId);
+      
+      // Delete site tags
+      await supabase.from('site_tags').delete().eq('site_id', siteId);
+      
+      // Delete the WordPress site
+      const { error } = await supabase
+        .from('wordpress_sites')
+        .delete()
+        .eq('id', siteId);
+
+      if (error) throw error;
+
+      setWordpressSites(prev => prev.filter(s => s.id !== siteId));
+      toast.success('Site deleted successfully');
+    } catch (error: any) {
+      console.error('Error deleting site:', error);
+      toast.error('Failed to delete site');
+    }
+  };
+
   // Calculate counts for partial rejections
   const partiallyRejectedSubmissions = approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0);
   const totalRejectedCount = rejectedMediaSubmissions.length + partiallyRejectedSubmissions.length;
@@ -448,7 +517,7 @@ export function AgencyMediaView() {
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="connected" className="relative overflow-visible">
-                Connected ({wordpressSites.length})
+                Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
                   <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                     {unreadConnectedWpCount}
@@ -558,6 +627,45 @@ export function AgencyMediaView() {
                             <Badge variant="outline" className="text-xs">
                               {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
+                            {!site.connected && (
+                              <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-600 border-yellow-500/30">
+                                Disconnected
+                              </Badge>
+                            )}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
+                                  Action
+                                  <ChevronDown className="h-3 w-3 ml-1" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="min-w-[120px]">
+                                {site.connected ? (
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDisconnectSite(site.id)}
+                                    className="cursor-pointer hover:bg-foreground hover:text-background"
+                                  >
+                                    <Unplug className="h-4 w-4 mr-2" />
+                                    Disconnect
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem 
+                                    onClick={() => handleConnectSite(site.id)}
+                                    className="cursor-pointer hover:bg-foreground hover:text-background"
+                                  >
+                                    <Plug className="h-4 w-4 mr-2" />
+                                    Connect
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteSite(site.id)}
+                                  className="cursor-pointer text-destructive hover:bg-foreground hover:text-background"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       </CardContent>
