@@ -1087,7 +1087,7 @@ export function AgencyMediaView() {
                                       : `${new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
                                   </p>
                                   {submission.admin_notes && (
-                                    <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                                    <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
                                   )}
                                 </div>
                               </div>
