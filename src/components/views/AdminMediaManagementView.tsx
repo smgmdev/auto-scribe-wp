@@ -43,6 +43,7 @@ interface WordPressSiteSubmission {
   reviewed_at: string | null;
   read: boolean;
   logo_url: string | null;
+  price: number | null;
 }
 
 interface ApprovedWordPressSite {
@@ -571,7 +572,7 @@ export function AdminMediaManagementView() {
       // Use the uploaded logo from submission, fallback to generated favicon
       const favicon = selectedSubmission.logo_url || getFaviconUrl(selectedSubmission.url);
       
-      const { error: insertError } = await supabase
+      const { data: newSite, error: insertError } = await supabase
         .from('wordpress_sites')
         .insert({
           name: selectedSubmission.name,
@@ -582,9 +583,19 @@ export function AdminMediaManagementView() {
           user_id: selectedSubmission.user_id,
           favicon: favicon,
           connected: true,
-        });
+        })
+        .select('id')
+        .single();
 
       if (insertError) throw insertError;
+
+      // Create site credits entry with the price from submission
+      if (newSite && selectedSubmission.price) {
+        await supabase.from('site_credits').insert({
+          site_id: newSite.id,
+          credits_required: selectedSubmission.price,
+        });
+      }
 
       // Update the submission status
       const { error: updateError } = await supabase
