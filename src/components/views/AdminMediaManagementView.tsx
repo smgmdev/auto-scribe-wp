@@ -2220,11 +2220,22 @@ export function AdminMediaManagementView() {
       {/* Review Dialog */}
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Review WordPress Site Submission</DialogTitle>
-            <DialogDescription>
-              Review the submission details and approve or reject the site.
-            </DialogDescription>
+          <DialogHeader className="flex flex-row items-start gap-4">
+            {selectedSubmission?.logo_url && (
+              <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0 bg-muted">
+                <img 
+                  src={selectedSubmission.logo_url} 
+                  alt={`${selectedSubmission.name} logo`}
+                  className="h-12 w-12 object-cover"
+                />
+              </div>
+            )}
+            <div>
+              <DialogTitle>Review WordPress Site Submission</DialogTitle>
+              <DialogDescription>
+                Review the submission details and approve or reject the site.
+              </DialogDescription>
+            </div>
           </DialogHeader>
 
           {selectedSubmission && (
