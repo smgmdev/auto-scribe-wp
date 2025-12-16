@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X } from 'lucide-react';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -1460,7 +1460,7 @@ export function AdminMediaManagementView() {
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {agencyName || 'Unknown Agency'}
-                                  <ExternalLink className="h-3 w-3" />
+                                  <ArrowUpRight className="h-3 w-3" />
                                 </button>
                                 <h3 className="text-sm font-medium">{site.name}</h3>
                                 <div className="flex items-center gap-2">
@@ -1560,7 +1560,7 @@ export function AdminMediaManagementView() {
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
-                                  <ExternalLink className="h-3 w-3" />
+                                  <ArrowUpRight className="h-3 w-3" />
                                 </button>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
@@ -1655,7 +1655,7 @@ export function AdminMediaManagementView() {
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
-                                  <ExternalLink className="h-3 w-3" />
+                                  <ArrowUpRight className="h-3 w-3" />
                                 </button>
                                 <h3 className="text-sm font-medium">{submission.name}</h3>
                                 <div className="flex items-center gap-2">
