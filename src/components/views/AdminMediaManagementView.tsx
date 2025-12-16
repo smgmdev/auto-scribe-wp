@@ -2026,22 +2026,22 @@ export function AdminMediaManagementView() {
                         >
                           <CardContent className="p-4">
                             <div className="flex items-center gap-4">
-                              <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                              <div className="h-10 w-10 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
                                 {logoUrl ? (
                                   <>
                                     {(!isLogoLoaded || isLogoLoading) && (
-                                      <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                                      <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
                                     )}
                                     <img 
                                       src={logoUrl} 
                                       alt={`${submission.agency_name} logo`}
-                                      className={`h-8 w-8 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                      className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
                                       onLoad={() => handleLogoLoad(submission.agency_name)}
                                       onError={() => handleLogoLoad(submission.agency_name)}
                                     />
                                   </>
                                 ) : (
-                                  <XCircle className="h-4 w-4 text-red-500" />
+                                  <XCircle className="h-5 w-5 text-red-500" />
                                 )}
                               </div>
                               <div className="flex-1 min-w-0 max-w-[400px]">
@@ -2147,22 +2147,22 @@ export function AdminMediaManagementView() {
                           className="flex items-center gap-4 p-4 rounded-lg border border-dashed border-red-500/50 bg-card transition-all duration-300"
                           style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          <div className="h-10 w-10 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
                             {logoUrl ? (
                               <>
                                 {(!isLogoLoaded || isLogoLoading) && (
-                                  <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                                  <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
                                 )}
                                 <img 
                                   src={logoUrl} 
                                   alt={`${submission.agency_name} logo`}
-                                  className={`h-6 w-6 object-contain ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
+                                  className={`h-10 w-10 object-cover ${isLogoLoaded && !isLogoLoading ? '' : 'hidden'}`}
                                   onLoad={() => handleLogoLoad(submission.agency_name)}
                                   onError={() => handleLogoLoad(submission.agency_name)}
                                 />
                               </>
                             ) : (
-                              <XCircle className="h-4 w-4 text-red-500" />
+                              <XCircle className="h-5 w-5 text-red-500" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0 max-w-[400px]">
