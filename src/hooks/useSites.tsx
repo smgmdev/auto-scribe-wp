@@ -118,6 +118,32 @@ export function useSites() {
     }
   }, [fetchSites, authLoading, isAdmin, lastIsAdmin, hasFetched]);
 
+  // Real-time subscription for wordpress_sites changes
+  useEffect(() => {
+    if (authLoading) return;
+
+    const channel = supabase
+      .channel('wordpress-sites-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wordpress_sites'
+        },
+        (payload) => {
+          console.log('[useSites] Real-time update:', payload.eventType);
+          // Refetch sites when any change occurs
+          fetchSites();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [authLoading, fetchSites]);
+
   const addSite = async (site: Omit<WordPressSite, 'id' | 'connected'>) => {
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
     

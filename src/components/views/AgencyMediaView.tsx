@@ -302,6 +302,41 @@ export function AgencyMediaView() {
     fetchData();
   }, [user]);
 
+  // Real-time subscription for wordpress_sites changes (for cross-user sync)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('agency-wordpress-sites-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wordpress_sites',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('[AgencyMediaView] Real-time WP site update:', payload.eventType);
+          // Refetch WordPress sites when changes occur
+          const fetchWpSites = async () => {
+            const { data } = await supabase
+              .from('wordpress_sites')
+              .select('id, name, url, seo_plugin, favicon, connected, read, created_at')
+              .eq('user_id', user.id)
+              .order('created_at', { ascending: false });
+            if (data) setWordpressSites(data);
+          };
+          fetchWpSites();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const handleAddMedia = (type: 'wordpress' | 'media') => {
     if (type === 'wordpress') {
       setIsWPDialogOpen(true);
