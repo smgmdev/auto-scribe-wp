@@ -545,60 +545,58 @@ export function AgencyMediaView() {
                   {pendingSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="group hover:shadow-md transition-all duration-300 border-dashed border-yellow-500/50"
+                      className="group hover:shadow-md hover:border-yellow-500 transition-all duration-300"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                            {submission.logo_url ? (
-                              <img 
-                                src={submission.logo_url} 
-                                alt={`${submission.name} logo`} 
-                                className="h-8 w-8 object-cover"
-                              />
-                            ) : (
-                              <Clock className="h-4 w-4 text-yellow-500" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0 max-w-[400px]">
-                            <p className="font-medium text-sm">{submission.name}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                {submission.url.replace(/^https?:\/\//, '').length > 40 
-                                  ? `${submission.url.replace(/^https?:\/\//, '').substring(0, 40)}...` 
-                                  : submission.url.replace(/^https?:\/\//, '')}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(submission.url);
-                                  toast.success('Link copied to clipboard');
-                                }}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Copy link"
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </button>
-                              <a
-                                href={ensureHttps(submission.url)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Open link"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 min-w-0 flex-1">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-yellow-500/10 mt-0.5">
+                              {submission.logo_url ? (
+                                <img 
+                                  src={submission.logo_url} 
+                                  alt={`${submission.name} logo`} 
+                                  className="h-10 w-10 object-cover"
+                                />
+                              ) : (
+                                <Clock className="h-5 w-5 text-yellow-500" />
+                              )}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs text-muted-foreground">Pending Review</p>
+                              <h3 className="text-sm font-medium">{submission.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                  {submission.url.replace(/^https?:\/\//, '')}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(submission.url);
+                                    toast.success('URL copied to clipboard');
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                                <a
+                                  href={ensureHttps(submission.url)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0 ml-auto">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <Badge variant="outline" className="text-xs">
                               {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-500">
-                              Pending
                             </Badge>
                           </div>
                         </div>
@@ -625,59 +623,62 @@ export function AgencyMediaView() {
                   {rejectedSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="group hover:shadow-md transition-all duration-300 border-dashed border-red-500/50 cursor-pointer"
+                      className="group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer"
                       style={{ animationDelay: `${index * 50}ms` }}
                       onClick={() => handleRejectedWpClick(submission.id)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-8 w-8 rounded bg-red-500/10 flex items-center justify-center shrink-0 overflow-hidden">
-                            {submission.logo_url ? (
-                              <img 
-                                src={submission.logo_url} 
-                                alt={`${submission.name} logo`} 
-                                className="h-8 w-8 object-cover"
-                              />
-                            ) : (
-                              <XCircle className="h-4 w-4 text-red-500" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0 max-w-[400px]">
-                            <p className="font-medium text-sm">{submission.name}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                {submission.url.replace(/^https?:\/\//, '')}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(submission.url);
-                                  toast.success('Link copied to clipboard');
-                                }}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Copy link"
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </button>
-                              <a
-                                href={ensureHttps(submission.url)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                title="Open link"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 min-w-0 flex-1">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-red-500/10 mt-0.5">
+                              {submission.logo_url ? (
+                                <img 
+                                  src={submission.logo_url} 
+                                  alt={`${submission.name} logo`} 
+                                  className="h-10 w-10 object-cover"
+                                />
+                              ) : (
+                                <XCircle className="h-5 w-5 text-red-500" />
+                              )}
                             </div>
-                            {submission.admin_notes && (
-                              <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {submission.reviewed_at 
-                                ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
-                                : `${new Date(submission.created_at).toLocaleDateString()} ${new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                            </p>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs text-muted-foreground">Rejected Site</p>
+                              <h3 className="text-sm font-medium">{submission.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                  {submission.url.replace(/^https?:\/\//, '')}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(submission.url);
+                                    toast.success('URL copied to clipboard');
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                                <a
+                                  href={ensureHttps(submission.url)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </div>
+                              {submission.admin_notes && (
+                                <p className="text-xs text-red-500 mt-1">Reason: {submission.admin_notes}</p>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {submission.reviewed_at 
+                                  ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
+                                  : `${new Date(submission.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0 ml-auto">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <Badge variant="outline" className="text-xs">
                               {submission.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
