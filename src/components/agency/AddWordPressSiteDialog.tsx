@@ -99,15 +99,44 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       });
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData(prev => ({
-        ...prev,
-        logo: file,
-        logoPreview: reader.result as string,
-      }));
+    
+    // Check image dimensions
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      
+      if (img.width !== 300 || img.height !== 300) {
+        toast({
+          title: 'Invalid resolution',
+          description: 'Logo must be exactly 300x300 pixels.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          logo: file,
+          logoPreview: reader.result as string,
+        }));
+      };
+      reader.readAsDataURL(file);
     };
-    reader.readAsDataURL(file);
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      toast({
+        title: 'Error',
+        description: 'Failed to load image.',
+        variant: 'destructive',
+      });
+    };
+    
+    img.src = objectUrl;
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -365,7 +394,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
                 className="hidden"
               />
               <p className="text-xs text-muted-foreground">
-                Drag & drop or click to upload (max 1MB)
+                300x300px required (max 1MB)
               </p>
             </div>
           </div>
