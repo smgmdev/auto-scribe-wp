@@ -22,6 +22,12 @@ interface AppState {
   targetSubcategory: string | null;
   setTargetSubcategory: (subcategory: string | null) => void;
   
+  // Agency media view targeting
+  agencyMediaTargetTab: 'wordpress' | 'media' | null;
+  setAgencyMediaTargetTab: (tab: 'wordpress' | 'media' | null) => void;
+  agencyMediaTargetSubTab: string | null;
+  setAgencyMediaTargetSubTab: (subTab: string | null) => void;
+  
   // Admin notifications
   unreadAgencyApplicationsCount: number;
   setUnreadAgencyApplicationsCount: (count: number) => void;
@@ -73,6 +79,12 @@ export const useAppStore = create<AppState>()((set) => ({
   setTargetTab: (tab) => set({ targetTab: tab }),
   targetSubcategory: null,
   setTargetSubcategory: (subcategory) => set({ targetSubcategory: subcategory }),
+  
+  // Agency media view targeting
+  agencyMediaTargetTab: null,
+  setAgencyMediaTargetTab: (tab) => set({ agencyMediaTargetTab: tab }),
+  agencyMediaTargetSubTab: null,
+  setAgencyMediaTargetSubTab: (subTab) => set({ agencyMediaTargetSubTab: subTab }),
   
   // Admin notifications
   unreadAgencyApplicationsCount: 0,

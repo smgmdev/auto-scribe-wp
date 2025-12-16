@@ -82,7 +82,15 @@ interface ApprovedMediaSubmission extends MediaSiteSubmission {
 
 export function AgencyMediaView() {
   const { user } = useAuth();
-  const { decrementAgencyUnreadWpSubmissionsCount, agencyUnreadWpSubmissionsCount, setAgencyUnreadWpSubmissionsCount } = useAppStore();
+  const { 
+    decrementAgencyUnreadWpSubmissionsCount, 
+    agencyUnreadWpSubmissionsCount, 
+    setAgencyUnreadWpSubmissionsCount,
+    agencyMediaTargetTab,
+    setAgencyMediaTargetTab,
+    agencyMediaTargetSubTab,
+    setAgencyMediaTargetSubTab
+  } = useAppStore();
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [wordpressSites, setWordpressSites] = useState<WordPressSite[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = useState<WordPressSiteSubmission[]>([]);
@@ -103,6 +111,23 @@ export function AgencyMediaView() {
   const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [expandedRejectedSubmissions, setExpandedRejectedSubmissions] = useState<Set<string>>(new Set());
+
+  // Handle target tab navigation from redirects
+  useEffect(() => {
+    if (agencyMediaTargetTab) {
+      setActiveTab(agencyMediaTargetTab);
+      if (agencyMediaTargetSubTab) {
+        if (agencyMediaTargetTab === 'wordpress') {
+          setWpSubTab(agencyMediaTargetSubTab);
+        } else if (agencyMediaTargetTab === 'media') {
+          setMediaSubTab(agencyMediaTargetSubTab);
+        }
+      }
+      // Clear target states
+      setAgencyMediaTargetTab(null);
+      setAgencyMediaTargetSubTab(null);
+    }
+  }, [agencyMediaTargetTab, agencyMediaTargetSubTab, setAgencyMediaTargetTab, setAgencyMediaTargetSubTab]);
 
   const fetchData = async () => {
     if (!user) return;
