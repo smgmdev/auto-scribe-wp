@@ -1459,19 +1459,19 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
+                                <p className="font-medium text-sm truncate">Approved WordPress Site</p>
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (site.user_id) fetchAgencyDetails(site.user_id);
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-accent transition-colors text-left flex items-center gap-1"
+                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5"
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {agencyName || 'Unknown Agency'}
                                   <ArrowUpRight className="h-3 w-3" />
                                 </button>
-                                <h3 className="text-sm font-medium">{site.name}</h3>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 -mt-0.5">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                     {site.url.replace(/^https?:\/\//, '')}
                                   </span>
@@ -1561,19 +1561,19 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
+                                <p className="font-medium text-sm truncate">Pending WordPress Site</p>
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     fetchAgencyDetails(submission.user_id);
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-accent transition-colors text-left flex items-center gap-1"
+                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5"
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
                                   <ArrowUpRight className="h-3 w-3" />
                                 </button>
-                                <h3 className="text-sm font-medium">{submission.name}</h3>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 -mt-0.5">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                     {submission.url.replace(/^https?:\/\//, '')}
                                   </span>
@@ -1664,19 +1664,19 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
+                                <p className="font-medium text-sm truncate">Rejected WordPress Site</p>
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     fetchAgencyDetails(submission.user_id);
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-accent transition-colors text-left flex items-center gap-1"
+                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5"
                                   disabled={isLoadingAgencyDetails}
                                 >
                                   {wpAgencyNames[submission.user_id] || 'Unknown Agency'}
                                   <ArrowUpRight className="h-3 w-3" />
                                 </button>
-                                <h3 className="text-sm font-medium">{submission.name}</h3>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 -mt-0.5">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                                     {submission.url.replace(/^https?:\/\//, '')}
                                   </span>
@@ -1700,14 +1700,14 @@ export function AdminMediaManagementView() {
                                     <ExternalLink className="h-3 w-3" />
                                   </a>
                                 </div>
-                                {submission.admin_notes && (
-                                  <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
-                                )}
                                 <p className="text-xs text-muted-foreground">
                                   {submission.reviewed_at 
                                     ? new Date(submission.reviewed_at).toLocaleDateString() + ' at ' + new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                     : 'N/A'}
                                 </p>
+                                {submission.admin_notes && (
+                                  <p className="text-xs text-red-500">Reason: {submission.admin_notes}</p>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
