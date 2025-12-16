@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2 } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,6 +116,18 @@ export function AgencyMediaView() {
   const [mediaSubTab, setMediaSubTab] = useState('added');
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
+  
+  // Price change dialog state
+  const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
+  const [priceEditSite, setPriceEditSite] = useState<WordPressSite | null>(null);
+  const [newPrice, setNewPrice] = useState('');
+  const [currentSitePrice, setCurrentSitePrice] = useState<number | null>(null);
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
+  
+  // Delete confirmation dialog state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [siteToDelete, setSiteToDelete] = useState<WordPressSite | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Expand/collapse states
   const [expandedApprovedSubmissions, setExpandedApprovedSubmissions] = useState<Set<string>>(new Set());
@@ -385,32 +407,81 @@ export function AgencyMediaView() {
     }
   };
 
-  // Handle delete WordPress site
-  const handleDeleteSite = async (siteId: string) => {
-    if (!confirm('Are you sure you want to delete this site? This action cannot be undone.')) {
-      return;
-    }
+  // Open delete confirmation dialog
+  const handleDeleteSite = (site: WordPressSite) => {
+    setSiteToDelete(site);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Confirm delete WordPress site
+  const confirmDeleteSite = async () => {
+    if (!siteToDelete) return;
+    setIsDeleting(true);
 
     try {
       // Delete site credits first
-      await supabase.from('site_credits').delete().eq('site_id', siteId);
+      await supabase.from('site_credits').delete().eq('site_id', siteToDelete.id);
       
       // Delete site tags
-      await supabase.from('site_tags').delete().eq('site_id', siteId);
+      await supabase.from('site_tags').delete().eq('site_id', siteToDelete.id);
       
       // Delete the WordPress site
       const { error } = await supabase
         .from('wordpress_sites')
         .delete()
-        .eq('id', siteId);
+        .eq('id', siteToDelete.id);
 
       if (error) throw error;
 
-      setWordpressSites(prev => prev.filter(s => s.id !== siteId));
-      toast.success('Site deleted successfully');
+      setWordpressSites(prev => prev.filter(s => s.id !== siteToDelete.id));
+      toast.success('Site removed successfully');
+      setIsDeleteDialogOpen(false);
+      setSiteToDelete(null);
     } catch (error: any) {
       console.error('Error deleting site:', error);
       toast.error('Failed to delete site');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Open price change dialog
+  const handleOpenPriceDialog = async (site: WordPressSite) => {
+    setPriceEditSite(site);
+    setIsPriceLoading(true);
+    setIsPriceDialogOpen(true);
+    
+    // Fetch current price from site_credits
+    const { data } = await supabase
+      .from('site_credits')
+      .select('credits_required')
+      .eq('site_id', site.id)
+      .single();
+    
+    const price = data?.credits_required || 0;
+    setCurrentSitePrice(price);
+    setNewPrice(price.toString());
+    setIsPriceLoading(false);
+  };
+
+  // Save new price
+  const handleSavePrice = async () => {
+    if (!priceEditSite) return;
+    const priceValue = parseInt(newPrice) || 0;
+    
+    try {
+      await supabase.from('site_credits').upsert({
+        site_id: priceEditSite.id,
+        credits_required: priceValue,
+        updated_at: new Date().toISOString(),
+      });
+      
+      toast.success('Price updated successfully');
+      setIsPriceDialogOpen(false);
+      setPriceEditSite(null);
+    } catch (error: any) {
+      console.error('Error updating price:', error);
+      toast.error('Failed to update price');
     }
   };
 
@@ -658,7 +729,14 @@ export function AgencyMediaView() {
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem 
-                                  onClick={() => handleDeleteSite(site.id)}
+                                  onClick={() => handleOpenPriceDialog(site)}
+                                  className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                >
+                                  <DollarSign className="h-4 w-4 mr-2" />
+                                  Change Price
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteSite(site)}
                                   className="cursor-pointer text-destructive hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
@@ -1352,6 +1430,105 @@ export function AgencyMediaView() {
         agencyName={agencyName}
         onSuccess={fetchData}
       />
+
+      {/* Change Price Dialog */}
+      <Dialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Price</DialogTitle>
+            <DialogDescription>
+              Update the credit price for {priceEditSite?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {isPriceLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label>Current Price</Label>
+                  <p className="text-sm text-muted-foreground">{currentSitePrice} credits</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPrice">New Price (credits)</Label>
+                  <Input
+                    id="newPrice"
+                    type="number"
+                    min="0"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    placeholder="Enter new price"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsPriceDialogOpen(false)}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSavePrice}
+              disabled={isPriceLoading}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Save Price
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Site</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove "{siteToDelete?.name}" from your agency?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              This will remove the site from the Instant Publishing Library. However:
+            </p>
+            <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+              <li>All published articles will remain intact</li>
+              <li>Site logos and data will be preserved</li>
+              <li>You can add this site again later if needed</li>
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={confirmDeleteSite}
+              disabled={isDeleting}
+              className="hover:!bg-foreground hover:!text-background"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Site'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
