@@ -266,6 +266,46 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
 
     setIsSubmitting(true);
 
+    // Check for duplicate URL in existing sites and pending submissions
+    try {
+      // Check wordpress_sites table (approved sites)
+      const { data: existingSites } = await supabase
+        .from('wordpress_sites')
+        .select('id')
+        .eq('url', siteUrl)
+        .limit(1);
+
+      if (existingSites && existingSites.length > 0) {
+        toast({
+          title: 'Duplicate Site',
+          description: 'This site is already registered on Arcana Mace.',
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check wordpress_site_submissions table (pending submissions)
+      const { data: pendingSubmissions } = await supabase
+        .from('wordpress_site_submissions')
+        .select('id')
+        .eq('url', siteUrl)
+        .eq('status', 'pending')
+        .limit(1);
+
+      if (pendingSubmissions && pendingSubmissions.length > 0) {
+        toast({
+          title: 'Duplicate Site',
+          description: 'This site is already pending review on Arcana Mace.',
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (duplicateError) {
+      console.error('Error checking for duplicate:', duplicateError);
+    }
+
     // Validate WordPress credentials
     try {
       const credentials = btoa(`${formData.username.trim()}:${formData.applicationPassword.trim()}`);
