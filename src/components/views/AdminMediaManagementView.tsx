@@ -2336,13 +2336,13 @@ export function AdminMediaManagementView() {
                                       e.stopPropagation();
                                       fetchAgencyDetails(submission.user_id);
                                     }}
-                                    className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1"
+                                    className="font-medium text-sm hover:text-accent transition-colors flex items-center gap-1 -mt-0.5"
                                     disabled={isLoadingAgencyDetails}
                                   >
                                     {submission.agency_name}
                                     <ArrowUpRight className="h-3 w-3" />
                                   </button>
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 -mt-0.5">
                                     <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                       {submission.google_sheet_url.length > 40 
                                         ? `${submission.google_sheet_url.substring(0, 40)}...` 
