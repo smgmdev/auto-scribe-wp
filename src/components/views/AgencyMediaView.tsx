@@ -476,9 +476,9 @@ export function AgencyMediaView() {
         updated_at: new Date().toISOString(),
       });
       
+      // Update the displayed current price to reflect the change
+      setCurrentSitePrice(priceValue);
       toast.success('Price updated successfully');
-      setIsPriceDialogOpen(false);
-      setPriceEditSite(null);
     } catch (error: any) {
       console.error('Error updating price:', error);
       toast.error('Failed to update price');
