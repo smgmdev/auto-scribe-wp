@@ -64,9 +64,11 @@ export function useSites() {
     
     if (isAdmin) {
       // Admins get full access to credentials via direct table query
+      // Only fetch connected sites for Instant Publishing library
       const { data, error: fetchError } = await supabase
         .from('wordpress_sites')
         .select('*')
+        .eq('connected', true)
         .order('created_at', { ascending: true });
 
       if (fetchError) {
