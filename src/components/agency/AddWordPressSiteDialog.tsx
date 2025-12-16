@@ -159,10 +159,19 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       return;
     }
 
-    if (!formData.name.trim() || !formData.url.trim() || !formData.username.trim() || !formData.applicationPassword.trim()) {
+    if (!formData.name.trim() || !formData.url.trim() || !formData.username.trim() || !formData.applicationPassword.trim() || !formData.price.trim()) {
       toast({
         title: 'Validation Error',
         description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.logo) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please upload a site logo.',
         variant: 'destructive',
       });
       return;
