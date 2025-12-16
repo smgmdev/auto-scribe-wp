@@ -248,11 +248,8 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       return;
     }
 
-    // Validate URL format
-    let siteUrl = formData.url.trim();
-    if (!siteUrl.startsWith('http://') && !siteUrl.startsWith('https://')) {
-      siteUrl = 'https://' + siteUrl;
-    }
+    // Validate URL format - always prepend https://
+    const siteUrl = 'https://' + formData.url.trim();
 
     try {
       new URL(siteUrl);
@@ -410,13 +407,18 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
           </div>
           <div className="space-y-2">
             <Label htmlFor="wp-url">Site URL</Label>
-            <Input 
-              id="wp-url" 
-              type="url" 
-              placeholder="https://example.com" 
-              value={formData.url} 
-              onChange={e => setFormData({ ...formData, url: e.target.value })} 
-            />
+            <div className="flex">
+              <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                https://
+              </span>
+              <Input 
+                id="wp-url" 
+                placeholder="example.com" 
+                value={formData.url} 
+                onChange={e => setFormData({ ...formData, url: e.target.value })} 
+                className="rounded-l-none"
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="wp-username">Username</Label>
