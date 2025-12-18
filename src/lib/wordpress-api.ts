@@ -130,7 +130,6 @@ export interface PublishArticleParams {
     focusKeyword?: string;
     metaDescription?: string;
   };
-  featureOnHomepage?: boolean;
 }
 
 export async function publishArticle(params: PublishArticleParams): Promise<{ id: number; link: string }> {
@@ -176,18 +175,6 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
       }
     }
 
-    // Add feature on homepage (Washington Morning specific)
-    // Use WordPress built-in sticky post feature
-    if (params.featureOnHomepage) {
-      body.sticky = true;
-      console.log('[WordPress API] Setting sticky=true for featured post');
-    }
-
-    console.log('[WordPress API] Publishing article with body:', JSON.stringify({
-      ...body,
-      content: body.content?.substring(0, 100) + '...',
-    }, null, 2));
-
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
       method: 'POST',
       headers: {
@@ -199,17 +186,11 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('[WordPress API] Failed to publish article:', response.status, errorData);
+      console.error('Failed to publish article:', response.status, errorData);
       throw new Error(errorData.message || `Failed to publish: ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('[WordPress API] Article published successfully:', {
-      id: data.id,
-      link: data.link,
-      sticky: data.sticky,
-    });
-    
     return {
       id: data.id,
       link: data.link,
@@ -233,7 +214,6 @@ export interface UpdateArticleParams {
     focusKeyword?: string;
     metaDescription?: string;
   };
-  featureOnHomepage?: boolean;
 }
 
 export async function updateArticle(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
@@ -279,16 +259,6 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
       }
     }
 
-    // Add feature on homepage (Washington Morning specific)
-    // Use WordPress built-in sticky post feature
-    if (params.featureOnHomepage !== undefined) {
-      body.sticky = params.featureOnHomepage;
-      // Also try setting the custom meta in case it's registered
-      body.meta = {
-        ...body.meta,
-        _is_featured: params.featureOnHomepage ? 'yes' : '',
-      };
-    }
 
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${params.postId}`, {
       method: 'PUT',
@@ -357,13 +327,12 @@ export async function updateMediaMetadata(
 export async function fetchPostSEOData(
   site: WordPressSite,
   postId: number
-): Promise<{ focusKeyword: string; metaDescription: string; isFeatured: boolean }> {
+): Promise<{ focusKeyword: string; metaDescription: string }> {
   try {
     const baseUrl = normalizeUrl(site.url);
     
     let focusKeyword = '';
     let metaDescription = '';
-    let isFeatured = false;
     
     // Fetch post with meta context
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
@@ -375,13 +344,10 @@ export async function fetchPostSEOData(
 
     if (!response.ok) {
       console.error('Failed to fetch post SEO data:', response.status);
-      return { focusKeyword: '', metaDescription: '', isFeatured: false };
+      return { focusKeyword: '', metaDescription: '' };
     }
 
     const data = await response.json();
-    
-    // Check for featured status - use sticky property or _is_featured meta
-    isFeatured = data.sticky === true || data.meta?._is_featured === 'yes';
     
     if (site.seoPlugin === 'rankmath') {
       // RankMath exposes data via rank_math_meta object when REST API addon is enabled
@@ -413,10 +379,10 @@ export async function fetchPostSEOData(
       }
     }
     
-    return { focusKeyword, metaDescription, isFeatured };
+    return { focusKeyword, metaDescription };
   } catch (error) {
     console.error('Error fetching post SEO data:', error);
-    return { focusKeyword: '', metaDescription: '', isFeatured: false };
+    return { focusKeyword: '', metaDescription: '' };
   }
 }
 
