@@ -95,6 +95,8 @@ export function Sidebar({
   const {
     currentView,
     setCurrentView,
+    setEditingArticle,
+    setSelectedHeadline,
     unreadAgencyApplicationsCount,
     setUnreadAgencyApplicationsCount,
     unreadCustomVerificationsCount,
@@ -317,6 +319,11 @@ export function Sidebar({
   }, [user?.id, isAdmin]); // Remove userApplicationStatus from dependencies to prevent re-fetch loops
 
   const handleNavClick = (viewId: string) => {
+    // Clear editing state when navigating away from compose
+    if (viewId !== 'compose') {
+      setEditingArticle(null);
+      setSelectedHeadline(null);
+    }
     setCurrentView(viewId as typeof currentView);
     onClose();
   };
