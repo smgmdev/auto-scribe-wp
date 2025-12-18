@@ -112,8 +112,15 @@ export function ComposeView() {
   const [metaDescription, setMetaDescription] = useState('');
   const [isLoadingSEO, setIsLoadingSEO] = useState(false);
 
+  // Feature on homepage (Washington Morning exclusive)
+  const [featureOnHomepage, setFeatureOnHomepage] = useState(false);
+  const FEATURE_HOMEPAGE_COST = 50;
+
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
+
+  // Check if current site is Washington Morning
+  const isWashingtonMorning = currentSite?.name?.toLowerCase().includes('washington morning');
 
   // Fetch site credits on mount and subscribe to changes
   useEffect(() => {
@@ -156,10 +163,18 @@ export function ComposeView() {
   };
 
   // Check if user can afford a site (admins bypass credit check)
-  const canAffordSite = (siteId: string): boolean => {
+  const canAffordSite = (siteId: string, includeFeature: boolean = false): boolean => {
     if (isAdmin) return true;
     const cost = getSiteCreditCost(siteId);
-    return credits >= cost;
+    const totalCost = includeFeature && featureOnHomepage ? cost + FEATURE_HOMEPAGE_COST : cost;
+    return credits >= totalCost;
+  };
+
+  // Get total credit cost including feature
+  const getTotalCreditCost = (): number => {
+    if (!selectedSite) return 0;
+    const baseCost = getSiteCreditCost(selectedSite);
+    return isWashingtonMorning && featureOnHomepage ? baseCost + FEATURE_HOMEPAGE_COST : baseCost;
   };
 
   // Sync all form fields when editingArticle changes
@@ -488,6 +503,18 @@ export function ComposeView() {
       });
       return;
     }
+    // Check if user can afford total cost (only for new articles, non-admins)
+    if (!isAdmin && !editingArticle) {
+      const totalCost = getTotalCreditCost();
+      if (credits < totalCost) {
+        toast({
+          title: "Insufficient credits",
+          description: `You need ${totalCost} credits to publish this article${isWashingtonMorning && featureOnHomepage ? ' with homepage feature' : ''}`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
     setIsPublishing(true);
     try {
       let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
@@ -527,7 +554,8 @@ export function ComposeView() {
           seo: {
             focusKeyword,
             metaDescription
-          }
+          },
+          featureOnHomepage: isWashingtonMorning ? featureOnHomepage : undefined
         });
       } else {
         result = await publishArticle({
@@ -541,7 +569,8 @@ export function ComposeView() {
           seo: {
             focusKeyword,
             metaDescription
-          }
+          },
+          featureOnHomepage: isWashingtonMorning ? featureOnHomepage : undefined
         });
       }
 
@@ -592,7 +621,7 @@ export function ComposeView() {
       }
       // Deduct credits for non-admin users (only for new articles, not updates)
       if (!isAdmin && !editingArticle && user) {
-        const creditCost = getSiteCreditCost(selectedSite);
+        const creditCost = getTotalCreditCost();
         if (creditCost > 0) {
           const newCredits = credits - creditCost;
           
@@ -606,11 +635,12 @@ export function ComposeView() {
             console.error('Failed to deduct credits:', creditsError);
           } else {
             // Record transaction
+            const featureText = isWashingtonMorning && featureOnHomepage ? ' (with homepage feature)' : '';
             await supabase.from('credit_transactions').insert({
               user_id: user.id,
               amount: -creditCost,
               type: 'publish',
-              description: `Published article to ${currentSite.name}`
+              description: `Published article to ${currentSite.name}${featureText}`
             });
             
             // Refresh credits in auth context
@@ -638,6 +668,7 @@ export function ComposeView() {
       setSelectedTagIds([]);
       setFocusKeyword('');
       setMetaDescription('');
+      setFeatureOnHomepage(false);
       removeImage();
     } catch (error) {
       console.error('Publish error:', error);
@@ -843,6 +874,7 @@ export function ComposeView() {
                 onValueChange={(value) => {
                   if (canAffordSite(value)) {
                     setSelectedSite(value);
+                    setFeatureOnHomepage(false); // Reset when site changes
                   }
                 }}
               >
@@ -891,6 +923,31 @@ export function ComposeView() {
                 </SelectContent>
               </Select>}
           </div>
+
+          {/* Feature on Homepage - Washington Morning exclusive */}
+          {isWashingtonMorning && (
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
+              <div className="flex items-center gap-3">
+                <Checkbox 
+                  id="featureOnHomepage" 
+                  checked={featureOnHomepage}
+                  onCheckedChange={(checked) => setFeatureOnHomepage(checked === true)}
+                />
+                <div>
+                  <Label htmlFor="featureOnHomepage" className="cursor-pointer font-medium">
+                    Feature on Homepage
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Make this post a featured article on Washington Morning homepage
+                  </p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Coins className="h-3 w-3" />
+                +{FEATURE_HOMEPAGE_COST} credits
+              </Badge>
+            </div>
+          )}
 
           {fetchError && <div className="flex items-start gap-2 text-sm text-destructive">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />

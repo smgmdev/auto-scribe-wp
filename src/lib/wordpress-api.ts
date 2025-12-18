@@ -130,6 +130,7 @@ export interface PublishArticleParams {
     focusKeyword?: string;
     metaDescription?: string;
   };
+  featureOnHomepage?: boolean;
 }
 
 export async function publishArticle(params: PublishArticleParams): Promise<{ id: number; link: string }> {
@@ -175,6 +176,14 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
       }
     }
 
+    // Add feature on homepage meta (Washington Morning specific)
+    if (params.featureOnHomepage) {
+      body.meta = {
+        ...body.meta,
+        developer_feature_post: '1',
+      };
+    }
+
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
       method: 'POST',
       headers: {
@@ -214,6 +223,7 @@ export interface UpdateArticleParams {
     focusKeyword?: string;
     metaDescription?: string;
   };
+  featureOnHomepage?: boolean;
 }
 
 export async function updateArticle(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
@@ -257,6 +267,14 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
           rank_math_description: params.seo.metaDescription || '',
         };
       }
+    }
+
+    // Add feature on homepage meta (Washington Morning specific)
+    if (params.featureOnHomepage !== undefined) {
+      body.meta = {
+        ...body.meta,
+        developer_feature_post: params.featureOnHomepage ? '1' : '0',
+      };
     }
 
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${params.postId}`, {
