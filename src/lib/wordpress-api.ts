@@ -176,8 +176,11 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
       }
     }
 
-    // Add feature on homepage meta (Washington Morning specific)
+    // Add feature on homepage (Washington Morning specific)
+    // Use WordPress built-in sticky post feature
     if (params.featureOnHomepage) {
+      body.sticky = true;
+      // Also try setting the custom meta in case it's registered
       body.meta = {
         ...body.meta,
         _is_featured: 'yes',
@@ -269,8 +272,11 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
       }
     }
 
-    // Add feature on homepage meta (Washington Morning specific)
+    // Add feature on homepage (Washington Morning specific)
+    // Use WordPress built-in sticky post feature
     if (params.featureOnHomepage !== undefined) {
+      body.sticky = params.featureOnHomepage;
+      // Also try setting the custom meta in case it's registered
       body.meta = {
         ...body.meta,
         _is_featured: params.featureOnHomepage ? 'yes' : '',
@@ -367,8 +373,8 @@ export async function fetchPostSEOData(
 
     const data = await response.json();
     
-    // Check for _is_featured meta (Washington Morning feature)
-    isFeatured = data.meta?._is_featured === 'yes';
+    // Check for featured status - use sticky property or _is_featured meta
+    isFeatured = data.sticky === true || data.meta?._is_featured === 'yes';
     
     if (site.seoPlugin === 'rankmath') {
       // RankMath exposes data via rank_math_meta object when REST API addon is enabled
