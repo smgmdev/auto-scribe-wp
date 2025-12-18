@@ -942,7 +942,7 @@ export function ComposeView() {
                   </p>
                 </div>
               </div>
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="secondary" className="flex items-center gap-1 shrink-0 whitespace-nowrap">
                 <Coins className="h-3 w-3" />
                 +{FEATURE_HOMEPAGE_COST} credits
               </Badge>
