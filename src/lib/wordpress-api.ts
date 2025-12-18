@@ -180,7 +180,7 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
     if (params.featureOnHomepage) {
       body.meta = {
         ...body.meta,
-        developer_feature_post: '1',
+        _is_featured: 'yes',
       };
     }
 
@@ -273,7 +273,7 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
     if (params.featureOnHomepage !== undefined) {
       body.meta = {
         ...body.meta,
-        developer_feature_post: params.featureOnHomepage ? '1' : '0',
+        _is_featured: params.featureOnHomepage ? 'yes' : '',
       };
     }
 
