@@ -180,12 +180,13 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
     // Use WordPress built-in sticky post feature
     if (params.featureOnHomepage) {
       body.sticky = true;
-      // Also try setting the custom meta in case it's registered
-      body.meta = {
-        ...body.meta,
-        _is_featured: 'yes',
-      };
+      console.log('[WordPress API] Setting sticky=true for featured post');
     }
+
+    console.log('[WordPress API] Publishing article with body:', JSON.stringify({
+      ...body,
+      content: body.content?.substring(0, 100) + '...',
+    }, null, 2));
 
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
       method: 'POST',
@@ -198,11 +199,17 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Failed to publish article:', response.status, errorData);
+      console.error('[WordPress API] Failed to publish article:', response.status, errorData);
       throw new Error(errorData.message || `Failed to publish: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('[WordPress API] Article published successfully:', {
+      id: data.id,
+      link: data.link,
+      sticky: data.sticky,
+    });
+    
     return {
       id: data.id,
       link: data.link,
