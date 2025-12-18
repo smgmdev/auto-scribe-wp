@@ -237,12 +237,13 @@ export function ComposeView() {
         setAvailableTags([]);
       });
 
-      // Fetch SEO data if editing an existing WP post
+      // Fetch SEO data and feature status if editing an existing WP post
       if (editingArticle?.wpPostId) {
         setIsLoadingSEO(true);
         fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
           setFocusKeyword(seoData.focusKeyword);
           setMetaDescription(seoData.metaDescription);
+          setFeatureOnHomepage(seoData.isFeatured);
         }).catch(error => {
           console.error('Failed to fetch SEO data:', error);
         }).finally(() => {

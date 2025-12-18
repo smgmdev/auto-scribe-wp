@@ -344,12 +344,13 @@ export async function updateMediaMetadata(
 export async function fetchPostSEOData(
   site: WordPressSite,
   postId: number
-): Promise<{ focusKeyword: string; metaDescription: string }> {
+): Promise<{ focusKeyword: string; metaDescription: string; isFeatured: boolean }> {
   try {
     const baseUrl = normalizeUrl(site.url);
     
     let focusKeyword = '';
     let metaDescription = '';
+    let isFeatured = false;
     
     // Fetch post with meta context
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
@@ -361,10 +362,13 @@ export async function fetchPostSEOData(
 
     if (!response.ok) {
       console.error('Failed to fetch post SEO data:', response.status);
-      return { focusKeyword: '', metaDescription: '' };
+      return { focusKeyword: '', metaDescription: '', isFeatured: false };
     }
 
     const data = await response.json();
+    
+    // Check for _is_featured meta (Washington Morning feature)
+    isFeatured = data.meta?._is_featured === 'yes';
     
     if (site.seoPlugin === 'rankmath') {
       // RankMath exposes data via rank_math_meta object when REST API addon is enabled
@@ -396,10 +400,10 @@ export async function fetchPostSEOData(
       }
     }
     
-    return { focusKeyword, metaDescription };
+    return { focusKeyword, metaDescription, isFeatured };
   } catch (error) {
     console.error('Error fetching post SEO data:', error);
-    return { focusKeyword: '', metaDescription: '' };
+    return { focusKeyword: '', metaDescription: '', isFeatured: false };
   }
 }
 
