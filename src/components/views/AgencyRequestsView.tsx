@@ -166,13 +166,14 @@ export function AgencyRequestsView() {
         },
         (payload) => {
           const newMsg = payload.new as ServiceMessage;
-          // Only notify if the message is from client (not from the agency themselves)
-          if (newMsg.sender_type === 'client') {
-            toast({
-              title: 'New Message!',
-              description: 'You received a message from a client.',
-            });
+          // Only process messages from clients (skip agency's own messages to avoid duplicates)
+          if (newMsg.sender_type === 'agency') {
+            return; // Skip - already added to local state when sent
           }
+          toast({
+            title: 'New Message!',
+            description: 'You received a message from a client.',
+          });
           // Update messages state
           setMessages(prev => ({
             ...prev,
