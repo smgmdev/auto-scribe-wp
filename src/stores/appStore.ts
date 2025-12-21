@@ -12,8 +12,12 @@ interface AppState {
   editingArticle: Article | null;
   setEditingArticle: (article: Article | null) => void;
   
+  // Preselected site for compose view
+  preselectedSiteId: string | null;
+  setPreselectedSiteId: (siteId: string | null) => void;
+  
   // UI State
-  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application' | 'agency-requests' | 'agency-payouts' | 'agency-media';
+  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application' | 'agency-requests' | 'agency-payouts' | 'agency-media' | 'admin-media-management';
   setCurrentView: (view: AppState['currentView']) => void;
   
   // Target tab and subcategory for Sites view navigation
@@ -69,6 +73,10 @@ export const useAppStore = create<AppState>()((set) => ({
   // Editing Article
   editingArticle: null,
   setEditingArticle: (article) => set({ editingArticle: article }),
+
+  // Preselected site
+  preselectedSiteId: null,
+  setPreselectedSiteId: (siteId) => set({ preselectedSiteId: siteId }),
 
   // UI State
   currentView: 'dashboard',
