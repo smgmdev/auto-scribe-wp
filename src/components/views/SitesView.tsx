@@ -57,6 +57,8 @@ interface ActiveAgency {
   favicon: string | null;
   country: string | null;
   about: string | null;
+  media_channels: string | null;
+  media_niches: string[] | null;
 }
 
 const MEDIA_CATEGORIES = ['Global', 'Focused', 'Epic', 'Agencies/People'];
@@ -254,7 +256,7 @@ export function SitesView() {
       const agencyNames = activeAgenciesData.map(a => a.agency_name);
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('agency_name, agency_website, country, logo_url')
+        .select('agency_name, agency_website, country, logo_url, media_channels, media_niches')
         .in('agency_name', agencyNames)
         .eq('status', 'approved');
       
@@ -278,7 +280,9 @@ export function SitesView() {
             link: app.agency_website || '',
             favicon: logoUrl,
             country: app.country || null,
-            about: null
+            about: null,
+            media_channels: app.media_channels || null,
+            media_niches: app.media_niches || null
           });
         }
       }
@@ -2497,32 +2501,76 @@ export function SitesView() {
               </DialogHeader>
 
               <div className="space-y-4 py-4">
-                {selectedAgency.country && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Country</span>
-                    <span className="text-sm font-medium">{selectedAgency.country}</span>
+                {selectedAgency.link && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Website</p>
+                    <div className="flex items-center gap-2">
+                      <a 
+                        href={ensureHttps(selectedAgency.link)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent hover:underline flex items-center gap-1"
+                      >
+                        {extractDomain(selectedAgency.link)}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                      <button
+                        onClick={() => { 
+                          navigator.clipboard.writeText(selectedAgency.link); 
+                          toast({ title: 'Copied to clipboard' }); 
+                        }}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 )}
 
-                {selectedAgency.link && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Website</span>
-                    <a 
-                      href={ensureHttps(selectedAgency.link)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-accent hover:underline flex items-center gap-1"
-                    >
-                      {selectedAgency.link.replace(/^https?:\/\//, '')}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                {selectedAgency.country && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Country</p>
+                    <p className="text-foreground">{selectedAgency.country}</p>
+                  </div>
+                )}
+
+                {selectedAgency.media_niches && selectedAgency.media_niches.length > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Media Niches</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedAgency.media_niches.map((niche, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {niche}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedAgency.media_channels && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Media Channels</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedAgency.media_channels.split(',').map((channel, index) => (
+                        <a
+                          key={index}
+                          href={ensureHttps(channel.trim())}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-accent hover:underline flex items-center gap-1"
+                        >
+                          {channel.trim().replace(/^https?:\/\//, '')}
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {selectedAgency.about && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">About</p>
-                    <p className="text-sm">{selectedAgency.about}</p>
+                    <p className="text-sm text-muted-foreground">About</p>
+                    <p className="text-foreground text-sm">{selectedAgency.about}</p>
                   </div>
                 )}
 
