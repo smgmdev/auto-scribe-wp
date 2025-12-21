@@ -463,35 +463,6 @@ export function AgencyRequestsView() {
                   </Button>
                 </div>
               )}
-
-              {/* Action Buttons for pending requests */}
-              {selectedRequest.status === 'pending_review' && (
-                <div className="flex gap-2">
-                  <Button 
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                    onClick={() => updateRequestStatus('accepted')}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Accept Request
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="flex-1 border-amber-500 text-amber-600 hover:bg-amber-500/10"
-                    onClick={() => updateRequestStatus('changes_requested')}
-                  >
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    Request Changes
-                  </Button>
-                  <Button 
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={() => updateRequestStatus('rejected')}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Reject
-                  </Button>
-                </div>
-              )}
             </div>
           )}
         </DialogContent>
