@@ -257,11 +257,16 @@ export function AgencyRequestsView() {
 
     setSending(true);
     try {
+      // Build message with quote if replying
+      const fullMessage = replyToMessage 
+        ? `> ${replyToMessage.message}\n\n${newMessage.trim()}`
+        : newMessage.trim();
+
       const { error } = await supabase.from('service_messages').insert({
         request_id: selectedRequest.id,
         sender_type: 'agency',
         sender_id: agencyPayoutId,
-        message: newMessage.trim()
+        message: fullMessage
       });
 
       if (error) throw error;
@@ -272,7 +277,7 @@ export function AgencyRequestsView() {
         request_id: selectedRequest.id,
         sender_type: 'agency',
         sender_id: agencyPayoutId,
-        message: newMessage.trim(),
+        message: fullMessage,
         created_at: new Date().toISOString()
       };
 
@@ -456,7 +461,18 @@ export function AgencyRequestsView() {
                         <p className="text-xs font-medium mb-1 opacity-70 pr-5">
                           {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
                         </p>
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        {msg.message.startsWith('> ') ? (
+                          <div className="text-sm">
+                            <div className={`border-l-2 pl-2 mb-2 text-xs italic opacity-70 ${
+                              msg.sender_type === 'agency' ? 'border-primary-foreground/50' : 'border-foreground/30'
+                            }`}>
+                              {msg.message.split('\n\n')[0].substring(2)}
+                            </div>
+                            <p className="whitespace-pre-wrap">{msg.message.split('\n\n').slice(1).join('\n\n')}</p>
+                          </div>
+                        ) : (
+                          <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        )}
                         <p className="text-xs opacity-50 mt-1">
                           {format(new Date(msg.created_at), 'MMM d, h:mm a')}
                         </p>
