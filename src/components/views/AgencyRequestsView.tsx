@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, MinimizedChat } from '@/stores/appStore';
+import { MinimizedChats } from '@/components/ui/MinimizedChats';
 
 interface ServiceRequest {
   id: string;
@@ -44,7 +45,7 @@ interface ServiceMessage {
 
 export function AgencyRequestsView() {
   const { user } = useAuth();
-  const { setAgencyUnreadServiceRequestsCount } = useAppStore();
+  const { setAgencyUnreadServiceRequestsCount, addMinimizedChat, removeMinimizedChat } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
@@ -428,12 +429,32 @@ export function AgencyRequestsView() {
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none">
           <DialogHeader className="px-4 pt-3 pb-0">
-            <DialogTitle className="flex items-center gap-2">
-              {selectedRequest?.media_site?.favicon && (
-                <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
-              )}
-              {selectedRequest?.title}
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                {selectedRequest?.media_site?.favicon && (
+                  <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
+                )}
+                {selectedRequest?.title}
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 mr-6"
+                onClick={() => {
+                  if (selectedRequest) {
+                    addMinimizedChat({
+                      id: selectedRequest.id,
+                      title: selectedRequest.title,
+                      favicon: selectedRequest.media_site?.favicon,
+                      type: 'agency-request'
+                    });
+                    setSelectedRequest(null);
+                  }
+                }}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+            </div>
           </DialogHeader>
           {selectedRequest && (
             <div className="px-4">
@@ -567,6 +588,17 @@ export function AgencyRequestsView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Minimized Chats */}
+      <MinimizedChats
+        onOpenChat={(chat) => {
+          removeMinimizedChat(chat.id);
+          const request = requests.find(r => r.id === chat.id);
+          if (request) {
+            setSelectedRequest(request);
+          }
+        }}
+      />
     </div>
   );
 }
