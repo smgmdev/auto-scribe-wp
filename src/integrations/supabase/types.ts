@@ -963,6 +963,7 @@ export type Database = {
     }
     Functions: {
       check_email_verified: { Args: { check_email: string }; Returns: boolean }
+      check_user_status: { Args: { check_email: string }; Returns: string }
       check_user_suspended: { Args: { check_email: string }; Returns: boolean }
       get_public_sites: {
         Args: never
