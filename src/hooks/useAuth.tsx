@@ -144,13 +144,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, newSession) => {
         if (!isMounted) return;
         
-        // Only update state if session actually changed
-        const sessionChanged = 
-          (newSession?.user?.id !== session?.user?.id) ||
-          (event === 'SIGNED_OUT') ||
-          (event === 'SIGNED_IN');
-        
-        if (!sessionChanged) return;
+        // Always process sign out and sign in events
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setRole(null);
+          setCredits(0);
+          setPinRequired(false);
+          setPinVerified(false);
+          return;
+        }
         
         setSession(newSession);
         setUser(newSession?.user ?? null);
