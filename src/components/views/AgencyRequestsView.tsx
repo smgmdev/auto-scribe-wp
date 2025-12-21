@@ -53,6 +53,7 @@ export function AgencyRequestsView() {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +61,30 @@ export function AgencyRequestsView() {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }, 50);
+  };
+
+  const parseQuote = (message: string): { originalId: string | null; quoteText: string; replyText: string } | null => {
+    if (!message.startsWith('> ')) return null;
+    const parts = message.split('\n\n');
+    const quotePart = parts[0].substring(2); // Remove "> "
+    const replyText = parts.slice(1).join('\n\n');
+    
+    // Check for new format with ID: [id]:message
+    const idMatch = quotePart.match(/^\[([^\]]+)\]:(.*)$/);
+    if (idMatch) {
+      return { originalId: idMatch[1], quoteText: idMatch[2], replyText };
+    }
+    // Legacy format without ID
+    return { originalId: null, quoteText: quotePart, replyText };
+  };
+
+  const scrollToMessage = (messageId: string) => {
+    const element = document.getElementById(`msg-${messageId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightedMessageId(messageId);
+      setTimeout(() => setHighlightedMessageId(null), 2000);
+    }
   };
 
   // Scroll to bottom when messages change or dialog opens
@@ -257,9 +282,9 @@ export function AgencyRequestsView() {
 
     setSending(true);
     try {
-      // Build message with quote if replying
+      // Build message with quote if replying (format: > [id]:[message])
       const fullMessage = replyToMessage 
-        ? `> ${replyToMessage.message}\n\n${newMessage.trim()}`
+        ? `> [${replyToMessage.id}]:${replyToMessage.message}\n\n${newMessage.trim()}`
         : newMessage.trim();
 
       const { error } = await supabase.from('service_messages').insert({
@@ -422,65 +447,72 @@ export function AgencyRequestsView() {
               {/* Messages */}
               <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
                 <div className="space-y-2 p-3">
-                  {(messages[selectedRequest.id] || []).map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
-                    >
+                  {(messages[selectedRequest.id] || []).map((msg) => {
+                    const quote = parseQuote(msg.message);
+                    return (
                       <div
-                        className={`relative group max-w-[80%] rounded-lg p-3 ${
-                          msg.sender_type === 'agency'
-                            ? 'bg-primary text-primary-foreground'
-                            : msg.sender_type === 'admin'
-                            ? 'bg-amber-100 text-amber-900'
-                            : 'bg-muted'
-                        }`}
+                        key={msg.id}
+                        id={`msg-${msg.id}`}
+                        className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                                msg.sender_type === 'agency' 
-                                  ? 'text-primary-foreground hover:bg-primary-foreground/20' 
-                                  : 'text-foreground hover:bg-background/50'
-                              }`}
-                            >
-                              <ChevronDown className="h-3 w-3" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover z-50">
-                            <DropdownMenuItem onClick={() => {
-                              setReplyToMessage(msg);
-                              setTimeout(() => inputRef.current?.focus(), 0);
-                            }}>
-                              <Reply className="h-4 w-4 mr-2" />
-                              Reply
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <p className="text-xs font-medium mb-1 opacity-70 pr-5">
-                          {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
-                        </p>
-                        {msg.message.startsWith('> ') ? (
-                          <div className="text-sm">
-                            <div className={`border-l-2 pl-2 mb-2 text-xs italic opacity-70 ${
-                              msg.sender_type === 'agency' ? 'border-primary-foreground/50' : 'border-foreground/30'
-                            }`}>
-                              {msg.message.split('\n\n')[0].substring(2)}
+                        <div
+                          className={`relative group max-w-[80%] rounded-lg p-3 transition-all duration-300 ${
+                            msg.sender_type === 'agency'
+                              ? 'bg-primary text-primary-foreground'
+                              : msg.sender_type === 'admin'
+                              ? 'bg-amber-100 text-amber-900'
+                              : 'bg-muted'
+                          } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                                  msg.sender_type === 'agency' 
+                                    ? 'text-primary-foreground hover:bg-primary-foreground/20' 
+                                    : 'text-foreground hover:bg-background/50'
+                                }`}
+                              >
+                                <ChevronDown className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover z-50">
+                              <DropdownMenuItem onClick={() => {
+                                setReplyToMessage(msg);
+                                setTimeout(() => inputRef.current?.focus(), 0);
+                              }}>
+                                <Reply className="h-4 w-4 mr-2" />
+                                Reply
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <p className="text-xs font-medium mb-1 opacity-70 pr-5">
+                            {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
+                          </p>
+                          {quote ? (
+                            <div className="text-sm">
+                              <div 
+                                onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
+                                className={`border-l-2 pl-2 mb-2 text-xs italic opacity-70 ${
+                                  msg.sender_type === 'agency' ? 'border-primary-foreground/50' : 'border-foreground/30'
+                                } ${quote.originalId ? 'cursor-pointer hover:opacity-100' : ''}`}
+                              >
+                                {quote.quoteText}
+                              </div>
+                              <p className="whitespace-pre-wrap">{quote.replyText}</p>
                             </div>
-                            <p className="whitespace-pre-wrap">{msg.message.split('\n\n').slice(1).join('\n\n')}</p>
-                          </div>
-                        ) : (
-                          <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        )}
-                        <p className="text-xs opacity-50 mt-1">
-                          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
-                        </p>
+                          ) : (
+                            <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                          )}
+                          <p className="text-xs opacity-50 mt-1">
+                            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {(messages[selectedRequest.id] || []).length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
                   )}
