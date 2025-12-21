@@ -442,7 +442,9 @@ export function AgencyRequestsView() {
                               variant="ghost"
                               size="icon"
                               className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                                msg.sender_type === 'agency' ? 'hover:bg-primary-foreground/20' : 'hover:bg-background/50'
+                                msg.sender_type === 'agency' 
+                                  ? 'text-primary-foreground hover:bg-primary-foreground/20' 
+                                  : 'text-foreground hover:bg-background/50'
                               }`}
                             >
                               <ChevronDown className="h-3 w-3" />
