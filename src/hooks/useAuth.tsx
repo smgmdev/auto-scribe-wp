@@ -217,9 +217,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    console.log('signOut called');
     setPinVerified(false);
     setPinRequired(false);
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      console.log('signOut result:', error ? error.message : 'success');
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+    } catch (err) {
+      console.error('Sign out exception:', err);
+    }
   };
 
   return (
