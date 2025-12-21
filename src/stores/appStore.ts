@@ -54,6 +54,10 @@ interface AppState {
   agencyUnreadMediaSubmissionsCount: number;
   setAgencyUnreadMediaSubmissionsCount: (count: number) => void;
   
+  // Agency service request notifications
+  agencyUnreadServiceRequestsCount: number;
+  setAgencyUnreadServiceRequestsCount: (count: number) => void;
+  
   // User agency application status
   userApplicationStatus: string | null;
   setUserApplicationStatus: (status: string | null) => void;
@@ -123,6 +127,10 @@ export const useAppStore = create<AppState>()((set) => ({
   })),
   agencyUnreadMediaSubmissionsCount: 0,
   setAgencyUnreadMediaSubmissionsCount: (count) => set({ agencyUnreadMediaSubmissionsCount: count }),
+  
+  // Agency service request notifications
+  agencyUnreadServiceRequestsCount: 0,
+  setAgencyUnreadServiceRequestsCount: (count) => set({ agencyUnreadServiceRequestsCount: count }),
   
   // User agency application status
   userApplicationStatus: null,
