@@ -311,10 +311,11 @@ export function AgencyApplicationView() {
 
   // CASE 1: Stripe Connect verification (has stripe account but not onboarded)
   // BUT only show this if:
-  // - The application is APPROVED (not pending)
+  // - The application is APPROVED (not pending or cancelled)
   // - The payout method is NOT custom (custom payout has its own verification flow)
   const isCustomPayout = agencyPayout?.payout_method === 'custom';
-  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete && !isPending && !isCustomPayout) {
+  const isCancelled = currentAppStatus === 'cancelled';
+  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete && !isPending && !isCancelled && !isCustomPayout) {
     const handleRefresh = async () => {
       setRefreshing(true);
       if (verificationRef.current?.refresh) {
