@@ -867,9 +867,7 @@ const Landing = () => {
                 <div className="flex gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Price</p>
-                    <Badge variant="outline" className="text-accent border-accent/30">
-                      {(selectedSite as MediaSite).price} USD
-                    </Badge>
+                    <p className="text-foreground font-medium">${(selectedSite as MediaSite).price} USD</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Format</p>
