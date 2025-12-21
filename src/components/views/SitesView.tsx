@@ -1219,20 +1219,22 @@ export function SitesView() {
               <div className="w-[100px] flex justify-start">
                 <span className="text-xs text-muted-foreground">{site.publication_format}</span>
               </div>
-              {/* Agency info - no fixed width */}
-              {site.agency && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span>via</span>
-                  <span className="text-foreground">{site.agency}</span>
-                  {agencyLogos[site.agency] && (
-                    <img 
-                      src={agencyLogos[site.agency]} 
-                      alt={site.agency} 
-                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                    />
-                  )}
-                </div>
-              )}
+              {/* Agency info - fixed width for alignment */}
+              <div className="w-[180px] flex-shrink-0">
+                {site.agency ? (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span>via</span>
+                    <span className="text-foreground truncate">{site.agency}</span>
+                    {agencyLogos[site.agency] && (
+                      <img 
+                        src={agencyLogos[site.agency]} 
+                        alt={site.agency} 
+                        className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                      />
+                    )}
+                  </div>
+                ) : null}
+              </div>
               {isAdmin && (
                 <Button 
                   variant="ghost" 
