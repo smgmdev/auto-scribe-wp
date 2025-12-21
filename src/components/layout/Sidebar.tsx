@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
@@ -112,6 +113,7 @@ export function Sidebar({
     userCustomVerificationStatus,
     setUserCustomVerificationStatus
   } = useAppStore();
+  const navigate = useNavigate();
   const {
     signOut,
     isAdmin,
@@ -344,15 +346,17 @@ export function Sidebar({
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-6">
-            <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
               <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
               <div>
                 <h1 className="text-lg font-semibold text-white">
                   Arcana Mace 
                 </h1>
-                
               </div>
-            </div>
+            </button>
             {/* Close button for mobile */}
             <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full">
               <X className="h-5 w-5" />
