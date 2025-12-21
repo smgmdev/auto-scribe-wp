@@ -100,6 +100,11 @@ const Index = () => {
   
   // Determine which view to render based on role
   const getAuthorizedView = () => {
+    // While loading, always show dashboard to prevent unauthorized view access
+    if (isLoading) {
+      return DashboardView;
+    }
+    
     // Admin can access everything EXCEPT user-only views
     if (isAdmin) {
       if (publicViews[currentView]) return publicViews[currentView];
