@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -51,6 +52,7 @@ export function AgencyRequestsView() {
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -280,6 +282,7 @@ export function AgencyRequestsView() {
       }));
 
       setNewMessage('');
+      setReplyToMessage(null);
       setTimeout(() => inputRef.current?.focus(), 0);
     } catch (error: any) {
       toast({
@@ -420,7 +423,7 @@ export function AgencyRequestsView() {
                       className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
+                        className={`relative group max-w-[80%] rounded-lg p-3 ${
                           msg.sender_type === 'agency'
                             ? 'bg-primary text-primary-foreground'
                             : msg.sender_type === 'admin'
@@ -428,7 +431,29 @@ export function AgencyRequestsView() {
                             : 'bg-muted'
                         }`}
                       >
-                        <p className="text-xs font-medium mb-1 opacity-70">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                                msg.sender_type === 'agency' ? 'hover:bg-primary-foreground/20' : 'hover:bg-background/50'
+                              }`}
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover z-50">
+                            <DropdownMenuItem onClick={() => {
+                              setReplyToMessage(msg);
+                              setTimeout(() => inputRef.current?.focus(), 0);
+                            }}>
+                              <Reply className="h-4 w-4 mr-2" />
+                              Reply
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <p className="text-xs font-medium mb-1 opacity-70 pr-5">
                           {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
                         </p>
                         <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
@@ -448,10 +473,30 @@ export function AgencyRequestsView() {
               {/* Reply Input */}
               {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'completed' && (
                 <div className="-mx-4" style={{ width: 'calc(100% + 2rem)' }}>
+                  {/* Reply context */}
+                  {replyToMessage && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-t">
+                      <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">
+                          Replying to {replyToMessage.sender_type === 'agency' ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Admin' : 'Client'}
+                        </p>
+                        <p className="text-sm truncate">{replyToMessage.message}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => setReplyToMessage(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
                   <div className="relative">
                     <Input
                       ref={inputRef}
-                      placeholder="Type your message..."
+                      placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       disabled={sending}
