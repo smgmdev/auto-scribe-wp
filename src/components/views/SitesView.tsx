@@ -2494,7 +2494,7 @@ export function SitesView() {
                   <div>
                     <DialogTitle>{selectedAgency.name}</DialogTitle>
                     <DialogDescription className="text-xs">
-                      Verified Agency
+                      Agency
                     </DialogDescription>
                   </div>
                 </div>
