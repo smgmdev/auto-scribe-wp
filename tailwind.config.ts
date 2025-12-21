@@ -187,7 +187,7 @@ export default {
 			'dialog-in': {
 				from: {
 					opacity: '0',
-					transform: 'translate(-50%, -50%) scale(0.95)'
+					transform: 'translate(-50%, -50%) scale(0.96)'
 				},
 				to: {
 					opacity: '1',
@@ -201,8 +201,16 @@ export default {
 				},
 				to: {
 					opacity: '0',
-					transform: 'translate(-50%, -50%) scale(0.95)'
+					transform: 'translate(-50%, -50%) scale(0.96)'
 				}
+			},
+			'overlay-in': {
+				from: { opacity: '0' },
+				to: { opacity: '1' }
+			},
+			'overlay-out': {
+				from: { opacity: '1' },
+				to: { opacity: '0' }
 			}
 		},
 		animation: {
@@ -213,8 +221,10 @@ export default {
 			'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
 			shimmer: 'shimmer 3s ease-in-out infinite',
 			'loading-bar': 'loading-bar 1.5s ease-in-out infinite',
-			'dialog-in': 'dialog-in 0.2s ease-out forwards',
-			'dialog-out': 'dialog-out 0.15s ease-in forwards'
+			'dialog-in': 'dialog-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+			'dialog-out': 'dialog-out 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+			'overlay-in': 'overlay-in 0.2s ease-out forwards',
+			'overlay-out': 'overlay-out 0.15s ease-out forwards'
 		}
   	}
   },
