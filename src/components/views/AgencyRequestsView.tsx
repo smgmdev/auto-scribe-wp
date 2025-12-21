@@ -397,8 +397,7 @@ export function AgencyRequestsView() {
 
           {selectedRequest && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{selectedRequest.media_site?.name}</p>
+              <div className="flex items-center justify-end">
                 {getStatusBadge(selectedRequest.status, selectedRequest.read)}
               </div>
 
