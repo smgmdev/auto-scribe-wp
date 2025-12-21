@@ -934,7 +934,7 @@ const Landing = () => {
             {selectedSiteType === 'media' && selectedSite && (selectedSite as MediaSite).category !== 'Agencies/People' && (
               user ? (
                 <Button 
-                  className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3 relative overflow-visible"
+                  className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                   onClick={() => {
                     setSelectedForBrief(selectedSite as MediaSite);
                     setBriefDialogOpen(true);
@@ -942,7 +942,9 @@ const Landing = () => {
                   }}
                 >
                   <span>I'm Interested - ${(selectedSite as MediaSite).price}</span>
-                  <ArrowRight className="h-4 w-4 absolute -right-5 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:-right-6" />
+                  <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                    <ArrowRight className="h-4 w-4 shrink-0" />
+                  </span>
                 </Button>
               ) : (
                 <Button 
