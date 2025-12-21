@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send, Upload, X, FileText, Image } from 'lucide-react';
+import { Loader2, Send, Upload, X, FileText, Image, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -288,8 +288,9 @@ export function BriefSubmissionDialog({
               onBack?.();
             }} 
             disabled={isSubmitting}
-            className="hover:bg-black hover:text-white transition-colors"
+            className="hover:bg-black hover:text-white transition-colors group"
           >
+            <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:-translate-x-1" />
             Back
           </Button>
           <Button 
