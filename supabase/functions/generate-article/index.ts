@@ -212,15 +212,24 @@ STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings${sourceCo
     const userPrompt = `Write an article based on this headline: "${headline}"
 
 TITLE REQUIREMENTS:
-- Create a NEW compelling headline that sparks curiosity
+- Create a NEW compelling headline that sparks curiosity and matches the ${selectedTone.toUpperCase()} tone
 - NEVER use colons (:) in the title - write flowing, natural headlines instead
-- AVOID title structures like "Topic: Explanation" or "Subject: Details" - these look robotic
-- If there are names (people, companies, countries, cities), emphasize them prominently
-- Make it intriguing - readers should NEED to click
-- Keep it concise but impactful (8-14 words ideal)
-- Write like a seasoned newspaper editor would craft a front-page headline
-- Examples of GOOD titles: "Tesla's Berlin Gambit Could Reshape European Manufacturing", "Why Warren Buffett Just Made His Biggest Bet Yet", "The $50 Billion Question Hanging Over London", "Inside the Secret Deal That Changed Everything"
-- Examples of BAD titles (never do this): "Tesla: A New Era Begins", "Warren Buffett: The Oracle Speaks", "London: A City in Crisis"
+- NEVER start titles with possessive forms like "Company's", "Person's", "Country's" - these are overused and robotic
+- AVOID title structures like "Topic: Explanation" or "Subject: Details"
+- Use dynamic sentence structures: questions, action verbs, or intriguing statements
+- If there are names, weave them naturally into the headline rather than leading with them
+- Make it intriguing and ${selectedTone === 'formal' ? 'authoritative' : selectedTone === 'conversational' ? 'relatable and punchy' : selectedTone === 'analytical' ? 'thought-provoking' : 'engaging'} - readers should NEED to click
+- Aim for 10-16 words for maximum engagement and impact
+- Write like a seasoned newspaper editor crafting a front-page headline
+
+TITLE STYLE BASED ON TONE:
+${selectedTone === 'formal' ? '- Use sophisticated, authoritative language that conveys gravity and importance' : ''}
+${selectedTone === 'conversational' ? '- Use punchy, relatable language that feels like talking to a friend' : ''}
+${selectedTone === 'analytical' ? '- Use insightful, thought-provoking language that promises deeper understanding' : ''}
+${selectedTone === 'neutral' ? '- Use clear, balanced language that informs without sensationalism' : ''}
+
+Examples of GOOD titles: "Why the World Is Watching This Billion-Dollar Gamble Unfold", "Inside the Secret Deal That Could Change Everything We Know", "What Nobody Told You About the Biggest Shift in a Decade", "How a Single Decision Sparked a Global Transformation"
+Examples of BAD titles (never do this): "Tesla's New Era Begins", "Apple's Big Announcement: What It Means", "Warren Buffett: The Oracle Speaks", "Company's Bold Move"
 
 ${sourceContent ? `ORIGINALITY REQUIREMENT:
 - Use facts and data from the source but write a COMPLETELY ORIGINAL article
