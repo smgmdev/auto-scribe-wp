@@ -108,7 +108,7 @@ export default function Auth() {
       return;
     }
 
-    // Check if email is verified using RPC function (bypasses RLS)
+    // Check if email exists and is verified using RPC function (bypasses RLS)
     const { data: isVerified, error: rpcError } = await supabase
       .rpc('check_email_verified', { check_email: email });
 
@@ -116,6 +116,29 @@ export default function Auth() {
       console.error('Error checking email verification:', rpcError);
     }
 
+    // Check if account exists by looking in profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, email_verified')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error('Error checking profile:', profileError);
+    }
+
+    // If no profile found, account doesn't exist
+    if (!profileData) {
+      setIsLoading(false);
+      toast({
+        variant: 'destructive',
+        title: 'Account not found',
+        description: 'No account exists with this email. Please create a new account.',
+      });
+      return;
+    }
+
+    // If account exists but email not verified
     if (!isVerified) {
       setIsLoading(false);
       toast({
