@@ -108,6 +108,8 @@ export function Sidebar({
     setAgencyUnreadWpSubmissionsCount,
     agencyUnreadMediaSubmissionsCount,
     setAgencyUnreadMediaSubmissionsCount,
+    agencyUnreadServiceRequestsCount,
+    setAgencyUnreadServiceRequestsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -294,9 +296,27 @@ export function Sidebar({
               .eq('status', 'rejected')
               .eq('read', false);
             
+            // Count unread service requests for this agency
+            const { data: agencyPayoutData } = await supabase
+              .from('agency_payouts')
+              .select('id')
+              .eq('user_id', user.id)
+              .maybeSingle();
+            
+            let serviceRequestsCount = 0;
+            if (agencyPayoutData) {
+              const { count: requestsCount } = await supabase
+                .from('service_requests')
+                .select('*', { count: 'exact', head: true })
+                .eq('agency_payout_id', agencyPayoutData.id)
+                .eq('read', false);
+              serviceRequestsCount = requestsCount || 0;
+            }
+            
             if (isMounted) {
               setAgencyUnreadWpSubmissionsCount((wpRejectedCount || 0) + (wpConnectedCount || 0));
               setAgencyUnreadMediaSubmissionsCount((mediaApprovedCount || 0) + (mediaRejectedCount || 0));
+              setAgencyUnreadServiceRequestsCount(serviceRequestsCount);
             }
           }
       }
@@ -389,7 +409,7 @@ export function Sidebar({
                   : 0;
                 // Calculate notification count for Agency Management dropdown (agency user)
                 const agencyManagementCount = item.id === 'agency-management'
-                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount)
+                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount)
                   : 0;
                 return (
                   <div key={item.id}>
@@ -435,6 +455,8 @@ export function Sidebar({
                           // Agency user My Media shows pending submission notifications
                           const showAgencyMediaBadge = subItem.id === 'agency-media' && (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount) > 0;
                           const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
+                          // Agency user Service Requests shows unread request notifications
+                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && agencyUnreadServiceRequestsCount > 0;
                           return (
                             <Button
                               key={subItem.id}
@@ -462,6 +484,11 @@ export function Sidebar({
                               {showAgencyMediaBadge && (
                                 <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyMediaBadgeCount}
+                                </Badge>
+                              )}
+                              {showServiceRequestsBadge && (
+                                <Badge className="bg-green-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                  {agencyUnreadServiceRequestsCount}
                                 </Badge>
                               )}
                             </Button>

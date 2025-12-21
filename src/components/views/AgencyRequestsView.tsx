@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Bell } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,12 +7,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useAppStore } from '@/stores/appStore';
 
 interface ServiceRequest {
   id: string;
   title: string;
   description: string;
   status: string;
+  read: boolean;
   created_at: string;
   updated_at: string;
   media_site: {
@@ -28,6 +30,7 @@ interface ServiceRequest {
 
 export function AgencyRequestsView() {
   const { user } = useAuth();
+  const { setAgencyUnreadServiceRequestsCount } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
@@ -57,6 +60,7 @@ export function AgencyRequestsView() {
         title,
         description,
         status,
+        read,
         created_at,
         updated_at,
         media_site:media_sites(name, favicon),
@@ -67,6 +71,9 @@ export function AgencyRequestsView() {
 
     if (!error && data) {
       setRequests(data as unknown as ServiceRequest[]);
+      // Update unread count in store
+      const unreadCount = data.filter(r => !r.read).length;
+      setAgencyUnreadServiceRequestsCount(unreadCount);
     }
     setLoading(false);
   };
@@ -117,7 +124,11 @@ export function AgencyRequestsView() {
     };
   }, [agencyPayoutId]);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, isRead: boolean) => {
+    // Show "New Request" in green for unread pending_review
+    if (status === 'pending_review' && !isRead) {
+      return <Badge className="bg-green-500 text-white border-green-500">New Request</Badge>;
+    }
     switch (status) {
       case 'pending_review':
         return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending Review</Badge>;
@@ -130,6 +141,22 @@ export function AgencyRequestsView() {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const markAsRead = async (requestId: string) => {
+    await supabase
+      .from('service_requests')
+      .update({ read: true })
+      .eq('id', requestId);
+    
+    // Update local state
+    setRequests(prev => prev.map(r => 
+      r.id === requestId ? { ...r, read: true } : r
+    ));
+    
+    // Update store count
+    const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId).length;
+    setAgencyUnreadServiceRequestsCount(newUnreadCount);
   };
 
   if (loading) {
@@ -166,7 +193,16 @@ export function AgencyRequestsView() {
       ) : (
         <div className="space-y-4">
           {requests.map((request) => (
-            <Card key={request.id} className="border-border/50 hover:border-border transition-colors">
+            <Card 
+              key={request.id} 
+              className={`border-border/50 hover:border-border transition-colors relative ${!request.read ? 'ring-1 ring-green-500/50' : ''}`}
+              onClick={() => !request.read && markAsRead(request.id)}
+            >
+              {!request.read && (
+                <div className="absolute top-3 right-3">
+                  <Bell className="h-4 w-4 text-green-500 animate-pulse" />
+                </div>
+              )}
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -184,7 +220,7 @@ export function AgencyRequestsView() {
                       </p>
                     </div>
                   </div>
-                  {getStatusBadge(request.status)}
+                  {getStatusBadge(request.status, request.read)}
                 </div>
               </CardHeader>
               <CardContent>
