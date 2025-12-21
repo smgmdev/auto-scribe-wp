@@ -2501,6 +2501,13 @@ export function SitesView() {
               </DialogHeader>
 
               <div className="space-y-4 py-4">
+                {selectedAgency.country && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Country</p>
+                    <p className="text-foreground">{selectedAgency.country}</p>
+                  </div>
+                )}
+
                 {selectedAgency.link && (
                   <div>
                     <p className="text-sm text-muted-foreground">Website</p>
@@ -2526,59 +2533,6 @@ export function SitesView() {
                     </div>
                   </div>
                 )}
-
-                {selectedAgency.country && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Country</p>
-                    <p className="text-foreground">{selectedAgency.country}</p>
-                  </div>
-                )}
-
-                {selectedAgency.media_niches && selectedAgency.media_niches.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Media Niches</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedAgency.media_niches.map((niche, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {niche}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {selectedAgency.media_channels && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Media Channels</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedAgency.media_channels.split(',').map((channel, index) => (
-                        <a
-                          key={index}
-                          href={ensureHttps(channel.trim())}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-accent hover:underline flex items-center gap-1"
-                        >
-                          {channel.trim().replace(/^https?:\/\//, '')}
-                          <ExternalLink className="h-2.5 w-2.5" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {selectedAgency.about && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">About</p>
-                    <p className="text-foreground text-sm">{selectedAgency.about}</p>
-                  </div>
-                )}
-
-                <div className="pt-2">
-                  <Badge variant="secondary" className="text-xs">
-                    Verified Partner
-                  </Badge>
-                </div>
               </div>
 
               <div className="flex justify-end">
