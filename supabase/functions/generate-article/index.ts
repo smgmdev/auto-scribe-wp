@@ -213,10 +213,14 @@ STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings${sourceCo
 
 TITLE REQUIREMENTS:
 - Create a NEW compelling headline that sparks curiosity
+- NEVER use colons (:) in the title - write flowing, natural headlines instead
+- AVOID title structures like "Topic: Explanation" or "Subject: Details" - these look robotic
 - If there are names (people, companies, countries, cities), emphasize them prominently
 - Make it intriguing - readers should NEED to click
-- Keep it concise but impactful
-- Examples of good titles: "Tesla's Berlin Gambit Could Reshape European Manufacturing", "Why Warren Buffett Just Made His Biggest Bet Yet", "The $50 Billion Question Hanging Over London"
+- Keep it concise but impactful (8-14 words ideal)
+- Write like a seasoned newspaper editor would craft a front-page headline
+- Examples of GOOD titles: "Tesla's Berlin Gambit Could Reshape European Manufacturing", "Why Warren Buffett Just Made His Biggest Bet Yet", "The $50 Billion Question Hanging Over London", "Inside the Secret Deal That Changed Everything"
+- Examples of BAD titles (never do this): "Tesla: A New Era Begins", "Warren Buffett: The Oracle Speaks", "London: A City in Crisis"
 
 ${sourceContent ? `ORIGINALITY REQUIREMENT:
 - Use facts and data from the source but write a COMPLETELY ORIGINAL article
