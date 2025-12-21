@@ -62,7 +62,7 @@ export function ComposeView() {
     editingArticle,
     setEditingArticle
   } = useAppStore();
-  const { sites } = useSites();
+  const { sites, loading: sitesLoading } = useSites();
   const { addArticle, updateArticle } = useArticles();
   const { user, credits, isAdmin, refreshCredits } = useAuth();
   const {
@@ -855,9 +855,14 @@ export function ComposeView() {
           {/* Publish To - Single Line */}
           <div className="flex items-center gap-4">
             <Label className="whitespace-nowrap text-sm font-medium">Publish To</Label>
-            {sites.length === 0 ? <p className="text-sm text-muted-foreground">
+            {sitesLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Media sites loading...</span>
+              </div>
+            ) : sites.length === 0 ? <p className="text-sm text-muted-foreground">
                 No media sites connected. Add a site first.
-              </p> : <Select 
+              </p> : <Select
                 value={selectedSite} 
                 onValueChange={(value) => {
                   if (canAffordSite(value)) {
