@@ -2,14 +2,36 @@ import { ReactNode, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
+import { MinimizedChats } from '@/components/ui/MinimizedChats';
+import { useAppStore, MinimizedChat } from '@/stores/appStore';
 import amlogo from '@/assets/amlogo.png';
+
 interface MainLayoutProps {
   children: ReactNode;
+  onOpenMinimizedChat?: (chat: MinimizedChat) => void;
 }
+
 export function MainLayout({
-  children
+  children,
+  onOpenMinimizedChat
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { removeMinimizedChat, setCurrentView } = useAppStore();
+
+  const handleOpenChat = (chat: MinimizedChat) => {
+    removeMinimizedChat(chat.id);
+    if (onOpenMinimizedChat) {
+      onOpenMinimizedChat(chat);
+    } else {
+      // Navigate to the appropriate view based on chat type
+      if (chat.type === 'agency-request') {
+        setCurrentView('agency-requests');
+      } else if (chat.type === 'my-request') {
+        setCurrentView('my-requests');
+      }
+    }
+  };
+
   return <div className="min-h-screen bg-background">
       {/* Mobile Header with Burger Menu */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center px-4">
@@ -32,5 +54,8 @@ export function MainLayout({
           {children}
         </div>
       </main>
+
+      {/* Global Minimized Chats */}
+      <MinimizedChats onOpenChat={handleOpenChat} />
     </div>;
 }
