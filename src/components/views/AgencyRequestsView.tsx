@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +51,18 @@ export function AgencyRequestsView() {
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Scroll to bottom when messages change or dialog opens
+  useEffect(() => {
+    if (selectedRequest) {
+      scrollToBottom();
+    }
+  }, [selectedRequest, messages]);
 
   const fetchRequests = async () => {
     if (!user) return;
@@ -427,6 +439,7 @@ export function AgencyRequestsView() {
                   {(messages[selectedRequest.id] || []).length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
 
