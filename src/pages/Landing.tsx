@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
-import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
+import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import amblack from '@/assets/amblack.png';
 
 interface SiteTag {
@@ -73,10 +73,8 @@ const Landing = () => {
   const [activeTab, setActiveTab] = useState('Global');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   
-  // Brief submission dialog state
-  const [briefDialogOpen, setBriefDialogOpen] = useState(false);
-  const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  // Media site dialog state (unified with brief submission)
+  const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
   // WebView state removed - now using direct _blank links
 
   const handlePublishNewArticle = (siteId: string) => {
@@ -383,14 +381,22 @@ const Landing = () => {
   };
 
   const handleSiteClick = (site: WPSite | MediaSite, type: 'wp' | 'media') => {
-    setSelectedSite(site);
-    setSelectedSiteType(type);
+    if (type === 'media') {
+      setSelectedMediaSite(site as MediaSite);
+    } else {
+      setSelectedSite(site);
+      setSelectedSiteType(type);
+    }
     setShowSearchModal(false);
   };
 
   const handleDropdownSiteClick = (site: WPSite | MediaSite, type: 'wp' | 'media') => {
-    setSelectedSite(site);
-    setSelectedSiteType(type);
+    if (type === 'media') {
+      setSelectedMediaSite(site as MediaSite);
+    } else {
+      setSelectedSite(site);
+      setSelectedSiteType(type);
+    }
     // Keep dropdown open
   };
 
@@ -767,14 +773,10 @@ const Landing = () => {
         )}
       </main>
 
-      {/* Persistent overlay during transitions */}
-      {isTransitioning && (
-        <div className="fixed inset-0 z-[199] bg-black/80 transition-opacity duration-150" />
-      )}
 
-      {/* Site Detail Dialog */}
-      <Dialog open={!!selectedSite} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-md z-[200]" overlayClassName={isTransitioning ? "opacity-0" : ""}>
+      {/* WP Site Detail Dialog */}
+      <Dialog open={!!selectedSite && selectedSiteType === 'wp'} onOpenChange={(open) => !open && setSelectedSite(null)}>
+        <DialogContent className="sm:max-w-md z-[200]">
 
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
@@ -838,74 +840,6 @@ const Landing = () => {
             </div>
           )}
 
-          {selectedSite && selectedSiteType === 'media' && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Website</p>
-                <div className="flex items-center gap-2">
-                  <a 
-                    href={(selectedSite as MediaSite).link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline flex items-center gap-1"
-                  >
-                    {extractDomain((selectedSite as MediaSite).link)}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              </div>
-              
-              {/* Show price and format only for non-agency sites */}
-              {(selectedSite as MediaSite).category !== 'Agencies/People' && (
-                <div className="flex gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-foreground font-medium">${(selectedSite as MediaSite).price} USD</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Format</p>
-                    <Badge variant="secondary">
-                      {(selectedSite as MediaSite).publication_format}
-                    </Badge>
-                  </div>
-                </div>
-              )}
-              
-              {/* Show country for agencies */}
-              {(selectedSite as MediaSite).category === 'Agencies/People' && (selectedSite as any).country && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Country</p>
-                  <p className="text-foreground">{(selectedSite as any).country}</p>
-                </div>
-              )}
-              
-              {(selectedSite as MediaSite).category && (selectedSite as MediaSite).category !== 'Agencies/People' && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Category</p>
-                  <p className="text-foreground">{(selectedSite as MediaSite).category}</p>
-                </div>
-              )}
-              {(selectedSite as MediaSite).subcategory && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Subcategory</p>
-                  <p className="text-foreground">{(selectedSite as MediaSite).subcategory}</p>
-                </div>
-              )}
-              {(selectedSite as MediaSite).agency && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Agency</p>
-                  <p className="text-foreground">{(selectedSite as MediaSite).agency}</p>
-                </div>
-              )}
-              {(selectedSite as MediaSite).about && (
-                <div>
-                  <p className="text-sm text-muted-foreground">About</p>
-                  <p className="text-foreground text-sm">{(selectedSite as MediaSite).about}</p>
-                </div>
-              )}
-            </div>
-          )}
-
           <div className="flex justify-end gap-3 mt-4">
             <Button 
               variant="outline"
@@ -925,69 +859,17 @@ const Landing = () => {
                 </span>
               </Button>
             )}
-            {selectedSiteType === 'media' && selectedSite && (selectedSite as MediaSite).category !== 'Agencies/People' && (
-              user ? (
-                <Button 
-                  className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
-                  onClick={() => {
-                    setIsTransitioning(true);
-                    setSelectedForBrief(selectedSite as MediaSite);
-                    // Smooth transition: close first dialog, then open second
-                    setSelectedSite(null);
-                    setTimeout(() => {
-                      setBriefDialogOpen(true);
-                      setIsTransitioning(false);
-                    }, 150);
-                  }}
-                >
-                  <span>I'm Interested - ${(selectedSite as MediaSite).price}</span>
-                  <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                    <ArrowRight className="h-4 w-4 shrink-0" />
-                  </span>
-                </Button>
-              ) : (
-                <Button 
-                  className="bg-black text-white hover:bg-gray-800 transition-colors"
-                  onClick={() => {
-                    navigate('/auth', { 
-                      state: { 
-                        targetView: 'orders',
-                        pendingPurchase: (selectedSite as MediaSite).id
-                      } 
-                    });
-                  }}
-                >
-                  Sign In to Purchase
-                </Button>
-              )
-            )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Brief Submission Dialog */}
-      <BriefSubmissionDialog
-        open={briefDialogOpen}
-        onOpenChange={setBriefDialogOpen}
-        mediaSite={selectedForBrief}
-        hideOverlay={isTransitioning}
-        onSuccess={() => {
-          setSelectedForBrief(null);
-          toast({ title: 'Brief submitted! View it in My Engagements.' });
-          navigate('/dashboard', { state: { targetView: 'my-requests' } });
-        }}
-        onBack={() => {
-          if (selectedForBrief) {
-            setIsTransitioning(true);
-            setBriefDialogOpen(false);
-            // Smooth transition back: close brief dialog, then open site dialog
-            setTimeout(() => {
-              setSelectedSite(selectedForBrief);
-              setSelectedSiteType('media');
-              setIsTransitioning(false);
-            }, 150);
-          }
-        }}
+      {/* Media Site Dialog with integrated brief submission */}
+      <MediaSiteDialog
+        open={!!selectedMediaSite}
+        onOpenChange={(open) => !open && setSelectedMediaSite(null)}
+        mediaSite={selectedMediaSite}
+        agencyLogos={agencyLogos}
+        onSuccess={() => setSelectedMediaSite(null)}
       />
 
       {/* Footer */}

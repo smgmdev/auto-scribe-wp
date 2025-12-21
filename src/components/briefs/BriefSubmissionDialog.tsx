@@ -22,7 +22,6 @@ interface BriefSubmissionDialogProps {
   mediaSite: MediaSite | null;
   onSuccess: () => void;
   onBack?: () => void;
-  hideOverlay?: boolean;
 }
 
 export function BriefSubmissionDialog({ 
@@ -30,8 +29,7 @@ export function BriefSubmissionDialog({
   onOpenChange, 
   mediaSite,
   onSuccess,
-  onBack,
-  hideOverlay
+  onBack
 }: BriefSubmissionDialogProps) {
   const { user } = useAuth();
   const [description, setDescription] = useState('');
@@ -188,7 +186,7 @@ export function BriefSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200]" overlayClassName={hideOverlay ? "opacity-0" : ""}>
+      <DialogContent className="sm:max-w-lg z-[200]">
         <DialogHeader>
           <DialogTitle>Submit Your Brief</DialogTitle>
           <DialogDescription>
