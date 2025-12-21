@@ -942,7 +942,7 @@ const Landing = () => {
                   }}
                 >
                   I'm Interested - ${(selectedSite as MediaSite).price}
-                  <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 ml-2 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-1" />
                 </Button>
               ) : (
                 <Button 
