@@ -438,7 +438,12 @@ export function AgencyRequestsView() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     disabled={sending}
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
                   />
                   <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
