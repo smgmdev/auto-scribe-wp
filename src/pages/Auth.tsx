@@ -128,11 +128,11 @@ export default function Auth() {
       setIsLoading(false);
       
       if (profileData) {
-        // Profile exists but not verified
+        // Profile exists but not verified - user signed up but didn't verify
         toast({
           variant: 'destructive',
           title: 'Email not verified',
-          description: 'Please verify your email before signing in. Check your inbox for the verification link.',
+          description: 'This email was already used to sign up but has not yet been verified. Please check your inbox for the verification link.',
         });
       } else {
         // No profile found - account doesn't exist
