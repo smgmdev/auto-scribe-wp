@@ -682,6 +682,7 @@ export type Database = {
           id: string
           media_site_id: string
           order_id: string | null
+          read: boolean
           status: string
           title: string
           updated_at: string
@@ -694,6 +695,7 @@ export type Database = {
           id?: string
           media_site_id: string
           order_id?: string | null
+          read?: boolean
           status?: string
           title: string
           updated_at?: string
@@ -706,6 +708,7 @@ export type Database = {
           id?: string
           media_site_id?: string
           order_id?: string | null
+          read?: boolean
           status?: string
           title?: string
           updated_at?: string

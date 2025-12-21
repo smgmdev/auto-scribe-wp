@@ -186,7 +186,11 @@ export default function AgencyPortal() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, isNew: boolean = false) => {
+    // Show "New Request" in green for new pending_review requests
+    if (status === 'pending_review' && isNew) {
+      return <Badge className="bg-green-500 text-white border-green-500">New Request</Badge>;
+    }
     switch (status) {
       case 'pending_review':
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
