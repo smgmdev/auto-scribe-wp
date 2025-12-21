@@ -204,6 +204,26 @@ export default {
 					transform: 'translate(-50%, -50%) scale(0.96)'
 				}
 			},
+			'dialog-slide-left': {
+				from: {
+					opacity: '1',
+					transform: 'translate(-50%, -50%) scale(1) translateX(0)'
+				},
+				to: {
+					opacity: '0',
+					transform: 'translate(-50%, -50%) scale(0.98) translateX(-20px)'
+				}
+			},
+			'dialog-slide-right': {
+				from: {
+					opacity: '0',
+					transform: 'translate(-50%, -50%) scale(0.98) translateX(20px)'
+				},
+				to: {
+					opacity: '1',
+					transform: 'translate(-50%, -50%) scale(1) translateX(0)'
+				}
+			},
 			'overlay-in': {
 				from: { opacity: '0' },
 				to: { opacity: '1' }
@@ -223,6 +243,8 @@ export default {
 			'loading-bar': 'loading-bar 1.5s ease-in-out infinite',
 			'dialog-in': 'dialog-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 			'dialog-out': 'dialog-out 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+			'dialog-slide-left': 'dialog-slide-left 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+			'dialog-slide-right': 'dialog-slide-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 			'overlay-in': 'overlay-in 0.2s ease-out forwards',
 			'overlay-out': 'overlay-out 0.15s ease-out forwards'
 		}
