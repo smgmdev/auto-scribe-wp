@@ -52,6 +52,7 @@ export function AgencyRequestsView() {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -279,6 +280,7 @@ export function AgencyRequestsView() {
       }));
 
       setNewMessage('');
+      setTimeout(() => inputRef.current?.focus(), 0);
       toast({ title: 'Message sent' });
     } catch (error: any) {
       toast({
@@ -449,6 +451,7 @@ export function AgencyRequestsView() {
                 <div className="-mx-4" style={{ width: 'calc(100% + 2rem)' }}>
                   <div className="relative">
                     <Input
+                      ref={inputRef}
                       placeholder="Type your message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
