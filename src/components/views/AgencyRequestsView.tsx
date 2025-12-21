@@ -374,7 +374,6 @@ export function AgencyRequestsView() {
                       </p>
                     </div>
                   </div>
-                  {getStatusBadge(request.status, request.read)}
                 </div>
               </CardHeader>
               <CardContent>
@@ -444,28 +443,6 @@ export function AgencyRequestsView() {
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
-
-              {/* Reply Input */}
-              {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'completed' && (
-                <div className="flex gap-2 -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
-                  <Input
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    disabled={sending}
-                    className="rounded-none flex-1"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
-                  />
-                  <Button onClick={sendMessage} disabled={sending || !newMessage.trim()} className="rounded-none">
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  </Button>
-                </div>
-              )}
             </div>
           )}
         </DialogContent>
