@@ -1145,9 +1145,6 @@ export function SitesView() {
                   )
                 )}
 
-                {(!siteTags[site.id] || siteTags[site.id].length === 0) && !isAdmin && (
-                  <span className="text-xs text-muted-foreground">No tags available</span>
-                )}
               </div>
 
               {/* Link below tags */}
