@@ -411,9 +411,6 @@ export function AgencyRequestsView() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {request.description}
-                </p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">
                     {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
