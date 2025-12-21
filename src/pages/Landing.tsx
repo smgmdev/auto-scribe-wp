@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, Heart, User, Copy, PenLine } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -934,15 +934,15 @@ const Landing = () => {
             {selectedSiteType === 'media' && selectedSite && (selectedSite as MediaSite).category !== 'Agencies/People' && (
               user ? (
                 <Button 
-                  className="bg-black text-white hover:bg-gray-800 transition-colors"
+                  className="bg-black text-white hover:bg-gray-800 transition-colors group"
                   onClick={() => {
                     setSelectedForBrief(selectedSite as MediaSite);
                     setBriefDialogOpen(true);
                     setSelectedSite(null);
                   }}
                 >
-                  <Heart className="h-4 w-4 mr-2" />
                   I'm Interested - ${(selectedSite as MediaSite).price}
+                  <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
               ) : (
                 <Button 
