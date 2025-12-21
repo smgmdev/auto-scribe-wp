@@ -487,7 +487,7 @@ export function Sidebar({
                                 </Badge>
                               )}
                               {showServiceRequestsBadge && (
-                                <Badge className="bg-green-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyUnreadServiceRequestsCount}
                                 </Badge>
                               )}
