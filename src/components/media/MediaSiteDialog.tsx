@@ -44,8 +44,6 @@ export function MediaSiteDialog({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DialogView>('detail');
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [animationDirection, setAnimationDirection] = useState<'forward' | 'back'>('forward');
   
   // Brief form state
   const [description, setDescription] = useState('');
@@ -134,7 +132,6 @@ export function MediaSiteDialog({
         setCurrentView('detail');
         setDescription('');
         setFiles([]);
-        setIsAnimating(false);
       }, 200);
       return () => clearTimeout(timer);
     }
@@ -148,24 +145,18 @@ export function MediaSiteDialog({
     }
   };
 
-  const transitionToView = (view: DialogView, direction: 'forward' | 'back') => {
-    setAnimationDirection(direction);
-    setIsAnimating(true);
-    setTimeout(() => {
-      setCurrentView(view);
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 50);
-    }, 150);
+  const transitionToView = (view: DialogView) => {
+    setCurrentView(view);
   };
 
   const handleInterested = () => {
-    transitionToView('brief', 'forward');
+    transitionToView('brief');
   };
 
   const handleBack = () => {
-    transitionToView('detail', 'back');
+    transitionToView('detail');
   };
+
 
   const handleSubmit = async () => {
     if (!user || !mediaSite) return;
@@ -247,12 +238,10 @@ export function MediaSiteDialog({
         <div className="relative">
           {/* Detail View */}
           <div
-            className={`transition-all duration-200 ease-out ${
+            className={`transition-all duration-300 ease-in-out ${
               currentView === 'detail'
-                ? isAnimating && animationDirection === 'back'
-                  ? 'opacity-0 translate-x-5'
-                  : 'opacity-100 translate-x-0'
-                : 'absolute inset-0 opacity-0 -translate-x-5 pointer-events-none'
+                ? 'opacity-100 translate-x-0'
+                : 'absolute inset-0 opacity-0 -translate-x-full pointer-events-none'
             }`}
           >
             <DialogHeader>
@@ -362,12 +351,10 @@ export function MediaSiteDialog({
 
           {/* Brief View */}
           <div
-            className={`transition-all duration-200 ease-out ${
+            className={`transition-all duration-300 ease-in-out ${
               currentView === 'brief'
-                ? isAnimating && animationDirection === 'forward'
-                  ? 'opacity-0 -translate-x-5'
-                  : 'opacity-100 translate-x-0'
-                : 'absolute inset-0 opacity-0 translate-x-5 pointer-events-none'
+                ? 'opacity-100 translate-x-0'
+                : 'absolute inset-0 opacity-0 translate-x-full pointer-events-none'
             }`}
           >
             <DialogHeader>
