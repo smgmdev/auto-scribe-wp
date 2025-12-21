@@ -74,6 +74,15 @@ const Index = () => {
   const [isApprovedAgency, setIsApprovedAgency] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Reset to dashboard view on initial login/page load
+  useEffect(() => {
+    // Only reset to dashboard if there's no deep-link navigation state
+    const state = location.state as LocationState | null;
+    if (!state?.targetView) {
+      setCurrentView('dashboard');
+    }
+  }, []);
+
   // Check if user is an approved agency
   useEffect(() => {
     const checkAgencyStatus = async () => {
