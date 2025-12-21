@@ -928,7 +928,6 @@ const Landing = () => {
                 className="bg-black text-white hover:bg-gray-800 transition-colors"
                 onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)}
               >
-                <PenLine className="h-4 w-4 mr-2" />
                 Publish New Article
               </Button>
             )}

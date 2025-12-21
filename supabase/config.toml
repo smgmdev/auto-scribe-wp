@@ -105,3 +105,6 @@ verify_jwt = true
 
 [functions.send-rejection-email]
 verify_jwt = true
+
+[functions.deduct-publish-credits]
+verify_jwt = true
