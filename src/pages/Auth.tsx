@@ -116,7 +116,7 @@ export default function Auth() {
       console.error('Error checking email verification:', rpcError);
     }
 
-    // If not verified, check if account exists to show appropriate message
+    // If not verified (could mean unverified OR account doesn't exist)
     if (!isVerified) {
       // Check if there's any profile with this email
       const { data: profileData } = await supabase
@@ -135,12 +135,11 @@ export default function Auth() {
           description: 'Please verify your email before signing in. Check your inbox for the verification link.',
         });
       } else {
-        // No profile found - could be unverified signup (profile not created yet) or truly non-existent
-        // Show a message that covers both cases
+        // No profile found - account doesn't exist
         toast({
           variant: 'destructive',
-          title: 'Unable to sign in',
-          description: 'If you recently signed up, please check your email for the verification link. Otherwise, please create a new account.',
+          title: 'Account not found',
+          description: 'No account exists with this email. Please create a new account.',
         });
       }
       return;
