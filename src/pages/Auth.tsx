@@ -108,40 +108,39 @@ export default function Auth() {
       return;
     }
 
-    // Check if email is verified using RPC function (bypasses RLS)
-    const { data: isVerified, error: rpcError } = await supabase
-      .rpc('check_email_verified', { check_email: email });
+    // Check user status: 'verified', 'unverified', or 'not_found'
+    const { data: userStatus, error: statusError } = await supabase
+      .rpc('check_user_status', { check_email: email });
 
-    if (rpcError) {
-      console.error('Error checking email verification:', rpcError);
+    if (statusError) {
+      console.error('Error checking user status:', statusError);
+      setIsLoading(false);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Unable to verify account status. Please try again.',
+      });
+      return;
     }
 
-    // If not verified (could mean unverified OR account doesn't exist)
-    if (!isVerified) {
-      // Check if there's any profile with this email
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('id, email_verified')
-        .eq('email', email)
-        .maybeSingle();
-      
+    // Handle different user statuses
+    if (userStatus === 'not_found') {
       setIsLoading(false);
-      
-      if (profileData) {
-        // Profile exists but not verified - user signed up but didn't verify
-        toast({
-          variant: 'destructive',
-          title: 'Email not verified',
-          description: 'This email was already used to sign up but has not yet been verified. Please check your inbox for the verification link.',
-        });
-      } else {
-        // No profile found - account doesn't exist
-        toast({
-          variant: 'destructive',
-          title: 'Account not found',
-          description: 'No account exists with this email. Please create a new account.',
-        });
-      }
+      toast({
+        variant: 'destructive',
+        title: 'Account not found',
+        description: 'No account exists with this email. Please create a new account.',
+      });
+      return;
+    }
+
+    if (userStatus === 'unverified') {
+      setIsLoading(false);
+      toast({
+        variant: 'destructive',
+        title: 'Email not verified',
+        description: 'This email was already used to sign up but has not yet been verified. Please check your inbox for the verification link.',
+      });
       return;
     }
 
