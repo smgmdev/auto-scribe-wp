@@ -76,6 +76,7 @@ const Landing = () => {
   // Brief submission dialog state
   const [briefDialogOpen, setBriefDialogOpen] = useState(false);
   const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   // WebView state removed - now using direct _blank links
 
   const handlePublishNewArticle = (siteId: string) => {
@@ -766,9 +767,15 @@ const Landing = () => {
         )}
       </main>
 
+      {/* Persistent overlay during transitions */}
+      {isTransitioning && (
+        <div className="fixed inset-0 z-[199] bg-black/80 transition-opacity duration-150" />
+      )}
+
       {/* Site Detail Dialog */}
       <Dialog open={!!selectedSite} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-md z-[200]">
+        <DialogContent className="sm:max-w-md z-[200]" overlayClassName={isTransitioning ? "opacity-0" : ""}>
+
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {selectedSite && (
@@ -923,9 +930,14 @@ const Landing = () => {
                 <Button 
                   className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                   onClick={() => {
+                    setIsTransitioning(true);
                     setSelectedForBrief(selectedSite as MediaSite);
-                    setBriefDialogOpen(true);
+                    // Smooth transition: close first dialog, then open second
                     setSelectedSite(null);
+                    setTimeout(() => {
+                      setBriefDialogOpen(true);
+                      setIsTransitioning(false);
+                    }, 150);
                   }}
                 >
                   <span>I'm Interested - ${(selectedSite as MediaSite).price}</span>
@@ -958,6 +970,7 @@ const Landing = () => {
         open={briefDialogOpen}
         onOpenChange={setBriefDialogOpen}
         mediaSite={selectedForBrief}
+        hideOverlay={isTransitioning}
         onSuccess={() => {
           setSelectedForBrief(null);
           toast({ title: 'Brief submitted! View it in My Engagements.' });
@@ -965,8 +978,14 @@ const Landing = () => {
         }}
         onBack={() => {
           if (selectedForBrief) {
-            setSelectedSite(selectedForBrief);
-            setSelectedSiteType('media');
+            setIsTransitioning(true);
+            setBriefDialogOpen(false);
+            // Smooth transition back: close brief dialog, then open site dialog
+            setTimeout(() => {
+              setSelectedSite(selectedForBrief);
+              setSelectedSiteType('media');
+              setIsTransitioning(false);
+            }, 150);
           }
         }}
       />
