@@ -1,0 +1,362 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
+import { getFaviconUrl } from '@/lib/favicon';
+
+interface MediaSite {
+  id: string;
+  name: string;
+  link: string;
+  favicon: string | null;
+  price: number;
+  publication_format: string;
+  category: string;
+  subcategory: string | null;
+  agency: string | null;
+  about: string | null;
+}
+
+interface MediaSiteDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mediaSite: MediaSite | null;
+  agencyLogos?: Record<string, string>;
+  onSuccess?: () => void;
+}
+
+type DialogView = 'detail' | 'brief';
+
+export function MediaSiteDialog({
+  open,
+  onOpenChange,
+  mediaSite,
+  agencyLogos = {},
+  onSuccess
+}: MediaSiteDialogProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [currentView, setCurrentView] = useState<DialogView>('detail');
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationDirection, setAnimationDirection] = useState<'forward' | 'back'>('forward');
+  
+  // Brief form state
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+
+  // Reset to detail view when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      // Delay reset to allow close animation
+      const timer = setTimeout(() => {
+        setCurrentView('detail');
+        setDescription('');
+        setFiles([]);
+        setIsAnimating(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  const extractDomain = (url: string) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return url;
+    }
+  };
+
+  const transitionToView = (view: DialogView, direction: 'forward' | 'back') => {
+    setAnimationDirection(direction);
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentView(view);
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 50);
+    }, 150);
+  };
+
+  const handleInterested = () => {
+    transitionToView('brief', 'forward');
+  };
+
+  const handleBack = () => {
+    transitionToView('detail', 'back');
+  };
+
+  const handleSubmit = async () => {
+    if (!user || !mediaSite) return;
+
+    if (!description.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing information',
+        description: 'Please describe what you are looking for.',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      let agencyPayoutId = null;
+      if (mediaSite.agency) {
+        const { data: agencyData } = await supabase
+          .from('agency_payouts')
+          .select('id')
+          .eq('agency_name', mediaSite.agency)
+          .single();
+        
+        if (agencyData) {
+          agencyPayoutId = agencyData.id;
+        }
+      }
+
+      const { data: request, error } = await supabase
+        .from('service_requests')
+        .insert({
+          user_id: user.id,
+          media_site_id: mediaSite.id,
+          agency_payout_id: agencyPayoutId,
+          title: mediaSite.name,
+          description: description.trim(),
+          status: 'pending_review'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await supabase.from('service_messages').insert({
+        request_id: request.id,
+        sender_type: 'client',
+        sender_id: user.id,
+        message: description.trim()
+      });
+
+      toast({
+        title: 'Request submitted!',
+        description: 'Your brief has been sent to the agency for review.',
+        className: 'bg-green-600 text-white border-green-600',
+      });
+
+      onOpenChange(false);
+      onSuccess?.();
+      navigate('/dashboard', { state: { targetView: 'my-requests' } });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Submission failed',
+        description: error.message,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!mediaSite) return null;
+
+  const isAgency = mediaSite.category === 'Agencies/People';
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg z-[200] overflow-hidden">
+        <div className="relative">
+          {/* Detail View */}
+          <div
+            className={`transition-all duration-200 ease-out ${
+              currentView === 'detail'
+                ? isAnimating && animationDirection === 'back'
+                  ? 'opacity-0 translate-x-5'
+                  : 'opacity-100 translate-x-0'
+                : 'absolute inset-0 opacity-0 -translate-x-5 pointer-events-none'
+            }`}
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <img
+                  src={mediaSite.favicon || getFaviconUrl(mediaSite.link)}
+                  alt={mediaSite.name}
+                  className="h-12 w-12 rounded-xl bg-muted object-contain"
+                />
+                <span>{mediaSite.name}</span>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 mt-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Website</p>
+                <a 
+                  href={mediaSite.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline flex items-center gap-1"
+                >
+                  {extractDomain(mediaSite.link)}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              
+              {!isAgency && (
+                <div className="flex gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <p className="text-foreground font-medium">${mediaSite.price} USD</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Format</p>
+                    <Badge variant="secondary">{mediaSite.publication_format}</Badge>
+                  </div>
+                </div>
+              )}
+              
+              {mediaSite.category && !isAgency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Category</p>
+                  <p className="text-foreground">{mediaSite.category}</p>
+                </div>
+              )}
+              
+              {mediaSite.subcategory && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Subcategory</p>
+                  <p className="text-foreground">{mediaSite.subcategory}</p>
+                </div>
+              )}
+              
+              {mediaSite.agency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Agency</p>
+                  <p className="text-foreground">{mediaSite.agency}</p>
+                </div>
+              )}
+              
+              {mediaSite.about && (
+                <div>
+                  <p className="text-sm text-muted-foreground">About</p>
+                  <p className="text-foreground text-sm">{mediaSite.about}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <Button 
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="hover:bg-black hover:text-white transition-colors"
+              >
+                Close
+              </Button>
+              {!isAgency && (
+                user ? (
+                  <Button 
+                    className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
+                    onClick={handleInterested}
+                  >
+                    <span>I'm Interested - ${mediaSite.price}</span>
+                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                      <ArrowRight className="h-4 w-4 shrink-0" />
+                    </span>
+                  </Button>
+                ) : (
+                  <Button 
+                    className="bg-black text-white hover:bg-gray-800 transition-colors"
+                    onClick={() => {
+                      navigate('/auth', { 
+                        state: { 
+                          targetView: 'orders',
+                          pendingPurchase: mediaSite.id
+                        } 
+                      });
+                    }}
+                  >
+                    Sign In to Purchase
+                  </Button>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Brief View */}
+          <div
+            className={`transition-all duration-200 ease-out ${
+              currentView === 'brief'
+                ? isAnimating && animationDirection === 'forward'
+                  ? 'opacity-0 -translate-x-5'
+                  : 'opacity-100 translate-x-0'
+                : 'absolute inset-0 opacity-0 translate-x-5 pointer-events-none'
+            }`}
+          >
+            <DialogHeader>
+              <DialogTitle>Submit Your Brief</DialogTitle>
+              <DialogDescription>
+                Tell the agency what you're looking for. They'll review your request and respond.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg my-4">
+              <img 
+                src={mediaSite.favicon || getFaviconUrl(mediaSite.link)} 
+                alt="" 
+                className="w-8 h-8 rounded" 
+              />
+              <div>
+                <p className="font-medium">{mediaSite.name}</p>
+                <p className="text-sm text-muted-foreground">${mediaSite.price} USD</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="description">What are you looking for?</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe your ideas. What are you looking to publish? What is your story about? Provide specific details and instructions if any."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={6}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between gap-3 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={handleBack}
+                disabled={isSubmitting}
+                className="hover:bg-black hover:text-white transition-all duration-200 group w-fit px-3"
+              >
+                <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
+                  <ArrowLeft className="h-4 w-4 shrink-0" />
+                </span>
+                <span>Back</span>
+              </Button>
+              <Button 
+                className="bg-black text-white hover:bg-gray-800 transition-colors"
+                onClick={handleSubmit} 
+                disabled={isSubmitting || !description.trim()}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
+                Submit Brief
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
