@@ -401,12 +401,6 @@ export function AgencyRequestsView() {
                 {getStatusBadge(selectedRequest.status, selectedRequest.read)}
               </div>
 
-              {/* Brief Description */}
-              <div className="bg-muted/50 rounded-lg p-4">
-                <p className="text-sm font-medium mb-2">Brief</p>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedRequest.description}</p>
-              </div>
-
               {/* Messages */}
               <ScrollArea className="h-[250px] border rounded-lg p-4">
                 <div className="space-y-4">
