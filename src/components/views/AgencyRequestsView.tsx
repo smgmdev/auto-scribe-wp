@@ -54,7 +54,9 @@ export function AgencyRequestsView() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 50);
   };
 
   // Scroll to bottom when messages change or dialog opens
