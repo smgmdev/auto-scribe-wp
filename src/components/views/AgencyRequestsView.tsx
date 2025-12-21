@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Bell } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -125,9 +125,9 @@ export function AgencyRequestsView() {
   }, [agencyPayoutId]);
 
   const getStatusBadge = (status: string, isRead: boolean) => {
-    // Show "New Request" in green for unread pending_review
+    // Show "New Request" for unread pending_review
     if (status === 'pending_review' && !isRead) {
-      return <Badge className="bg-green-500 text-white border-green-500">New Request</Badge>;
+      return <Badge className="bg-blue-500 text-white border-blue-500">New Request</Badge>;
     }
     switch (status) {
       case 'pending_review':
@@ -195,14 +195,9 @@ export function AgencyRequestsView() {
           {requests.map((request) => (
             <Card 
               key={request.id} 
-              className={`border-border/50 hover:border-border transition-colors relative ${!request.read ? 'ring-1 ring-green-500/50' : ''}`}
+              className={`border-border/50 hover:border-border transition-colors relative ${!request.read ? 'ring-1 ring-blue-500/50' : ''}`}
               onClick={() => !request.read && markAsRead(request.id)}
             >
-              {!request.read && (
-                <div className="absolute top-3 right-3">
-                  <Bell className="h-4 w-4 text-green-500 animate-pulse" />
-                </div>
-              )}
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
