@@ -230,13 +230,20 @@ export function Sidebar({
         .limit(1)
         .maybeSingle();
       
-      if (isMounted && appData) {
-        // Always update status and rejection_seen from DB to ensure accuracy on refresh
-        setUserApplicationStatus(appData.status);
-        setApplicationId(appData.id);
-        setRejectionSeen(appData.rejection_seen || false);
-        if (appData.payout_method) {
-          setPayoutMethod(appData.payout_method);
+      if (isMounted) {
+        if (appData) {
+          // Always update status and rejection_seen from DB to ensure accuracy on refresh
+          setUserApplicationStatus(appData.status);
+          setApplicationId(appData.id);
+          setRejectionSeen(appData.rejection_seen || false);
+          if (appData.payout_method) {
+            setPayoutMethod(appData.payout_method);
+          }
+        } else {
+          // No application exists - reset to null to show "Apply Now" box
+          setUserApplicationStatus(null);
+          setApplicationId(null);
+          setRejectionSeen(false);
         }
       }
 
