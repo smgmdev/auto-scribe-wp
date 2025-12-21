@@ -802,12 +802,6 @@ const Landing = () => {
                     {extractDomain((selectedSite as WPSite).url)}
                     <ExternalLink className="h-3 w-3" />
                   </a>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText((selectedSite as WPSite).url); toast({ title: 'Copied to clipboard' }); }}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
                 </div>
               </div>
               <div>
@@ -816,9 +810,7 @@ const Landing = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Credits Required</p>
-                <Badge variant="outline" className="text-accent border-accent/30">
-                  {(selectedSite as WPSite).credits_required} Credits
-                </Badge>
+                <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} Credits</p>
               </div>
               {siteTags[(selectedSite as WPSite).id]?.length > 0 && (
                 <div>
