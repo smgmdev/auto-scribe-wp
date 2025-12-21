@@ -1210,23 +1210,23 @@ export function SitesView() {
                 <h3 className="text-sm break-words">{site.name}</h3>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-1 justify-end">
+            <div className="flex items-center gap-2 flex-1 justify-end">
               {/* Price badge - fixed width for alignment */}
-              <div className="w-[90px] flex justify-end flex-shrink-0">
+              <div className="w-[85px] flex justify-end flex-shrink-0">
                 <Badge variant="secondary" className="text-xs whitespace-nowrap">
                   {site.price > 0 ? `${site.price} USD` : 'Free'}
                 </Badge>
               </div>
               {/* Fixed width container for format */}
-              <div className="w-[100px] flex justify-start flex-shrink-0">
+              <div className="w-[90px] flex justify-start flex-shrink-0">
                 <span className="text-xs text-muted-foreground">{site.publication_format}</span>
               </div>
               {/* Agency info - fixed width for alignment */}
-              <div className="w-[160px] flex justify-start flex-shrink-0">
+              <div className="w-[140px] flex justify-start flex-shrink-0">
                 {site.agency ? (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <span>via</span>
-                    <span className="text-foreground truncate max-w-[90px]">{site.agency}</span>
+                    <span className="text-foreground truncate max-w-[80px]">{site.agency}</span>
                     {agencyLogos[site.agency] && (
                       <img 
                         src={agencyLogos[site.agency]} 
@@ -1241,7 +1241,7 @@ export function SitesView() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveMediaSite(site.id, site.name);
@@ -1250,7 +1250,7 @@ export function SitesView() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               )}
-              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+              <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </div>
             </div>
