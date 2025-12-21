@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import type { Headline, Article } from '@/types';
 
+export interface MinimizedChat {
+  id: string;
+  title: string;
+  favicon?: string | null;
+  type: 'agency-request' | 'my-request';
+}
+
 interface AppState {
   // Headlines (session state only)
   headlines: Headline[];
@@ -65,6 +72,12 @@ interface AppState {
   // User custom verification status
   userCustomVerificationStatus: string | null;
   setUserCustomVerificationStatus: (status: string | null) => void;
+  
+  // Minimized chats
+  minimizedChats: MinimizedChat[];
+  addMinimizedChat: (chat: MinimizedChat) => void;
+  removeMinimizedChat: (id: string) => void;
+  clearMinimizedChats: () => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -139,4 +152,18 @@ export const useAppStore = create<AppState>()((set) => ({
   // User custom verification status
   userCustomVerificationStatus: null,
   setUserCustomVerificationStatus: (status) => set({ userCustomVerificationStatus: status }),
+  
+  // Minimized chats (max 4)
+  minimizedChats: [],
+  addMinimizedChat: (chat) => set((state) => {
+    // Don't add if already minimized
+    if (state.minimizedChats.some(c => c.id === chat.id)) return state;
+    // Max 4 chats, remove oldest if needed
+    const newChats = [...state.minimizedChats, chat].slice(-4);
+    return { minimizedChats: newChats };
+  }),
+  removeMinimizedChat: (id) => set((state) => ({
+    minimizedChats: state.minimizedChats.filter(c => c.id !== id)
+  })),
+  clearMinimizedChats: () => set({ minimizedChats: [] }),
 }));
