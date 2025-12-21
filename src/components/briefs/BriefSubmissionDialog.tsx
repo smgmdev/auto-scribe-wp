@@ -290,7 +290,7 @@ export function BriefSubmissionDialog({
             disabled={isSubmitting}
             className="hover:bg-black hover:text-white transition-colors group"
           >
-            <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:-translate-x-1" />
+            <ArrowLeft className="h-4 w-4 mr-2 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:-translate-x-1" />
             Back
           </Button>
           <Button 
