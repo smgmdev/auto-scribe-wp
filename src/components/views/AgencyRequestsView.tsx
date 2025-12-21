@@ -397,10 +397,6 @@ export function AgencyRequestsView() {
 
           {selectedRequest && (
             <div className="space-y-4">
-              <div className="flex items-center justify-end">
-                {getStatusBadge(selectedRequest.status, selectedRequest.read)}
-              </div>
-
               {/* Messages */}
               <ScrollArea className="h-[250px] border rounded-lg p-4">
                 <div className="space-y-4">
