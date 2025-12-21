@@ -217,17 +217,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    console.log('signOut called');
+    // Clear local state first
+    setSession(null);
+    setUser(null);
+    setRole(null);
+    setCredits(0);
     setPinVerified(false);
     setPinRequired(false);
+    
     try {
-      const { error } = await supabase.auth.signOut();
-      console.log('signOut result:', error ? error.message : 'success');
-      if (error) {
-        console.error('Sign out error:', error);
-      }
+      await supabase.auth.signOut();
     } catch (err) {
-      console.error('Sign out exception:', err);
+      // Ignore errors - session might already be gone
+      console.log('Sign out completed (session may have already been cleared)');
     }
   };
 
