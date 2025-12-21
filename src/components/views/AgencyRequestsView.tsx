@@ -410,7 +410,7 @@ export function AgencyRequestsView() {
           {selectedRequest && (
             <div className="space-y-2">
               {/* Messages */}
-              <ScrollArea className="h-[450px] border rounded-lg">
+              <ScrollArea className="h-[450px] w-full border rounded-lg">
                 <div className="space-y-2 p-3">
                   {(messages[selectedRequest.id] || []).map((msg) => (
                     <div
