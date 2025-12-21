@@ -441,9 +441,8 @@ export function AgencyRequestsView() {
               {selectedRequest?.title}
             </DialogTitle>
           </DialogHeader>
-
           {selectedRequest && (
-            <div className="px-4 pt-1">
+            <div className="px-4">
               {/* Messages */}
               <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
                 <div className="space-y-2 p-3">
