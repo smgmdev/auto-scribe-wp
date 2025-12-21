@@ -398,7 +398,7 @@ export function AgencyRequestsView() {
       {/* Request Detail Dialog */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0">
-          <DialogHeader className="px-4 pt-4 pb-2">
+          <DialogHeader className="px-4 pt-3 pb-1">
             <DialogTitle className="flex items-center gap-2">
               {selectedRequest?.media_site?.favicon && (
                 <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
