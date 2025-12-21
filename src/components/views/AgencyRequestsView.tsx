@@ -443,6 +443,36 @@ export function AgencyRequestsView() {
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
+
+              {/* Reply Input */}
+              {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'completed' && (
+                <div className="-mx-4" style={{ width: 'calc(100% + 2rem)' }}>
+                  <div className="relative">
+                    <Input
+                      placeholder="Type your message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      disabled={sending}
+                      className="rounded-none pr-12 border-x-0 border-b-0"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                    />
+                    <Button 
+                      onClick={sendMessage} 
+                      disabled={sending || !newMessage.trim()} 
+                      size="icon"
+                      variant="ghost"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                    >
+                      {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
