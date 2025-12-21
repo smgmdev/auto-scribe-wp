@@ -896,7 +896,7 @@ const Landing = () => {
             </div>
           )}
 
-          <div className="flex justify-between gap-3 mt-4">
+          <div className="flex justify-end gap-3 mt-4">
             <Button 
               variant="outline"
               onClick={() => setSelectedSite(null)}
