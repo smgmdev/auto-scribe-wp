@@ -853,12 +853,6 @@ const Landing = () => {
                     {extractDomain((selectedSite as MediaSite).link)}
                     <ExternalLink className="h-3 w-3" />
                   </a>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText((selectedSite as MediaSite).link); toast({ title: 'Copied to clipboard' }); }}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
                 </div>
               </div>
               
