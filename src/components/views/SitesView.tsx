@@ -1211,20 +1211,22 @@ export function SitesView() {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-1 justify-end">
-              {/* Price badge */}
-              <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                {site.price > 0 ? `${site.price} USD` : 'Free'}
-              </Badge>
+              {/* Price badge - fixed width for alignment */}
+              <div className="w-[90px] flex justify-end flex-shrink-0">
+                <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                  {site.price > 0 ? `${site.price} USD` : 'Free'}
+                </Badge>
+              </div>
               {/* Fixed width container for format */}
-              <div className="w-[100px] flex justify-start">
+              <div className="w-[100px] flex justify-start flex-shrink-0">
                 <span className="text-xs text-muted-foreground">{site.publication_format}</span>
               </div>
               {/* Agency info - fixed width for alignment */}
-              <div className="w-[180px] flex-shrink-0">
+              <div className="w-[160px] flex justify-start flex-shrink-0">
                 {site.agency ? (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <span>via</span>
-                    <span className="text-foreground truncate">{site.agency}</span>
+                    <span className="text-foreground truncate max-w-[90px]">{site.agency}</span>
                     {agencyLogos[site.agency] && (
                       <img 
                         src={agencyLogos[site.agency]} 
