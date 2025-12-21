@@ -2535,7 +2535,7 @@ export function SitesView() {
                 )}
               </div>
 
-              <div className="flex justify-start">
+              <div className="flex justify-end">
                 <Button 
                   variant="outline" 
                   onClick={() => setSelectedAgency(null)}
