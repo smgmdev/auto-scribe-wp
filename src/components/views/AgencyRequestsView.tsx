@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 interface ServiceRequest {
@@ -29,47 +30,92 @@ export function AgencyRequestsView() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
+
+  const fetchRequests = async () => {
+    if (!user) return;
+
+    // First get the agency payout id for this user
+    const { data: agencyData } = await supabase
+      .from('agency_payouts')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!agencyData) {
+      setLoading(false);
+      return;
+    }
+
+    setAgencyPayoutId(agencyData.id);
+
+    // Fetch service requests for this agency
+    const { data, error } = await supabase
+      .from('service_requests')
+      .select(`
+        id,
+        title,
+        description,
+        status,
+        created_at,
+        updated_at,
+        media_site:media_sites(name, favicon),
+        order:orders(id, status, delivery_status)
+      `)
+      .eq('agency_payout_id', agencyData.id)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setRequests(data as unknown as ServiceRequest[]);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      if (!user) return;
-
-      // First get the agency payout id for this user
-      const { data: agencyData } = await supabase
-        .from('agency_payouts')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (!agencyData) {
-        setLoading(false);
-        return;
-      }
-
-      // Fetch service requests for this agency
-      const { data, error } = await supabase
-        .from('service_requests')
-        .select(`
-          id,
-          title,
-          description,
-          status,
-          created_at,
-          updated_at,
-          media_site:media_sites(name, favicon),
-          order:orders(id, status, delivery_status)
-        `)
-        .eq('agency_payout_id', agencyData.id)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setRequests(data as unknown as ServiceRequest[]);
-      }
-      setLoading(false);
-    };
-
     fetchRequests();
   }, [user]);
+
+  // Real-time subscription for new requests
+  useEffect(() => {
+    if (!agencyPayoutId) return;
+
+    const channel = supabase
+      .channel('agency-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `agency_payout_id=eq.${agencyPayoutId}`
+        },
+        (payload) => {
+          console.log('New service request received:', payload);
+          toast({
+            title: 'New Service Request!',
+            description: 'A client has submitted a new brief.',
+          });
+          fetchRequests(); // Refetch to get full data with joins
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `agency_payout_id=eq.${agencyPayoutId}`
+        },
+        () => {
+          fetchRequests();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [agencyPayoutId]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

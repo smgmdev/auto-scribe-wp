@@ -20,6 +20,7 @@ interface ServiceRequest {
   updated_at: string;
   media_site_id: string;
   order_id: string | null;
+  user_id: string;
   media_sites: {
     name: string;
     favicon: string | null;
@@ -50,6 +51,80 @@ export function MyRequestsView() {
     if (user) {
       fetchRequests();
     }
+  }, [user]);
+
+  // Real-time subscription for new messages and status updates
+  useEffect(() => {
+    if (!user) return;
+
+    const messagesChannel = supabase
+      .channel('user-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMsg = payload.new as ServiceMessage;
+          // Only notify if the message is from agency (not from the user themselves)
+          if (newMsg.sender_type === 'agency') {
+            toast({
+              title: 'New Message!',
+              description: 'You received a reply from the agency.',
+            });
+          }
+          // Update messages state
+          setMessages(prev => ({
+            ...prev,
+            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
+          }));
+        }
+      )
+      .subscribe();
+
+    const requestsChannel = supabase
+      .channel('user-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        (payload) => {
+          const updated = payload.new as ServiceRequest;
+          // Check if this request belongs to current user
+          if (updated.user_id === user.id) {
+            if (updated.status === 'accepted') {
+              toast({
+                title: 'Request Accepted!',
+                description: 'Your request has been accepted. You can now proceed to payment.',
+                className: 'bg-green-600 text-white border-green-600',
+              });
+            } else if (updated.status === 'rejected') {
+              toast({
+                variant: 'destructive',
+                title: 'Request Rejected',
+                description: 'Your request has been rejected by the agency.',
+              });
+            } else if (updated.status === 'changes_requested') {
+              toast({
+                title: 'Changes Requested',
+                description: 'The agency has requested changes to your brief.',
+              });
+            }
+            fetchRequests(); // Refetch to update UI
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(requestsChannel);
+    };
   }, [user]);
 
   const fetchRequests = async () => {
