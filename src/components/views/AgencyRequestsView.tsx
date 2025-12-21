@@ -400,7 +400,7 @@ export function AgencyRequestsView() {
       {/* Request Detail Dialog */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0">
-          <DialogHeader className="px-4 pt-3 pb-1">
+          <DialogHeader className="px-4 pt-3 pb-0">
             <DialogTitle className="flex items-center gap-2">
               {selectedRequest?.media_site?.favicon && (
                 <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
@@ -410,7 +410,7 @@ export function AgencyRequestsView() {
           </DialogHeader>
 
           {selectedRequest && (
-            <div className="space-y-2 px-4 pb-4">
+            <div className="space-y-2 px-4 pb-4 pt-1">
               {/* Messages */}
               <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
                 <div className="space-y-2 p-3">
