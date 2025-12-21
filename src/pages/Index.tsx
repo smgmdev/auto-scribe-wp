@@ -28,6 +28,7 @@ interface LocationState {
   targetView?: string;
   targetTab?: string;
   targetSubcategory?: string;
+  preselectedSiteId?: string;
 }
 
 // Views accessible by all authenticated users (regular users)
@@ -67,7 +68,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
 };
 
 const Index = () => {
-  const { currentView, setCurrentView, setTargetTab, setTargetSubcategory } = useAppStore();
+  const { currentView, setCurrentView, setTargetTab, setTargetSubcategory, setPreselectedSiteId } = useAppStore();
   const { isAdmin, user } = useAuth();
   const location = useLocation();
   const [isApprovedAgency, setIsApprovedAgency] = useState(false);
@@ -177,8 +178,15 @@ const Index = () => {
       }
       // Clear the state to prevent re-triggering on subsequent renders
       window.history.replaceState({}, document.title);
+    } else if (state?.targetView === 'compose') {
+      setCurrentView('compose');
+      if (state?.preselectedSiteId) {
+        setPreselectedSiteId(state.preselectedSiteId);
+      }
+      // Clear the state to prevent re-triggering on subsequent renders
+      window.history.replaceState({}, document.title);
     }
-  }, [location.state, setCurrentView, setTargetTab, setTargetSubcategory]);
+  }, [location.state, setCurrentView, setTargetTab, setTargetSubcategory, setPreselectedSiteId]);
 
   return (
     <MainLayout>

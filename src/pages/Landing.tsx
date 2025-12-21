@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, Heart, User, Copy } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, Heart, User, Copy, PenLine } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
 import amblack from '@/assets/amblack.png';
 
@@ -58,6 +59,7 @@ const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaig
 const Landing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { setPreselectedSiteId, setCurrentView } = useAppStore();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
@@ -75,6 +77,23 @@ const Landing = () => {
   const [briefDialogOpen, setBriefDialogOpen] = useState(false);
   const [selectedForBrief, setSelectedForBrief] = useState<MediaSite | null>(null);
   // WebView state removed - now using direct _blank links
+
+  const handlePublishNewArticle = (siteId: string) => {
+    setPreselectedSiteId(siteId);
+    if (user) {
+      setCurrentView('compose');
+      navigate('/dashboard');
+    } else {
+      navigate('/auth', { 
+        state: { 
+          redirectTo: '/dashboard',
+          targetView: 'compose',
+          preselectedSiteId: siteId
+        } 
+      });
+    }
+    setSelectedSite(null);
+  };
 
   useEffect(() => {
     const fetchSites = async () => {
@@ -904,6 +923,15 @@ const Landing = () => {
             >
               Close
             </Button>
+            {selectedSiteType === 'wp' && selectedSite && (
+              <Button 
+                className="bg-black text-white hover:bg-gray-800 transition-colors"
+                onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)}
+              >
+                <PenLine className="h-4 w-4 mr-2" />
+                Publish New Article
+              </Button>
+            )}
             {selectedSiteType === 'media' && selectedSite && (selectedSite as MediaSite).category !== 'Agencies/People' && (
               user ? (
                 <Button 

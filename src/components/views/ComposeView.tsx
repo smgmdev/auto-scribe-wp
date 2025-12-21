@@ -60,7 +60,9 @@ export function ComposeView() {
     selectedHeadline,
     setSelectedHeadline,
     editingArticle,
-    setEditingArticle
+    setEditingArticle,
+    preselectedSiteId,
+    setPreselectedSiteId
   } = useAppStore();
   const { sites, loading: sitesLoading } = useSites();
   const { addArticle, updateArticle } = useArticles();
@@ -78,7 +80,7 @@ export function ComposeView() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedSite, setSelectedSite] = useState<string>(editingArticle?.publishedTo || '');
+  const [selectedSite, setSelectedSite] = useState<string>(editingArticle?.publishedTo || preselectedSiteId || '');
   const [featuredImage, setFeaturedImage] = useState<FeaturedImage>(() => {
     if (editingArticle?.featuredImage?.url) {
       return {
@@ -168,6 +170,15 @@ export function ComposeView() {
     if (!selectedSite) return 0;
     return getSiteCreditCost(selectedSite);
   };
+
+  // Handle preselected site from store
+  useEffect(() => {
+    if (preselectedSiteId && !editingArticle) {
+      setSelectedSite(preselectedSiteId);
+      // Clear the preselected site after using it
+      setPreselectedSiteId(null);
+    }
+  }, [preselectedSiteId, editingArticle, setPreselectedSiteId]);
 
   // Sync all form fields when editingArticle changes
   useEffect(() => {
