@@ -620,29 +620,35 @@ export function ComposeView() {
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
         });
       }
-      // Deduct credits for non-admin users (only for new articles, not updates)
+      // Deduct credits for non-admin users via backend (only for new articles, not updates)
       if (!isAdmin && !editingArticle && user) {
         const creditCost = getTotalCreditCost();
         if (creditCost > 0) {
-          const newCredits = credits - creditCost;
-          
-          // Update credits in database
-          const { error: creditsError } = await supabase
-            .from('user_credits')
-            .update({ credits: newCredits, updated_at: new Date().toISOString() })
-            .eq('user_id', user.id);
-          
-          if (creditsError) {
-            console.error('Failed to deduct credits:', creditsError);
-          } else {
-            // Record transaction
-            await supabase.from('credit_transactions').insert({
-              user_id: user.id,
-              amount: -creditCost,
-              type: 'publish',
-              description: `Published article to ${currentSite.name}`
+          const { data: creditResult, error: creditError } = await supabase.functions.invoke('deduct-publish-credits', {
+            body: {
+              siteId: selectedSite,
+              siteName: currentSite.name
+            }
+          });
+
+          if (creditError) {
+            console.error('Failed to deduct credits:', creditError);
+            toast({
+              title: "Credit deduction failed",
+              description: "Article published but credits could not be deducted. Please contact support.",
+              variant: "destructive"
             });
-            
+          } else if (creditResult?.error) {
+            // Backend returned an error (e.g., insufficient credits)
+            console.error('Backend credit error:', creditResult.error);
+            toast({
+              title: "Publishing failed",
+              description: creditResult.error,
+              variant: "destructive"
+            });
+            setIsPublishing(false);
+            return;
+          } else {
             // Refresh credits in auth context
             await refreshCredits();
           }
@@ -1140,7 +1146,12 @@ export function ComposeView() {
                     Saving...
                   </> : 'Save Changes'}
               </Button>}
-            <Button variant="accent" className="w-full" onClick={handlePublish} disabled={isPublishing || !selectedSite}>
+            <Button 
+              variant="accent" 
+              className="w-full" 
+              onClick={handlePublish} 
+              disabled={isPublishing || !selectedSite || (!isAdmin && !editingArticle && !canAffordSite(selectedSite))}
+            >
               {isPublishing ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Publishing...
@@ -1149,6 +1160,11 @@ export function ComposeView() {
                   {editingArticle ? 'Update & Publish' : 'Publish Article'}
                 </>}
             </Button>
+            {!isAdmin && !editingArticle && selectedSite && !canAffordSite(selectedSite) && (
+              <p className="text-xs text-destructive text-center">
+                Insufficient credits. You need {getSiteCreditCost(selectedSite)} credits to publish.
+              </p>
+            )}
             {!editingArticle && <Button variant="outline" className="w-full" onClick={handleSaveDraft} disabled={!title || isPublishing}>
                 Save as Draft
               </Button>}
