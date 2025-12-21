@@ -3,7 +3,7 @@ import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle,
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
@@ -433,12 +433,12 @@ export function AgencyRequestsView() {
               {/* Reply Input */}
               {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'completed' && (
                 <div className="flex gap-2">
-                  <Textarea
+                  <Input
                     placeholder="Type your message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    rows={2}
                     disabled={sending}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                   />
                   <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
