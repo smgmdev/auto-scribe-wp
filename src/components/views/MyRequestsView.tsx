@@ -174,7 +174,7 @@ export function MyRequestsView() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending_review':
-        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
+        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Waiting Reply</Badge>;
       case 'changes_requested':
         return <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes Requested</Badge>;
       case 'accepted':
