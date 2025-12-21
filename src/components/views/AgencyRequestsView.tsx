@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -20,6 +23,7 @@ interface ServiceRequest {
   media_site: {
     name: string;
     favicon: string | null;
+    price: number;
   } | null;
   order: {
     id: string;
@@ -28,12 +32,25 @@ interface ServiceRequest {
   } | null;
 }
 
+interface ServiceMessage {
+  id: string;
+  request_id: string;
+  sender_type: 'client' | 'agency' | 'admin';
+  sender_id: string;
+  message: string;
+  created_at: string;
+}
+
 export function AgencyRequestsView() {
   const { user } = useAuth();
   const { setAgencyUnreadServiceRequestsCount } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
 
   const fetchRequests = async () => {
     if (!user) return;
@@ -63,7 +80,7 @@ export function AgencyRequestsView() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon),
+        media_site:media_sites(name, favicon, price),
         order:orders(id, status, delivery_status)
       `)
       .eq('agency_payout_id', agencyData.id)
@@ -74,6 +91,25 @@ export function AgencyRequestsView() {
       // Update unread count in store
       const unreadCount = data.filter(r => !r.read).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
+
+      // Fetch messages for all requests
+      if (data.length > 0) {
+        const requestIds = data.map(r => r.id);
+        const { data: messagesData } = await supabase
+          .from('service_messages')
+          .select('*')
+          .in('request_id', requestIds)
+          .order('created_at', { ascending: true });
+
+        const messagesByRequest: Record<string, ServiceMessage[]> = {};
+        messagesData?.forEach(msg => {
+          if (!messagesByRequest[msg.request_id]) {
+            messagesByRequest[msg.request_id] = [];
+          }
+          messagesByRequest[msg.request_id].push(msg as ServiceMessage);
+        });
+        setMessages(messagesByRequest);
+      }
     }
     setLoading(false);
   };
@@ -82,11 +118,11 @@ export function AgencyRequestsView() {
     fetchRequests();
   }, [user]);
 
-  // Real-time subscription for new requests
+  // Real-time subscription for new requests and messages
   useEffect(() => {
     if (!agencyPayoutId) return;
 
-    const channel = supabase
+    const requestsChannel = supabase
       .channel('agency-requests')
       .on(
         'postgres_changes',
@@ -102,7 +138,7 @@ export function AgencyRequestsView() {
             title: 'New Service Request!',
             description: 'A client has submitted a new brief.',
           });
-          fetchRequests(); // Refetch to get full data with joins
+          fetchRequests();
         }
       )
       .on(
@@ -119,8 +155,36 @@ export function AgencyRequestsView() {
       )
       .subscribe();
 
+    const messagesChannel = supabase
+      .channel('agency-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMsg = payload.new as ServiceMessage;
+          // Only notify if the message is from client (not from the agency themselves)
+          if (newMsg.sender_type === 'client') {
+            toast({
+              title: 'New Message!',
+              description: 'You received a message from a client.',
+            });
+          }
+          // Update messages state
+          setMessages(prev => ({
+            ...prev,
+            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
+          }));
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(requestsChannel);
+      supabase.removeChannel(messagesChannel);
     };
   }, [agencyPayoutId]);
 
@@ -131,11 +195,15 @@ export function AgencyRequestsView() {
     }
     switch (status) {
       case 'pending_review':
-        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending Review</Badge>;
+        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
       case 'accepted':
-        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Accepted</Badge>;
+        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Rejected</Badge>;
+        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+      case 'changes_requested':
+        return <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes Requested</Badge>;
+      case 'paid':
+        return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Paid</Badge>;
       case 'completed':
         return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Completed</Badge>;
       default:
@@ -157,6 +225,82 @@ export function AgencyRequestsView() {
     // Update store count
     const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId).length;
     setAgencyUnreadServiceRequestsCount(newUnreadCount);
+  };
+
+  const handleCardClick = (request: ServiceRequest) => {
+    if (!request.read) {
+      markAsRead(request.id);
+    }
+    setSelectedRequest(request);
+  };
+
+  const sendMessage = async () => {
+    if (!user || !selectedRequest || !newMessage.trim() || !agencyPayoutId) return;
+
+    setSending(true);
+    try {
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: selectedRequest.id,
+        sender_type: 'agency',
+        sender_id: agencyPayoutId,
+        message: newMessage.trim()
+      });
+
+      if (error) throw error;
+
+      // Update local state
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: selectedRequest.id,
+        sender_type: 'agency',
+        sender_id: agencyPayoutId,
+        message: newMessage.trim(),
+        created_at: new Date().toISOString()
+      };
+
+      setMessages(prev => ({
+        ...prev,
+        [selectedRequest.id]: [...(prev[selectedRequest.id] || []), newMsg]
+      }));
+
+      setNewMessage('');
+      toast({ title: 'Message sent' });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to send message',
+        description: error.message,
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const updateRequestStatus = async (status: string) => {
+    if (!selectedRequest) return;
+
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ status })
+        .eq('id', selectedRequest.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setRequests(prev => prev.map(r => 
+        r.id === selectedRequest.id ? { ...r, status } : r
+      ));
+      setSelectedRequest(prev => prev ? { ...prev, status } : null);
+
+      toast({ title: `Request ${status === 'accepted' ? 'accepted' : status === 'rejected' ? 'rejected' : 'updated'}` });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to update request',
+        description: error.message,
+      });
+    }
   };
 
   if (loading) {
@@ -195,8 +339,8 @@ export function AgencyRequestsView() {
           {requests.map((request) => (
             <Card 
               key={request.id} 
-              className={`border-border/50 hover:border-border transition-colors relative ${!request.read ? 'ring-1 ring-blue-500/50' : ''}`}
-              onClick={() => !request.read && markAsRead(request.id)}
+              className={`border-border/50 hover:border-border transition-colors cursor-pointer ${!request.read ? 'ring-1 ring-blue-500/50' : ''}`}
+              onClick={() => handleCardClick(request)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -226,16 +370,124 @@ export function AgencyRequestsView() {
                   <span className="text-xs text-muted-foreground">
                     {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                   </span>
-                  <Button variant="outline" size="sm">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Details
-                  </Button>
+                  {messages[request.id]?.length > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {messages[request.id].length} message{messages[request.id].length > 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Request Detail Dialog */}
+      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedRequest?.media_site?.favicon && (
+                <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
+              )}
+              {selectedRequest?.title}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{selectedRequest.media_site?.name}</p>
+                {getStatusBadge(selectedRequest.status, selectedRequest.read)}
+              </div>
+
+              {/* Brief Description */}
+              <div className="bg-muted/50 rounded-lg p-4">
+                <p className="text-sm font-medium mb-2">Brief</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedRequest.description}</p>
+              </div>
+
+              {/* Messages */}
+              <ScrollArea className="h-[250px] border rounded-lg p-4">
+                <div className="space-y-4">
+                  {(messages[selectedRequest.id] || []).map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${
+                          msg.sender_type === 'agency'
+                            ? 'bg-primary text-primary-foreground'
+                            : msg.sender_type === 'admin'
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <p className="text-xs font-medium mb-1 opacity-70">
+                          {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
+                        </p>
+                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        <p className="text-xs opacity-50 mt-1">
+                          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {(messages[selectedRequest.id] || []).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Reply Input */}
+              {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'completed' && (
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    rows={2}
+                    disabled={sending}
+                  />
+                  <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
+              )}
+
+              {/* Action Buttons for pending requests */}
+              {selectedRequest.status === 'pending_review' && (
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => updateRequestStatus('accepted')}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Accept Request
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1 border-amber-500 text-amber-600 hover:bg-amber-500/10"
+                    onClick={() => updateRequestStatus('changes_requested')}
+                  >
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Request Changes
+                  </Button>
+                  <Button 
+                    variant="destructive"
+                    className="flex-1"
+                    onClick={() => updateRequestStatus('rejected')}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Reject
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
