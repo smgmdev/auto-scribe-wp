@@ -403,9 +403,6 @@ export function AgencyRequestsView() {
                     )}
                     <div>
                       <CardTitle className="text-lg">{request.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {request.media_site?.name || 'Unknown Site'}
-                      </p>
                     </div>
                   </div>
                 </div>
