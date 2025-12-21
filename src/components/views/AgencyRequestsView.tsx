@@ -408,10 +408,10 @@ export function AgencyRequestsView() {
           </DialogHeader>
 
           {selectedRequest && (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {/* Messages */}
               <ScrollArea className="h-[450px] border rounded-lg">
-                <div className="space-y-4 p-4">
+                <div className="space-y-2 p-3">
                   {(messages[selectedRequest.id] || []).map((msg) => (
                     <div
                       key={msg.id}
