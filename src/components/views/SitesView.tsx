@@ -107,6 +107,7 @@ export function SitesView() {
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
+  const [selectedAgency, setSelectedAgency] = useState<ActiveAgency | null>(null);
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -1638,8 +1639,7 @@ export function SitesView() {
                               key={agency.id}
                               className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
                               onClick={() => {
-                                toggleExpand(agency.id);
-                                setActiveMediaCategory('Agencies/People');
+                                setSelectedAgency(agency);
                                 setSearchQuery('');
                                 setShowSearchDropdown(false);
                               }}
@@ -2463,6 +2463,87 @@ export function SitesView() {
               Delete
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agency Detail Dialog */}
+      <Dialog open={!!selectedAgency} onOpenChange={(open) => !open && setSelectedAgency(null)}>
+        <DialogContent className="sm:max-w-md">
+          {selectedAgency && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border">
+                    {selectedAgency.favicon ? (
+                      <img 
+                        src={selectedAgency.favicon} 
+                        alt={`${selectedAgency.name} logo`} 
+                        className="h-8 w-8 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <Globe className={`h-6 w-6 text-muted-foreground ${selectedAgency.favicon ? 'hidden' : ''}`} />
+                  </div>
+                  <div>
+                    <DialogTitle>{selectedAgency.name}</DialogTitle>
+                    <DialogDescription className="text-xs">
+                      Verified Agency
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                {selectedAgency.country && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Country</span>
+                    <span className="text-sm font-medium">{selectedAgency.country}</span>
+                  </div>
+                )}
+
+                {selectedAgency.link && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Website</span>
+                    <a 
+                      href={ensureHttps(selectedAgency.link)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-accent hover:underline flex items-center gap-1"
+                    >
+                      {selectedAgency.link.replace(/^https?:\/\//, '')}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
+
+                {selectedAgency.about && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">About</p>
+                    <p className="text-sm">{selectedAgency.about}</p>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <Badge variant="secondary" className="text-xs">
+                    Verified Partner
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedAgency(null)}
+                  className="hover:bg-black hover:text-white transition-colors"
+                >
+                  Close
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
