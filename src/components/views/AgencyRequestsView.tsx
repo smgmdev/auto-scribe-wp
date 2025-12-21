@@ -11,8 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useAppStore, MinimizedChat } from '@/stores/appStore';
-import { MinimizedChats } from '@/components/ui/MinimizedChats';
+import { useAppStore } from '@/stores/appStore';
 
 interface ServiceRequest {
   id: string;
@@ -45,7 +44,7 @@ interface ServiceMessage {
 
 export function AgencyRequestsView() {
   const { user } = useAuth();
-  const { setAgencyUnreadServiceRequestsCount, addMinimizedChat, removeMinimizedChat } = useAppStore();
+  const { setAgencyUnreadServiceRequestsCount, addMinimizedChat } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
@@ -588,17 +587,6 @@ export function AgencyRequestsView() {
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Minimized Chats */}
-      <MinimizedChats
-        onOpenChat={(chat) => {
-          removeMinimizedChat(chat.id);
-          const request = requests.find(r => r.id === chat.id);
-          if (request) {
-            setSelectedRequest(request);
-          }
-        }}
-      />
     </div>
   );
 }
