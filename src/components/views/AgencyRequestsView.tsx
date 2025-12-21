@@ -281,7 +281,6 @@ export function AgencyRequestsView() {
 
       setNewMessage('');
       setTimeout(() => inputRef.current?.focus(), 0);
-      toast({ title: 'Message sent' });
     } catch (error: any) {
       toast({
         variant: 'destructive',
