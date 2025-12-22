@@ -7,7 +7,8 @@ let audioInstance: HTMLAudioElement | null = null;
 export const playMessageSound = () => {
   try {
     if (!audioInstance) {
-      audioInstance = new Audio('/sounds/new-message.mp3');
+      // Add cache-busting parameter to ensure latest sound file is loaded
+      audioInstance = new Audio('/sounds/new-message.mp3?v=2');
       audioInstance.volume = 0.5;
     }
     audioInstance.currentTime = 0;
