@@ -63,12 +63,64 @@ export function GlobalChatDialog() {
   const [sendOrderDialogOpen, setSendOrderDialogOpen] = useState(false);
   const [specialTerms, setSpecialTerms] = useState('');
   
+  // Drag state
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
+  
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    // Only start drag on left mouse button and not on buttons/inputs
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
+    
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: dragPosition.x,
+      posY: dragPosition.y
+    };
+    e.preventDefault();
+  }, [dragPosition]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
+      setDragPosition({
+        x: dragStartRef.current.posX + deltaX,
+        y: dragStartRef.current.posY + deltaY
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  // Reset position when dialog closes
+  useEffect(() => {
+    if (!globalChatOpen) {
+      setDragPosition({ x: 0, y: 0 });
+    }
+  }, [globalChatOpen]);
 
   const senderType = globalChatType === 'agency-request' ? 'agency' : 'client';
   const counterpartyLabel = globalChatType === 'agency-request' ? 'Client' : 'Agency';
@@ -727,8 +779,16 @@ export function GlobalChatDialog() {
   return (
     <>
       <Dialog open={globalChatOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none gap-0 shadow-2xl shadow-black/25" hideCloseButton overlayClassName="bg-transparent">
-          <DialogHeader className={`px-4 py-2 ${isCancelled ? 'bg-red-500/20' : ''}`}>
+        <DialogContent 
+          className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none gap-0 shadow-2xl shadow-black/25" 
+          hideCloseButton 
+          overlayClassName="bg-transparent"
+          style={{ transform: `translate(calc(-50% + ${dragPosition.x}px), calc(-50% + ${dragPosition.y}px))` }}
+        >
+          <DialogHeader 
+            className={`px-4 py-2 ${isCancelled ? 'bg-red-500/20' : ''} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onMouseDown={handleDragStart}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {globalChatRequest.media_site?.favicon && (
