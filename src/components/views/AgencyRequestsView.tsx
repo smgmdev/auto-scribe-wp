@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -50,17 +50,18 @@ export function AgencyRequestsView() {
     setAgencyUnreadServiceRequestsCount, 
     unreadMessageCounts,
     clearUnreadMessageCount,
-    openGlobalChat,
-    incrementMinimizedChatUnread,
-    incrementUnreadMessageCount,
-    minimizedChats,
-    globalChatOpen,
-    globalChatRequest
+    openGlobalChat
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
+  
+  // Refs to avoid stale closures in subscriptions
+  const requestsRef = useRef<ServiceRequest[]>([]);
+  useEffect(() => {
+    requestsRef.current = requests;
+  }, [requests]);
 
   const fetchRequests = async () => {
     if (!user) return;
@@ -128,7 +129,8 @@ export function AgencyRequestsView() {
     fetchRequests();
   }, [user]);
 
-  // Real-time subscription for new requests and messages
+  // Real-time subscription for new requests and status updates
+  // NOTE: Message notifications are handled by ChatListPanel via broadcast
   useEffect(() => {
     if (!agencyPayoutId) return;
 
@@ -174,69 +176,53 @@ export function AgencyRequestsView() {
       )
       .subscribe();
 
-    const messagesChannel = supabase
-      .channel('agency-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'service_messages'
-        },
-        async (payload) => {
-          const newMsg = payload.new as ServiceMessage;
-          if (newMsg.sender_type === 'agency') return;
-          
-          // Check if this message belongs to one of our requests
-          const requestExists = requests.some(r => r.id === newMsg.request_id);
-          if (!requestExists) return;
-          
-          const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
-          const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
-          
-          if (isMinimized) {
-            incrementMinimizedChatUnread(newMsg.request_id);
-          } else if (!isDialogOpen) {
-            incrementUnreadMessageCount(newMsg.request_id);
-          }
-          
-          // Mark the request as unread when a new client message arrives
-          if (!isDialogOpen) {
-            await supabase
-              .from('service_requests')
-              .update({ read: false })
-              .eq('id', newMsg.request_id);
-            
-            // Update local state
-            setRequests(prev => {
-              const updated = prev.map(r => 
-                r.id === newMsg.request_id ? { ...r, read: false } : r
-              );
-              // Recalculate unread count
-              const newUnreadCount = updated.filter(r => !r.read).length;
-              setAgencyUnreadServiceRequestsCount(newUnreadCount);
-              return updated;
-            });
-            
-            toast({
-              title: 'New Message!',
-              description: 'You received a message from a client.',
-            });
-          }
-          
-          setMessages(prev => ({
-            ...prev,
-            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
-          }));
-        }
-      )
+    // Broadcast subscription to receive messages from clients (works regardless of RLS)
+    const broadcastChannel = supabase
+      .channel(`notify-${agencyPayoutId}`)
+      .on('broadcast', { event: 'new-message' }, (payload) => {
+        const data = payload.payload;
+        if (!data) return;
+        
+        const { request_id, sender_type, message } = data;
+        // Only process client messages
+        if (sender_type === 'agency' || sender_type === 'admin') return;
+        
+        // Check if this message belongs to one of our requests
+        const requestExists = requestsRef.current.some(r => r.id === request_id);
+        if (!requestExists) return;
+        
+        // Add message to local state
+        const newMsg: ServiceMessage = {
+          id: crypto.randomUUID(),
+          request_id,
+          sender_type,
+          sender_id: data.sender_id || '',
+          message,
+          created_at: new Date().toISOString()
+        };
+        
+        setMessages(prev => ({
+          ...prev,
+          [request_id]: [...(prev[request_id] || []), newMsg]
+        }));
+        
+        // Update local state read status
+        setRequests(prev => {
+          const updated = prev.map(r => 
+            r.id === request_id ? { ...r, read: false } : r
+          );
+          const newUnreadCount = updated.filter(r => !r.read).length;
+          setAgencyUnreadServiceRequestsCount(newUnreadCount);
+          return updated;
+        });
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(requestsChannel);
-      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(broadcastChannel);
     };
-  }, [agencyPayoutId, minimizedChats, globalChatOpen, globalChatRequest?.id]);
+  }, [agencyPayoutId]);
 
   const getStatusBadge = (status: string, isRead: boolean) => {
     if (status === 'pending_review' && !isRead) {

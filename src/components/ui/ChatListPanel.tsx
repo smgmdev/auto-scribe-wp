@@ -292,7 +292,7 @@ export function ChatListPanel() {
     agencyPayoutIdRef.current = agencyPayoutId;
   }, [agencyPayoutId]);
 
-  const handleBroadcastNotification = useCallback((payload: any) => {
+  const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
     
     const { request_id, sender_type, title, media_site_name } = payload;
@@ -311,6 +311,12 @@ export function ChatListPanel() {
       incrementMinimizedChatUnread(request_id);
       playMessageSound();
     } else if (!isDialogOpen) {
+      // Mark request as unread in database
+      await supabase
+        .from('service_requests')
+        .update({ read: false })
+        .eq('id', request_id);
+      
       incrementUnreadMessageCount(request_id);
       
       // For user engagements (receiving from agency)
@@ -326,14 +332,15 @@ export function ChatListPanel() {
       playMessageSound();
     }
     
-    // Refresh the lists
+    // Refresh the lists to get latest data
     fetchMyEngagements();
-    if (agencyPayoutIdRef.current) {
+    if (agencyPayoutIdRef.current || isAdmin) {
       fetchServiceRequests();
     }
-  }, [incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount]);
+  }, [incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, isAdmin]);
 
-  // Real-time subscription for read status changes and new messages
+  // Real-time subscription for read status changes only
+  // NOTE: New message notifications are handled via broadcast (above) which works regardless of RLS
   useEffect(() => {
     if (!user) return;
 
@@ -363,123 +370,54 @@ export function ChatListPanel() {
       )
       .subscribe();
 
-    // Listen for new messages to trigger notifications and refetch
-    const messagesChannel = supabase
-      .channel('chat-panel-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'service_messages'
-        },
-        async (payload) => {
-          const newMsg = payload.new as any;
-          
-          // Check if this message is relevant to the user (use refs for fresh values)
-          const isMyEngagement = myEngagementsRef.current.some(e => e.id === newMsg.request_id);
-          const isServiceRequest = serviceRequestsRef.current.some(r => r.id === newMsg.request_id);
-          
-          if (!isMyEngagement && !isServiceRequest) return;
-          
-          const isMinimized = minimizedChatsRef.current.some(c => c.id === newMsg.request_id);
-          const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === newMsg.request_id;
-          
-          // For user's engagements: notify when agency sends message
-          if (isMyEngagement && newMsg.sender_type !== 'client') {
-            if (isMinimized) {
-              incrementMinimizedChatUnread(newMsg.request_id);
-              playMessageSound();
-            } else if (!isDialogOpen) {
-              // Mark request as unread
-              await supabase
-                .from('service_requests')
-                .update({ read: false })
-                .eq('id', newMsg.request_id);
-              
-              toast({
-                title: 'New Message',
-                description: 'You received a reply from the agency.',
-              });
-              playMessageSound();
-            }
-          }
-          
-          // For agency's service requests: notify when client sends message
-          if (isServiceRequest && newMsg.sender_type === 'client') {
-            if (isMinimized) {
-              incrementMinimizedChatUnread(newMsg.request_id);
-              playMessageSound();
-            } else if (!isDialogOpen) {
-              // Mark request as unread
-              await supabase
-                .from('service_requests')
-                .update({ read: false })
-                .eq('id', newMsg.request_id);
-              
-              toast({
-                title: 'New Client Message',
-                description: 'You received a message from a client.',
-              });
-              playMessageSound();
-            }
-          }
-          
-          // Refresh the lists to get latest data
-          fetchMyEngagements();
-          if (agencyPayoutIdRef.current || isAdmin) {
-            fetchServiceRequests();
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       supabase.removeChannel(readStatusChannel);
-      supabase.removeChannel(messagesChannel);
     };
-  }, [user?.id, isAdmin]);
+  }, [user?.id]);
 
   // Broadcast notification subscription - works regardless of RLS
+  // This is the PRIMARY notification mechanism since postgres_changes may be blocked by RLS
   useEffect(() => {
     if (!user) return;
 
-    // Determine which channel to listen on - user's own ID and agency payout ID if applicable
     const channels: ReturnType<typeof supabase.channel>[] = [];
     
-    // Listen for notifications to user's own ID
-    console.log('[ChatListPanel] Setting up broadcast subscription for user:', user.id);
+    // Listen for notifications to user's own ID (for when agencies reply to user's requests)
     const userChannel = supabase
       .channel(`notify-${user.id}`)
       .on('broadcast', { event: 'new-message' }, (payload) => {
-        console.log('[ChatListPanel] Received broadcast notification (user):', payload);
+        console.log('[ChatListPanel] Received broadcast for user:', user.id, payload);
         handleBroadcastNotification(payload.payload);
       })
       .subscribe((status) => {
-        console.log('[ChatListPanel] User broadcast subscription status:', status);
+        console.log('[ChatListPanel] User channel status:', status, 'for user:', user.id);
       });
     channels.push(userChannel);
-    
-    // Also listen for notifications to agency payout ID if user is an agency
-    if (agencyPayoutId) {
-      console.log('[ChatListPanel] Setting up broadcast subscription for agency:', agencyPayoutId);
-      const agencyChannel = supabase
-        .channel(`notify-${agencyPayoutId}`)
-        .on('broadcast', { event: 'new-message' }, (payload) => {
-          console.log('[ChatListPanel] Received broadcast notification (agency):', payload);
-          handleBroadcastNotification(payload.payload);
-        })
-        .subscribe((status) => {
-          console.log('[ChatListPanel] Agency broadcast subscription status:', status);
-        });
-      channels.push(agencyChannel);
-    }
 
     return () => {
-      console.log('[ChatListPanel] Cleaning up broadcast subscriptions');
       channels.forEach(ch => supabase.removeChannel(ch));
     };
-  }, [user?.id, agencyPayoutId, handleBroadcastNotification]);
+  }, [user?.id, handleBroadcastNotification]);
+
+  // Separate effect for agency broadcast subscription - re-runs when agencyPayoutId changes
+  useEffect(() => {
+    if (!agencyPayoutId) return;
+
+    console.log('[ChatListPanel] Setting up agency broadcast for:', agencyPayoutId);
+    const agencyChannel = supabase
+      .channel(`notify-${agencyPayoutId}`)
+      .on('broadcast', { event: 'new-message' }, (payload) => {
+        console.log('[ChatListPanel] Received broadcast for agency:', agencyPayoutId, payload);
+        handleBroadcastNotification(payload.payload);
+      })
+      .subscribe((status) => {
+        console.log('[ChatListPanel] Agency channel status:', status, 'for agency:', agencyPayoutId);
+      });
+
+    return () => {
+      supabase.removeChannel(agencyChannel);
+    };
+  }, [agencyPayoutId, handleBroadcastNotification]);
 
   const handleOpenChat = async (item: ChatItem, type: 'my-request' | 'agency-request') => {
     clearUnreadMessageCount(item.id);
