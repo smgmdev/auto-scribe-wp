@@ -296,8 +296,11 @@ export function GlobalChatDialog() {
           if (newMsg.sender_type === senderType) return;
           
           // Don't play sound here - the counterparty will hear it from their ChatListPanel
-          // We only add the message to local state for display
-          setMessages(prev => [...prev, newMsg]);
+          // Avoid duplicates by checking if message already exists
+          setMessages(prev => {
+            if (prev.some(m => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
         }
       )
       .on(
@@ -874,25 +877,17 @@ export function GlobalChatDialog() {
 
       const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderData)}[/ORDER_REQUEST]`;
 
-      const { error } = await supabase.from('service_messages').insert({
+      const { data: insertedMsg, error } = await supabase.from('service_messages').insert({
         request_id: globalChatRequest.id,
         sender_type: senderType,
         sender_id: senderId,
         message: orderMessage
-      });
+      }).select().single();
 
       if (error) throw error;
 
-      const newMsg: ServiceMessage = {
-        id: crypto.randomUUID(),
-        request_id: globalChatRequest.id,
-        sender_type: senderType,
-        sender_id: senderId,
-        message: orderMessage,
-        created_at: new Date().toISOString()
-      };
-
-      setMessages(prev => [...prev, newMsg]);
+      // Use the actual inserted message from the database to avoid duplicates
+      setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
 
       // Notify the client
       const { data: requestData } = await supabase
