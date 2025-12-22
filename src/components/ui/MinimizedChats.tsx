@@ -52,10 +52,10 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
         return (
           <div
             key={`${chat.id}-${totalUnread}`}
-            className={`relative flex items-center gap-2 rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
+            className={`relative flex items-center gap-2 rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group border ${
               hasUnread 
-                ? 'bg-sky-100 dark:bg-sky-900/50 border-2 border-sky-500' 
-                : 'bg-card border border-border'
+                ? 'bg-sky-200 dark:bg-sky-800/60 border-border' 
+                : 'bg-card border-border'
             }`}
             onClick={() => handleOpenChat(chat)}
           >
