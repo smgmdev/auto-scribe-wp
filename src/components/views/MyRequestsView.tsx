@@ -55,6 +55,7 @@ export function MyRequestsView() {
     minimizedChats,
     globalChatOpen,
     globalChatRequest,
+    userUnreadEngagementsCount,
     setUserUnreadEngagementsCount
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -278,8 +279,25 @@ export function MyRequestsView() {
     }
   };
 
-  const handleCardClick = (request: ServiceRequest) => {
+  const handleCardClick = async (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
+    
+    // Mark the request as read in the database and decrement sidebar count
+    if (!request.read) {
+      await supabase
+        .from('service_requests')
+        .update({ read: true })
+        .eq('id', request.id);
+      
+      // Decrement the sidebar notification count
+      setUserUnreadEngagementsCount(Math.max(0, userUnreadEngagementsCount - 1));
+      
+      // Update local state
+      setRequests(prev => prev.map(r => 
+        r.id === request.id ? { ...r, read: true } : r
+      ));
+    }
+    
     openGlobalChat(request as unknown as GlobalChatRequest, 'my-request');
   };
 

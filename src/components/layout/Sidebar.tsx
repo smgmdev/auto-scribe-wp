@@ -112,6 +112,7 @@ export function Sidebar({
     setAgencyUnreadServiceRequestsCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
+    incrementUserUnreadEngagementsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -348,6 +349,76 @@ export function Sidebar({
       isMounted = false;
     };
   }, [user?.id, isAdmin]); // Remove userApplicationStatus from dependencies to prevent re-fetch loops
+
+  // Fetch initial unread engagement count and subscribe to real-time updates for regular users
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const fetchUnreadEngagements = async () => {
+      // Get all user's service requests
+      const { data: requests } = await supabase
+        .from('service_requests')
+        .select('id, read')
+        .eq('user_id', user.id);
+
+      if (!requests || requests.length === 0) return;
+
+      // Get all messages for these requests
+      const requestIds = requests.map(r => r.id);
+      const { data: messages } = await supabase
+        .from('service_messages')
+        .select('request_id, sender_type')
+        .in('request_id', requestIds);
+
+      // Count requests that have unread agency messages
+      let unreadCount = 0;
+      requests.forEach(request => {
+        const hasAgencyMessages = messages?.some(
+          m => m.request_id === request.id && m.sender_type !== 'client'
+        );
+        if (hasAgencyMessages && !request.read) {
+          unreadCount++;
+        }
+      });
+
+      setUserUnreadEngagementsCount(unreadCount);
+    };
+
+    fetchUnreadEngagements();
+
+    // Subscribe to real-time message inserts for user's requests
+    const channel = supabase
+      .channel('user-engagement-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        async (payload) => {
+          const newMsg = payload.new as { request_id: string; sender_type: string };
+          // Only count messages from agency, not from the user themselves
+          if (newMsg.sender_type === 'client') return;
+
+          // Check if this request belongs to the current user
+          const { data: request } = await supabase
+            .from('service_requests')
+            .select('user_id')
+            .eq('id', newMsg.request_id)
+            .maybeSingle();
+
+          if (request?.user_id === user.id) {
+            incrementUserUnreadEngagementsCount();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
 
   const handleNavClick = (viewId: string) => {
     // Clear editing state when navigating away from compose
