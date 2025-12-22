@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
+import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
 
 interface ServiceRequest {
   id: string;
@@ -62,11 +63,39 @@ export function AgencyRequestsView() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectedRequestRef = useRef<ServiceRequest | null>(null);
+  const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
+  const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
   
   // Keep ref in sync with state
   useEffect(() => {
     selectedRequestRef.current = selectedRequest;
   }, [selectedRequest]);
+
+  // Presence tracking for the open chat
+  useEffect(() => {
+    if (selectedRequest && agencyPayoutId) {
+      // Join presence channel for this chat
+      const tracker = new ChatPresenceTracker(
+        selectedRequest.id,
+        agencyPayoutId,
+        'agency',
+        (onlineUsers) => {
+          // Check if counterparty (client) is online
+          const hasOtherUser = onlineUsers.some(id => id !== agencyPayoutId);
+          setIsCounterpartyOnline(hasOtherUser);
+        }
+      );
+      
+      tracker.join();
+      presenceTrackerRef.current = tracker;
+
+      return () => {
+        tracker.leave();
+        presenceTrackerRef.current = null;
+        setIsCounterpartyOnline(false);
+      };
+    }
+  }, [selectedRequest?.id, agencyPayoutId]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -230,6 +259,12 @@ export function AgencyRequestsView() {
           
           // Check if dialog is open for this request (using ref to avoid stale closure)
           const isDialogOpen = selectedRequestRef.current?.id === newMsg.request_id;
+          
+          // Play sound only if both users are online (presence tracker exists and counterparty is online)
+          // This means the dialog is open and presence is being tracked
+          if (isDialogOpen && presenceTrackerRef.current?.isCounterpartyOnline()) {
+            playMessageSound();
+          }
           
           if (isMinimized) {
             // Increment unread count on minimized chat
@@ -474,6 +509,12 @@ export function AgencyRequestsView() {
                   <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
                 )}
                 {selectedRequest?.title}
+                {isCounterpartyOnline && (
+                  <span className="flex items-center gap-1 text-xs font-normal text-green-500">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    Online
+                  </span>
+                )}
               </DialogTitle>
               <Button
                 variant="ghost"
