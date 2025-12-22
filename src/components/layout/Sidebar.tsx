@@ -636,7 +636,10 @@ export function Sidebar({
                 <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
                 Account Settings
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={signOut}>
+              <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={async () => {
+                await signOut();
+                navigate('/');
+              }}>
                 <LogOut className="h-5 w-5" />
                 Log Out
               </Button>
