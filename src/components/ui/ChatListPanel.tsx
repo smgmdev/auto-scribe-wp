@@ -413,8 +413,8 @@ export function ChatListPanel() {
           }`}
           onClick={() => handleOpenChat(item, type)}
         >
-          {/* Avatar/Favicon */}
-          <div className="shrink-0">
+          {/* Avatar/Favicon with notification dot */}
+          <div className="shrink-0 relative">
             {item.media_site?.favicon ? (
               <img 
                 src={item.media_site.favicon} 
@@ -425,6 +425,10 @@ export function ChatListPanel() {
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
               </div>
+            )}
+            {/* Notification dot for unread */}
+            {(!item.read || unreadCount > 0) && (
+              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
             )}
           </div>
 
