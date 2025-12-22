@@ -597,13 +597,12 @@ export function GlobalChatDialog() {
             <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
               {loadingMessages ? (
                 <div className="flex flex-col items-center justify-center h-full py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-                  <p className="text-muted-foreground text-sm mb-4">Loading messages...</p>
                   <img 
-                    src="https://corporate.stankeviciusgroup.com/assets/zc/zcchat.png" 
-                    alt="Chat" 
-                    className="max-w-[200px] opacity-70"
+                    src="/lovable-uploads/d0f30333-4169-4f44-8851-47eb1fcbd203.png" 
+                    alt="Loading" 
+                    className="w-16 h-16 animate-pulse mb-4"
                   />
+                  <p className="text-muted-foreground text-sm">Loading messages...</p>
                 </div>
               ) : (
               <div className="space-y-2 p-3">
