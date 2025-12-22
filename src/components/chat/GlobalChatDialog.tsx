@@ -603,7 +603,10 @@ export function GlobalChatDialog() {
                     alt="Loading" 
                     className="w-16 h-16 animate-pulse mb-4"
                   />
-                  <p className="text-muted-foreground text-sm">Loading messages...</p>
+                  <p className="text-muted-foreground text-sm flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading messages...
+                  </p>
                 </div>
               ) : (
               <div className="space-y-2 p-3">
