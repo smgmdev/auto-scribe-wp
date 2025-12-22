@@ -456,13 +456,13 @@ export function GlobalChatDialog() {
                       className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       onClick={() => {
                         toast({
-                          title: "Delete Engagement",
-                          description: "Delete functionality coming soon",
+                          title: "Cancel Engagement",
+                          description: "Cancel functionality coming soon",
                           variant: "destructive"
                         });
                       }}
                     >
-                      Delete Engagement
+                      Cancel Engagement
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
