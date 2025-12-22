@@ -2315,120 +2315,127 @@ export function SitesView() {
         </DialogContent>
       </Dialog>
 
-      {/* Media Site Detail Dialog - Matching Landing Page Style */}
+      {/* Media Site Detail Dialog - Matching Landing Page Style with Transitions */}
       <Dialog open={!!selectedMediaSite} onOpenChange={(open) => !open && setSelectedMediaSite(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg overflow-hidden">
           {selectedMediaSite && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
-                  <img
-                    src={selectedMediaSite.favicon || getFaviconUrl(selectedMediaSite.link)}
-                    alt={selectedMediaSite.name}
-                    className="h-12 w-12 rounded-xl bg-muted object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <span>{selectedMediaSite.name}</span>
-                </DialogTitle>
-              </DialogHeader>
+            <div className="relative">
+              {/* Detail View */}
+              <div
+                className={`transition-all duration-300 ease-in-out ${
+                  !briefDialogOpen || selectedForBrief?.id !== selectedMediaSite.id
+                    ? 'opacity-100 translate-x-0'
+                    : 'absolute inset-0 opacity-0 -translate-x-full pointer-events-none'
+                }`}
+              >
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-3">
+                    <img
+                      src={selectedMediaSite.favicon || getFaviconUrl(selectedMediaSite.link)}
+                      alt={selectedMediaSite.name}
+                      className="h-12 w-12 rounded-xl bg-muted object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <span>{selectedMediaSite.name}</span>
+                  </DialogTitle>
+                </DialogHeader>
 
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Website</p>
-                  <div className="flex items-center gap-2">
-                    <a 
-                      href={selectedMediaSite.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent hover:underline flex items-center gap-1"
-                    >
-                      {selectedMediaSite.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(selectedMediaSite.link); toast({ title: 'Copied to clipboard' }); }}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <Copy className="h-3 w-3" />
-                    </button>
+                <div className="space-y-4 mt-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Website</p>
+                    <div className="flex items-center gap-2">
+                      <a 
+                        href={selectedMediaSite.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent hover:underline flex items-center gap-1"
+                      >
+                        {selectedMediaSite.link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(selectedMediaSite.link); toast({ title: 'Copied to clipboard' }); }}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
+                  
+                  {/* Show price and format only for non-agency sites */}
+                  {selectedMediaSite.category !== 'Agencies/People' && (
+                    <div className="flex gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Price</p>
+                        <p className="text-foreground font-medium">${selectedMediaSite.price} USD</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Format</p>
+                        <Badge variant="secondary">
+                          {selectedMediaSite.publication_format}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Show country for agencies */}
+                  {selectedMediaSite.category === 'Agencies/People' && (selectedMediaSite as any).country && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Country</p>
+                      <p className="text-foreground">{(selectedMediaSite as any).country}</p>
+                    </div>
+                  )}
+                  
+                  {selectedMediaSite.category && selectedMediaSite.category !== 'Agencies/People' && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Category</p>
+                      <p className="text-foreground">{selectedMediaSite.category}</p>
+                    </div>
+                  )}
+                  {selectedMediaSite.subcategory && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Subcategory</p>
+                      <p className="text-foreground">{selectedMediaSite.subcategory}</p>
+                    </div>
+                  )}
+                  {selectedMediaSite.agency && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Agency</p>
+                      <p className="text-foreground">{selectedMediaSite.agency}</p>
+                    </div>
+                  )}
+                  {selectedMediaSite.about && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">About</p>
+                      <p className="text-foreground text-sm">{selectedMediaSite.about}</p>
+                    </div>
+                  )}
                 </div>
-                
-                {/* Show price and format only for non-agency sites */}
-                {selectedMediaSite.category !== 'Agencies/People' && (
-                  <div className="flex gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <Badge variant="outline" className="text-accent border-accent/30">
-                        {selectedMediaSite.price} USD
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Format</p>
-                      <Badge variant="secondary">
-                        {selectedMediaSite.publication_format}
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Show country for agencies */}
-                {selectedMediaSite.category === 'Agencies/People' && (selectedMediaSite as any).country && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Country</p>
-                    <p className="text-foreground">{(selectedMediaSite as any).country}</p>
-                  </div>
-                )}
-                
-                {selectedMediaSite.category && selectedMediaSite.category !== 'Agencies/People' && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Category</p>
-                    <p className="text-foreground">{selectedMediaSite.category}</p>
-                  </div>
-                )}
-                {selectedMediaSite.subcategory && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Subcategory</p>
-                    <p className="text-foreground">{selectedMediaSite.subcategory}</p>
-                  </div>
-                )}
-                {selectedMediaSite.agency && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Agency</p>
-                    <p className="text-foreground">{selectedMediaSite.agency}</p>
-                  </div>
-                )}
-                {selectedMediaSite.about && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">About</p>
-                    <p className="text-foreground text-sm">{selectedMediaSite.about}</p>
-                  </div>
-                )}
-              </div>
 
-              <div className="flex justify-between gap-3 mt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setSelectedMediaSite(null)}
-                  className="hover:bg-black hover:text-white transition-colors"
-                >
-                  Close
-                </Button>
-                {selectedMediaSite.category !== 'Agencies/People' && (
+                <div className="flex justify-end gap-3 mt-6">
                   <Button 
-                    className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
-                    onClick={() => handleRequestService(selectedMediaSite)}
+                    variant="outline" 
+                    onClick={() => setSelectedMediaSite(null)}
+                    className="hover:bg-black hover:text-white transition-colors"
                   >
-                    <span>I'm Interested - ${selectedMediaSite.price}</span>
-                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </span>
+                    Close
                   </Button>
-                )}
+                  {selectedMediaSite.category !== 'Agencies/People' && (
+                    <Button 
+                      className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
+                      onClick={() => handleRequestService(selectedMediaSite)}
+                    >
+                      <span>I'm Interested - ${selectedMediaSite.price}</span>
+                      <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                        <ArrowRight className="h-4 w-4 shrink-0" />
+                      </span>
+                    </Button>
+                  )}
+                </div>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
