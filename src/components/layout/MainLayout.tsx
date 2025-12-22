@@ -24,28 +24,43 @@ export function MainLayout({
   const { removeMinimizedChat } = useMinimizedChats();
 
   const handleOpenChat = async (chat: MinimizedChat) => {
+    console.log('[MainLayout] handleOpenChat called with chat:', chat);
+    
+    // Remove and clear unread immediately for responsive UI
     removeMinimizedChat(chat.id);
     clearUnreadMessageCount(chat.id);
     
-    // Fetch the full request data
-    const { data } = await supabase
-      .from('service_requests')
-      .select(`
-        id,
-        title,
-        description,
-        status,
-        read,
-        created_at,
-        updated_at,
-        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
-        order:orders(id, status, delivery_status)
-      `)
-      .eq('id', chat.id)
-      .single();
+    try {
+      // Fetch the full request data
+      const { data, error } = await supabase
+        .from('service_requests')
+        .select(`
+          id,
+          title,
+          description,
+          status,
+          read,
+          created_at,
+          updated_at,
+          media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+          order:orders(id, status, delivery_status)
+        `)
+        .eq('id', chat.id)
+        .single();
 
-    if (data) {
-      openGlobalChat(data as unknown as GlobalChatRequest, chat.type);
+      console.log('[MainLayout] Fetched request data:', data, 'error:', error);
+
+      if (error) {
+        console.error('Error fetching request for minimized chat:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('[MainLayout] Opening global chat with type:', chat.type);
+        openGlobalChat(data as unknown as GlobalChatRequest, chat.type);
+      }
+    } catch (err) {
+      console.error('Error opening minimized chat:', err);
     }
   };
 
