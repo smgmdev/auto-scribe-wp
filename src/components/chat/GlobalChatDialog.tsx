@@ -69,6 +69,9 @@ export function GlobalChatDialog() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [imagePreview, setImagePreview] = useState<{ url: string; name: string } | null>(null);
   const [fileWebView, setFileWebView] = useState<{ url: string; name: string } | null>(null);
+  const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
+  const [cancelOrderMessageId, setCancelOrderMessageId] = useState<string | null>(null);
+  const [cancellingOrder, setCancellingOrder] = useState(false);
   
   // Drag state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -472,27 +475,40 @@ export function GlobalChatDialog() {
     }
   };
 
-  const handleCancelOrderRequest = async (messageId: string) => {
+  const openCancelOrderDialog = (messageId: string) => {
+    setCancelOrderMessageId(messageId);
+    setCancelOrderDialogOpen(true);
+  };
+
+  const handleCancelOrderRequest = async () => {
+    if (!cancelOrderMessageId) return;
+    
+    setCancellingOrder(true);
     try {
       const { error } = await supabase
         .from('service_messages')
         .delete()
-        .eq('id', messageId);
+        .eq('id', cancelOrderMessageId);
 
       if (error) throw error;
 
-      setMessages(prev => prev.filter(m => m.id !== messageId));
+      setMessages(prev => prev.filter(m => m.id !== cancelOrderMessageId));
       
       toast({
         title: "Order Request Cancelled",
         description: "The order request has been removed.",
       });
+      
+      setCancelOrderDialogOpen(false);
+      setCancelOrderMessageId(null);
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Failed to cancel order',
         description: error.message,
       });
+    } finally {
+      setCancellingOrder(false);
     }
   };
 
@@ -551,7 +567,7 @@ export function GlobalChatDialog() {
             )}
             {isOwnMessage && globalChatType === 'agency-request' && !hasOrder && (
               <Button
-                onClick={() => handleCancelOrderRequest(msg.id)}
+                onClick={() => openCancelOrderDialog(msg.id)}
                 className="w-full gap-2 bg-black text-white hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
                 size="sm"
               >
@@ -1595,6 +1611,37 @@ export function GlobalChatDialog() {
             >
               {removing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, remove engagement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel Order Request Confirmation */}
+      <AlertDialog open={cancelOrderDialogOpen} onOpenChange={(open) => {
+        setCancelOrderDialogOpen(open);
+        if (!open) setCancelOrderMessageId(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order Request?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order request? The client will no longer be able to accept it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              disabled={cancellingOrder}
+              className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+            >
+              No, keep it
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelOrderRequest}
+              disabled={cancellingOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+            >
+              {cancellingOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, cancel order
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
