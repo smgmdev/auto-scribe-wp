@@ -382,14 +382,24 @@ export function MyRequestsView() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 pb-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                    </span>
-                    {requestMessages.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">
-                        {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                        Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                       </span>
+                      {requestMessages.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                    {requestMessages.length > 0 && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        <span className="font-medium">
+                          {requestMessages[requestMessages.length - 1].sender_type === 'client' ? 'You: ' : 'Agency: '}
+                        </span>
+                        {requestMessages[requestMessages.length - 1].message.replace(/^> \[[^\]]+\]:.*\n\n/, '')}
+                      </p>
                     )}
                   </div>
                 </CardContent>
