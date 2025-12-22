@@ -81,6 +81,10 @@ interface AppState {
   incrementMinimizedChatUnread: (id: string) => void;
   clearMinimizedChats: () => void;
   
+  // Pending chat to open (when clicking minimized chat)
+  pendingChatToOpen: string | null;
+  setPendingChatToOpen: (id: string | null) => void;
+  
   // Unread message counts per request (for cards)
   unreadMessageCounts: Record<string, number>;
   setUnreadMessageCount: (requestId: string, count: number) => void;
@@ -179,6 +183,10 @@ export const useAppStore = create<AppState>()((set) => ({
     )
   })),
   clearMinimizedChats: () => set({ minimizedChats: [] }),
+  
+  // Pending chat to open
+  pendingChatToOpen: null,
+  setPendingChatToOpen: (id) => set({ pendingChatToOpen: id }),
   
   // Unread message counts per request
   unreadMessageCounts: {},
