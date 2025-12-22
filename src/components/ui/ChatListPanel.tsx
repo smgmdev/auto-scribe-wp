@@ -295,7 +295,13 @@ export function ChatListPanel() {
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
     
-    const { request_id, sender_type, title, media_site_name } = payload;
+    const { request_id, sender_type, sender_id, title, media_site_name } = payload;
+    
+    // Skip if this is our own message (sender_id matches our user id or agency payout id)
+    if (sender_id === user?.id || sender_id === agencyPayoutIdRef.current) {
+      console.log('[ChatListPanel] Skipping own message broadcast');
+      return;
+    }
     
     const isMinimized = minimizedChatsRef.current.some(c => c.id === request_id);
     const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === request_id;
@@ -337,7 +343,7 @@ export function ChatListPanel() {
     if (agencyPayoutIdRef.current || isAdmin) {
       fetchServiceRequests();
     }
-  }, [incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, isAdmin]);
+  }, [user?.id, incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, isAdmin]);
 
   // Real-time subscription for read status changes and new messages
   // This syncs read status across all views (ChatListPanel, MyRequestsView, AgencyRequestsView)
