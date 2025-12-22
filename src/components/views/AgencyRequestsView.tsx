@@ -788,7 +788,7 @@ export function AgencyRequestsView() {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       disabled={sending}
-                      className="rounded-none pr-12 border-x-0 border-b-0"
+                      className="rounded-none pr-12 border-0"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
                           e.preventDefault();
