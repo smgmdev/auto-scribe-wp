@@ -10,8 +10,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore';
+import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
+import { MinimizedChats } from '@/components/ui/MinimizedChats';
+import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import amblack from '@/assets/amblack.png';
 
 interface SiteTag {
@@ -59,7 +62,8 @@ const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaig
 const Landing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { setPreselectedSiteId, setCurrentView } = useAppStore();
+  const { setPreselectedSiteId, setCurrentView, openGlobalChat, clearUnreadMessageCount } = useAppStore();
+  const { removeMinimizedChat } = useMinimizedChats();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
@@ -881,6 +885,37 @@ const Landing = () => {
     </div>
 
     {/* WebView Dialog removed - using direct _blank links */}
+
+    {/* Global Chat Components for logged-in users */}
+    {user && (
+      <>
+        <MinimizedChats onOpenChat={async (chat: MinimizedChat) => {
+          removeMinimizedChat(chat.id);
+          clearUnreadMessageCount(chat.id);
+          
+          const { data } = await supabase
+            .from('service_requests')
+            .select(`
+              id,
+              title,
+              description,
+              status,
+              read,
+              created_at,
+              updated_at,
+              media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+              order:orders(id, status, delivery_status)
+            `)
+            .eq('id', chat.id)
+            .single();
+
+          if (data) {
+            openGlobalChat(data as unknown as GlobalChatRequest, chat.type);
+          }
+        }} />
+        <GlobalChatDialog />
+      </>
+    )}
   </>
   );
 };
