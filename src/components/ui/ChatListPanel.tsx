@@ -814,6 +814,32 @@ export function ChatListPanel() {
     }
   };
 
+  // Message preview component to avoid IIFE rendering issues
+  const MessagePreview = ({ 
+    message, 
+    description, 
+    title, 
+    hasUnread 
+  }: { 
+    message: string | undefined; 
+    description: string; 
+    title: string; 
+    hasUnread: boolean;
+  }) => {
+    const preview = formatPreviewMessage(message, description, title);
+    const typeIcon = getMessageTypeIcon(preview.type);
+    const isReply = isReplyMessage(message);
+    
+    return (
+      <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+        {typeIcon || (isReply && (
+          <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
+        ))}
+        <span className="truncate">{preview.text}</span>
+      </p>
+    );
+  };
+
   // Check if a message is a reply (contains quote markers)
   const isReplyMessage = (message: string | undefined): boolean => {
     if (!message) return false;
@@ -902,18 +928,12 @@ export function ChatListPanel() {
                 {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
               </span>
             </div>
-            {(() => {
-              const preview = formatPreviewMessage(item.lastMessage, item.description, item.title);
-              const typeIcon = getMessageTypeIcon(preview.type);
-              return (
-                <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                  {typeIcon || (isReplyMessage(item.lastMessage) && (
-                    <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
-                  ))}
-                  <span className="truncate">{preview.text}</span>
-                </p>
-              );
-            })()}
+            <MessagePreview 
+              message={item.lastMessage} 
+              description={item.description} 
+              title={item.title}
+              hasUnread={hasUnread}
+            />
           </div>
 
           {/* Unread badge */}
