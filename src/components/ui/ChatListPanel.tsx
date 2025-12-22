@@ -101,7 +101,7 @@ export function ChatListPanel() {
         ...item,
         lastMessage: lastMessages[item.id]?.message,
         lastMessageTime: lastMessages[item.id]?.created_at,
-        unreadCount: unreadMessageCounts[item.id] || 0,
+        unreadCount: 0, // Will use store directly for real-time updates
         favicon: item.media_site?.favicon,
       })) as ChatItem[]);
     }
@@ -150,7 +150,7 @@ export function ChatListPanel() {
         ...item,
         lastMessage: lastMessages[item.id]?.message,
         lastMessageTime: lastMessages[item.id]?.created_at,
-        unreadCount: unreadMessageCounts[item.id] || 0,
+        unreadCount: 0, // Will use store directly for real-time updates
         favicon: item.media_site?.favicon,
       })) as ChatItem[]);
     }
@@ -189,13 +189,13 @@ export function ChatListPanel() {
     if (user) {
       fetchMyEngagements();
     }
-  }, [user, unreadMessageCounts]);
+  }, [user]);
 
   useEffect(() => {
     if (agencyPayoutId) {
       fetchServiceRequests();
     }
-  }, [agencyPayoutId, unreadMessageCounts]);
+  }, [agencyPayoutId]);
 
   // Real-time subscription for new messages
   useEffect(() => {
@@ -270,50 +270,53 @@ export function ChatListPanel() {
       );
     }
 
-    return items.map((item) => (
-      <div
-        key={item.id}
-        className="flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0"
-        onClick={() => handleOpenChat(item, type)}
-      >
-        {/* Avatar/Favicon */}
-        <div className="shrink-0">
-          {item.media_site?.favicon ? (
-            <img 
-              src={item.media_site.favicon} 
-              alt="" 
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-              <MessageSquare className="h-5 w-5 text-muted-foreground" />
+    return items.map((item) => {
+      const unreadCount = unreadMessageCounts[item.id] || 0;
+      return (
+        <div
+          key={item.id}
+          className="flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0"
+          onClick={() => handleOpenChat(item, type)}
+        >
+          {/* Avatar/Favicon */}
+          <div className="shrink-0">
+            {item.media_site?.favicon ? (
+              <img 
+                src={item.media_site.favicon} 
+                alt="" 
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className={`font-medium text-sm truncate ${unreadCount > 0 ? 'text-foreground' : 'text-foreground/80'}`}>
+                {item.media_site?.name || item.title}
+              </span>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
+              </span>
             </div>
+            <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+              {item.lastMessage || item.description.slice(0, 50)}
+            </p>
+          </div>
+
+          {/* Unread badge */}
+          {unreadCount > 0 && (
+            <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-primary text-primary-foreground text-xs px-1.5 shrink-0">
+              {unreadCount}
+            </Badge>
           )}
         </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className={`font-medium text-sm truncate ${item.unreadCount > 0 ? 'text-foreground' : 'text-foreground/80'}`}>
-              {item.media_site?.name || item.title}
-            </span>
-            <span className="text-xs text-muted-foreground shrink-0">
-              {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
-            </span>
-          </div>
-          <p className={`text-xs truncate mt-0.5 ${item.unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-            {item.lastMessage || item.description.slice(0, 50)}
-          </p>
-        </div>
-
-        {/* Unread badge */}
-        {item.unreadCount > 0 && (
-          <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-primary text-primary-foreground text-xs px-1.5 shrink-0">
-            {item.unreadCount}
-          </Badge>
-        )}
-      </div>
-    ));
+      );
+    });
   };
 
   if (!user) return null;
