@@ -442,7 +442,7 @@ export function GlobalChatDialog() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem 
-                      className="gap-2 cursor-pointer"
+                      className="cursor-pointer hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                       onClick={() => {
                         toast({
                           title: "Order Now",
@@ -450,11 +450,10 @@ export function GlobalChatDialog() {
                         });
                       }}
                     >
-                      <ShoppingCart className="h-4 w-4" />
                       Order Now
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                      className="cursor-pointer text-destructive hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                       onClick={() => {
                         toast({
                           title: "Delete Engagement",
@@ -463,7 +462,6 @@ export function GlobalChatDialog() {
                         });
                       }}
                     >
-                      <Trash2 className="h-4 w-4" />
                       Delete Engagement
                     </DropdownMenuItem>
                   </DropdownMenuContent>
