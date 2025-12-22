@@ -56,6 +56,10 @@ export function AgencyStatusCard({
     setStatusLoading(true);
     try {
       const response = await supabase.functions.invoke('get-agency-onboarding-link');
+      if (response.error) {
+        console.error('Failed to fetch Stripe status:', response.error);
+        return;
+      }
       if (response.data?.status) {
         setStripeStatus(response.data.status);
       }
