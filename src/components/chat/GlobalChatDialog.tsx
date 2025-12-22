@@ -1383,7 +1383,7 @@ export function GlobalChatDialog() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 shrink-0 rounded-none border-0"
+                    className="h-10 w-10 shrink-0 rounded-none border-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={sending || uploadingFile}
                   >
