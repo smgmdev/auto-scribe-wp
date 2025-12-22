@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,7 @@ export function MyRequestsView() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -289,9 +291,17 @@ export function MyRequestsView() {
     }
   };
 
-  // Sort requests based on selected sort option - must be before any conditional returns
+  // Filter and sort requests based on search and sort option - must be before any conditional returns
   const sortedRequests = useMemo(() => {
-    return [...requests].sort((a, b) => {
+    const filtered = requests.filter((request) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const titleMatch = request.title.toLowerCase().includes(query);
+      const siteMatch = request.media_site?.name.toLowerCase().includes(query);
+      return titleMatch || siteMatch;
+    });
+    
+    return filtered.sort((a, b) => {
       if (sortBy === 'last_message') {
         const aMessages = messages[a.id] || [];
         const bMessages = messages[b.id] || [];
@@ -310,7 +320,7 @@ export function MyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [requests, messages, sortBy]);
+  }, [requests, messages, sortBy, searchQuery]);
 
   if (loading) {
     return (
@@ -334,6 +344,15 @@ export function MyRequestsView() {
         </div>
         {requests.length > 0 && (
           <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search engagements..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-[200px]"
+              />
+            </div>
             <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
               <SelectTrigger className="w-[160px]">
