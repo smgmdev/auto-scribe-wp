@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { MinimizedChats } from '@/components/ui/MinimizedChats';
+import { ChatListPanel } from '@/components/ui/ChatListPanel';
 import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore';
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
@@ -70,6 +71,9 @@ export function MainLayout({
           {children}
         </div>
       </main>
+
+      {/* Global Chat List Panel */}
+      <ChatListPanel />
 
       {/* Global Minimized Chats */}
       <MinimizedChats onOpenChat={handleOpenChat} />
