@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,9 +52,13 @@ export function GlobalChatDialog() {
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [senderId, setSenderId] = useState<string | null>(null);
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
+  const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
+  
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -162,6 +166,75 @@ export function GlobalChatDialog() {
     }
   }, [globalChatRequest?.id, globalChatOpen, senderId, senderType]);
 
+  // Typing indicator broadcast channel
+  useEffect(() => {
+    if (!globalChatRequest || !globalChatOpen || !senderId) return;
+
+    const channelName = `typing:${globalChatRequest.id}`;
+    const channel = supabase.channel(channelName);
+
+    channel
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        // Only show typing if it's from someone else
+        if (payload.sender_id !== senderId) {
+          setIsCounterpartyTyping(payload.is_typing);
+        }
+      })
+      .subscribe();
+
+    typingChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      typingChannelRef.current = null;
+      setIsCounterpartyTyping(false);
+    };
+  }, [globalChatRequest?.id, globalChatOpen, senderId]);
+
+  // Broadcast typing status
+  const broadcastTyping = useCallback((isTyping: boolean) => {
+    if (typingChannelRef.current && senderId) {
+      typingChannelRef.current.send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: {
+          sender_id: senderId,
+          sender_type: senderType,
+          is_typing: isTyping
+        }
+      });
+    }
+  }, [senderId, senderType]);
+
+  // Handle input change with typing indicator
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+
+    // Clear previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Broadcast typing start
+    if (e.target.value.trim()) {
+      broadcastTyping(true);
+    }
+
+    // Set timeout to stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      broadcastTyping(false);
+    }, 2000);
+  }, [broadcastTyping]);
+
+  // Clear typing on unmount or send
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     if (globalChatOpen) {
@@ -228,6 +301,12 @@ export function GlobalChatDialog() {
 
   const sendMessage = async () => {
     if (!user || !globalChatRequest || !newMessage.trim() || !senderId) return;
+
+    // Stop typing indicator when sending
+    broadcastTyping(false);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
 
     setSending(true);
     try {
@@ -532,6 +611,18 @@ export function GlobalChatDialog() {
               )}
             </ScrollArea>
 
+            {/* Typing Indicator */}
+            {isCounterpartyTyping && (
+              <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <span>{counterpartyLabel} is typing...</span>
+              </div>
+            )}
+
             {/* Reply Input */}
             {globalChatRequest.status !== 'rejected' && globalChatRequest.status !== 'completed' && (
               <div className="-mx-4" style={{ width: 'calc(100% + 2rem)' }}>
@@ -559,7 +650,7 @@ export function GlobalChatDialog() {
                     ref={inputRef}
                     placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleInputChange}
                     disabled={sending}
                     className="rounded-none pr-12 border-0"
                     onKeyDown={(e) => {
