@@ -109,6 +109,21 @@ export function MyRequestsView() {
           messagesByRequest[msg.request_id].push(msg as ServiceMessage);
         });
         setMessages(messagesByRequest);
+
+        // Calculate initial unread counts - count messages from agency that haven't been read
+        // We track this by checking if the request's 'read' field is false and there are agency messages
+        let totalUnread = 0;
+        requestsData.forEach(request => {
+          const requestMessages = messagesByRequest[request.id] || [];
+          // Count messages from agency (not from client/user)
+          const agencyMessages = requestMessages.filter(m => m.sender_type !== 'client');
+          if (agencyMessages.length > 0 && !request.read) {
+            // If request is unread and has agency messages, mark as having unread
+            incrementUnreadMessageCount(request.id);
+            totalUnread++;
+          }
+        });
+        setUserUnreadEngagementsCount(totalUnread);
       }
     } catch (error: any) {
       toast({
