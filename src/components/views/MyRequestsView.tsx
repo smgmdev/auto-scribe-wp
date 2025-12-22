@@ -289,15 +289,7 @@ export function MyRequestsView() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  // Sort requests based on selected sort option
+  // Sort requests based on selected sort option - must be before any conditional returns
   const sortedRequests = useMemo(() => {
     return [...requests].sort((a, b) => {
       if (sortBy === 'last_message') {
@@ -319,6 +311,14 @@ export function MyRequestsView() {
       }
     });
   }, [requests, messages, sortBy]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
