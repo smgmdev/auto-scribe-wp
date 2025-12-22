@@ -270,7 +270,11 @@ export function ChatListPanel() {
   // Sync unread counts - count requests where read = false
   useEffect(() => {
     // Calculate total unread for my engagements (count of unread requests)
-    const engagementUnread = myEngagements.filter(e => !e.read).length;
+    const unreadEngagements = myEngagements.filter(e => !e.read);
+    const engagementUnread = unreadEngagements.length;
+    if (engagementUnread > 0) {
+      console.log('[ChatListPanel] Unread engagements:', unreadEngagements.map(e => ({ id: e.id, read: e.read, title: e.title })));
+    }
     setUserUnreadEngagementsCount(engagementUnread);
 
     // Calculate total unread for service requests (count of unread requests)

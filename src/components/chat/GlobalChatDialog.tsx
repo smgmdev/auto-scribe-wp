@@ -106,10 +106,19 @@ export function GlobalChatDialog() {
     }
   };
 
-  // Clear unread when dialog opens
+  // Clear unread when dialog opens and mark request as read
   useEffect(() => {
     if (globalChatOpen && globalChatRequest) {
       clearUnreadMessageCount(globalChatRequest.id);
+      
+      // Mark request as read in database
+      supabase
+        .from('service_requests')
+        .update({ read: true })
+        .eq('id', globalChatRequest.id)
+        .then(() => {
+          console.log('[GlobalChatDialog] Marked request as read:', globalChatRequest.id);
+        });
     }
   }, [globalChatOpen, globalChatRequest?.id, clearUnreadMessageCount]);
 
