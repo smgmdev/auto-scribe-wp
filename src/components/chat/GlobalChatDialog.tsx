@@ -934,10 +934,20 @@ export function GlobalChatDialog() {
 
   // Resend order - delete existing order request and send a new one
   const handleResendOrder = async () => {
-    if (!existingOrderMessage) return;
+    if (!existingOrderMessage || !user || !globalChatRequest || !senderId || !globalChatRequest.media_site) return;
     
     setResendingOrder(true);
     try {
+      // Extract previous special terms from existing order
+      const match = existingOrderMessage.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+      let previousSpecialTerms = '';
+      if (match) {
+        try {
+          const prevOrderData = JSON.parse(match[1]);
+          previousSpecialTerms = prevOrderData.special_terms || '';
+        } catch {}
+      }
+
       // Delete the existing order request message
       const { error: deleteError } = await supabase
         .from('service_messages')
@@ -949,9 +959,72 @@ export function GlobalChatDialog() {
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
       
-      // Open the send order dialog to send a new order
-      setSendOrderDialogOpen(true);
+      // Send new order with same terms
+      const orderData = {
+        type: 'order_request',
+        media_site_id: globalChatRequest.media_site.id,
+        media_site_name: globalChatRequest.media_site.name,
+        media_site_favicon: globalChatRequest.media_site.favicon,
+        price: globalChatRequest.media_site.price,
+        request_id: globalChatRequest.id,
+        special_terms: previousSpecialTerms || undefined
+      };
+
+      const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderData)}[/ORDER_REQUEST]`;
+
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: orderMessage
+      });
+
+      if (error) throw error;
+
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: orderMessage,
+        created_at: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, newMsg]);
+
+      // Notify the client
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id')
+        .eq('id', globalChatRequest.id)
+        .maybeSingle();
+
+      if (requestData?.user_id) {
+        const notifyChannel = supabase.channel(`user-notifications-${requestData.user_id}`);
+        notifyChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await notifyChannel.send({
+              type: 'broadcast',
+              event: 'new-message',
+              payload: {
+                request_id: globalChatRequest.id,
+                sender_type: senderType,
+                sender_id: senderId,
+                message: 'Sent you an order request',
+                title: globalChatRequest.title,
+                media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                media_site_favicon: globalChatRequest.media_site?.favicon
+              }
+            });
+            setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+          }
+        });
+      }
       
+      toast({
+        title: "Order Resent",
+        description: "New order request has been sent to the client.",
+      });
     } catch (error: any) {
       toast({
         variant: 'destructive',
