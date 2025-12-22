@@ -279,7 +279,12 @@ export function ChatListPanel() {
           const newMsg = payload.new as { request_id: string; sender_id: string; sender_type: string; message: string };
           
           // Skip if message is from current user
-          if (newMsg.sender_id === user.id) {
+          // For clients: sender_id === user.id
+          // For agencies: sender_id === agencyPayoutId
+          const isOwnMessage = newMsg.sender_id === user.id || 
+            (agencyPayoutIdRef.current && newMsg.sender_id === agencyPayoutIdRef.current);
+          
+          if (isOwnMessage) {
             console.log('[ChatListPanel] Ignoring own message');
             return;
           }
@@ -311,6 +316,9 @@ export function ChatListPanel() {
             isMyEngagement, 
             isServiceRequest, 
             senderType: newMsg.sender_type,
+            senderId: newMsg.sender_id,
+            userId: user.id,
+            agencyPayoutId: agencyPayoutIdRef.current,
             shouldNotifyUser, 
             shouldNotifyAgency 
           });
