@@ -304,28 +304,30 @@ export function ChatListPanel() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50 w-80">
       {/* Collapsed state - Messaging button */}
       {!isExpanded && (
         <Button
           onClick={() => setIsExpanded(true)}
-          className="rounded-lg shadow-lg px-4 py-3 h-auto flex items-center gap-2"
+          className="w-full rounded-lg shadow-lg px-4 py-3 h-auto flex items-center justify-between"
           variant="default"
         >
-          <MessageSquare className="h-5 w-5" />
-          <span className="font-medium">Messaging</span>
-          {totalUnread > 0 && (
-            <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5 ml-1">
-              {totalUnread}
-            </Badge>
-          )}
-          <ChevronUp className="h-4 w-4 ml-1" />
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            <span className="font-medium">Messaging</span>
+            {totalUnread > 0 && (
+              <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5">
+                {totalUnread}
+              </Badge>
+            )}
+          </div>
+          <ChevronUp className="h-4 w-4" />
         </Button>
       )}
 
       {/* Expanded state - Chat list panel */}
       {isExpanded && (
-        <div className="w-80 bg-card border border-border rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+        <div className="w-full bg-card border border-border rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
           {/* Header - clickable to minimize */}
           <div 
             className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
