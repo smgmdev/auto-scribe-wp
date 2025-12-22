@@ -1108,7 +1108,7 @@ export function GlobalChatDialog() {
             <Button
               onClick={sendOrderMessage}
               disabled={sending}
-              className="flex-1 bg-black text-white hover:bg-white hover:text-black dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white transition-all duration-200"
+              className="flex-1 bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 transition-all duration-200"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Send Order
