@@ -572,7 +572,7 @@ export function AgencyRequestsView() {
 
       {/* Request Detail Dialog */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none" hideCloseButton>
           <DialogHeader className="px-4 pt-2 pb-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -587,7 +587,7 @@ export function AgencyRequestsView() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 mr-9">
+              <div className="flex items-center gap-1">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -674,8 +674,18 @@ export function AgencyRequestsView() {
                       setSelectedRequest(null);
                     }
                   }}
+                  title="Minimize"
                 >
                   <Minus className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                  onClick={() => setSelectedRequest(null)}
+                  title="Close"
+                >
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>
