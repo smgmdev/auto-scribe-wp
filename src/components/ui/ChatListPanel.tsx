@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
+import { playMessageSound } from '@/lib/chat-presence';
 
 interface ChatItem {
   id: string;
@@ -46,7 +48,13 @@ export function ChatListPanel() {
     clearUnreadMessageCount, 
     unreadMessageCounts,
     userUnreadEngagementsCount,
-    agencyUnreadServiceRequestsCount 
+    agencyUnreadServiceRequestsCount,
+    incrementUnreadMessageCount,
+    incrementUserUnreadEngagementsCount,
+    globalChatOpen,
+    globalChatRequest,
+    minimizedChats,
+    incrementMinimizedChatUnread
   } = useAppStore();
   
   const [isExpanded, setIsExpanded] = useState(false);
@@ -210,7 +218,42 @@ export function ChatListPanel() {
           schema: 'public',
           table: 'service_messages'
         },
-        () => {
+        (payload) => {
+          const newMsg = payload.new as { request_id: string; sender_id: string; sender_type: string; message: string };
+          
+          // Skip if message is from current user
+          if (newMsg.sender_id === user.id) return;
+          
+          const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
+          const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
+          
+          // Check if this request belongs to user's engagements or agency's service requests
+          const isMyEngagement = myEngagements.some(e => e.id === newMsg.request_id);
+          const isServiceRequest = serviceRequests.some(r => r.id === newMsg.request_id);
+          
+          if (isMinimized) {
+            // Increment minimized chat unread
+            incrementMinimizedChatUnread(newMsg.request_id);
+            playMessageSound();
+          } else if (!isDialogOpen) {
+            // Increment unread count for the request
+            incrementUnreadMessageCount(newMsg.request_id);
+            
+            // Also increment total counts
+            if (isMyEngagement) {
+              incrementUserUnreadEngagementsCount();
+            }
+            
+            // Show toast notification
+            toast({
+              title: 'New Message',
+              description: newMsg.message.slice(0, 50) + (newMsg.message.length > 50 ? '...' : ''),
+            });
+            
+            playMessageSound();
+          }
+          
+          // Refresh the lists
           fetchMyEngagements();
           if (agencyPayoutId) {
             fetchServiceRequests();
@@ -222,7 +265,7 @@ export function ChatListPanel() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, agencyPayoutId]);
+  }, [user, agencyPayoutId, minimizedChats, globalChatOpen, globalChatRequest?.id, myEngagements, serviceRequests]);
 
   const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
     clearUnreadMessageCount(item.id);
