@@ -52,7 +52,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
         return (
           <div
             key={`${chat.id}-${totalUnread}`}
-            className={`relative flex items-center gap-2 rounded-t-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
+            className={`relative flex items-center gap-2 rounded-t-lg border border-border/50 shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
               hasUnread 
                 ? 'bg-[#4771d9] text-white' 
                 : 'bg-card'
