@@ -350,8 +350,8 @@ export function MyRequestsView() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="last_message">Last Message</SelectItem>
-                <SelectItem value="submitted">Submitted Date</SelectItem>
+                <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
+                <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
               </SelectContent>
             </Select>
           </div>
