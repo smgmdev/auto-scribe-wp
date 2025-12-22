@@ -11,6 +11,7 @@ import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
 
 const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
@@ -405,12 +406,28 @@ export function Sidebar({
           // Check if this request belongs to the current user
           const { data: request } = await supabase
             .from('service_requests')
-            .select('user_id')
+            .select('user_id, title, media_site:media_sites(name)')
             .eq('id', newMsg.request_id)
             .maybeSingle();
 
           if (request?.user_id === user.id) {
             incrementUserUnreadEngagementsCount();
+            
+            // Show toast notification
+            const mediaSiteName = (request.media_site as { name: string } | null)?.name || 'Unknown';
+            toast({
+              title: 'New Message',
+              description: `You have a new message for "${request.title}" (${mediaSiteName})`,
+            });
+
+            // Play notification sound
+            try {
+              const audio = new Audio('/sounds/new-message.mp3');
+              audio.volume = 0.5;
+              audio.play().catch(() => {});
+            } catch (e) {
+              // Ignore audio errors
+            }
           }
         }
       )
@@ -455,12 +472,28 @@ export function Sidebar({
             // Check if this request belongs to the current agency
             const { data: request } = await supabase
               .from('service_requests')
-              .select('agency_payout_id')
+              .select('agency_payout_id, title, media_site:media_sites(name)')
               .eq('id', newMsg.request_id)
               .maybeSingle();
 
             if (request?.agency_payout_id === agencyPayoutId) {
               incrementAgencyUnreadServiceRequestsCount();
+              
+              // Show toast notification
+              const mediaSiteName = (request.media_site as { name: string } | null)?.name || 'Unknown';
+              toast({
+                title: 'New Client Message',
+                description: `New message for "${request.title}" (${mediaSiteName})`,
+              });
+
+              // Play notification sound
+              try {
+                const audio = new Audio('/sounds/new-message.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(() => {});
+              } catch (e) {
+                // Ignore audio errors
+              }
             }
           }
         )
