@@ -128,13 +128,13 @@ export function MyRequestsView() {
     }
   }, [user]);
 
-  // Real-time subscription for status updates (service_requests table)
-  // NOTE: Message notifications are handled by ChatListPanel via broadcast
+  // Real-time subscription for status updates and read status sync (service_requests table)
+  // This syncs read status across all views/tabs when updated from any source
   useEffect(() => {
     if (!user) return;
 
     const requestsChannel = supabase
-      .channel('user-requests')
+      .channel('user-requests-sync')
       .on(
         'postgres_changes',
         {
@@ -146,27 +146,30 @@ export function MyRequestsView() {
           const updated = payload.new as any;
           // Check if this request belongs to current user
           if (updated.user_id === user.id) {
-            // Show toast for status changes
-            if (updated.status === 'accepted') {
-              toast({
-                title: 'Request Accepted!',
-                description: 'Your request has been accepted. You can now proceed to payment.',
-                className: 'bg-green-600 text-white border-green-600',
-              });
-            } else if (updated.status === 'rejected') {
-              toast({
-                variant: 'destructive',
-                title: 'Request Rejected',
-                description: 'Your request has been rejected by the agency.',
-              });
-            } else if (updated.status === 'changes_requested') {
-              toast({
-                title: 'Changes Requested',
-                description: 'The agency has requested changes to your brief.',
-              });
+            // Show toast for status changes (only for meaningful status updates)
+            const currentRequest = requestsRef.current.find(r => r.id === updated.id);
+            if (currentRequest && currentRequest.status !== updated.status) {
+              if (updated.status === 'accepted') {
+                toast({
+                  title: 'Request Accepted!',
+                  description: 'Your request has been accepted. You can now proceed to payment.',
+                  className: 'bg-green-600 text-white border-green-600',
+                });
+              } else if (updated.status === 'rejected') {
+                toast({
+                  variant: 'destructive',
+                  title: 'Request Rejected',
+                  description: 'Your request has been rejected by the agency.',
+                });
+              } else if (updated.status === 'changes_requested') {
+                toast({
+                  title: 'Changes Requested',
+                  description: 'The agency has requested changes to your brief.',
+                });
+              }
             }
             
-            // Update local state with new read status and status
+            // Update local state with new read status and status - this syncs across all views
             setRequests(prev => {
               const newRequests = prev.map(r => 
                 r.id === updated.id ? { ...r, read: updated.read, status: updated.status } : r
@@ -179,53 +182,33 @@ export function MyRequestsView() {
           }
         }
       )
-      .subscribe();
-
-    // Broadcast subscription to receive messages from agency (works regardless of RLS)
-    const broadcastChannel = supabase
-      .channel(`notify-${user.id}`)
-      .on('broadcast', { event: 'new-message' }, (payload) => {
-        const data = payload.payload;
-        if (!data) return;
-        
-        const { request_id, sender_type, message } = data;
-        // Only process agency messages
-        if (sender_type === 'client') return;
-        
-        // Check if this message belongs to one of our requests
-        const requestExists = requestsRef.current.some(r => r.id === request_id);
-        if (!requestExists) return;
-        
-        // Add message to local state
-        const newMsg: ServiceMessage = {
-          id: crypto.randomUUID(),
-          request_id,
-          sender_type,
-          sender_id: data.sender_id || '',
-          message,
-          created_at: new Date().toISOString()
-        };
-        
-        setMessages(prev => ({
-          ...prev,
-          [request_id]: [...(prev[request_id] || []), newMsg]
-        }));
-        
-        // Update local state read status
-        setRequests(prev => {
-          const updated = prev.map(r => 
-            r.id === request_id ? { ...r, read: false } : r
-          );
-          const newUnreadCount = updated.filter(r => !r.read).length;
-          setUserUnreadEngagementsCount(newUnreadCount);
-          return updated;
-        });
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMsg = payload.new as any;
+          // Check if this message belongs to one of our requests
+          const requestExists = requestsRef.current.some(r => r.id === newMsg.request_id);
+          if (!requestExists) return;
+          
+          // Only process agency messages (not our own)
+          if (newMsg.sender_type === 'client') return;
+          
+          // Add message to local state
+          setMessages(prev => ({
+            ...prev,
+            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg as ServiceMessage]
+          }));
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(requestsChannel);
-      supabase.removeChannel(broadcastChannel);
     };
   }, [user?.id]);
 

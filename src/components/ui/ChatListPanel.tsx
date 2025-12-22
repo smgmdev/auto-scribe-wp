@@ -339,14 +339,14 @@ export function ChatListPanel() {
     }
   }, [incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, isAdmin]);
 
-  // Real-time subscription for read status changes only
-  // NOTE: New message notifications are handled via broadcast (above) which works regardless of RLS
+  // Real-time subscription for read status changes and new messages
+  // This syncs read status across all views (ChatListPanel, MyRequestsView, AgencyRequestsView)
   useEffect(() => {
     if (!user) return;
 
     // Listen for updates to service_requests to sync read status
-    const readStatusChannel = supabase
-      .channel('chat-panel-read-status')
+    const syncChannel = supabase
+      .channel('chat-panel-sync')
       .on(
         'postgres_changes',
         {
@@ -368,34 +368,84 @@ export function ChatListPanel() {
           ));
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        async (payload) => {
+          const newMsg = payload.new as any;
+          const requestId = newMsg.request_id;
+          
+          // Check if this belongs to our engagements or service requests
+          const isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
+          const isServiceRequest = serviceRequestsRef.current.some(r => r.id === requestId);
+          
+          if (!isMyEngagement && !isServiceRequest) return;
+          
+          // Determine if this is our own message
+          const isOwnMessage = (isMyEngagement && newMsg.sender_type === 'client') ||
+                               (isServiceRequest && (newMsg.sender_type === 'agency' || newMsg.sender_type === 'admin'));
+          
+          if (isOwnMessage) return; // Skip our own messages
+          
+          // Check if chat is open or minimized
+          const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
+          const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === requestId;
+          
+          if (isMinimized) {
+            incrementMinimizedChatUnread(requestId);
+            playMessageSound();
+          } else if (!isDialogOpen) {
+            // Mark request as unread in database - this triggers sync to all views
+            await supabase
+              .from('service_requests')
+              .update({ read: false })
+              .eq('id', requestId);
+            
+            incrementUnreadMessageCount(requestId);
+            
+            // Get request info for toast
+            const request = myEngagementsRef.current.find(e => e.id === requestId) ||
+                           serviceRequestsRef.current.find(r => r.id === requestId);
+            
+            toast({
+              title: isMyEngagement ? 'New Message from Agency' : 'New Client Message',
+              description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
+            });
+            
+            playMessageSound();
+          }
+          
+          // Refresh lists to get latest message
+          fetchMyEngagements();
+          if (agencyPayoutIdRef.current || isAdmin) {
+            fetchServiceRequests();
+          }
+        }
+      )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(readStatusChannel);
+      supabase.removeChannel(syncChannel);
     };
-  }, [user?.id]);
+  }, [user?.id, incrementMinimizedChatUnread, incrementUnreadMessageCount, isAdmin]);
 
-  // Broadcast notification subscription - works regardless of RLS
-  // This is the PRIMARY notification mechanism since postgres_changes may be blocked by RLS
+  // Broadcast notification subscription - backup for when postgres_changes is blocked by RLS
   useEffect(() => {
     if (!user) return;
 
-    const channels: ReturnType<typeof supabase.channel>[] = [];
-    
-    // Listen for notifications to user's own ID (for when agencies reply to user's requests)
     const userChannel = supabase
       .channel(`notify-${user.id}`)
       .on('broadcast', { event: 'new-message' }, (payload) => {
-        console.log('[ChatListPanel] Received broadcast for user:', user.id, payload);
         handleBroadcastNotification(payload.payload);
       })
-      .subscribe((status) => {
-        console.log('[ChatListPanel] User channel status:', status, 'for user:', user.id);
-      });
-    channels.push(userChannel);
+      .subscribe();
 
     return () => {
-      channels.forEach(ch => supabase.removeChannel(ch));
+      supabase.removeChannel(userChannel);
     };
   }, [user?.id, handleBroadcastNotification]);
 
@@ -403,16 +453,12 @@ export function ChatListPanel() {
   useEffect(() => {
     if (!agencyPayoutId) return;
 
-    console.log('[ChatListPanel] Setting up agency broadcast for:', agencyPayoutId);
     const agencyChannel = supabase
       .channel(`notify-${agencyPayoutId}`)
       .on('broadcast', { event: 'new-message' }, (payload) => {
-        console.log('[ChatListPanel] Received broadcast for agency:', agencyPayoutId, payload);
         handleBroadcastNotification(payload.payload);
       })
-      .subscribe((status) => {
-        console.log('[ChatListPanel] Agency channel status:', status, 'for agency:', agencyPayoutId);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(agencyChannel);
