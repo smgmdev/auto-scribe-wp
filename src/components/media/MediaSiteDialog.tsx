@@ -332,7 +332,7 @@ export function MediaSiteDialog({
                   </Button>
                 ) : (
                   <Button 
-                    className="bg-black text-white hover:bg-gray-800 transition-colors"
+                    className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                     onClick={() => {
                       navigate('/auth', { 
                         state: { 
@@ -342,7 +342,10 @@ export function MediaSiteDialog({
                       });
                     }}
                   >
-                    Sign In to Purchase
+                    <span>Sign In to Purchase</span>
+                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                      <ArrowRight className="h-4 w-4 shrink-0" />
+                    </span>
                   </Button>
                 )
               )}
@@ -466,16 +469,19 @@ export function MediaSiteDialog({
                 <span>Back</span>
               </Button>
               <Button 
-                className="bg-black text-white hover:bg-gray-800 transition-colors"
+                className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                 onClick={handleSubmit} 
                 disabled={isSubmitting || !description.trim()}
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Send className="h-4 w-4 mr-2" />
+                ) : null}
+                <span>Submit Brief</span>
+                {!isSubmitting && (
+                  <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                    <ArrowRight className="h-4 w-4 shrink-0" />
+                  </span>
                 )}
-                Submit Brief
               </Button>
             </div>
           </div>
