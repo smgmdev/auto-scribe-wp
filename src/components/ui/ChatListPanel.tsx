@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageSquare, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -237,12 +237,36 @@ export function ChatListPanel() {
     setAgencyUnreadServiceRequestsCount(requestsUnread);
   }, [myEngagements, serviceRequests, unreadMessageCounts]);
 
-  // Real-time subscription for new messages
+  // Use refs to avoid re-subscribing when these values change
+  const minimizedChatsRef = useRef(minimizedChats);
+  const globalChatOpenRef = useRef(globalChatOpen);
+  const globalChatRequestRef = useRef(globalChatRequest);
+  const agencyPayoutIdRef = useRef(agencyPayoutId);
+
+  useEffect(() => {
+    minimizedChatsRef.current = minimizedChats;
+  }, [minimizedChats]);
+
+  useEffect(() => {
+    globalChatOpenRef.current = globalChatOpen;
+  }, [globalChatOpen]);
+
+  useEffect(() => {
+    globalChatRequestRef.current = globalChatRequest;
+  }, [globalChatRequest]);
+
+  useEffect(() => {
+    agencyPayoutIdRef.current = agencyPayoutId;
+  }, [agencyPayoutId]);
+
+  // Real-time subscription for new messages - stable subscription
   useEffect(() => {
     if (!user) return;
 
+    console.log('[ChatListPanel] Setting up realtime subscription for user:', user.id);
+
     const channel = supabase
-      .channel('chat-list-messages')
+      .channel(`chat-messages-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -254,11 +278,16 @@ export function ChatListPanel() {
           console.log('[ChatListPanel] Received message:', payload);
           const newMsg = payload.new as { request_id: string; sender_id: string; sender_type: string; message: string };
           
-          const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
-          const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
+          // Skip if message is from current user
+          if (newMsg.sender_id === user.id) {
+            console.log('[ChatListPanel] Ignoring own message');
+            return;
+          }
+          
+          const isMinimized = minimizedChatsRef.current.some(c => c.id === newMsg.request_id);
+          const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === newMsg.request_id;
           
           // Check if this is a message for the user (from agency) or for agency (from client)
-          // Query to check ownership
           const { data: request } = await supabase
             .from('service_requests')
             .select('user_id, agency_payout_id, title, media_site:media_sites(name)')
@@ -271,21 +300,17 @@ export function ChatListPanel() {
           }
           
           const isMyEngagement = request.user_id === user.id;
-          const isServiceRequest = agencyPayoutId && request.agency_payout_id === agencyPayoutId;
+          const isServiceRequest = agencyPayoutIdRef.current && request.agency_payout_id === agencyPayoutIdRef.current;
           
           // For user engagement: only notify if message is from agency (sender_type !== 'client')
           // For agency service request: only notify if message is from client (sender_type === 'client')
-          // Also ensure we don't notify ourselves (sender_id check)
-          const shouldNotifyUser = isMyEngagement && newMsg.sender_type !== 'client' && newMsg.sender_id !== user.id;
-          const shouldNotifyAgency = isServiceRequest && newMsg.sender_type === 'client' && newMsg.sender_id !== user.id;
+          const shouldNotifyUser = isMyEngagement && newMsg.sender_type !== 'client';
+          const shouldNotifyAgency = isServiceRequest && newMsg.sender_type === 'client';
           
           console.log('[ChatListPanel] Notification check:', { 
             isMyEngagement, 
             isServiceRequest, 
             senderType: newMsg.sender_type,
-            senderId: newMsg.sender_id,
-            userId: user.id,
-            agencyPayoutId,
             shouldNotifyUser, 
             shouldNotifyAgency 
           });
@@ -295,22 +320,18 @@ export function ChatListPanel() {
             return;
           }
           
-          console.log('[ChatListPanel] Processing notification', { isMinimized, isDialogOpen, shouldNotifyUser, shouldNotifyAgency });
+          console.log('[ChatListPanel] Processing notification', { isMinimized, isDialogOpen });
           
           if (isMinimized) {
-            // Increment minimized chat unread
             incrementMinimizedChatUnread(newMsg.request_id);
             playMessageSound();
           } else if (!isDialogOpen) {
-            // Increment unread count for the request
             incrementUnreadMessageCount(newMsg.request_id);
             
-            // Also increment total counts
             if (shouldNotifyUser) {
               incrementUserUnreadEngagementsCount();
             }
             
-            // Show toast notification
             const mediaSiteName = (request.media_site as { name: string } | null)?.name || 'Unknown';
             toast({
               title: shouldNotifyUser ? 'New Message' : 'New Client Message',
@@ -322,7 +343,7 @@ export function ChatListPanel() {
           
           // Refresh the lists
           fetchMyEngagements();
-          if (agencyPayoutId) {
+          if (agencyPayoutIdRef.current) {
             fetchServiceRequests();
           }
         }
@@ -332,9 +353,10 @@ export function ChatListPanel() {
       });
 
     return () => {
+      console.log('[ChatListPanel] Cleaning up subscription');
       supabase.removeChannel(channel);
     };
-  }, [user, agencyPayoutId, minimizedChats, globalChatOpen, globalChatRequest?.id]);
+  }, [user?.id]); // Only re-subscribe when user changes
 
   const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
     clearUnreadMessageCount(item.id);
