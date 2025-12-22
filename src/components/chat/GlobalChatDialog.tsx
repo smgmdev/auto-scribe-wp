@@ -126,11 +126,8 @@ export function GlobalChatDialog() {
           // Skip own messages (already added locally)
           if (newMsg.sender_type === senderType) return;
           
-          // Play sound if counterparty is online
-          if (presenceTrackerRef.current?.isCounterpartyOnline()) {
-            playMessageSound();
-          }
-          
+          // Don't play sound here - the counterparty will hear it from their ChatListPanel
+          // We only add the message to local state for display
           setMessages(prev => [...prev, newMsg]);
         }
       )
