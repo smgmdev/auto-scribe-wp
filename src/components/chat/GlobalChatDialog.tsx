@@ -591,42 +591,29 @@ export function GlobalChatDialog() {
           )}
           <div
             onClick={handleAttachmentClick}
-            className={`block rounded-lg border p-3 transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 transition-colors cursor-pointer ${
               isOwnMessage 
-                ? 'bg-primary-foreground/10 border-primary-foreground/30 hover:bg-primary-foreground/20' 
-                : 'bg-background border-border hover:bg-muted'
+                ? 'bg-primary-foreground/10 hover:bg-primary-foreground/20' 
+                : 'bg-muted/50 hover:bg-muted'
             }`}
           >
             {attachmentData.is_image ? (
-              <div className="space-y-2">
+              <>
                 <img 
                   src={attachmentData.file_url} 
                   alt={attachmentData.file_name}
-                  className="max-w-full max-h-48 rounded object-contain"
+                  className="max-w-[120px] max-h-20 rounded object-contain"
                 />
-                <div className="flex items-center gap-2 text-xs opacity-70">
-                  <ImageIcon className="h-3 w-3" />
-                  <span className="truncate">{attachmentData.file_name}</span>
-                </div>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded flex items-center justify-center ${
-                  isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
-                }`}>
-                  <FileText className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{attachmentData.file_name}</p>
-                  <p className="text-xs opacity-70">
-                    {(attachmentData.file_size / 1024).toFixed(1)} KB
-                  </p>
-                </div>
-                <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
-              </div>
+              <>
+                <FileText className="h-4 w-4 shrink-0 opacity-70" />
+                <span className="text-xs truncate max-w-[140px]">{attachmentData.file_name}</span>
+                <ExternalLink className="h-3 w-3 shrink-0 opacity-50" />
+              </>
             )}
           </div>
-          <p className="text-xs opacity-50 mt-2">
+          <p className="text-xs opacity-50 mt-1">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
           </p>
         </div>
@@ -1360,22 +1347,20 @@ export function GlobalChatDialog() {
                 )}
                 {/* Selected file preview */}
                 {selectedFile && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-t">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 border-t">
                     {selectedFile.type.startsWith('image/') ? (
-                      <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <ImageIcon className="h-3 w-3 text-muted-foreground shrink-0" />
                     ) : (
-                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <FileText className="h-3 w-3 text-muted-foreground shrink-0" />
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">{selectedFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(selectedFile.size / 1024).toFixed(1)} KB
-                      </p>
-                    </div>
+                    <span className="text-xs truncate flex-1 min-w-0">{selectedFile.name}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {(selectedFile.size / 1024).toFixed(0)} KB
+                    </span>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 shrink-0"
+                      className="h-5 w-5 shrink-0"
                       onClick={removeSelectedFile}
                     >
                       <X className="h-3 w-3" />
