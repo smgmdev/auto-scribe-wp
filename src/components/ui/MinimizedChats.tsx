@@ -44,18 +44,18 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
         
         return (
           <div
-            key={chat.id}
-            className={`relative flex items-center gap-2 border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
+            key={`${chat.id}-${chat.unreadCount}`}
+            className={`relative flex items-center gap-2 rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
               hasUnread 
-                ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-500 border-l-4' 
-                : 'bg-card border-border'
+                ? 'bg-sky-100 dark:bg-sky-900/50 border-2 border-sky-500' 
+                : 'bg-card border border-border'
             }`}
             onClick={() => handleOpenChat(chat)}
           >
             {/* Unread badge */}
             {hasUnread && (
               <Badge 
-                className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5 animate-pulse"
+                className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-sky-500 text-white text-xs px-1.5 animate-pulse"
               >
                 {chat.unreadCount}
               </Badge>
@@ -70,7 +70,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
               )}
               {/* Blue dot indicator with pulse */}
               {hasUnread && (
-                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-sky-500 rounded-full border-2 border-white dark:border-card animate-pulse" />
               )}
             </div>
             <span className={`text-sm whitespace-nowrap ${hasUnread ? 'font-semibold' : 'font-medium'}`}>
