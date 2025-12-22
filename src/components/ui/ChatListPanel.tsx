@@ -478,16 +478,42 @@ export function ChatListPanel() {
             return;
           }
           
-          // Update last message immediately in local state for both engagements and service requests
-          // (Do this even for own messages so the UI updates)
+          // Skip notification/sound for own messages - but still update last message
+          if (isOwnMessage) {
+            console.log('[ChatListPanel] Own message, updating last message only');
+            if (isMyEngagement) {
+              setMyEngagements(prev => {
+                const updated = prev.map(e => 
+                  e.id === requestId 
+                    ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    : e
+                );
+                myEngagementsRef.current = updated;
+                return updated;
+              });
+            }
+            if (isServiceRequest) {
+              setServiceRequests(prev => {
+                const updated = prev.map(r => 
+                  r.id === requestId 
+                    ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    : r
+                );
+                serviceRequestsRef.current = updated;
+                return updated;
+              });
+            }
+            return;
+          }
+          
+          // For received messages (not own), update last message AND mark as unread locally
           if (isMyEngagement) {
             setMyEngagements(prev => {
               const updated = prev.map(e => 
                 e.id === requestId 
-                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: false }
                   : e
               );
-              // Update ref immediately for subsequent checks
               myEngagementsRef.current = updated;
               return updated;
             });
@@ -496,19 +522,12 @@ export function ChatListPanel() {
             setServiceRequests(prev => {
               const updated = prev.map(r => 
                 r.id === requestId 
-                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: false }
                   : r
               );
-              // Update ref immediately for subsequent checks
               serviceRequestsRef.current = updated;
               return updated;
             });
-          }
-          
-          // Skip notification/sound for own messages
-          if (isOwnMessage) {
-            console.log('[ChatListPanel] Skipping notification for own message');
-            return;
           }
           
           // Check if chat is open or minimized
