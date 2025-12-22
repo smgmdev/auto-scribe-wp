@@ -166,11 +166,21 @@ export function AgencyRequestsView() {
         },
         (payload) => {
           const updated = payload.new as any;
-          // Update local state with the new read status - this syncs across all views
+          const old = payload.old as any;
+          
+          // Only sync read status when marked as read (not unread from external source)
+          const readChanged = old?.read !== updated.read;
+          const markedAsRead = readChanged && updated.read === true;
+          
+          // Update local state with the new read status - only sync if marking as read
           setRequests(prev => {
-            const newRequests = prev.map(r => 
-              r.id === updated.id ? { ...r, read: updated.read, status: updated.status } : r
-            );
+            const newRequests = prev.map(r => {
+              if (r.id === updated.id) {
+                const newRead = markedAsRead ? true : r.read;
+                return { ...r, read: newRead, status: updated.status };
+              }
+              return r;
+            });
             // Recalculate unread count
             const newUnreadCount = newRequests.filter(r => !r.read).length;
             setAgencyUnreadServiceRequestsCount(newUnreadCount);
