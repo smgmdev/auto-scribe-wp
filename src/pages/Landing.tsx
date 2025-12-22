@@ -81,12 +81,6 @@ const Landing = () => {
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
   // WebView state removed - now using direct _blank links
 
-  // Redirect logged-in users to dashboard
-  useEffect(() => {
-    if (!authLoading && user) {
-      navigate('/dashboard');
-    }
-  }, [user, authLoading, navigate]);
 
   const handlePublishNewArticle = (siteId: string) => {
     setPreselectedSiteId(siteId);
