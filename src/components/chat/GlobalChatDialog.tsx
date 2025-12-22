@@ -609,7 +609,7 @@ export function GlobalChatDialog() {
                   </p>
                 </div>
               ) : (
-              <div className="space-y-2 p-3">
+              <div className="space-y-2 p-3 animate-fade-in">
                 {messages.map((msg) => {
                   const quote = parseQuote(msg.message);
                   const isOwnMessage = msg.sender_type === senderType;
