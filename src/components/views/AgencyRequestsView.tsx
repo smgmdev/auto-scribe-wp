@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, History } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -454,14 +454,40 @@ export function AgencyRequestsView() {
         </TabsContent>
 
         <TabsContent value="orders" className="mt-6">
-          <Card className="border-border/50">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground text-center">
-                Orders from your client requests will appear here.
-              </p>
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="active" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="active" className="gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                Active Orders
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-2">
+                <History className="h-4 w-4" />
+                Order History
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="active" className="mt-4">
+              <Card className="border-border/50">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground text-center">
+                    Active orders from your client requests will appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-4">
+              <Card className="border-border/50">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <History className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground text-center">
+                    Cancelled and delivered orders will appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
