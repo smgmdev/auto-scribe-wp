@@ -483,17 +483,20 @@ export function ChatListPanel() {
     };
   }, [agencyPayoutId, handleBroadcastNotification]);
 
-  const handleOpenChat = async (item: ChatItem, type: 'my-request' | 'agency-request') => {
+  const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
     clearUnreadMessageCount(item.id);
     
-    // Mark as read in database if not already read
+    // Open chat immediately for better UX
+    openGlobalChat(item as unknown as GlobalChatRequest, type);
+    
+    // Mark as read in database asynchronously (don't await)
     if (!item.read) {
-      await supabase
+      supabase
         .from('service_requests')
         .update({ read: true })
         .eq('id', item.id);
       
-      // Update local state
+      // Update local state immediately
       if (type === 'my-request') {
         setMyEngagements(prev => prev.map(e => 
           e.id === item.id ? { ...e, read: true } : e
@@ -504,8 +507,6 @@ export function ChatListPanel() {
         ));
       }
     }
-    
-    openGlobalChat(item as unknown as GlobalChatRequest, type);
   };
 
   const formatTime = (dateStr: string) => {
