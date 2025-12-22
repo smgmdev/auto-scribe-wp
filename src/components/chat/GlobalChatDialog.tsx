@@ -442,7 +442,7 @@ export function GlobalChatDialog() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem 
-                      className="cursor-pointer hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       onClick={() => {
                         toast({
                           title: "Order Now",
@@ -453,7 +453,7 @@ export function GlobalChatDialog() {
                       Order Now
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="cursor-pointer text-destructive hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       onClick={() => {
                         toast({
                           title: "Delete Engagement",
