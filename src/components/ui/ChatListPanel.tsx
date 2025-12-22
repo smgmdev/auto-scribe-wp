@@ -409,7 +409,7 @@ export function ChatListPanel() {
         <div
           key={item.id}
           className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
-            !item.read || unreadCount > 0 ? 'bg-green-500/10 border-l-2 border-l-green-500' : ''
+            !item.read || unreadCount > 0 ? 'bg-blue-500/10 border-l-2 border-l-blue-500' : ''
           }`}
           onClick={() => handleOpenChat(item, type)}
         >
