@@ -1190,14 +1190,11 @@ export function GlobalChatDialog() {
                       Cancel Engagement
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black flex flex-col items-start gap-0.5"
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       disabled={!isCancelled}
                       onClick={() => setRemoveDialogOpen(true)}
                     >
-                      <span>Remove</span>
-                      {!isCancelled && (
-                        <span className="text-[10px] text-muted-foreground font-normal">Only cancelled engagements</span>
-                      )}
+                      Remove
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
