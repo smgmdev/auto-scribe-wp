@@ -385,15 +385,45 @@ export function ChatListPanel() {
           const newMsg = payload.new as any;
           const requestId = newMsg.request_id;
           const senderId = newMsg.sender_id;
+          const senderType = newMsg.sender_type;
+          
+          console.log('[ChatListPanel] Received service_messages INSERT:', { requestId, senderId, senderType, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
           
           // Skip if this is our own message - check sender_id directly
           const isOwnMessage = senderId === user?.id || senderId === agencyPayoutIdRef.current;
           
-          // Check if this belongs to our engagements or service requests
-          const isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
-          const isServiceRequest = serviceRequestsRef.current.some(r => r.id === requestId);
+          // Check if this belongs to our engagements or service requests from local state
+          let isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
+          let isServiceRequest = serviceRequestsRef.current.some(r => r.id === requestId);
           
-          if (!isMyEngagement && !isServiceRequest) return;
+          // If not found in local state, verify from database (handles race condition on initial load)
+          if (!isMyEngagement && !isServiceRequest && !isOwnMessage) {
+            console.log('[ChatListPanel] Request not found in local state, checking database...');
+            const { data: requestData } = await supabase
+              .from('service_requests')
+              .select('id, user_id, agency_payout_id, title, media_site:media_sites(name)')
+              .eq('id', requestId)
+              .maybeSingle();
+            
+            if (requestData) {
+              isMyEngagement = requestData.user_id === user?.id;
+              isServiceRequest = requestData.agency_payout_id === agencyPayoutIdRef.current;
+              console.log('[ChatListPanel] Database check result:', { isMyEngagement, isServiceRequest, requestData });
+              
+              // Refresh lists if we found a match
+              if (isMyEngagement) {
+                fetchMyEngagements();
+              }
+              if (isServiceRequest) {
+                fetchServiceRequests();
+              }
+            }
+          }
+          
+          if (!isMyEngagement && !isServiceRequest) {
+            console.log('[ChatListPanel] Request does not belong to this user, ignoring');
+            return;
+          }
           
           // Update last message immediately in local state for both engagements and service requests
           // (Do this even for own messages so the UI updates)
@@ -413,19 +443,24 @@ export function ChatListPanel() {
           }
           
           // Skip notification/sound for own messages
-          if (isOwnMessage) return;
+          if (isOwnMessage) {
+            console.log('[ChatListPanel] Skipping notification for own message');
+            return;
+          }
           
           // Check if chat is open or minimized
           const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
           const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === requestId;
           
-          console.log('[ChatListPanel] New message received:', { requestId, isMinimized, isDialogOpen, minimizedChats: minimizedChatsRef.current });
+          console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, senderType });
           
           if (isMinimized) {
-            console.log('[ChatListPanel] Incrementing minimized chat unread for:', requestId);
+            console.log('[ChatListPanel] Chat is minimized, incrementing unread');
             incrementMinimizedChatUnread(requestId);
             playMessageSound();
           } else if (!isDialogOpen) {
+            console.log('[ChatListPanel] Chat is not open, showing notification');
+            
             // Mark request as unread in database - this triggers sync to all views
             await supabase
               .from('service_requests')
@@ -433,6 +468,11 @@ export function ChatListPanel() {
               .eq('id', requestId);
             
             incrementUnreadMessageCount(requestId);
+            
+            // For user engagements receiving from agency, increment sidebar count
+            if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
+              incrementUserUnreadEngagementsCount();
+            }
             
             // Get request info for toast
             const request = myEngagementsRef.current.find(e => e.id === requestId) ||
@@ -444,6 +484,8 @@ export function ChatListPanel() {
             });
             
             playMessageSound();
+          } else {
+            console.log('[ChatListPanel] Chat is already open, not showing notification');
           }
         }
       )
