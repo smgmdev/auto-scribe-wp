@@ -123,7 +123,7 @@ export function ChatListPanel() {
         });
       }
 
-      setMyEngagements(data.map(item => {
+      const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
         return {
           ...item,
@@ -133,7 +133,11 @@ export function ChatListPanel() {
           // Use the read field from DB - it gets set to false when new messages arrive
           favicon: item.media_site?.favicon,
         };
-      }) as ChatItem[]);
+      }) as ChatItem[];
+      
+      setMyEngagements(engagements);
+      // Update ref immediately to avoid race conditions
+      myEngagementsRef.current = engagements;
     }
   };
 
@@ -188,7 +192,7 @@ export function ChatListPanel() {
         });
       }
 
-      setServiceRequests(data.map(item => {
+      const requests = data.map(item => {
         const lastMsg = lastMessages[item.id];
         return {
           ...item,
@@ -198,7 +202,11 @@ export function ChatListPanel() {
           // Use the read field from DB - it gets set to false when new messages arrive
           favicon: item.media_site?.favicon,
         };
-      }) as ChatItem[]);
+      }) as ChatItem[];
+      
+      setServiceRequests(requests);
+      // Update ref immediately to avoid race conditions
+      serviceRequestsRef.current = requests;
     }
   };
 
@@ -387,17 +395,30 @@ export function ChatListPanel() {
           const senderId = newMsg.sender_id;
           const senderType = newMsg.sender_type;
           
-          console.log('[ChatListPanel] Received service_messages INSERT:', { requestId, senderId, senderType, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
+          console.log('[ChatListPanel] Received service_messages INSERT:', { 
+            requestId, 
+            senderId, 
+            senderType, 
+            userId: user?.id, 
+            agencyPayoutId: agencyPayoutIdRef.current 
+          });
           
           // Skip if this is our own message - check sender_id directly
-          const isOwnMessage = senderId === user?.id || senderId === agencyPayoutIdRef.current;
+          // For regular users: senderId would match user.id when they send
+          // For agencies: senderId would match agencyPayoutId when they send
+          const isOwnMessage = senderId === user?.id || 
+                               (agencyPayoutIdRef.current && senderId === agencyPayoutIdRef.current);
+          
+          console.log('[ChatListPanel] isOwnMessage check:', { isOwnMessage, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
           
           // Check if this belongs to our engagements or service requests from local state
           let isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
           let isServiceRequest = serviceRequestsRef.current.some(r => r.id === requestId);
           
+          console.log('[ChatListPanel] Local state check:', { isMyEngagement, isServiceRequest, engagementsCount: myEngagementsRef.current.length });
+          
           // If not found in local state, verify from database (handles race condition on initial load)
-          if (!isMyEngagement && !isServiceRequest && !isOwnMessage) {
+          if (!isMyEngagement && !isServiceRequest) {
             console.log('[ChatListPanel] Request not found in local state, checking database...');
             const { data: requestData } = await supabase
               .from('service_requests')
@@ -407,7 +428,7 @@ export function ChatListPanel() {
             
             if (requestData) {
               isMyEngagement = requestData.user_id === user?.id;
-              isServiceRequest = requestData.agency_payout_id === agencyPayoutIdRef.current;
+              isServiceRequest = agencyPayoutIdRef.current ? requestData.agency_payout_id === agencyPayoutIdRef.current : false;
               console.log('[ChatListPanel] Database check result:', { isMyEngagement, isServiceRequest, requestData });
               
               // Refresh lists if we found a match
@@ -428,18 +449,28 @@ export function ChatListPanel() {
           // Update last message immediately in local state for both engagements and service requests
           // (Do this even for own messages so the UI updates)
           if (isMyEngagement) {
-            setMyEngagements(prev => prev.map(e => 
-              e.id === requestId 
-                ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
-                : e
-            ));
+            setMyEngagements(prev => {
+              const updated = prev.map(e => 
+                e.id === requestId 
+                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  : e
+              );
+              // Update ref immediately for subsequent checks
+              myEngagementsRef.current = updated;
+              return updated;
+            });
           }
           if (isServiceRequest) {
-            setServiceRequests(prev => prev.map(r => 
-              r.id === requestId 
-                ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
-                : r
-            ));
+            setServiceRequests(prev => {
+              const updated = prev.map(r => 
+                r.id === requestId 
+                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  : r
+              );
+              // Update ref immediately for subsequent checks
+              serviceRequestsRef.current = updated;
+              return updated;
+            });
           }
           
           // Skip notification/sound for own messages
