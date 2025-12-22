@@ -263,26 +263,28 @@ export function MyRequestsView() {
     }
   };
 
-  const handleCardClick = async (request: ServiceRequest) => {
+  const handleCardClick = (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
     
-    // Mark the request as read in the database and decrement sidebar count
+    // Open chat immediately for better UX
+    openGlobalChat(request as unknown as GlobalChatRequest, 'my-request');
+    
+    // Mark the request as read in the database asynchronously (don't await)
     if (!request.read) {
-      await supabase
+      supabase
         .from('service_requests')
         .update({ read: true })
-        .eq('id', request.id);
+        .eq('id', request.id)
+        .then(() => {
+          // Decrement the sidebar notification count
+          setUserUnreadEngagementsCount(Math.max(0, userUnreadEngagementsCount - 1));
+        });
       
-      // Decrement the sidebar notification count
-      setUserUnreadEngagementsCount(Math.max(0, userUnreadEngagementsCount - 1));
-      
-      // Update local state
+      // Update local state immediately
       setRequests(prev => prev.map(r => 
         r.id === request.id ? { ...r, read: true } : r
       ));
     }
-    
-    openGlobalChat(request as unknown as GlobalChatRequest, 'my-request');
   };
 
   if (loading) {
