@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -786,9 +786,12 @@ export function GlobalChatDialog() {
           style={{ transform: `translate(calc(-50% + ${dragPosition.x}px), calc(-50% + ${dragPosition.y}px))` }}
         >
           <DialogHeader 
-            className={`px-4 py-2 ${isCancelled ? 'bg-red-500/20' : ''} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            className={`px-4 py-2 ${isCancelled ? 'bg-red-500/20' : ''} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
             onMouseDown={handleDragStart}
           >
+            <div className="flex justify-center mb-1">
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {globalChatRequest.media_site?.favicon && (

@@ -30,12 +30,13 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   overlayClassName?: string;
   hideCloseButton?: boolean;
+  style?: React.CSSProperties;
 }
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, overlayClassName, hideCloseButton, ...props }, ref) => (
+>(({ className, children, overlayClassName, hideCloseButton, style, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay className={overlayClassName} />
     <DialogPrimitive.Content
@@ -44,6 +45,7 @@ const DialogContent = React.forwardRef<
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out",
         className,
       )}
+      style={style}
       {...props}
     >
       {children}
