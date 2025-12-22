@@ -14,7 +14,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
   if (minimizedChats.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-[304px] z-50 flex flex-row-reverse gap-2">
+    <div className="fixed bottom-4 right-[312px] z-50 flex flex-row-reverse gap-2">
       {minimizedChats.map((chat) => (
         <div
           key={chat.id}
