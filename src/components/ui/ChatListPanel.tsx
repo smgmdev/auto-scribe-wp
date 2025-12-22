@@ -337,10 +337,11 @@ export function ChatListPanel() {
 
   const renderChatList = (items: ChatItem[], type: 'my-request' | 'agency-request') => {
     if (items.length === 0) {
+      const emptyMessage = type === 'my-request' ? 'No engagements yet' : 'No service requests yet';
       return (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-          <p className="text-sm">{searchQuery ? 'No results found' : 'No conversations yet'}</p>
+          <p className="text-sm">{searchQuery ? 'No results found' : emptyMessage}</p>
         </div>
       );
     }
@@ -466,17 +467,6 @@ export function ChatListPanel() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
             <TabsList className="w-full rounded-none border-b border-border bg-transparent h-auto p-0">
-              <TabsTrigger 
-                value="my-engagements" 
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
-              >
-                My Engagements
-                {userUnreadEngagementsCount > 0 && (
-                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1">
-                    {userUnreadEngagementsCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
               {isAgency && (
                 <TabsTrigger 
                   value="service-requests" 
@@ -490,13 +480,18 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
+              <TabsTrigger 
+                value="my-engagements" 
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
+              >
+                My Engagements
+                {userUnreadEngagementsCount > 0 && (
+                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1">
+                    {userUnreadEngagementsCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="my-engagements" className="m-0">
-              <ScrollArea className="h-[300px]">
-                {renderChatList(filteredEngagements, 'my-request')}
-              </ScrollArea>
-            </TabsContent>
 
             {isAgency && (
               <TabsContent value="service-requests" className="m-0">
@@ -505,6 +500,12 @@ export function ChatListPanel() {
                 </ScrollArea>
               </TabsContent>
             )}
+
+            <TabsContent value="my-engagements" className="m-0">
+              <ScrollArea className="h-[300px]">
+                {renderChatList(filteredEngagements, 'my-request')}
+              </ScrollArea>
+            </TabsContent>
           </Tabs>
         </div>
       )}
