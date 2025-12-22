@@ -56,8 +56,7 @@ export function ChatListPanel() {
     incrementUserUnreadEngagementsCount,
     globalChatOpen,
     globalChatRequest,
-    minimizedChats,
-    incrementMinimizedChatUnread
+    minimizedChats
   } = useAppStore();
   
   const [isExpanded, setIsExpanded] = useState(false);
@@ -314,7 +313,9 @@ export function ChatListPanel() {
       return;
     }
     
-    const isMinimized = minimizedChatsRef.current.some(c => c.id === request_id);
+    // Get fresh minimized chats state directly from store
+    const currentMinimizedChats = useAppStore.getState().minimizedChats;
+    const isMinimized = currentMinimizedChats.some(c => c.id === request_id);
     const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === request_id;
     
     // Determine if this is for user engagement or agency service request
@@ -355,14 +356,15 @@ export function ChatListPanel() {
     
     console.log('[ChatListPanel] Broadcast: isMinimized check', { 
       isMinimized, 
-      minimizedChatsCount: minimizedChatsRef.current.length,
-      minimizedChatIds: minimizedChatsRef.current.map(c => c.id),
+      minimizedChatsCount: currentMinimizedChats.length,
+      minimizedChatIds: currentMinimizedChats.map(c => c.id),
       request_id 
     });
     
     if (isMinimized) {
       console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id);
-      incrementMinimizedChatUnread(request_id);
+      // Use store's action directly for reliability
+      useAppStore.getState().incrementMinimizedChatUnread(request_id);
       playMessageSound();
     } else if (!isDialogOpen) {
       // Mark request as unread in database (async, non-blocking)
@@ -399,7 +401,7 @@ export function ChatListPanel() {
         fetchServiceRequests();
       }
     }
-  }, [user?.id, incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, incrementAgencyUnreadServiceRequestsCount, isAdmin]);
+  }, [user?.id, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, incrementAgencyUnreadServiceRequestsCount, isAdmin]);
 
   // Real-time subscription for read status changes and new messages
   // This syncs read status across all views (ChatListPanel, MyRequestsView, AgencyRequestsView)
@@ -581,7 +583,7 @@ export function ChatListPanel() {
           
           if (isMinimized) {
             console.log('[ChatListPanel] Chat is minimized, incrementing unread');
-            incrementMinimizedChatUnread(requestId);
+            useAppStore.getState().incrementMinimizedChatUnread(requestId);
             playMessageSound();
           } else if (!isDialogOpen) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
@@ -624,7 +626,7 @@ export function ChatListPanel() {
     return () => {
       supabase.removeChannel(syncChannel);
     };
-  }, [user?.id, incrementMinimizedChatUnread, incrementUnreadMessageCount, isAdmin]);
+  }, [user?.id, incrementUnreadMessageCount, isAdmin]);
 
   // Broadcast notification subscription - backup for when postgres_changes is blocked by RLS
   useEffect(() => {
