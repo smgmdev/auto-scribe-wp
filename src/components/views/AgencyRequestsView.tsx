@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus, Megaphone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -537,24 +537,34 @@ export function AgencyRequestsView() {
                   </span>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 mr-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                onClick={() => {
-                  if (selectedRequest) {
-                    addMinimizedChat({
-                      id: selectedRequest.id,
-                      title: selectedRequest.title,
-                      favicon: selectedRequest.media_site?.favicon,
-                      type: 'agency-request'
-                    });
-                    setSelectedRequest(null);
-                  }
-                }}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                  title="Shout"
+                >
+                  <Megaphone className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                  onClick={() => {
+                    if (selectedRequest) {
+                      addMinimizedChat({
+                        id: selectedRequest.id,
+                        title: selectedRequest.title,
+                        favicon: selectedRequest.media_site?.favicon,
+                        type: 'agency-request'
+                      });
+                      setSelectedRequest(null);
+                    }
+                  }}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </DialogHeader>
           {selectedRequest && (
