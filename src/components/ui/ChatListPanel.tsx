@@ -155,20 +155,27 @@ export function ChatListPanel() {
     }
   };
 
-  // Check if user is agency
+  // Check if user is an approved agency (must have onboarding_complete = true)
   useEffect(() => {
     const checkAgency = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       const { data } = await supabase
         .from('agency_payouts')
-        .select('id')
+        .select('id, onboarding_complete')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (data) {
+      // Only show agency features if onboarding is complete (approved agency)
+      if (data?.onboarding_complete === true) {
         setAgencyPayoutId(data.id);
         setIsAgency(true);
+      } else {
+        setAgencyPayoutId(null);
+        setIsAgency(false);
       }
       setLoading(false);
     };
