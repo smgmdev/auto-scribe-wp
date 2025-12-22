@@ -129,13 +129,13 @@ export function AgencyRequestsView() {
     fetchRequests();
   }, [user]);
 
-  // Real-time subscription for new requests and status updates
-  // NOTE: Message notifications are handled by ChatListPanel via broadcast
+  // Real-time subscription for new requests and status/read sync
+  // This syncs read status across all views/tabs when updated from any source
   useEffect(() => {
     if (!agencyPayoutId) return;
 
     const requestsChannel = supabase
-      .channel('agency-requests')
+      .channel('agency-requests-sync')
       .on(
         'postgres_changes',
         {
@@ -162,7 +162,7 @@ export function AgencyRequestsView() {
         },
         (payload) => {
           const updated = payload.new as any;
-          // Update local state with the new read status
+          // Update local state with the new read status - this syncs across all views
           setRequests(prev => {
             const newRequests = prev.map(r => 
               r.id === updated.id ? { ...r, read: updated.read, status: updated.status } : r
@@ -174,53 +174,33 @@ export function AgencyRequestsView() {
           });
         }
       )
-      .subscribe();
-
-    // Broadcast subscription to receive messages from clients (works regardless of RLS)
-    const broadcastChannel = supabase
-      .channel(`notify-${agencyPayoutId}`)
-      .on('broadcast', { event: 'new-message' }, (payload) => {
-        const data = payload.payload;
-        if (!data) return;
-        
-        const { request_id, sender_type, message } = data;
-        // Only process client messages
-        if (sender_type === 'agency' || sender_type === 'admin') return;
-        
-        // Check if this message belongs to one of our requests
-        const requestExists = requestsRef.current.some(r => r.id === request_id);
-        if (!requestExists) return;
-        
-        // Add message to local state
-        const newMsg: ServiceMessage = {
-          id: crypto.randomUUID(),
-          request_id,
-          sender_type,
-          sender_id: data.sender_id || '',
-          message,
-          created_at: new Date().toISOString()
-        };
-        
-        setMessages(prev => ({
-          ...prev,
-          [request_id]: [...(prev[request_id] || []), newMsg]
-        }));
-        
-        // Update local state read status
-        setRequests(prev => {
-          const updated = prev.map(r => 
-            r.id === request_id ? { ...r, read: false } : r
-          );
-          const newUnreadCount = updated.filter(r => !r.read).length;
-          setAgencyUnreadServiceRequestsCount(newUnreadCount);
-          return updated;
-        });
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMsg = payload.new as any;
+          // Check if this message belongs to one of our requests
+          const requestExists = requestsRef.current.some(r => r.id === newMsg.request_id);
+          if (!requestExists) return;
+          
+          // Only process client messages (not our own)
+          if (newMsg.sender_type === 'agency' || newMsg.sender_type === 'admin') return;
+          
+          // Add message to local state
+          setMessages(prev => ({
+            ...prev,
+            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg as ServiceMessage]
+          }));
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(requestsChannel);
-      supabase.removeChannel(broadcastChannel);
     };
   }, [agencyPayoutId]);
 
