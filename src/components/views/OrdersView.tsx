@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2 } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -46,6 +47,7 @@ export function OrdersView() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [releasing, setReleasing] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -146,6 +148,17 @@ export function OrdersView() {
     }
   };
 
+  // Filter orders based on search query
+  const filterOrders = (orderList: Order[]) => {
+    if (!searchQuery.trim()) return orderList;
+    const query = searchQuery.toLowerCase();
+    return orderList.filter(o => 
+      o.media_sites?.name?.toLowerCase().includes(query) ||
+      o.media_sites?.agency?.toLowerCase().includes(query) ||
+      o.id.toLowerCase().includes(query)
+    );
+  };
+
   // Calculate order counts for tabs
   // Active: paid orders waiting for delivery
   const activeOrders = useMemo(() => 
@@ -164,6 +177,11 @@ export function OrdersView() {
     orders.filter(o => o.status === 'cancelled'), 
     [orders]
   );
+
+  // Filtered orders for display
+  const filteredActiveOrders = useMemo(() => filterOrders(activeOrders), [activeOrders, searchQuery]);
+  const filteredCompletedOrders = useMemo(() => filterOrders(completedOrders), [completedOrders, searchQuery]);
+  const filteredHistoryOrders = useMemo(() => filterOrders(historyOrders), [historyOrders, searchQuery]);
 
   const renderOrderCard = (order: Order) => (
     <Card key={order.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
@@ -240,58 +258,78 @@ export function OrdersView() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full max-w-xl grid-cols-3">
-            <TabsTrigger value="active" className="gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              Active Orders ({activeOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Completed ({completedOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="h-4 w-4" />
-              Order History ({historyOrders.length})
-            </TabsTrigger>
-          </TabsList>
+        <>
+          {orders.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search orders by site name or agency..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+              />
+            </div>
+          )}
 
-          <TabsContent value="active" className="mt-6">
-            {activeOrders.length === 0 ? (
-              renderEmptyState(isAdmin 
-                ? 'No active orders at the moment'
-                : 'You have no active orders waiting for delivery')
-            ) : (
-              <div className="space-y-2">
-                {activeOrders.map(renderOrderCard)}
-              </div>
-            )}
-          </TabsContent>
+          <Tabs defaultValue="active" className="w-full">
+            <TabsList className="grid w-full max-w-xl grid-cols-3">
+              <TabsTrigger value="active" className="gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                Active Orders ({activeOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Completed ({completedOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-2">
+                <History className="h-4 w-4" />
+                Order History ({historyOrders.length})
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="completed" className="mt-6">
-            {completedOrders.length === 0 ? (
-              renderEmptyState(isAdmin 
-                ? 'No completed orders yet'
-                : 'Your completed orders will appear here')
-            ) : (
-              <div className="space-y-2">
-                {completedOrders.map(renderOrderCard)}
-              </div>
-            )}
-          </TabsContent>
+            <TabsContent value="active" className="mt-6">
+              {filteredActiveOrders.length === 0 ? (
+                renderEmptyState(searchQuery 
+                  ? 'No matching active orders found'
+                  : isAdmin 
+                    ? 'No active orders at the moment'
+                    : 'You have no active orders waiting for delivery')
+              ) : (
+                <div className="space-y-2">
+                  {filteredActiveOrders.map(renderOrderCard)}
+                </div>
+              )}
+            </TabsContent>
 
-          <TabsContent value="history" className="mt-6">
-            {historyOrders.length === 0 ? (
-              renderEmptyState(isAdmin 
-                ? 'No cancelled orders'
-                : 'Cancelled orders will appear here')
-            ) : (
-              <div className="space-y-2">
-                {historyOrders.map(renderOrderCard)}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="completed" className="mt-6">
+              {filteredCompletedOrders.length === 0 ? (
+                renderEmptyState(searchQuery 
+                  ? 'No matching completed orders found'
+                  : isAdmin 
+                    ? 'No completed orders yet'
+                    : 'Your completed orders will appear here')
+              ) : (
+                <div className="space-y-2">
+                  {filteredCompletedOrders.map(renderOrderCard)}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-6">
+              {filteredHistoryOrders.length === 0 ? (
+                renderEmptyState(searchQuery 
+                  ? 'No matching cancelled orders found'
+                  : isAdmin 
+                    ? 'No cancelled orders'
+                    : 'Cancelled orders will appear here')
+              ) : (
+                <div className="space-y-2">
+                  {filteredHistoryOrders.map(renderOrderCard)}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </>
       )}
 
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
