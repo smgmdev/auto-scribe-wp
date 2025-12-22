@@ -110,6 +110,8 @@ export function Sidebar({
     setAgencyUnreadMediaSubmissionsCount,
     agencyUnreadServiceRequestsCount,
     setAgencyUnreadServiceRequestsCount,
+    userUnreadEngagementsCount,
+    setUserUnreadEngagementsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -411,6 +413,10 @@ export function Sidebar({
                 const agencyManagementCount = item.id === 'agency-management'
                   ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount)
                   : 0;
+                // Calculate notification count for B2B Media Buying dropdown (user engagements)
+                const b2bMediaBuyingCount = item.id === 'b2b-media-buying' && !isAdmin
+                  ? userUnreadEngagementsCount
+                  : 0;
                 return (
                   <div key={item.id}>
                     <Button
@@ -436,6 +442,11 @@ export function Sidebar({
                             {agencyManagementCount}
                           </Badge>
                         )}
+                        {b2bMediaBuyingCount > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                            {b2bMediaBuyingCount}
+                          </Badge>
+                        )}
                         <ChevronDown className={cn(
                           "h-4 w-4 transition-transform duration-200",
                           isExpanded && "rotate-180"
@@ -457,6 +468,8 @@ export function Sidebar({
                           const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
                           // Agency user Service Requests shows unread request notifications
                           const showServiceRequestsBadge = subItem.id === 'agency-requests' && agencyUnreadServiceRequestsCount > 0;
+                          // User My Engagements shows unread message notifications
+                          const showEngagementsBadge = subItem.id === 'my-requests' && userUnreadEngagementsCount > 0;
                           return (
                             <Button
                               key={subItem.id}
@@ -489,6 +502,11 @@ export function Sidebar({
                               {showServiceRequestsBadge && (
                                 <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyUnreadServiceRequestsCount}
+                                </Badge>
+                              )}
+                              {showEngagementsBadge && (
+                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                  {userUnreadEngagementsCount}
                                 </Badge>
                               )}
                             </Button>
