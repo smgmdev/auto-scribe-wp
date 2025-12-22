@@ -54,12 +54,19 @@ export function MyRequestsView() {
     incrementUnreadMessageCount,
     minimizedChats,
     globalChatOpen,
-    globalChatRequest
+    globalChatRequest,
+    setUserUnreadEngagementsCount
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
+
+  // Update total unread count when unreadMessageCounts changes
+  useEffect(() => {
+    const totalUnread = Object.values(unreadMessageCounts).reduce((sum, count) => sum + count, 0);
+    setUserUnreadEngagementsCount(totalUnread);
+  }, [unreadMessageCounts, setUserUnreadEngagementsCount]);
 
   const fetchRequests = async () => {
     if (!user) return;
