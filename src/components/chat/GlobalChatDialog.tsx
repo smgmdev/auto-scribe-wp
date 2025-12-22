@@ -390,6 +390,13 @@ export function GlobalChatDialog() {
         .single();
       
       if (requestData) {
+        // Mark the request as unread for the recipient in the database
+        // This ensures the unread state persists even if they're offline
+        await supabase
+          .from('service_requests')
+          .update({ read: false })
+          .eq('id', globalChatRequest.id);
+        
         // Determine recipient based on sender type
         const recipientId = senderType === 'client' 
           ? requestData.agency_payout_id // Notify agency
