@@ -24,6 +24,7 @@ interface ChatItem {
   unreadCount: number;
   favicon?: string | null;
   media_site: {
+    id: string;
     name: string;
     favicon: string | null;
     price: number;
@@ -94,7 +95,7 @@ export function ChatListPanel() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+        media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
         order:orders(id, status, delivery_status)
       `)
       .eq('user_id', user.id)
@@ -155,7 +156,7 @@ export function ChatListPanel() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+        media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
         order:orders(id, status, delivery_status)
       `)
       .order('updated_at', { ascending: false });

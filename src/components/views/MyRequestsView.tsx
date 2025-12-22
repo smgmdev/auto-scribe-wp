@@ -20,6 +20,7 @@ interface ServiceRequest {
   created_at: string;
   updated_at: string;
   media_site: {
+    id: string;
     name: string;
     favicon: string | null;
     price: number;
@@ -83,7 +84,7 @@ export function MyRequestsView() {
           read,
           created_at,
           updated_at,
-          media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+          media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
           order:orders(id, status, delivery_status)
         `)
         .eq('user_id', user.id)

@@ -19,6 +19,7 @@ export interface GlobalChatRequest {
   created_at: string;
   updated_at: string;
   media_site: {
+    id: string;
     name: string;
     favicon: string | null;
     price: number;
