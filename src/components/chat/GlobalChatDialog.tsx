@@ -814,11 +814,16 @@ export function GlobalChatDialog() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelling}>No, keep it</AlertDialogCancel>
+            <AlertDialogCancel 
+              disabled={cancelling}
+              className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+            >
+              No, keep it
+            </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleCancelEngagement}
               disabled={cancelling}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, cancel engagement
