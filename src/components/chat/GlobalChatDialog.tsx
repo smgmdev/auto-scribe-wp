@@ -484,12 +484,12 @@ export function GlobalChatDialog() {
                       disabled={hasOrder || isCancelled}
                       onClick={() => {
                         toast({
-                          title: "Order Now",
+                          title: globalChatType === 'agency-request' ? "Send Order" : "Order Now",
                           description: "Order functionality coming soon",
                         });
                       }}
                     >
-                      Order Now
+                      {globalChatType === 'agency-request' ? 'Send Order' : 'Order Now'}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
