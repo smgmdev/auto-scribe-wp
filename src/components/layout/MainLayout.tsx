@@ -16,13 +16,17 @@ export function MainLayout({
   onOpenMinimizedChat
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { removeMinimizedChat, setCurrentView } = useAppStore();
+  const { removeMinimizedChat, setCurrentView, setPendingChatToOpen } = useAppStore();
 
   const handleOpenChat = (chat: MinimizedChat) => {
     removeMinimizedChat(chat.id);
+    
     if (onOpenMinimizedChat) {
       onOpenMinimizedChat(chat);
     } else {
+      // Set the pending chat to open
+      setPendingChatToOpen(chat.id);
+      
       // Navigate to the appropriate view based on chat type
       if (chat.type === 'agency-request') {
         setCurrentView('agency-requests');

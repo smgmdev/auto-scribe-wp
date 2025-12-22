@@ -49,7 +49,9 @@ export function AgencyRequestsView() {
     setAgencyUnreadServiceRequestsCount, 
     addMinimizedChat, 
     unreadMessageCounts,
-    clearUnreadMessageCount 
+    clearUnreadMessageCount,
+    pendingChatToOpen,
+    setPendingChatToOpen
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
@@ -70,6 +72,18 @@ export function AgencyRequestsView() {
   useEffect(() => {
     selectedRequestRef.current = selectedRequest;
   }, [selectedRequest]);
+
+  // Handle pending chat to open (from minimized chat click)
+  useEffect(() => {
+    if (pendingChatToOpen && requests.length > 0) {
+      const requestToOpen = requests.find(r => r.id === pendingChatToOpen);
+      if (requestToOpen) {
+        setSelectedRequest(requestToOpen);
+        clearUnreadMessageCount(requestToOpen.id);
+        setPendingChatToOpen(null);
+      }
+    }
+  }, [pendingChatToOpen, requests, clearUnreadMessageCount, setPendingChatToOpen]);
 
   // Presence tracking for the open chat
   useEffect(() => {
