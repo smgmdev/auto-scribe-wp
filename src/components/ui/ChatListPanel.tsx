@@ -390,7 +390,11 @@ export function ChatListPanel() {
     }
   };
 
-  const totalUnread = userUnreadEngagementsCount + agencyUnreadServiceRequestsCount;
+  // Calculate total unread from store counts + unread items based on last message
+  const unreadEngagementsFromMessages = myEngagements.filter(item => !item.read).length;
+  const unreadServiceRequestsFromMessages = serviceRequests.filter(item => !item.read).length;
+  const totalUnread = Math.max(userUnreadEngagementsCount, unreadEngagementsFromMessages) + 
+                      Math.max(agencyUnreadServiceRequestsCount, unreadServiceRequestsFromMessages);
 
   // Filter and sort items based on search query and last message time
   const filterAndSortItems = (items: ChatItem[]) => {
