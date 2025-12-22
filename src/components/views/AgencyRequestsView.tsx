@@ -315,10 +315,10 @@ export function AgencyRequestsView() {
       <div>
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <ClipboardList className="h-8 w-8" />
-          Service Requests
+          Client Requests
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Manage service requests and orders from clients for your media sites
+          Manage client requests and orders for your media sites
         </p>
       </div>
 
@@ -367,7 +367,7 @@ export function AgencyRequestsView() {
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
                 <p className="text-muted-foreground text-center">
-                  No service requests yet. When clients submit briefs for your media sites, they'll appear here.
+                  No client requests yet. When clients submit briefs for your media sites, they'll appear here.
                 </p>
               </CardContent>
             </Card>
@@ -458,7 +458,7 @@ export function AgencyRequestsView() {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground text-center">
-                Orders from your service requests will appear here.
+                Orders from your client requests will appear here.
               </p>
             </CardContent>
           </Card>

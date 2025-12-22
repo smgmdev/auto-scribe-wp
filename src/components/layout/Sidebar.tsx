@@ -53,7 +53,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       icon: Briefcase,
       submenu: [
         { id: 'agency-media', label: 'My Media', icon: Library },
-        { id: 'agency-requests', label: 'Service Requests', icon: ClipboardList },
+        { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
         { id: 'agency-payouts', label: 'Payout History', icon: Wallet }
       ]
     });
