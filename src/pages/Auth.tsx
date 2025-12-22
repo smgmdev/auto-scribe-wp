@@ -171,10 +171,6 @@ export default function Auth() {
     }
 
     setIsLoading(false);
-    toast({
-      title: 'Welcome back!',
-      description: 'You have successfully signed in.',
-    });
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
