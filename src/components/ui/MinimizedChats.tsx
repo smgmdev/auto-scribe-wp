@@ -54,7 +54,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
             key={`${chat.id}-${totalUnread}`}
             className={`relative flex items-center gap-2 rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group border ${
               hasUnread 
-                ? 'bg-sky-200 dark:bg-sky-800/60 border-border' 
+                ? 'bg-[#4771d9] text-white border-border' 
                 : 'bg-card border-border'
             }`}
             onClick={() => handleOpenChat(chat)}
