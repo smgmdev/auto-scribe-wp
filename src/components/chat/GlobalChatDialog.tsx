@@ -1661,7 +1661,11 @@ export function GlobalChatDialog() {
               disabled={sending}
               className="flex-1 bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 transition-all duration-200 gap-2"
             >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : isResendMode ? <RefreshCw className="h-4 w-4" /> : null}
+              {sending ? (
+                isResendMode ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                isResendMode ? <RefreshCw className="h-4 w-4" /> : null
+              )}
               {isResendMode ? 'Resend Order' : 'Send Order'}
             </Button>
           </div>
