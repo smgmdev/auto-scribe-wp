@@ -1,5 +1,6 @@
 import { MessageSquare, X, Maximize2 } from 'lucide-react';
-import { useAppStore, MinimizedChat } from '@/stores/appStore';
+import { MinimizedChat } from '@/stores/appStore';
+import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -8,7 +9,7 @@ interface MinimizedChatsProps {
 }
 
 export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
-  const { minimizedChats, removeMinimizedChat } = useAppStore();
+  const { minimizedChats, removeMinimizedChat } = useMinimizedChats();
 
   if (minimizedChats.length === 0) return null;
 

@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { Headline, Article } from '@/types';
 
 export interface MinimizedChat {
@@ -128,9 +127,7 @@ interface AppState {
   updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>) => void;
 }
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set) => ({
+export const useAppStore = create<AppState>()((set) => ({
   // Headlines
   headlines: [],
   setHeadlines: (headlines) => set({ headlines }),
@@ -261,12 +258,4 @@ export const useAppStore = create<AppState>()(
       ? { ...state.globalChatRequest, ...updates } 
       : null
   })),
-}),
-    {
-      name: 'arcana-mace-chats',
-      partialize: (state) => ({
-        minimizedChats: state.minimizedChats,
-      }),
-    }
-  )
-);
+}));

@@ -478,6 +478,39 @@ export type Database = {
         }
         Relationships: []
       }
+      minimized_chats: {
+        Row: {
+          chat_type: string
+          created_at: string
+          id: string
+          media_site_favicon: string | null
+          media_site_name: string | null
+          request_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          chat_type?: string
+          created_at?: string
+          id?: string
+          media_site_favicon?: string | null
+          media_site_name?: string | null
+          request_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          chat_type?: string
+          created_at?: string
+          id?: string
+          media_site_favicon?: string | null
+          media_site_name?: string | null
+          request_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           accepted_at: string | null
