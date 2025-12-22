@@ -1,9 +1,11 @@
-import { ReactNode, useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { ReactNode, useState, useEffect } from 'react';
+import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { MinimizedChats } from '@/components/ui/MinimizedChats';
-import { useAppStore, MinimizedChat } from '@/stores/appStore';
+import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
+import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore';
+import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 
 interface MainLayoutProps {
@@ -16,23 +18,35 @@ export function MainLayout({
   onOpenMinimizedChat
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { removeMinimizedChat, setCurrentView, setPendingChatToOpen } = useAppStore();
+  const { 
+    removeMinimizedChat, 
+    openGlobalChat,
+    clearUnreadMessageCount
+  } = useAppStore();
 
-  const handleOpenChat = (chat: MinimizedChat) => {
+  const handleOpenChat = async (chat: MinimizedChat) => {
     removeMinimizedChat(chat.id);
+    clearUnreadMessageCount(chat.id);
     
-    if (onOpenMinimizedChat) {
-      onOpenMinimizedChat(chat);
-    } else {
-      // Set the pending chat to open
-      setPendingChatToOpen(chat.id);
-      
-      // Navigate to the appropriate view based on chat type
-      if (chat.type === 'agency-request') {
-        setCurrentView('agency-requests');
-      } else if (chat.type === 'my-request') {
-        setCurrentView('my-requests');
-      }
+    // Fetch the full request data
+    const { data } = await supabase
+      .from('service_requests')
+      .select(`
+        id,
+        title,
+        description,
+        status,
+        read,
+        created_at,
+        updated_at,
+        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+        order:orders(id, status, delivery_status)
+      `)
+      .eq('id', chat.id)
+      .single();
+
+    if (data) {
+      openGlobalChat(data as unknown as GlobalChatRequest, chat.type);
     }
   };
 
@@ -61,5 +75,8 @@ export function MainLayout({
 
       {/* Global Minimized Chats */}
       <MinimizedChats onOpenChat={handleOpenChat} />
+      
+      {/* Global Chat Dialog */}
+      <GlobalChatDialog />
     </div>;
 }
