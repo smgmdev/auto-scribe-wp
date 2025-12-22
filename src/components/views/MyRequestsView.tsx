@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -325,9 +326,20 @@ export function MyRequestsView() {
     }
   };
 
+  // Filter requests into active and cancelled
+  const activeRequests = useMemo(() => 
+    requests.filter(r => r.status !== 'cancelled'), 
+    [requests]
+  );
+  
+  const cancelledRequests = useMemo(() => 
+    requests.filter(r => r.status === 'cancelled'), 
+    [requests]
+  );
+
   // Filter and sort requests based on search and sort option - must be before any conditional returns
-  const sortedRequests = useMemo(() => {
-    const filtered = requests.filter((request) => {
+  const getSortedRequests = (requestList: ServiceRequest[]) => {
+    const filtered = requestList.filter((request) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       const titleMatch = request.title.toLowerCase().includes(query);
@@ -354,7 +366,10 @@ export function MyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [requests, messages, sortBy, searchQuery]);
+  };
+
+  const sortedActiveRequests = useMemo(() => getSortedRequests(activeRequests), [activeRequests, messages, sortBy, searchQuery]);
+  const sortedCancelledRequests = useMemo(() => getSortedRequests(cancelledRequests), [cancelledRequests, messages, sortBy, searchQuery]);
 
   if (loading) {
     return (
@@ -413,99 +428,191 @@ export function MyRequestsView() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {sortedRequests.map((request) => {
-            const unreadCount = unreadMessageCounts[request.id] || 0;
-            const requestMessages = messages[request.id] || [];
-            // Unread is based solely on request.read - we mark as unread when new agency message arrives
-            const hasUnread = !request.read;
-            
-            return (
-              <Card 
-                key={request.id} 
-                className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                  hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
-                }`}
-                onClick={() => handleCardClick(request)}
-              >
-                {(unreadCount > 0 || hasUnread) && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
-                  >
-                    {unreadCount > 0 ? unreadCount : '•'}
-                  </Badge>
-                )}
-                <CardHeader className="py-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        {request.media_site?.favicon ? (
-                          <img 
-                            src={request.media_site.favicon} 
-                            alt="" 
-                            className="h-8 w-8 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        )}
-                        {hasUnread && (
-                          <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
-                        )}
-                      </div>
-                      <div className="flex flex-col">
-                        <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                        {request.media_site?.agency && (
-                          <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {getStatusBadge(request.status)}
-                      {request.status === 'accepted' && (
-                        <Button 
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={(e) => proceedToPayment(e, request)}
-                          disabled={paying === request.id}
-                        >
-                          {paying === request.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <CreditCard className="h-4 w-4 mr-1" />
-                              Pay ${request.media_site?.price}
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3 px-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                      {requestMessages.length > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                    {requestMessages.length > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                    )}
-                  </div>
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="active" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Active ({activeRequests.length})
+            </TabsTrigger>
+            <TabsTrigger value="cancelled" className="gap-2">
+              <History className="h-4 w-4" />
+              Cancelled ({cancelledRequests.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="active" className="mt-6">
+            {sortedActiveRequests.length === 0 ? (
+              <Card className="border-border/50">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground text-center">No active engagements</p>
+                  <p className="text-sm text-muted-foreground text-center">Browse media sites and submit a brief to get started</p>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            ) : (
+              <div className="space-y-4">
+                {sortedActiveRequests.map((request) => {
+                  const unreadCount = unreadMessageCounts[request.id] || 0;
+                  const requestMessages = messages[request.id] || [];
+                  const hasUnread = !request.read;
+                  
+                  return (
+                    <Card 
+                      key={request.id} 
+                      className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                        hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+                      }`}
+                      onClick={() => handleCardClick(request)}
+                    >
+                      {(unreadCount > 0 || hasUnread) && (
+                        <Badge 
+                          className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
+                        >
+                          {unreadCount > 0 ? unreadCount : '•'}
+                        </Badge>
+                      )}
+                      <CardHeader className="py-3 px-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              {request.media_site?.favicon ? (
+                                <img 
+                                  src={request.media_site.favicon} 
+                                  alt="" 
+                                  className="h-8 w-8 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              )}
+                              {hasUnread && (
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                              {request.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {getStatusBadge(request.status)}
+                            {request.status === 'accepted' && (
+                              <Button 
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={(e) => proceedToPayment(e, request)}
+                                disabled={paying === request.id}
+                              >
+                                {paying === request.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <>
+                                    <CreditCard className="h-4 w-4 mr-1" />
+                                    Pay ${request.media_site?.price}
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                            {requestMessages.length > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                          {requestMessages.length > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="cancelled" className="mt-6">
+            {sortedCancelledRequests.length === 0 ? (
+              <Card className="border-border/50">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground text-center">No cancelled engagements</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {sortedCancelledRequests.map((request) => {
+                  const requestMessages = messages[request.id] || [];
+                  
+                  return (
+                    <Card 
+                      key={request.id} 
+                      className="relative border-border/50 hover:border-border transition-colors cursor-pointer opacity-75"
+                      onClick={() => handleCardClick(request)}
+                    >
+                      <CardHeader className="py-3 px-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              {request.media_site?.favicon ? (
+                                <img 
+                                  src={request.media_site.favicon} 
+                                  alt="" 
+                                  className="h-8 w-8 rounded object-cover grayscale"
+                                />
+                              ) : (
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                              {request.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {getStatusBadge(request.status)}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                            {requestMessages.length > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
