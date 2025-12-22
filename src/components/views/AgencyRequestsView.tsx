@@ -619,20 +619,6 @@ export function AgencyRequestsView() {
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        {selectedRequest?.media_site?.agency && (
-                          <div className="col-span-2">
-                            <span className="text-muted-foreground">Agency:</span>
-                            <button 
-                              className="font-medium text-primary hover:underline flex items-center gap-1 mt-0.5"
-                              onClick={() => fetchAgencyDetails(selectedRequest.media_site!.agency!)}
-                              disabled={loadingAgency}
-                            >
-                              <Building2 className="h-3 w-3" />
-                              {selectedRequest?.media_site?.agency}
-                              {loadingAgency && <Loader2 className="h-3 w-3 animate-spin" />}
-                            </button>
-                          </div>
-                        )}
                         <div>
                           <span className="text-muted-foreground">Category:</span>
                           <p className="font-medium capitalize">{selectedRequest?.media_site?.category}</p>
@@ -652,6 +638,20 @@ export function AgencyRequestsView() {
                           <p className="font-medium">${selectedRequest?.media_site?.price}</p>
                         </div>
                       </div>
+                      {selectedRequest?.media_site?.agency && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Agency:</span>
+                          <button 
+                            className="font-medium text-primary hover:underline flex items-center gap-1 mt-0.5"
+                            onClick={() => fetchAgencyDetails(selectedRequest.media_site!.agency!)}
+                            disabled={loadingAgency}
+                          >
+                            <Building2 className="h-3 w-3" />
+                            {selectedRequest?.media_site?.agency}
+                            {loadingAgency && <Loader2 className="h-3 w-3 animate-spin" />}
+                          </button>
+                        </div>
+                      )}
                       {selectedRequest?.media_site?.about && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">About:</span>
