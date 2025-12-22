@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Order {
@@ -145,6 +146,76 @@ export function OrdersView() {
     }
   };
 
+  // Calculate order counts for tabs
+  const activeOrders = useMemo(() => 
+    orders.filter(o => o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && o.status !== 'cancelled'), 
+    [orders]
+  );
+  
+  const historyOrders = useMemo(() => 
+    orders.filter(o => o.delivery_status === 'delivered' || o.delivery_status === 'accepted' || o.status === 'cancelled'), 
+    [orders]
+  );
+
+  const renderOrderCard = (order: Order) => (
+    <Card key={order.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
+      <CardContent className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-4">
+          {order.media_sites?.favicon ? (
+            <img 
+              src={order.media_sites.favicon} 
+              alt="" 
+              className="w-10 h-10 rounded object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
+              <Package className="h-5 w-5 text-muted-foreground" />
+            </div>
+          )}
+          <div>
+            <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
+            <p className="text-sm text-muted-foreground">
+              {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
+              {order.media_sites?.agency && ` • via ${order.media_sites.agency}`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+            {isAdmin && (
+              <p className="text-xs text-muted-foreground">
+                Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            {getStatusBadge(order.status)}
+            {getDeliveryBadge(order.delivery_status)}
+          </div>
+
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderEmptyState = (message: string) => (
+    <Card className="border-dashed border-2">
+      <CardContent className="flex flex-col items-center justify-center py-16">
+        <Package className="h-12 w-12 text-muted-foreground/50" />
+        <h3 className="mt-4 text-xl font-semibold">No orders</h3>
+        <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
+          {message}
+        </p>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -160,67 +231,43 @@ export function OrdersView() {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : orders.length === 0 ? (
-        <Card className="border-dashed border-2">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Package className="h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-xl font-semibold">No orders yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-              {isAdmin 
-                ? 'Orders will appear here when clients make purchases'
-                : 'Purchase media placements to see your orders here'}
-            </p>
-          </CardContent>
-        </Card>
       ) : (
-        <div className="space-y-2">
-          {orders.map(order => (
-            <Card key={order.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
-              <CardContent className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-4">
-                  {order.media_sites?.favicon ? (
-                    <img 
-                      src={order.media_sites.favicon} 
-                      alt="" 
-                      className="w-10 h-10 rounded object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
-                      <Package className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
-                      {order.media_sites?.agency && ` • via ${order.media_sites.agency}`}
-                    </p>
-                  </div>
-                </div>
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="active" className="gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              Active Orders ({activeOrders.length})
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-2">
+              <History className="h-4 w-4" />
+              Order History ({historyOrders.length})
+            </TabsTrigger>
+          </TabsList>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
-                    {isAdmin && (
-                      <p className="text-xs text-muted-foreground">
-                        Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    {getStatusBadge(order.status)}
-                    {getDeliveryBadge(order.delivery_status)}
-                  </div>
+          <TabsContent value="active" className="mt-6">
+            {activeOrders.length === 0 ? (
+              renderEmptyState(isAdmin 
+                ? 'No active orders at the moment'
+                : 'You have no active orders')
+            ) : (
+              <div className="space-y-2">
+                {activeOrders.map(renderOrderCard)}
+              </div>
+            )}
+          </TabsContent>
 
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          <TabsContent value="history" className="mt-6">
+            {historyOrders.length === 0 ? (
+              renderEmptyState(isAdmin 
+                ? 'No completed or cancelled orders yet'
+                : 'Your completed and cancelled orders will appear here')
+            ) : (
+              <div className="space-y-2">
+                {historyOrders.map(renderOrderCard)}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
 
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
