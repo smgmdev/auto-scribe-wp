@@ -385,11 +385,27 @@ export function ChatListPanel() {
           
           if (!isMyEngagement && !isServiceRequest) return;
           
+          // Update last message immediately in local state for both engagements and service requests
+          if (isMyEngagement) {
+            setMyEngagements(prev => prev.map(e => 
+              e.id === requestId 
+                ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                : e
+            ));
+          }
+          if (isServiceRequest) {
+            setServiceRequests(prev => prev.map(r => 
+              r.id === requestId 
+                ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                : r
+            ));
+          }
+          
           // Determine if this is our own message
           const isOwnMessage = (isMyEngagement && newMsg.sender_type === 'client') ||
                                (isServiceRequest && (newMsg.sender_type === 'agency' || newMsg.sender_type === 'admin'));
           
-          if (isOwnMessage) return; // Skip our own messages
+          if (isOwnMessage) return; // Skip notification for own messages
           
           // Check if chat is open or minimized
           const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
@@ -417,12 +433,6 @@ export function ChatListPanel() {
             });
             
             playMessageSound();
-          }
-          
-          // Refresh lists to get latest message
-          fetchMyEngagements();
-          if (agencyPayoutIdRef.current || isAdmin) {
-            fetchServiceRequests();
           }
         }
       )
