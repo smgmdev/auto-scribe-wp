@@ -1,19 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus, Info, Building2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useAppStore } from '@/stores/appStore';
-import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
+import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
+import { playMessageSound } from '@/lib/chat-presence';
 
 interface ServiceRequest {
   id: string;
@@ -50,159 +44,27 @@ interface ServiceMessage {
   created_at: string;
 }
 
-interface AgencyDetails {
-  agency_name: string;
-  email: string | null;
-  payout_method: string | null;
-  onboarding_complete: boolean;
-  created_at: string;
-}
-
 export function AgencyRequestsView() {
   const { user } = useAuth();
   const { 
     setAgencyUnreadServiceRequestsCount, 
-    addMinimizedChat, 
     unreadMessageCounts,
     clearUnreadMessageCount,
-    pendingChatToOpen,
-    setPendingChatToOpen
+    openGlobalChat,
+    incrementMinimizedChatUnread,
+    incrementUnreadMessageCount,
+    minimizedChats,
+    globalChatOpen,
+    globalChatRequest
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
-  const [newMessage, setNewMessage] = useState('');
-  const [sending, setSending] = useState(false);
-  const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
-  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const selectedRequestRef = useRef<ServiceRequest | null>(null);
-  const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
-  const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
-  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
-  const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
-  const [loadingAgency, setLoadingAgency] = useState(false);
-  
-  // Keep ref in sync with state
-  useEffect(() => {
-    selectedRequestRef.current = selectedRequest;
-  }, [selectedRequest]);
-
-  // Handle pending chat to open (from minimized chat click)
-  useEffect(() => {
-    if (pendingChatToOpen && requests.length > 0) {
-      const requestToOpen = requests.find(r => r.id === pendingChatToOpen);
-      if (requestToOpen) {
-        setSelectedRequest(requestToOpen);
-        clearUnreadMessageCount(requestToOpen.id);
-        setPendingChatToOpen(null);
-      }
-    }
-  }, [pendingChatToOpen, requests, clearUnreadMessageCount, setPendingChatToOpen]);
-
-  // Presence tracking for the open chat
-  useEffect(() => {
-    if (selectedRequest && agencyPayoutId) {
-      // Join presence channel for this chat
-      const tracker = new ChatPresenceTracker(
-        selectedRequest.id,
-        agencyPayoutId,
-        'agency',
-        (onlineUsers) => {
-          // Check if counterparty (client) is online
-          const hasOtherUser = onlineUsers.some(id => id !== agencyPayoutId);
-          setIsCounterpartyOnline(hasOtherUser);
-        }
-      );
-      
-      tracker.join();
-      presenceTrackerRef.current = tracker;
-
-      return () => {
-        tracker.leave();
-        presenceTrackerRef.current = null;
-        setIsCounterpartyOnline(false);
-      };
-    }
-  }, [selectedRequest?.id, agencyPayoutId]);
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-    }, 50);
-  };
-
-  const fetchAgencyDetails = async (agencyName: string) => {
-    setLoadingAgency(true);
-    try {
-      const { data, error } = await supabase
-        .from('agency_payouts')
-        .select('agency_name, email, payout_method, onboarding_complete, created_at')
-        .eq('agency_name', agencyName)
-        .maybeSingle();
-
-      if (error) throw error;
-      
-      if (data) {
-        setAgencyDetails(data);
-        setAgencyDetailsOpen(true);
-      } else {
-        toast({
-          title: "Agency not found",
-          description: "Could not find details for this agency.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching agency details:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch agency details.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingAgency(false);
-    }
-  };
-
-  const parseQuote = (message: string): { originalId: string | null; quoteText: string; replyText: string } | null => {
-    if (!message.startsWith('> ')) return null;
-    const parts = message.split('\n\n');
-    const quotePart = parts[0].substring(2); // Remove "> "
-    const replyText = parts.slice(1).join('\n\n');
-    
-    // Check for new format with ID: [id]:message
-    const idMatch = quotePart.match(/^\[([^\]]+)\]:(.*)$/);
-    if (idMatch) {
-      return { originalId: idMatch[1], quoteText: idMatch[2], replyText };
-    }
-    // Legacy format without ID
-    return { originalId: null, quoteText: quotePart, replyText };
-  };
-
-  const scrollToMessage = (messageId: string) => {
-    const element = document.getElementById(`msg-${messageId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setHighlightedMessageId(messageId);
-      setTimeout(() => setHighlightedMessageId(null), 2000);
-    }
-  };
-
-  // Scroll to bottom when messages change or dialog opens
-  useEffect(() => {
-    if (selectedRequest) {
-      scrollToBottom();
-    }
-  }, [selectedRequest, messages]);
 
   const fetchRequests = async () => {
     if (!user) return;
 
-    // First get the agency payout id for this user
     const { data: agencyData } = await supabase
       .from('agency_payouts')
       .select('id')
@@ -216,7 +78,6 @@ export function AgencyRequestsView() {
 
     setAgencyPayoutId(agencyData.id);
 
-    // Fetch service requests for this agency
     const { data, error } = await supabase
       .from('service_requests')
       .select(`
@@ -235,11 +96,9 @@ export function AgencyRequestsView() {
 
     if (!error && data) {
       setRequests(data as unknown as ServiceRequest[]);
-      // Update unread count in store
       const unreadCount = data.filter(r => !r.read).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
 
-      // Fetch messages for all requests
       if (data.length > 0) {
         const requestIds = data.map(r => r.id);
         const { data: messagesData } = await supabase
@@ -279,8 +138,7 @@ export function AgencyRequestsView() {
           table: 'service_requests',
           filter: `agency_payout_id=eq.${agencyPayoutId}`
         },
-        (payload) => {
-          console.log('New service request received:', payload);
+        () => {
           toast({
             title: 'New Service Request!',
             description: 'A client has submitted a new brief.',
@@ -313,37 +171,24 @@ export function AgencyRequestsView() {
         },
         (payload) => {
           const newMsg = payload.new as ServiceMessage;
-          // Only process messages from clients (skip agency's own messages to avoid duplicates)
-          if (newMsg.sender_type === 'agency') {
-            return; // Skip - already added to local state when sent
-          }
+          if (newMsg.sender_type === 'agency') return;
           
-          // Get fresh state to check if chat is minimized or dialog is open
-          const { minimizedChats: currentMinimized, incrementMinimizedChatUnread: incMinimized, incrementUnreadMessageCount: incUnread } = useAppStore.getState();
-          const isMinimized = currentMinimized.some(c => c.id === newMsg.request_id);
-          
-          // Check if dialog is open for this request (using ref to avoid stale closure)
-          const isDialogOpen = selectedRequestRef.current?.id === newMsg.request_id;
-          
-          // Play sound only if both users are online (presence tracker exists and counterparty is online)
-          // This means the dialog is open and presence is being tracked
-          if (isDialogOpen && presenceTrackerRef.current?.isCounterpartyOnline()) {
-            playMessageSound();
-          }
+          const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
+          const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
           
           if (isMinimized) {
-            // Increment unread count on minimized chat
-            incMinimized(newMsg.request_id);
+            incrementMinimizedChatUnread(newMsg.request_id);
           } else if (!isDialogOpen) {
-            // Increment unread count for card badge
-            incUnread(newMsg.request_id);
+            incrementUnreadMessageCount(newMsg.request_id);
           }
           
-          toast({
-            title: 'New Message!',
-            description: 'You received a message from a client.',
-          });
-          // Update messages state
+          if (!isDialogOpen) {
+            toast({
+              title: 'New Message!',
+              description: 'You received a message from a client.',
+            });
+          }
+          
           setMessages(prev => ({
             ...prev,
             [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
@@ -356,10 +201,9 @@ export function AgencyRequestsView() {
       supabase.removeChannel(requestsChannel);
       supabase.removeChannel(messagesChannel);
     };
-  }, [agencyPayoutId]);
+  }, [agencyPayoutId, minimizedChats, globalChatOpen, globalChatRequest?.id]);
 
   const getStatusBadge = (status: string, isRead: boolean) => {
-    // Show "New Request" for unread pending_review
     if (status === 'pending_review' && !isRead) {
       return <Badge className="bg-blue-500 text-white border-blue-500">New Request</Badge>;
     }
@@ -387,12 +231,10 @@ export function AgencyRequestsView() {
       .update({ read: true })
       .eq('id', requestId);
     
-    // Update local state
     setRequests(prev => prev.map(r => 
       r.id === requestId ? { ...r, read: true } : r
     ));
     
-    // Update store count
     const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId).length;
     setAgencyUnreadServiceRequestsCount(newUnreadCount);
   };
@@ -401,84 +243,8 @@ export function AgencyRequestsView() {
     if (!request.read) {
       markAsRead(request.id);
     }
-    // Clear unread message count when opening
     clearUnreadMessageCount(request.id);
-    setSelectedRequest(request);
-  };
-
-  const sendMessage = async () => {
-    if (!user || !selectedRequest || !newMessage.trim() || !agencyPayoutId) return;
-
-    setSending(true);
-    try {
-      // Build message with quote if replying (format: > [id]:[message])
-      const fullMessage = replyToMessage 
-        ? `> [${replyToMessage.id}]:${replyToMessage.message}\n\n${newMessage.trim()}`
-        : newMessage.trim();
-
-      const { error } = await supabase.from('service_messages').insert({
-        request_id: selectedRequest.id,
-        sender_type: 'agency',
-        sender_id: agencyPayoutId,
-        message: fullMessage
-      });
-
-      if (error) throw error;
-
-      // Update local state
-      const newMsg: ServiceMessage = {
-        id: crypto.randomUUID(),
-        request_id: selectedRequest.id,
-        sender_type: 'agency',
-        sender_id: agencyPayoutId,
-        message: fullMessage,
-        created_at: new Date().toISOString()
-      };
-
-      setMessages(prev => ({
-        ...prev,
-        [selectedRequest.id]: [...(prev[selectedRequest.id] || []), newMsg]
-      }));
-
-      setNewMessage('');
-      setReplyToMessage(null);
-      setTimeout(() => inputRef.current?.focus(), 0);
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to send message',
-        description: error.message,
-      });
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const updateRequestStatus = async (status: string) => {
-    if (!selectedRequest) return;
-
-    try {
-      const { error } = await supabase
-        .from('service_requests')
-        .update({ status })
-        .eq('id', selectedRequest.id);
-
-      if (error) throw error;
-
-      // Update local state
-      setRequests(prev => prev.map(r => 
-        r.id === selectedRequest.id ? { ...r, status } : r
-      ));
-      setSelectedRequest(prev => prev ? { ...prev, status } : null);
-
-      toast({ title: `Request ${status === 'accepted' ? 'accepted' : status === 'rejected' ? 'rejected' : 'updated'}` });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to update request',
-        description: error.message,
-      });
-    }
+    openGlobalChat(request as unknown as GlobalChatRequest, 'agency-request');
   };
 
   if (loading) {
@@ -491,7 +257,6 @@ export function AgencyRequestsView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <ClipboardList className="h-8 w-8" />
@@ -502,7 +267,6 @@ export function AgencyRequestsView() {
         </p>
       </div>
 
-      {/* Requests List */}
       {requests.length === 0 ? (
         <Card className="border-border/50">
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -522,7 +286,6 @@ export function AgencyRequestsView() {
                 className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${!request.read ? 'ring-1 ring-blue-500/50' : ''}`}
                 onClick={() => handleCardClick(request)}
               >
-                {/* Unread message badge */}
                 {unreadCount > 0 && (
                   <Badge 
                     className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5"
@@ -540,7 +303,7 @@ export function AgencyRequestsView() {
                           className="h-8 w-8 rounded object-cover"
                         />
                       )}
-                      <CardTitle className="text-base">{request.title}</CardTitle>
+                      <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       {request.media_site?.publication_format && (
@@ -569,312 +332,6 @@ export function AgencyRequestsView() {
           })}
         </div>
       )}
-
-      {/* Request Detail Dialog */}
-      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none" hideCloseButton>
-          <DialogHeader className="px-4 pt-2 pb-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {selectedRequest?.media_site?.favicon && (
-                  <img src={selectedRequest.media_site.favicon} alt="" className="w-8 h-8 rounded" />
-                )}
-                <div className="flex flex-col">
-                  <DialogTitle>{selectedRequest?.title}</DialogTitle>
-                  <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
-                    <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                    Client {isCounterpartyOnline ? 'Online' : 'Offline'}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                      title="Info"
-                    >
-                      <Info className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80" align="end">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        {selectedRequest?.media_site?.favicon && (
-                          <img src={selectedRequest.media_site.favicon} alt="" className="w-10 h-10 rounded" />
-                        )}
-                        <div>
-                          <h4 className="font-semibold">{selectedRequest?.media_site?.name}</h4>
-                          <a 
-                            href={selectedRequest?.media_site?.link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
-                          >
-                            Visit site
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Category:</span>
-                          <p className="font-medium capitalize">{selectedRequest?.media_site?.category}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Subcategory:</span>
-                          <p className="font-medium capitalize">{selectedRequest?.media_site?.subcategory || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Format:</span>
-                          <p className="font-medium capitalize">{selectedRequest?.media_site?.publication_format}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Price:</span>
-                          <p className="font-medium">${selectedRequest?.media_site?.price}</p>
-                        </div>
-                      </div>
-                      {selectedRequest?.media_site?.agency && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Agency:</span>
-                          <button 
-                            className="font-medium text-primary hover:underline flex items-center gap-1 mt-0.5"
-                            onClick={() => fetchAgencyDetails(selectedRequest.media_site!.agency!)}
-                            disabled={loadingAgency}
-                          >
-                            <Building2 className="h-3 w-3" />
-                            {selectedRequest?.media_site?.agency}
-                            {loadingAgency && <Loader2 className="h-3 w-3 animate-spin" />}
-                          </button>
-                        </div>
-                      )}
-                      {selectedRequest?.media_site?.about && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">About:</span>
-                          <p className="font-medium mt-1 text-xs">{selectedRequest.media_site.about}</p>
-                        </div>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                  onClick={() => {
-                    if (selectedRequest) {
-                      addMinimizedChat({
-                        id: selectedRequest.id,
-                        title: selectedRequest.title,
-                        favicon: selectedRequest.media_site?.favicon,
-                        type: 'agency-request'
-                      });
-                      setSelectedRequest(null);
-                    }
-                  }}
-                  title="Minimize"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                  onClick={() => setSelectedRequest(null)}
-                  title="Close"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </DialogHeader>
-          {selectedRequest && (
-            <div className="px-4 pt-0">
-              {/* Messages */}
-              <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
-                <div className="space-y-2 p-3">
-                  {(messages[selectedRequest.id] || []).map((msg) => {
-                    const quote = parseQuote(msg.message);
-                    return (
-                      <div
-                        key={msg.id}
-                        id={`msg-${msg.id}`}
-                        className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`relative group max-w-[80%] rounded-lg p-3 transition-all duration-300 ${
-                            msg.sender_type === 'agency'
-                              ? 'bg-primary text-primary-foreground'
-                              : msg.sender_type === 'admin'
-                              ? 'bg-amber-100 text-amber-900'
-                              : 'bg-muted'
-                          } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
-                        >
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                                  msg.sender_type === 'agency' 
-                                    ? 'text-primary-foreground hover:bg-primary-foreground/20' 
-                                    : 'text-foreground hover:bg-background/50'
-                                }`}
-                              >
-                                <ChevronDown className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-popover z-50">
-                              <DropdownMenuItem onClick={() => {
-                                setReplyToMessage(msg);
-                                setTimeout(() => inputRef.current?.focus(), 0);
-                              }}>
-                                <Reply className="h-4 w-4 mr-2" />
-                                Reply
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                          <p className="text-xs font-medium mb-1 opacity-70 pr-5">
-                            {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
-                          </p>
-                          {quote ? (
-                            <div className="text-sm">
-                              <div 
-                                onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
-                                className={`border-l-2 pl-2 mb-2 text-xs italic opacity-70 ${
-                                  msg.sender_type === 'agency' ? 'border-primary-foreground/50' : 'border-foreground/30'
-                                } ${quote.originalId ? 'cursor-pointer hover:opacity-100' : ''}`}
-                              >
-                                {quote.quoteText}
-                              </div>
-                              <p className="whitespace-pre-wrap">{quote.replyText}</p>
-                            </div>
-                          ) : (
-                            <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                          )}
-                          <p className="text-xs opacity-50 mt-1">
-                            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {(messages[selectedRequest.id] || []).length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-
-              {/* Reply Input */}
-              {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'completed' && (
-                <div className="-mx-4" style={{ width: 'calc(100% + 2rem)' }}>
-                  {/* Reply context */}
-                  {replyToMessage && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-t">
-                      <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground">
-                          Replying to {replyToMessage.sender_type === 'agency' ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Admin' : 'Client'}
-                        </p>
-                        <p className="text-sm truncate">{replyToMessage.message}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 shrink-0"
-                        onClick={() => setReplyToMessage(null)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
-                  <div className="relative">
-                    <Input
-                      ref={inputRef}
-                      placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      disabled={sending}
-                      className="rounded-none pr-12 border-0"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                    />
-                    <Button 
-                      onClick={sendMessage} 
-                      disabled={sending || !newMessage.trim()} 
-                      size="icon"
-                      variant="ghost"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    >
-                      {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Agency Details Dialog */}
-      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Agency Details
-            </DialogTitle>
-          </DialogHeader>
-          {agencyDetails && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">{agencyDetails.agency_name}</h3>
-                  {agencyDetails.email && (
-                    <p className="text-sm text-muted-foreground">{agencyDetails.email}</p>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Status:</span>
-                  <p className="font-medium flex items-center gap-1">
-                    {agencyDetails.onboarding_complete ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        Verified
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="h-4 w-4 text-yellow-500" />
-                        Pending
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Payout Method:</span>
-                  <p className="font-medium capitalize">{agencyDetails.payout_method || 'Not set'}</p>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">Member Since:</span>
-                  <p className="font-medium">{format(new Date(agencyDetails.created_at), 'MMMM d, yyyy')}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -9,6 +9,33 @@ export interface MinimizedChat {
   unreadCount?: number;
 }
 
+// Global chat request data stored for the overlay
+export interface GlobalChatRequest {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  read: boolean;
+  created_at: string;
+  updated_at: string;
+  media_site: {
+    name: string;
+    favicon: string | null;
+    price: number;
+    publication_format: string;
+    link: string;
+    category: string;
+    subcategory: string | null;
+    about: string | null;
+    agency: string | null;
+  } | null;
+  order: {
+    id: string;
+    status: string;
+    delivery_status: string;
+  } | null;
+}
+
 interface AppState {
   // Headlines (session state only)
   headlines: Headline[];
@@ -90,6 +117,14 @@ interface AppState {
   setUnreadMessageCount: (requestId: string, count: number) => void;
   incrementUnreadMessageCount: (requestId: string) => void;
   clearUnreadMessageCount: (requestId: string) => void;
+  
+  // Global chat overlay state
+  globalChatOpen: boolean;
+  globalChatRequest: GlobalChatRequest | null;
+  globalChatType: 'agency-request' | 'my-request' | null;
+  openGlobalChat: (request: GlobalChatRequest, type: 'agency-request' | 'my-request') => void;
+  closeGlobalChat: () => void;
+  updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>) => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -203,4 +238,24 @@ export const useAppStore = create<AppState>()((set) => ({
     const { [requestId]: _, ...rest } = state.unreadMessageCounts;
     return { unreadMessageCounts: rest };
   }),
+  
+  // Global chat overlay state
+  globalChatOpen: false,
+  globalChatRequest: null,
+  globalChatType: null,
+  openGlobalChat: (request, type) => set({ 
+    globalChatOpen: true, 
+    globalChatRequest: request, 
+    globalChatType: type 
+  }),
+  closeGlobalChat: () => set({ 
+    globalChatOpen: false, 
+    globalChatRequest: null, 
+    globalChatType: null 
+  }),
+  updateGlobalChatRequest: (updates) => set((state) => ({
+    globalChatRequest: state.globalChatRequest 
+      ? { ...state.globalChatRequest, ...updates } 
+      : null
+  })),
 }));
