@@ -92,6 +92,7 @@ interface AppState {
   // Agency service request notifications
   agencyUnreadServiceRequestsCount: number;
   setAgencyUnreadServiceRequestsCount: (count: number) => void;
+  incrementAgencyUnreadServiceRequestsCount: () => void;
   
   // User engagement notifications (for My Engagements)
   userUnreadEngagementsCount: number;
@@ -196,6 +197,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // Agency service request notifications
   agencyUnreadServiceRequestsCount: 0,
   setAgencyUnreadServiceRequestsCount: (count) => set({ agencyUnreadServiceRequestsCount: count }),
+  incrementAgencyUnreadServiceRequestsCount: () => set((state) => ({ 
+    agencyUnreadServiceRequestsCount: state.agencyUnreadServiceRequestsCount + 1 
+  })),
   
   // User engagement notifications
   userUnreadEngagementsCount: 0,

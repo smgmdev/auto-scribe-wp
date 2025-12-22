@@ -110,6 +110,7 @@ export function Sidebar({
     setAgencyUnreadMediaSubmissionsCount,
     agencyUnreadServiceRequestsCount,
     setAgencyUnreadServiceRequestsCount,
+    incrementAgencyUnreadServiceRequestsCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
     incrementUserUnreadEngagementsCount,
@@ -419,6 +420,62 @@ export function Sidebar({
       supabase.removeChannel(channel);
     };
   }, [user?.id, isAdmin]);
+
+  // Subscribe to real-time message notifications for agency users
+  useEffect(() => {
+    if (!user || isAdmin || !isAgencyOnboarded) return;
+
+    // Get agency payout ID for this user
+    const setupAgencySubscription = async () => {
+      const { data: agencyPayoutData } = await supabase
+        .from('agency_payouts')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!agencyPayoutData) return;
+
+      const agencyPayoutId = agencyPayoutData.id;
+
+      // Subscribe to real-time message inserts for agency's requests
+      const channel = supabase
+        .channel('agency-message-notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'service_messages'
+          },
+          async (payload) => {
+            const newMsg = payload.new as { request_id: string; sender_type: string };
+            // Only count messages from clients, not from the agency themselves
+            if (newMsg.sender_type !== 'client') return;
+
+            // Check if this request belongs to the current agency
+            const { data: request } = await supabase
+              .from('service_requests')
+              .select('agency_payout_id')
+              .eq('id', newMsg.request_id)
+              .maybeSingle();
+
+            if (request?.agency_payout_id === agencyPayoutId) {
+              incrementAgencyUnreadServiceRequestsCount();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+
+    const cleanup = setupAgencySubscription();
+    return () => {
+      cleanup.then(fn => fn?.());
+    };
+  }, [user?.id, isAdmin, isAgencyOnboarded]);
 
   const handleNavClick = (viewId: string) => {
     // Clear editing state when navigating away from compose
