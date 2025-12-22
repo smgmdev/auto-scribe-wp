@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Search, Reply } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -737,22 +737,23 @@ export function ChatListPanel() {
   };
 
   // Format preview message - make it user-friendly by cleaning up technical content
-  const formatPreviewMessage = (message: string | undefined, description: string, title: string): string => {
+  // Returns { text, type } where type can be used for icon display
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string): { text: string; type: 'order' | 'payment' | 'delivery' | 'status' | 'normal' } => {
     if (message) {
       let cleanMessage = message;
       
       // Check for special message types first
       if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
-        return 'Order Request';
+        return { text: 'Order Request', type: 'order' };
       }
       if (cleanMessage.startsWith('[PAYMENT_')) {
-        return 'Payment Update';
+        return { text: 'Payment Update', type: 'payment' };
       }
       if (cleanMessage.startsWith('[DELIVERY_')) {
-        return 'Delivery Update';
+        return { text: 'Delivery Update', type: 'delivery' };
       }
       if (cleanMessage.startsWith('[STATUS_')) {
-        return 'Status Update';
+        return { text: 'Status Update', type: 'status' };
       }
       
       // Remove reply quotes - formats like "> quoted text\nactual message" or ":quoted actual"
@@ -776,7 +777,8 @@ export function ChatListPanel() {
         .trim();
       
       if (cleanMessage) {
-        return cleanMessage.length > 50 ? cleanMessage.slice(0, 50) + '...' : cleanMessage;
+        const text = cleanMessage.length > 50 ? cleanMessage.slice(0, 50) + '...' : cleanMessage;
+        return { text, type: 'normal' };
       }
     }
     
@@ -788,11 +790,28 @@ export function ChatListPanel() {
       .trim();
     
     if (cleanDesc && cleanDesc.length > 5) {
-      return cleanDesc.length > 50 ? cleanDesc.slice(0, 50) + '...' : cleanDesc;
+      const text = cleanDesc.length > 50 ? cleanDesc.slice(0, 50) + '...' : cleanDesc;
+      return { text, type: 'normal' };
     }
     
     // Fallback to a friendly default
-    return title || 'New engagement';
+    return { text: title || 'New engagement', type: 'normal' };
+  };
+
+  // Get icon for message type
+  const getMessageTypeIcon = (type: 'order' | 'payment' | 'delivery' | 'status' | 'normal') => {
+    switch (type) {
+      case 'order':
+        return <ShoppingCart className="h-3 w-3 shrink-0 text-green-500" />;
+      case 'payment':
+        return <CreditCard className="h-3 w-3 shrink-0 text-blue-500" />;
+      case 'delivery':
+        return <Truck className="h-3 w-3 shrink-0 text-purple-500" />;
+      case 'status':
+        return <Bell className="h-3 w-3 shrink-0 text-amber-500" />;
+      default:
+        return null;
+    }
   };
 
   // Check if a message is a reply (contains quote markers)
@@ -883,12 +902,18 @@ export function ChatListPanel() {
                 {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
               </span>
             </div>
-            <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-              {isReplyMessage(item.lastMessage) && (
-                <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
-              )}
-              <span className="truncate">{formatPreviewMessage(item.lastMessage, item.description, item.title)}</span>
-            </p>
+            {(() => {
+              const preview = formatPreviewMessage(item.lastMessage, item.description, item.title);
+              const typeIcon = getMessageTypeIcon(preview.type);
+              return (
+                <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                  {typeIcon || (isReplyMessage(item.lastMessage) && (
+                    <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
+                  ))}
+                  <span className="truncate">{preview.text}</span>
+                </p>
+              );
+            })()}
           </div>
 
           {/* Unread badge */}
