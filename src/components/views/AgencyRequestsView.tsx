@@ -32,6 +32,7 @@ interface ServiceRequest {
     category: string;
     subcategory: string | null;
     about: string | null;
+    agency: string | null;
   } | null;
   order: {
     id: string;
@@ -182,7 +183,7 @@ export function AgencyRequestsView() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about),
+        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
         order:orders(id, status, delivery_status)
       `)
       .eq('agency_payout_id', agencyData.id)
@@ -574,6 +575,12 @@ export function AgencyRequestsView() {
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
+                        {selectedRequest?.media_site?.agency && (
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Agency:</span>
+                            <p className="font-medium">{selectedRequest?.media_site?.agency}</p>
+                          </div>
+                        )}
                         <div>
                           <span className="text-muted-foreground">Category:</span>
                           <p className="font-medium capitalize">{selectedRequest?.media_site?.category}</p>
