@@ -208,6 +208,7 @@ export function MyRequestsView() {
           const updated = payload.new as any;
           // Check if this request belongs to current user
           if (updated.user_id === user.id) {
+            // Show toast for status changes
             if (updated.status === 'accepted') {
               toast({
                 title: 'Request Accepted!',
@@ -226,7 +227,17 @@ export function MyRequestsView() {
                 description: 'The agency has requested changes to your brief.',
               });
             }
-            fetchRequests(); // Refetch to update UI
+            
+            // Update local state with new read status and status
+            setRequests(prev => {
+              const newRequests = prev.map(r => 
+                r.id === updated.id ? { ...r, read: updated.read, status: updated.status } : r
+              );
+              // Recalculate unread count
+              const newUnreadCount = newRequests.filter(r => !r.read).length;
+              setUserUnreadEngagementsCount(newUnreadCount);
+              return newRequests;
+            });
           }
         }
       )
