@@ -333,29 +333,45 @@ export function MyRequestsView() {
         <div className="space-y-4">
           {requests.map((request) => {
             const unreadCount = unreadMessageCounts[request.id] || 0;
+            const requestMessages = messages[request.id] || [];
+            const lastMessage = requestMessages[requestMessages.length - 1];
+            // Unread if: request not read OR last message is from agency (not client)
+            const hasUnread = !request.read || (lastMessage && lastMessage.sender_type !== 'client');
+            
             return (
               <Card 
                 key={request.id} 
-                className="relative border-border/50 hover:border-border transition-colors cursor-pointer"
+                className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                  hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+                }`}
                 onClick={() => handleCardClick(request)}
               >
-                {unreadCount > 0 && (
+                {(unreadCount > 0 || hasUnread) && (
                   <Badge 
-                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5"
+                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
                   >
-                    {unreadCount}
+                    {unreadCount > 0 ? unreadCount : '•'}
                   </Badge>
                 )}
                 <CardHeader className="py-3 px-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {request.media_site?.favicon && (
-                        <img 
-                          src={request.media_site.favicon} 
-                          alt="" 
-                          className="h-8 w-8 rounded object-cover"
-                        />
-                      )}
+                      <div className="relative">
+                        {request.media_site?.favicon ? (
+                          <img 
+                            src={request.media_site.favicon} 
+                            alt="" 
+                            className="h-8 w-8 rounded object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        {hasUnread && (
+                          <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                        )}
+                      </div>
                       <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                     </div>
                     <div className="flex items-center gap-3">
@@ -385,9 +401,9 @@ export function MyRequestsView() {
                     <span className="text-xs text-muted-foreground">
                       Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                     </span>
-                    {messages[request.id]?.length > 0 && (
+                    {requestMessages.length > 0 && (
                       <span className="text-xs text-muted-foreground">
-                        {messages[request.id].length} message{messages[request.id].length > 1 ? 's' : ''}
+                        {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
