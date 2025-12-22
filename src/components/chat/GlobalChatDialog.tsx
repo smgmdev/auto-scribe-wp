@@ -74,6 +74,7 @@ export function GlobalChatDialog() {
   const [cancelOrderMessageId, setCancelOrderMessageId] = useState<string | null>(null);
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
+  const [isResendMode, setIsResendMode] = useState(false);
   
   // Drag state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -848,6 +849,19 @@ export function GlobalChatDialog() {
 
     setSending(true);
     try {
+      // If resending, delete the previous order first
+      if (isResendMode && existingOrderMessage) {
+        const { error: deleteError } = await supabase
+          .from('service_messages')
+          .delete()
+          .eq('id', existingOrderMessage.id);
+
+        if (deleteError) throw deleteError;
+
+        // Remove from local state
+        setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
+      }
+
       const orderData = {
         type: 'order_request',
         media_site_id: globalChatRequest.media_site.id,
@@ -885,7 +899,7 @@ export function GlobalChatDialog() {
         .from('service_requests')
         .select('user_id')
         .eq('id', globalChatRequest.id)
-        .single();
+        .maybeSingle();
 
       if (requestData?.user_id) {
         await supabase
@@ -916,15 +930,18 @@ export function GlobalChatDialog() {
 
       setSendOrderDialogOpen(false);
       setSpecialTerms('');
+      setIsResendMode(false);
       
       toast({
-        title: "Order Sent",
-        description: "Order request has been sent to the client.",
+        title: isResendMode ? "Order Resent" : "Order Sent",
+        description: isResendMode 
+          ? "New order request has been sent to the client." 
+          : "Order request has been sent to the client.",
       });
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Failed to send order',
+        title: isResendMode ? 'Failed to resend order' : 'Failed to send order',
         description: error.message,
       });
     } finally {
@@ -932,108 +949,24 @@ export function GlobalChatDialog() {
     }
   };
 
-  // Resend order - delete existing order request and send a new one
-  const handleResendOrder = async () => {
-    if (!existingOrderMessage || !user || !globalChatRequest || !senderId || !globalChatRequest.media_site) return;
+  // Resend order - open dialog with previous terms pre-populated
+  const handleResendOrder = () => {
+    if (!existingOrderMessage) return;
     
-    setResendingOrder(true);
-    try {
-      // Extract previous special terms from existing order
-      const match = existingOrderMessage.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
-      let previousSpecialTerms = '';
-      if (match) {
-        try {
-          const prevOrderData = JSON.parse(match[1]);
-          previousSpecialTerms = prevOrderData.special_terms || '';
-        } catch {}
-      }
-
-      // Delete the existing order request message
-      const { error: deleteError } = await supabase
-        .from('service_messages')
-        .delete()
-        .eq('id', existingOrderMessage.id);
-
-      if (deleteError) throw deleteError;
-
-      // Remove from local state
-      setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
-      
-      // Send new order with same terms
-      const orderData = {
-        type: 'order_request',
-        media_site_id: globalChatRequest.media_site.id,
-        media_site_name: globalChatRequest.media_site.name,
-        media_site_favicon: globalChatRequest.media_site.favicon,
-        price: globalChatRequest.media_site.price,
-        request_id: globalChatRequest.id,
-        special_terms: previousSpecialTerms || undefined
-      };
-
-      const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderData)}[/ORDER_REQUEST]`;
-
-      const { error } = await supabase.from('service_messages').insert({
-        request_id: globalChatRequest.id,
-        sender_type: senderType,
-        sender_id: senderId,
-        message: orderMessage
-      });
-
-      if (error) throw error;
-
-      const newMsg: ServiceMessage = {
-        id: crypto.randomUUID(),
-        request_id: globalChatRequest.id,
-        sender_type: senderType,
-        sender_id: senderId,
-        message: orderMessage,
-        created_at: new Date().toISOString()
-      };
-
-      setMessages(prev => [...prev, newMsg]);
-
-      // Notify the client
-      const { data: requestData } = await supabase
-        .from('service_requests')
-        .select('user_id')
-        .eq('id', globalChatRequest.id)
-        .maybeSingle();
-
-      if (requestData?.user_id) {
-        const notifyChannel = supabase.channel(`user-notifications-${requestData.user_id}`);
-        notifyChannel.subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await notifyChannel.send({
-              type: 'broadcast',
-              event: 'new-message',
-              payload: {
-                request_id: globalChatRequest.id,
-                sender_type: senderType,
-                sender_id: senderId,
-                message: 'Sent you an order request',
-                title: globalChatRequest.title,
-                media_site_name: globalChatRequest.media_site?.name || 'Unknown',
-                media_site_favicon: globalChatRequest.media_site?.favicon
-              }
-            });
-            setTimeout(() => supabase.removeChannel(notifyChannel), 500);
-          }
-        });
-      }
-      
-      toast({
-        title: "Order Resent",
-        description: "New order request has been sent to the client.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to resend order',
-        description: error.message,
-      });
-    } finally {
-      setResendingOrder(false);
+    // Extract previous special terms from existing order
+    const match = existingOrderMessage.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+    let previousSpecialTerms = '';
+    if (match) {
+      try {
+        const prevOrderData = JSON.parse(match[1]);
+        previousSpecialTerms = prevOrderData.special_terms || '';
+      } catch {}
     }
+    
+    // Pre-populate terms and open dialog in resend mode
+    setSpecialTerms(previousSpecialTerms);
+    setIsResendMode(true);
+    setSendOrderDialogOpen(true);
   };
 
   // File upload validation and handling
@@ -1667,16 +1600,24 @@ export function GlobalChatDialog() {
       {/* Send Order Confirmation Dialog */}
       <Dialog open={sendOrderDialogOpen} onOpenChange={(open) => {
         setSendOrderDialogOpen(open);
-        if (!open) setSpecialTerms('');
+        if (!open) {
+          setSpecialTerms('');
+          setIsResendMode(false);
+        }
       }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Send Order Request
+              {isResendMode ? <RefreshCw className="h-5 w-5" /> : <ShoppingCart className="h-5 w-5" />}
+              {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {isResendMode && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded-md">
+                The previous order request will be replaced with this new one.
+              </p>
+            )}
             <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
               {globalChatRequest?.media_site?.favicon && (
                 <img src={globalChatRequest.media_site.favicon} alt="" className="w-10 h-10 rounded" />
@@ -1709,6 +1650,7 @@ export function GlobalChatDialog() {
               onClick={() => {
                 setSendOrderDialogOpen(false);
                 setSpecialTerms('');
+                setIsResendMode(false);
               }}
               className="flex-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
             >
@@ -1717,10 +1659,10 @@ export function GlobalChatDialog() {
             <Button
               onClick={sendOrderMessage}
               disabled={sending}
-              className="flex-1 bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 transition-all duration-200"
+              className="flex-1 bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 transition-all duration-200 gap-2"
             >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Send Order
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : isResendMode ? <RefreshCw className="h-4 w-4" /> : null}
+              {isResendMode ? 'Resend Order' : 'Send Order'}
             </Button>
           </div>
         </DialogContent>
