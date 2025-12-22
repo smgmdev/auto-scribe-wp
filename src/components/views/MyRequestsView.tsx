@@ -50,11 +50,6 @@ export function MyRequestsView() {
     unreadMessageCounts,
     clearUnreadMessageCount,
     openGlobalChat,
-    incrementMinimizedChatUnread,
-    incrementUnreadMessageCount,
-    minimizedChats,
-    globalChatOpen,
-    globalChatRequest,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount
   } = useAppStore();
@@ -133,68 +128,10 @@ export function MyRequestsView() {
     }
   }, [user]);
 
-  // Real-time subscription for new messages and status updates
+  // Real-time subscription for status updates (service_requests table)
+  // NOTE: Message notifications are handled by ChatListPanel via broadcast
   useEffect(() => {
     if (!user) return;
-
-    const messagesChannel = supabase
-      .channel('user-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'service_messages'
-        },
-        async (payload) => {
-          const newMsg = payload.new as ServiceMessage;
-          // Only process if from agency (not from the user themselves)
-          if (newMsg.sender_type === 'client') return;
-          
-          // Check if this message belongs to one of our requests (use ref for fresh value)
-          const requestExists = requestsRef.current.some(r => r.id === newMsg.request_id);
-          if (!requestExists) return;
-          
-          const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
-          const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
-          
-          if (isMinimized) {
-            incrementMinimizedChatUnread(newMsg.request_id);
-          } else if (!isDialogOpen) {
-            incrementUnreadMessageCount(newMsg.request_id);
-          }
-          
-          // Mark the request as unread when a new agency message arrives
-          if (!isDialogOpen) {
-            await supabase
-              .from('service_requests')
-              .update({ read: false })
-              .eq('id', newMsg.request_id);
-            
-            // Update local state
-            setRequests(prev => {
-              const updated = prev.map(r => 
-                r.id === newMsg.request_id ? { ...r, read: false } : r
-              );
-              // Recalculate unread count
-              const newUnreadCount = updated.filter(r => !r.read).length;
-              setUserUnreadEngagementsCount(newUnreadCount);
-              return updated;
-            });
-            
-            toast({
-              title: 'New Message!',
-              description: 'You received a reply from the agency.',
-            });
-          }
-          
-          setMessages(prev => ({
-            ...prev,
-            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
-          }));
-        }
-      )
-      .subscribe();
 
     const requestsChannel = supabase
       .channel('user-requests')
@@ -244,11 +181,53 @@ export function MyRequestsView() {
       )
       .subscribe();
 
+    // Broadcast subscription to receive messages from agency (works regardless of RLS)
+    const broadcastChannel = supabase
+      .channel(`notify-${user.id}`)
+      .on('broadcast', { event: 'new-message' }, (payload) => {
+        const data = payload.payload;
+        if (!data) return;
+        
+        const { request_id, sender_type, message } = data;
+        // Only process agency messages
+        if (sender_type === 'client') return;
+        
+        // Check if this message belongs to one of our requests
+        const requestExists = requestsRef.current.some(r => r.id === request_id);
+        if (!requestExists) return;
+        
+        // Add message to local state
+        const newMsg: ServiceMessage = {
+          id: crypto.randomUUID(),
+          request_id,
+          sender_type,
+          sender_id: data.sender_id || '',
+          message,
+          created_at: new Date().toISOString()
+        };
+        
+        setMessages(prev => ({
+          ...prev,
+          [request_id]: [...(prev[request_id] || []), newMsg]
+        }));
+        
+        // Update local state read status
+        setRequests(prev => {
+          const updated = prev.map(r => 
+            r.id === request_id ? { ...r, read: false } : r
+          );
+          const newUnreadCount = updated.filter(r => !r.read).length;
+          setUserUnreadEngagementsCount(newUnreadCount);
+          return updated;
+        });
+      })
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(messagesChannel);
       supabase.removeChannel(requestsChannel);
+      supabase.removeChannel(broadcastChannel);
     };
-  }, [user, minimizedChats, globalChatOpen, globalChatRequest?.id]);
+  }, [user?.id]);
 
   const proceedToPayment = async (e: React.MouseEvent, request: ServiceRequest) => {
     e.stopPropagation();
