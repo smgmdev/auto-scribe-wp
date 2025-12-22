@@ -542,7 +542,7 @@ export function AgencyRequestsView() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 mr-6">
+              <div className="flex items-center gap-2 mr-8">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
