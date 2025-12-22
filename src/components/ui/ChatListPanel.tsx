@@ -653,12 +653,17 @@ export function ChatListPanel() {
   useEffect(() => {
     if (!agencyPayoutId) return;
 
+    console.log('[ChatListPanel] Setting up agency broadcast channel for:', agencyPayoutId);
+    
     const agencyChannel = supabase
       .channel(`notify-${agencyPayoutId}`)
       .on('broadcast', { event: 'new-message' }, (payload) => {
+        console.log('[ChatListPanel] Received broadcast on AGENCY channel:', payload);
         handleBroadcastNotification(payload.payload);
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[ChatListPanel] Agency broadcast channel status:', status);
+      });
 
     return () => {
       supabase.removeChannel(agencyChannel);
