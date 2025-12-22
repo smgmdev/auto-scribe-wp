@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -51,6 +51,7 @@ export function ChatListPanel() {
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'my-engagements' | 'service-requests'>('my-engagements');
+  const [searchQuery, setSearchQuery] = useState('');
   const [myEngagements, setMyEngagements] = useState<ChatItem[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ChatItem[]>([]);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
@@ -245,12 +246,26 @@ export function ChatListPanel() {
 
   const totalUnread = userUnreadEngagementsCount + agencyUnreadServiceRequestsCount;
 
+  // Filter items based on search query
+  const filterItems = (items: ChatItem[]) => {
+    if (!searchQuery.trim()) return items;
+    const query = searchQuery.toLowerCase();
+    return items.filter(item => 
+      item.media_site?.name?.toLowerCase().includes(query) ||
+      item.title?.toLowerCase().includes(query) ||
+      item.lastMessage?.toLowerCase().includes(query)
+    );
+  };
+
+  const filteredEngagements = filterItems(myEngagements);
+  const filteredServiceRequests = filterItems(serviceRequests);
+
   const renderChatList = (items: ChatItem[], type: 'my-request' | 'agency-request') => {
     if (items.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-          <p className="text-sm">No conversations yet</p>
+          <p className="text-sm">{searchQuery ? 'No results found' : 'No conversations yet'}</p>
         </div>
       );
     }
@@ -355,6 +370,21 @@ export function ChatListPanel() {
             </Button>
           </div>
 
+          {/* Search bar */}
+          <div className="px-3 py-2 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search messages"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full pl-8 pr-3 py-1.5 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
             <TabsList className="w-full rounded-none border-b border-border bg-transparent h-auto p-0">
@@ -385,15 +415,15 @@ export function ChatListPanel() {
             </TabsList>
 
             <TabsContent value="my-engagements" className="m-0">
-              <ScrollArea className="h-[350px]">
-                {renderChatList(myEngagements, 'my-request')}
+              <ScrollArea className="h-[300px]">
+                {renderChatList(filteredEngagements, 'my-request')}
               </ScrollArea>
             </TabsContent>
 
             {isAgency && (
               <TabsContent value="service-requests" className="m-0">
-                <ScrollArea className="h-[350px]">
-                  {renderChatList(serviceRequests, 'agency-request')}
+                <ScrollArea className="h-[300px]">
+                  {renderChatList(filteredServiceRequests, 'agency-request')}
                 </ScrollArea>
               </TabsContent>
             )}
