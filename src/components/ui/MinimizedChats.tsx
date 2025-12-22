@@ -40,7 +40,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-6 w-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenChat(chat);
@@ -51,7 +51,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 hover:bg-destructive/20 hover:text-destructive"
+              className="h-6 w-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 removeMinimizedChat(chat.id);
