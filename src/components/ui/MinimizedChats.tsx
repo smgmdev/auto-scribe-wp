@@ -17,7 +17,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
       {minimizedChats.map((chat) => (
         <div
           key={chat.id}
-          className="relative flex items-center gap-2 bg-card border border-border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-shadow cursor-pointer group max-w-[200px]"
+          className="relative flex items-center gap-2 bg-card border border-border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-shadow cursor-pointer group"
           onClick={() => onOpenChat(chat)}
         >
           {/* Unread badge */}
@@ -35,7 +35,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
-          <span className="text-sm font-medium truncate flex-1">{chat.title}</span>
+          <span className="text-sm font-medium whitespace-nowrap">{chat.title}</span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
