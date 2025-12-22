@@ -534,24 +534,24 @@ export function GlobalChatDialog() {
     if (orderData) {
       return (
         <div className="w-full">
-          <p className="text-xs font-medium mb-1 opacity-70">Order Request</p>
-          <div className={`rounded-md border p-2.5 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-background border-border'}`}>
-            <div className="flex items-center gap-2 mb-2">
+          <p className="text-xs font-medium mb-2 opacity-70">Order Request</p>
+          <div className={`rounded-lg border p-3.5 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-background border-border'}`}>
+            <div className="flex items-center gap-3 mb-3">
               {orderData.media_site_favicon && (
-                <img src={orderData.media_site_favicon} alt="" className="w-8 h-8 rounded" />
+                <img src={orderData.media_site_favicon} alt="" className="w-10 h-10 rounded" />
               )}
               <div className="flex-1 min-w-0">
-                <h4 className={`font-semibold text-sm truncate ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                <h4 className={`font-semibold truncate ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {orderData.media_site_name}
                 </h4>
-                <p className={`text-sm font-bold ${isOwnMessage ? 'text-primary-foreground' : 'text-primary'}`}>
+                <p className={`text-base font-bold ${isOwnMessage ? 'text-primary-foreground' : 'text-primary'}`}>
                   ${orderData.price.toLocaleString()}
                 </p>
               </div>
             </div>
             {orderData.special_terms && (
-              <div className={`text-xs mb-2 p-1.5 rounded ${isOwnMessage ? 'bg-primary-foreground/5 border border-primary-foreground/20' : 'bg-muted'}`}>
-                <p className="text-xs font-medium mb-0.5 opacity-70">Special Terms:</p>
+              <div className={`text-sm mb-3 p-2 rounded ${isOwnMessage ? 'bg-primary-foreground/5 border border-primary-foreground/20' : 'bg-muted'}`}>
+                <p className="text-xs font-medium mb-1 opacity-70">Special Terms:</p>
                 <p className="whitespace-pre-wrap">{orderData.special_terms}</p>
               </div>
             )}
@@ -561,7 +561,7 @@ export function GlobalChatDialog() {
                 className="w-full gap-2"
                 size="sm"
               >
-                <ShoppingCart className="h-3.5 w-3.5" />
+                <ShoppingCart className="h-4 w-4" />
                 Buy Now
               </Button>
             )}
@@ -571,17 +571,17 @@ export function GlobalChatDialog() {
                 className="w-full gap-2 bg-black text-white hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
                 size="sm"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4" />
                 Cancel Order Request
               </Button>
             )}
             {hasOrder && (
-              <div className="text-center text-xs text-muted-foreground py-1">
+              <div className="text-center text-sm text-muted-foreground py-1.5">
                 Order already placed
               </div>
             )}
           </div>
-          <p className="text-xs opacity-50 mt-1">
+          <p className="text-xs opacity-50 mt-2">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
           </p>
         </div>
@@ -617,24 +617,31 @@ export function GlobalChatDialog() {
               <img 
                 src={attachmentData.file_url} 
                 alt={attachmentData.file_name}
-                className="max-w-full max-h-48 rounded object-contain"
+                className="max-w-full max-h-56 rounded object-contain"
               />
             </div>
           ) : (
             <div
               onClick={handleAttachmentClick}
-              className={`inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 rounded-lg border p-3 transition-colors cursor-pointer ${
                 isOwnMessage 
-                  ? 'bg-primary-foreground/10 hover:bg-primary-foreground/20' 
-                  : 'bg-muted/50 hover:bg-muted'
+                  ? 'bg-primary-foreground/10 border-primary-foreground/30 hover:bg-primary-foreground/20' 
+                  : 'bg-background border-border hover:bg-muted'
               }`}
             >
-              <FileText className="h-4 w-4 shrink-0 opacity-70" />
-              <span className="text-xs truncate max-w-[140px]">{attachmentData.file_name}</span>
-              <ExternalLink className="h-3 w-3 shrink-0 opacity-50" />
+              <div className={`h-10 w-10 rounded flex items-center justify-center shrink-0 ${
+                isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
+              }`}>
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{attachmentData.file_name}</p>
+                <p className="text-xs opacity-70">{(attachmentData.file_size / 1024).toFixed(1)} KB</p>
+              </div>
+              <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
             </div>
           )}
-          <p className="text-xs opacity-50 mt-1">
+          <p className="text-xs opacity-50 mt-2">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
           </p>
         </div>
