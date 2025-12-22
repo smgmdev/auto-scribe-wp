@@ -370,16 +370,43 @@ export function ChatListPanel() {
         },
         (payload) => {
           const updated = payload.new as any;
+          const old = payload.old as any;
           
-          // Update my engagements if it belongs to this user
-          setMyEngagements(prev => prev.map(e => 
-            e.id === updated.id ? { ...e, read: updated.read } : e
-          ));
+          // Only sync read status when it changes TO true (marking as read)
+          // This prevents false "unread" states when counterparty marks their copy as unread
+          const readChanged = old?.read !== updated.read;
+          const markedAsRead = readChanged && updated.read === true;
           
-          // Update service requests
-          setServiceRequests(prev => prev.map(r => 
-            r.id === updated.id ? { ...r, read: updated.read } : r
-          ));
+          // For my engagements: only update if user_id matches
+          if (updated.user_id === user?.id) {
+            setMyEngagements(prev => {
+              const newEngagements = prev.map(e => {
+                if (e.id === updated.id) {
+                  // Only update read status if marked as read (not unread from external source)
+                  const newRead = markedAsRead ? true : e.read;
+                  return { ...e, read: newRead, status: updated.status };
+                }
+                return e;
+              });
+              myEngagementsRef.current = newEngagements;
+              return newEngagements;
+            });
+          }
+          
+          // For service requests: only update if agency_payout_id matches
+          if (agencyPayoutIdRef.current && updated.agency_payout_id === agencyPayoutIdRef.current) {
+            setServiceRequests(prev => {
+              const newRequests = prev.map(r => {
+                if (r.id === updated.id) {
+                  const newRead = markedAsRead ? true : r.read;
+                  return { ...r, read: newRead, status: updated.status };
+                }
+                return r;
+              });
+              serviceRequestsRef.current = newRequests;
+              return newRequests;
+            });
+          }
         }
       )
       .on(

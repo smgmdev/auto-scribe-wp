@@ -148,6 +148,8 @@ export function MyRequestsView() {
         },
         (payload) => {
           const updated = payload.new as any;
+          const old = payload.old as any;
+          
           // Check if this request belongs to current user
           if (updated.user_id === user.id) {
             // Show toast for status changes (only for meaningful status updates)
@@ -173,11 +175,20 @@ export function MyRequestsView() {
               }
             }
             
-            // Update local state with new read status and status - this syncs across all views
+            // Only sync read status when marked as read (not unread from external source)
+            // This prevents the agency's unread state from affecting the user
+            const readChanged = old?.read !== updated.read;
+            const markedAsRead = readChanged && updated.read === true;
+            
+            // Update local state - only sync read if marking as read
             setRequests(prev => {
-              const newRequests = prev.map(r => 
-                r.id === updated.id ? { ...r, read: updated.read, status: updated.status } : r
-              );
+              const newRequests = prev.map(r => {
+                if (r.id === updated.id) {
+                  const newRead = markedAsRead ? true : r.read;
+                  return { ...r, read: newRead, status: updated.status };
+                }
+                return r;
+              });
               // Recalculate unread count
               const newUnreadCount = newRequests.filter(r => !r.read).length;
               setUserUnreadEngagementsCount(newUnreadCount);
