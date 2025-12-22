@@ -518,16 +518,18 @@ export function AgencyRequestsView() {
         <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none">
           <DialogHeader className="px-4 pt-3 pb-0">
             <div className="flex items-center justify-between">
-              <DialogTitle className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {selectedRequest?.media_site?.favicon && (
-                  <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
+                  <img src={selectedRequest.media_site.favicon} alt="" className="w-8 h-8 rounded" />
                 )}
-                {selectedRequest?.title}
-                <span className={`flex items-center gap-1 text-xs font-normal ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
-                  <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {isCounterpartyOnline ? 'Online' : 'Offline'}
-                </span>
-              </DialogTitle>
+                <div className="flex flex-col">
+                  <DialogTitle>{selectedRequest?.title}</DialogTitle>
+                  <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
+                    <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
+                    Client {isCounterpartyOnline ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
