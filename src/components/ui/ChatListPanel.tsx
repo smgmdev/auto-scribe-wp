@@ -352,19 +352,27 @@ export function ChatListPanel() {
 
   const totalUnread = userUnreadEngagementsCount + agencyUnreadServiceRequestsCount;
 
-  // Filter items based on search query
-  const filterItems = (items: ChatItem[]) => {
-    if (!searchQuery.trim()) return items;
-    const query = searchQuery.toLowerCase();
-    return items.filter(item => 
-      item.media_site?.name?.toLowerCase().includes(query) ||
-      item.title?.toLowerCase().includes(query) ||
-      item.lastMessage?.toLowerCase().includes(query)
-    );
+  // Filter and sort items based on search query and last message time
+  const filterAndSortItems = (items: ChatItem[]) => {
+    let filtered = items;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = items.filter(item => 
+        item.media_site?.name?.toLowerCase().includes(query) ||
+        item.title?.toLowerCase().includes(query) ||
+        item.lastMessage?.toLowerCase().includes(query)
+      );
+    }
+    // Sort by last message time (most recent first), fallback to created_at
+    return filtered.sort((a, b) => {
+      const timeA = a.lastMessageTime || a.created_at;
+      const timeB = b.lastMessageTime || b.created_at;
+      return new Date(timeB).getTime() - new Date(timeA).getTime();
+    });
   };
 
-  const filteredEngagements = filterItems(myEngagements);
-  const filteredServiceRequests = filterItems(serviceRequests);
+  const filteredEngagements = filterAndSortItems(myEngagements);
+  const filteredServiceRequests = filterAndSortItems(serviceRequests);
 
   const renderChatList = (items: ChatItem[], type: 'my-request' | 'agency-request') => {
     if (items.length === 0) {
