@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Heart, Copy, ArrowRight } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, ArrowRight } from 'lucide-react';
 
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
@@ -2421,7 +2421,6 @@ export function SitesView() {
                     className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                     onClick={() => handleRequestService(selectedMediaSite)}
                   >
-                    <Heart className="h-4 w-4 mr-2" />
                     <span>I'm Interested - ${selectedMediaSite.price}</span>
                     <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
                       <ArrowRight className="h-4 w-4 shrink-0" />
