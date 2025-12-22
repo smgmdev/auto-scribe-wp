@@ -114,11 +114,11 @@ serve(async (req) => {
 
     logStep("Order created", { orderId: order.id });
 
-    // Link to service request if provided
+    // Link to service request if provided (but don't mark as paid yet - that happens after successful payment)
     if (service_request_id) {
       await supabaseClient
         .from("service_requests")
-        .update({ order_id: order.id, status: "paid" })
+        .update({ order_id: order.id })
         .eq("id", service_request_id);
       logStep("Linked to service request", { service_request_id });
     }

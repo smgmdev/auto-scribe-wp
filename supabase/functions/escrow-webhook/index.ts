@@ -63,6 +63,18 @@ serve(async (req) => {
         }
 
         logStep("Order updated to paid status");
+
+        // Also update the linked service request status to "paid"
+        const { error: requestError } = await supabase
+          .from("service_requests")
+          .update({ status: "paid" })
+          .eq("order_id", orderId);
+
+        if (requestError) {
+          logStep("Service request update failed", { error: requestError.message });
+        } else {
+          logStep("Service request updated to paid status");
+        }
       }
     }
 
