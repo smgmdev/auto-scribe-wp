@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -1188,13 +1189,26 @@ export function GlobalChatDialog() {
                     >
                       Cancel Engagement
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      disabled={!isCancelled}
-                      onClick={() => setRemoveDialogOpen(true)}
-                    >
-                      Remove
-                    </DropdownMenuItem>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <DropdownMenuItem 
+                              className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                              disabled={!isCancelled}
+                              onClick={() => setRemoveDialogOpen(true)}
+                            >
+                              Remove
+                            </DropdownMenuItem>
+                          </div>
+                        </TooltipTrigger>
+                        {!isCancelled && (
+                          <TooltipContent side="left">
+                            <p>Only cancelled engagements can be removed</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Popover>
