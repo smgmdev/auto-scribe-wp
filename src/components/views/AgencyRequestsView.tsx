@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -56,6 +58,8 @@ export function AgencyRequestsView() {
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -249,6 +253,36 @@ export function AgencyRequestsView() {
     openGlobalChat(request as unknown as GlobalChatRequest, 'agency-request');
   };
 
+  // Filter and sort requests
+  const sortedRequests = useMemo(() => {
+    const filtered = requests.filter((request) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const titleMatch = request.title.toLowerCase().includes(query);
+      const siteMatch = request.media_site?.name.toLowerCase().includes(query);
+      return titleMatch || siteMatch;
+    });
+    
+    return filtered.sort((a, b) => {
+      if (sortBy === 'last_message') {
+        const aMessages = messages[a.id] || [];
+        const bMessages = messages[b.id] || [];
+        const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
+        const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
+        if (aLastMessage && bLastMessage) {
+          return bLastMessage - aLastMessage;
+        } else if (aLastMessage) {
+          return -1;
+        } else if (bLastMessage) {
+          return 1;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+  }, [requests, messages, sortBy, searchQuery]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -259,15 +293,43 @@ export function AgencyRequestsView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <ClipboardList className="h-8 w-8" />
-          Service Requests
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Manage service requests from clients for your media sites
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <ClipboardList className="h-8 w-8" />
+            Service Requests
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage service requests from clients for your media sites
+          </p>
+        </div>
+        {requests.length > 0 && (
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
+                <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
+
+      {requests.length > 0 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search requests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 w-full"
+          />
+        </div>
+      )}
 
       {requests.length === 0 ? (
         <Card className="border-border/50">
@@ -280,9 +342,10 @@ export function AgencyRequestsView() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => {
+          {sortedRequests.map((request) => {
             const unreadCount = unreadMessageCounts[request.id] || 0;
             const requestMessages = messages[request.id] || [];
+            const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
             // Unread is based solely on request.read - we mark as unread when new client message arrives
             const hasUnread = !request.read;
             
@@ -335,14 +398,22 @@ export function AgencyRequestsView() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 pb-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                    </span>
-                    {requestMessages.length > 0 && (
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">
-                        {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                        Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                       </span>
+                      {requestMessages.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                    {lastMessage && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}</span>
+                      </div>
                     )}
                   </div>
                 </CardContent>
