@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -64,6 +64,8 @@ export function GlobalChatDialog() {
   const [removing, setRemoving] = useState(false);
   const [sendOrderDialogOpen, setSendOrderDialogOpen] = useState(false);
   const [specialTerms, setSpecialTerms] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   
   // Drag state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -75,6 +77,7 @@ export function GlobalChatDialog() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
   
   // Drag handlers
@@ -490,8 +493,24 @@ export function GlobalChatDialog() {
     }
   };
 
+  const parseFileAttachment = (message: string): { type: string; file_name: string; file_url: string; file_type: string; file_size: number; is_image: boolean; textContent?: string } | null => {
+    const match = message.match(/\[ATTACHMENT\](.*?)\[\/ATTACHMENT\]/);
+    if (match) {
+      try {
+        const data = JSON.parse(match[1]);
+        // Extract text content before the attachment tag
+        const textContent = message.split('[ATTACHMENT]')[0].trim();
+        return { ...data, textContent: textContent || undefined };
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: { originalId: string | null; quoteText: string; replyText: string } | null) => {
     const orderData = parseOrderRequest(msg.message);
+    const attachmentData = parseFileAttachment(msg.message);
 
     if (orderData) {
       return (
@@ -543,6 +562,58 @@ export function GlobalChatDialog() {
               </div>
             )}
           </div>
+          <p className="text-xs opacity-50 mt-2">
+            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+          </p>
+        </div>
+      );
+    }
+
+    if (attachmentData) {
+      return (
+        <div className="text-sm">
+          {attachmentData.textContent && (
+            <p className="whitespace-pre-wrap mb-2">{attachmentData.textContent}</p>
+          )}
+          <a
+            href={attachmentData.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`block rounded-lg border p-3 transition-colors ${
+              isOwnMessage 
+                ? 'bg-primary-foreground/10 border-primary-foreground/30 hover:bg-primary-foreground/20' 
+                : 'bg-background border-border hover:bg-muted'
+            }`}
+          >
+            {attachmentData.is_image ? (
+              <div className="space-y-2">
+                <img 
+                  src={attachmentData.file_url} 
+                  alt={attachmentData.file_name}
+                  className="max-w-full max-h-48 rounded object-contain"
+                />
+                <div className="flex items-center gap-2 text-xs opacity-70">
+                  <ImageIcon className="h-3 w-3" />
+                  <span className="truncate">{attachmentData.file_name}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded flex items-center justify-center ${
+                  isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
+                }`}>
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{attachmentData.file_name}</p>
+                  <p className="text-xs opacity-70">
+                    {(attachmentData.file_size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
+              </div>
+            )}
+          </a>
           <p className="text-xs opacity-50 mt-2">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
           </p>
@@ -794,6 +865,183 @@ export function GlobalChatDialog() {
         description: error.message,
       });
     } finally {
+      setSending(false);
+    }
+  };
+
+  // File upload validation and handling
+  const ALLOWED_FILE_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/png',
+    'image/jpeg',
+    'image/jpg'
+  ];
+  const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg'];
+  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
+
+  const validateFile = (file: File): string | null => {
+    // Check file type
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    const isValidType = ALLOWED_FILE_TYPES.includes(file.type) || 
+                        ALLOWED_EXTENSIONS.includes(fileExtension);
+    
+    if (!isValidType) {
+      return 'Only Word (.doc, .docx), PDF, PNG, and JPG files are allowed.';
+    }
+    
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return `File size exceeds 1MB limit. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`;
+    }
+    
+    return null;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const error = validateFile(file);
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid File',
+        description: error,
+      });
+      e.target.value = '';
+      return;
+    }
+    
+    setSelectedFile(file);
+    e.target.value = '';
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+  };
+
+  const uploadFileAndSendMessage = async () => {
+    if (!user || !globalChatRequest || !senderId || !selectedFile) return;
+    
+    setUploadingFile(true);
+    setSending(true);
+    
+    try {
+      // Create unique file path
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${user.id}/${globalChatRequest.id}/${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chat-attachments')
+        .upload(fileName, selectedFile);
+      
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('chat-attachments')
+        .getPublicUrl(fileName);
+      
+      const fileUrl = urlData.publicUrl;
+      const isImage = selectedFile.type.startsWith('image/');
+      
+      // Create message with file attachment
+      const attachmentData = {
+        type: 'file_attachment',
+        file_name: selectedFile.name,
+        file_url: fileUrl,
+        file_type: selectedFile.type,
+        file_size: selectedFile.size,
+        is_image: isImage
+      };
+      
+      const messageContent = newMessage.trim() 
+        ? `${newMessage.trim()}\n\n[ATTACHMENT]${JSON.stringify(attachmentData)}[/ATTACHMENT]`
+        : `[ATTACHMENT]${JSON.stringify(attachmentData)}[/ATTACHMENT]`;
+      
+      const fullMessage = replyToMessage 
+        ? `> [${replyToMessage.id}]:${replyToMessage.message}\n\n${messageContent}`
+        : messageContent;
+
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: fullMessage
+      });
+
+      if (error) throw error;
+
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: fullMessage,
+        created_at: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, newMsg]);
+      
+      // Notify recipient
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id, agency_payout_id')
+        .eq('id', globalChatRequest.id)
+        .single();
+      
+      if (requestData) {
+        await supabase
+          .from('service_requests')
+          .update({ read: false })
+          .eq('id', globalChatRequest.id);
+        
+        const recipientId = senderType === 'client' 
+          ? requestData.agency_payout_id 
+          : requestData.user_id;
+        
+        if (recipientId) {
+          const notifyChannel = supabase.channel(`notify-${recipientId}`);
+          notifyChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await notifyChannel.send({
+                type: 'broadcast',
+                event: 'new-message',
+                payload: {
+                  request_id: globalChatRequest.id,
+                  sender_type: senderType,
+                  sender_id: senderId,
+                  message: `Sent a file: ${selectedFile.name}`,
+                  title: globalChatRequest.title,
+                  media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                  media_site_favicon: globalChatRequest.media_site?.favicon
+                }
+              });
+              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+            }
+          });
+        }
+      }
+      
+      setNewMessage('');
+      setSelectedFile(null);
+      setReplyToMessage(null);
+      
+      toast({
+        title: "File Sent",
+        description: `${selectedFile.name} has been sent successfully.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to upload file',
+        description: error.message,
+      });
+    } finally {
+      setUploadingFile(false);
       setSending(false);
     }
   };
@@ -1098,29 +1346,75 @@ export function GlobalChatDialog() {
                     </Button>
                   </div>
                 )}
-                <div className="relative">
+                {/* Selected file preview */}
+                {selectedFile && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-t">
+                    {selectedFile.type.startsWith('image/') ? (
+                      <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">{selectedFile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(selectedFile.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={removeSelectedFile}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                <div className="relative flex items-center">
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  {/* Attachment button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 shrink-0 rounded-none border-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={sending || uploadingFile}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
                   <Input
                     ref={inputRef}
                     placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
                     value={newMessage}
                     onChange={handleInputChange}
-                    disabled={sending}
-                    className="rounded-none pr-12 border-0"
+                    disabled={sending || uploadingFile}
+                    className="rounded-none pr-12 border-0 flex-1"
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                      if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        sendMessage();
+                        if (selectedFile) {
+                          uploadFileAndSendMessage();
+                        } else if (newMessage.trim()) {
+                          sendMessage();
+                        }
                       }
                     }}
                   />
                   <Button 
-                    onClick={sendMessage} 
-                    disabled={sending || !newMessage.trim()} 
+                    onClick={selectedFile ? uploadFileAndSendMessage : sendMessage} 
+                    disabled={sending || uploadingFile || (!newMessage.trim() && !selectedFile)} 
                     size="icon"
                     variant="ghost"
                     className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                   >
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {sending || uploadingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
