@@ -227,11 +227,14 @@ export const useAppStore = create<AppState>()((set) => ({
   removeMinimizedChat: (id) => set((state) => ({
     minimizedChats: state.minimizedChats.filter(c => c.id !== id)
   })),
-  incrementMinimizedChatUnread: (id) => set((state) => ({
-    minimizedChats: state.minimizedChats.map(c => 
+  incrementMinimizedChatUnread: (id) => set((state) => {
+    console.log('[AppStore] incrementMinimizedChatUnread called for:', id, 'current chats:', state.minimizedChats.map(c => ({ id: c.id, unreadCount: c.unreadCount })));
+    const updated = state.minimizedChats.map(c => 
       c.id === id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
-    )
-  })),
+    );
+    console.log('[AppStore] Updated chats:', updated.map(c => ({ id: c.id, unreadCount: c.unreadCount })));
+    return { minimizedChats: updated };
+  }),
   clearMinimizedChatUnread: (id) => set((state) => ({
     minimizedChats: state.minimizedChats.map(c => 
       c.id === id ? { ...c, unreadCount: 0 } : c
