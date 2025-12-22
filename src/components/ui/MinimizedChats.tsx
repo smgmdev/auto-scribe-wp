@@ -1,6 +1,7 @@
 import { MessageSquare, X, Maximize2 } from 'lucide-react';
 import { useAppStore, MinimizedChat } from '@/stores/appStore';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface MinimizedChatsProps {
   onOpenChat: (chat: MinimizedChat) => void;
@@ -16,9 +17,17 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
       {minimizedChats.map((chat) => (
         <div
           key={chat.id}
-          className="flex items-center gap-2 bg-card border border-border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-shadow cursor-pointer group max-w-[200px]"
+          className="relative flex items-center gap-2 bg-card border border-border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-shadow cursor-pointer group max-w-[200px]"
           onClick={() => onOpenChat(chat)}
         >
+          {/* Unread badge */}
+          {(chat.unreadCount ?? 0) > 0 && (
+            <Badge 
+              className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5"
+            >
+              {chat.unreadCount}
+            </Badge>
+          )}
           {chat.favicon ? (
             <img src={chat.favicon} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
           ) : (
