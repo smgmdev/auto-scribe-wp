@@ -384,6 +384,10 @@ export function ChatListPanel() {
         async (payload) => {
           const newMsg = payload.new as any;
           const requestId = newMsg.request_id;
+          const senderId = newMsg.sender_id;
+          
+          // Skip if this is our own message - check sender_id directly
+          const isOwnMessage = senderId === user?.id || senderId === agencyPayoutIdRef.current;
           
           // Check if this belongs to our engagements or service requests
           const isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
@@ -407,11 +411,8 @@ export function ChatListPanel() {
             ));
           }
           
-          // Determine if this is our own message
-          const isOwnMessage = (isMyEngagement && newMsg.sender_type === 'client') ||
-                               (isServiceRequest && (newMsg.sender_type === 'agency' || newMsg.sender_type === 'admin'));
-          
-          if (isOwnMessage) return; // Skip notification for own messages
+          // Skip notification for own messages
+          if (isOwnMessage) return;
           
           // Check if chat is open or minimized
           const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
