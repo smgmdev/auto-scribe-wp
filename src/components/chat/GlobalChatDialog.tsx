@@ -1671,6 +1671,8 @@ export function GlobalChatDialog() {
               : fileWebView.url
         ) : ''}
         title={fileWebView?.name || 'File Preview'}
+        downloadUrl={fileWebView?.url}
+        downloadName={fileWebView?.name}
       />
     </>
   );
