@@ -304,6 +304,7 @@ export function AgencyRequestsView() {
                         />
                       )}
                       <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                      {getStatusBadge(request.status, request.read)}
                     </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       {request.media_site?.publication_format && (
