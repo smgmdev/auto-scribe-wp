@@ -57,6 +57,7 @@ export function AgencyRequestsView() {
     openGlobalChat
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
@@ -127,6 +128,27 @@ export function AgencyRequestsView() {
       // (new requests start as unread, and we mark as unread when new client message arrives)
       const unreadCount = data.filter(r => !r.read).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
+
+      // Fetch orders for this agency's service requests
+      const requestIds = data.map(r => r.id);
+      if (requestIds.length > 0) {
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            status,
+            delivery_status,
+            amount_cents,
+            created_at,
+            delivered_at,
+            media_site:media_sites(id, name, favicon)
+          `)
+          .in('id', data.filter(r => r.order).map(r => r.order!.id));
+
+        if (ordersData) {
+          setOrders(ordersData);
+        }
+      }
     }
     setLoading(false);
   };
@@ -302,6 +324,17 @@ export function AgencyRequestsView() {
     });
   }, [requests, messages, sortBy, searchQuery]);
 
+  // Calculate order counts
+  const activeOrders = useMemo(() => 
+    orders.filter(o => o.delivery_status !== 'delivered' && o.status !== 'cancelled'), 
+    [orders]
+  );
+  
+  const historyOrders = useMemo(() => 
+    orders.filter(o => o.delivery_status === 'delivered' || o.status === 'cancelled'), 
+    [orders]
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -352,11 +385,11 @@ export function AgencyRequestsView() {
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="requests" className="gap-2">
             <MessageSquare className="h-4 w-4" />
-            Requests
+            Requests ({requests.length})
           </TabsTrigger>
           <TabsTrigger value="orders" className="gap-2">
             <ShoppingBag className="h-4 w-4" />
-            Orders
+            Orders ({orders.length})
           </TabsTrigger>
         </TabsList>
 
@@ -458,11 +491,11 @@ export function AgencyRequestsView() {
             <TabsList className="grid w-full max-w-md grid-cols-2">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                Active Orders
+                Active Orders ({activeOrders.length})
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-2">
                 <History className="h-4 w-4" />
-                Order History
+                Order History ({historyOrders.length})
               </TabsTrigger>
             </TabsList>
 
