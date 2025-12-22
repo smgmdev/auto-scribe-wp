@@ -96,6 +96,7 @@ interface AppState {
   // User engagement notifications (for My Engagements)
   userUnreadEngagementsCount: number;
   setUserUnreadEngagementsCount: (count: number) => void;
+  incrementUserUnreadEngagementsCount: () => void;
   
   // User agency application status
   userApplicationStatus: string | null;
@@ -199,6 +200,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // User engagement notifications
   userUnreadEngagementsCount: 0,
   setUserUnreadEngagementsCount: (count) => set({ userUnreadEngagementsCount: count }),
+  incrementUserUnreadEngagementsCount: () => set((state) => ({ 
+    userUnreadEngagementsCount: state.userUnreadEngagementsCount + 1 
+  })),
   userApplicationStatus: null,
   setUserApplicationStatus: (status) => set({ userApplicationStatus: status }),
   
