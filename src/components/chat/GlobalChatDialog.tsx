@@ -1622,13 +1622,30 @@ export function GlobalChatDialog() {
             >
               <X className="h-4 w-4" />
             </Button>
-            <a
-              href={imagePreview?.url}
-              download={imagePreview?.name}
-              className="absolute top-2 right-12 z-10 h-8 w-8 bg-black/50 hover:bg-black text-white rounded-full flex items-center justify-center"
+            <Button
+              onClick={async () => {
+                if (!imagePreview) return;
+                try {
+                  const response = await fetch(imagePreview.url);
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = imagePreview.name;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  window.open(imagePreview.url, '_blank');
+                }
+              }}
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-12 z-10 h-8 w-8 bg-black/50 hover:bg-black text-white rounded-full"
             >
               <Download className="h-4 w-4" />
-            </a>
+            </Button>
             {imagePreview && (
               <img 
                 src={imagePreview.url} 
