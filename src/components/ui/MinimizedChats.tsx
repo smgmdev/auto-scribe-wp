@@ -59,13 +59,9 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
             }`}
             onClick={() => handleOpenChat(chat)}
           >
-            {/* Unread badge */}
+            {/* Blue circle indicator */}
             {hasUnread && (
-              <Badge 
-                className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-sky-500 text-white text-xs px-1.5 animate-pulse"
-              >
-                {totalUnread}
-              </Badge>
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-sky-500 rounded-full" />
             )}
             <div className="relative shrink-0">
               {chat.favicon ? (
