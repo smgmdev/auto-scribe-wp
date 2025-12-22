@@ -185,6 +185,20 @@ export function GlobalChatDialog() {
           setMessages(prev => [...prev, newMsg]);
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'service_messages',
+          filter: `request_id=eq.${globalChatRequest.id}`
+        },
+        (payload) => {
+          const deletedMsg = payload.old as ServiceMessage;
+          // Remove deleted message from local state
+          setMessages(prev => prev.filter(m => m.id !== deletedMsg.id));
+        }
+      )
       .subscribe();
 
     return () => {
