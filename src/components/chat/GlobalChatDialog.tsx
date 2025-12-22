@@ -60,6 +60,8 @@ export function GlobalChatDialog() {
   const [loadingAgency, setLoadingAgency] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const [sendOrderDialogOpen, setSendOrderDialogOpen] = useState(false);
   const [specialTerms, setSpecialTerms] = useState('');
   
@@ -157,6 +159,44 @@ export function GlobalChatDialog() {
       });
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleRemoveEngagement = async () => {
+    if (!globalChatRequest) return;
+    
+    setRemoving(true);
+    try {
+      // Delete related messages first
+      await supabase
+        .from('service_messages')
+        .delete()
+        .eq('request_id', globalChatRequest.id);
+      
+      // Delete the service request
+      const { error } = await supabase
+        .from('service_requests')
+        .delete()
+        .eq('id', globalChatRequest.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Engagement Removed",
+        description: "The cancelled engagement has been removed from your account.",
+      });
+      
+      setRemoveDialogOpen(false);
+      closeGlobalChat();
+    } catch (error) {
+      console.error('Error removing engagement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove engagement. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -844,6 +884,14 @@ export function GlobalChatDialog() {
                     >
                       Cancel Engagement
                     </DropdownMenuItem>
+                    {isCancelled && globalChatType === 'my-request' && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        onClick={() => setRemoveDialogOpen(true)}
+                      >
+                        Remove Engagement
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Popover>
@@ -1220,6 +1268,34 @@ export function GlobalChatDialog() {
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, cancel engagement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Engagement Confirmation */}
+      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Cancelled Engagement?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the cancelled engagement from your account. All messages and history for this engagement will be deleted. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              disabled={removing}
+              className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemoveEngagement}
+              disabled={removing}
+              className="bg-destructive text-destructive-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+            >
+              {removing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, remove engagement
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
