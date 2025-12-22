@@ -257,6 +257,40 @@ export function GlobalChatDialog() {
       };
 
       setMessages(prev => [...prev, newMsg]);
+      
+      // Fetch the request to get recipient info for broadcast notification
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id, agency_payout_id')
+        .eq('id', globalChatRequest.id)
+        .single();
+      
+      if (requestData) {
+        // Determine recipient based on sender type
+        const recipientId = senderType === 'client' 
+          ? requestData.agency_payout_id // Notify agency
+          : requestData.user_id; // Notify client
+        
+        if (recipientId) {
+          console.log('[GlobalChatDialog] Broadcasting notification to:', recipientId);
+          const notifyChannel = supabase.channel(`notify-${recipientId}`);
+          await notifyChannel.send({
+            type: 'broadcast',
+            event: 'new-message',
+            payload: {
+              request_id: globalChatRequest.id,
+              sender_type: senderType,
+              sender_id: senderId,
+              message: fullMessage,
+              title: globalChatRequest.title,
+              media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+              media_site_favicon: globalChatRequest.media_site?.favicon
+            }
+          });
+          supabase.removeChannel(notifyChannel);
+        }
+      }
+      
       setNewMessage('');
       setReplyToMessage(null);
       setTimeout(() => inputRef.current?.focus(), 0);
