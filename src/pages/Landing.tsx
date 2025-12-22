@@ -857,7 +857,7 @@ const Landing = () => {
                 className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                 onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)}
               >
-                <span>Publish New Article</span>
+                <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
                 <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
                   <ArrowRight className="h-4 w-4 shrink-0" />
                 </span>
