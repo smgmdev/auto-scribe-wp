@@ -254,12 +254,6 @@ export function ChatListPanel() {
           console.log('[ChatListPanel] Received message:', payload);
           const newMsg = payload.new as { request_id: string; sender_id: string; sender_type: string; message: string };
           
-          // Skip if message is from current user
-          if (newMsg.sender_id === user.id) {
-            console.log('[ChatListPanel] Ignoring own message');
-            return;
-          }
-          
           const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
           const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
           
@@ -279,10 +273,22 @@ export function ChatListPanel() {
           const isMyEngagement = request.user_id === user.id;
           const isServiceRequest = agencyPayoutId && request.agency_payout_id === agencyPayoutId;
           
-          // For user: only notify if message is from agency (sender_type !== 'client')
-          // For agency: only notify if message is from client (sender_type === 'client')
-          const shouldNotifyUser = isMyEngagement && newMsg.sender_type !== 'client';
-          const shouldNotifyAgency = isServiceRequest && newMsg.sender_type === 'client';
+          // For user engagement: only notify if message is from agency (sender_type !== 'client')
+          // For agency service request: only notify if message is from client (sender_type === 'client')
+          // Also ensure we don't notify ourselves (sender_id check)
+          const shouldNotifyUser = isMyEngagement && newMsg.sender_type !== 'client' && newMsg.sender_id !== user.id;
+          const shouldNotifyAgency = isServiceRequest && newMsg.sender_type === 'client' && newMsg.sender_id !== user.id;
+          
+          console.log('[ChatListPanel] Notification check:', { 
+            isMyEngagement, 
+            isServiceRequest, 
+            senderType: newMsg.sender_type,
+            senderId: newMsg.sender_id,
+            userId: user.id,
+            agencyPayoutId,
+            shouldNotifyUser, 
+            shouldNotifyAgency 
+          });
           
           if (!shouldNotifyUser && !shouldNotifyAgency) {
             console.log('[ChatListPanel] Not relevant for current user');
