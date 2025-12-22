@@ -624,12 +624,12 @@ export function ChatListPanel() {
       {!isExpanded && (
         <Button
           onClick={() => setIsExpanded(true)}
-          className="w-full rounded-lg shadow-lg px-4 py-3 h-auto flex items-center justify-between"
+          className="w-full rounded-lg shadow-lg px-3 py-2 h-auto flex items-center justify-between"
           variant="default"
         >
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            <span className="font-medium">Messaging</span>
+            <span className="font-medium text-sm">Messaging</span>
             {totalUnread > 0 && (
               <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5">
                 {totalUnread}
