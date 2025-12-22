@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus, Megaphone } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -537,14 +537,14 @@ export function AgencyRequestsView() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 mr-6">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                  title="Shout"
+                  title="Info"
                 >
-                  <Megaphone className="h-4 w-4" />
+                  <Info className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
