@@ -744,7 +744,7 @@ export function GlobalChatDialog() {
               </div>
             ) : isCancelled ? (
               <div className="p-4 text-center text-muted-foreground bg-muted/50 border-t">
-                This engagement has been cancelled. Chat is disabled.
+                This engagement has been cancelled.
               </div>
             ) : null}
           </div>
