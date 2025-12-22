@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -56,6 +57,8 @@ export function GlobalChatDialog() {
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -66,6 +69,41 @@ export function GlobalChatDialog() {
 
   const senderType = globalChatType === 'agency-request' ? 'agency' : 'client';
   const counterpartyLabel = globalChatType === 'agency-request' ? 'Client' : 'Agency';
+  
+  const isCancelled = globalChatRequest?.status === 'cancelled';
+  const hasOrder = !!globalChatRequest?.order;
+
+  const handleCancelEngagement = async () => {
+    if (!globalChatRequest) return;
+    
+    setCancelling(true);
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ status: 'cancelled' })
+        .eq('id', globalChatRequest.id);
+      
+      if (error) throw error;
+      
+      updateGlobalChatRequest({ status: 'cancelled' });
+      
+      toast({
+        title: "Engagement Cancelled",
+        description: "This engagement has been cancelled and the chat is now closed.",
+      });
+      
+      setCancelDialogOpen(false);
+    } catch (error) {
+      console.error('Error cancelling engagement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel engagement. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   // Clear unread when dialog opens
   useEffect(() => {
@@ -443,6 +481,7 @@ export function GlobalChatDialog() {
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem 
                       className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      disabled={hasOrder || isCancelled}
                       onClick={() => {
                         toast({
                           title: "Order Now",
@@ -454,13 +493,8 @@ export function GlobalChatDialog() {
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      onClick={() => {
-                        toast({
-                          title: "Cancel Engagement",
-                          description: "Cancel functionality coming soon",
-                          variant: "destructive"
-                        });
-                      }}
+                      disabled={hasOrder || isCancelled}
+                      onClick={() => setCancelDialogOpen(true)}
                     >
                       Cancel Engagement
                     </DropdownMenuItem>
@@ -661,7 +695,7 @@ export function GlobalChatDialog() {
             )}
 
             {/* Reply Input */}
-            {globalChatRequest.status !== 'rejected' && globalChatRequest.status !== 'completed' && (
+            {globalChatRequest.status !== 'rejected' && globalChatRequest.status !== 'completed' && !isCancelled ? (
               <div className="-mx-4" style={{ width: 'calc(100% + 2rem)' }}>
                 {replyToMessage && (
                   <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-t">
@@ -708,7 +742,11 @@ export function GlobalChatDialog() {
                   </Button>
                 </div>
               </div>
-            )}
+            ) : isCancelled ? (
+              <div className="p-4 text-center text-muted-foreground bg-muted/50 border-t">
+                This engagement has been cancelled. Chat is disabled.
+              </div>
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>
@@ -765,6 +803,29 @@ export function GlobalChatDialog() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Engagement Confirmation */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Engagement?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this engagement? This action cannot be undone and the chat will be disabled for further communication.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>No, keep it</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelEngagement}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, cancel engagement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
