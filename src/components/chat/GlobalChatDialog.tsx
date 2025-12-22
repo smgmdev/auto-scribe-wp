@@ -849,8 +849,8 @@ export function GlobalChatDialog() {
 
     setSending(true);
     try {
-      // If resending, delete the previous order first
-      if (isResendMode && existingOrderMessage) {
+      // Always delete any existing order before sending a new one (max 1 order at a time)
+      if (existingOrderMessage) {
         const { error: deleteError } = await supabase
           .from('service_messages')
           .delete()
