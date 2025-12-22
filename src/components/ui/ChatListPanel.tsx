@@ -419,7 +419,10 @@ export function ChatListPanel() {
           const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
           const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === requestId;
           
+          console.log('[ChatListPanel] New message received:', { requestId, isMinimized, isDialogOpen, minimizedChats: minimizedChatsRef.current });
+          
           if (isMinimized) {
+            console.log('[ChatListPanel] Incrementing minimized chat unread for:', requestId);
             incrementMinimizedChatUnread(requestId);
             playMessageSound();
           } else if (!isDialogOpen) {
