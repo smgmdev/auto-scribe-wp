@@ -288,6 +288,7 @@ export function ChatListPanel() {
 
   useEffect(() => {
     minimizedChatsRef.current = minimizedChats;
+    console.log('[ChatListPanel] minimizedChatsRef updated:', minimizedChats.map(c => ({ id: c.id, unreadCount: c.unreadCount })));
   }, [minimizedChats]);
 
   useEffect(() => {
@@ -352,7 +353,15 @@ export function ChatListPanel() {
       });
     }
     
+    console.log('[ChatListPanel] Broadcast: isMinimized check', { 
+      isMinimized, 
+      minimizedChatsCount: minimizedChatsRef.current.length,
+      minimizedChatIds: minimizedChatsRef.current.map(c => c.id),
+      request_id 
+    });
+    
     if (isMinimized) {
+      console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id);
       incrementMinimizedChatUnread(request_id);
       playMessageSound();
     } else if (!isDialogOpen) {
@@ -621,12 +630,17 @@ export function ChatListPanel() {
   useEffect(() => {
     if (!user) return;
 
+    console.log('[ChatListPanel] Setting up broadcast channel for user:', user.id);
+    
     const userChannel = supabase
       .channel(`notify-${user.id}`)
       .on('broadcast', { event: 'new-message' }, (payload) => {
+        console.log('[ChatListPanel] Received broadcast on user channel:', payload);
         handleBroadcastNotification(payload.payload);
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[ChatListPanel] User broadcast channel status:', status);
+      });
 
     return () => {
       supabase.removeChannel(userChannel);
