@@ -158,8 +158,18 @@ export function AgencyRequestsView() {
           table: 'service_requests',
           filter: `agency_payout_id=eq.${agencyPayoutId}`
         },
-        () => {
-          fetchRequests();
+        (payload) => {
+          const updated = payload.new as any;
+          // Update local state with the new read status
+          setRequests(prev => {
+            const newRequests = prev.map(r => 
+              r.id === updated.id ? { ...r, read: updated.read, status: updated.status } : r
+            );
+            // Recalculate unread count
+            const newUnreadCount = newRequests.filter(r => !r.read).length;
+            setAgencyUnreadServiceRequestsCount(newUnreadCount);
+            return newRequests;
+          });
         }
       )
       .subscribe();

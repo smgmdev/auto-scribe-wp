@@ -321,6 +321,41 @@ export function ChatListPanel() {
     }
   }, [incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount]);
 
+  // Real-time subscription for read status changes
+  useEffect(() => {
+    if (!user) return;
+
+    // Listen for updates to service_requests to sync read status
+    const readStatusChannel = supabase
+      .channel('chat-panel-read-status')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          
+          // Update my engagements if it belongs to this user
+          setMyEngagements(prev => prev.map(e => 
+            e.id === updated.id ? { ...e, read: updated.read } : e
+          ));
+          
+          // Update service requests
+          setServiceRequests(prev => prev.map(r => 
+            r.id === updated.id ? { ...r, read: updated.read } : r
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(readStatusChannel);
+    };
+  }, [user?.id]);
+
   // Broadcast notification subscription - works regardless of RLS
   useEffect(() => {
     if (!user) return;
