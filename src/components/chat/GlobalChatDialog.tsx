@@ -886,10 +886,10 @@ export function GlobalChatDialog() {
                     </DropdownMenuItem>
                     {isCancelled && globalChatType === 'my-request' && (
                       <DropdownMenuItem 
-                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         onClick={() => setRemoveDialogOpen(true)}
                       >
-                        Remove Engagement
+                        Remove
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
