@@ -138,6 +138,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
+  // Track if this is the initial load to avoid showing toast on refresh
+  const isInitialLoadRef = useRef(true);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -155,11 +158,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setPinRequired(false);
           setPinVerified(false);
           hasShownWelcomeRef.current = false;
+          isInitialLoadRef.current = false;
           return;
         }
         
-        // Show welcome back notification on sign in (only once per session)
-        if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current) {
+        // Show welcome back notification on actual sign in (not on page refresh/session restore)
+        // SIGNED_IN fires on refresh too, so we check if this is NOT the initial load
+        if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current && !isInitialLoadRef.current) {
           hasShownWelcomeRef.current = true;
           toast({
             title: "Welcome back! 👋",
@@ -167,6 +172,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             duration: 2000,
           });
         }
+        
+        // After first auth state change, no longer initial load
+        isInitialLoadRef.current = false;
         
         setSession(newSession);
         setUser(newSession?.user ?? null);
