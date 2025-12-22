@@ -1661,7 +1661,15 @@ export function GlobalChatDialog() {
       <WebViewDialog
         open={!!fileWebView}
         onOpenChange={(open) => !open && setFileWebView(null)}
-        url={fileWebView?.url || ''}
+        url={fileWebView?.url ? (
+          // Use Google Docs Viewer for Word documents
+          fileWebView.name.match(/\.(doc|docx)$/i)
+            ? `https://docs.google.com/viewer?url=${encodeURIComponent(fileWebView.url)}&embedded=true`
+            // Use Google Docs Viewer for PDFs too for consistent experience
+            : fileWebView.name.match(/\.pdf$/i)
+              ? `https://docs.google.com/viewer?url=${encodeURIComponent(fileWebView.url)}&embedded=true`
+              : fileWebView.url
+        ) : ''}
         title={fileWebView?.name || 'File Preview'}
       />
     </>
