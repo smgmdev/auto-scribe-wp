@@ -533,7 +533,7 @@ export function AgencyRequestsView() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 mr-6 hover:bg-black/10 dark:hover:bg-white/10"
+                className="h-7 w-7 mr-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                 onClick={() => {
                   if (selectedRequest) {
                     addMinimizedChat({
