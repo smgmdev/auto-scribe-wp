@@ -523,17 +523,15 @@ export function AgencyRequestsView() {
                   <img src={selectedRequest.media_site.favicon} alt="" className="w-6 h-6 rounded" />
                 )}
                 {selectedRequest?.title}
-                {isCounterpartyOnline && (
-                  <span className="flex items-center gap-1 text-xs font-normal text-green-500">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    Online
-                  </span>
-                )}
+                <span className={`flex items-center gap-1 text-xs font-normal ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
+                  <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
+                  {isCounterpartyOnline ? 'Online' : 'Offline'}
+                </span>
               </DialogTitle>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 mr-6"
+                className="h-7 w-7 mr-6 hover:bg-black/10 dark:hover:bg-white/10"
                 onClick={() => {
                   if (selectedRequest) {
                     addMinimizedChat({
