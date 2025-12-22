@@ -26,6 +26,7 @@ interface ServiceRequest {
     name: string;
     favicon: string | null;
     price: number;
+    publication_format: string;
   } | null;
   order: {
     id: string;
@@ -176,7 +177,7 @@ export function AgencyRequestsView() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon, price),
+        media_site:media_sites(name, favicon, price, publication_format),
         order:orders(id, status, delivery_status)
       `)
       .eq('agency_payout_id', agencyData.id)
@@ -490,6 +491,14 @@ export function AgencyRequestsView() {
                         />
                       )}
                       <CardTitle className="text-base">{request.title}</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      {request.media_site?.publication_format && (
+                        <span className="capitalize">{request.media_site.publication_format}</span>
+                      )}
+                      {request.media_site?.price !== undefined && (
+                        <span className="font-medium text-foreground">${request.media_site.price}</span>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
