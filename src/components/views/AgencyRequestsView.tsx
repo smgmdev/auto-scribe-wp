@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -311,135 +312,159 @@ export function AgencyRequestsView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <ClipboardList className="h-8 w-8" />
-            Service Requests
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage service requests from clients for your media sites
-          </p>
-        </div>
-        {requests.length > 0 && (
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
-                <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+      <div>
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <ClipboardList className="h-8 w-8" />
+          Service Requests
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Manage service requests and orders from clients for your media sites
+        </p>
       </div>
 
-      {requests.length > 0 && (
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search requests..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 w-full"
-          />
-        </div>
-      )}
+      <Tabs defaultValue="requests" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="requests" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Requests
+          </TabsTrigger>
+          <TabsTrigger value="orders" className="gap-2">
+            <ShoppingBag className="h-4 w-4" />
+            Orders
+          </TabsTrigger>
+        </TabsList>
 
-      {requests.length === 0 ? (
-        <Card className="border-border/50">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">
-              No service requests yet. When clients submit briefs for your media sites, they'll appear here.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {sortedRequests.map((request) => {
-            const unreadCount = unreadMessageCounts[request.id] || 0;
-            const requestMessages = messages[request.id] || [];
-            const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
-            // Unread is based solely on request.read - we mark as unread when new client message arrives
-            const hasUnread = !request.read;
-            
-            return (
-              <Card 
-                key={request.id} 
-                className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                  hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
-                }`}
-                onClick={() => handleCardClick(request)}
-              >
-                {(unreadCount > 0 || hasUnread) && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
+        <TabsContent value="requests" className="mt-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            {requests.length > 0 && (
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search requests..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 w-full"
+                />
+              </div>
+            )}
+            {requests.length > 0 && (
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
+                    <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          {requests.length === 0 ? (
+            <Card className="border-border/50">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground text-center">
+                  No service requests yet. When clients submit briefs for your media sites, they'll appear here.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {sortedRequests.map((request) => {
+                const unreadCount = unreadMessageCounts[request.id] || 0;
+                const requestMessages = messages[request.id] || [];
+                const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
+                const hasUnread = !request.read;
+                
+                return (
+                  <Card 
+                    key={request.id} 
+                    className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                      hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+                    }`}
+                    onClick={() => handleCardClick(request)}
                   >
-                    {unreadCount > 0 ? unreadCount : '•'}
-                  </Badge>
-                )}
-                <CardHeader className="py-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        {request.media_site?.favicon ? (
-                          <img 
-                            src={request.media_site.favicon} 
-                            alt="" 
-                            className="h-8 w-8 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    {(unreadCount > 0 || hasUnread) && (
+                      <Badge 
+                        className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
+                      >
+                        {unreadCount > 0 ? unreadCount : '•'}
+                      </Badge>
+                    )}
+                    <CardHeader className="py-3 px-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            {request.media_site?.favicon ? (
+                              <img 
+                                src={request.media_site.favicon} 
+                                alt="" 
+                                className="h-8 w-8 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                            )}
+                            {hasUnread && (
+                              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                            )}
+                          </div>
+                          <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                          {getStatusBadge(request.status, request.read, request.id)}
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          {request.media_site?.publication_format && (
+                            <span className="capitalize">{request.media_site.publication_format}</span>
+                          )}
+                          {request.media_site?.price !== undefined && (
+                            <span className="font-medium text-foreground">${request.media_site.price}</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-3 px-4">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">
+                            Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                          {requestMessages.length > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                        {lastMessage && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}</span>
                           </div>
                         )}
-                        {/* Notification dot */}
-                        {hasUnread && (
-                          <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
-                        )}
                       </div>
-                      <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                      {getStatusBadge(request.status, request.read, request.id)}
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      {request.media_site?.publication_format && (
-                        <span className="capitalize">{request.media_site.publication_format}</span>
-                      )}
-                      {request.media_site?.price !== undefined && (
-                        <span className="font-medium text-foreground">${request.media_site.price}</span>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3 px-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                      {requestMessages.length > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                    {lastMessage && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="orders" className="mt-6">
+          <Card className="border-border/50">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground text-center">
+                Orders from your service requests will appear here.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
