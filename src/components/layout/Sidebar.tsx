@@ -399,9 +399,13 @@ export function Sidebar({
           table: 'service_messages'
         },
         async (payload) => {
+          console.log('[User Notifications] Received message:', payload);
           const newMsg = payload.new as { request_id: string; sender_type: string };
           // Only count messages from agency, not from the user themselves
-          if (newMsg.sender_type === 'client') return;
+          if (newMsg.sender_type === 'client') {
+            console.log('[User Notifications] Ignoring own message');
+            return;
+          }
 
           // Check if this request belongs to the current user
           const { data: request } = await supabase
@@ -409,6 +413,8 @@ export function Sidebar({
             .select('user_id, title, media_site:media_sites(name)')
             .eq('id', newMsg.request_id)
             .maybeSingle();
+
+          console.log('[User Notifications] Request data:', request, 'Current user:', user.id);
 
           if (request?.user_id === user.id) {
             incrementUserUnreadEngagementsCount();
@@ -431,7 +437,9 @@ export function Sidebar({
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[User Notifications] Subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -450,9 +458,13 @@ export function Sidebar({
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!agencyPayoutData) return;
+      if (!agencyPayoutData) {
+        console.log('[Agency Notifications] No agency payout data found');
+        return;
+      }
 
       const agencyPayoutId = agencyPayoutData.id;
+      console.log('[Agency Notifications] Setting up subscription for agency:', agencyPayoutId);
 
       // Subscribe to real-time message inserts for agency's requests
       const channel = supabase
@@ -465,9 +477,13 @@ export function Sidebar({
             table: 'service_messages'
           },
           async (payload) => {
+            console.log('[Agency Notifications] Received message:', payload);
             const newMsg = payload.new as { request_id: string; sender_type: string };
             // Only count messages from clients, not from the agency themselves
-            if (newMsg.sender_type !== 'client') return;
+            if (newMsg.sender_type !== 'client') {
+              console.log('[Agency Notifications] Ignoring own message');
+              return;
+            }
 
             // Check if this request belongs to the current agency
             const { data: request } = await supabase
@@ -475,6 +491,8 @@ export function Sidebar({
               .select('agency_payout_id, title, media_site:media_sites(name)')
               .eq('id', newMsg.request_id)
               .maybeSingle();
+
+            console.log('[Agency Notifications] Request data:', request, 'Agency ID:', agencyPayoutId);
 
             if (request?.agency_payout_id === agencyPayoutId) {
               incrementAgencyUnreadServiceRequestsCount();
@@ -497,7 +515,9 @@ export function Sidebar({
             }
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('[Agency Notifications] Subscription status:', status);
+        });
 
       return () => {
         supabase.removeChannel(channel);
