@@ -133,6 +133,26 @@ export function MyRequestsView() {
     }
   }, [user]);
 
+  // Listen for engagement-removed event to refresh list
+  useEffect(() => {
+    const handleEngagementRemoved = (event: CustomEvent) => {
+      const removedId = event.detail?.id;
+      if (removedId) {
+        setRequests(prev => prev.filter(r => r.id !== removedId));
+        setMessages(prev => {
+          const newMessages = { ...prev };
+          delete newMessages[removedId];
+          return newMessages;
+        });
+      }
+    };
+
+    window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+    return () => {
+      window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+    };
+  }, []);
+
   // Real-time subscription for status updates and read status sync (service_requests table)
   // This syncs read status across all views/tabs when updated from any source
   useEffect(() => {

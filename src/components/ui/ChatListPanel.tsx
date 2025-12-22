@@ -258,6 +258,30 @@ export function ChatListPanel() {
     }
   }, [user]);
 
+  // Listen for engagement-removed event to refresh list
+  useEffect(() => {
+    const handleEngagementRemoved = (event: CustomEvent) => {
+      const removedId = event.detail?.id;
+      if (removedId) {
+        setMyEngagements(prev => {
+          const filtered = prev.filter(e => e.id !== removedId);
+          myEngagementsRef.current = filtered;
+          return filtered;
+        });
+        setServiceRequests(prev => {
+          const filtered = prev.filter(r => r.id !== removedId);
+          serviceRequestsRef.current = filtered;
+          return filtered;
+        });
+      }
+    };
+
+    window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+    return () => {
+      window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+    };
+  }, []);
+
   useEffect(() => {
     // Fetch for agencies or admins
     if (agencyPayoutId || isAdmin) {

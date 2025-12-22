@@ -188,6 +188,9 @@ export function GlobalChatDialog() {
       
       setRemoveDialogOpen(false);
       closeGlobalChat();
+      
+      // Dispatch custom event to notify other components to refresh
+      window.dispatchEvent(new CustomEvent('engagement-removed', { detail: { id: globalChatRequest.id } }));
     } catch (error) {
       console.error('Error removing engagement:', error);
       toast({
