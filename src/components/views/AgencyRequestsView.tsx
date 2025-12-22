@@ -218,13 +218,20 @@ export function AgencyRequestsView() {
     };
   }, [agencyPayoutId]);
 
-  const getStatusBadge = (status: string, isRead: boolean) => {
-    if (status === 'pending_review' && !isRead) {
+  const getStatusBadge = (status: string, isRead: boolean, requestId: string) => {
+    // Check if agency has ever replied to this request
+    const requestMessages = messages[requestId] || [];
+    const hasAgencyReply = requestMessages.some(m => m.sender_type === 'agency' || m.sender_type === 'admin');
+    
+    // Only show "New Request" for pending_review requests that:
+    // 1. Are unread AND
+    // 2. Have NO agency replies yet (truly new, not just unread due to new client message)
+    if (status === 'pending_review' && !isRead && !hasAgencyReply) {
       return <Badge className="bg-green-500 text-white border-green-500">New Request</Badge>;
     }
     switch (status) {
       case 'pending_review':
-        // No badge for read pending_review requests
+        // No badge for read pending_review requests or those with agency replies
         return null;
       case 'accepted':
         return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
@@ -395,7 +402,7 @@ export function AgencyRequestsView() {
                         )}
                       </div>
                       <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                      {getStatusBadge(request.status, request.read)}
+                      {getStatusBadge(request.status, request.read, request.id)}
                     </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       {request.media_site?.publication_format && (

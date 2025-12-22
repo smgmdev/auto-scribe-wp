@@ -186,9 +186,12 @@ export default function AgencyPortal() {
     }
   };
 
-  const getStatusBadge = (status: string, isNew: boolean = false) => {
-    // Show "New Request" in green for new pending_review requests
-    if (status === 'pending_review' && isNew) {
+  const getStatusBadge = (status: string, messages: ServiceMessage[] = []) => {
+    // Check if agency has ever replied to this request
+    const hasAgencyReply = messages.some(m => m.sender_type === 'agency' || m.sender_type === 'admin');
+    
+    // Show "New Request" only for pending_review requests that have no agency replies yet
+    if (status === 'pending_review' && !hasAgencyReply) {
       return <Badge className="bg-green-500 text-white border-green-500">New Request</Badge>;
     }
     switch (status) {
@@ -334,7 +337,7 @@ export default function AgencyPortal() {
                   )}
                   <span className="text-sm">{selectedRequest.media_sites?.name}</span>
                 </div>
-                {getStatusBadge(selectedRequest.status)}
+                {getStatusBadge(selectedRequest.status, selectedRequest.messages)}
               </div>
 
               <div className="text-sm text-muted-foreground">
@@ -430,7 +433,7 @@ export default function AgencyPortal() {
 function RequestCard({ request, onSelect, getStatusBadge }: { 
   request: ServiceRequest; 
   onSelect: () => void;
-  getStatusBadge: (status: string) => React.ReactNode;
+  getStatusBadge: (status: string, messages?: ServiceMessage[]) => React.ReactNode;
 }) {
   return (
     <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={onSelect}>
@@ -449,7 +452,7 @@ function RequestCard({ request, onSelect, getStatusBadge }: {
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            {getStatusBadge(request.status)}
+            {getStatusBadge(request.status, request.messages)}
             <span className="text-xs text-muted-foreground">
               {format(new Date(request.updated_at), 'MMM d, yyyy')}
             </span>
