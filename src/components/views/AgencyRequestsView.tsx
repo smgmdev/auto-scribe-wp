@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus, Info } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, ExternalLink, Send, CheckCircle, XCircle, AlertCircle, Clock, ChevronDown, Reply, X, Minus, Info, Building2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,14 @@ interface ServiceMessage {
   created_at: string;
 }
 
+interface AgencyDetails {
+  agency_name: string;
+  email: string | null;
+  payout_method: string | null;
+  onboarding_complete: boolean;
+  created_at: string;
+}
+
 export function AgencyRequestsView() {
   const { user } = useAuth();
   const { 
@@ -74,6 +82,9 @@ export function AgencyRequestsView() {
   const selectedRequestRef = useRef<ServiceRequest | null>(null);
   const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
+  const [loadingAgency, setLoadingAgency] = useState(false);
   
   // Keep ref in sync with state
   useEffect(() => {
@@ -122,6 +133,39 @@ export function AgencyRequestsView() {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }, 50);
+  };
+
+  const fetchAgencyDetails = async (agencyName: string) => {
+    setLoadingAgency(true);
+    try {
+      const { data, error } = await supabase
+        .from('agency_payouts')
+        .select('agency_name, email, payout_method, onboarding_complete, created_at')
+        .eq('agency_name', agencyName)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setAgencyDetails(data);
+        setAgencyDetailsOpen(true);
+      } else {
+        toast({
+          title: "Agency not found",
+          description: "Could not find details for this agency.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching agency details:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch agency details.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingAgency(false);
+    }
   };
 
   const parseQuote = (message: string): { originalId: string | null; quoteText: string; replyText: string } | null => {
@@ -578,7 +622,15 @@ export function AgencyRequestsView() {
                         {selectedRequest?.media_site?.agency && (
                           <div className="col-span-2">
                             <span className="text-muted-foreground">Agency:</span>
-                            <p className="font-medium">{selectedRequest?.media_site?.agency}</p>
+                            <button 
+                              className="font-medium text-primary hover:underline flex items-center gap-1 mt-0.5"
+                              onClick={() => fetchAgencyDetails(selectedRequest.media_site!.agency!)}
+                              disabled={loadingAgency}
+                            >
+                              <Building2 className="h-3 w-3" />
+                              {selectedRequest?.media_site?.agency}
+                              {loadingAgency && <Loader2 className="h-3 w-3 animate-spin" />}
+                            </button>
                           </div>
                         )}
                         <div>
@@ -758,6 +810,59 @@ export function AgencyRequestsView() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Agency Details Dialog */}
+      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Agency Details
+            </DialogTitle>
+          </DialogHeader>
+          {agencyDetails && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{agencyDetails.agency_name}</h3>
+                  {agencyDetails.email && (
+                    <p className="text-sm text-muted-foreground">{agencyDetails.email}</p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Status:</span>
+                  <p className="font-medium flex items-center gap-1">
+                    {agencyDetails.onboarding_complete ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        Verified
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                        Pending
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Payout Method:</span>
+                  <p className="font-medium capitalize">{agencyDetails.payout_method || 'Not set'}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Member Since:</span>
+                  <p className="font-medium">{format(new Date(agencyDetails.created_at), 'MMMM d, yyyy')}</p>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
