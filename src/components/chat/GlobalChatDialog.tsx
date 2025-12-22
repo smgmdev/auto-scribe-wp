@@ -1189,26 +1189,14 @@ export function GlobalChatDialog() {
                     >
                       Cancel Engagement
                     </DropdownMenuItem>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div>
-                            <DropdownMenuItem 
-                              className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                              disabled={!isCancelled}
-                              onClick={() => setRemoveDialogOpen(true)}
-                            >
-                              Remove
-                            </DropdownMenuItem>
-                          </div>
-                        </TooltipTrigger>
-                        {!isCancelled && (
-                          <TooltipContent side="left">
-                            <p>Only cancelled engagements can be removed</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      disabled={!isCancelled}
+                      onClick={() => setRemoveDialogOpen(true)}
+                      title={!isCancelled ? "Only cancelled engagements can be removed" : undefined}
+                    >
+                      Remove
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Popover>
