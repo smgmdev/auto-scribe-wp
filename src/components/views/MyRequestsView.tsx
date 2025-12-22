@@ -1,31 +1,38 @@
 import { useState, useEffect } from 'react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, MessageSquare, Send, CreditCard, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
 interface ServiceRequest {
   id: string;
   title: string;
   description: string;
   status: string;
+  read: boolean;
   created_at: string;
   updated_at: string;
-  media_site_id: string;
-  order_id: string | null;
-  user_id: string;
-  media_sites: {
+  media_site: {
     name: string;
     favicon: string | null;
     price: number;
-  };
+    publication_format: string;
+    link: string;
+    category: string;
+    subcategory: string | null;
+    about: string | null;
+    agency: string | null;
+  } | null;
+  order: {
+    id: string;
+    status: string;
+    delivery_status: string;
+  } | null;
 }
 
 interface ServiceMessage {
@@ -39,93 +46,20 @@ interface ServiceMessage {
 
 export function MyRequestsView() {
   const { user } = useAuth();
+  const { 
+    unreadMessageCounts,
+    clearUnreadMessageCount,
+    openGlobalChat,
+    incrementMinimizedChatUnread,
+    incrementUnreadMessageCount,
+    minimizedChats,
+    globalChatOpen,
+    globalChatRequest
+  } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
-  const [newMessage, setNewMessage] = useState('');
-  const [sending, setSending] = useState(false);
-  const [paying, setPaying] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      fetchRequests();
-    }
-  }, [user]);
-
-  // Real-time subscription for new messages and status updates
-  useEffect(() => {
-    if (!user) return;
-
-    const messagesChannel = supabase
-      .channel('user-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'service_messages'
-        },
-        (payload) => {
-          const newMsg = payload.new as ServiceMessage;
-          // Only notify if the message is from agency (not from the user themselves)
-          if (newMsg.sender_type === 'agency') {
-            toast({
-              title: 'New Message!',
-              description: 'You received a reply from the agency.',
-            });
-          }
-          // Update messages state
-          setMessages(prev => ({
-            ...prev,
-            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
-          }));
-        }
-      )
-      .subscribe();
-
-    const requestsChannel = supabase
-      .channel('user-requests')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'service_requests'
-        },
-        (payload) => {
-          const updated = payload.new as ServiceRequest;
-          // Check if this request belongs to current user
-          if (updated.user_id === user.id) {
-            if (updated.status === 'accepted') {
-              toast({
-                title: 'Request Accepted!',
-                description: 'Your request has been accepted. You can now proceed to payment.',
-                className: 'bg-green-600 text-white border-green-600',
-              });
-            } else if (updated.status === 'rejected') {
-              toast({
-                variant: 'destructive',
-                title: 'Request Rejected',
-                description: 'Your request has been rejected by the agency.',
-              });
-            } else if (updated.status === 'changes_requested') {
-              toast({
-                title: 'Changes Requested',
-                description: 'The agency has requested changes to your brief.',
-              });
-            }
-            fetchRequests(); // Refetch to update UI
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(requestsChannel);
-    };
-  }, [user]);
+  const [paying, setPaying] = useState<string | null>(null);
 
   const fetchRequests = async () => {
     if (!user) return;
@@ -134,15 +68,22 @@ export function MyRequestsView() {
       const { data: requestsData, error: reqError } = await supabase
         .from('service_requests')
         .select(`
-          *,
-          media_sites (name, favicon, price)
+          id,
+          title,
+          description,
+          status,
+          read,
+          created_at,
+          updated_at,
+          media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+          order:orders(id, status, delivery_status)
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (reqError) throw reqError;
 
-      setRequests(requestsData || []);
+      setRequests((requestsData as unknown as ServiceRequest[]) || []);
 
       // Fetch messages for all requests
       if (requestsData && requestsData.length > 0) {
@@ -173,54 +114,104 @@ export function MyRequestsView() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!user || !selectedRequest || !newMessage.trim()) return;
-
-    setSending(true);
-    try {
-      const { error } = await supabase.from('service_messages').insert({
-        request_id: selectedRequest.id,
-        sender_type: 'client',
-        sender_id: user.id,
-        message: newMessage.trim()
-      });
-
-      if (error) throw error;
-
-      // Update local state
-      const newMsg: ServiceMessage = {
-        id: crypto.randomUUID(),
-        request_id: selectedRequest.id,
-        sender_type: 'client',
-        sender_id: user.id,
-        message: newMessage.trim(),
-        created_at: new Date().toISOString()
-      };
-
-      setMessages(prev => ({
-        ...prev,
-        [selectedRequest.id]: [...(prev[selectedRequest.id] || []), newMsg]
-      }));
-
-      setNewMessage('');
-      toast({ title: 'Message sent' });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to send message',
-        description: error.message,
-      });
-    } finally {
-      setSending(false);
+  useEffect(() => {
+    if (user) {
+      fetchRequests();
     }
-  };
+  }, [user]);
 
-  const proceedToPayment = async (request: ServiceRequest) => {
-    setPaying(true);
+  // Real-time subscription for new messages and status updates
+  useEffect(() => {
+    if (!user) return;
+
+    const messagesChannel = supabase
+      .channel('user-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMsg = payload.new as ServiceMessage;
+          // Only process if from agency (not from the user themselves)
+          if (newMsg.sender_type === 'client') return;
+          
+          const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
+          const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
+          
+          if (isMinimized) {
+            incrementMinimizedChatUnread(newMsg.request_id);
+          } else if (!isDialogOpen) {
+            incrementUnreadMessageCount(newMsg.request_id);
+          }
+          
+          if (!isDialogOpen) {
+            toast({
+              title: 'New Message!',
+              description: 'You received a reply from the agency.',
+            });
+          }
+          
+          setMessages(prev => ({
+            ...prev,
+            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg]
+          }));
+        }
+      )
+      .subscribe();
+
+    const requestsChannel = supabase
+      .channel('user-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          // Check if this request belongs to current user
+          if (updated.user_id === user.id) {
+            if (updated.status === 'accepted') {
+              toast({
+                title: 'Request Accepted!',
+                description: 'Your request has been accepted. You can now proceed to payment.',
+                className: 'bg-green-600 text-white border-green-600',
+              });
+            } else if (updated.status === 'rejected') {
+              toast({
+                variant: 'destructive',
+                title: 'Request Rejected',
+                description: 'Your request has been rejected by the agency.',
+              });
+            } else if (updated.status === 'changes_requested') {
+              toast({
+                title: 'Changes Requested',
+                description: 'The agency has requested changes to your brief.',
+              });
+            }
+            fetchRequests(); // Refetch to update UI
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(requestsChannel);
+    };
+  }, [user, minimizedChats, globalChatOpen, globalChatRequest?.id]);
+
+  const proceedToPayment = async (e: React.MouseEvent, request: ServiceRequest) => {
+    e.stopPropagation();
+    setPaying(request.id);
     try {
       const response = await supabase.functions.invoke('create-escrow-payment', {
         body: { 
-          media_site_id: request.media_site_id,
+          media_site_id: request.media_site ? request.media_site.name : request.id,
           service_request_id: request.id
         }
       });
@@ -242,7 +233,7 @@ export function MyRequestsView() {
         description: error.message,
       });
     } finally {
-      setPaying(false);
+      setPaying(null);
     }
   };
 
@@ -253,14 +244,21 @@ export function MyRequestsView() {
       case 'changes_requested':
         return <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes Requested</Badge>;
       case 'accepted':
-        return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted - Ready to Pay</Badge>;
+        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       case 'rejected':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
       case 'paid':
-        return <Badge className="bg-blue-600"><CreditCard className="h-3 w-3 mr-1" />Paid</Badge>;
+        return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30"><CreditCard className="h-3 w-3 mr-1" />Paid</Badge>;
+      case 'completed':
+        return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const handleCardClick = (request: ServiceRequest) => {
+    clearUnreadMessageCount(request.id);
+    openGlobalChat(request as unknown as GlobalChatRequest, 'my-request');
   };
 
   if (loading) {
@@ -272,141 +270,93 @@ export function MyRequestsView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="text-2xl font-bold">My Engagements</h2>
-        <p className="text-muted-foreground">Track your engagements and communicate with agencies</p>
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <ClipboardList className="h-8 w-8" />
+          My Engagements
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Track your engagements and communicate with agencies
+        </p>
       </div>
 
       {requests.length === 0 ? (
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No requests yet</p>
-            <p className="text-sm text-muted-foreground">Browse media sites and submit a brief to get started</p>
+            <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground text-center">No engagements yet</p>
+            <p className="text-sm text-muted-foreground text-center">Browse media sites and submit a brief to get started</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {requests.map((request) => (
-            <Card 
-              key={request.id} 
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => setSelectedRequest(request)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {request.media_sites?.favicon && (
-                      <img src={request.media_sites.favicon} alt="" className="w-10 h-10 rounded" />
-                    )}
-                    <div>
-                      <h3 className="font-medium">{request.title}</h3>
-                      <p className="text-sm text-muted-foreground">{request.media_sites?.name}</p>
+        <div className="space-y-4">
+          {requests.map((request) => {
+            const unreadCount = unreadMessageCounts[request.id] || 0;
+            return (
+              <Card 
+                key={request.id} 
+                className="relative border-border/50 hover:border-border transition-colors cursor-pointer"
+                onClick={() => handleCardClick(request)}
+              >
+                {unreadCount > 0 && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
+                <CardHeader className="py-3 px-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {request.media_site?.favicon && (
+                        <img 
+                          src={request.media_site.favicon} 
+                          alt="" 
+                          className="h-8 w-8 rounded object-cover"
+                        />
+                      )}
+                      <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {getStatusBadge(request.status)}
+                      {request.status === 'accepted' && (
+                        <Button 
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={(e) => proceedToPayment(e, request)}
+                          disabled={paying === request.id}
+                        >
+                          {paying === request.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <CreditCard className="h-4 w-4 mr-1" />
+                              Pay ${request.media_site?.price}
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {getStatusBadge(request.status)}
+                </CardHeader>
+                <CardContent className="pt-0 pb-3 px-4">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {format(new Date(request.updated_at), 'MMM d, yyyy')}
+                      Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                     </span>
+                    {messages[request.id]?.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {messages[request.id].length} message{messages[request.id].length > 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
-                </div>
-                {messages[request.id]?.length > 0 && (
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    {messages[request.id].length} message{messages[request.id].length > 1 ? 's' : ''}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
-
-      {/* Request Detail Dialog */}
-      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedRequest?.media_sites?.favicon && (
-                <img src={selectedRequest.media_sites.favicon} alt="" className="w-6 h-6 rounded" />
-              )}
-              {selectedRequest?.title}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{selectedRequest.media_sites?.name}</p>
-                {getStatusBadge(selectedRequest.status)}
-              </div>
-
-              {/* Messages */}
-              <ScrollArea className="h-[300px] border rounded-lg p-4">
-                <div className="space-y-4">
-                  {(messages[selectedRequest.id] || []).map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender_type === 'client' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          msg.sender_type === 'client'
-                            ? 'bg-primary text-primary-foreground'
-                            : msg.sender_type === 'admin'
-                            ? 'bg-amber-100 text-amber-900'
-                            : 'bg-muted'
-                        }`}
-                      >
-                        <p className="text-xs font-medium mb-1 opacity-70">
-                          {msg.sender_type === 'client' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Agency'}
-                        </p>
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        <p className="text-xs opacity-50 mt-1">
-                          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-
-              {/* Reply Input */}
-              {selectedRequest.status !== 'rejected' && selectedRequest.status !== 'paid' && (
-                <div className="flex gap-2">
-                  <Textarea
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    rows={2}
-                    disabled={sending}
-                  />
-                  <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  </Button>
-                </div>
-              )}
-
-              {/* Payment Button */}
-              {selectedRequest.status === 'accepted' && (
-                <Button 
-                  className="w-full bg-green-600 hover:bg-green-700"
-                  onClick={() => proceedToPayment(selectedRequest)}
-                  disabled={paying}
-                >
-                  {paying ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <CreditCard className="h-4 w-4 mr-2" />
-                  )}
-                  Proceed to Payment - ${selectedRequest.media_sites?.price}
-                </Button>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
