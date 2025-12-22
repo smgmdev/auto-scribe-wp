@@ -1412,7 +1412,7 @@ export function GlobalChatDialog() {
                     disabled={sending || uploadingFile || (!newMessage.trim() && !selectedFile)} 
                     size="icon"
                     variant="ghost"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                   >
                     {sending || uploadingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
