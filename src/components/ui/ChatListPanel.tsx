@@ -802,7 +802,7 @@ export function ChatListPanel() {
   const getMessageTypeIcon = (type: 'order' | 'payment' | 'delivery' | 'status' | 'normal') => {
     switch (type) {
       case 'order':
-        return <ShoppingCart className="h-3 w-3 shrink-0 text-green-500" />;
+        return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'payment':
         return <CreditCard className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'delivery':
