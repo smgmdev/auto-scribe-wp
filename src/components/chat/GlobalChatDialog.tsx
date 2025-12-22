@@ -1188,15 +1188,13 @@ export function GlobalChatDialog() {
                     >
                       Cancel Engagement
                     </DropdownMenuItem>
-                    {globalChatType === 'my-request' && (
-                      <DropdownMenuItem 
-                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        disabled={!isCancelled}
-                        onClick={() => setRemoveDialogOpen(true)}
-                      >
-                        Remove
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      disabled={!isCancelled}
+                      onClick={() => setRemoveDialogOpen(true)}
+                    >
+                      Remove
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Popover>
