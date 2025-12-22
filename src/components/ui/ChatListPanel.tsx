@@ -308,7 +308,7 @@ export function ChatListPanel() {
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
     
-    const { request_id, sender_type, sender_id, title, media_site_name } = payload;
+    const { request_id, sender_type, sender_id, message, title, media_site_name, media_site_favicon } = payload;
     
     // Skip if this is our own message (sender_id matches our user id or agency payout id)
     if (sender_id === user?.id || sender_id === agencyPayoutIdRef.current) {
@@ -321,17 +321,46 @@ export function ChatListPanel() {
     
     // Determine if this is for user engagement or agency service request
     const isFromAgency = sender_type === 'agency' || sender_type === 'admin';
+    const isFromClient = sender_type === 'client';
+    
+    // Check if we have this in our local lists
+    const isMyEngagement = myEngagementsRef.current.some(e => e.id === request_id);
+    const isServiceRequest = serviceRequestsRef.current.some(r => r.id === request_id);
     
     console.log('[ChatListPanel] Processing broadcast notification', { 
-      request_id, sender_type, isMinimized, isDialogOpen, isFromAgency 
+      request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isMyEngagement, isServiceRequest 
     });
+    
+    // Update local state immediately to show unread UI
+    if (isMyEngagement) {
+      setMyEngagements(prev => {
+        const updated = prev.map(e => 
+          e.id === request_id 
+            ? { ...e, lastMessage: message, lastMessageTime: new Date().toISOString(), read: false }
+            : e
+        );
+        myEngagementsRef.current = updated;
+        return updated;
+      });
+    }
+    if (isServiceRequest) {
+      setServiceRequests(prev => {
+        const updated = prev.map(r => 
+          r.id === request_id 
+            ? { ...r, lastMessage: message, lastMessageTime: new Date().toISOString(), read: false }
+            : r
+        );
+        serviceRequestsRef.current = updated;
+        return updated;
+      });
+    }
     
     if (isMinimized) {
       incrementMinimizedChatUnread(request_id);
       playMessageSound();
     } else if (!isDialogOpen) {
-      // Mark request as unread in database
-      await supabase
+      // Mark request as unread in database (async, non-blocking)
+      supabase
         .from('service_requests')
         .update({ read: false })
         .eq('id', request_id);
@@ -339,8 +368,13 @@ export function ChatListPanel() {
       incrementUnreadMessageCount(request_id);
       
       // For user engagements (receiving from agency)
-      if (isFromAgency) {
+      if (isMyEngagement && isFromAgency) {
         incrementUserUnreadEngagementsCount();
+      }
+      
+      // For agency service requests (receiving from client)
+      if (isServiceRequest && isFromClient) {
+        incrementAgencyUnreadServiceRequestsCount();
       }
       
       toast({
@@ -351,12 +385,15 @@ export function ChatListPanel() {
       playMessageSound();
     }
     
-    // Refresh the lists to get latest data
-    fetchMyEngagements();
-    if (agencyPayoutIdRef.current || isAdmin) {
-      fetchServiceRequests();
+    // Refresh the lists to get latest data (non-blocking)
+    if (!isMyEngagement && !isServiceRequest) {
+      // Only refresh if we didn't already have this in our local state
+      fetchMyEngagements();
+      if (agencyPayoutIdRef.current || isAdmin) {
+        fetchServiceRequests();
+      }
     }
-  }, [user?.id, incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, isAdmin]);
+  }, [user?.id, incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount, incrementAgencyUnreadServiceRequestsCount, isAdmin]);
 
   // Real-time subscription for read status changes and new messages
   // This syncs read status across all views (ChatListPanel, MyRequestsView, AgencyRequestsView)
