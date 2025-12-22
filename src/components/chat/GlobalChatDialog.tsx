@@ -45,6 +45,7 @@ export function GlobalChatDialog() {
   const { addMinimizedChat } = useMinimizedChats();
   
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
@@ -93,6 +94,7 @@ export function GlobalChatDialog() {
     const fetchMessages = async () => {
       if (!globalChatRequest || !globalChatOpen) return;
       
+      setLoadingMessages(true);
       const { data } = await supabase
         .from('service_messages')
         .select('*')
@@ -100,6 +102,7 @@ export function GlobalChatDialog() {
         .order('created_at', { ascending: true });
       
       setMessages((data as ServiceMessage[]) || []);
+      setLoadingMessages(false);
     };
     fetchMessages();
   }, [globalChatRequest?.id, globalChatOpen]);
@@ -403,6 +406,17 @@ export function GlobalChatDialog() {
           <div className="px-4 pt-0">
             {/* Messages */}
             <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
+              {loadingMessages ? (
+                <div className="flex flex-col items-center justify-center h-full py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                  <p className="text-muted-foreground text-sm mb-4">Loading messages...</p>
+                  <img 
+                    src="https://corporate.stankeviciusgroup.com/assets/zc/zcchat.png" 
+                    alt="Chat" 
+                    className="max-w-[200px] opacity-70"
+                  />
+                </div>
+              ) : (
               <div className="space-y-2 p-3">
                 {messages.map((msg) => {
                   const quote = parseQuote(msg.message);
@@ -476,6 +490,7 @@ export function GlobalChatDialog() {
                 )}
                 <div ref={messagesEndRef} />
               </div>
+              )}
             </ScrollArea>
 
             {/* Reply Input */}
