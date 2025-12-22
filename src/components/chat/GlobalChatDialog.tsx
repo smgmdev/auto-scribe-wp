@@ -355,6 +355,30 @@ export function GlobalChatDialog() {
     }
   };
 
+  const handleCancelOrderRequest = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      setMessages(prev => prev.filter(m => m.id !== messageId));
+      
+      toast({
+        title: "Order Request Cancelled",
+        description: "The order request has been removed.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to cancel order',
+        description: error.message,
+      });
+    }
+  };
+
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: { originalId: string | null; quoteText: string; replyText: string } | null) => {
     const orderData = parseOrderRequest(msg.message);
 
@@ -384,6 +408,17 @@ export function GlobalChatDialog() {
               >
                 <ShoppingCart className="h-4 w-4" />
                 Buy Now
+              </Button>
+            )}
+            {isOwnMessage && globalChatType === 'agency-request' && !hasOrder && (
+              <Button
+                onClick={() => handleCancelOrderRequest(msg.id)}
+                variant="outline"
+                className="w-full gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
+                size="sm"
+              >
+                <X className="h-4 w-4" />
+                Cancel Order Request
               </Button>
             )}
             {hasOrder && (
