@@ -386,18 +386,8 @@ export function ChatListPanel() {
           const requestId = newMsg.request_id;
           const senderId = newMsg.sender_id;
           
-          // Skip if this is our own message - check sender_id directly against current user id AND agency payout id
-          const currentUserId = user?.id;
-          const currentAgencyPayoutId = agencyPayoutIdRef.current;
-          const isOwnMessage = senderId === currentUserId || senderId === currentAgencyPayoutId;
-          
-          console.log('[ChatListPanel] postgres_changes INSERT:', { 
-            senderId, 
-            currentUserId, 
-            currentAgencyPayoutId, 
-            isOwnMessage,
-            requestId 
-          });
+          // Skip if this is our own message - check sender_id directly
+          const isOwnMessage = senderId === user?.id || senderId === agencyPayoutIdRef.current;
           
           // Check if this belongs to our engagements or service requests
           const isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
@@ -423,10 +413,7 @@ export function ChatListPanel() {
           }
           
           // Skip notification/sound for own messages
-          if (isOwnMessage) {
-            console.log('[ChatListPanel] Own message - updated UI but skipping notification');
-            return;
-          }
+          if (isOwnMessage) return;
           
           // Check if chat is open or minimized
           const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
