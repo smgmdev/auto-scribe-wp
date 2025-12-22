@@ -451,8 +451,8 @@ export function GlobalChatDialog() {
   return (
     <>
       <Dialog open={globalChatOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none" hideCloseButton>
-          <DialogHeader className={`px-4 pt-2 ${isCancelled ? 'bg-red-500/20' : ''}`}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none gap-0" hideCloseButton>
+          <DialogHeader className={`px-4 py-2 ${isCancelled ? 'bg-red-500/20' : ''}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {globalChatRequest.media_site?.favicon && (
