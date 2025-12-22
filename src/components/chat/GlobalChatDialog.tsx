@@ -852,17 +852,25 @@ export function GlobalChatDialog() {
 
     setSending(true);
     try {
-      // Always delete any existing order before sending a new one (max 1 order at a time)
-      if (existingOrderMessage) {
+      // Always delete ALL existing order messages for this request from the database (max 1 order at a time)
+      // This handles cases where the chat was closed/reopened and local state is stale
+      const { data: existingOrders } = await supabase
+        .from('service_messages')
+        .select('id')
+        .eq('request_id', globalChatRequest.id)
+        .like('message', '%[ORDER_REQUEST]%');
+
+      if (existingOrders && existingOrders.length > 0) {
+        const orderIds = existingOrders.map(o => o.id);
         const { error: deleteError } = await supabase
           .from('service_messages')
           .delete()
-          .eq('id', existingOrderMessage.id);
+          .in('id', orderIds);
 
         if (deleteError) throw deleteError;
 
         // Remove from local state
-        setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
+        setMessages(prev => prev.filter(m => !orderIds.includes(m.id)));
       }
 
       const orderData = {
