@@ -620,25 +620,52 @@ export function GlobalChatDialog() {
               />
             </div>
           ) : (
-            <div
-              onClick={handleAttachmentClick}
-              className={`flex items-center gap-3 rounded-lg border p-3 transition-colors cursor-pointer ${
-                isOwnMessage 
-                  ? 'bg-primary-foreground/10 border-primary-foreground/30 hover:bg-primary-foreground/20' 
-                  : 'bg-background border-border hover:bg-muted'
-              }`}
-            >
-              <div className={`h-10 w-10 rounded flex items-center justify-center shrink-0 ${
-                isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
-              }`}>
-                <FileText className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{attachmentData.file_name}</p>
-                <p className="text-xs opacity-70">{(attachmentData.file_size / 1024).toFixed(1)} KB</p>
-              </div>
-              <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
-            </div>
+            (() => {
+              const ext = attachmentData.file_name.split('.').pop()?.toLowerCase() || '';
+              const isPdf = ext === 'pdf';
+              const isWord = ext === 'doc' || ext === 'docx';
+              
+              return (
+                <div
+                  onClick={handleAttachmentClick}
+                  className={`flex items-center gap-3 rounded-lg border p-3 transition-colors cursor-pointer ${
+                    isOwnMessage 
+                      ? 'bg-primary-foreground/10 border-primary-foreground/30 hover:bg-primary-foreground/20' 
+                      : 'bg-background border-border hover:bg-muted'
+                  }`}
+                >
+                  <div className={`h-10 w-10 rounded flex items-center justify-center shrink-0 relative ${
+                    isPdf 
+                      ? 'bg-red-100 dark:bg-red-900/30' 
+                      : isWord 
+                        ? 'bg-blue-100 dark:bg-blue-900/30' 
+                        : isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
+                  }`}>
+                    <FileText className={`h-5 w-5 ${
+                      isPdf 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : isWord 
+                          ? 'text-blue-600 dark:text-blue-400' 
+                          : ''
+                    }`} />
+                    <span className={`absolute -bottom-0.5 -right-0.5 text-[8px] font-bold uppercase px-1 rounded ${
+                      isPdf 
+                        ? 'bg-red-600 text-white' 
+                        : isWord 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-muted-foreground text-white'
+                    }`}>
+                      {ext}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{attachmentData.file_name}</p>
+                    <p className="text-xs opacity-70">{(attachmentData.file_size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
+                </div>
+              );
+            })()
           )}
           <p className="text-xs opacity-50 mt-2">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
