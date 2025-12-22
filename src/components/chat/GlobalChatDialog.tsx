@@ -782,8 +782,11 @@ export function GlobalChatDialog() {
         <DialogContent 
           className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none gap-0 shadow-2xl shadow-black/25" 
           hideCloseButton 
-          overlayClassName="bg-transparent"
-          style={{ transform: `translate(calc(-50% + ${dragPosition.x}px), calc(-50% + ${dragPosition.y}px))` }}
+          overlayClassName="bg-transparent pointer-events-none"
+          style={{ 
+            left: `calc(50% + ${dragPosition.x}px)`,
+            top: `calc(50% + ${dragPosition.y}px)`
+          }}
         >
           <DialogHeader 
             className={`px-4 py-2 ${isCancelled ? 'bg-red-500/20' : ''} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
