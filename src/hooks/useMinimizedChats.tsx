@@ -40,23 +40,50 @@ export function useMinimizedChats() {
         return;
       }
 
+      if (!data || data.length === 0) {
+        loadedUserIdRef.current = user.id;
+        return;
+      }
+
+      // Fetch read status for all minimized chat requests
+      const requestIds = data.map(chat => chat.request_id);
+      const { data: requestsData } = await supabase
+        .from('service_requests')
+        .select('id, read')
+        .in('id', requestIds);
+
+      // Create a map of request_id -> read status
+      const readStatusMap: Record<string, boolean> = {};
+      requestsData?.forEach(req => {
+        readStatusMap[req.id] = req.read;
+      });
+
       // Mark as loaded for this user BEFORE modifying state
       loadedUserIdRef.current = user.id;
       
       // Get current state directly from store to check existing chats
       const currentChats = useAppStore.getState().minimizedChats;
+      const setUnreadMessageCount = useAppStore.getState().setUnreadMessageCount;
       
       // Only add chats that aren't already in the store
       data?.forEach(chat => {
         const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
+          // If request is unread, set unread count to 1 to trigger the UI
+          const isUnread = readStatusMap[chat.request_id] === false;
+          
           addToStore({
             id: chat.request_id,
             title: chat.title,
             favicon: chat.media_site_favicon,
             type: chat.chat_type as 'agency-request' | 'my-request',
-            unreadCount: 0,
+            unreadCount: isUnread ? 1 : 0,
           });
+          
+          // Also set the unreadMessageCounts for consistency
+          if (isUnread) {
+            setUnreadMessageCount(chat.request_id, 1);
+          }
         }
       });
     };
