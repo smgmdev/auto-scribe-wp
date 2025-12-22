@@ -97,7 +97,7 @@ export function AgencyRequestsView() {
     if (!error && data) {
       setRequests(data as unknown as ServiceRequest[]);
 
-      // Fetch messages first to determine unread status based on last message sender
+      // Fetch messages for all requests
       let messagesByRequest: Record<string, ServiceMessage[]> = {};
       if (data.length > 0) {
         const requestIds = data.map(r => r.id);
@@ -116,12 +116,9 @@ export function AgencyRequestsView() {
         setMessages(messagesByRequest);
       }
 
-      // Count unread: request not read OR last message is from client (count each request as 1)
-      const unreadCount = data.filter(r => {
-        const reqMessages = messagesByRequest[r.id] || [];
-        const lastMsg = reqMessages[reqMessages.length - 1];
-        return !r.read || (lastMsg && lastMsg.sender_type === 'client');
-      }).length;
+      // Count unread: simply count requests where read = false
+      // (new requests start as unread, and we mark as unread when new client message arrives)
+      const unreadCount = data.filter(r => !r.read).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
     }
     setLoading(false);
@@ -176,9 +173,13 @@ export function AgencyRequestsView() {
           schema: 'public',
           table: 'service_messages'
         },
-        (payload) => {
+        async (payload) => {
           const newMsg = payload.new as ServiceMessage;
           if (newMsg.sender_type === 'agency') return;
+          
+          // Check if this message belongs to one of our requests
+          const requestExists = requests.some(r => r.id === newMsg.request_id);
+          if (!requestExists) return;
           
           const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
           const isDialogOpen = globalChatOpen && globalChatRequest?.id === newMsg.request_id;
@@ -189,7 +190,24 @@ export function AgencyRequestsView() {
             incrementUnreadMessageCount(newMsg.request_id);
           }
           
+          // Mark the request as unread when a new client message arrives
           if (!isDialogOpen) {
+            await supabase
+              .from('service_requests')
+              .update({ read: false })
+              .eq('id', newMsg.request_id);
+            
+            // Update local state
+            setRequests(prev => {
+              const updated = prev.map(r => 
+                r.id === newMsg.request_id ? { ...r, read: false } : r
+              );
+              // Recalculate unread count
+              const newUnreadCount = updated.filter(r => !r.read).length;
+              setAgencyUnreadServiceRequestsCount(newUnreadCount);
+              return updated;
+            });
+            
             toast({
               title: 'New Message!',
               description: 'You received a message from a client.',
@@ -288,9 +306,8 @@ export function AgencyRequestsView() {
           {requests.map((request) => {
             const unreadCount = unreadMessageCounts[request.id] || 0;
             const requestMessages = messages[request.id] || [];
-            const lastMessage = requestMessages[requestMessages.length - 1];
-            // Unread if: request not read OR last message is from client
-            const hasUnread = !request.read || (lastMessage && lastMessage.sender_type === 'client');
+            // Unread is based solely on request.read - we mark as unread when new client message arrives
+            const hasUnread = !request.read;
             
             return (
               <Card 
