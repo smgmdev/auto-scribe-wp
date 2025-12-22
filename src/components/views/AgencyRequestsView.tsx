@@ -31,10 +31,6 @@ interface ServiceRequest {
     link: string;
     category: string;
     subcategory: string | null;
-    publishing_time: string;
-    max_words: number | null;
-    max_images: number | null;
-    google_index: string;
     about: string | null;
   } | null;
   order: {
@@ -186,7 +182,7 @@ export function AgencyRequestsView() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, publishing_time, max_words, max_images, google_index, about),
+        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about),
         order:orders(id, status, delivery_status)
       `)
       .eq('agency_payout_id', agencyData.id)
@@ -572,7 +568,7 @@ export function AgencyRequestsView() {
                             rel="noopener noreferrer"
                             className="text-xs text-primary hover:underline flex items-center gap-1"
                           >
-                            {selectedRequest?.media_site?.link}
+                            Visit site
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         </div>
@@ -596,26 +592,6 @@ export function AgencyRequestsView() {
                           <span className="text-muted-foreground">Price:</span>
                           <p className="font-medium">${selectedRequest?.media_site?.price}</p>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">Publishing Time:</span>
-                          <p className="font-medium">{selectedRequest?.media_site?.publishing_time}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Google Index:</span>
-                          <p className="font-medium capitalize">{selectedRequest?.media_site?.google_index}</p>
-                        </div>
-                        {selectedRequest?.media_site?.max_words && (
-                          <div>
-                            <span className="text-muted-foreground">Max Words:</span>
-                            <p className="font-medium">{selectedRequest?.media_site?.max_words}</p>
-                          </div>
-                        )}
-                        {selectedRequest?.media_site?.max_images && (
-                          <div>
-                            <span className="text-muted-foreground">Max Images:</span>
-                            <p className="font-medium">{selectedRequest?.media_site?.max_images}</p>
-                          </div>
-                        )}
                       </div>
                       {selectedRequest?.media_site?.about && (
                         <div className="text-sm">
