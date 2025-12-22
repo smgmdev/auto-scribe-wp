@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -62,12 +62,13 @@ export function MyRequestsView() {
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
-
-  // Update total unread count when unreadMessageCounts changes
+  
+  // Refs to avoid stale closures in subscriptions
+  const requestsRef = useRef<ServiceRequest[]>([]);
   useEffect(() => {
-    const totalUnread = Object.values(unreadMessageCounts).reduce((sum, count) => sum + count, 0);
-    setUserUnreadEngagementsCount(totalUnread);
-  }, [unreadMessageCounts, setUserUnreadEngagementsCount]);
+    requestsRef.current = requests;
+  }, [requests]);
+
 
   const fetchRequests = async () => {
     if (!user) return;
@@ -93,6 +94,10 @@ export function MyRequestsView() {
 
       setRequests((requestsData as unknown as ServiceRequest[]) || []);
 
+      // Count unread: simply count requests where read = false
+      const unreadCount = (requestsData || []).filter(r => !r.read).length;
+      setUserUnreadEngagementsCount(unreadCount);
+
       // Fetch messages for all requests
       if (requestsData && requestsData.length > 0) {
         const requestIds = requestsData.map(r => r.id);
@@ -110,10 +115,6 @@ export function MyRequestsView() {
           messagesByRequest[msg.request_id].push(msg as ServiceMessage);
         });
         setMessages(messagesByRequest);
-
-        // Count unread: simply count requests where read = false
-        const unreadCount = requestsData.filter(r => !r.read).length;
-        setUserUnreadEngagementsCount(unreadCount);
       }
     } catch (error: any) {
       toast({
@@ -150,8 +151,8 @@ export function MyRequestsView() {
           // Only process if from agency (not from the user themselves)
           if (newMsg.sender_type === 'client') return;
           
-          // Check if this message belongs to one of our requests
-          const requestExists = requests.some(r => r.id === newMsg.request_id);
+          // Check if this message belongs to one of our requests (use ref for fresh value)
+          const requestExists = requestsRef.current.some(r => r.id === newMsg.request_id);
           if (!requestExists) return;
           
           const isMinimized = minimizedChats.some(c => c.id === newMsg.request_id);
