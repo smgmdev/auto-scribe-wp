@@ -1,6 +1,7 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 type AppRole = 'admin' | 'user';
 
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [credits, setCredits] = useState(0);
   const [pinRequired, setPinRequired] = useState(false);
   const [pinVerified, setPinVerified] = useState(false);
+  const hasShownWelcomeRef = useRef(false);
 
   const fetchUserData = async (userId: string): Promise<void> => {
     // Fetch role
@@ -152,7 +154,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setCredits(0);
           setPinRequired(false);
           setPinVerified(false);
+          hasShownWelcomeRef.current = false;
           return;
+        }
+        
+        // Show welcome back notification on sign in (only once per session)
+        if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current) {
+          hasShownWelcomeRef.current = true;
+          toast({
+            title: "Welcome back! 👋",
+            description: "You have successfully signed in.",
+            duration: 2000,
+          });
         }
         
         setSession(newSession);
