@@ -68,6 +68,18 @@ export function ChatListPanel() {
   const [isAgency, setIsAgency] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Refs to avoid stale closures in subscriptions
+  const myEngagementsRef = useRef<ChatItem[]>([]);
+  const serviceRequestsRef = useRef<ChatItem[]>([]);
+  
+  useEffect(() => {
+    myEngagementsRef.current = myEngagements;
+  }, [myEngagements]);
+  
+  useEffect(() => {
+    serviceRequestsRef.current = serviceRequests;
+  }, [serviceRequests]);
+
   // Fetch my engagements (user's submitted requests)
   const fetchMyEngagements = async () => {
     if (!user) return;
@@ -321,7 +333,7 @@ export function ChatListPanel() {
     }
   }, [incrementMinimizedChatUnread, incrementUnreadMessageCount, incrementUserUnreadEngagementsCount]);
 
-  // Real-time subscription for read status changes
+  // Real-time subscription for read status changes and new messages
   useEffect(() => {
     if (!user) return;
 
@@ -351,10 +363,82 @@ export function ChatListPanel() {
       )
       .subscribe();
 
+    // Listen for new messages to trigger notifications and refetch
+    const messagesChannel = supabase
+      .channel('chat-panel-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        async (payload) => {
+          const newMsg = payload.new as any;
+          
+          // Check if this message is relevant to the user (use refs for fresh values)
+          const isMyEngagement = myEngagementsRef.current.some(e => e.id === newMsg.request_id);
+          const isServiceRequest = serviceRequestsRef.current.some(r => r.id === newMsg.request_id);
+          
+          if (!isMyEngagement && !isServiceRequest) return;
+          
+          const isMinimized = minimizedChatsRef.current.some(c => c.id === newMsg.request_id);
+          const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === newMsg.request_id;
+          
+          // For user's engagements: notify when agency sends message
+          if (isMyEngagement && newMsg.sender_type !== 'client') {
+            if (isMinimized) {
+              incrementMinimizedChatUnread(newMsg.request_id);
+              playMessageSound();
+            } else if (!isDialogOpen) {
+              // Mark request as unread
+              await supabase
+                .from('service_requests')
+                .update({ read: false })
+                .eq('id', newMsg.request_id);
+              
+              toast({
+                title: 'New Message',
+                description: 'You received a reply from the agency.',
+              });
+              playMessageSound();
+            }
+          }
+          
+          // For agency's service requests: notify when client sends message
+          if (isServiceRequest && newMsg.sender_type === 'client') {
+            if (isMinimized) {
+              incrementMinimizedChatUnread(newMsg.request_id);
+              playMessageSound();
+            } else if (!isDialogOpen) {
+              // Mark request as unread
+              await supabase
+                .from('service_requests')
+                .update({ read: false })
+                .eq('id', newMsg.request_id);
+              
+              toast({
+                title: 'New Client Message',
+                description: 'You received a message from a client.',
+              });
+              playMessageSound();
+            }
+          }
+          
+          // Refresh the lists to get latest data
+          fetchMyEngagements();
+          if (agencyPayoutIdRef.current || isAdmin) {
+            fetchServiceRequests();
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(readStatusChannel);
+      supabase.removeChannel(messagesChannel);
     };
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   // Broadcast notification subscription - works regardless of RLS
   useEffect(() => {
