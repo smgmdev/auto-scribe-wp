@@ -113,15 +113,12 @@ export function ChatListPanel() {
 
       setMyEngagements(data.map(item => {
         const lastMsg = lastMessages[item.id];
-        // For client's engagements: unread if last message is from agency/admin
-        const hasUnreadFromAgency = lastMsg && lastMsg.sender_type !== 'client';
         return {
           ...item,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount: 0, // Will use store directly for real-time updates
-          // Mark as unread if last message is from counterparty
-          read: hasUnreadFromAgency ? false : item.read,
+          // Use the read field from DB - it gets set to false when new messages arrive
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[]);
@@ -181,15 +178,12 @@ export function ChatListPanel() {
 
       setServiceRequests(data.map(item => {
         const lastMsg = lastMessages[item.id];
-        // For agency's requests: unread if last message is from client
-        const hasUnreadFromClient = lastMsg && lastMsg.sender_type === 'client';
         return {
           ...item,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount: 0, // Will use store directly for real-time updates
-          // Mark as unread if last message is from counterparty OR request itself is unread
-          read: hasUnreadFromClient ? false : item.read,
+          // Use the read field from DB - it gets set to false when new messages arrive
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[]);
@@ -253,18 +247,16 @@ export function ChatListPanel() {
     }
   }, [agencyPayoutId, isAdmin]);
 
-  // Sync unread counts from the store
+  // Sync unread counts - count requests where read = false
   useEffect(() => {
-    // Calculate total unread for my engagements
-    const engagementIds = myEngagements.map(e => e.id);
-    const engagementUnread = engagementIds.reduce((sum, id) => sum + (unreadMessageCounts[id] || 0), 0);
+    // Calculate total unread for my engagements (count of unread requests)
+    const engagementUnread = myEngagements.filter(e => !e.read).length;
     setUserUnreadEngagementsCount(engagementUnread);
 
-    // Calculate total unread for service requests
-    const requestIds = serviceRequests.map(r => r.id);
-    const requestsUnread = requestIds.reduce((sum, id) => sum + (unreadMessageCounts[id] || 0), 0);
+    // Calculate total unread for service requests (count of unread requests)
+    const requestsUnread = serviceRequests.filter(r => !r.read).length;
     setAgencyUnreadServiceRequestsCount(requestsUnread);
-  }, [myEngagements, serviceRequests, unreadMessageCounts]);
+  }, [myEngagements, serviceRequests]);
 
   // Use refs to avoid re-subscribing when these values change
   const minimizedChatsRef = useRef(minimizedChats);
@@ -370,8 +362,28 @@ export function ChatListPanel() {
     };
   }, [user?.id, agencyPayoutId, handleBroadcastNotification]);
 
-  const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
+  const handleOpenChat = async (item: ChatItem, type: 'my-request' | 'agency-request') => {
     clearUnreadMessageCount(item.id);
+    
+    // Mark as read in database if not already read
+    if (!item.read) {
+      await supabase
+        .from('service_requests')
+        .update({ read: true })
+        .eq('id', item.id);
+      
+      // Update local state
+      if (type === 'my-request') {
+        setMyEngagements(prev => prev.map(e => 
+          e.id === item.id ? { ...e, read: true } : e
+        ));
+      } else {
+        setServiceRequests(prev => prev.map(r => 
+          r.id === item.id ? { ...r, read: true } : r
+        ));
+      }
+    }
+    
     openGlobalChat(item as unknown as GlobalChatRequest, type);
   };
 
@@ -390,11 +402,9 @@ export function ChatListPanel() {
     }
   };
 
-  // Calculate total unread from store counts + unread items based on last message
-  const unreadEngagementsFromMessages = myEngagements.filter(item => !item.read).length;
-  const unreadServiceRequestsFromMessages = serviceRequests.filter(item => !item.read).length;
-  const totalUnread = Math.max(userUnreadEngagementsCount, unreadEngagementsFromMessages) + 
-                      Math.max(agencyUnreadServiceRequestsCount, unreadServiceRequestsFromMessages);
+  // Calculate total unread - simply count unread requests
+  const totalUnread = myEngagements.filter(e => !e.read).length + 
+                      serviceRequests.filter(r => !r.read).length;
 
   // Filter and sort items based on search query and last message time
   const filterAndSortItems = (items: ChatItem[]) => {
