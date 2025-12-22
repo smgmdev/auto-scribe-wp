@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -1622,14 +1622,13 @@ export function GlobalChatDialog() {
             >
               <X className="h-4 w-4" />
             </Button>
-            <Button
-              onClick={() => imagePreview && window.open(imagePreview.url, '_blank')}
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-12 z-10 h-8 w-8 bg-black/50 hover:bg-black text-white rounded-full"
+            <a
+              href={imagePreview?.url}
+              download={imagePreview?.name}
+              className="absolute top-2 right-12 z-10 h-8 w-8 bg-black/50 hover:bg-black text-white rounded-full flex items-center justify-center"
             >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
+              <Download className="h-4 w-4" />
+            </a>
             {imagePreview && (
               <img 
                 src={imagePreview.url} 
