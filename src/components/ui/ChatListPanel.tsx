@@ -741,6 +741,20 @@ export function ChatListPanel() {
     if (message) {
       let cleanMessage = message;
       
+      // Check for special message types first
+      if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
+        return 'Order Request';
+      }
+      if (cleanMessage.startsWith('[PAYMENT_')) {
+        return 'Payment Update';
+      }
+      if (cleanMessage.startsWith('[DELIVERY_')) {
+        return 'Delivery Update';
+      }
+      if (cleanMessage.startsWith('[STATUS_')) {
+        return 'Status Update';
+      }
+      
       // Remove reply quotes - formats like "> quoted text\nactual message" or ":quoted actual"
       // Handle multiline reply format ("> quote\nmessage")
       if (cleanMessage.includes('\n')) {
@@ -755,6 +769,10 @@ export function ChatListPanel() {
         .replace(/^>\s*\[[\w-]+\].*?\n?/g, '') // Remove "> [uuid...]" patterns
         .replace(/^:\s*\S+\s+/g, '') // Remove ":quote " prefix patterns
         .replace(/\[[\w-]{36,}\]/g, '') // Remove standalone UUIDs in brackets
+        .replace(/\[ORDER_REQUEST\]\{.*\}/g, 'Order Request') // Handle inline order request
+        .replace(/\[PAYMENT_\w+\]\{.*\}/g, 'Payment Update') // Handle inline payment
+        .replace(/\[DELIVERY_\w+\]\{.*\}/g, 'Delivery Update') // Handle inline delivery
+        .replace(/\[STATUS_\w+\]\{.*\}/g, 'Status Update') // Handle inline status
         .trim();
       
       if (cleanMessage) {
