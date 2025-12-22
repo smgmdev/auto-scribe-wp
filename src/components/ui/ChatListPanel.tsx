@@ -712,6 +712,35 @@ export function ChatListPanel() {
     }
   };
 
+  // Format preview message - make it user-friendly by cleaning up technical content
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string): string => {
+    if (message) {
+      // Clean up the message if it looks like a technical/reply format
+      const cleanMessage = message
+        .replace(/^>\s*\[[\w-]+\].*?\n?/g, '') // Remove reply references like "> [uuid...]"
+        .replace(/\[[\w-]{36,}\]/g, '') // Remove standalone UUIDs in brackets
+        .trim();
+      
+      if (cleanMessage) {
+        return cleanMessage.length > 50 ? cleanMessage.slice(0, 50) + '...' : cleanMessage;
+      }
+    }
+    
+    // Clean description - remove UUIDs and technical data
+    const cleanDesc = description
+      .replace(/[\w-]{36,}/g, '') // Remove UUIDs
+      .replace(/^>\s*/gm, '') // Remove quote markers
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+    
+    if (cleanDesc && cleanDesc.length > 5) {
+      return cleanDesc.length > 50 ? cleanDesc.slice(0, 50) + '...' : cleanDesc;
+    }
+    
+    // Fallback to a friendly default
+    return title || 'New engagement';
+  };
+
   // Calculate total unread - simply count unread requests
   const totalUnread = myEngagements.filter(e => !e.read).length + 
                       serviceRequests.filter(r => !r.read).length;
@@ -791,7 +820,7 @@ export function ChatListPanel() {
               </span>
             </div>
             <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-              {item.lastMessage || item.description.slice(0, 50)}
+              {formatPreviewMessage(item.lastMessage, item.description, item.title)}
             </p>
           </div>
 
