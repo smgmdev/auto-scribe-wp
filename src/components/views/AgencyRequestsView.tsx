@@ -496,7 +496,7 @@ export function AgencyRequestsView() {
                 <CardContent className="pt-0 pb-3 px-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                      Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                     </span>
                     {messages[request.id]?.length > 0 && (
                       <span className="text-xs text-muted-foreground">
