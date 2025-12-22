@@ -887,7 +887,7 @@ export function ChatListPanel() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-2 right-4 z-50 w-72">
+    <div className="fixed bottom-0 right-4 z-50 w-72">
       {/* Collapsed state - Messaging button */}
       {!isExpanded && (
         <Button

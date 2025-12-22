@@ -41,7 +41,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
   };
   
   return (
-    <div className="fixed bottom-2 right-[312px] z-50 flex flex-row-reverse gap-2">
+    <div className="fixed bottom-0 right-[312px] z-50 flex flex-row-reverse gap-2">
       {minimizedChats.map((chat) => {
         // Check both sources for unread messages
         const minimizedUnread = chat.unreadCount ?? 0;
