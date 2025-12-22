@@ -130,14 +130,12 @@ export function ChatListPanel() {
           ...item,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: 0, // Will use store directly for real-time updates
-          // Use the read field from DB - it gets set to false when new messages arrive
+          unreadCount: 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
       
       setMyEngagements(engagements);
-      // Update ref immediately to avoid race conditions
       myEngagementsRef.current = engagements;
     }
   };
@@ -199,8 +197,7 @@ export function ChatListPanel() {
           ...item,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: 0, // Will use store directly for real-time updates
-          // Use the read field from DB - it gets set to false when new messages arrive
+          unreadCount: 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
