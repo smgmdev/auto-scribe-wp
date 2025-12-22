@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
+import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
 
 interface ServiceMessage {
@@ -39,9 +40,9 @@ export function GlobalChatDialog() {
     globalChatType,
     closeGlobalChat,
     updateGlobalChatRequest,
-    addMinimizedChat,
     clearUnreadMessageCount
   } = useAppStore();
+  const { addMinimizedChat } = useMinimizedChats();
   
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');

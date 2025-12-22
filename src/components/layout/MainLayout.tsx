@@ -1,10 +1,11 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { MinimizedChats } from '@/components/ui/MinimizedChats';
 import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore';
+import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 
@@ -18,11 +19,8 @@ export function MainLayout({
   onOpenMinimizedChat
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { 
-    removeMinimizedChat, 
-    openGlobalChat,
-    clearUnreadMessageCount
-  } = useAppStore();
+  const { openGlobalChat, clearUnreadMessageCount } = useAppStore();
+  const { removeMinimizedChat } = useMinimizedChats();
 
   const handleOpenChat = async (chat: MinimizedChat) => {
     removeMinimizedChat(chat.id);
