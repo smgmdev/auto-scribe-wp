@@ -814,6 +814,16 @@ export function ChatListPanel() {
     }
   };
 
+  // Check if a message is a reply (contains quote markers)
+  const isReplyMessage = (message: string | undefined): boolean => {
+    if (!message) return false;
+    // Check for reply patterns: starts with ">", contains "\n>" (multiline quote), or starts with ":"
+    return message.startsWith('>') || 
+           message.includes('\n>') || 
+           /^:\s*\S+\s+/.test(message) ||
+           message.includes('[') && message.includes(']') && message.includes('\n');
+  };
+
   // Message preview component to avoid IIFE rendering issues
   const MessagePreview = ({ 
     message, 
@@ -838,16 +848,6 @@ export function ChatListPanel() {
         <span className="truncate">{preview.text}</span>
       </p>
     );
-  };
-
-  // Check if a message is a reply (contains quote markers)
-  const isReplyMessage = (message: string | undefined): boolean => {
-    if (!message) return false;
-    // Check for reply patterns: starts with ">", contains "\n>" (multiline quote), or starts with ":"
-    return message.startsWith('>') || 
-           message.includes('\n>') || 
-           /^:\s*\S+\s+/.test(message) ||
-           message.includes('[') && message.includes(']') && message.includes('\n');
   };
 
   // Calculate total unread - simply count unread requests
