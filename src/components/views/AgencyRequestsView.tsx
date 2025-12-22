@@ -96,9 +96,9 @@ export function AgencyRequestsView() {
 
     if (!error && data) {
       setRequests(data as unknown as ServiceRequest[]);
-      const unreadCount = data.filter(r => !r.read).length;
-      setAgencyUnreadServiceRequestsCount(unreadCount);
 
+      // Fetch messages first to determine unread status based on last message sender
+      let messagesByRequest: Record<string, ServiceMessage[]> = {};
       if (data.length > 0) {
         const requestIds = data.map(r => r.id);
         const { data: messagesData } = await supabase
@@ -107,7 +107,6 @@ export function AgencyRequestsView() {
           .in('request_id', requestIds)
           .order('created_at', { ascending: true });
 
-        const messagesByRequest: Record<string, ServiceMessage[]> = {};
         messagesData?.forEach(msg => {
           if (!messagesByRequest[msg.request_id]) {
             messagesByRequest[msg.request_id] = [];
@@ -116,6 +115,14 @@ export function AgencyRequestsView() {
         });
         setMessages(messagesByRequest);
       }
+
+      // Count unread: request not read OR last message is from client (count each request as 1)
+      const unreadCount = data.filter(r => {
+        const reqMessages = messagesByRequest[r.id] || [];
+        const lastMsg = reqMessages[reqMessages.length - 1];
+        return !r.read || (lastMsg && lastMsg.sender_type === 'client');
+      }).length;
+      setAgencyUnreadServiceRequestsCount(unreadCount);
     }
     setLoading(false);
   };
