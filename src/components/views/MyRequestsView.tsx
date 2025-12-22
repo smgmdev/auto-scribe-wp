@@ -262,6 +262,8 @@ export function MyRequestsView() {
         return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30"><CreditCard className="h-3 w-3 mr-1" />Paid</Badge>;
       case 'completed':
         return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-muted text-muted-foreground border-muted-foreground/30"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
       default:
         return null;
     }
