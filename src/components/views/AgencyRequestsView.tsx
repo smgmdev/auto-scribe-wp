@@ -479,8 +479,8 @@ export function AgencyRequestsView() {
                     {unreadCount}
                   </Badge>
                 )}
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
+                <CardHeader className="py-3 px-4">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {request.media_site?.favicon && (
                         <img 
@@ -489,13 +489,11 @@ export function AgencyRequestsView() {
                           className="h-8 w-8 rounded object-cover"
                         />
                       )}
-                      <div>
-                        <CardTitle className="text-lg">{request.title}</CardTitle>
-                      </div>
+                      <CardTitle className="text-base">{request.title}</CardTitle>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0 pb-3 px-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
                       {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
