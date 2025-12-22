@@ -6,6 +6,10 @@ let audioInstance: HTMLAudioElement | null = null;
 
 export const playMessageSound = () => {
   try {
+    // Log the call stack to see where the sound is being triggered from
+    console.log('[playMessageSound] Sound triggered');
+    console.trace('[playMessageSound] Call stack');
+    
     if (!audioInstance) {
       audioInstance = new Audio('/sounds/new-message.mp3');
       audioInstance.volume = 0.5;
