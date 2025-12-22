@@ -314,6 +314,120 @@ export function GlobalChatDialog() {
     }
   };
 
+  const parseOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; request_id: string } | null => {
+    const match = message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const handleBuyOrder = async (orderData: { media_site_id: string; request_id: string }) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({ title: "Please log in", variant: "destructive" });
+        return;
+      }
+
+      const response = await supabase.functions.invoke('create-escrow-payment', {
+        body: {
+          media_site_id: orderData.media_site_id,
+          service_request_id: orderData.request_id
+        }
+      });
+
+      if (response.error) throw response.error;
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error: any) {
+      console.error('Error creating checkout:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Payment Error',
+        description: error.message || 'Failed to initiate payment'
+      });
+    }
+  };
+
+  const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: { originalId: string | null; quoteText: string; replyText: string } | null) => {
+    const orderData = parseOrderRequest(msg.message);
+
+    if (orderData) {
+      return (
+        <div className="w-full">
+          <p className="text-xs font-medium mb-2 opacity-70">Order Request</p>
+          <div className={`rounded-lg border p-4 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-background border-border'}`}>
+            <div className="flex items-center gap-3 mb-3">
+              {orderData.media_site_favicon && (
+                <img src={orderData.media_site_favicon} alt="" className="w-10 h-10 rounded" />
+              )}
+              <div className="flex-1">
+                <h4 className={`font-semibold ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  {orderData.media_site_name}
+                </h4>
+                <p className={`text-lg font-bold ${isOwnMessage ? 'text-primary-foreground' : 'text-primary'}`}>
+                  ${orderData.price.toLocaleString()}
+                </p>
+              </div>
+            </div>
+            {!isOwnMessage && globalChatType === 'my-request' && !hasOrder && (
+              <Button
+                onClick={() => handleBuyOrder(orderData)}
+                className="w-full gap-2"
+                size="sm"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Buy Now
+              </Button>
+            )}
+            {hasOrder && (
+              <div className="text-center text-sm text-muted-foreground py-2">
+                Order already placed
+              </div>
+            )}
+          </div>
+          <p className="text-xs opacity-50 mt-2">
+            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+          </p>
+        </div>
+      );
+    }
+
+    if (quote) {
+      return (
+        <div className="text-sm">
+          <div 
+            onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
+            className={`border-l-2 pl-2 mb-2 text-xs italic opacity-70 ${
+              isOwnMessage ? 'border-primary-foreground/50' : 'border-foreground/30'
+            } ${quote.originalId ? 'cursor-pointer hover:opacity-100' : ''}`}
+          >
+            {quote.quoteText}
+          </div>
+          <p className="whitespace-pre-wrap">{quote.replyText}</p>
+          <p className="text-xs opacity-50 mt-1">
+            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+        <p className="text-xs opacity-50 mt-1">
+          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+        </p>
+      </>
+    );
+  };
+
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
     try {
@@ -444,6 +558,91 @@ export function GlobalChatDialog() {
     }
   };
 
+  const sendOrderMessage = async () => {
+    if (!user || !globalChatRequest || !senderId || !globalChatRequest.media_site) return;
+
+    setSending(true);
+    try {
+      const orderData = {
+        type: 'order_request',
+        media_site_id: globalChatRequest.media_site.id,
+        media_site_name: globalChatRequest.media_site.name,
+        media_site_favicon: globalChatRequest.media_site.favicon,
+        price: globalChatRequest.media_site.price,
+        request_id: globalChatRequest.id
+      };
+
+      const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderData)}[/ORDER_REQUEST]`;
+
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: orderMessage
+      });
+
+      if (error) throw error;
+
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: orderMessage,
+        created_at: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, newMsg]);
+
+      // Notify the client
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id')
+        .eq('id', globalChatRequest.id)
+        .single();
+
+      if (requestData?.user_id) {
+        await supabase
+          .from('service_requests')
+          .update({ read: false })
+          .eq('id', globalChatRequest.id);
+
+        const notifyChannel = supabase.channel(`notify-${requestData.user_id}`);
+        notifyChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await notifyChannel.send({
+              type: 'broadcast',
+              event: 'new-message',
+              payload: {
+                request_id: globalChatRequest.id,
+                sender_type: senderType,
+                sender_id: senderId,
+                message: 'Sent you an order request',
+                title: globalChatRequest.title,
+                media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                media_site_favicon: globalChatRequest.media_site?.favicon
+              }
+            });
+            setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+          }
+        });
+      }
+
+      toast({
+        title: "Order Sent",
+        description: "Order request has been sent to the client.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to send order',
+        description: error.message,
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleMinimize = () => {
     if (globalChatRequest) {
       addMinimizedChat({
@@ -500,10 +699,14 @@ export function GlobalChatDialog() {
                       className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       disabled={hasOrder || isCancelled}
                       onClick={() => {
-                        toast({
-                          title: globalChatType === 'agency-request' ? "Send Order" : "Order Now",
-                          description: "Order functionality coming soon",
-                        });
+                        if (globalChatType === 'agency-request') {
+                          sendOrderMessage();
+                        } else {
+                          toast({
+                            title: "Order Now",
+                            description: "Order functionality coming soon",
+                          });
+                        }
                       }}
                     >
                       {globalChatType === 'agency-request' ? 'Send Order' : 'Order Now'}
@@ -671,24 +874,7 @@ export function GlobalChatDialog() {
                         <p className="text-xs font-medium mb-1 opacity-70 pr-5">
                           {isOwnMessage ? 'You' : msg.sender_type === 'admin' ? 'Admin' : counterpartyLabel}
                         </p>
-                        {quote ? (
-                          <div className="text-sm">
-                            <div 
-                              onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
-                              className={`border-l-2 pl-2 mb-2 text-xs italic opacity-70 ${
-                                isOwnMessage ? 'border-primary-foreground/50' : 'border-foreground/30'
-                              } ${quote.originalId ? 'cursor-pointer hover:opacity-100' : ''}`}
-                            >
-                              {quote.quoteText}
-                            </div>
-                            <p className="whitespace-pre-wrap">{quote.replyText}</p>
-                          </div>
-                        ) : (
-                          <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        )}
-                        <p className="text-xs opacity-50 mt-1">
-                          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
-                        </p>
+                        {renderMessageContent(msg, isOwnMessage, quote)}
                       </div>
                     </div>
                   );

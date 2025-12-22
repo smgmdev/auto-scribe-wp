@@ -42,7 +42,7 @@ export function MainLayout({
           read,
           created_at,
           updated_at,
-          media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
+          media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
           order:orders(id, status, delivery_status)
         `)
         .eq('id', chat.id)
