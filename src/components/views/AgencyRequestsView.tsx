@@ -573,7 +573,7 @@ export function AgencyRequestsView() {
       {/* Request Detail Dialog */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none">
-          <DialogHeader className="px-4 pt-3 pb-0">
+          <DialogHeader className="px-4 pt-3 pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {selectedRequest?.media_site?.favicon && (
@@ -623,12 +623,10 @@ export function AgencyRequestsView() {
                           <span className="text-muted-foreground">Category:</span>
                           <p className="font-medium capitalize">{selectedRequest?.media_site?.category}</p>
                         </div>
-                        {selectedRequest?.media_site?.subcategory && (
-                          <div>
-                            <span className="text-muted-foreground">Subcategory:</span>
-                            <p className="font-medium capitalize">{selectedRequest?.media_site?.subcategory}</p>
-                          </div>
-                        )}
+                        <div>
+                          <span className="text-muted-foreground">Subcategory:</span>
+                          <p className="font-medium capitalize">{selectedRequest?.media_site?.subcategory || 'N/A'}</p>
+                        </div>
                         <div>
                           <span className="text-muted-foreground">Format:</span>
                           <p className="font-medium capitalize">{selectedRequest?.media_site?.publication_format}</p>
@@ -655,7 +653,7 @@ export function AgencyRequestsView() {
                       {selectedRequest?.media_site?.about && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">About:</span>
-                          <p className="mt-1">{selectedRequest?.media_site?.about}</p>
+                          <p className="font-medium mt-1 text-xs">{selectedRequest.media_site.about}</p>
                         </div>
                       )}
                     </div>
@@ -683,7 +681,7 @@ export function AgencyRequestsView() {
             </div>
           </DialogHeader>
           {selectedRequest && (
-            <div className="px-4">
+            <div className="px-4 pt-0">
               {/* Messages */}
               <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
                 <div className="space-y-2 p-3">
