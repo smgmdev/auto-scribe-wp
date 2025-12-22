@@ -60,6 +60,8 @@ export function GlobalChatDialog() {
   const [loadingAgency, setLoadingAgency] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [sendOrderDialogOpen, setSendOrderDialogOpen] = useState(false);
+  const [specialTerms, setSpecialTerms] = useState('');
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -314,7 +316,7 @@ export function GlobalChatDialog() {
     }
   };
 
-  const parseOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; request_id: string } | null => {
+  const parseOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; request_id: string; special_terms?: string } | null => {
     const match = message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
     if (match) {
       try {
@@ -400,6 +402,12 @@ export function GlobalChatDialog() {
                 </p>
               </div>
             </div>
+            {orderData.special_terms && (
+              <div className={`text-sm mb-3 p-2 rounded ${isOwnMessage ? 'bg-primary-foreground/5 border border-primary-foreground/20' : 'bg-muted'}`}>
+                <p className="text-xs font-medium mb-1 opacity-70">Special Terms:</p>
+                <p className="whitespace-pre-wrap">{orderData.special_terms}</p>
+              </div>
+            )}
             {!isOwnMessage && globalChatType === 'my-request' && !hasOrder && (
               <Button
                 onClick={() => handleBuyOrder(orderData)}
@@ -603,7 +611,8 @@ export function GlobalChatDialog() {
         media_site_name: globalChatRequest.media_site.name,
         media_site_favicon: globalChatRequest.media_site.favicon,
         price: globalChatRequest.media_site.price,
-        request_id: globalChatRequest.id
+        request_id: globalChatRequest.id,
+        special_terms: specialTerms.trim() || undefined
       };
 
       const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderData)}[/ORDER_REQUEST]`;
@@ -662,6 +671,9 @@ export function GlobalChatDialog() {
         });
       }
 
+      setSendOrderDialogOpen(false);
+      setSpecialTerms('');
+      
       toast({
         title: "Order Sent",
         description: "Order request has been sent to the client.",
@@ -734,7 +746,7 @@ export function GlobalChatDialog() {
                       disabled={hasOrder || isCancelled}
                       onClick={() => {
                         if (globalChatType === 'agency-request') {
-                          sendOrderMessage();
+                          setSendOrderDialogOpen(true);
                         } else {
                           toast({
                             title: "Order Now",
@@ -1040,6 +1052,68 @@ export function GlobalChatDialog() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Order Confirmation Dialog */}
+      <Dialog open={sendOrderDialogOpen} onOpenChange={(open) => {
+        setSendOrderDialogOpen(open);
+        if (!open) setSpecialTerms('');
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Send Order Request
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              {globalChatRequest?.media_site?.favicon && (
+                <img src={globalChatRequest.media_site.favicon} alt="" className="w-10 h-10 rounded" />
+              )}
+              <div>
+                <h4 className="font-semibold">{globalChatRequest?.media_site?.name}</h4>
+                <p className="text-lg font-bold text-primary">
+                  ${globalChatRequest?.media_site?.price?.toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Special Terms (optional)</label>
+              <textarea
+                value={specialTerms}
+                onChange={(e) => setSpecialTerms(e.target.value)}
+                placeholder="Add any special terms agreed with the client..."
+                className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground text-right">{specialTerms.length}/500</p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              This will send an order request to the client. They can then proceed to checkout and complete the payment.
+            </p>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSendOrderDialogOpen(false);
+                setSpecialTerms('');
+              }}
+              className="flex-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={sendOrderMessage}
+              disabled={sending}
+              className="flex-1 bg-black text-white hover:bg-white hover:text-black dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white transition-all duration-200"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Send Order
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
