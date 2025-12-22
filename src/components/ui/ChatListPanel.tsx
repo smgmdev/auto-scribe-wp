@@ -42,13 +42,15 @@ interface ChatItem {
 }
 
 export function ChatListPanel() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { 
     openGlobalChat, 
     clearUnreadMessageCount, 
     unreadMessageCounts,
     userUnreadEngagementsCount,
+    setUserUnreadEngagementsCount,
     agencyUnreadServiceRequestsCount,
+    setAgencyUnreadServiceRequestsCount,
     incrementUnreadMessageCount,
     incrementUserUnreadEngagementsCount,
     globalChatOpen,
@@ -115,11 +117,13 @@ export function ChatListPanel() {
     }
   };
 
-  // Fetch service requests (agency's received requests)
+  // Fetch service requests (agency's received requests, or all for admins)
   const fetchServiceRequests = async () => {
-    if (!user || !agencyPayoutId) return;
+    if (!user) return;
+    // For non-admin users, require agencyPayoutId
+    if (!isAdmin && !agencyPayoutId) return;
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('service_requests')
       .select(`
         id,
@@ -132,8 +136,14 @@ export function ChatListPanel() {
         media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, about, agency),
         order:orders(id, status, delivery_status)
       `)
-      .eq('agency_payout_id', agencyPayoutId)
       .order('updated_at', { ascending: false });
+
+    // Filter by agency for non-admins
+    if (!isAdmin && agencyPayoutId) {
+      query = query.eq('agency_payout_id', agencyPayoutId);
+    }
+
+    const { data, error } = await query;
 
     if (!error && data) {
       // Fetch last messages for each request
@@ -165,9 +175,17 @@ export function ChatListPanel() {
   };
 
   // Check if user is an approved agency (must have onboarding_complete = true)
+  // Admins are treated as having access to agency features
   useEffect(() => {
     const checkAgency = async () => {
       if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // Admins can see both tabs
+      if (isAdmin) {
+        setIsAgency(true);
         setLoading(false);
         return;
       }
@@ -190,9 +208,9 @@ export function ChatListPanel() {
     };
 
     checkAgency();
-  }, [user]);
+  }, [user, isAdmin]);
 
-  // Fetch data when expanded or when user/agency changes
+  // Fetch data and sync notification counts on mount
   useEffect(() => {
     if (user) {
       fetchMyEngagements();
@@ -200,10 +218,24 @@ export function ChatListPanel() {
   }, [user]);
 
   useEffect(() => {
-    if (agencyPayoutId) {
+    // Fetch for agencies or admins
+    if (agencyPayoutId || isAdmin) {
       fetchServiceRequests();
     }
-  }, [agencyPayoutId]);
+  }, [agencyPayoutId, isAdmin]);
+
+  // Sync unread counts from the store
+  useEffect(() => {
+    // Calculate total unread for my engagements
+    const engagementIds = myEngagements.map(e => e.id);
+    const engagementUnread = engagementIds.reduce((sum, id) => sum + (unreadMessageCounts[id] || 0), 0);
+    setUserUnreadEngagementsCount(engagementUnread);
+
+    // Calculate total unread for service requests
+    const requestIds = serviceRequests.map(r => r.id);
+    const requestsUnread = requestIds.reduce((sum, id) => sum + (unreadMessageCounts[id] || 0), 0);
+    setAgencyUnreadServiceRequestsCount(requestsUnread);
+  }, [myEngagements, serviceRequests, unreadMessageCounts]);
 
   // Real-time subscription for new messages
   useEffect(() => {
