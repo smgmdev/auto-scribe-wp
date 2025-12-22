@@ -729,11 +729,13 @@ export function ChatListPanel() {
 
     return items.map((item) => {
       const unreadCount = unreadMessageCounts[item.id] || 0;
+      const hasUnread = !item.read || unreadCount > 0;
+      
       return (
         <div
           key={item.id}
           className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
-            !item.read || unreadCount > 0 ? 'bg-blue-500/10 border-l-2 border-l-blue-500' : ''
+            hasUnread ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-l-blue-500' : ''
           }`}
           onClick={() => handleOpenChat(item, type)}
         >
@@ -750,30 +752,30 @@ export function ChatListPanel() {
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
-            {/* Notification dot for unread */}
-            {(!item.read || unreadCount > 0) && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+            {/* Notification dot for unread with pulse animation */}
+            {hasUnread && (
+              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card animate-pulse" />
             )}
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <span className={`font-medium text-sm truncate ${unreadCount > 0 ? 'text-foreground' : 'text-foreground/80'}`}>
+              <span className={`font-medium text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
                 {item.media_site?.name || item.title}
               </span>
               <span className="text-xs text-muted-foreground shrink-0">
                 {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
               </span>
             </div>
-            <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+            <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
               {item.lastMessage || item.description.slice(0, 50)}
             </p>
           </div>
 
           {/* Unread badge */}
           {unreadCount > 0 && (
-            <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-primary text-primary-foreground text-xs px-1.5 shrink-0">
+            <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5 shrink-0 animate-pulse">
               {unreadCount}
             </Badge>
           )}

@@ -1,5 +1,5 @@
 import { MessageSquare, X, Maximize2 } from 'lucide-react';
-import { MinimizedChat } from '@/stores/appStore';
+import { MinimizedChat, useAppStore } from '@/stores/appStore';
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,8 +10,15 @@ interface MinimizedChatsProps {
 
 export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
   const { minimizedChats, removeMinimizedChat } = useMinimizedChats();
+  const { clearMinimizedChatUnread } = useAppStore();
 
   if (minimizedChats.length === 0) return null;
+
+  const handleOpenChat = (chat: MinimizedChat) => {
+    // Clear unread count when opening the chat
+    clearMinimizedChatUnread(chat.id);
+    onOpenChat(chat);
+  };
 
   return (
     <div className="fixed bottom-2 right-[312px] z-50 flex flex-row-reverse gap-2">
@@ -21,15 +28,17 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
         return (
           <div
             key={chat.id}
-            className={`relative flex items-center gap-2 bg-card border border-border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-shadow cursor-pointer group ${
-              hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+            className={`relative flex items-center gap-2 border rounded-lg shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
+              hasUnread 
+                ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-500 border-l-4' 
+                : 'bg-card border-border'
             }`}
-            onClick={() => onOpenChat(chat)}
+            onClick={() => handleOpenChat(chat)}
           >
             {/* Unread badge */}
             {hasUnread && (
               <Badge 
-                className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
+                className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5 animate-pulse"
               >
                 {chat.unreadCount}
               </Badge>
@@ -42,12 +51,14 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
-              {/* Blue dot indicator */}
+              {/* Blue dot indicator with pulse */}
               {hasUnread && (
-                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card animate-pulse" />
               )}
             </div>
-            <span className="text-sm font-medium whitespace-nowrap">{chat.title}</span>
+            <span className={`text-sm whitespace-nowrap ${hasUnread ? 'font-semibold' : 'font-medium'}`}>
+              {chat.title}
+            </span>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="ghost"
@@ -55,7 +66,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
                 className="h-6 w-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onOpenChat(chat);
+                  handleOpenChat(chat);
                 }}
               >
                 <Maximize2 className="h-3 w-3" />
