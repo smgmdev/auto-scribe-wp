@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,6 +67,8 @@ export function GlobalChatDialog() {
   const [specialTerms, setSpecialTerms] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [imagePreview, setImagePreview] = useState<{ url: string; name: string } | null>(null);
+  const [fileWebView, setFileWebView] = useState<{ url: string; name: string } | null>(null);
   
   // Drag state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -570,16 +573,25 @@ export function GlobalChatDialog() {
     }
 
     if (attachmentData) {
+      const handleAttachmentClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (attachmentData.is_image) {
+          setImagePreview({ url: attachmentData.file_url, name: attachmentData.file_name });
+        } else {
+          setFileWebView({ url: attachmentData.file_url, name: attachmentData.file_name });
+        }
+      };
+
       return (
         <div className="text-sm">
           {attachmentData.textContent && (
             <p className="whitespace-pre-wrap mb-2">{attachmentData.textContent}</p>
           )}
-          <a
-            href={attachmentData.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`block rounded-lg border p-3 transition-colors ${
+          <div
+            onClick={handleAttachmentClick}
+            className={`block rounded-lg border p-3 transition-colors cursor-pointer ${
               isOwnMessage 
                 ? 'bg-primary-foreground/10 border-primary-foreground/30 hover:bg-primary-foreground/20' 
                 : 'bg-background border-border hover:bg-muted'
@@ -613,7 +625,7 @@ export function GlobalChatDialog() {
                 <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
               </div>
             )}
-          </a>
+          </div>
           <p className="text-xs opacity-50 mt-2">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
           </p>
@@ -1597,6 +1609,45 @@ export function GlobalChatDialog() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!imagePreview} onOpenChange={(open) => !open && setImagePreview(null)}>
+        <DialogContent className="max-w-[90vw] w-auto max-h-[90vh] p-0 gap-0 [&>button]:hidden overflow-hidden z-[300]" overlayClassName="bg-black/80 z-[299]">
+          <div className="relative">
+            <Button
+              onClick={() => setImagePreview(null)}
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 h-8 w-8 bg-black/50 hover:bg-black text-white rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={() => imagePreview && window.open(imagePreview.url, '_blank')}
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-12 z-10 h-8 w-8 bg-black/50 hover:bg-black text-white rounded-full"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            {imagePreview && (
+              <img 
+                src={imagePreview.url} 
+                alt={imagePreview.name}
+                className="max-w-[90vw] max-h-[90vh] object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Web View Dialog */}
+      <WebViewDialog
+        open={!!fileWebView}
+        onOpenChange={(open) => !open && setFileWebView(null)}
+        url={fileWebView?.url || ''}
+        title={fileWebView?.name || 'File Preview'}
+      />
     </>
   );
 }
