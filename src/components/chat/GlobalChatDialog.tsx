@@ -518,24 +518,24 @@ export function GlobalChatDialog() {
     if (orderData) {
       return (
         <div className="w-full">
-          <p className="text-xs font-medium mb-2 opacity-70">Order Request</p>
-          <div className={`rounded-lg border p-4 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-background border-border'}`}>
-            <div className="flex items-center gap-3 mb-3">
+          <p className="text-xs font-medium mb-1 opacity-70">Order Request</p>
+          <div className={`rounded-md border p-2.5 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-background border-border'}`}>
+            <div className="flex items-center gap-2 mb-2">
               {orderData.media_site_favicon && (
-                <img src={orderData.media_site_favicon} alt="" className="w-10 h-10 rounded" />
+                <img src={orderData.media_site_favicon} alt="" className="w-8 h-8 rounded" />
               )}
-              <div className="flex-1">
-                <h4 className={`font-semibold ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+              <div className="flex-1 min-w-0">
+                <h4 className={`font-semibold text-sm truncate ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {orderData.media_site_name}
                 </h4>
-                <p className={`text-lg font-bold ${isOwnMessage ? 'text-primary-foreground' : 'text-primary'}`}>
+                <p className={`text-sm font-bold ${isOwnMessage ? 'text-primary-foreground' : 'text-primary'}`}>
                   ${orderData.price.toLocaleString()}
                 </p>
               </div>
             </div>
             {orderData.special_terms && (
-              <div className={`text-sm mb-3 p-2 rounded ${isOwnMessage ? 'bg-primary-foreground/5 border border-primary-foreground/20' : 'bg-muted'}`}>
-                <p className="text-xs font-medium mb-1 opacity-70">Special Terms:</p>
+              <div className={`text-xs mb-2 p-1.5 rounded ${isOwnMessage ? 'bg-primary-foreground/5 border border-primary-foreground/20' : 'bg-muted'}`}>
+                <p className="text-xs font-medium mb-0.5 opacity-70">Special Terms:</p>
                 <p className="whitespace-pre-wrap">{orderData.special_terms}</p>
               </div>
             )}
@@ -545,7 +545,7 @@ export function GlobalChatDialog() {
                 className="w-full gap-2"
                 size="sm"
               >
-                <ShoppingCart className="h-4 w-4" />
+                <ShoppingCart className="h-3.5 w-3.5" />
                 Buy Now
               </Button>
             )}
@@ -555,17 +555,17 @@ export function GlobalChatDialog() {
                 className="w-full gap-2 bg-black text-white hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
                 size="sm"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
                 Cancel Order Request
               </Button>
             )}
             {hasOrder && (
-              <div className="text-center text-sm text-muted-foreground py-2">
+              <div className="text-center text-xs text-muted-foreground py-1">
                 Order already placed
               </div>
             )}
           </div>
-          <p className="text-xs opacity-50 mt-2">
+          <p className="text-xs opacity-50 mt-1">
             {format(new Date(msg.created_at), 'MMM d, h:mm a')}
           </p>
         </div>
