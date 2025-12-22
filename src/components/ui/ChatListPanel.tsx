@@ -91,29 +91,40 @@ export function ChatListPanel() {
     if (!error && data) {
       // Fetch last messages for each request
       const requestIds = data.map(r => r.id);
-      let lastMessages: Record<string, { message: string; created_at: string }> = {};
+      let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
       
       if (requestIds.length > 0) {
         const { data: messagesData } = await supabase
           .from('service_messages')
-          .select('request_id, message, created_at')
+          .select('request_id, message, created_at, sender_type')
           .in('request_id', requestIds)
           .order('created_at', { ascending: false });
         
         messagesData?.forEach(msg => {
           if (!lastMessages[msg.request_id]) {
-            lastMessages[msg.request_id] = { message: msg.message, created_at: msg.created_at };
+            lastMessages[msg.request_id] = { 
+              message: msg.message, 
+              created_at: msg.created_at,
+              sender_type: msg.sender_type
+            };
           }
         });
       }
 
-      setMyEngagements(data.map(item => ({
-        ...item,
-        lastMessage: lastMessages[item.id]?.message,
-        lastMessageTime: lastMessages[item.id]?.created_at,
-        unreadCount: 0, // Will use store directly for real-time updates
-        favicon: item.media_site?.favicon,
-      })) as ChatItem[]);
+      setMyEngagements(data.map(item => {
+        const lastMsg = lastMessages[item.id];
+        // For client's engagements: unread if last message is from agency/admin
+        const hasUnreadFromAgency = lastMsg && lastMsg.sender_type !== 'client';
+        return {
+          ...item,
+          lastMessage: lastMsg?.message,
+          lastMessageTime: lastMsg?.created_at,
+          unreadCount: 0, // Will use store directly for real-time updates
+          // Mark as unread if last message is from counterparty
+          read: hasUnreadFromAgency ? false : item.read,
+          favicon: item.media_site?.favicon,
+        };
+      }) as ChatItem[]);
     }
   };
 
@@ -148,29 +159,40 @@ export function ChatListPanel() {
     if (!error && data) {
       // Fetch last messages for each request
       const requestIds = data.map(r => r.id);
-      let lastMessages: Record<string, { message: string; created_at: string }> = {};
+      let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
       
       if (requestIds.length > 0) {
         const { data: messagesData } = await supabase
           .from('service_messages')
-          .select('request_id, message, created_at')
+          .select('request_id, message, created_at, sender_type')
           .in('request_id', requestIds)
           .order('created_at', { ascending: false });
         
         messagesData?.forEach(msg => {
           if (!lastMessages[msg.request_id]) {
-            lastMessages[msg.request_id] = { message: msg.message, created_at: msg.created_at };
+            lastMessages[msg.request_id] = { 
+              message: msg.message, 
+              created_at: msg.created_at,
+              sender_type: msg.sender_type
+            };
           }
         });
       }
 
-      setServiceRequests(data.map(item => ({
-        ...item,
-        lastMessage: lastMessages[item.id]?.message,
-        lastMessageTime: lastMessages[item.id]?.created_at,
-        unreadCount: 0, // Will use store directly for real-time updates
-        favicon: item.media_site?.favicon,
-      })) as ChatItem[]);
+      setServiceRequests(data.map(item => {
+        const lastMsg = lastMessages[item.id];
+        // For agency's requests: unread if last message is from client
+        const hasUnreadFromClient = lastMsg && lastMsg.sender_type === 'client';
+        return {
+          ...item,
+          lastMessage: lastMsg?.message,
+          lastMessageTime: lastMsg?.created_at,
+          unreadCount: 0, // Will use store directly for real-time updates
+          // Mark as unread if last message is from counterparty OR request itself is unread
+          read: hasUnreadFromClient ? false : item.read,
+          favicon: item.media_site?.favicon,
+        };
+      }) as ChatItem[]);
     }
   };
 
