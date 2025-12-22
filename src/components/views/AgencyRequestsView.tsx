@@ -205,7 +205,7 @@ export function AgencyRequestsView() {
 
   const getStatusBadge = (status: string, isRead: boolean) => {
     if (status === 'pending_review' && !isRead) {
-      return <Badge className="bg-blue-500 text-white border-blue-500">New Request</Badge>;
+      return <Badge className="bg-green-500 text-white border-green-500">New Request</Badge>;
     }
     switch (status) {
       case 'pending_review':
