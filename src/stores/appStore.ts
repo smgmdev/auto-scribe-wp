@@ -112,6 +112,7 @@ interface AppState {
   addMinimizedChat: (chat: MinimizedChat) => void;
   removeMinimizedChat: (id: string) => void;
   incrementMinimizedChatUnread: (id: string) => void;
+  clearMinimizedChatUnread: (id: string) => void;
   clearMinimizedChats: () => void;
   
   // Pending chat to open (when clicking minimized chat)
@@ -229,6 +230,11 @@ export const useAppStore = create<AppState>()((set) => ({
   incrementMinimizedChatUnread: (id) => set((state) => ({
     minimizedChats: state.minimizedChats.map(c => 
       c.id === id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
+    )
+  })),
+  clearMinimizedChatUnread: (id) => set((state) => ({
+    minimizedChats: state.minimizedChats.map(c => 
+      c.id === id ? { ...c, unreadCount: 0 } : c
     )
   })),
   clearMinimizedChats: () => set({ minimizedChats: [] }),
