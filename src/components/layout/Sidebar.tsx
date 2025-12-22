@@ -441,7 +441,7 @@ export function Sidebar({
           <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-6">
             <button 
               onClick={() => navigate('/')} 
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-3 hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 transition-colors"
             >
               <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
               <div>
