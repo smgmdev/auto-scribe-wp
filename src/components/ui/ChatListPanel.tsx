@@ -715,9 +715,21 @@ export function ChatListPanel() {
   // Format preview message - make it user-friendly by cleaning up technical content
   const formatPreviewMessage = (message: string | undefined, description: string, title: string): string => {
     if (message) {
-      // Clean up the message if it looks like a technical/reply format
-      const cleanMessage = message
-        .replace(/^>\s*\[[\w-]+\].*?\n?/g, '') // Remove reply references like "> [uuid...]"
+      let cleanMessage = message;
+      
+      // Remove reply quotes - formats like "> quoted text\nactual message" or ":quoted actual"
+      // Handle multiline reply format ("> quote\nmessage")
+      if (cleanMessage.includes('\n')) {
+        const lines = cleanMessage.split('\n');
+        // Filter out lines starting with ">" (quotes)
+        const nonQuoteLines = lines.filter(line => !line.trim().startsWith('>'));
+        cleanMessage = nonQuoteLines.join(' ').trim();
+      }
+      
+      // Handle inline reply format (":quote message" or "> [uuid] message")
+      cleanMessage = cleanMessage
+        .replace(/^>\s*\[[\w-]+\].*?\n?/g, '') // Remove "> [uuid...]" patterns
+        .replace(/^:\s*\S+\s+/g, '') // Remove ":quote " prefix patterns
         .replace(/\[[\w-]{36,}\]/g, '') // Remove standalone UUIDs in brackets
         .trim();
       
