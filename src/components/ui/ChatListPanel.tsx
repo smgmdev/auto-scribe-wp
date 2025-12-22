@@ -210,6 +210,13 @@ export function ChatListPanel() {
     checkAgency();
   }, [user, isAdmin]);
 
+  // Set default tab to service-requests for agencies
+  useEffect(() => {
+    if (isAgency) {
+      setActiveTab('service-requests');
+    }
+  }, [isAgency]);
+
   // Fetch data and sync notification counts on mount
   useEffect(() => {
     if (user) {
