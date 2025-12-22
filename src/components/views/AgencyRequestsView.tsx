@@ -244,7 +244,8 @@ export function AgencyRequestsView() {
     }
     switch (status) {
       case 'pending_review':
-        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
+        // No badge for read pending_review requests
+        return null;
       case 'accepted':
         return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       case 'rejected':
@@ -256,7 +257,7 @@ export function AgencyRequestsView() {
       case 'completed':
         return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Completed</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return null;
     }
   };
 
