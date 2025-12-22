@@ -769,7 +769,21 @@ const Landing = () => {
                 <div className="h-6 w-64 bg-muted rounded animate-pulse mb-4" />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {[...Array(6)].map((_, j) => (
-                    <div key={j} className="h-20 rounded-xl bg-muted animate-pulse" />
+                    <div 
+                      key={j} 
+                      className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
+                      style={{ animationDelay: `${j * 100}ms` }}
+                    >
+                      {/* Favicon skeleton */}
+                      <div className="h-10 w-10 rounded-lg bg-muted animate-pulse flex-shrink-0" />
+                      {/* Content skeleton */}
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+                        <div className="h-3 w-1/2 bg-muted rounded animate-pulse" />
+                      </div>
+                      {/* Price skeleton */}
+                      <div className="h-5 w-16 bg-muted rounded animate-pulse flex-shrink-0" />
+                    </div>
                   ))}
                 </div>
               </div>
