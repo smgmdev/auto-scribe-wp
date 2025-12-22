@@ -51,6 +51,7 @@ export function ChatListPanel() {
     setUserUnreadEngagementsCount,
     agencyUnreadServiceRequestsCount,
     setAgencyUnreadServiceRequestsCount,
+    incrementAgencyUnreadServiceRequestsCount,
     incrementUnreadMessageCount,
     incrementUserUnreadEngagementsCount,
     globalChatOpen,
@@ -534,6 +535,11 @@ export function ChatListPanel() {
             // For user engagements receiving from agency, increment sidebar count
             if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
               incrementUserUnreadEngagementsCount();
+            }
+            
+            // For agency service requests receiving from client, increment sidebar count
+            if (isServiceRequest && senderType === 'client') {
+              incrementAgencyUnreadServiceRequestsCount();
             }
             
             // Get request info for toast
