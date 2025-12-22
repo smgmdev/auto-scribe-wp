@@ -274,20 +274,28 @@ export function GlobalChatDialog() {
         if (recipientId) {
           console.log('[GlobalChatDialog] Broadcasting notification to:', recipientId);
           const notifyChannel = supabase.channel(`notify-${recipientId}`);
-          await notifyChannel.send({
-            type: 'broadcast',
-            event: 'new-message',
-            payload: {
-              request_id: globalChatRequest.id,
-              sender_type: senderType,
-              sender_id: senderId,
-              message: fullMessage,
-              title: globalChatRequest.title,
-              media_site_name: globalChatRequest.media_site?.name || 'Unknown',
-              media_site_favicon: globalChatRequest.media_site?.favicon
+          
+          // Must subscribe before sending broadcast
+          notifyChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await notifyChannel.send({
+                type: 'broadcast',
+                event: 'new-message',
+                payload: {
+                  request_id: globalChatRequest.id,
+                  sender_type: senderType,
+                  sender_id: senderId,
+                  message: fullMessage,
+                  title: globalChatRequest.title,
+                  media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                  media_site_favicon: globalChatRequest.media_site?.favicon
+                }
+              });
+              console.log('[GlobalChatDialog] Broadcast sent successfully');
+              // Clean up after a short delay
+              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
             }
           });
-          supabase.removeChannel(notifyChannel);
         }
       }
       
