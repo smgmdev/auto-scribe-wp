@@ -6,6 +6,7 @@ export interface MinimizedChat {
   title: string;
   favicon?: string | null;
   type: 'agency-request' | 'my-request';
+  unreadCount?: number;
 }
 
 interface AppState {
@@ -77,7 +78,14 @@ interface AppState {
   minimizedChats: MinimizedChat[];
   addMinimizedChat: (chat: MinimizedChat) => void;
   removeMinimizedChat: (id: string) => void;
+  incrementMinimizedChatUnread: (id: string) => void;
   clearMinimizedChats: () => void;
+  
+  // Unread message counts per request (for cards)
+  unreadMessageCounts: Record<string, number>;
+  setUnreadMessageCount: (requestId: string, count: number) => void;
+  incrementUnreadMessageCount: (requestId: string) => void;
+  clearUnreadMessageCount: (requestId: string) => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -159,11 +167,32 @@ export const useAppStore = create<AppState>()((set) => ({
     // Don't add if already minimized
     if (state.minimizedChats.some(c => c.id === chat.id)) return state;
     // Max 4 chats, remove oldest if needed
-    const newChats = [...state.minimizedChats, chat].slice(-4);
+    const newChats = [...state.minimizedChats, { ...chat, unreadCount: 0 }].slice(-4);
     return { minimizedChats: newChats };
   }),
   removeMinimizedChat: (id) => set((state) => ({
     minimizedChats: state.minimizedChats.filter(c => c.id !== id)
   })),
+  incrementMinimizedChatUnread: (id) => set((state) => ({
+    minimizedChats: state.minimizedChats.map(c => 
+      c.id === id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
+    )
+  })),
   clearMinimizedChats: () => set({ minimizedChats: [] }),
+  
+  // Unread message counts per request
+  unreadMessageCounts: {},
+  setUnreadMessageCount: (requestId, count) => set((state) => ({
+    unreadMessageCounts: { ...state.unreadMessageCounts, [requestId]: count }
+  })),
+  incrementUnreadMessageCount: (requestId) => set((state) => ({
+    unreadMessageCounts: { 
+      ...state.unreadMessageCounts, 
+      [requestId]: (state.unreadMessageCounts[requestId] || 0) + 1 
+    }
+  })),
+  clearUnreadMessageCount: (requestId) => set((state) => {
+    const { [requestId]: _, ...rest } = state.unreadMessageCounts;
+    return { unreadMessageCounts: rest };
+  }),
 }));

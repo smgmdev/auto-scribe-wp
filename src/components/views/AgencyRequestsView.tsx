@@ -44,7 +44,12 @@ interface ServiceMessage {
 
 export function AgencyRequestsView() {
   const { user } = useAuth();
-  const { setAgencyUnreadServiceRequestsCount, addMinimizedChat } = useAppStore();
+  const { 
+    setAgencyUnreadServiceRequestsCount, 
+    addMinimizedChat, 
+    unreadMessageCounts,
+    clearUnreadMessageCount 
+  } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
@@ -56,6 +61,12 @@ export function AgencyRequestsView() {
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedRequestRef = useRef<ServiceRequest | null>(null);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    selectedRequestRef.current = selectedRequest;
+  }, [selectedRequest]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -212,6 +223,22 @@ export function AgencyRequestsView() {
           if (newMsg.sender_type === 'agency') {
             return; // Skip - already added to local state when sent
           }
+          
+          // Get fresh state to check if chat is minimized or dialog is open
+          const { minimizedChats: currentMinimized, incrementMinimizedChatUnread: incMinimized, incrementUnreadMessageCount: incUnread } = useAppStore.getState();
+          const isMinimized = currentMinimized.some(c => c.id === newMsg.request_id);
+          
+          // Check if dialog is open for this request (using ref to avoid stale closure)
+          const isDialogOpen = selectedRequestRef.current?.id === newMsg.request_id;
+          
+          if (isMinimized) {
+            // Increment unread count on minimized chat
+            incMinimized(newMsg.request_id);
+          } else if (!isDialogOpen) {
+            // Increment unread count for card badge
+            incUnread(newMsg.request_id);
+          }
+          
           toast({
             title: 'New Message!',
             description: 'You received a message from a client.',
@@ -274,6 +301,8 @@ export function AgencyRequestsView() {
     if (!request.read) {
       markAsRead(request.id);
     }
+    // Clear unread message count when opening
+    clearUnreadMessageCount(request.id);
     setSelectedRequest(request);
   };
 
@@ -385,42 +414,53 @@ export function AgencyRequestsView() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => (
-            <Card 
-              key={request.id} 
-              className={`border-border/50 hover:border-border transition-colors cursor-pointer ${!request.read ? 'ring-1 ring-blue-500/50' : ''}`}
-              onClick={() => handleCardClick(request)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {request.media_site?.favicon && (
-                      <img 
-                        src={request.media_site.favicon} 
-                        alt="" 
-                        className="h-8 w-8 rounded object-cover"
-                      />
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{request.title}</CardTitle>
+          {requests.map((request) => {
+            const unreadCount = unreadMessageCounts[request.id] || 0;
+            return (
+              <Card 
+                key={request.id} 
+                className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${!request.read ? 'ring-1 ring-blue-500/50' : ''}`}
+                onClick={() => handleCardClick(request)}
+              >
+                {/* Unread message badge */}
+                {unreadCount > 0 && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      {request.media_site?.favicon && (
+                        <img 
+                          src={request.media_site.favicon} 
+                          alt="" 
+                          className="h-8 w-8 rounded object-cover"
+                        />
+                      )}
+                      <div>
+                        <CardTitle className="text-lg">{request.title}</CardTitle>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                  </span>
-                  {messages[request.id]?.length > 0 && (
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {messages[request.id].length} message{messages[request.id].length > 1 ? 's' : ''}
+                      {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                     </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    {messages[request.id]?.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {messages[request.id].length} message{messages[request.id].length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
