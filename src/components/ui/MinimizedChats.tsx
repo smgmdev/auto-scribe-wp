@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { MessageSquare, X, Maximize2 } from 'lucide-react';
 import { MinimizedChat, useAppStore } from '@/stores/appStore';
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
@@ -9,8 +10,21 @@ interface MinimizedChatsProps {
 }
 
 export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
-  const { minimizedChats, removeMinimizedChat } = useMinimizedChats();
-  const { clearMinimizedChatUnread } = useAppStore();
+  // Use the hook for loading/syncing with DB and removing chats
+  const { removeMinimizedChat } = useMinimizedChats();
+  
+  // Get minimizedChats directly from store for reactivity
+  const minimizedChats = useAppStore((state) => state.minimizedChats);
+  const clearMinimizedChatUnread = useAppStore((state) => state.clearMinimizedChatUnread);
+
+  // Debug log to verify state updates
+  useEffect(() => {
+    console.log('[MinimizedChats] State updated:', minimizedChats.map(c => ({ 
+      id: c.id, 
+      title: c.title, 
+      unreadCount: c.unreadCount 
+    })));
+  }, [minimizedChats]);
 
   if (minimizedChats.length === 0) return null;
 
@@ -20,6 +34,9 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
     onOpenChat(chat);
   };
 
+  const handleRemoveChat = (id: string) => {
+    removeMinimizedChat(id);
+  };
   return (
     <div className="fixed bottom-2 right-[312px] z-50 flex flex-row-reverse gap-2">
       {minimizedChats.map((chat) => {
@@ -77,7 +94,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
                 className="h-6 w-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeMinimizedChat(chat.id);
+                  handleRemoveChat(chat.id);
                 }}
               >
                 <X className="h-3 w-3" />
