@@ -1,7 +1,10 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore, MinimizedChat } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
+
+// Track if initial load has been done for each user
+const loadedForUser = new Map<string, boolean>();
 
 export function useMinimizedChats() {
   const { user } = useAuth();
@@ -11,11 +14,20 @@ export function useMinimizedChats() {
     removeMinimizedChat: removeFromStore,
     clearMinimizedChats 
   } = useAppStore();
+  
+  const hasLoadedRef = useRef(false);
 
-  // Load minimized chats from DB on mount/user change
+  // Load minimized chats from DB on mount/user change - only once per user session
   useEffect(() => {
     if (!user) {
       clearMinimizedChats();
+      hasLoadedRef.current = false;
+      loadedForUser.clear();
+      return;
+    }
+
+    // Only load once per user session
+    if (loadedForUser.get(user.id)) {
       return;
     }
 
@@ -31,17 +43,22 @@ export function useMinimizedChats() {
         return;
       }
 
-      // Clear existing and load from DB
-      clearMinimizedChats();
+      // Mark as loaded for this user
+      loadedForUser.set(user.id, true);
+      hasLoadedRef.current = true;
       
+      // Only add chats that aren't already in the store (preserve existing unread counts)
       data?.forEach(chat => {
-        addToStore({
-          id: chat.request_id,
-          title: chat.title,
-          favicon: chat.media_site_favicon,
-          type: chat.chat_type as 'agency-request' | 'my-request',
-          unreadCount: 0,
-        });
+        const existingChat = minimizedChats.find(c => c.id === chat.request_id);
+        if (!existingChat) {
+          addToStore({
+            id: chat.request_id,
+            title: chat.title,
+            favicon: chat.media_site_favicon,
+            type: chat.chat_type as 'agency-request' | 'my-request',
+            unreadCount: 0,
+          });
+        }
       });
     };
 
