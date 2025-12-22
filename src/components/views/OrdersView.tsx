@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -147,13 +147,21 @@ export function OrdersView() {
   };
 
   // Calculate order counts for tabs
+  // Active: paid orders waiting for delivery
   const activeOrders = useMemo(() => 
-    orders.filter(o => o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && o.status !== 'cancelled'), 
+    orders.filter(o => o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted'), 
     [orders]
   );
   
+  // Completed: delivered or accepted orders
+  const completedOrders = useMemo(() => 
+    orders.filter(o => o.delivery_status === 'delivered' || o.delivery_status === 'accepted'), 
+    [orders]
+  );
+  
+  // History: cancelled orders
   const historyOrders = useMemo(() => 
-    orders.filter(o => o.delivery_status === 'delivered' || o.delivery_status === 'accepted' || o.status === 'cancelled'), 
+    orders.filter(o => o.status === 'cancelled'), 
     [orders]
   );
 
@@ -233,10 +241,14 @@ export function OrdersView() {
         </div>
       ) : (
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-xl grid-cols-3">
             <TabsTrigger value="active" className="gap-2">
               <ShoppingBag className="h-4 w-4" />
               Active Orders ({activeOrders.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Completed ({completedOrders.length})
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
@@ -248,7 +260,7 @@ export function OrdersView() {
             {activeOrders.length === 0 ? (
               renderEmptyState(isAdmin 
                 ? 'No active orders at the moment'
-                : 'You have no active orders')
+                : 'You have no active orders waiting for delivery')
             ) : (
               <div className="space-y-2">
                 {activeOrders.map(renderOrderCard)}
@@ -256,11 +268,23 @@ export function OrdersView() {
             )}
           </TabsContent>
 
+          <TabsContent value="completed" className="mt-6">
+            {completedOrders.length === 0 ? (
+              renderEmptyState(isAdmin 
+                ? 'No completed orders yet'
+                : 'Your completed orders will appear here')
+            ) : (
+              <div className="space-y-2">
+                {completedOrders.map(renderOrderCard)}
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="history" className="mt-6">
             {historyOrders.length === 0 ? (
               renderEmptyState(isAdmin 
-                ? 'No completed or cancelled orders yet'
-                : 'Your completed and cancelled orders will appear here')
+                ? 'No cancelled orders'
+                : 'Cancelled orders will appear here')
             ) : (
               <div className="space-y-2">
                 {historyOrders.map(renderOrderCard)}
