@@ -3,9 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAppStore, MinimizedChat } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 
-// Track if initial load has been done for each user
-const loadedForUser = new Map<string, boolean>();
-
 export function useMinimizedChats() {
   const { user } = useAuth();
   const { 
@@ -15,19 +12,19 @@ export function useMinimizedChats() {
     clearMinimizedChats 
   } = useAppStore();
   
-  const hasLoadedRef = useRef(false);
+  // Track if we've loaded for the current user to avoid repeated DB calls
+  const loadedUserIdRef = useRef<string | null>(null);
 
-  // Load minimized chats from DB on mount/user change - only once per user session
+  // Load minimized chats from DB on mount/user change - only once per user
   useEffect(() => {
     if (!user) {
       clearMinimizedChats();
-      hasLoadedRef.current = false;
-      loadedForUser.clear();
+      loadedUserIdRef.current = null;
       return;
     }
 
-    // Only load once per user session
-    if (loadedForUser.get(user.id)) {
+    // Only load once per user - skip if we've already loaded for this user
+    if (loadedUserIdRef.current === user.id) {
       return;
     }
 
@@ -43,13 +40,15 @@ export function useMinimizedChats() {
         return;
       }
 
-      // Mark as loaded for this user
-      loadedForUser.set(user.id, true);
-      hasLoadedRef.current = true;
+      // Mark as loaded for this user BEFORE modifying state
+      loadedUserIdRef.current = user.id;
       
-      // Only add chats that aren't already in the store (preserve existing unread counts)
+      // Get current state directly from store to check existing chats
+      const currentChats = useAppStore.getState().minimizedChats;
+      
+      // Only add chats that aren't already in the store
       data?.forEach(chat => {
-        const existingChat = minimizedChats.find(c => c.id === chat.request_id);
+        const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
           addToStore({
             id: chat.request_id,
@@ -63,7 +62,7 @@ export function useMinimizedChats() {
     };
 
     loadChats();
-  }, [user?.id]);
+  }, [user?.id, addToStore, clearMinimizedChats]);
 
   // Add minimized chat to DB and store
   const addMinimizedChat = useCallback(async (chat: MinimizedChat) => {
