@@ -326,8 +326,11 @@ export function ChatListPanel() {
       {/* Expanded state - Chat list panel */}
       {isExpanded && (
         <div className="w-80 bg-card border border-border rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+          {/* Header - clickable to minimize */}
+          <div 
+            className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setIsExpanded(false)}
+          >
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
               <span className="font-semibold">Messaging</span>
@@ -340,8 +343,11 @@ export function ChatListPanel() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
-              onClick={() => setIsExpanded(false)}
+              className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(false);
+              }}
             >
               <ChevronDown className="h-4 w-4" />
             </Button>
