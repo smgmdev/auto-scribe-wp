@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -73,6 +73,7 @@ export function GlobalChatDialog() {
   const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
   const [cancelOrderMessageId, setCancelOrderMessageId] = useState<string | null>(null);
   const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [resendingOrder, setResendingOrder] = useState(false);
   
   // Drag state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -139,6 +140,14 @@ export function GlobalChatDialog() {
   
   const isCancelled = globalChatRequest?.status === 'cancelled';
   const hasOrder = !!globalChatRequest?.order;
+  
+  // Check if there's an existing order request in messages (sent by agency)
+  const existingOrderMessage = messages.find(msg => {
+    if (msg.sender_type !== 'agency') return false;
+    const match = msg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+    return !!match;
+  });
+  const hasExistingOrderRequest = !!existingOrderMessage;
 
   const handleCancelEngagement = async () => {
     if (!globalChatRequest) return;
@@ -923,6 +932,37 @@ export function GlobalChatDialog() {
     }
   };
 
+  // Resend order - delete existing order request and send a new one
+  const handleResendOrder = async () => {
+    if (!existingOrderMessage) return;
+    
+    setResendingOrder(true);
+    try {
+      // Delete the existing order request message
+      const { error: deleteError } = await supabase
+        .from('service_messages')
+        .delete()
+        .eq('id', existingOrderMessage.id);
+
+      if (deleteError) throw deleteError;
+
+      // Remove from local state
+      setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
+      
+      // Open the send order dialog to send a new order
+      setSendOrderDialogOpen(true);
+      
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to resend order',
+        description: error.message,
+      });
+    } finally {
+      setResendingOrder(false);
+    }
+  };
+
   // File upload validation and handling
   const ALLOWED_FILE_TYPES = [
     'application/pdf',
@@ -1166,22 +1206,42 @@ export function GlobalChatDialog() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem 
-                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      disabled={hasOrder || isCancelled}
-                      onClick={() => {
-                        if (globalChatType === 'agency-request') {
-                          setSendOrderDialogOpen(true);
-                        } else {
+                    {globalChatType === 'agency-request' && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black gap-2"
+                        disabled={hasOrder || isCancelled || resendingOrder}
+                        onClick={() => {
+                          if (hasExistingOrderRequest) {
+                            handleResendOrder();
+                          } else {
+                            setSendOrderDialogOpen(true);
+                          }
+                        }}
+                      >
+                        {hasExistingOrderRequest ? (
+                          <>
+                            <RefreshCw className={`h-3.5 w-3.5 ${resendingOrder ? 'animate-spin' : ''}`} />
+                            Resend Order
+                          </>
+                        ) : (
+                          'Send Order'
+                        )}
+                      </DropdownMenuItem>
+                    )}
+                    {globalChatType === 'my-request' && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        disabled={hasOrder || isCancelled}
+                        onClick={() => {
                           toast({
                             title: "Order Now",
                             description: "Order functionality coming soon",
                           });
-                        }
-                      }}
-                    >
-                      {globalChatType === 'agency-request' ? 'Send Order' : 'Order Now'}
-                    </DropdownMenuItem>
+                        }}
+                      >
+                        Order Now
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem 
                       className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       disabled={hasOrder || isCancelled}
