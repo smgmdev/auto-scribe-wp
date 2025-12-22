@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,14 @@ interface ServiceRequest {
     favicon: string | null;
     price: number;
     publication_format: string;
+    link: string;
+    category: string;
+    subcategory: string | null;
+    publishing_time: string;
+    max_words: number | null;
+    max_images: number | null;
+    google_index: string;
+    about: string | null;
   } | null;
   order: {
     id: string;
@@ -177,7 +186,7 @@ export function AgencyRequestsView() {
         read,
         created_at,
         updated_at,
-        media_site:media_sites(name, favicon, price, publication_format),
+        media_site:media_sites(name, favicon, price, publication_format, link, category, subcategory, publishing_time, max_words, max_images, google_index, about),
         order:orders(id, status, delivery_status)
       `)
       .eq('agency_payout_id', agencyData.id)
@@ -538,14 +547,85 @@ export function AgencyRequestsView() {
                 </div>
               </div>
               <div className="flex items-center gap-1 mr-6">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                  title="Info"
-                >
-                  <Info className="h-4 w-4" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                      title="Info"
+                    >
+                      <Info className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" align="end">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        {selectedRequest?.media_site?.favicon && (
+                          <img src={selectedRequest.media_site.favicon} alt="" className="w-10 h-10 rounded" />
+                        )}
+                        <div>
+                          <h4 className="font-semibold">{selectedRequest?.media_site?.name}</h4>
+                          <a 
+                            href={selectedRequest?.media_site?.link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                          >
+                            {selectedRequest?.media_site?.link}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Category:</span>
+                          <p className="font-medium capitalize">{selectedRequest?.media_site?.category}</p>
+                        </div>
+                        {selectedRequest?.media_site?.subcategory && (
+                          <div>
+                            <span className="text-muted-foreground">Subcategory:</span>
+                            <p className="font-medium capitalize">{selectedRequest?.media_site?.subcategory}</p>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-muted-foreground">Format:</span>
+                          <p className="font-medium capitalize">{selectedRequest?.media_site?.publication_format}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Price:</span>
+                          <p className="font-medium">${selectedRequest?.media_site?.price}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Publishing Time:</span>
+                          <p className="font-medium">{selectedRequest?.media_site?.publishing_time}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Google Index:</span>
+                          <p className="font-medium capitalize">{selectedRequest?.media_site?.google_index}</p>
+                        </div>
+                        {selectedRequest?.media_site?.max_words && (
+                          <div>
+                            <span className="text-muted-foreground">Max Words:</span>
+                            <p className="font-medium">{selectedRequest?.media_site?.max_words}</p>
+                          </div>
+                        )}
+                        {selectedRequest?.media_site?.max_images && (
+                          <div>
+                            <span className="text-muted-foreground">Max Images:</span>
+                            <p className="font-medium">{selectedRequest?.media_site?.max_images}</p>
+                          </div>
+                        )}
+                      </div>
+                      {selectedRequest?.media_site?.about && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">About:</span>
+                          <p className="mt-1">{selectedRequest?.media_site?.about}</p>
+                        </div>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <Button
                   variant="ghost"
                   size="icon"
