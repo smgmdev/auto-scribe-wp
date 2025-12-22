@@ -345,7 +345,7 @@ export function ChatListPanel() {
         <div className="w-full bg-card border border-border rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
           {/* Header - clickable to minimize */}
           <div 
-            className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+            className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
             onClick={() => setIsExpanded(false)}
           >
             <div className="flex items-center gap-2">
