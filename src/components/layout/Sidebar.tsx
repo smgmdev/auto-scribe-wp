@@ -111,10 +111,8 @@ export function Sidebar({
     setAgencyUnreadMediaSubmissionsCount,
     agencyUnreadServiceRequestsCount,
     setAgencyUnreadServiceRequestsCount,
-    incrementAgencyUnreadServiceRequestsCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
-    incrementUserUnreadEngagementsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -352,7 +350,7 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]); // Remove userApplicationStatus from dependencies to prevent re-fetch loops
 
-  // Fetch initial unread engagement count and subscribe to real-time updates for regular users
+  // Fetch initial unread engagement count for regular users
   useEffect(() => {
     if (!user || isAdmin) return;
 
@@ -387,148 +385,7 @@ export function Sidebar({
     };
 
     fetchUnreadEngagements();
-
-    // Subscribe to real-time message inserts for user's requests
-    const channel = supabase
-      .channel('user-engagement-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'service_messages'
-        },
-        async (payload) => {
-          console.log('[User Notifications] Received message:', payload);
-          const newMsg = payload.new as { request_id: string; sender_type: string };
-          // Only count messages from agency, not from the user themselves
-          if (newMsg.sender_type === 'client') {
-            console.log('[User Notifications] Ignoring own message');
-            return;
-          }
-
-          // Check if this request belongs to the current user
-          const { data: request } = await supabase
-            .from('service_requests')
-            .select('user_id, title, media_site:media_sites(name)')
-            .eq('id', newMsg.request_id)
-            .maybeSingle();
-
-          console.log('[User Notifications] Request data:', request, 'Current user:', user.id);
-
-          if (request?.user_id === user.id) {
-            incrementUserUnreadEngagementsCount();
-            
-            // Show toast notification
-            const mediaSiteName = (request.media_site as { name: string } | null)?.name || 'Unknown';
-            toast({
-              title: 'New Message',
-              description: `You have a new message for "${request.title}" (${mediaSiteName})`,
-            });
-
-            // Play notification sound
-            try {
-              const audio = new Audio('/sounds/new-message.mp3');
-              audio.volume = 0.5;
-              audio.play().catch(() => {});
-            } catch (e) {
-              // Ignore audio errors
-            }
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('[User Notifications] Subscription status:', status);
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user?.id, isAdmin]);
-
-  // Subscribe to real-time message notifications for agency users
-  useEffect(() => {
-    if (!user || isAdmin || !isAgencyOnboarded) return;
-
-    // Get agency payout ID for this user
-    const setupAgencySubscription = async () => {
-      const { data: agencyPayoutData } = await supabase
-        .from('agency_payouts')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (!agencyPayoutData) {
-        console.log('[Agency Notifications] No agency payout data found');
-        return;
-      }
-
-      const agencyPayoutId = agencyPayoutData.id;
-      console.log('[Agency Notifications] Setting up subscription for agency:', agencyPayoutId);
-
-      // Subscribe to real-time message inserts for agency's requests
-      const channel = supabase
-        .channel('agency-message-notifications')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'service_messages'
-          },
-          async (payload) => {
-            console.log('[Agency Notifications] Received message:', payload);
-            const newMsg = payload.new as { request_id: string; sender_type: string };
-            // Only count messages from clients, not from the agency themselves
-            if (newMsg.sender_type !== 'client') {
-              console.log('[Agency Notifications] Ignoring own message');
-              return;
-            }
-
-            // Check if this request belongs to the current agency
-            const { data: request } = await supabase
-              .from('service_requests')
-              .select('agency_payout_id, title, media_site:media_sites(name)')
-              .eq('id', newMsg.request_id)
-              .maybeSingle();
-
-            console.log('[Agency Notifications] Request data:', request, 'Agency ID:', agencyPayoutId);
-
-            if (request?.agency_payout_id === agencyPayoutId) {
-              incrementAgencyUnreadServiceRequestsCount();
-              
-              // Show toast notification
-              const mediaSiteName = (request.media_site as { name: string } | null)?.name || 'Unknown';
-              toast({
-                title: 'New Client Message',
-                description: `New message for "${request.title}" (${mediaSiteName})`,
-              });
-
-              // Play notification sound
-              try {
-                const audio = new Audio('/sounds/new-message.mp3');
-                audio.volume = 0.5;
-                audio.play().catch(() => {});
-              } catch (e) {
-                // Ignore audio errors
-              }
-            }
-          }
-        )
-        .subscribe((status) => {
-          console.log('[Agency Notifications] Subscription status:', status);
-        });
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    };
-
-    const cleanup = setupAgencySubscription();
-    return () => {
-      cleanup.then(fn => fn?.());
-    };
-  }, [user?.id, isAdmin, isAgencyOnboarded]);
 
   const handleNavClick = (viewId: string) => {
     // Clear editing state when navigating away from compose
