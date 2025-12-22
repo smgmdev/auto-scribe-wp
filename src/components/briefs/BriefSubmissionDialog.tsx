@@ -163,6 +163,29 @@ export function BriefSubmissionDialog({
         message: description.trim()
       });
 
+      // Broadcast notification to agency
+      if (agencyPayoutId) {
+        const notifyChannel = supabase.channel(`notify-${agencyPayoutId}`);
+        notifyChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await notifyChannel.send({
+              type: 'broadcast',
+              event: 'new-message',
+              payload: {
+                request_id: request.id,
+                sender_type: 'client',
+                sender_id: user.id,
+                message: description.trim(),
+                title: mediaSite.name,
+                media_site_name: mediaSite.name,
+                media_site_favicon: mediaSite.favicon
+              }
+            });
+            setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+          }
+        });
+      }
+
       toast({
         title: 'Request submitted!',
         description: 'Your brief has been sent to the agency for review.',
