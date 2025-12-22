@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -57,6 +58,7 @@ export function MyRequestsView() {
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -295,16 +297,55 @@ export function MyRequestsView() {
     );
   }
 
+  // Sort requests based on selected sort option
+  const sortedRequests = useMemo(() => {
+    return [...requests].sort((a, b) => {
+      if (sortBy === 'last_message') {
+        const aMessages = messages[a.id] || [];
+        const bMessages = messages[b.id] || [];
+        const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
+        const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
+        // If both have messages, sort by last message. Otherwise, fall back to created_at
+        if (aLastMessage && bLastMessage) {
+          return bLastMessage - aLastMessage;
+        } else if (aLastMessage) {
+          return -1;
+        } else if (bLastMessage) {
+          return 1;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+  }, [requests, messages, sortBy]);
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <ClipboardList className="h-8 w-8" />
-          My Engagements
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Track your engagements and communicate with agencies
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <ClipboardList className="h-8 w-8" />
+            My Engagements
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Track your engagements and communicate with agencies
+          </p>
+        </div>
+        {requests.length > 0 && (
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="last_message">Last Message</SelectItem>
+                <SelectItem value="submitted">Submitted Date</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {requests.length === 0 ? (
@@ -317,7 +358,7 @@ export function MyRequestsView() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => {
+          {sortedRequests.map((request) => {
             const unreadCount = unreadMessageCounts[request.id] || 0;
             const requestMessages = messages[request.id] || [];
             // Unread is based solely on request.read - we mark as unread when new agency message arrives
