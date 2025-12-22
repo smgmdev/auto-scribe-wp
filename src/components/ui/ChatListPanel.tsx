@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search, Reply } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -753,6 +753,16 @@ export function ChatListPanel() {
     return title || 'New engagement';
   };
 
+  // Check if a message is a reply (contains quote markers)
+  const isReplyMessage = (message: string | undefined): boolean => {
+    if (!message) return false;
+    // Check for reply patterns: starts with ">", contains "\n>" (multiline quote), or starts with ":"
+    return message.startsWith('>') || 
+           message.includes('\n>') || 
+           /^:\s*\S+\s+/.test(message) ||
+           message.includes('[') && message.includes(']') && message.includes('\n');
+  };
+
   // Calculate total unread - simply count unread requests
   const totalUnread = myEngagements.filter(e => !e.read).length + 
                       serviceRequests.filter(r => !r.read).length;
@@ -831,8 +841,11 @@ export function ChatListPanel() {
                 {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
               </span>
             </div>
-            <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-              {formatPreviewMessage(item.lastMessage, item.description, item.title)}
+            <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+              {isReplyMessage(item.lastMessage) && (
+                <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
+              )}
+              <span className="truncate">{formatPreviewMessage(item.lastMessage, item.description, item.title)}</span>
             </p>
           </div>
 
