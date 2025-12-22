@@ -568,10 +568,9 @@ export function GlobalChatDialog() {
             {isOwnMessage && globalChatType === 'agency-request' && !hasOrder && (
               <Button
                 onClick={() => openCancelOrderDialog(msg.id)}
-                className="w-full gap-2 bg-black text-white hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
+                className="w-full bg-black text-white hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
                 size="sm"
               >
-                <X className="h-4 w-4" />
                 Cancel Order Request
               </Button>
             )}
