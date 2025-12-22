@@ -75,10 +75,6 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
-              {/* Blue dot indicator with pulse */}
-              {hasUnread && (
-                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-sky-500 rounded-full border-2 border-white dark:border-card animate-pulse" />
-              )}
             </div>
             <span className={`text-sm whitespace-nowrap ${hasUnread ? 'font-semibold' : 'font-medium'}`}>
               {chat.title}
