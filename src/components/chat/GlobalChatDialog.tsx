@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -429,6 +429,45 @@ export function GlobalChatDialog() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                    >
+                      Action
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem 
+                      className="gap-2 cursor-pointer"
+                      onClick={() => {
+                        toast({
+                          title: "Order Now",
+                          description: "Order functionality coming soon",
+                        });
+                      }}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      Order Now
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                      onClick={() => {
+                        toast({
+                          title: "Delete Engagement",
+                          description: "Delete functionality coming soon",
+                          variant: "destructive"
+                        });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Engagement
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
