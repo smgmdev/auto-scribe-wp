@@ -59,9 +59,9 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
             }`}
             onClick={() => handleOpenChat(chat)}
           >
-            {/* Blue circle indicator */}
+            {/* Red circle indicator */}
             {hasUnread && (
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-sky-500 rounded-full" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full" />
             )}
             <div className="relative shrink-0">
               {chat.favicon ? (
