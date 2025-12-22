@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart } from 'lucide-react';
+import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -598,7 +599,7 @@ export function GlobalChatDialog() {
               {loadingMessages ? (
                 <div className="flex flex-col items-center justify-center h-full py-12">
                   <img 
-                    src="/lovable-uploads/d0f30333-4169-4f44-8851-47eb1fcbd203.png" 
+                    src={amblackLogo} 
                     alt="Loading" 
                     className="w-16 h-16 animate-pulse mb-4"
                   />
