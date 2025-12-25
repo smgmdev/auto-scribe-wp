@@ -68,14 +68,9 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
   const [licenseUrl, setLicenseUrl] = useState<string | null>(null);
   const [uploadingLicense, setUploadingLicense] = useState(false);
 
-  // Parse prefill name into first and last
-  const parsedFirstName = prefillData?.full_name?.split(' ')[0] || '';
-  const parsedLastName = prefillData?.full_name?.split(' ').slice(1).join(' ') || '';
-
   const [formData, setFormData] = useState({
     // Personal info - prefilled from application
-    first_name: parsedFirstName,
-    last_name: parsedLastName,
+    full_name: prefillData?.full_name || '',
     personal_country: prefillData?.country || '',
     phone: prefillData?.phone || '',
     email: prefillData?.email || '',
@@ -188,8 +183,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
     const errors: Record<string, boolean> = {};
 
     // Personal info validation
-    if (!formData.first_name.trim()) errors.first_name = true;
-    if (!formData.last_name.trim()) errors.last_name = true;
+    if (!formData.full_name.trim()) errors.full_name = true;
     if (!formData.personal_country) errors.personal_country = true;
     
     // Email validation
@@ -252,9 +246,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
       const { error } = await supabase.from('agency_custom_verifications').insert({
         user_id: user.id,
         agency_payout_id: agencyPayoutId,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        full_name: `${formData.first_name} ${formData.last_name}`,
+        full_name: formData.full_name,
         email: formData.email,
         company_name: formData.company_name,
         country: formData.company_country,
@@ -285,7 +277,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         await supabase.functions.invoke('notify-admin-custom-verification', {
           body: {
             agency_name: agencyName,
-            full_name: `${formData.first_name} ${formData.last_name}`,
+            full_name: formData.full_name,
             company_name: formData.company_name,
             country: formData.company_country,
           }
@@ -449,31 +441,17 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name">First Name *</Label>
+                <Label htmlFor="full_name">Full Name *</Label>
                 <Input
-                  id="first_name"
-                  placeholder="John"
-                  value={formData.first_name}
+                  id="full_name"
+                  placeholder="John Doe"
+                  value={formData.full_name}
                   onChange={(e) => {
-                    setFormData(prev => ({ ...prev, first_name: e.target.value }));
-                    clearFieldError('first_name');
+                    setFormData(prev => ({ ...prev, full_name: e.target.value }));
+                    clearFieldError('full_name');
                   }}
                   disabled={submitting}
-                  className={fieldErrors.first_name ? 'border-red-500' : ''}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name *</Label>
-                <Input
-                  id="last_name"
-                  placeholder="Doe"
-                  value={formData.last_name}
-                  onChange={(e) => {
-                    setFormData(prev => ({ ...prev, last_name: e.target.value }));
-                    clearFieldError('last_name');
-                  }}
-                  disabled={submitting}
-                  className={fieldErrors.last_name ? 'border-red-500' : ''}
+                  className={fieldErrors.full_name ? 'border-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
