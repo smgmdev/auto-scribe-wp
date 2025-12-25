@@ -847,7 +847,20 @@ export function ComposeView() {
       description: currentSite ? `Draft saved to ${currentSite.name}` : "Your draft has been saved"
     });
   };
-  return <div className="space-y-8 animate-fade-in">
+  return <div className="space-y-8 animate-fade-in relative">
+      {/* Publishing Overlay */}
+      {isPublishing && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg">
+            <Loader2 className="h-10 w-10 animate-spin text-accent" />
+            <div className="text-center">
+              <p className="text-lg font-medium text-foreground">Publishing Article...</p>
+              <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-foreground">
