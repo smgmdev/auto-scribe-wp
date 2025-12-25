@@ -59,6 +59,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [otherNiche, setOtherNiche] = useState('');
   const [wpBlogUrl, setWpBlogUrl] = useState('');
+  const [agencyDescription, setAgencyDescription] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -104,6 +105,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       setSelectedNiches([]);
       setOtherNiche('');
       setWpBlogUrl('');
+      setAgencyDescription('');
       setDocumentFile(null);
       setDocumentUrl(null);
       setLogoFile(null);
@@ -387,6 +389,8 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         media_niches: niches,
         media_channels,
         payout_method: 'custom',
+        agency_description: agencyDescription || null,
+        wp_blog_url: selectedNiches.includes('WP Media Blog Owner') ? wpBlogUrl : null,
         status: 'pending'
       } as any);
 
@@ -562,6 +566,24 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   <p className="text-xs text-red-500">Please enter a valid URL</p>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="agency_description">Agency Description <span className="text-muted-foreground font-normal text-xs">(max 150 characters)</span></Label>
+              <Textarea
+                id="agency_description"
+                placeholder="Write your achievements and show off! Describe what makes your agency stand out..."
+                value={agencyDescription}
+                onChange={(e) => {
+                  if (e.target.value.length <= 150) {
+                    setAgencyDescription(e.target.value);
+                  }
+                }}
+                disabled={submitting}
+                className="resize-none h-20"
+                maxLength={150}
+              />
+              <p className="text-xs text-muted-foreground text-right">{agencyDescription.length}/150</p>
             </div>
 
             <div className="space-y-3">
