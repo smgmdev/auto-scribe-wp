@@ -43,10 +43,49 @@ export const AdminCreditManagementView = () => {
   const [transactionsSearchTerm, setTransactionsSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
+  // Agencies state
+  const [agencyStats, setAgencyStats] = useState({
+    totalAgencies: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalCommission: 0
+  });
+
   useEffect(() => {
     fetchUserCredits();
     fetchTransactions();
+    fetchAgencyStats();
   }, []);
+
+  const fetchAgencyStats = async () => {
+    try {
+      // Fetch active agencies count
+      const { count: agenciesCount } = await supabase
+        .from('agency_payouts')
+        .select('*', { count: 'exact', head: true })
+        .eq('onboarding_complete', true)
+        .eq('downgraded', false);
+
+      // Fetch orders data
+      const { data: ordersData } = await supabase
+        .from('orders')
+        .select('amount_cents, platform_fee_cents, status')
+        .in('status', ['paid', 'completed']);
+
+      const totalOrders = ordersData?.length || 0;
+      const totalRevenue = ordersData?.reduce((sum, o) => sum + o.amount_cents, 0) || 0;
+      const totalCommission = ordersData?.reduce((sum, o) => sum + o.platform_fee_cents, 0) || 0;
+
+      setAgencyStats({
+        totalAgencies: agenciesCount || 0,
+        totalOrders,
+        totalRevenue,
+        totalCommission
+      });
+    } catch (error) {
+      console.error('Error fetching agency stats:', error);
+    }
+  };
 
   const fetchUserCredits = async () => {
     setBalancesLoading(true);
@@ -539,7 +578,7 @@ export const AdminCreditManagementView = () => {
                   <Building2 className="h-4 w-4 text-muted-foreground/60" />
                 </CardHeader>
                 <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-foreground">0</div>
+                  <div className="text-2xl font-semibold text-foreground">{agencyStats.totalAgencies}</div>
                 </CardContent>
               </Card>
 
@@ -561,7 +600,7 @@ export const AdminCreditManagementView = () => {
                   <CreditCard className="h-4 w-4 text-muted-foreground/60" />
                 </CardHeader>
                 <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-foreground">0</div>
+                  <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
                 </CardContent>
               </Card>
 
@@ -583,7 +622,7 @@ export const AdminCreditManagementView = () => {
                   <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
                 </CardHeader>
                 <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-green-500">$0.00</div>
+                  <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
                 </CardContent>
               </Card>
 
@@ -605,7 +644,7 @@ export const AdminCreditManagementView = () => {
                   <Percent className="h-4 w-4 text-muted-foreground/60" />
                 </CardHeader>
                 <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-primary">$0.00</div>
+                  <div className="text-2xl font-semibold text-primary">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
                 </CardContent>
               </Card>
             </div>
