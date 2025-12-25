@@ -386,8 +386,8 @@ export function DashboardView() {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                   <div className="flex-1 min-w-0 space-y-2">
-                    <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
-                    <div className="h-3 w-1/3 bg-muted animate-pulse rounded" />
+                    <div className="h-4 w-3/4 bg-foreground/10 animate-pulse rounded" />
+                    <div className="h-3 w-1/3 bg-foreground/10 animate-pulse rounded" />
                   </div>
                 </div>
               ))}
