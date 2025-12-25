@@ -137,11 +137,13 @@ export const AdminCreditManagementView = () => {
   };
 
   // Balances computed values
-  const filteredCredits = userCredits.filter(user => 
+  // Only include users with purchased or available credits
+  const activeUsers = userCredits.filter(user => user.purchased > 0 || user.available > 0);
+  const filteredCredits = activeUsers.filter(user => 
     user.email?.toLowerCase().includes(balancesSearchTerm.toLowerCase())
   );
-  const totalCredits = userCredits.reduce((sum, user) => sum + user.available, 0);
-  const usersWithCredits = userCredits.filter(user => user.available > 0).length;
+  const totalCredits = activeUsers.reduce((sum, user) => sum + user.available, 0);
+  const usersWithCredits = activeUsers.filter(user => user.available > 0).length;
 
   // Transactions computed values
   const filteredTransactions = transactions.filter(tx => {
@@ -204,13 +206,13 @@ export const AdminCreditManagementView = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                    <p>Total number of users with credit accounts</p>
+                    <p>Users who have purchased or have available credits</p>
                   </TooltipContent>
                 </Tooltip>
                 <Users className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">{userCredits.length}</div>
+                <div className="text-2xl font-semibold text-foreground">{activeUsers.length}</div>
               </CardContent>
             </Card>
 
