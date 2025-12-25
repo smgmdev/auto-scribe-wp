@@ -1509,7 +1509,7 @@ export function AdminAgenciesView() {
 
       {/* Application Review Dialog */}
       <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); }}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-3">
               {logoUrl && (
@@ -1524,7 +1524,7 @@ export function AdminAgenciesView() {
           </DialogHeader>
 
           {selectedApp && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Contact & Basic Info */}
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1607,6 +1607,19 @@ export function AdminAgenciesView() {
                   </div>
                 )}
 
+                {selectedApp.wp_blog_url && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground mb-1">WP Media Blog</p>
+                    <button 
+                      onClick={() => { setWebViewUrl(`https://${selectedApp.wp_blog_url}`); setWebViewTitle('WP Media Blog'); }}
+                      className="font-medium text-primary hover:underline flex items-center gap-1"
+                    >
+                      {selectedApp.wp_blog_url}
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+
                 {selectedApp.media_channels && (
                   <div className="text-sm">
                     <p className="text-muted-foreground mb-1">3 Media Channels to List</p>
@@ -1631,23 +1644,10 @@ export function AdminAgenciesView() {
                     <p className="font-medium">{selectedApp.agency_description}</p>
                   </div>
                 )}
-
-                {selectedApp.wp_blog_url && (
-                  <div className="text-sm">
-                    <p className="text-muted-foreground mb-1">WP Media Blog</p>
-                    <button 
-                      onClick={() => { setWebViewUrl(`https://${selectedApp.wp_blog_url}`); setWebViewTitle('WP Media Blog'); }}
-                      className="font-medium text-primary hover:underline flex items-center gap-1"
-                    >
-                      {selectedApp.wp_blog_url}
-                      <ExternalLink className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* Full Width - Actions Section */}
-              <div className="col-span-1 md:col-span-2 space-y-4 border-t pt-4">
+              <div className="col-span-1 lg:col-span-2 space-y-4 border-t pt-4">
                 {selectedApp.status === 'pending' && (
                   <>
                     <div className="space-y-2">
