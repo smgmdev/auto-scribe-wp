@@ -31,6 +31,7 @@ interface CreditTransaction {
 export const AdminCreditManagementView = () => {
   const [mainTab, setMainTab] = useState('users');
   const [activeTab, setActiveTab] = useState('balances');
+  const [agencyActiveTab, setAgencyActiveTab] = useState('balances');
   
   // Balances state
   const [userCredits, setUserCredits] = useState<UserCredit[]>([]);
@@ -558,105 +559,218 @@ export const AdminCreditManagementView = () => {
 
         {/* Agencies Tab */}
         <TabsContent value="agencies" className="space-y-6">
-          <TooltipProvider>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="transition-colors hover:border-[#4771d9] py-3">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 cursor-help">
-                        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          Total Agencies
-                        </CardTitle>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                      <p>Total number of active agencies</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Building2 className="h-4 w-4 text-muted-foreground/60" />
-                </CardHeader>
-                <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-foreground">{agencyStats.totalAgencies}</div>
+          <Tabs value={agencyActiveTab} onValueChange={setAgencyActiveTab}>
+            <TabsList>
+              <TabsTrigger value="balances">Balances</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            </TabsList>
+
+            {/* Agency Balances Tab */}
+            <TabsContent value="balances" className="space-y-6">
+              <TooltipProvider>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Agencies
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total number of active agencies</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Building2 className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-foreground">{agencyStats.totalAgencies}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Orders
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total orders placed through agencies</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Revenue
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total revenue from agency transactions</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Commission
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total commission earned from agencies</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Percent className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-primary">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TooltipProvider>
+
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">Agency Balances</p>
+                  <p className="text-sm mt-1">View balances and payouts for each agency</p>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              <Card className="transition-colors hover:border-[#4771d9] py-3">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 cursor-help">
-                        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          Total Orders
-                        </CardTitle>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                      <p>Total orders placed through agencies</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <CreditCard className="h-4 w-4 text-muted-foreground/60" />
-                </CardHeader>
-                <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
+            {/* Agency Transactions Tab */}
+            <TabsContent value="transactions" className="space-y-6">
+              <TooltipProvider>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Orders
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total orders placed through agencies</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Revenue
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total revenue from agency transactions</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Payouts
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total amount paid out to agencies</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-red-500">${((agencyStats.totalRevenue - agencyStats.totalCommission) / 100).toFixed(2)}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="transition-colors hover:border-[#4771d9] py-3">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-help">
+                            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Total Commission
+                            </CardTitle>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                          <p>Total commission earned from agencies</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Percent className="h-4 w-4 text-muted-foreground/60" />
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-0 px-4">
+                      <div className="text-2xl font-semibold text-primary">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TooltipProvider>
+
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">Agency Transactions</p>
+                  <p className="text-sm mt-1">View transactions between users and agencies from the Global Library</p>
                 </CardContent>
               </Card>
-
-              <Card className="transition-colors hover:border-[#4771d9] py-3">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 cursor-help">
-                        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          Total Revenue
-                        </CardTitle>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                      <p>Total revenue from agency transactions</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
-                </CardHeader>
-                <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="transition-colors hover:border-[#4771d9] py-3">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 cursor-help">
-                        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          Total Commission
-                        </CardTitle>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                      <p>Total commission earned from agencies</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Percent className="h-4 w-4 text-muted-foreground/60" />
-                </CardHeader>
-                <CardContent className="pt-0 pb-0 px-4">
-                  <div className="text-2xl font-semibold text-primary">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
-                </CardContent>
-              </Card>
-            </div>
-          </TooltipProvider>
-
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium">Agency Transactions</p>
-              <p className="text-sm mt-1">View transactions between users and agencies from the Global Library</p>
-            </CardContent>
-          </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
