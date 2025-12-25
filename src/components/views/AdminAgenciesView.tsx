@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -152,6 +153,10 @@ export function AdminAgenciesView() {
   const [processingVerification, setProcessingVerification] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
   const [agencyToDowngrade, setAgencyToDowngrade] = useState<AgencyPayout | null>(null);
+  const [showCommissionDialog, setShowCommissionDialog] = useState(false);
+  const [agencyToEditCommission, setAgencyToEditCommission] = useState<AgencyPayout | null>(null);
+  const [newCommissionPercentage, setNewCommissionPercentage] = useState<string>('');
+  const [updatingCommission, setUpdatingCommission] = useState(false);
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
@@ -557,6 +562,49 @@ export function AdminAgenciesView() {
   const handleOpenDowngradeDialog = (agency: AgencyPayout) => {
     setAgencyToDowngrade(agency);
     setShowDowngradeDialog(true);
+  };
+
+  const handleOpenCommissionDialog = (agency: AgencyPayout) => {
+    setAgencyToEditCommission(agency);
+    setNewCommissionPercentage(agency.commission_percentage.toString());
+    setShowCommissionDialog(true);
+  };
+
+  const handleUpdateCommission = async () => {
+    if (!agencyToEditCommission) return;
+    
+    const percentage = parseFloat(newCommissionPercentage);
+    if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid percentage',
+        description: 'Please enter a valid percentage between 0 and 100'
+      });
+      return;
+    }
+
+    setUpdatingCommission(true);
+    try {
+      const { error } = await supabase
+        .from('agency_payouts')
+        .update({ commission_percentage: percentage })
+        .eq('id', agencyToEditCommission.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Commission updated',
+        description: `${agencyToEditCommission.agency_name}'s commission has been updated to ${percentage}%`
+      });
+      
+      setShowCommissionDialog(false);
+      setAgencyToEditCommission(null);
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setUpdatingCommission(false);
+    }
   };
 
   const handleOpenStripeAccountsDialog = async () => {
@@ -1510,6 +1558,27 @@ export function AdminAgenciesView() {
                               </div>
 
                               <div className="flex gap-1">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 hover:bg-black hover:text-white"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenCommissionDialog(agency);
+                                        }}
+                                        title="Edit commission"
+                                      >
+                                        <Percent className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Commission: {agency.commission_percentage}%</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -1630,6 +1699,27 @@ export function AdminAgenciesView() {
                               </div>
 
                               <div className="flex gap-1">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 hover:bg-black hover:text-white"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenCommissionDialog(agency);
+                                        }}
+                                        title="Edit commission"
+                                      >
+                                        <Percent className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Commission: {agency.commission_percentage}%</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -2646,6 +2736,63 @@ export function AdminAgenciesView() {
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
                 Downgrade
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Commission Dialog */}
+      <Dialog open={showCommissionDialog} onOpenChange={setShowCommissionDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Commission</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Set the platform commission percentage for <span className="font-semibold">{agencyToEditCommission?.agency_name}</span>
+            </p>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Commission Percentage</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={newCommissionPercentage}
+                  onChange={(e) => setNewCommissionPercentage(e.target.value)}
+                  placeholder="Enter percentage"
+                  className="flex-1"
+                />
+                <span className="text-muted-foreground">%</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Agency keeps {100 - (parseFloat(newCommissionPercentage) || 0)}% of each order
+              </p>
+            </div>
+            
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1 hover:bg-black hover:text-white"
+                onClick={() => {
+                  setShowCommissionDialog(false);
+                  setAgencyToEditCommission(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-black text-white hover:bg-black/80"
+                onClick={handleUpdateCommission}
+                disabled={updatingCommission}
+              >
+                {updatingCommission ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Save
               </Button>
             </div>
           </div>
