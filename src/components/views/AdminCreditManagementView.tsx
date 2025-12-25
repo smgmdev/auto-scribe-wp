@@ -57,6 +57,7 @@ export const AdminCreditManagementView = () => {
     id: string;
     agency_name: string;
     revenue: number;
+    orders: number;
     payouts: number;
     refunds: number;
     fee_earnings: number;
@@ -129,10 +130,10 @@ export const AdminCreditManagementView = () => {
         .in('status', ['paid', 'completed']);
 
       // Calculate per-agency stats
-      const agencyStatsMap = new Map<string, { revenue: number; payouts: number; refunds: number; fee_earnings: number }>();
+      const agencyStatsMap = new Map<string, { revenue: number; orders: number; payouts: number; refunds: number; fee_earnings: number }>();
       
       agencies.forEach(agency => {
-        agencyStatsMap.set(agency.agency_name, { revenue: 0, payouts: 0, refunds: 0, fee_earnings: 0 });
+        agencyStatsMap.set(agency.agency_name, { revenue: 0, orders: 0, payouts: 0, refunds: 0, fee_earnings: 0 });
       });
 
       ordersData?.forEach(order => {
@@ -140,6 +141,7 @@ export const AdminCreditManagementView = () => {
         if (agencyName && agencyStatsMap.has(agencyName)) {
           const stats = agencyStatsMap.get(agencyName)!;
           stats.revenue += order.amount_cents;
+          stats.orders += 1;
           stats.payouts += order.agency_payout_cents;
           stats.fee_earnings += order.platform_fee_cents;
         }
@@ -149,6 +151,7 @@ export const AdminCreditManagementView = () => {
         id: agency.id,
         agency_name: agency.agency_name,
         revenue: agencyStatsMap.get(agency.agency_name)?.revenue || 0,
+        orders: agencyStatsMap.get(agency.agency_name)?.orders || 0,
         payouts: agencyStatsMap.get(agency.agency_name)?.payouts || 0,
         refunds: agencyStatsMap.get(agency.agency_name)?.refunds || 0,
         fee_earnings: agencyStatsMap.get(agency.agency_name)?.fee_earnings || 0
@@ -763,6 +766,7 @@ export const AdminCreditManagementView = () => {
                       <TableRow>
                         <TableHead>Agency</TableHead>
                         <TableHead className="text-right">Revenue</TableHead>
+                        <TableHead className="text-right">Orders</TableHead>
                         <TableHead className="text-right">Payouts</TableHead>
                         <TableHead className="text-right">Refunds</TableHead>
                         <TableHead className="text-right">Fee Earnings</TableHead>
@@ -777,11 +781,12 @@ export const AdminCreditManagementView = () => {
                             <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                             <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                             <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                           </TableRow>
                         ))
                       ) : agencyBalances.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                             No active agencies found
                           </TableCell>
                         </TableRow>
@@ -790,6 +795,7 @@ export const AdminCreditManagementView = () => {
                           <TableRow key={agency.id}>
                             <TableCell className="font-medium">{agency.agency_name}</TableCell>
                             <TableCell className="text-right">${(agency.revenue / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{agency.orders}</TableCell>
                             <TableCell className="text-right">${(agency.payouts / 100).toFixed(2)}</TableCell>
                             <TableCell className="text-right">${(agency.refunds / 100).toFixed(2)}</TableCell>
                             <TableCell className="text-right">${(agency.fee_earnings / 100).toFixed(2)}</TableCell>
