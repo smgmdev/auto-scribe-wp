@@ -1,20 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, Coins, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Coins } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
-interface CreditPack {
-  id: string;
-  name: string;
-  credits: number;
-  price_cents: number;
-  stripe_price_id: string | null;
-}
+const PRICE_PER_CREDIT = 1; // $1 per credit
+const MIN_CREDITS = 10;
 
 interface BuyCreditsDialogProps {
   open: boolean;
@@ -22,56 +17,31 @@ interface BuyCreditsDialogProps {
 }
 
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
-  const [packs, setPacks] = useState<CreditPack[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState<string | null>(null);
-  const { user, refreshCredits } = useAuth();
+  const [creditAmount, setCreditAmount] = useState<string>('10');
+  const [purchasing, setPurchasing] = useState(false);
+  const { refreshCredits } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (open) {
-      fetchPacks();
-    }
-  }, [open]);
+  const parsedAmount = parseInt(creditAmount) || 0;
+  const isValidAmount = parsedAmount >= MIN_CREDITS;
+  const totalPrice = parsedAmount * PRICE_PER_CREDIT;
 
-  const fetchPacks = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('credit_packs')
-      .select('*')
-      .eq('active', true)
-      .order('credits', { ascending: true });
-
-    if (error) {
+  const handlePurchase = async () => {
+    if (!isValidAmount) {
       toast({
         variant: 'destructive',
-        title: 'Error loading credit packs',
-        description: error.message,
-      });
-    } else {
-      setPacks(data || []);
-    }
-    setLoading(false);
-  };
-
-  const handlePurchase = async (pack: CreditPack) => {
-    if (!pack.stripe_price_id) {
-      toast({
-        variant: 'destructive',
-        title: 'Pack not available',
-        description: 'This credit pack is not yet configured for purchase.',
+        title: 'Invalid amount',
+        description: `Minimum purchase is ${MIN_CREDITS} credits.`,
       });
       return;
     }
 
-    setPurchasing(pack.id);
+    setPurchasing(true);
 
     try {
-      // User ID is now extracted from JWT token on the server side
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
-          priceId: pack.stripe_price_id,
-          packId: pack.id,
+          creditAmount: parsedAmount,
         },
       });
 
@@ -81,7 +51,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         window.open(data.url, '_blank');
         onOpenChange(false);
         
-        // Poll for credit updates after checkout (user may complete payment in new tab)
+        // Poll for credit updates after checkout
         const pollInterval = setInterval(async () => {
           await refreshCredits();
         }, 3000);
@@ -96,13 +66,18 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         description: error.message || 'Failed to create checkout session.',
       });
     } finally {
-      setPurchasing(null);
+      setPurchasing(false);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setCreditAmount(value);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-accent" />
@@ -113,54 +88,63 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           </DialogDescription>
         </DialogHeader>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="space-y-6 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="credit-amount">Number of Credits</Label>
+            <Input
+              id="credit-amount"
+              type="text"
+              inputMode="numeric"
+              value={creditAmount}
+              onChange={handleInputChange}
+              placeholder="Enter amount"
+              className="text-lg"
+            />
+            <p className="text-xs text-muted-foreground">
+              Minimum purchase: {MIN_CREDITS} credits
+            </p>
           </div>
-        ) : packs.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No credit packs available at the moment.
+
+          <div className="rounded-lg border border-border bg-muted/50 p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Price per credit</span>
+              <span className="font-medium">${PRICE_PER_CREDIT.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-sm text-muted-foreground">Credits</span>
+              <span className="font-medium">{parsedAmount || 0}</span>
+            </div>
+            <div className="border-t border-border my-3" />
+            <div className="flex items-center justify-between">
+              <span className="font-semibold">Total</span>
+              <span className="text-2xl font-bold text-primary">
+                ${totalPrice.toFixed(2)}
+              </span>
+            </div>
           </div>
-        ) : (
-          <div className="grid gap-4">
-            {packs.map((pack) => (
-              <Card 
-                key={pack.id}
-                className="relative hover:border-primary/50 transition-colors"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">{pack.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary" className="bg-accent/10 text-accent">
-                          {pack.credits} credits
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold">
-                        ${(pack.price_cents / 100).toFixed(2)}
-                      </p>
-                      <Button
-                        size="sm"
-                        onClick={() => handlePurchase(pack)}
-                        disabled={purchasing !== null || !pack.stripe_price_id}
-                        className="mt-2"
-                      >
-                        {purchasing === pack.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          'Buy Now'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+
+          <Button
+            onClick={handlePurchase}
+            disabled={purchasing || !isValidAmount}
+            className="w-full"
+            size="lg"
+          >
+            {purchasing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Processing...
+              </>
+            ) : (
+              `Buy ${parsedAmount || 0} Credits for $${totalPrice.toFixed(2)}`
+            )}
+          </Button>
+
+          {!isValidAmount && parsedAmount > 0 && (
+            <p className="text-sm text-destructive text-center">
+              Please enter at least {MIN_CREDITS} credits
+            </p>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
