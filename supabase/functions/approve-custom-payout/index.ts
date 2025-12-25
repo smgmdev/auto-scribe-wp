@@ -120,7 +120,7 @@ serve(async (req) => {
               </p>
               <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                 Great news! Your agency application for <strong>${agency_name}</strong> has been pre-approved. 
-                Since you selected Custom Payout, please log in to complete your verification process to receive full approval.
+                Please log in to complete your verification process to receive full approval.
               </p>
               <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                 You will need to provide:
