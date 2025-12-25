@@ -388,18 +388,22 @@ export const AdminCreditManagementView = () => {
             </Card>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by email..."
-              value={balancesSearchTerm}
-              onChange={(e) => setBalancesSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
           <Card>
-            <CardContent className="p-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold">User Credit Balances</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by email..."
+                    value={balancesSearchTerm}
+                    onChange={(e) => setBalancesSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -414,9 +418,9 @@ export const AdminCreditManagementView = () => {
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
@@ -431,15 +435,9 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="font-medium">
                           {user.email || <span className="text-muted-foreground italic">No email</span>}
                         </TableCell>
-                        <TableCell className="text-right font-semibold text-green-500">
-                          {user.purchased.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {user.available.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold text-muted-foreground">
-                          {user.used.toLocaleString()}
-                        </TableCell>
+                        <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
                       </TableRow>
                     ))
                   )}
