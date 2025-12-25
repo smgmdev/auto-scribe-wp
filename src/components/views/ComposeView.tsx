@@ -118,6 +118,11 @@ export function ComposeView() {
   // Get the currently selected site object
   const currentSite = sites.find(s => s.id === selectedSite);
 
+  // Scroll to top when component mounts (e.g., when coming from headlines)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Fetch site credits on mount and subscribe to changes
   useEffect(() => {
     const fetchSiteCredits = async () => {
