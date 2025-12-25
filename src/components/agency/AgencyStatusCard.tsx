@@ -53,7 +53,7 @@ export function AgencyStatusCard({
           </div>
           <div className="flex-1">
             <span className="font-medium text-[#3872e0]">Become an Agency</span>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to offer your media publishing services to clients and receive payments</p>
           </div>
         </div>
         <Button
@@ -127,7 +127,7 @@ export function AgencyStatusCard({
           </div>
           <div className="flex-1">
             <span className="font-medium text-[#3872e0]">Become an Agency</span>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to offer your media publishing services to clients and receive payments</p>
           </div>
         </div>
         <Button
@@ -231,7 +231,7 @@ export function AgencyStatusCard({
         </div>
         <div className="flex-1">
           <span className="font-medium text-[#3872e0]">Become an Agency</span>
-          <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to receive payments for your media services</p>
+          <p className="text-xs text-sidebar-foreground/60 mt-0.5">Apply to offer your media publishing services to clients and receive payments</p>
         </div>
       </div>
       <Button
