@@ -174,16 +174,27 @@
 }
 
 /* Prevent body scroll lock from affecting layout */
+html,
 html[data-scroll-locked],
+body,
 body[data-scroll-locked] {
   overflow-y: scroll !important;
   padding-right: 0 !important;
   margin-right: 0 !important;
+  scrollbar-gutter: stable;
 }
 
-/* Prevent Radix RemoveScroll from adding padding */
-[data-radix-scroll-area-viewport] {
+/* Prevent any element from getting padding-right compensation */
+[data-radix-scroll-area-viewport],
+[data-radix-popper-content-wrapper] {
   scrollbar-gutter: stable;
+}
+
+/* Override Radix RemoveScroll padding compensation */
+.ReactRemoveScroll,
+[data-radix-dialog-overlay],
+[data-radix-alert-dialog-overlay] {
+  padding-right: 0 !important;
 }
 
 /* Disable default focus highlights and outlines */
