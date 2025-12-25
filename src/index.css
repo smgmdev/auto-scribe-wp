@@ -198,14 +198,20 @@ body[data-scroll-locked] {
 }
 
 /* Prevent sidebar from being affected by scroll lock */
-aside {
+aside.fixed {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+  width: 16rem !important; /* w-64 = 16rem, force fixed width */
   scrollbar-gutter: stable !important;
 }
 
 aside nav,
-aside .overflow-y-auto {
-  overflow-y: scroll !important;
+aside .overflow-y-auto,
+aside .scrollbar-thin {
+  overflow-y: auto !important;
   scrollbar-gutter: stable !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
 }
 
 /* Disable default focus highlights and outlines */
@@ -235,6 +241,7 @@ button:focus-visible,
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: hsl(220 10% 40%) transparent;
+  scrollbar-gutter: stable;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
