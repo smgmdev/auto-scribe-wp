@@ -84,7 +84,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         { id: 'admin-media-management', label: 'Media Management', icon: Library }
       ]
     }, {
-      id: 'credit-history',
+      id: 'admin-credit-balances',
       label: 'Credit Management',
       icon: CreditCard
     }, {
