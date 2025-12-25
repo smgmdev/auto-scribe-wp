@@ -636,6 +636,25 @@ export function AdminAgenciesView() {
       
       if (verificationError) throw verificationError;
       
+      // Also update the original agency application to rejected status
+      // Find the linked agency payout to get the user_id
+      const linkedAgency = agencies.find(a => a.id === selectedVerification.agency_payout_id);
+      if (linkedAgency?.user_id) {
+        const { error: appError } = await supabase
+          .from('agency_applications')
+          .update({ 
+            status: 'rejected',
+            admin_notes: verificationRejectionReason.trim(),
+            reviewed_at: new Date().toISOString()
+          })
+          .eq('user_id', linkedAgency.user_id)
+          .eq('status', 'approved'); // Only update if currently approved
+        
+        if (appError) {
+          console.error('Failed to update application status:', appError);
+        }
+      }
+      
       toast({
         title: 'Verification Rejected',
         description: 'The agency has been notified of the rejection.',
