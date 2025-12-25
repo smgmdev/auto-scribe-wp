@@ -398,7 +398,7 @@ export const AdminCreditManagementView = () => {
                 <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-green-500">+{totalPurchased.toLocaleString()}</div>
+                <div className="text-2xl font-semibold text-green-500">${totalPurchased.toLocaleString()}</div>
               </CardContent>
             </Card>
 
@@ -420,7 +420,7 @@ export const AdminCreditManagementView = () => {
                 <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-red-500">-{totalRefunds.toLocaleString()}</div>
+                <div className="text-2xl font-semibold text-red-500">${totalRefunds.toLocaleString()}</div>
               </CardContent>
             </Card>
 
