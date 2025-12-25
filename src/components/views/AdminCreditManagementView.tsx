@@ -13,6 +13,7 @@ import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, H
 interface UserCredit {
   user_id: string;
   credits: number;
+  used: number;
   email: string | null;
 }
 
@@ -61,14 +62,30 @@ export const AdminCreditManagementView = () => {
 
       if (profilesError) throw profilesError;
 
+      // Fetch transactions to calculate used credits per user
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('credit_transactions')
+        .select('user_id, amount');
+
+      if (transactionsError) throw transactionsError;
+
       const emailMap = new Map<string, string | null>();
       profilesData?.forEach(profile => {
         emailMap.set(profile.id, profile.email);
       });
 
+      // Calculate used credits per user (sum of negative amounts)
+      const usedMap = new Map<string, number>();
+      transactionsData?.forEach(tx => {
+        if (tx.amount < 0) {
+          usedMap.set(tx.user_id, (usedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
+      });
+
       const combined: UserCredit[] = (creditsData || []).map(credit => ({
         user_id: credit.user_id,
         credits: credit.credits,
+        used: usedMap.get(credit.user_id) || 0,
         email: emailMap.get(credit.user_id) || null
       }));
 
@@ -254,6 +271,7 @@ export const AdminCreditManagementView = () => {
                   <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Credits</TableHead>
+                    <TableHead className="text-right">Used</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -262,11 +280,12 @@ export const AdminCreditManagementView = () => {
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -278,6 +297,9 @@ export const AdminCreditManagementView = () => {
                         </TableCell>
                         <TableCell className="text-right font-semibold">
                           {user.credits.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-muted-foreground">
+                          {user.used.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
