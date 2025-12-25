@@ -18,11 +18,11 @@ import {
 
 const faqItems = [
   {
-    question: "Is Agency Account for You?",
+    question: "Is the Agency Account the Right Fit for You?",
     answer: "You must be a formally incorporated media marketing agency that provides professional PR services with a focus on securing media coverage for clients. This account type is intended exclusively for established agencies with proven operations and a documented track record in the media industry."
   },
   {
-    question: "What is the Benefit for Agency on Arcana Mace?",
+    question: "What Are the Benefits for Agencies on Arcana Mace?",
     answer: "As an agency, you can list your own media channels for sale and promote them to a wide audience. With Arcana Mace, clients gain greater confidence when engaging agencies for media buying, while we ensure that agencies receive the support, protection, and guaranteed payment they deserve for their work."
   },
   {
