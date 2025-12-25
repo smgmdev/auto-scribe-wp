@@ -1566,20 +1566,21 @@ export function AdminAgenciesView() {
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 hover:bg-black hover:text-white"
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 px-2 hover:bg-black hover:text-white"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleOpenCommissionDialog(agency);
                                         }}
                                         title="Edit commission"
                                       >
-                                        <Percent className="h-4 w-4" />
+                                        <Percent className="h-3 w-3 mr-1" />
+                                        {agency.commission_percentage}%
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                      <p>Commission: {agency.commission_percentage}%</p>
+                                      <p>Click to edit commission</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
@@ -1711,20 +1712,21 @@ export function AdminAgenciesView() {
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 hover:bg-black hover:text-white"
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 px-2 hover:bg-black hover:text-white"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleOpenCommissionDialog(agency);
                                         }}
                                         title="Edit commission"
                                       >
-                                        <Percent className="h-4 w-4" />
+                                        <Percent className="h-3 w-3 mr-1" />
+                                        {agency.commission_percentage}%
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                      <p>Commission: {agency.commission_percentage}%</p>
+                                      <p>Click to edit commission</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
