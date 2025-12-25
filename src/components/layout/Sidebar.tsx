@@ -23,16 +23,13 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     label: 'Media Network',
     icon: Globe
   }, {
-    id: 'instant-publishing',
+  id: 'instant-publishing',
     label: 'Instant Publishing',
     icon: Zap,
     submenu: [
       { id: 'compose', label: 'New Article', icon: Plus },
       { id: 'headlines', label: 'Sources', icon: Newspaper },
       { id: 'articles', label: 'My Articles', icon: FileText },
-      ...(!isAdmin ? [
-        { id: 'credit-history', label: 'Credit History', icon: History }
-      ] : []),
       ...(isAdmin ? [
         { id: 'admin-credits', label: 'Credit Management', icon: CreditCard },
         { id: 'settings', label: 'Settings', icon: Settings }
@@ -48,17 +45,20 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     ]
   }];
 
-  // Add Agency Management for onboarded agencies
-  if (isAgencyOnboarded && !isAdmin) {
+  // Add Agency Management for onboarded agencies OR Credit History for regular users
+  if (!isAdmin) {
     base.push({
       id: 'agency-management',
       label: 'Agency Management',
       icon: Briefcase,
       submenu: [
-        { id: 'agency-media', label: 'My Media', icon: Library },
-        { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
-        { id: 'agency-payouts', label: 'Payout History', icon: Wallet },
-        { id: 'my-agency', label: 'My Agency', icon: Building2 }
+        ...(isAgencyOnboarded ? [
+          { id: 'agency-media', label: 'My Media', icon: Library },
+          { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
+          { id: 'agency-payouts', label: 'Payout History', icon: Wallet },
+          { id: 'my-agency', label: 'My Agency', icon: Building2 },
+        ] : []),
+        { id: 'credit-history', label: 'Credit History', icon: History }
       ]
     });
   }
@@ -141,9 +141,9 @@ export function Sidebar({
 
   // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
-    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits', 'credit-history'];
+    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
-    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
+    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency', 'credit-history'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
