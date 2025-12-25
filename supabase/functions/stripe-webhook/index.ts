@@ -37,26 +37,51 @@ serve(async (req) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.user_id;
-      const packId = session.metadata?.pack_id;
+      const purchaseType = session.metadata?.type;
+      
+      console.log("Payment completed:", { userId, purchaseType, metadata: session.metadata });
 
-      console.log("Payment completed:", { userId, packId });
-
-      if (!userId || !packId) {
-        throw new Error("Missing user_id or pack_id in session metadata");
+      if (!userId) {
+        throw new Error("Missing user_id in session metadata");
       }
 
-      // Get credit pack details
-      const { data: pack, error: packError } = await supabase
-        .from("credit_packs")
-        .select("credits, name")
-        .eq("id", packId)
-        .single();
+      let creditsToAdd = 0;
+      let description = "";
 
-      if (packError || !pack) {
-        throw new Error(`Credit pack not found: ${packError?.message}`);
+      // Handle custom credit purchases
+      if (purchaseType === 'custom_credits') {
+        const creditAmount = session.metadata?.credit_amount;
+        if (!creditAmount) {
+          throw new Error("Missing credit_amount in session metadata for custom credits");
+        }
+        creditsToAdd = parseInt(creditAmount);
+        description = `Purchased ${creditsToAdd} credits for $${(creditsToAdd).toFixed(2)}`;
+        console.log("Custom credit purchase:", { creditsToAdd });
+      } 
+      // Handle legacy pack purchases (for backwards compatibility)
+      else {
+        const packId = session.metadata?.pack_id;
+        if (!packId) {
+          throw new Error("Missing pack_id in session metadata");
+        }
+
+        // Get credit pack details
+        const { data: pack, error: packError } = await supabase
+          .from("credit_packs")
+          .select("credits, name")
+          .eq("id", packId)
+          .single();
+
+        if (packError || !pack) {
+          throw new Error(`Credit pack not found: ${packError?.message}`);
+        }
+
+        creditsToAdd = pack.credits;
+        description = `Purchased ${pack.name} (${pack.credits} credits)`;
+        console.log("Pack purchase:", { packId, creditsToAdd });
       }
 
-      console.log("Adding credits:", pack.credits);
+      console.log("Adding credits:", creditsToAdd);
 
       // Add credits to user
       const { data: existingCredits } = await supabase
@@ -66,7 +91,7 @@ serve(async (req) => {
         .single();
 
       const currentCredits = existingCredits?.credits || 0;
-      const newCredits = currentCredits + pack.credits;
+      const newCredits = currentCredits + creditsToAdd;
 
       const { error: updateError } = await supabase
         .from("user_credits")
@@ -85,16 +110,16 @@ serve(async (req) => {
         .from("credit_transactions")
         .insert({
           user_id: userId,
-          amount: pack.credits,
+          amount: creditsToAdd,
           type: "purchase",
-          description: `Purchased ${pack.name} (${pack.credits} credits)`,
+          description: description,
         });
 
       if (txError) {
         console.error("Failed to record transaction:", txError);
       }
 
-      console.log("Credits added successfully");
+      console.log("Credits added successfully. New balance:", newCredits);
     }
 
     return new Response(JSON.stringify({ received: true }), {

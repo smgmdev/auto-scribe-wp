@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const PRICE_PER_CREDIT_CENTS = 100; // $1.00 per credit
+const MIN_CREDITS = 10;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,7 +18,6 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     // Create client with anon key for user authentication
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
@@ -39,13 +41,20 @@ serve(async (req) => {
     
     console.log("Authenticated user:", { userId, email });
 
-    const { priceId, packId } = await req.json();
+    const { creditAmount } = await req.json();
 
-    console.log("Creating checkout session:", { priceId, packId, userId });
+    console.log("Creating checkout session for custom credits:", { creditAmount, userId });
 
-    if (!priceId || !packId) {
-      throw new Error("Missing required parameters: priceId and packId are required");
+    // Validate credit amount
+    if (!creditAmount || typeof creditAmount !== 'number' || creditAmount < MIN_CREDITS) {
+      throw new Error(`Invalid credit amount. Minimum is ${MIN_CREDITS} credits.`);
     }
+
+    // Ensure it's a whole number
+    const credits = Math.floor(creditAmount);
+    const totalCents = credits * PRICE_PER_CREDIT_CENTS;
+
+    console.log("Calculated price:", { credits, totalCents });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
@@ -61,12 +70,14 @@ serve(async (req) => {
 
       if (existingCustomers.data.length > 0) {
         customerId = existingCustomers.data[0].id;
+        console.log("Found existing customer:", customerId);
       } else {
         const customer = await stripe.customers.create({
           email: email,
           metadata: { supabase_user_id: userId },
         });
         customerId = customer.id;
+        console.log("Created new customer:", customerId);
       }
     }
 
@@ -76,16 +87,24 @@ serve(async (req) => {
       customer: customerId,
       line_items: [
         {
-          price: priceId,
-          quantity: 1,
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${credits} Credits`,
+              description: `Purchase of ${credits} credits at $1.00 per credit`,
+            },
+            unit_amount: PRICE_PER_CREDIT_CENTS,
+          },
+          quantity: credits,
         },
       ],
       mode: "payment",
       success_url: `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?payment=cancelled`,
       metadata: {
-        pack_id: packId,
+        credit_amount: credits.toString(),
         user_id: userId,
+        type: 'custom_credits',
       },
     });
 
