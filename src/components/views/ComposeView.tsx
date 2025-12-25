@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins } from 'lucide-react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useAuth } from '@/hooks/useAuth';
@@ -79,6 +79,8 @@ export function ComposeView() {
   const [content, setContent] = useState(editingArticle?.content || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [showPublishSuccess, setShowPublishSuccess] = useState(false);
+  const [publishedLink, setPublishedLink] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedSite, setSelectedSite] = useState<string>(editingArticle?.publishedTo || preselectedSiteId || '');
   const [featuredImage, setFeaturedImage] = useState<FeaturedImage>(() => {
@@ -661,26 +663,35 @@ export function ComposeView() {
         }
       }
 
-      toast({
-        title: "Article published!",
-        description: <div>
-            Successfully published to {currentSite.name}.{' '}
-            <a href={result.link} rel="noopener noreferrer" className="underline font-medium">
-              View article
-            </a>
-          </div>
-      });
+      // Show success animation
+      setPublishedLink(result.link);
+      setIsPublishing(false);
+      setShowPublishSuccess(true);
 
-      // Reset form
-      setTitle('');
-      setContent('');
-      setSelectedHeadline(null);
-      setSelectedSite('');
-      setSelectedCategories([]);
-      setSelectedTagIds([]);
-      setFocusKeyword('');
-      setMetaDescription('');
-      removeImage();
+      // Reset form after a delay to show success animation
+      setTimeout(() => {
+        setShowPublishSuccess(false);
+        setPublishedLink(null);
+        setTitle('');
+        setContent('');
+        setSelectedHeadline(null);
+        setSelectedSite('');
+        setSelectedCategories([]);
+        setSelectedTagIds([]);
+        setFocusKeyword('');
+        setMetaDescription('');
+        removeImage();
+        
+        toast({
+          title: "Article published!",
+          description: <div>
+              Successfully published to {currentSite.name}.{' '}
+              <a href={result.link} rel="noopener noreferrer" className="underline font-medium">
+                View article
+              </a>
+            </div>
+        });
+      }, 2500);
     } catch (error) {
       console.error('Publish error:', error);
       toast({
@@ -688,7 +699,6 @@ export function ComposeView() {
         description: error instanceof Error ? error.message : "Could not publish to WordPress",
         variant: "destructive"
       });
-    } finally {
       setIsPublishing(false);
     }
   };
@@ -852,11 +862,38 @@ export function ComposeView() {
       {/* Publishing Overlay */}
       {isPublishing && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
             <Loader2 className="h-10 w-10 animate-spin text-accent" />
             <div className="text-center">
               <p className="text-lg font-medium text-foreground">Publishing Article...</p>
               <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Overlay */}
+      {showPublishSuccess && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+            <div className="relative">
+              <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
+                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-semibold text-foreground">Published Successfully!</p>
+              <p className="text-sm text-muted-foreground mt-2">Your article is now live</p>
+              {publishedLink && (
+                <a 
+                  href={publishedLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="inline-block mt-3 text-sm text-accent hover:underline font-medium"
+                >
+                  View published article →
+                </a>
+              )}
             </div>
           </div>
         </div>
