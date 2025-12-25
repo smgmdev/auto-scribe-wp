@@ -115,63 +115,75 @@ export function CreditHistoryView() {
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Available Credits
             </CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1.5">
-              <Wallet className="h-3.5 w-3.5 text-primary" />
-              <span className="text-sm font-bold text-primary">{availableCredits}</span>
-              <span className="text-sm text-muted-foreground">credits</span>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                availableCredits
+              )}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Total Purchased
             </CardTitle>
+            <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1.5">
-              <ArrowUpCircle className="h-3.5 w-3.5 text-green-500" />
-              <span className="text-sm font-bold text-green-500">+{totalPurchased}</span>
-              <span className="text-sm text-muted-foreground">credits</span>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-green-500">
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                `+${totalPurchased}`
+              )}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Total Used
             </CardTitle>
+            <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1.5">
-              <ArrowDownCircle className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-sm font-bold text-muted-foreground">-{totalSpent}</span>
-              <span className="text-sm text-muted-foreground">credits</span>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-muted-foreground">
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                `-${totalSpent}`
+              )}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Total Transactions
             </CardTitle>
+            <Coins className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1.5">
-              <Coins className="h-3.5 w-3.5 text-primary" />
-              <span className="text-sm font-bold">{transactions.length}</span>
-              <span className="text-sm text-muted-foreground">transactions</span>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                transactions.length
+              )}
             </div>
           </CardContent>
         </Card>
