@@ -66,11 +66,26 @@ export const AdminCreditManagementView = () => {
   const [agencyBalancesLoading, setAgencyBalancesLoading] = useState(true);
   const [agencyBalancesSearchTerm, setAgencyBalancesSearchTerm] = useState('');
 
+  // Agency Transactions state
+  const [agencyTransactions, setAgencyTransactions] = useState<{
+    id: string;
+    agency_name: string;
+    media_site_name: string;
+    amount_cents: number;
+    platform_fee_cents: number;
+    agency_payout_cents: number;
+    status: string;
+    created_at: string;
+  }[]>([]);
+  const [agencyTransactionsLoading, setAgencyTransactionsLoading] = useState(true);
+  const [agencyTransactionsSearchTerm, setAgencyTransactionsSearchTerm] = useState('');
+
   useEffect(() => {
     fetchUserCredits();
     fetchTransactions();
     fetchAgencyStats();
     fetchAgencyBalances();
+    fetchAgencyTransactions();
   }, []);
 
   const fetchAgencyStats = async () => {
@@ -165,6 +180,43 @@ export const AdminCreditManagementView = () => {
       console.error('Error fetching agency balances:', error);
     } finally {
       setAgencyBalancesLoading(false);
+    }
+  };
+
+  const fetchAgencyTransactions = async () => {
+    try {
+      setAgencyTransactionsLoading(true);
+      
+      const { data: orders } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          amount_cents,
+          platform_fee_cents,
+          agency_payout_cents,
+          status,
+          created_at,
+          media_sites!inner(name, agency)
+        `)
+        .in('status', ['paid', 'completed', 'refunded'])
+        .order('created_at', { ascending: false });
+
+      const transactions = (orders || []).map(order => ({
+        id: order.id,
+        agency_name: (order.media_sites as any)?.agency || 'Unknown',
+        media_site_name: (order.media_sites as any)?.name || 'Unknown',
+        amount_cents: order.amount_cents,
+        platform_fee_cents: order.platform_fee_cents,
+        agency_payout_cents: order.agency_payout_cents,
+        status: order.status,
+        created_at: order.created_at
+      }));
+
+      setAgencyTransactions(transactions);
+    } catch (error) {
+      console.error('Error fetching agency transactions:', error);
+    } finally {
+      setAgencyTransactionsLoading(false);
     }
   };
 
@@ -922,10 +974,76 @@ export const AdminCreditManagementView = () => {
               </TooltipProvider>
 
               <Card>
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium">Agency Transactions</p>
-                  <p className="text-sm mt-1">View transactions between users and agencies from the Global Library</p>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold">Agency Transactions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search by agency name..."
+                        value={agencyTransactionsSearchTerm}
+                        onChange={(e) => setAgencyTransactionsSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Agency</TableHead>
+                        <TableHead>Media Site</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Fee</TableHead>
+                        <TableHead className="text-right">Payout</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {agencyTransactionsLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          </TableRow>
+                        ))
+                      ) : agencyTransactions.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                            No transactions found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        agencyTransactions
+                          .filter(tx => {
+                            const searchLower = agencyTransactionsSearchTerm.toLowerCase();
+                            return tx.agency_name.toLowerCase().includes(searchLower);
+                          })
+                          .map((tx) => (
+                          <TableRow key={tx.id}>
+                            <TableCell className="font-medium">{tx.agency_name}</TableCell>
+                            <TableCell>{tx.media_site_name}</TableCell>
+                            <TableCell className="text-right">${(tx.amount_cents / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">${(tx.platform_fee_cents / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">${(tx.agency_payout_cents / 100).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Badge variant={tx.status === 'completed' ? 'default' : tx.status === 'paid' ? 'secondary' : 'destructive'}>
+                                {tx.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{new Date(tx.created_at).toLocaleDateString()}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
             </TabsContent>
