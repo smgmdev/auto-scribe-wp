@@ -58,6 +58,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [otherNiche, setOtherNiche] = useState('');
+  const [wpBlogUrl, setWpBlogUrl] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -102,6 +103,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       });
       setSelectedNiches([]);
       setOtherNiche('');
+      setWpBlogUrl('');
       setDocumentFile(null);
       setDocumentUrl(null);
       setLogoFile(null);
@@ -540,6 +542,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                           } else if (!checked) {
                             setSelectedNiches(prev => prev.filter(n => n !== niche));
                             if (niche === 'Other') setOtherNiche('');
+                            if (niche === 'WP Media Blog Owner') setWpBlogUrl('');
                           }
                         }}
                         disabled={isDisabled}
@@ -554,6 +557,22 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   );
                 })}
               </div>
+              {selectedNiches.includes('WP Media Blog Owner') && (
+                <div className="mt-2">
+                  <div className="flex w-full">
+                    <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md border-input">
+                      https://
+                    </span>
+                    <Input
+                      placeholder="yourblog.com"
+                      value={wpBlogUrl}
+                      onChange={(e) => setWpBlogUrl(e.target.value)}
+                      disabled={submitting}
+                      className="rounded-l-none flex-1"
+                    />
+                  </div>
+                </div>
+              )}
               {selectedNiches.includes('Other') && (
                 <Input
                   placeholder="Please specify your niche"
