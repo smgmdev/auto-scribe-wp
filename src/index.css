@@ -197,6 +197,17 @@ body[data-scroll-locked] {
   padding-right: 0 !important;
 }
 
+/* Prevent sidebar from being affected by scroll lock */
+aside {
+  scrollbar-gutter: stable !important;
+}
+
+aside nav,
+aside .overflow-y-auto {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+}
+
 /* Disable default focus highlights and outlines */
 a:focus,
 a:focus-visible,
