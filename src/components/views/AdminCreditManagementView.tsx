@@ -12,7 +12,8 @@ import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, H
 
 interface UserCredit {
   user_id: string;
-  credits: number;
+  purchased: number;
+  available: number;
   used: number;
   email: string | null;
 }
@@ -74,17 +75,21 @@ export const AdminCreditManagementView = () => {
         emailMap.set(profile.id, profile.email);
       });
 
-      // Calculate used credits per user (sum of negative amounts)
+      // Calculate purchased and used credits per user
+      const purchasedMap = new Map<string, number>();
       const usedMap = new Map<string, number>();
       transactionsData?.forEach(tx => {
-        if (tx.amount < 0) {
+        if (tx.amount > 0) {
+          purchasedMap.set(tx.user_id, (purchasedMap.get(tx.user_id) || 0) + tx.amount);
+        } else {
           usedMap.set(tx.user_id, (usedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
       });
 
       const combined: UserCredit[] = (creditsData || []).map(credit => ({
         user_id: credit.user_id,
-        credits: credit.credits,
+        purchased: purchasedMap.get(credit.user_id) || 0,
+        available: credit.credits,
         used: usedMap.get(credit.user_id) || 0,
         email: emailMap.get(credit.user_id) || null
       }));
@@ -135,8 +140,8 @@ export const AdminCreditManagementView = () => {
   const filteredCredits = userCredits.filter(user => 
     user.email?.toLowerCase().includes(balancesSearchTerm.toLowerCase())
   );
-  const totalCredits = userCredits.reduce((sum, user) => sum + user.credits, 0);
-  const usersWithCredits = userCredits.filter(user => user.credits > 0).length;
+  const totalCredits = userCredits.reduce((sum, user) => sum + user.available, 0);
+  const usersWithCredits = userCredits.filter(user => user.available > 0).length;
 
   // Transactions computed values
   const filteredTransactions = transactions.filter(tx => {
@@ -270,7 +275,8 @@ export const AdminCreditManagementView = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Email</TableHead>
-                    <TableHead className="text-right">Credits</TableHead>
+                    <TableHead className="text-right">Purchased</TableHead>
+                    <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Used</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -281,11 +287,12 @@ export const AdminCreditManagementView = () => {
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -295,8 +302,11 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="font-medium">
                           {user.email || <span className="text-muted-foreground italic">No email</span>}
                         </TableCell>
+                        <TableCell className="text-right font-semibold text-green-500">
+                          {user.purchased.toLocaleString()}
+                        </TableCell>
                         <TableCell className="text-right font-semibold">
-                          {user.credits.toLocaleString()}
+                          {user.available.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-muted-foreground">
                           {user.used.toLocaleString()}
