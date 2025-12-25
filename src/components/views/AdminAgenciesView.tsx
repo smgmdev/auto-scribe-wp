@@ -1552,10 +1552,6 @@ export function AdminAgenciesView() {
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Verified
                                 </Badge>
-                                <Badge variant="outline">
-                                  <Percent className="h-3 w-3 mr-1" />
-                                  {agency.commission_percentage}%
-                                </Badge>
                                 <Badge className="bg-black text-white">
                                   Stripe Connect
                                 </Badge>
@@ -1685,10 +1681,6 @@ export function AdminAgenciesView() {
                                 <Badge className="bg-green-600 text-white">
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Verified
-                                </Badge>
-                                <Badge variant="outline">
-                                  <Percent className="h-3 w-3 mr-1" />
-                                  {agency.commission_percentage}%
                                 </Badge>
                                 {verification && (
                                   <Badge 
