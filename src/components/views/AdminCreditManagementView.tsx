@@ -14,6 +14,7 @@ interface UserCredit {
   user_id: string;
   purchased: number;
   available: number;
+  orders: number;
   used: number;
   refunded: number;
   email: string | null;
@@ -203,10 +204,22 @@ export const AdminCreditManagementView = () => {
         }
       });
 
+      // Fetch orders count per user
+      const { data: ordersData } = await supabase
+        .from('orders')
+        .select('user_id')
+        .in('status', ['paid', 'completed']);
+
+      const ordersMap = new Map<string, number>();
+      ordersData?.forEach(order => {
+        ordersMap.set(order.user_id, (ordersMap.get(order.user_id) || 0) + 1);
+      });
+
       const combined: UserCredit[] = (creditsData || []).map(credit => ({
         user_id: credit.user_id,
         purchased: purchasedMap.get(credit.user_id) || 0,
         available: credit.credits,
+        orders: ordersMap.get(credit.user_id) || 0,
         used: usedMap.get(credit.user_id) || 0,
         refunded: refundedMap.get(credit.user_id) || 0,
         email: emailMap.get(credit.user_id) || null
@@ -416,6 +429,7 @@ export const AdminCreditManagementView = () => {
                     <TableHead className="text-right">Purchased</TableHead>
                     <TableHead className="text-right">Refunded</TableHead>
                     <TableHead className="text-right">Available</TableHead>
+                    <TableHead className="text-right">Orders</TableHead>
                     <TableHead className="text-right">Used</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -428,11 +442,12 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -445,6 +460,7 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
                       </TableRow>
                     ))
