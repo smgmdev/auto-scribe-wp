@@ -398,7 +398,7 @@ export const AdminCreditManagementView = () => {
                 <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-green-500">${totalPurchased.toLocaleString()}</div>
+                <div className="text-2xl font-semibold text-foreground">${totalPurchased.toFixed(2)}</div>
               </CardContent>
             </Card>
 
@@ -420,7 +420,7 @@ export const AdminCreditManagementView = () => {
                 <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-red-500">${totalRefunds.toLocaleString()}</div>
+                <div className="text-2xl font-semibold text-foreground">${totalRefunds.toFixed(2)}</div>
               </CardContent>
             </Card>
 
@@ -442,7 +442,7 @@ export const AdminCreditManagementView = () => {
                 <RotateCcw className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-orange-500">{totalRefundRequests.toLocaleString()}</div>
+                <div className="text-2xl font-semibold text-foreground">{totalRefundRequests.toLocaleString()}</div>
               </CardContent>
             </Card>
 
@@ -609,7 +609,7 @@ export const AdminCreditManagementView = () => {
                       <DollarSign className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
-                      <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
+                      <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
                     </CardContent>
                   </Card>
 
@@ -653,7 +653,7 @@ export const AdminCreditManagementView = () => {
                       <Percent className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
-                      <div className="text-2xl font-semibold text-primary">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
+                      <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -690,7 +690,7 @@ export const AdminCreditManagementView = () => {
                       <DollarSign className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
-                      <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
+                      <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
                     </CardContent>
                   </Card>
 
@@ -712,7 +712,7 @@ export const AdminCreditManagementView = () => {
                       <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
-                      <div className="text-2xl font-semibold text-red-500">$0.00</div>
+                      <div className="text-2xl font-semibold text-foreground">$0.00</div>
                     </CardContent>
                   </Card>
 
@@ -756,7 +756,7 @@ export const AdminCreditManagementView = () => {
                       <ShoppingCart className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
-                      <div className="text-2xl font-semibold text-primary">{agencyStats.totalOrders}</div>
+                      <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
                     </CardContent>
                   </Card>
                 </div>
