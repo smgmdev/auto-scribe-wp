@@ -122,6 +122,7 @@ export function AdminAgenciesView() {
   const [processingVerification, setProcessingVerification] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
   const [agencyToDowngrade, setAgencyToDowngrade] = useState<AgencyPayout | null>(null);
+  const [selectedAgencyPayout, setSelectedAgencyPayout] = useState<AgencyPayout | null>(null);
   const [showCommissionDialog, setShowCommissionDialog] = useState(false);
   const [agencyToEditCommission, setAgencyToEditCommission] = useState<AgencyPayout | null>(null);
   const [newCommissionPercentage, setNewCommissionPercentage] = useState<string>('');
@@ -275,6 +276,10 @@ export function AdminAgenciesView() {
     setAdminNotes(app.admin_notes || '');
     setLogoUrl(null);
     setDialogLogoLoaded(false);
+    
+    // Find the corresponding agency payout if exists (for active agencies)
+    const agencyPayout = agencies.find(a => a.user_id === app.user_id && a.onboarding_complete && !a.downgraded);
+    setSelectedAgencyPayout(agencyPayout || null);
     
     // Fetch logo URL if exists
     if (app.logo_url) {
@@ -1525,7 +1530,7 @@ export function AdminAgenciesView() {
       </Tabs>
 
       {/* Application Review Dialog */}
-      <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); }}>
+      <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null); }}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-3">
@@ -1706,6 +1711,24 @@ export function AdminAgenciesView() {
                     {selectedApp.status === 'cancelled' ? 'Cancellation Reason' : 'Rejection Reason'}
                   </p>
                   <p className="text-sm">{selectedApp.admin_notes}</p>
+                </div>
+              )}
+
+              {/* Downgrade button for active agencies */}
+              {selectedAgencyPayout && (
+                <div className="border-t pt-4">
+                  <Button
+                    variant="outline"
+                    className="w-full hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                    onClick={() => {
+                      setSelectedApp(null);
+                      setSelectedAgencyPayout(null);
+                      handleOpenDowngradeDialog(selectedAgencyPayout);
+                    }}
+                  >
+                    <ArrowDownCircle className="h-4 w-4 mr-2" />
+                    Downgrade Agency
+                  </Button>
                 </div>
               )}
             </div>
