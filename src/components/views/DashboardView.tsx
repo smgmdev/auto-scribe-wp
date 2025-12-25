@@ -69,7 +69,7 @@ export function DashboardView() {
     loading: articlesLoading
   } = useArticles();
   const { sites, loading: sitesLoading } = useSites();
-  const [isAgency, setIsAgency] = useState(false);
+  const [isAgency, setIsAgency] = useState<boolean | null>(null);
   const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
   const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
   const [agencyEarnings, setAgencyEarnings] = useState({
@@ -79,6 +79,7 @@ export function DashboardView() {
     loading: true
   });
 
+  const agencyStatusLoading = isAgency === null && !isAdmin;
   const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
 
   useEffect(() => {
@@ -193,7 +194,11 @@ export function DashboardView() {
           </h1>
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
-        {isAgency ? (
+        {agencyStatusLoading ? (
+          <Badge className="bg-muted text-muted-foreground border-border hover:bg-muted">
+            <Loader2 className="h-3 w-3 animate-spin" />
+          </Badge>
+        ) : isAgency ? (
           <Badge className="bg-green-500/20 text-black border-green-500/30 flex items-center gap-1 px-3 py-1 hover:bg-green-500/20">
             <CheckCircle className="h-3 w-3" />
             Active Agency
