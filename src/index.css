@@ -113,11 +113,12 @@
   }
 
   html {
-    overflow-y: scroll;
+    scrollbar-gutter: stable;
   }
 
   body {
     @apply bg-background text-foreground font-body antialiased text-sm;
+    scrollbar-gutter: stable;
   }
 
   h1, h2, h3, h4, h5, h6 {
