@@ -300,7 +300,7 @@ export function AgencyApplicationView() {
             Agency Verification
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Complete your verification to start receiving payouts
+            Complete your verification to upgrade your account to Agency and be able to offer your own media sites to clients.
           </p>
         </div>
 
