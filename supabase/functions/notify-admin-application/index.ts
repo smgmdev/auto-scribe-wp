@@ -17,6 +17,8 @@ interface ApplicationNotification {
   agency_website: string;
   media_niches: string[];
   media_channels: string;
+  agency_description?: string;
+  wp_blog_url?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -64,6 +66,21 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending notification to admin email:", adminEmail);
 
+    // Build optional rows
+    const wpBlogRow = data.wp_blog_url ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">WP Media Blog:</td>
+                  <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500;">
+                    <a href="https://${data.wp_blog_url}" style="color: #3872e0;">${data.wp_blog_url}</a>
+                  </td>
+                </tr>` : '';
+
+    const descriptionRow = data.agency_description ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;">Agency Description:</td>
+                  <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500;">${data.agency_description}</td>
+                </tr>` : '';
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -107,11 +124,11 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="padding: 8px 0; color: #666; vertical-align: top;">Media Niches:</td>
                   <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500;">${data.media_niches.join(', ')}</td>
-                </tr>
+                </tr>${wpBlogRow}
                 <tr>
                   <td style="padding: 8px 0; color: #666; vertical-align: top;">Media Channels:</td>
                   <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500; white-space: pre-wrap;">${data.media_channels}</td>
-                </tr>
+                </tr>${descriptionRow}
               </table>
             </div>
             

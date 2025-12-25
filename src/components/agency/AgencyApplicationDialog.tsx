@@ -405,7 +405,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
           whatsapp_phone,
           agency_website: `https://${agency_website}`,
           media_niches: niches,
-          media_channels
+          media_channels,
+          agency_description: agencyDescription || undefined,
+          wp_blog_url: selectedNiches.includes('WP Media Blog Owner') ? wpBlogUrl : undefined
         }
       }).catch(err => console.error('Failed to send admin notification:', err));
 
