@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, HelpCircle, Building2, Percent } from 'lucide-react';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, HelpCircle, Building2, Percent, DollarSign, Wallet, RefreshCcw, ShoppingCart } from 'lucide-react';
 
 interface UserCredit {
   user_id: string;
@@ -606,7 +606,7 @@ export const AdminCreditManagementView = () => {
                           <p>Total revenue from agency transactions</p>
                         </TooltipContent>
                       </Tooltip>
-                      <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+                      <DollarSign className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
@@ -628,7 +628,7 @@ export const AdminCreditManagementView = () => {
                           <p>Total payouts made to agencies</p>
                         </TooltipContent>
                       </Tooltip>
-                      <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+                      <Wallet className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
@@ -687,7 +687,7 @@ export const AdminCreditManagementView = () => {
                           <p>Total revenue from agency transactions</p>
                         </TooltipContent>
                       </Tooltip>
-                      <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+                      <DollarSign className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-green-500">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
@@ -709,7 +709,7 @@ export const AdminCreditManagementView = () => {
                           <p>Total refunds processed for agencies</p>
                         </TooltipContent>
                       </Tooltip>
-                      <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
+                      <RefreshCcw className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-red-500">$0.00</div>
@@ -731,7 +731,7 @@ export const AdminCreditManagementView = () => {
                           <p>Pending refund requests from agencies</p>
                         </TooltipContent>
                       </Tooltip>
-                      <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+                      <RotateCcw className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-foreground">0</div>
@@ -753,7 +753,7 @@ export const AdminCreditManagementView = () => {
                           <p>Total number of agency orders</p>
                         </TooltipContent>
                       </Tooltip>
-                      <Percent className="h-4 w-4 text-muted-foreground/60" />
+                      <ShoppingCart className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-primary">{agencyStats.totalOrders}</div>
