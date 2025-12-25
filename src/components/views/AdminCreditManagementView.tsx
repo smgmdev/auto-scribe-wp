@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw } from 'lucide-react';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, HelpCircle } from 'lucide-react';
 
 interface UserCredit {
   user_id: string;
@@ -252,90 +252,95 @@ export const AdminCreditManagementView = () => {
 
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="space-y-6">
-          <TooltipProvider>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="transition-colors hover:border-[#4771d9] cursor-default">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-500/10 rounded-lg shrink-0">
-                          <ArrowUpCircle className="h-4 w-4 text-green-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground truncate">Total Purchased</p>
-                          <p className="text-lg font-bold text-green-500">+{totalPurchased.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total credits purchased by all users</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="transition-colors hover:border-[#4771d9] cursor-default">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-red-500/10 rounded-lg shrink-0">
-                          <ArrowDownCircle className="h-4 w-4 text-red-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground truncate">Total Refunds</p>
-                          <p className="text-lg font-bold text-red-500">-{totalRefunds.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total credits refunded to users</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="transition-colors hover:border-[#4771d9] cursor-default">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-orange-500/10 rounded-lg shrink-0">
-                          <RotateCcw className="h-4 w-4 text-orange-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground truncate">Refund Requests</p>
-                          <p className="text-lg font-bold text-orange-500">{totalRefundRequests.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Number of refund transactions processed</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="transition-colors hover:border-[#4771d9] cursor-default">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg shrink-0">
-                          <CreditCard className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground truncate">Transactions</p>
-                          <p className="text-lg font-bold">{transactions.length.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total number of credit transactions</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Total Purchased
+                      </CardTitle>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Total credits purchased by all users</p>
+                  </TooltipContent>
+                </Tooltip>
+                <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-green-500">+{totalPurchased.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Total Refunds
+                      </CardTitle>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Total credits refunded to users</p>
+                  </TooltipContent>
+                </Tooltip>
+                <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-red-500">-{totalRefunds.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Refund Requests
+                      </CardTitle>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Number of refund transactions processed</p>
+                  </TooltipContent>
+                </Tooltip>
+                <RotateCcw className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-orange-500">{totalRefundRequests.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Transactions
+                      </CardTitle>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Total number of credit transactions</p>
+                  </TooltipContent>
+                </Tooltip>
+                <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">{transactions.length.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
