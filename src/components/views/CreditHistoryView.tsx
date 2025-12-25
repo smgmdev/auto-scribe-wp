@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { History, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter } from 'lucide-react';
+import { History, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,12 +20,19 @@ export function CreditHistoryView() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [availableCredits, setAvailableCredits] = useState<number>(0);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       if (!user) return;
 
       setLoading(true);
+      
+      // Fetch available credits
+      const { data: creditsData } = await supabase
+        .rpc('get_user_credits', { _user_id: user.id });
+      setAvailableCredits(creditsData || 0);
+
       let query = supabase
         .from('credit_transactions')
         .select('*')
@@ -95,7 +102,22 @@ export function CreditHistoryView() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Available Credits
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold text-primary">{availableCredits}</span>
+              <span className="text-sm text-muted-foreground">credits</span>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -119,8 +141,8 @@ export function CreditHistoryView() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <ArrowDownCircle className="h-5 w-5 text-red-500" />
-              <span className="text-2xl font-bold text-red-500">-{totalSpent}</span>
+              <ArrowDownCircle className="h-5 w-5 text-muted-foreground" />
+              <span className="text-2xl font-bold text-muted-foreground">-{totalSpent}</span>
               <span className="text-sm text-muted-foreground">credits</span>
             </div>
           </CardContent>
