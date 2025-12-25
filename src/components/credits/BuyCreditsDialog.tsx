@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 10;
+const QUICK_AMOUNTS = [10, 50, 100, 500];
 
 interface BuyCreditsDialogProps {
   open: boolean;
@@ -89,8 +90,35 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Quick Select Buttons */}
           <div className="space-y-2">
-            <Label htmlFor="credit-amount">Number of Credits</Label>
+            <Label>Quick Select</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {QUICK_AMOUNTS.map((amount) => (
+                <Button
+                  key={amount}
+                  variant={parsedAmount === amount ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCreditAmount(amount.toString())}
+                  className="w-full"
+                >
+                  {amount}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">or enter custom amount</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="credit-amount">Custom Amount</Label>
             <Input
               id="credit-amount"
               type="text"
