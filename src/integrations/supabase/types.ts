@@ -17,6 +17,7 @@ export type Database = {
       agency_applications: {
         Row: {
           admin_notes: string | null
+          agency_description: string | null
           agency_name: string
           agency_website: string
           country: string
@@ -37,9 +38,11 @@ export type Database = {
           updated_at: string
           user_id: string
           whatsapp_phone: string
+          wp_blog_url: string | null
         }
         Insert: {
           admin_notes?: string | null
+          agency_description?: string | null
           agency_name: string
           agency_website: string
           country: string
@@ -60,9 +63,11 @@ export type Database = {
           updated_at?: string
           user_id: string
           whatsapp_phone: string
+          wp_blog_url?: string | null
         }
         Update: {
           admin_notes?: string | null
+          agency_description?: string | null
           agency_name?: string
           agency_website?: string
           country?: string
@@ -83,6 +88,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           whatsapp_phone?: string
+          wp_blog_url?: string | null
         }
         Relationships: []
       }

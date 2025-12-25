@@ -70,6 +70,8 @@ interface AgencyApplication {
   updated_at: string;
   reviewed_at: string | null;
   read: boolean;
+  agency_description: string | null;
+  wp_blog_url: string | null;
 }
 
 interface AgencyPayout {
@@ -1937,6 +1939,26 @@ export function AdminAgenciesView() {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {selectedApp.agency_description && (
+                <div className="text-sm">
+                  <p className="text-muted-foreground mb-1">Agency Description</p>
+                  <p className="font-medium">{selectedApp.agency_description}</p>
+                </div>
+              )}
+
+              {selectedApp.wp_blog_url && (
+                <div className="text-sm">
+                  <p className="text-muted-foreground mb-1">WP Media Blog</p>
+                  <button 
+                    onClick={() => { setWebViewUrl(`https://${selectedApp.wp_blog_url}`); setWebViewTitle('WP Media Blog'); }}
+                    className="font-medium text-primary hover:underline flex items-center gap-1"
+                  >
+                    {selectedApp.wp_blog_url}
+                    <ExternalLink className="h-3 w-3" />
+                  </button>
                 </div>
               )}
 
