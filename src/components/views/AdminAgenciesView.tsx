@@ -110,6 +110,7 @@ export function AdminAgenciesView() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('pending');
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
+  const [onboardedSubTab, setOnboardedSubTab] = useState('active');
   const [voidSubTab, setVoidSubTab] = useState('cancelled');
   const [selectedVerification, setSelectedVerification] = useState<CustomVerification | null>(null);
   const [verificationDocUrls, setVerificationDocUrls] = useState<Record<string, string>>({});
@@ -776,7 +777,7 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
+          <TabsTrigger value="onboarded">Onboarded ({agencies.filter(a => a.onboarding_complete || a.downgraded).length})</TabsTrigger>
           <TabsTrigger value="void" className="relative">
             Void ({cancelledApplications.length + rejectedApplications.length})
             {unreadCancelledCount > 0 && (
@@ -1074,7 +1075,7 @@ export function AdminAgenciesView() {
           
           {/* Sub-tabs for verification stages */}
           <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab} className="mb-4">
-            <TabsList className="grid w-full grid-cols-3 max-w-lg">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="pending-verification" className="relative">
                 Pending Verification ({agenciesPendingVerification.length})
               </TabsTrigger>
@@ -1085,9 +1086,6 @@ export function AdminAgenciesView() {
                     {unreadPendingApprovalCount}
                   </span>
                 )}
-              </TabsTrigger>
-              <TabsTrigger value="downgraded" className="relative">
-                Downgraded ({agencies.filter(a => a.downgraded).length})
               </TabsTrigger>
             </TabsList>
 
@@ -1269,6 +1267,162 @@ export function AdminAgenciesView() {
               )}
             </TabsContent>
 
+          </Tabs>
+        </TabsContent>
+
+        {/* Onboarded Agencies Tab */}
+        <TabsContent value="onboarded" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
+          
+          {/* Sub-tabs for Active and Downgraded */}
+          <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab} className="mb-4">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="active" className="relative">
+                Active ({agencies.filter(a => a.onboarding_complete && !a.downgraded).length})
+              </TabsTrigger>
+              <TabsTrigger value="downgraded" className="relative">
+                Downgraded ({agencies.filter(a => a.downgraded).length})
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Active Sub-Tab */}
+            <TabsContent value="active" className="mt-4">
+              {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No active agencies</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Active agencies will appear here after completing verification
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {agencies.filter(a => a.onboarding_complete && !a.downgraded).map(agency => {
+                    const application = getAgencyWithApplication(agency);
+                    const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
+                    return (
+                      <Card 
+                        key={agency.id}
+                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
+                        onClick={() => {
+                          if (application) {
+                            handleOpenApplication(application);
+                          }
+                        }}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt={agency.agency_name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : application && logoUrls[application.id] ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                  </div>
+                                  <img 
+                                    src={logoUrls[application.id]} 
+                                    alt=""
+                                    className="hidden"
+                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  />
+                                </>
+                              ) : application && loadingLogoIds.has(application.id) ? (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                </div>
+                              )}
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h3 className="font-semibold">{agency.agency_name}</h3>
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                </div>
+                                <p className="text-sm text-muted-foreground">{agency.email}</p>
+                                {application && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {application.full_name} • {application.country}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <div className="flex gap-2">
+                                {verification && (
+                                  <Badge 
+                                    className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenVerification(verification, e);
+                                    }}
+                                  >
+                                    <FileText className="h-3 w-3 mr-1" />
+                                    Details
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex gap-1">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 px-2 hover:bg-black hover:text-white"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenCommissionDialog(agency);
+                                        }}
+                                        title="Edit commission"
+                                      >
+                                        <Percent className="h-3 w-3 mr-1" />
+                                        {agency.commission_percentage}%
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Click to edit commission</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-black hover:text-white"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenDowngradeDialog(agency);
+                                  }}
+                                  disabled={deleting === agency.id}
+                                  title="Downgrade agency"
+                                >
+                                  {deleting === agency.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <X className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
             {/* Downgraded Sub-Tab */}
             <TabsContent value="downgraded" className="mt-4">
               {agencies.filter(a => a.downgraded).length === 0 ? (
@@ -1374,145 +1528,6 @@ export function AdminAgenciesView() {
               )}
             </TabsContent>
           </Tabs>
-        </TabsContent>
-
-        {/* Active Agencies Tab */}
-        <TabsContent value="active" className="mt-6">
-          <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
-          {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Building2 className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No active agencies</h3>
-                <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Active agencies will appear here after completing verification
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {agencies.filter(a => a.onboarding_complete && !a.downgraded).map(agency => {
-                const application = getAgencyWithApplication(agency);
-                const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
-                return (
-                  <Card 
-                    key={agency.id}
-                    className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
-                    onClick={() => {
-                      if (application) {
-                        handleOpenApplication(application);
-                      }
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
-                            <img 
-                              src={logoUrls[application.id]} 
-                              alt={agency.agency_name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : application && logoUrls[application.id] ? (
-                            <>
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                              </div>
-                              <img 
-                                src={logoUrls[application.id]} 
-                                alt=""
-                                className="hidden"
-                                onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                              />
-                            </>
-                          ) : application && loadingLogoIds.has(application.id) ? (
-                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                              <CheckCircle className="h-5 w-5 text-green-500" />
-                            </div>
-                          )}
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <h3 className="font-semibold">{agency.agency_name}</h3>
-                              <CheckCircle className="h-4 w-4 text-green-500" />
-                            </div>
-                            <p className="text-sm text-muted-foreground">{agency.email}</p>
-                            {application && (
-                              <p className="text-xs text-muted-foreground">
-                                {application.full_name} • {application.country}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <div className="flex gap-2">
-                            {verification && (
-                              <Badge 
-                                className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenVerification(verification, e);
-                                }}
-                              >
-                                <FileText className="h-3 w-3 mr-1" />
-                                Details
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="flex gap-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 px-2 hover:bg-black hover:text-white"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenCommissionDialog(agency);
-                                    }}
-                                    title="Edit commission"
-                                  >
-                                    <Percent className="h-3 w-3 mr-1" />
-                                    {agency.commission_percentage}%
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Click to edit commission</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-black hover:text-white"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenDowngradeDialog(agency);
-                              }}
-                              disabled={deleting === agency.id}
-                              title="Downgrade agency"
-                            >
-                              {deleting === agency.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <X className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
         </TabsContent>
       </Tabs>
 
