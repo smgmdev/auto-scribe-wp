@@ -20,6 +20,7 @@ import { AgencyApplicationView } from '@/components/views/AgencyApplicationView'
 import { AgencyRequestsView } from '@/components/views/AgencyRequestsView';
 import { AgencyPayoutsView } from '@/components/views/AgencyPayoutsView';
 import { AgencyMediaView } from '@/components/views/AgencyMediaView';
+import { MyAgencyView } from '@/components/views/MyAgencyView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,6 +55,7 @@ const agencyOnlyViews: Record<string, React.ComponentType> = {
   'agency-requests': AgencyRequestsView,
   'agency-payouts': AgencyPayoutsView,
   'agency-media': AgencyMediaView,
+  'my-agency': MyAgencyView,
 };
 
 // Views accessible ONLY by admin users (NOT regular users, NOT agencies)
