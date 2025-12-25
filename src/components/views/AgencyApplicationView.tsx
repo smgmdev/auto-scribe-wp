@@ -9,7 +9,7 @@ import { useAppStore } from '@/stores/appStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format, differenceInSeconds, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import {
   Collapsible,
   CollapsibleContent,
@@ -50,32 +50,6 @@ interface AgencyPayout {
   payout_method: string;
   created_at: string;
 }
-
-// Helper function to calculate countdown
-const getCountdown = (createdAt: string, expirationDays: number = 3) => {
-  const expirationDate = addDays(new Date(createdAt), expirationDays);
-  const now = new Date();
-  const totalSeconds = differenceInSeconds(expirationDate, now);
-  
-  if (totalSeconds <= 0) {
-    return { expired: true, days: 0, hours: 0, minutes: 0, text: 'Expired' };
-  }
-  
-  const days = Math.floor(totalSeconds / (24 * 60 * 60));
-  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
-  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-  
-  let text = '';
-  if (days > 0) {
-    text = `${days}d ${hours}h remaining`;
-  } else if (hours > 0) {
-    text = `${hours}h ${minutes}m remaining`;
-  } else {
-    text = `${minutes}m remaining`;
-  }
-  
-  return { expired: false, days, hours, minutes, text };
-};
 
 interface CustomVerification {
   id: string;
@@ -318,42 +292,7 @@ export function AgencyApplicationView() {
       );
     }
 
-    // Show custom verification form with countdown
-    const countdown = getCountdown(agencyPayout.created_at);
-    
-    // Check if expired and auto-cancel
-    if (countdown.expired) {
-      return (
-        <div className="space-y-8 animate-fade-in">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">
-              Custom Verification
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Your verification period has expired
-            </p>
-          </div>
-
-          <Card className="border-red-500/30 bg-red-500/10">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
-                  <XCircle className="h-6 w-6 text-red-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-red-400">Verification Expired</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Your 3-day verification window has passed. Please contact support or submit a new application.
-                  </p>
-                </div>
-                <Badge className="bg-red-600">Expired</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-    
+    // Show custom verification form
     return (
       <div className="space-y-8 animate-fade-in">
         <div>
@@ -364,27 +303,6 @@ export function AgencyApplicationView() {
             Complete your verification to start receiving payouts
           </p>
         </div>
-
-        {/* Countdown Warning */}
-        <Card className="border-amber-500/30 bg-amber-500/10">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-amber-400">
-                  Verification Deadline: {countdown.text}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Please complete your verification within 3 days or your application will expire automatically.
-                </p>
-              </div>
-              <Badge variant="secondary" className="bg-amber-600/20 text-amber-500">
-                <Clock className="h-3 w-3 mr-1" />
-                {countdown.days}d {countdown.hours}h
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
 
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
           <p className="text-sm text-muted-foreground">
