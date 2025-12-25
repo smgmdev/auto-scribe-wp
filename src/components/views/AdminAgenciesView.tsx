@@ -1356,60 +1356,57 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                              <div className="flex gap-2">
-                                {verification && (
-                                  <Badge 
-                                    className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenVerification(verification, e);
-                                    }}
-                                  >
-                                    <FileText className="h-3 w-3 mr-1" />
-                                    Details
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <div className="flex gap-1">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge 
-                                        className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleOpenCommissionDialog(agency);
-                                        }}
-                                      >
-                                        <Percent className="h-3 w-3 mr-1" />
-                                        {agency.commission_percentage}%
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Click to edit commission</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 hover:bg-black hover:text-white"
+                            <div className="flex items-center gap-2">
+                              {verification && (
+                                <Badge 
+                                  className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleOpenDowngradeDialog(agency);
+                                    handleOpenVerification(verification, e);
                                   }}
-                                  disabled={deleting === agency.id}
-                                  title="Downgrade agency"
                                 >
-                                  {deleting === agency.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <X className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </div>
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Details
+                                </Badge>
+                              )}
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge 
+                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenCommissionDialog(agency);
+                                      }}
+                                    >
+                                      <Percent className="h-3 w-3 mr-1" />
+                                      {agency.commission_percentage}%
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Click to edit commission</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-black hover:text-white"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenDowngradeDialog(agency);
+                                }}
+                                disabled={deleting === agency.id}
+                                title="Downgrade agency"
+                              >
+                                {deleting === agency.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <X className="h-4 w-4" />
+                                )}
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
