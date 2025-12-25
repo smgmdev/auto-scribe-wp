@@ -524,6 +524,7 @@ export function ComposeView() {
       }
     }
     setIsPublishing(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
       let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
       let featuredImageUrl: string | undefined = editingArticle?.featuredImage?.url;
@@ -850,7 +851,7 @@ export function ComposeView() {
   return <div className="space-y-8 animate-fade-in relative">
       {/* Publishing Overlay */}
       {isPublishing && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
           <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg">
             <Loader2 className="h-10 w-10 animate-spin text-accent" />
             <div className="text-center">
