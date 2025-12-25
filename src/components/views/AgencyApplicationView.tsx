@@ -204,6 +204,14 @@ export function AgencyApplicationView() {
   const handleCustomVerificationSubmit = () => {
     // Update store immediately so sidebar reflects the new status
     setUserCustomVerificationStatus('pending_review');
+    // Update local state immediately so UI changes without waiting for refetch
+    setCustomVerification({
+      id: 'pending',
+      status: 'pending_review',
+      submitted_at: new Date().toISOString(),
+      admin_notes: null,
+    });
+    // Also refetch to get the actual data
     fetchAgencyData();
   };
 
