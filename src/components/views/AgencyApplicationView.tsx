@@ -35,7 +35,7 @@ const faqItems = [
   {
     icon: CalendarClock,
     question: "What Is the Verification and Approval Timeline?",
-    answer: "After submitting your application, our team will review your details and documentation. This process typically takes 1–3 business days. Once approved, you will be required to complete detailed KYC and payout verification. You may choose to receive payments via bank transfer or USDT. Verification must be completed within 3 days of approval, after which payments are processed within 1–7 business days. You will receive email notifications at each stage of the process."
+    answer: "After submitting your application, our team will review your details and documentation. This process typically takes 1–3 business days. Once approved, you will be required to complete additional KYC details and payout information. You may choose to receive payments via bank transfer or USDT. You will receive email notifications at each stage of the process."
   }
 ];
 
