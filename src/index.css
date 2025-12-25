@@ -113,8 +113,8 @@
   }
 
   html {
-    overflow-y: scroll;
-    scrollbar-gutter: stable;
+    overflow-y: scroll !important;
+    scrollbar-gutter: stable !important;
   }
 
   body {
@@ -173,28 +173,48 @@
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Prevent body scroll lock from affecting layout */
-html,
+/* Prevent body scroll lock from affecting layout - CRITICAL for dialogs/modals */
+html {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+}
+
 html[data-scroll-locked],
-body,
 body[data-scroll-locked] {
   overflow-y: scroll !important;
   padding-right: 0 !important;
   margin-right: 0 !important;
-  scrollbar-gutter: stable;
-}
-
-/* Prevent any element from getting padding-right compensation */
-[data-radix-scroll-area-viewport],
-[data-radix-popper-content-wrapper] {
-  scrollbar-gutter: stable;
 }
 
 /* Override Radix RemoveScroll padding compensation */
-.ReactRemoveScroll,
-[data-radix-dialog-overlay],
-[data-radix-alert-dialog-overlay] {
+body {
   padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* React Remove Scroll - override all width/padding compensations */
+[data-radix-focus-guard],
+[data-radix-scroll-area-viewport],
+[data-radix-popper-content-wrapper] {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Prevent focus guards from affecting layout */
+div[data-radix-focus-guard] {
+  position: fixed !important;
+}
+
+/* Override any inline styles added by RemoveScroll */
+.ReactRemoveScroll {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  overflow: visible !important;
+}
+
+.ReactRemoveScroll > * {
+  padding-right: inherit !important;
+  margin-right: inherit !important;
 }
 
 /* Prevent sidebar from being affected by scroll lock */
