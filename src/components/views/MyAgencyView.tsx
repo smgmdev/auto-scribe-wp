@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Globe, Mail, Phone, MapPin, Calendar, Wallet, Percent, CheckCircle2, Loader2, ExternalLink, Landmark, CreditCard, Bitcoin } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, Calendar, Wallet, Percent, CheckCircle2, Loader2, ExternalLink, Landmark, CreditCard, CircleDollarSign, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-
+import { toast } from '@/hooks/use-toast';
 interface AgencyDetails {
   id: string;
   agency_name: string;
@@ -62,6 +62,18 @@ export function MyAgencyView() {
   const [wordpressSites, setWordpressSites] = useState<WordPressSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast({ title: 'Copied to clipboard' });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({ title: 'Failed to copy', variant: 'destructive' });
+    }
+  };
 
   useEffect(() => {
     const fetchAgencyDetails = async () => {
@@ -259,9 +271,22 @@ export function MyAgencyView() {
                   <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                     <Mail className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium truncate">{agency.email}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium truncate">{agency.email}</p>
+                      <button
+                        onClick={() => copyToClipboard(agency.email!)}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        title="Copy email"
+                      >
+                        {copied ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -427,8 +452,8 @@ export function MyAgencyView() {
                 {bankDetails.usdt_wallet_address && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-sm font-medium">
-                      <Bitcoin className="h-4 w-4" />
-                      USDT Wallet
+                      <CircleDollarSign className="h-4 w-4" />
+                      Tether (USDT)
                     </div>
                     <div className="space-y-2 pl-6 text-sm">
                       {bankDetails.usdt_network && (
