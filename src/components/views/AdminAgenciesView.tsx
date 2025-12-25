@@ -1509,7 +1509,7 @@ export function AdminAgenciesView() {
 
       {/* Application Review Dialog */}
       <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <div className="flex items-center gap-3">
               {logoUrl && (
@@ -1524,38 +1524,42 @@ export function AdminAgenciesView() {
           </DialogHeader>
 
           {selectedApp && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Full Name</p>
-                  <p className="font-medium">{selectedApp.full_name}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column - Contact & Basic Info */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Full Name</p>
+                    <p className="font-medium">{selectedApp.full_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast({ title: 'Email copied' }); }}
+                      className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
+                    >
+                      {selectedApp.email}
+                      <Copy className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">WhatsApp Phone</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast({ title: 'Phone copied' }); }}
+                      className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
+                    >
+                      {selectedApp.whatsapp_phone}
+                      <Copy className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Country</p>
+                    <p className="font-medium">{selectedApp.country}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">Email</p>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast({ title: 'Email copied' }); }}
-                    className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
-                  >
-                    {selectedApp.email}
-                    <Copy className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">WhatsApp Phone</p>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast({ title: 'Phone copied' }); }}
-                    className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
-                  >
-                    {selectedApp.whatsapp_phone}
-                    <Copy className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Country</p>
-                  <p className="font-medium">{selectedApp.country}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">Agency Website</p>
+
+                <div className="text-sm">
+                  <p className="text-muted-foreground mb-1">Agency Website</p>
                   <button 
                     onClick={() => { setWebViewUrl(selectedApp.agency_website); setWebViewTitle('Agency Website'); }}
                     className="font-medium text-primary hover:underline flex items-center gap-1"
@@ -1564,130 +1568,136 @@ export function AdminAgenciesView() {
                     <ExternalLink className="h-3 w-3" />
                   </button>
                 </div>
-              </div>
 
-              {selectedApp.media_niches && selectedApp.media_niches.length > 0 && (
-                <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">Focus Media Niche</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedApp.media_niches.map((niche, i) => (
-                      <Badge key={i} variant="secondary">{niche}</Badge>
-                    ))}
+                {selectedApp.payout_method && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
+                    <p className="font-medium">
+                      {selectedApp.payout_method === 'stripe' && 'Automatic Payout via Stripe Connect'}
+                      {selectedApp.payout_method === 'custom' && 'Custom Payout'}
+                      {selectedApp.payout_method === 'usdt' && 'USDT Payout (Legacy)'}
+                      {selectedApp.payout_method === 'wire' && 'Wire Payout (Legacy)'}
+                    </p>
                   </div>
-                </div>
-              )}
+                )}
 
-              {selectedApp.media_channels && (
-                <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">3 Media Channels to List</p>
-                  <div className="flex flex-col gap-1">
-                    {selectedApp.media_channels.split(', ').map((channel, i) => (
-                      <button 
-                        key={i}
-                        onClick={() => { setWebViewUrl(channel); setWebViewTitle('Media Channel'); }}
-                        className="font-medium text-primary hover:underline flex items-center gap-1 text-left"
-                      >
-                        {channel.replace(/^https?:\/\//, '')}
-                        <ExternalLink className="h-3 w-3" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedApp.agency_description && (
-                <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">Agency Description</p>
-                  <p className="font-medium">{selectedApp.agency_description}</p>
-                </div>
-              )}
-
-              {selectedApp.wp_blog_url && (
-                <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">WP Media Blog</p>
-                  <button 
-                    onClick={() => { setWebViewUrl(`https://${selectedApp.wp_blog_url}`); setWebViewTitle('WP Media Blog'); }}
-                    className="font-medium text-primary hover:underline flex items-center gap-1"
+                <div className="flex gap-2 flex-wrap">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="hover:bg-black hover:text-white"
+                    onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
                   >
-                    {selectedApp.wp_blog_url}
-                    <ExternalLink className="h-3 w-3" />
-                  </button>
+                    <FileText className="h-4 w-4 mr-1" />
+                    Company Incorporation Document
+                  </Button>
                 </div>
-              )}
-
-              {selectedApp.payout_method && (
-                <div className="text-sm">
-                  <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
-                  <p className="font-medium">
-                    {selectedApp.payout_method === 'stripe' && 'Automatic Payout via Stripe Connect'}
-                    {selectedApp.payout_method === 'custom' && 'Custom Payout'}
-                    {selectedApp.payout_method === 'usdt' && 'USDT Payout (Legacy)'}
-                    {selectedApp.payout_method === 'wire' && 'Wire Payout (Legacy)'}
-                  </p>
-                </div>
-              )}
-
-              <div className="flex gap-2 flex-wrap">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hover:bg-black hover:text-white"
-                  onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Company Incorporation Document
-                </Button>
               </div>
 
-              {selectedApp.status === 'pending' && (
-                <>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Rejection Reason <span className="text-muted-foreground font-normal">(required if rejecting)</span></p>
-                    <Textarea
-                      placeholder="Provide a reason for rejection that will be visible to the applicant..."
-                      value={adminNotes}
-                      onChange={(e) => setAdminNotes(e.target.value)}
-                      className="min-h-[40px] resize-none"
-                      rows={1}
-                    />
+              {/* Right Column - Media & Description */}
+              <div className="space-y-4">
+                {selectedApp.media_niches && selectedApp.media_niches.length > 0 && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground mb-1">Focus Media Niche</p>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedApp.media_niches.map((niche, i) => (
+                        <Badge key={i} variant="secondary">{niche}</Badge>
+                      ))}
+                    </div>
                   </div>
+                )}
 
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 hover:bg-black hover:text-white"
-                      onClick={() => handleDecision('approved')}
-                      disabled={processing}
-                    >
-                      {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
-                      Pre-approve and Continue
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 hover:bg-black hover:text-white"
-                      onClick={() => {
-                        if (!adminNotes.trim()) {
-                          toast({ variant: 'destructive', title: 'Reason required', description: 'Please provide a rejection reason' });
-                          return;
-                        }
-                        handleDecision('rejected');
-                      }}
-                      disabled={processing}
-                    >
-                      {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
-                    </Button>
+                {selectedApp.media_channels && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground mb-1">3 Media Channels to List</p>
+                    <div className="flex flex-col gap-1">
+                      {selectedApp.media_channels.split(', ').map((channel, i) => (
+                        <button 
+                          key={i}
+                          onClick={() => { setWebViewUrl(channel); setWebViewTitle('Media Channel'); }}
+                          className="font-medium text-primary hover:underline flex items-center gap-1 text-left"
+                        >
+                          {channel.replace(/^https?:\/\//, '')}
+                          <ExternalLink className="h-3 w-3" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </>
-              )}
+                )}
 
-              {selectedApp.status !== 'pending' && selectedApp.admin_notes && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {selectedApp.status === 'cancelled' ? 'Cancellation Reason' : 'Rejection Reason'}
-                  </p>
-                  <p className="text-sm">{selectedApp.admin_notes}</p>
-                </div>
-              )}
+                {selectedApp.agency_description && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground mb-1">Agency Description</p>
+                    <p className="font-medium">{selectedApp.agency_description}</p>
+                  </div>
+                )}
+
+                {selectedApp.wp_blog_url && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground mb-1">WP Media Blog</p>
+                    <button 
+                      onClick={() => { setWebViewUrl(`https://${selectedApp.wp_blog_url}`); setWebViewTitle('WP Media Blog'); }}
+                      className="font-medium text-primary hover:underline flex items-center gap-1"
+                    >
+                      {selectedApp.wp_blog_url}
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Full Width - Actions Section */}
+              <div className="col-span-1 md:col-span-2 space-y-4 border-t pt-4">
+                {selectedApp.status === 'pending' && (
+                  <>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Rejection Reason <span className="text-muted-foreground font-normal">(required if rejecting)</span></p>
+                      <Textarea
+                        placeholder="Provide a reason for rejection that will be visible to the applicant..."
+                        value={adminNotes}
+                        onChange={(e) => setAdminNotes(e.target.value)}
+                        className="min-h-[40px] resize-none"
+                        rows={1}
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 hover:bg-black hover:text-white"
+                        onClick={() => handleDecision('approved')}
+                        disabled={processing}
+                      >
+                        {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+                        Pre-approve and Continue
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 hover:bg-black hover:text-white"
+                        onClick={() => {
+                          if (!adminNotes.trim()) {
+                            toast({ variant: 'destructive', title: 'Reason required', description: 'Please provide a rejection reason' });
+                            return;
+                          }
+                          handleDecision('rejected');
+                        }}
+                        disabled={processing}
+                      >
+                        {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reject'}
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {selectedApp.status !== 'pending' && selectedApp.admin_notes && (
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {selectedApp.status === 'cancelled' ? 'Cancellation Reason' : 'Rejection Reason'}
+                    </p>
+                    <p className="text-sm">{selectedApp.admin_notes}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
