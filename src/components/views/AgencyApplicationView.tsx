@@ -89,10 +89,10 @@ function AgencyFAQ() {
           onOpenChange={() => toggleItem(index)}
         >
           <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
+            <CollapsibleTrigger className="group flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                  <item.icon className="h-4 w-4 text-primary" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 transition-all duration-200 group-hover:bg-primary/20 group-hover:scale-110">
+                  <item.icon className="h-4 w-4 text-primary transition-transform duration-200 group-hover:scale-105" />
                 </div>
                 <span className="font-medium text-foreground">{item.question}</span>
               </div>
