@@ -684,7 +684,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Agency Logo *</Label>
+                <Label>Agency Logo * <span className="text-muted-foreground font-normal text-xs">(300x300px)</span></Label>
                 <div 
                   className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors h-[140px] flex flex-col justify-center ${
                     isDraggingLogo ? 'border-primary bg-primary/5' : 'border-border'
