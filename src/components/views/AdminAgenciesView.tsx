@@ -1692,9 +1692,6 @@ export function AdminAgenciesView() {
                                     Details
                                   </Badge>
                                 )}
-                                <Badge className="bg-black text-white">
-                                  Custom Payout
-                                </Badge>
                               </div>
 
                               <div className="flex gap-1">
