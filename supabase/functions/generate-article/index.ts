@@ -213,13 +213,15 @@ STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings${sourceCo
 
 TITLE REQUIREMENTS:
 - Create a NEW compelling headline that sparks curiosity and matches the ${selectedTone.toUpperCase()} tone
+- CRITICAL: If the original headline contains NAMES (people, countries, companies, organizations), you MUST preserve those names in your new title
+- Names are essential identifiers - readers need to know WHO or WHAT the story is about
+- Weave the names naturally into an engaging headline structure
 - NEVER use colons (:) in the title - write flowing, natural headlines instead
 - NEVER start titles with possessive forms like "Company's", "Person's", "Country's" - these are overused and robotic
 - AVOID title structures like "Topic: Explanation" or "Subject: Details"
 - Use dynamic sentence structures: questions, action verbs, or intriguing statements
-- If there are names, weave them naturally into the headline rather than leading with them
 - Make it intriguing and ${selectedTone === 'formal' ? 'authoritative' : selectedTone === 'conversational' ? 'relatable and punchy' : selectedTone === 'analytical' ? 'thought-provoking' : 'engaging'} - readers should NEED to click
-- Aim for 10-16 words for maximum engagement and impact
+- Aim for 12-18 words for maximum engagement and impact (slightly longer titles perform better)
 - Write like a seasoned newspaper editor crafting a front-page headline
 
 TITLE STYLE BASED ON TONE:
@@ -228,8 +230,13 @@ ${selectedTone === 'conversational' ? '- Use punchy, relatable language that fee
 ${selectedTone === 'analytical' ? '- Use insightful, thought-provoking language that promises deeper understanding' : ''}
 ${selectedTone === 'neutral' ? '- Use clear, balanced language that informs without sensationalism' : ''}
 
-Examples of GOOD titles: "Why the World Is Watching This Billion-Dollar Gamble Unfold", "Inside the Secret Deal That Could Change Everything We Know", "What Nobody Told You About the Biggest Shift in a Decade", "How a Single Decision Sparked a Global Transformation"
-Examples of BAD titles (never do this): "Tesla's New Era Begins", "Apple's Big Announcement: What It Means", "Warren Buffett: The Oracle Speaks", "Company's Bold Move"
+Examples of GOOD titles (note how names are preserved and titles are longer): 
+- "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future"
+- "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market"
+- "What Warren Buffett's Surprising Decision Reveals About the State of Global Investing"
+- "How Germany's Bold Climate Policy Is Forcing Europe to Rethink Everything"
+
+Examples of BAD titles (never do this): "Tesla's New Era Begins", "Apple's Big Announcement: What It Means", "Warren Buffett: The Oracle Speaks", "Company's Bold Move", "Tech Giant Makes Move"
 
 ${sourceContent ? `ORIGINALITY REQUIREMENT:
 - Use facts and data from the source but write a COMPLETELY ORIGINAL article
@@ -239,11 +246,11 @@ ${sourceContent ? `ORIGINALITY REQUIREMENT:
 - Think like a journalist who just finished an interview - you have the facts, now tell YOUR story` : ''}
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
-[Your new headline here - no prefix, just the headline]
+[Your new headline here - no prefix, just the headline - must include any names from the original]
 
 [Article content starts here - approximately 700 words, flowing paragraphs, human writing style]
 
-Remember: Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling.`;
+Remember: Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling. PRESERVE ALL NAMES from the original headline.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
