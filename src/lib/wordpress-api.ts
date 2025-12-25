@@ -27,9 +27,15 @@ export async function fetchCategories(site: WordPressSite): Promise<WPCategory[]
     }
 
     const data = await response.json();
+    // Decode HTML entities in category names (e.g., &amp; -> &)
+    const decodeHtmlEntities = (text: string): string => {
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = text;
+      return textarea.value;
+    };
     return data.map((cat: any) => ({
       id: cat.id,
-      name: cat.name,
+      name: decodeHtmlEntities(cat.name),
       slug: cat.slug,
     }));
   } catch (error) {

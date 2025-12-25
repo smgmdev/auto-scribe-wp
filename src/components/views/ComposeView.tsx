@@ -946,50 +946,59 @@ export function ComposeView() {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Article Title</Label>
-            <div className="flex gap-2">
-              <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-lg flex-1" />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={async () => {
-                  if (!title) {
-                    toast({
-                      title: "Title required",
-                      description: "Please enter a title first",
-                      variant: "destructive"
-                    });
-                    return;
-                  }
-                  setIsRefreshingTitle(true);
-                  try {
-                    const { data, error } = await supabase.functions.invoke('generate-title', {
-                      body: { headline: title, tone }
-                    });
-                    if (error) throw error;
-                    if (data?.title) {
-                      setTitle(data.title);
+            {isGenerating ? (
+              <div className="flex gap-2">
+                <div className="flex-1 h-10 bg-muted animate-pulse rounded-md flex items-center px-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
+                  <span className="text-sm text-muted-foreground">Generating title...</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-lg flex-1" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={async () => {
+                    if (!title) {
                       toast({
-                        title: "Title refreshed",
-                        description: "New title generated successfully"
+                        title: "Title required",
+                        description: "Please enter a title first",
+                        variant: "destructive"
                       });
+                      return;
                     }
-                  } catch (error) {
-                    console.error('Error refreshing title:', error);
-                    toast({
-                      title: "Failed to refresh title",
-                      description: error instanceof Error ? error.message : "Could not generate new title",
-                      variant: "destructive"
-                    });
-                  } finally {
-                    setIsRefreshingTitle(false);
-                  }
-                }}
-                disabled={isRefreshingTitle || !title}
-                title="Generate new title"
-              >
-                {isRefreshingTitle ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              </Button>
-            </div>
+                    setIsRefreshingTitle(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('generate-title', {
+                        body: { headline: title, tone }
+                      });
+                      if (error) throw error;
+                      if (data?.title) {
+                        setTitle(data.title);
+                        toast({
+                          title: "Title refreshed",
+                          description: "New title generated successfully"
+                        });
+                      }
+                    } catch (error) {
+                      console.error('Error refreshing title:', error);
+                      toast({
+                        title: "Failed to refresh title",
+                        description: error instanceof Error ? error.message : "Could not generate new title",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setIsRefreshingTitle(false);
+                    }
+                  }}
+                  disabled={isRefreshingTitle || !title}
+                  title="Generate new title"
+                >
+                  {isRefreshingTitle ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Tone Selection */}
@@ -1016,7 +1025,26 @@ export function ComposeView() {
           {/* Content Editor */}
           <div className="space-y-2">
             <Label htmlFor="content">Article Content</Label>
-            <Textarea id="content" placeholder="Your article content will appear here after generation, or you can write manually..." value={content} onChange={e => setContent(e.target.value)} className="min-h-[400px] font-body text-base leading-relaxed" />
+            {isGenerating ? (
+              <div className="min-h-[400px] bg-muted/50 rounded-md border border-border p-4 space-y-3 animate-pulse">
+                <div className="flex items-center gap-2 text-muted-foreground mb-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Generating article content...</span>
+                </div>
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-11/12" />
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-10/12" />
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-9/12" />
+                <div className="h-4 bg-muted rounded w-full mt-6" />
+                <div className="h-4 bg-muted rounded w-11/12" />
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-10/12" />
+              </div>
+            ) : (
+              <Textarea id="content" placeholder="Your article content will appear here after generation, or you can write manually..." value={content} onChange={e => setContent(e.target.value)} className="min-h-[400px] font-body text-base leading-relaxed" />
+            )}
             <p className="text-xs text-muted-foreground text-right">
               {content.split(/\s+/).filter(Boolean).length} words
             </p>
