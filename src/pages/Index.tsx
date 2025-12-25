@@ -9,8 +9,7 @@ import { ArticlesView } from '@/components/views/ArticlesView';
 import { SettingsView } from '@/components/views/SettingsView';
 import { AccountView } from '@/components/views/AccountView';
 import { AdminCreditsView } from '@/components/views/AdminCreditsView';
-import { AdminCreditBalancesView } from '@/components/views/AdminCreditBalancesView';
-import { AdminCreditTransactionsView } from '@/components/views/AdminCreditTransactionsView';
+import { AdminCreditManagementView } from '@/components/views/AdminCreditManagementView';
 import { AdminUsersView } from '@/components/views/AdminUsersView';
 import { AdminAgenciesView } from '@/components/views/AdminAgenciesView';
 import { OrdersView } from '@/components/views/OrdersView';
@@ -66,8 +65,7 @@ const agencyOnlyViews: Record<string, React.ComponentType> = {
 const adminOnlyViews: Record<string, React.ComponentType> = {
   settings: SettingsView,
   'admin-credits': AdminCreditsView,
-  'admin-credit-balances': AdminCreditBalancesView,
-  'admin-credit-transactions': AdminCreditTransactionsView,
+  'admin-credit-management': AdminCreditManagementView,
   'admin-users': AdminUsersView,
   'admin-agencies': AdminAgenciesView,
   'admin-orders': AdminOrdersView,
