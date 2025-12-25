@@ -19,15 +19,15 @@ import {
 const faqItems = [
   {
     question: "Is Agency Account for You?",
-    answer: "You must be an actual officially incorporated media marketing agency that provides PR services focusing on publishing clients to media. This account type is designed for professional agencies with established operations and a track record in the media industry."
+    answer: "You must be a formally incorporated media marketing agency that provides professional PR services with a focus on securing media coverage for clients. This account type is intended exclusively for established agencies with proven operations and a documented track record in the media industry."
   },
   {
     question: "What is the Benefit for Agency on Arcana Mace?",
-    answer: "As an agency, you can list your own media channels that you are selling and offer them to a wide audience. Using Arcana Mace, clients feel more secure to engage agencies for media buying. At the same time, we make sure to provide support and security for agencies and get you paid as well for your work."
+    answer: "As an agency, you can list your own media channels for sale and promote them to a wide audience. With Arcana Mace, clients gain greater confidence when engaging agencies for media buying, while we ensure that agencies receive the support, protection, and guaranteed payment they deserve for their work."
   },
   {
     question: "How Does the Model Work?",
-    answer: "You will list your media channels available for sale with your details. Clients can then engage you and ask questions about their orders, you can provide guidance and feedback to clients' requirements. If both client and you accept on a media publishing plan, then the client will place the order and you deliver. Arcana Mace holds the payment. After delivery, the client reviews your delivery and accepts, and once accepted, your payment is released to you. Simple."
+    answer: "You will list your available media channels along with your service details. Clients can then contact you directly with questions about their orders, allowing you to provide guidance and feedback on their requirements. Once both you and the client agree on a media publishing plan, the client places the order and you proceed with delivery. Arcana Mace securely holds the payment during this process. After delivery, the client reviews and approves your work. Once approved, your payment is released to you. Simple and secure."
   }
 ];
 
