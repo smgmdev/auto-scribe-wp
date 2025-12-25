@@ -51,11 +51,21 @@ export const AdminCreditManagementView = () => {
     totalRevenue: 0,
     totalCommission: 0
   });
+  const [agencyBalances, setAgencyBalances] = useState<{
+    id: string;
+    agency_name: string;
+    revenue: number;
+    payouts: number;
+    refunds: number;
+    fee_earnings: number;
+  }[]>([]);
+  const [agencyBalancesLoading, setAgencyBalancesLoading] = useState(true);
 
   useEffect(() => {
     fetchUserCredits();
     fetchTransactions();
     fetchAgencyStats();
+    fetchAgencyBalances();
   }, []);
 
   const fetchAgencyStats = async () => {
@@ -85,6 +95,68 @@ export const AdminCreditManagementView = () => {
       });
     } catch (error) {
       console.error('Error fetching agency stats:', error);
+    }
+  };
+
+  const fetchAgencyBalances = async () => {
+    try {
+      setAgencyBalancesLoading(true);
+      
+      // Fetch active agencies
+      const { data: agencies } = await supabase
+        .from('agency_payouts')
+        .select('id, agency_name')
+        .eq('onboarding_complete', true)
+        .eq('downgraded', false);
+
+      if (!agencies) {
+        setAgencyBalances([]);
+        return;
+      }
+
+      // Fetch orders with media_sites to get agency info
+      const { data: ordersData } = await supabase
+        .from('orders')
+        .select(`
+          amount_cents,
+          platform_fee_cents,
+          agency_payout_cents,
+          status,
+          media_sites!inner(agency)
+        `)
+        .in('status', ['paid', 'completed']);
+
+      // Calculate per-agency stats
+      const agencyStatsMap = new Map<string, { revenue: number; payouts: number; refunds: number; fee_earnings: number }>();
+      
+      agencies.forEach(agency => {
+        agencyStatsMap.set(agency.agency_name, { revenue: 0, payouts: 0, refunds: 0, fee_earnings: 0 });
+      });
+
+      ordersData?.forEach(order => {
+        const agencyName = (order.media_sites as any)?.agency;
+        if (agencyName && agencyStatsMap.has(agencyName)) {
+          const stats = agencyStatsMap.get(agencyName)!;
+          stats.revenue += order.amount_cents;
+          stats.payouts += order.agency_payout_cents;
+          stats.fee_earnings += order.platform_fee_cents;
+        }
+      });
+
+      const balances = agencies.map(agency => ({
+        id: agency.id,
+        agency_name: agency.agency_name,
+        revenue: agencyStatsMap.get(agency.agency_name)?.revenue || 0,
+        payouts: agencyStatsMap.get(agency.agency_name)?.payouts || 0,
+        refunds: agencyStatsMap.get(agency.agency_name)?.refunds || 0,
+        fee_earnings: agencyStatsMap.get(agency.agency_name)?.fee_earnings || 0
+      }));
+
+      setAgencyBalances(balances);
+    } catch (error) {
+      console.error('Error fetching agency balances:', error);
+    } finally {
+      setAgencyBalancesLoading(false);
     }
   };
 
@@ -660,10 +732,50 @@ export const AdminCreditManagementView = () => {
               </TooltipProvider>
 
               <Card>
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium">Agency Balances</p>
-                  <p className="text-sm mt-1">View balances and payouts for each agency</p>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold">Active Agencies</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Agency</TableHead>
+                        <TableHead className="text-right">Revenue</TableHead>
+                        <TableHead className="text-right">Payouts</TableHead>
+                        <TableHead className="text-right">Refunds</TableHead>
+                        <TableHead className="text-right">Fee Earnings</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {agencyBalancesLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
+                      ) : agencyBalances.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                            No active agencies found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        agencyBalances.map((agency) => (
+                          <TableRow key={agency.id}>
+                            <TableCell className="font-medium">{agency.agency_name}</TableCell>
+                            <TableCell className="text-right">${(agency.revenue / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">${(agency.payouts / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">${(agency.refunds / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">${(agency.fee_earnings / 100).toFixed(2)}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
             </TabsContent>
