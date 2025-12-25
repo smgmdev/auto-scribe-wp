@@ -6,8 +6,6 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { CreditDisplay } from '@/components/credits/CreditDisplay';
-import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
 import { Badge } from '@/components/ui/badge';
@@ -134,7 +132,6 @@ export function Sidebar({
     isAdmin,
     user
   } = useAuth();
-  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
   const [hasStripeAccount, setHasStripeAccount] = useState(false);
@@ -433,16 +430,6 @@ export function Sidebar({
             </Button>
           </div>
 
-          {/* Credits Display - Only for non-admin users */}
-          {!isAdmin && <div className="px-4 py-3 border-b border-sidebar-border">
-              <div className="flex items-center justify-between">
-                <CreditDisplay />
-                <button onClick={() => setBuyCreditsOpen(true)} className="flex items-center px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/30 text-sm font-medium text-sidebar-foreground hover:bg-accent/20 transition-colors">
-                  Buy credits
-                </button>
-              </div>
-            </div>}
-
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
             {navigation.map(item => {
@@ -625,6 +612,5 @@ export function Sidebar({
         </div>
       </aside>
 
-      <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
     </>;
 }
