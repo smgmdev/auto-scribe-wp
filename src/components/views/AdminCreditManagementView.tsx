@@ -766,9 +766,9 @@ export const AdminCreditManagementView = () => {
                       <TableRow>
                         <TableHead>Agency</TableHead>
                         <TableHead className="text-right">Revenue</TableHead>
+                        <TableHead className="text-right">Refunds</TableHead>
                         <TableHead className="text-right">Orders</TableHead>
                         <TableHead className="text-right">Payouts</TableHead>
-                        <TableHead className="text-right">Refunds</TableHead>
                         <TableHead className="text-right">Fee Earnings</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -795,9 +795,9 @@ export const AdminCreditManagementView = () => {
                           <TableRow key={agency.id}>
                             <TableCell className="font-medium">{agency.agency_name}</TableCell>
                             <TableCell className="text-right">${(agency.revenue / 100).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">${(agency.refunds / 100).toFixed(2)}</TableCell>
                             <TableCell className="text-right">{agency.orders}</TableCell>
                             <TableCell className="text-right">${(agency.payouts / 100).toFixed(2)}</TableCell>
-                            <TableCell className="text-right">${(agency.refunds / 100).toFixed(2)}</TableCell>
                             <TableCell className="text-right">${(agency.fee_earnings / 100).toFixed(2)}</TableCell>
                           </TableRow>
                         ))
