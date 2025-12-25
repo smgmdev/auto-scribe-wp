@@ -21,9 +21,17 @@ import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/constants/countries';
 
 
+interface PrefillData {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+}
+
 interface CustomVerificationFormProps {
   agencyPayoutId: string;
   agencyName: string;
+  prefillData?: PrefillData;
   onSubmitSuccess: () => void;
   onCancel?: () => void;
 }
@@ -35,7 +43,7 @@ const USDT_NETWORKS = [
   { value: 'SOL', label: 'Solana' },
 ];
 
-export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuccess, onCancel }: CustomVerificationFormProps) {
+export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData, onSubmitSuccess, onCancel }: CustomVerificationFormProps) {
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -60,16 +68,20 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, onSubmitSuc
   const [licenseUrl, setLicenseUrl] = useState<string | null>(null);
   const [uploadingLicense, setUploadingLicense] = useState(false);
 
+  // Parse prefill name into first and last
+  const parsedFirstName = prefillData?.full_name?.split(' ')[0] || '';
+  const parsedLastName = prefillData?.full_name?.split(' ').slice(1).join(' ') || '';
+
   const [formData, setFormData] = useState({
-    // Personal info
-    first_name: '',
-    last_name: '',
-    personal_country: '',
-    phone: '',
-    email: '',
+    // Personal info - prefilled from application
+    first_name: parsedFirstName,
+    last_name: parsedLastName,
+    personal_country: prefillData?.country || '',
+    phone: prefillData?.phone || '',
+    email: prefillData?.email || '',
     // Company info
     company_name: agencyName || '',
-    company_country: '',
+    company_country: prefillData?.country || '',
     company_address: '',
     company_id: '',
     tax_number: '',

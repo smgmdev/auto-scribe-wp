@@ -34,6 +34,9 @@ const faqItems = [
 interface AgencyApplication {
   id: string;
   agency_name: string;
+  full_name: string;
+  email: string;
+  whatsapp_phone: string;
   country: string;
   agency_website: string;
   status: string;
@@ -143,7 +146,7 @@ export function AgencyApplicationView() {
       // Fetch existing application first to check status
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, agency_name, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at')
+        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -314,6 +317,12 @@ export function AgencyApplicationView() {
         <CustomVerificationForm
           agencyPayoutId={agencyPayout.id}
           agencyName={agencyPayout.agency_name}
+          prefillData={existingApplication ? {
+            full_name: existingApplication.full_name,
+            email: existingApplication.email,
+            phone: existingApplication.whatsapp_phone,
+            country: existingApplication.country,
+          } : undefined}
           onSubmitSuccess={handleCustomVerificationSubmit}
           onCancel={handleCancelled}
         />
