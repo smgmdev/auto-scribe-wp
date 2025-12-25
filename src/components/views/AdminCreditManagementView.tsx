@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw } from 'lucide-react';
 
 interface UserCredit {
   user_id: string;
@@ -132,6 +132,7 @@ export const AdminCreditManagementView = () => {
   const uniqueTypes = [...new Set(transactions.map(tx => tx.type))];
   const totalPurchased = transactions.filter(tx => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0);
   const totalRefunds = transactions.filter(tx => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  const totalRefundRequests = transactions.filter(tx => tx.type === 'refund').length;
 
   const getTransactionIcon = (amount: number) => {
     return amount > 0 ? (
@@ -250,7 +251,7 @@ export const AdminCreditManagementView = () => {
 
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -273,6 +274,19 @@ export const AdminCreditManagementView = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Total Refunds</p>
                     <p className="text-2xl font-bold text-red-500">-{totalRefunds.toLocaleString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-500/10 rounded-lg">
+                    <RotateCcw className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Refund Requests</p>
+                    <p className="text-2xl font-bold text-orange-500">{totalRefundRequests.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
