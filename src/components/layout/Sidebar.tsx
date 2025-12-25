@@ -62,8 +62,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   if (!isAdmin) {
     base.push({
       id: 'credit-history',
-      label: 'Credit History',
-      icon: History
+      label: 'Credit Management',
+      icon: CreditCard
     });
   }
 
