@@ -709,7 +709,7 @@ export const AdminCreditManagementView = () => {
                           <p>Total refunds processed for agencies</p>
                         </TooltipContent>
                       </Tooltip>
-                      <RefreshCcw className="h-4 w-4 text-muted-foreground/60" />
+                      <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
                     </CardHeader>
                     <CardContent className="pt-0 pb-0 px-4">
                       <div className="text-2xl font-semibold text-red-500">$0.00</div>
