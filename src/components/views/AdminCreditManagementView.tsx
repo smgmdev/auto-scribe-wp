@@ -597,13 +597,13 @@ export const AdminCreditManagementView = () => {
                         <TooltipTrigger asChild>
                           <div className="flex items-center gap-1.5 cursor-help">
                             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              Total Orders
+                              Total Payouts
                             </CardTitle>
                             <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                           </div>
                         </TooltipTrigger>
                         <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                          <p>Total orders placed through agencies</p>
+                          <p>Total payouts made to agencies</p>
                         </TooltipContent>
                       </Tooltip>
                       <CreditCard className="h-4 w-4 text-muted-foreground/60" />
