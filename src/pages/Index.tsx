@@ -10,6 +10,7 @@ import { SettingsView } from '@/components/views/SettingsView';
 import { AccountView } from '@/components/views/AccountView';
 import { AdminCreditsView } from '@/components/views/AdminCreditsView';
 import { AdminCreditBalancesView } from '@/components/views/AdminCreditBalancesView';
+import { AdminCreditTransactionsView } from '@/components/views/AdminCreditTransactionsView';
 import { AdminUsersView } from '@/components/views/AdminUsersView';
 import { AdminAgenciesView } from '@/components/views/AdminAgenciesView';
 import { OrdersView } from '@/components/views/OrdersView';
@@ -66,6 +67,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   settings: SettingsView,
   'admin-credits': AdminCreditsView,
   'admin-credit-balances': AdminCreditBalancesView,
+  'admin-credit-transactions': AdminCreditTransactionsView,
   'admin-users': AdminUsersView,
   'admin-agencies': AdminAgenciesView,
   'admin-orders': AdminOrdersView,

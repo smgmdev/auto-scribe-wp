@@ -84,9 +84,13 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         { id: 'admin-media-management', label: 'Media Management', icon: Library }
       ]
     }, {
-      id: 'admin-credit-balances',
+      id: 'credit-management',
       label: 'Credit Management',
-      icon: CreditCard
+      icon: CreditCard,
+      submenu: [
+        { id: 'admin-credit-balances', label: 'Credit Balances', icon: Users },
+        { id: 'admin-credit-transactions', label: 'Transaction History', icon: History }
+      ]
     }, {
       id: 'admin-users',
       label: 'Users',
@@ -150,6 +154,7 @@ export function Sidebar({
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
+    const creditManagementIds = ['admin-credit-balances', 'admin-credit-transactions'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
@@ -159,6 +164,9 @@ export function Sidebar({
     }
     if (agencyManagementIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'agency-management': true }));
+    }
+    if (creditManagementIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'credit-management': true }));
     }
   }, [currentView]);
 
