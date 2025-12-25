@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Globe, Mail, Phone, MapPin, Calendar, Wallet, Percent, CheckCircle2, Loader2, ExternalLink, Landmark, CreditCard, CircleDollarSign, Copy, Check } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, Calendar, Wallet, Percent, CheckCircle2, Loader2, ExternalLink, Landmark, CreditCard, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import usdtIcon from '@/assets/usdt.svg';
 interface AgencyDetails {
   id: string;
   agency_name: string;
@@ -452,7 +453,7 @@ export function MyAgencyView() {
                 {bankDetails.usdt_wallet_address && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-sm font-medium">
-                      <CircleDollarSign className="h-4 w-4" />
+                      <img src={usdtIcon} alt="USDT" className="h-4 w-4" />
                       Tether (USDT)
                     </div>
                     <div className="space-y-2 pl-6 text-sm">
