@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { History, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +23,7 @@ export function CreditHistoryView() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [availableCredits, setAvailableCredits] = useState<number>(0);
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -91,15 +94,25 @@ export function CreditHistoryView() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <History className="h-8 w-8" />
-          Credit History
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          View all your credit transactions and spending history
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <History className="h-8 w-8" />
+            Credit History
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            View all your credit transactions and spending history
+          </p>
+        </div>
+        <Button 
+          onClick={() => setBuyCreditsOpen(true)}
+          className="bg-black text-white hover:bg-black/80"
+        >
+          Buy Credits
+        </Button>
       </div>
+
+      <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
