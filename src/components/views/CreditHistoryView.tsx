@@ -110,9 +110,9 @@ export function CreditHistoryView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <Wallet className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold text-primary">{availableCredits}</span>
+            <div className="flex items-center gap-1.5">
+              <Wallet className="h-3.5 w-3.5 text-primary" />
+              <span className="text-sm font-bold text-primary">{availableCredits}</span>
               <span className="text-sm text-muted-foreground">credits</span>
             </div>
           </CardContent>
@@ -125,9 +125,9 @@ export function CreditHistoryView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <ArrowUpCircle className="h-5 w-5 text-green-500" />
-              <span className="text-2xl font-bold text-green-500">+{totalPurchased}</span>
+            <div className="flex items-center gap-1.5">
+              <ArrowUpCircle className="h-3.5 w-3.5 text-green-500" />
+              <span className="text-sm font-bold text-green-500">+{totalPurchased}</span>
               <span className="text-sm text-muted-foreground">credits</span>
             </div>
           </CardContent>
@@ -140,9 +140,9 @@ export function CreditHistoryView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <ArrowDownCircle className="h-5 w-5 text-muted-foreground" />
-              <span className="text-2xl font-bold text-muted-foreground">-{totalSpent}</span>
+            <div className="flex items-center gap-1.5">
+              <ArrowDownCircle className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-sm font-bold text-muted-foreground">-{totalSpent}</span>
               <span className="text-sm text-muted-foreground">credits</span>
             </div>
           </CardContent>
@@ -155,9 +155,9 @@ export function CreditHistoryView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <Coins className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold">{transactions.length}</span>
+            <div className="flex items-center gap-1.5">
+              <Coins className="h-3.5 w-3.5 text-primary" />
+              <span className="text-sm font-bold">{transactions.length}</span>
               <span className="text-sm text-muted-foreground">transactions</span>
             </div>
           </CardContent>
