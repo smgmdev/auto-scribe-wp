@@ -61,8 +61,10 @@ export const AdminCreditManagementView = () => {
     payouts: number;
     refunds: number;
     fee_earnings: number;
+    email: string | null;
   }[]>([]);
   const [agencyBalancesLoading, setAgencyBalancesLoading] = useState(true);
+  const [agencyBalancesSearchTerm, setAgencyBalancesSearchTerm] = useState('');
 
   useEffect(() => {
     fetchUserCredits();
@@ -108,7 +110,7 @@ export const AdminCreditManagementView = () => {
       // Fetch active agencies
       const { data: agencies } = await supabase
         .from('agency_payouts')
-        .select('id, agency_name')
+        .select('id, agency_name, email')
         .eq('onboarding_complete', true)
         .eq('downgraded', false);
 
@@ -150,6 +152,7 @@ export const AdminCreditManagementView = () => {
       const balances = agencies.map(agency => ({
         id: agency.id,
         agency_name: agency.agency_name,
+        email: agency.email,
         revenue: agencyStatsMap.get(agency.agency_name)?.revenue || 0,
         orders: agencyStatsMap.get(agency.agency_name)?.orders || 0,
         payouts: agencyStatsMap.get(agency.agency_name)?.payouts || 0,
@@ -761,6 +764,17 @@ export const AdminCreditManagementView = () => {
                   <CardTitle className="text-lg font-semibold">Active Agencies</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search by agency name or email..."
+                        value={agencyBalancesSearchTerm}
+                        onChange={(e) => setAgencyBalancesSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -791,7 +805,13 @@ export const AdminCreditManagementView = () => {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        agencyBalances.map((agency) => (
+                        agencyBalances
+                          .filter(agency => {
+                            const searchLower = agencyBalancesSearchTerm.toLowerCase();
+                            return agency.agency_name.toLowerCase().includes(searchLower) ||
+                              (agency.email && agency.email.toLowerCase().includes(searchLower));
+                          })
+                          .map((agency) => (
                           <TableRow key={agency.id}>
                             <TableCell className="font-medium">{agency.agency_name}</TableCell>
                             <TableCell className="text-right">${(agency.revenue / 100).toFixed(2)}</TableCell>
