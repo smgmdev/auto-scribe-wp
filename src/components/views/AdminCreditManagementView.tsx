@@ -251,55 +251,55 @@ export const AdminCreditManagementView = () => {
 
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500/10 rounded-lg">
-                    <ArrowUpCircle className="h-5 w-5 text-green-500" />
+                  <div className="p-2 bg-green-500/10 rounded-lg shrink-0">
+                    <ArrowUpCircle className="h-4 w-4 text-green-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Purchased</p>
-                    <p className="text-2xl font-bold text-green-500">+{totalPurchased.toLocaleString()}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Total Purchased</p>
+                    <p className="text-lg font-bold text-green-500">+{totalPurchased.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-500/10 rounded-lg">
-                    <ArrowDownCircle className="h-5 w-5 text-red-500" />
+                  <div className="p-2 bg-red-500/10 rounded-lg shrink-0">
+                    <ArrowDownCircle className="h-4 w-4 text-red-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Refunds</p>
-                    <p className="text-2xl font-bold text-red-500">-{totalRefunds.toLocaleString()}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Total Refunds</p>
+                    <p className="text-lg font-bold text-red-500">-{totalRefunds.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-500/10 rounded-lg">
-                    <RotateCcw className="h-5 w-5 text-orange-500" />
+                  <div className="p-2 bg-orange-500/10 rounded-lg shrink-0">
+                    <RotateCcw className="h-4 w-4 text-orange-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Refund Requests</p>
-                    <p className="text-2xl font-bold text-orange-500">{totalRefundRequests.toLocaleString()}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Refund Requests</p>
+                    <p className="text-lg font-bold text-orange-500">{totalRefundRequests.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <CreditCard className="h-5 w-5 text-primary" />
+                  <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                    <CreditCard className="h-4 w-4 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Transactions</p>
-                    <p className="text-2xl font-bold">{transactions.length.toLocaleString()}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">Transactions</p>
+                    <p className="text-lg font-bold">{transactions.length.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
