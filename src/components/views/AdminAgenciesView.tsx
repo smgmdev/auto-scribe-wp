@@ -1079,10 +1079,10 @@ export function AdminAgenciesView() {
                               )}
                               <div>
                                 <h3 className="font-semibold">{agency.agency_name}</h3>
-                                <p className="text-sm text-muted-foreground">{agency.email}</p>
-                                {application && (
+                                <p className="text-sm text-muted-foreground">{verification?.email || agency.email}</p>
+                                {verification && (
                                   <p className="text-xs text-muted-foreground">
-                                    {application.full_name} • {application.country}
+                                    {verification.full_name} • {verification.company_name} • {verification.country}
                                   </p>
                                 )}
                                 {verification?.submitted_at && (
@@ -1763,6 +1763,27 @@ export function AdminAgenciesView() {
 
           {selectedVerification && (
             <div className="space-y-6">
+              {/* Agency Context */}
+              {(() => {
+                const linkedAgency = agencies.find(a => a.id === selectedVerification.agency_payout_id);
+                const linkedApp = linkedAgency ? approvedApplications.find(app => app.user_id === linkedAgency.user_id) : null;
+                return linkedAgency ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
+                    {linkedApp && logoUrls[linkedApp.id] && (
+                      <img 
+                        src={logoUrls[linkedApp.id]} 
+                        alt={linkedAgency.agency_name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    )}
+                    <div>
+                      <p className="font-medium">{linkedAgency.agency_name}</p>
+                      <p className="text-xs text-muted-foreground">Agency Verification Submission</p>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+
               {/* Personal Information */}
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Personal Information</h4>
@@ -1818,21 +1839,17 @@ export function AdminAgenciesView() {
                       )}
                     </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Country</p>
-                    <p className="font-medium">{selectedVerification.country}</p>
-                  </div>
                   {verificationDocUrls.passport && (
-                    <div className="col-span-2">
-                      <p className="text-muted-foreground mb-1">Passport</p>
+                    <div>
+                      <p className="text-muted-foreground mb-1">Passport / ID</p>
                       <Button
                         variant="outline"
                         size="sm"
                         className="hover:bg-black hover:text-white"
-                        onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport')}
+                        onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport / ID')}
                       >
                         <FileText className="h-4 w-4 mr-2" />
-                        View Passport
+                        View Document
                       </Button>
                     </div>
                   )}
@@ -1861,8 +1878,42 @@ export function AdminAgenciesView() {
                     </div>
                   </div>
                   <div>
+                    <p className="text-muted-foreground">Company Country</p>
+                    <p className="font-medium">{selectedVerification.country}</p>
+                  </div>
+                  <div>
                     <p className="text-muted-foreground">Company ID</p>
-                    <p className="font-medium">{selectedVerification.company_id || '-'}</p>
+                    <div 
+                      className="flex items-center gap-1 cursor-pointer hover:text-primary"
+                      onClick={() => {
+                        if (selectedVerification.company_id) {
+                          navigator.clipboard.writeText(selectedVerification.company_id);
+                          toast({ title: 'Copied', description: 'Company ID copied to clipboard' });
+                        }
+                      }}
+                    >
+                      <p className="font-medium">{selectedVerification.company_id || '-'}</p>
+                      {selectedVerification.company_id && (
+                        <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Tax Number</p>
+                    <div 
+                      className="flex items-center gap-1 cursor-pointer hover:text-primary"
+                      onClick={() => {
+                        if (selectedVerification.tax_number) {
+                          navigator.clipboard.writeText(selectedVerification.tax_number);
+                          toast({ title: 'Copied', description: 'Tax number copied to clipboard' });
+                        }
+                      }}
+                    >
+                      <p className="font-medium">{selectedVerification.tax_number || '-'}</p>
+                      {selectedVerification.tax_number && (
+                        <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
+                      )}
+                    </div>
                   </div>
                   <div className="col-span-2">
                     <p className="text-muted-foreground">Company Address</p>
@@ -1880,10 +1931,6 @@ export function AdminAgenciesView() {
                         <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground flex-shrink-0" />
                       )}
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Tax Number</p>
-                    <p className="font-medium">{selectedVerification.tax_number || '-'}</p>
                   </div>
                   {(verificationDocUrls.company_incorporation || verificationDocUrls.license || verificationDocUrls.memorandum || verificationDocUrls.additional) && (
                     <div className="col-span-2">
