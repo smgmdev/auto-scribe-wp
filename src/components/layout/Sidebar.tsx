@@ -359,6 +359,38 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]); // Remove userApplicationStatus from dependencies to prevent re-fetch loops
 
+  // Real-time subscription for agency application status changes (user side)
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const channel = supabase
+      .channel('agency-application-status')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'agency_applications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('[Sidebar] Application status updated:', payload.new);
+          const newData = payload.new as { id: string; status: string; rejection_seen: boolean; payout_method: string | null };
+          setUserApplicationStatus(newData.status);
+          setApplicationId(newData.id);
+          setRejectionSeen(newData.rejection_seen || false);
+          if (newData.payout_method) {
+            setPayoutMethod(newData.payout_method);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
   // Fetch initial unread engagement count for regular users
   useEffect(() => {
     if (!user || isAdmin) return;
