@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -30,6 +30,9 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       { id: 'compose', label: 'New Article', icon: Plus },
       { id: 'headlines', label: 'Sources', icon: Newspaper },
       { id: 'articles', label: 'My Articles', icon: FileText },
+      ...(!isAdmin ? [
+        { id: 'credit-history', label: 'Credit History', icon: History }
+      ] : []),
       ...(isAdmin ? [
         { id: 'admin-credits', label: 'Credit Management', icon: CreditCard },
         { id: 'settings', label: 'Settings', icon: Settings }
@@ -138,7 +141,7 @@ export function Sidebar({
 
   // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
-    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
+    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits', 'credit-history'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     
