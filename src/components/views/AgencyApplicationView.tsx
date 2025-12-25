@@ -28,6 +28,10 @@ const faqItems = [
   {
     question: "How Does the Model Work?",
     answer: "You will list your available media channels along with your service details. Clients can then contact you directly with questions about their orders, allowing you to provide guidance and feedback on their requirements. Once both you and the client agree on a media publishing plan, the client places the order and you proceed with delivery. Arcana Mace securely holds the payment during this process. After delivery, the client reviews and approves your work. Once approved, your payment is released to you. Simple and secure."
+  },
+  {
+    question: "What Is the Verification and Approval Timeline?",
+    answer: "After submitting your application, our team will review your details and documentation. This process typically takes 1-3 business days. Once approved, you will need to complete payout verification. For Automatic Payout (Stripe Connect), you will be guided through Stripe's secure KYC verification process. For Custom Payout, you must complete additional verification within 3 days of approval, after which payments are processed manually within 1-7 business days. You will receive email notifications at each stage of the process."
   }
 ];
 
