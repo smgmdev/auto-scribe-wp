@@ -110,6 +110,7 @@ export function AdminAgenciesView() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('pending');
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
+  const [voidSubTab, setVoidSubTab] = useState('cancelled');
   const [selectedVerification, setSelectedVerification] = useState<CustomVerification | null>(null);
   const [verificationDocUrls, setVerificationDocUrls] = useState<Record<string, string>>({});
   const [docViewerOpen, setDocViewerOpen] = useState(false);
@@ -706,7 +707,7 @@ export function AdminAgenciesView() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">Agencies</h1>
+          <h1 className="text-4xl font-bold text-foreground">Agency Management</h1>
           <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
         </div>
         <div className="flex items-center gap-2">
@@ -727,7 +728,7 @@ export function AdminAgenciesView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending" className="relative">
             New ({pendingApplications.length})
             {unreadPendingCount > 0 && (
@@ -745,15 +746,14 @@ export function AdminAgenciesView() {
             )}
           </TabsTrigger>
           <TabsTrigger value="active">Active ({agencies.filter(a => a.onboarding_complete).length})</TabsTrigger>
-          <TabsTrigger value="cancelled" className="relative">
-            Cancelled ({cancelledApplications.length})
+          <TabsTrigger value="void" className="relative">
+            Void ({cancelledApplications.length + rejectedApplications.length})
             {unreadCancelledCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
                 {unreadCancelledCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
         </TabsList>
 
         {/* Pending Applications Tab */}
@@ -832,85 +832,209 @@ export function AdminAgenciesView() {
           )}
         </TabsContent>
 
-        {/* Cancelled by User Tab */}
-        <TabsContent value="cancelled" className="mt-6">
-          <p className="text-sm text-muted-foreground mb-4">Applications cancelled by the user</p>
-          {cancelledApplications.length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <XCircle className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No cancelled applications</h3>
-                <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Applications cancelled by users will appear here
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-3">
-              {cancelledApplications.map((app) => (
-                <Card 
-                  key={app.id} 
-                  className={cn(
-                    "cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors",
-                    !app.read ? "border-red-500/50 bg-red-500/5" : "border-red-500/20"
-                  )}
-                  onClick={() => handleOpenApplication(app)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
-                          <img 
-                            src={logoUrls[app.id]} 
-                            alt={app.agency_name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : logoUrls[app.id] ? (
-                          <>
-                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                            </div>
-                            <img 
-                              src={logoUrls[app.id]} 
-                              alt=""
-                              className="hidden"
-                              onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
-                            />
-                          </>
-                        ) : loadingLogoIds.has(app.id) ? (
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                            <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                          </div>
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                            <XCircle className="h-5 w-5 text-red-500" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-medium">{app.agency_name}</h3>
-                          <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant="destructive">
-                          <XCircle className="h-3 w-3 mr-1" />Cancelled
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                        {app.updated_at && (
-                          <p className="text-xs text-red-500">
-                            Cancelled {format(new Date(app.updated_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+        {/* Void Tab - Cancelled and Rejected */}
+        <TabsContent value="void" className="mt-6">
+          <p className="text-sm text-muted-foreground mb-4">Cancelled and rejected agency applications</p>
+          
+          {/* Sub-tabs for void stages */}
+          <Tabs value={voidSubTab} onValueChange={setVoidSubTab} className="mb-4">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="cancelled" className="relative">
+                Cancelled ({cancelledApplications.length})
+                {unreadCancelledCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
+                    {unreadCancelledCount}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="rejected">
+                Rejected ({rejectedApplications.length})
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Cancelled Sub-Tab */}
+            <TabsContent value="cancelled" className="mt-4">
+              {cancelledApplications.length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <XCircle className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No cancelled applications</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Applications cancelled by users will appear here
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
+              ) : (
+                <div className="grid gap-3">
+                  {cancelledApplications.map((app) => (
+                    <Card 
+                      key={app.id} 
+                      className={cn(
+                        "cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors",
+                        !app.read ? "border-red-500/50 bg-red-500/5" : "border-red-500/20"
+                      )}
+                      onClick={() => handleOpenApplication(app)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-4">
+                            {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
+                              <img 
+                                src={logoUrls[app.id]} 
+                                alt={app.agency_name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : logoUrls[app.id] ? (
+                              <>
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
+                                <img 
+                                  src={logoUrls[app.id]} 
+                                  alt=""
+                                  className="hidden"
+                                  onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                                />
+                              </>
+                            ) : loadingLogoIds.has(app.id) ? (
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                                <XCircle className="h-5 w-5 text-red-500" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-medium">{app.agency_name}</h3>
+                              <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant="destructive">
+                              <XCircle className="h-3 w-3 mr-1" />Cancelled
+                            </Badge>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                            {app.updated_at && (
+                              <p className="text-xs text-red-500">
+                                Cancelled {format(new Date(app.updated_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Rejected Sub-Tab */}
+            <TabsContent value="rejected" className="mt-4">
+              {rejectedApplications.length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <XCircle className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-xl font-semibold">No rejected applications</h3>
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                      Rejected applications will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-3">
+                  {rejectedApplications.map((app) => (
+                    <Card 
+                      key={app.id} 
+                      className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-red-500/30"
+                      onClick={() => {
+                        setSelectedApp(app);
+                        setAdminNotes(app.admin_notes || '');
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-4">
+                            {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
+                              <img 
+                                src={logoUrls[app.id]} 
+                                alt={app.agency_name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : logoUrls[app.id] ? (
+                              <>
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                                </div>
+                                <img 
+                                  src={logoUrls[app.id]} 
+                                  alt=""
+                                  className="hidden"
+                                  onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                                />
+                              </>
+                            ) : loadingLogoIds.has(app.id) ? (
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                                <XCircle className="h-5 w-5 text-red-500" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-medium">{app.agency_name}</h3>
+                              <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
+                              {app.admin_notes && (
+                                <p className="text-xs text-red-400 mt-1">Reason: {app.admin_notes}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right flex flex-col items-end gap-1">
+                            <p className="text-xs text-muted-foreground">
+                              Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                            {app.reviewed_at && (
+                              <p className="text-xs text-red-500">
+                                Rejected {format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="hover:bg-destructive hover:text-white hover:border-destructive"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                // Update database to hide the application
+                                const { error } = await supabase
+                                  .from('agency_applications')
+                                  .update({ hidden: true })
+                                  .eq('id', app.id);
+                                
+                                if (error) {
+                                  toast({ variant: 'destructive', title: 'Error', description: error.message });
+                                  return;
+                                }
+                                
+                                // Remove from local state
+                                setApplications(prev => prev.filter(a => a.id !== app.id));
+                                toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* Under Verification Tab */}
@@ -1356,110 +1480,6 @@ export function AdminAgenciesView() {
                   </Card>
                 );
               })}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Rejected Applications Tab */}
-        <TabsContent value="rejected" className="mt-6">
-          <p className="text-sm text-muted-foreground mb-4">Rejected agency applications</p>
-          {rejectedApplications.length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <XCircle className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-xl font-semibold">No rejected applications</h3>
-                <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Rejected applications will appear here
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-3">
-              {rejectedApplications.map((app) => (
-                <Card 
-                  key={app.id} 
-                  className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-red-500/30"
-                  onClick={() => {
-                    setSelectedApp(app);
-                    setAdminNotes(app.admin_notes || '');
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
-                          <img 
-                            src={logoUrls[app.id]} 
-                            alt={app.agency_name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : logoUrls[app.id] ? (
-                          <>
-                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                            </div>
-                            <img 
-                              src={logoUrls[app.id]} 
-                              alt=""
-                              className="hidden"
-                              onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
-                            />
-                          </>
-                        ) : loadingLogoIds.has(app.id) ? (
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                            <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                          </div>
-                        ) : (
-                          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                            <XCircle className="h-5 w-5 text-red-500" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-medium">{app.agency_name}</h3>
-                          <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
-                          {app.admin_notes && (
-                            <p className="text-xs text-red-400 mt-1">Reason: {app.admin_notes}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right flex flex-col items-end gap-1">
-                        <p className="text-xs text-muted-foreground">
-                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                        {app.reviewed_at && (
-                          <p className="text-xs text-red-500">
-                            Rejected {format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="hover:bg-destructive hover:text-white hover:border-destructive"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            // Update database to hide the application
-                            const { error } = await supabase
-                              .from('agency_applications')
-                              .update({ hidden: true })
-                              .eq('id', app.id);
-                            
-                            if (error) {
-                              toast({ variant: 'destructive', title: 'Error', description: error.message });
-                              return;
-                            }
-                            
-                            // Remove from local state
-                            setApplications(prev => prev.filter(a => a.id !== app.id));
-                            toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           )}
         </TabsContent>
