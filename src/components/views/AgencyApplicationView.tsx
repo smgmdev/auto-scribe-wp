@@ -273,28 +273,26 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <Card className="border-0 bg-zinc-800">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
-                  <FileText className="h-6 w-6 text-gray-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
-                  <p className="text-sm text-gray-400">
-                    Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-                {getStatusBadge(customVerification.status)}
+          <div className="rounded-lg border border-gray-500/30 bg-gray-500/10 p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-500/20">
+                <Clock className="h-6 w-6 text-gray-400" />
               </div>
-              {customVerification.status === 'rejected' && customVerification.admin_notes && (
-                <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                  <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
-                  <p className="text-sm">{customVerification.admin_notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-400">Verification Under Review</h3>
+                <p className="text-sm text-muted-foreground">
+                  Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
+                </p>
+              </div>
+              {getStatusBadge(customVerification.status)}
+            </div>
+            {customVerification.status === 'rejected' && customVerification.admin_notes && (
+              <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
+                <p className="text-sm">{customVerification.admin_notes}</p>
+              </div>
+            )}
+          </div>
 
           <p className="text-sm text-muted-foreground text-center">
             We'll notify you by email with updates. This process usually takes 1–3 business days.
