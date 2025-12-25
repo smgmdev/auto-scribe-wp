@@ -45,21 +45,27 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     ]
   }];
 
-  // Add Agency Management for onboarded agencies OR Credit History for regular users
-  if (!isAdmin) {
+  // Add Agency Management for onboarded agencies
+  if (isAgencyOnboarded && !isAdmin) {
     base.push({
       id: 'agency-management',
       label: 'Agency Management',
       icon: Briefcase,
       submenu: [
-        ...(isAgencyOnboarded ? [
-          { id: 'agency-media', label: 'My Media', icon: Library },
-          { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
-          { id: 'agency-payouts', label: 'Payout History', icon: Wallet },
-          { id: 'my-agency', label: 'My Agency', icon: Building2 },
-        ] : []),
-        { id: 'credit-history', label: 'Credit History', icon: History }
+        { id: 'agency-media', label: 'My Media', icon: Library },
+        { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
+        { id: 'agency-payouts', label: 'Payout History', icon: Wallet },
+        { id: 'my-agency', label: 'My Agency', icon: Building2 }
       ]
+    });
+  }
+
+  // Add Credit History for non-admin users (after Agency Management)
+  if (!isAdmin) {
+    base.push({
+      id: 'credit-history',
+      label: 'Credit History',
+      icon: History
     });
   }
 
@@ -143,7 +149,7 @@ export function Sidebar({
   useEffect(() => {
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
-    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency', 'credit-history'];
+    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
