@@ -266,7 +266,7 @@ export function AgencyApplicationView() {
         <div className="space-y-8 animate-fade-in">
           <div>
             <h1 className="text-4xl font-bold text-foreground">
-              Custom Verification
+              Agency Verification
             </h1>
             <p className="mt-2 text-muted-foreground">
               Your verification is under review
@@ -299,6 +299,8 @@ export function AgencyApplicationView() {
           <p className="text-sm text-muted-foreground text-center">
             We'll notify you by email with updates. This process usually takes 1–3 business days.
           </p>
+
+          <AgencyFAQ />
         </div>
       );
     }
@@ -334,6 +336,8 @@ export function AgencyApplicationView() {
           onSubmitSuccess={handleCustomVerificationSubmit}
           onCancel={handleCancelled}
         />
+
+        <AgencyFAQ />
       </div>
     );
   }
