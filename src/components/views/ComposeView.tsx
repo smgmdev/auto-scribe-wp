@@ -681,16 +681,6 @@ export function ComposeView() {
         setFocusKeyword('');
         setMetaDescription('');
         removeImage();
-        
-        toast({
-          title: "Article published!",
-          description: <div>
-              Successfully published to {currentSite.name}.{' '}
-              <a href={result.link} rel="noopener noreferrer" className="underline font-medium">
-                View article
-              </a>
-            </div>
-        });
       }, 2500);
     } catch (error) {
       console.error('Publish error:', error);
