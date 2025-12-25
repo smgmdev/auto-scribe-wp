@@ -708,7 +708,7 @@ export function AdminAgenciesView() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Agency Management</h1>
-          <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
+          <p className="mt-2 text-muted-foreground">Manage agency applications and approvals</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
