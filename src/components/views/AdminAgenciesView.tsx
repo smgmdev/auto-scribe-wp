@@ -12,34 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
-import { format, differenceInSeconds, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-
-// Helper function to calculate countdown
-const getCountdown = (createdAt: string, expirationDays: number = 3) => {
-  const expirationDate = addDays(new Date(createdAt), expirationDays);
-  const now = new Date();
-  const totalSeconds = differenceInSeconds(expirationDate, now);
-  
-  if (totalSeconds <= 0) {
-    return { expired: true, days: 0, hours: 0, minutes: 0, text: 'Expired' };
-  }
-  
-  const days = Math.floor(totalSeconds / (24 * 60 * 60));
-  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
-  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-  
-  let text = '';
-  if (days > 0) {
-    text = `${days}d ${hours}h`;
-  } else if (hours > 0) {
-    text = `${hours}h ${minutes}m`;
-  } else {
-    text = `${minutes}m`;
-  }
-  
-  return { expired: false, days, hours, minutes, text };
-};
 
 interface StripeAccount {
   id: string;
@@ -711,19 +685,12 @@ export function AdminAgenciesView() {
         );
       }
       
-      // No verification submitted yet - show countdown
-      const countdown = getCountdown(agency.created_at);
+      // No verification submitted yet - show pending status
       return (
         <div className="flex gap-2">
-          {countdown.expired ? (
-            <Badge className="bg-red-600">
-              <XCircle className="h-3 w-3 mr-1" />Expired
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
-              <Clock className="h-3 w-3 mr-1" />Pending Verification • {countdown.text}
-            </Badge>
-          )}
+          <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
+            <Clock className="h-3 w-3 mr-1" />Pending Verification
+          </Badge>
           <Badge className="bg-black text-white">
             Custom Payout
           </Badge>
