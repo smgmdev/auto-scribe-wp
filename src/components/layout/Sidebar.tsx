@@ -54,7 +54,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       submenu: [
         { id: 'agency-media', label: 'My Media', icon: Library },
         { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
-        { id: 'agency-payouts', label: 'Payout History', icon: Wallet }
+        { id: 'agency-payouts', label: 'Payout History', icon: Wallet },
+        { id: 'my-agency', label: 'My Agency', icon: Building2 }
       ]
     });
   }
@@ -139,7 +140,7 @@ export function Sidebar({
   useEffect(() => {
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
-    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media'];
+    const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
