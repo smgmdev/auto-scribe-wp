@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { Loader2, ChevronDown, Send, RefreshCw, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
-import { AgencyVerificationStatus, AgencyVerificationStatusRef } from '@/components/agency/AgencyVerificationStatus';
 import { CustomVerificationForm } from '@/components/agency/CustomVerificationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,8 +9,7 @@ import { useAppStore } from '@/stores/appStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format, differenceInSeconds, differenceInHours, differenceInMinutes, addDays } from 'date-fns';
-import { CheckCircle, Clock, XCircle, ChevronUp, FileText } from 'lucide-react';
+import { format, differenceInSeconds, addDays } from 'date-fns';
 import {
   Collapsible,
   CollapsibleContent,
@@ -48,7 +46,6 @@ interface AgencyApplication {
 interface AgencyPayout {
   id: string;
   agency_name: string;
-  stripe_account_id: string | null;
   onboarding_complete: boolean;
   payout_method: string;
   created_at: string;
@@ -138,8 +135,6 @@ export function AgencyApplicationView() {
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const verificationRef = useRef<AgencyVerificationStatusRef>(null);
 
   useEffect(() => {
     // Reset dataLoaded when component mounts to prevent stale data flash
@@ -163,7 +158,7 @@ export function AgencyApplicationView() {
       // Fetch agency payout record
       const { data: payoutData } = await supabase
         .from('agency_payouts')
-        .select('id, agency_name, stripe_account_id, onboarding_complete, payout_method, created_at')
+        .select('id, agency_name, onboarding_complete, payout_method, created_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -180,36 +175,6 @@ export function AgencyApplicationView() {
         .limit(1)
         .maybeSingle();
 
-      // If there's a Stripe account that's not onboarded, verify it still exists
-      // BUT only do this if:
-      // 1. The application is already approved (not pending, cancelled, or rejected)
-      // 2. The payout method is NOT custom (custom payout doesn't use Stripe verification)
-      // This prevents stale payout records from affecting new pending applications or custom payouts
-      const isStripePayout = payoutData?.payout_method !== 'custom';
-      if (payoutData?.stripe_account_id && !payoutData?.onboarding_complete && appData?.status === 'approved' && isStripePayout) {
-        console.log('[AgencyView] Found unverified Stripe account, checking if still valid...');
-        try {
-          const response = await supabase.functions.invoke('get-agency-onboarding-link');
-          console.log('[AgencyView] Stripe check response:', response.data);
-          
-          // If Stripe account was deleted, clean up and treat as no payout
-          if (response.data?.error === 'account_deleted') {
-            console.log('[AgencyView] Stripe account was deleted, treating as no payout');
-            
-            // Note: DB cleanup may fail due to RLS, but we still set validatedPayout to null
-            // to prevent showing the Stripe verification view
-            validatedPayout = null;
-            setUserApplicationStatus('cancelled');
-          }
-        } catch (error) {
-          console.error('[AgencyView] Error verifying Stripe account:', error);
-        }
-      } else if (appData?.status === 'pending') {
-        // For pending applications, don't touch the payout data - just let it be
-        console.log('[AgencyView] Application is pending, skipping Stripe verification check');
-      } else if (payoutData?.payout_method === 'custom') {
-        console.log('[AgencyView] Custom payout method, skipping Stripe verification check');
-      }
 
       if (validatedPayout) {
         setAgencyPayout(validatedPayout);
@@ -304,59 +269,8 @@ export function AgencyApplicationView() {
       </div>
     );
   }
-  // CASE 0: If application is still pending, show the application form (not Stripe verification)
-  // This prevents showing Stripe verification UI for pending applications that have stale payout records
   const currentAppStatus = existingApplication?.status;
   const isPending = currentAppStatus === 'pending';
-
-  // CASE 1: Stripe Connect verification (has stripe account but not onboarded)
-  // BUT only show this if:
-  // - The application is APPROVED (not pending or cancelled)
-  // - The payout method is NOT custom (custom payout has its own verification flow)
-  const isCustomPayout = agencyPayout?.payout_method === 'custom';
-  const isCancelled = currentAppStatus === 'cancelled';
-  if (agencyPayout?.stripe_account_id && !agencyPayout?.onboarding_complete && !isPending && !isCancelled && !isCustomPayout) {
-    const handleRefresh = async () => {
-      setRefreshing(true);
-      if (verificationRef.current?.refresh) {
-        await verificationRef.current.refresh();
-      }
-      setRefreshing(false);
-    };
-
-    return (
-      <div className="space-y-8 animate-fade-in">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">
-              Stripe Connect Verification
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Complete your verification to start receiving payments
-            </p>
-          </div>
-          <Button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="bg-black hover:bg-black/80 text-white"
-          >
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Refresh
-          </Button>
-        </div>
-
-        <AgencyVerificationStatus 
-          ref={verificationRef}
-          onStatusUpdate={handleStatusUpdate} 
-          onCancelled={handleCancelled} 
-        />
-      </div>
-    );
-  }
 
   // CASE 2: Custom Payout verification needed (has agency payout with custom method, not onboarded)
   // Only show if application is approved (not pending, cancelled, or rejected)

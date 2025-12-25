@@ -134,7 +134,7 @@ export function Sidebar({
   } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
-  const [hasStripeAccount, setHasStripeAccount] = useState(false);
+  
   const [payoutMethod, setPayoutMethod] = useState<string | null>(null);
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
@@ -168,7 +168,6 @@ export function Sidebar({
     if (!user?.id) {
       setAgencyDataLoaded(false);
       setIsAgencyOnboarded(false);
-      setHasStripeAccount(false);
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
@@ -180,7 +179,7 @@ export function Sidebar({
   useEffect(() => {
     if (userApplicationStatus === 'cancelled') {
       // Reset all agency states immediately when application is cancelled
-      setHasStripeAccount(false);
+      
       setPayoutMethod(null);
       setIsAgencyOnboarded(false);
       setUserCustomVerificationStatus(null);
@@ -270,7 +269,7 @@ export function Sidebar({
       
       if (isMounted && agencyData) {
         setIsAgencyOnboarded(agencyData.onboarding_complete === true);
-        setHasStripeAccount(!!agencyData.stripe_account_id);
+        
         setPayoutMethod(agencyData.payout_method);
         
           // Fetch agency media notification counts if onboarded
@@ -585,7 +584,6 @@ export function Sidebar({
                 applicationStatus={userApplicationStatus}
                 applicationId={applicationId}
                 rejectionSeen={rejectionSeen}
-                hasStripeAccount={hasStripeAccount}
                 payoutMethod={payoutMethod}
                 isAgencyOnboarded={isAgencyOnboarded}
                 customVerificationStatus={userCustomVerificationStatus}
