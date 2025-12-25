@@ -636,19 +636,21 @@ export function AdminAgenciesView() {
       
       if (verificationError) throw verificationError;
       
-      // Mark the agency_payouts record as downgraded so it no longer appears in verification counts
+      // Get user_id before deleting the agency_payouts record
+      const linkedAgency = agencies.find(a => a.id === selectedVerification.agency_payout_id);
+      
+      // Delete the agency_payouts record since they never completed onboarding
+      // (this is a rejection, not a downgrade of an active agency)
       const { error: payoutError } = await supabase
         .from('agency_payouts')
-        .update({ downgraded: true })
+        .delete()
         .eq('id', selectedVerification.agency_payout_id);
       
       if (payoutError) {
-        console.error('Failed to downgrade agency payout:', payoutError);
+        console.error('Failed to delete agency payout:', payoutError);
       }
       
-      // Also update the original agency application to rejected status
-      // Find the linked agency payout to get the user_id
-      const linkedAgency = agencies.find(a => a.id === selectedVerification.agency_payout_id);
+      // Update the original agency application to rejected status
       if (linkedAgency?.user_id) {
         const { error: appError } = await supabase
           .from('agency_applications')
