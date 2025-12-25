@@ -697,7 +697,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               <Label htmlFor="agency_description">Agency Description <span className="text-muted-foreground font-normal text-xs">(max 150 characters)</span></Label>
               <Textarea
                 id="agency_description"
-                placeholder="Write your achievements and show off! Describe what makes your agency stand out..."
+                placeholder="Describe your agency and your achievements. This information will be public."
                 value={agencyDescription}
                 onChange={(e) => {
                   if (e.target.value.length <= 150) {
