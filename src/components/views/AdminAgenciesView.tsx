@@ -636,6 +636,16 @@ export function AdminAgenciesView() {
       
       if (verificationError) throw verificationError;
       
+      // Mark the agency_payouts record as downgraded so it no longer appears in verification counts
+      const { error: payoutError } = await supabase
+        .from('agency_payouts')
+        .update({ downgraded: true })
+        .eq('id', selectedVerification.agency_payout_id);
+      
+      if (payoutError) {
+        console.error('Failed to downgrade agency payout:', payoutError);
+      }
+      
       // Also update the original agency application to rejected status
       // Find the linked agency payout to get the user_id
       const linkedAgency = agencies.find(a => a.id === selectedVerification.agency_payout_id);
