@@ -21,6 +21,7 @@ import { AgencyRequestsView } from '@/components/views/AgencyRequestsView';
 import { AgencyPayoutsView } from '@/components/views/AgencyPayoutsView';
 import { AgencyMediaView } from '@/components/views/AgencyMediaView';
 import { MyAgencyView } from '@/components/views/MyAgencyView';
+import { CreditHistoryView } from '@/components/views/CreditHistoryView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +43,7 @@ const publicViews: Record<string, React.ComponentType> = {
   account: AccountView,
   orders: OrdersView,
   'my-requests': MyRequestsView,
+  'credit-history': CreditHistoryView,
 };
 
 // Views for non-admin users only (agency application is user-facing only)
