@@ -414,9 +414,9 @@ export const AdminCreditManagementView = () => {
                   <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Purchased</TableHead>
+                    <TableHead className="text-right">Refunded</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Used</TableHead>
-                    <TableHead className="text-right">Refunded</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -443,9 +443,9 @@ export const AdminCreditManagementView = () => {
                           {user.email || <span className="text-muted-foreground italic">No email</span>}
                         </TableCell>
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                       </TableRow>
                     ))
                   )}
