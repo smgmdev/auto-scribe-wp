@@ -1598,17 +1598,6 @@ export function AdminAgenciesView() {
                   </button>
                 </div>
 
-                {selectedApp.payout_method && (
-                  <div className="text-sm">
-                    <p className="text-muted-foreground mb-1">Preferred Payout Method</p>
-                    <p className="font-medium">
-                      {selectedApp.payout_method === 'stripe' && 'Automatic Payout via Stripe Connect'}
-                      {selectedApp.payout_method === 'custom' && 'Custom Payout'}
-                      {selectedApp.payout_method === 'usdt' && 'USDT Payout (Legacy)'}
-                      {selectedApp.payout_method === 'wire' && 'Wire Payout (Legacy)'}
-                    </p>
-                  </div>
-                )}
 
                 <div className="flex gap-2 flex-wrap">
                   <Button 
