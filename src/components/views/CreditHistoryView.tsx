@@ -177,11 +177,11 @@ export function CreditHistoryView() {
             <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-green-500">
+            <div className="text-2xl font-semibold text-foreground">
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : (
-                `+${totalPurchased}`
+                totalPurchased
               )}
             </div>
           </CardContent>
@@ -212,11 +212,11 @@ export function CreditHistoryView() {
             <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-muted-foreground">
+            <div className="text-2xl font-semibold text-foreground">
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : (
-                `-${totalSpent}`
+                totalSpent
               )}
             </div>
           </CardContent>
