@@ -126,9 +126,12 @@ export function AdminAgenciesView() {
   const [updatingCommission, setUpdatingCommission] = useState(false);
   
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(false);
+  const [dialogLogoLoaded, setDialogLogoLoaded] = useState(false);
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
   const [loadingLogoIds, setLoadingLogoIds] = useState<Set<string>>(new Set());
   const [loadedImageIds, setLoadedImageIds] = useState<Set<string>>(new Set());
+  const [verificationLogoLoaded, setVerificationLogoLoaded] = useState(false);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [documentLoading, setDocumentLoading] = useState(true);
@@ -269,11 +272,14 @@ export function AdminAgenciesView() {
     setSelectedApp(app);
     setAdminNotes(app.admin_notes || '');
     setLogoUrl(null);
+    setDialogLogoLoaded(false);
     
     // Fetch logo URL if exists
     if (app.logo_url) {
+      setLogoLoading(true);
       const url = await getSignedUrl(app.logo_url);
       setLogoUrl(url);
+      setLogoLoading(false);
     }
     
     // Mark as read if not already
@@ -1460,17 +1466,29 @@ export function AdminAgenciesView() {
       </Tabs>
 
       {/* Application Review Dialog */}
-      <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); }}>
+      <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); }}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              {logoUrl && (
-                <img 
-                  src={logoUrl} 
-                  alt="Agency logo" 
-                  className="w-12 h-12 rounded-lg object-cover border border-border"
-                />
-              )}
+              {logoLoading ? (
+                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : logoUrl ? (
+                <>
+                  {!dialogLogoLoaded && (
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  <img 
+                    src={logoUrl} 
+                    alt="Agency logo" 
+                    className={`w-12 h-12 rounded-lg object-cover border border-border ${!dialogLogoLoaded ? 'hidden' : ''}`}
+                    onLoad={() => setDialogLogoLoaded(true)}
+                  />
+                </>
+              ) : null}
               <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
             </div>
           </DialogHeader>
@@ -1737,7 +1755,7 @@ export function AdminAgenciesView() {
 
 
       {/* Custom Verification Details Dialog */}
-      <Dialog open={!!selectedVerification} onOpenChange={() => { setSelectedVerification(null); setVerificationDocUrls({}); }}>
+      <Dialog open={!!selectedVerification} onOpenChange={() => { setSelectedVerification(null); setVerificationDocUrls({}); setVerificationLogoLoaded(false); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -1752,14 +1770,27 @@ export function AdminAgenciesView() {
               {(() => {
                 const linkedAgency = agencies.find(a => a.id === selectedVerification.agency_payout_id);
                 const linkedApp = linkedAgency ? approvedApplications.find(app => app.user_id === linkedAgency.user_id) : null;
+                const logoSrc = linkedApp ? logoUrls[linkedApp.id] : null;
                 return linkedAgency ? (
                   <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
-                    {linkedApp && logoUrls[linkedApp.id] && (
-                      <img 
-                        src={logoUrls[linkedApp.id]} 
-                        alt={linkedAgency.agency_name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                    {logoSrc ? (
+                      <>
+                        {!verificationLogoLoaded && (
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          </div>
+                        )}
+                        <img 
+                          src={logoSrc} 
+                          alt={linkedAgency.agency_name}
+                          className={`w-10 h-10 rounded-full object-cover ${!verificationLogoLoaded ? 'hidden' : ''}`}
+                          onLoad={() => setVerificationLogoLoaded(true)}
+                        />
+                      </>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-muted-foreground" />
+                      </div>
                     )}
                     <div>
                       <p className="font-medium">{linkedAgency.agency_name}</p>
