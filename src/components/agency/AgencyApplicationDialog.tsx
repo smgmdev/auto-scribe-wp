@@ -188,16 +188,23 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       return;
     }
 
-    // Validate image dimensions (must be exactly 300x300)
+    // Validate image dimensions (must be square with minimum 300x300)
     const validateDimensions = (): Promise<boolean> => {
       return new Promise((resolve) => {
         const img = new window.Image();
         img.onload = () => {
-          if (img.width !== 300 || img.height !== 300) {
+          if (img.width !== img.height) {
             toast({
               variant: 'destructive',
               title: 'Invalid image dimensions',
-              description: 'Logo must be exactly 300x300 pixels'
+              description: 'Logo must be square (equal width and height)'
+            });
+            resolve(false);
+          } else if (img.width < 300) {
+            toast({
+              variant: 'destructive',
+              title: 'Image too small',
+              description: 'Logo must be at least 300x300 pixels'
             });
             resolve(false);
           } else {
@@ -684,7 +691,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Agency Logo * <span className="text-muted-foreground font-normal text-xs">(300x300px)</span></Label>
+                <Label>Agency Logo * <span className="text-muted-foreground font-normal text-xs">(min 300x300px, square)</span></Label>
                 <div 
                   className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors h-[140px] flex flex-col justify-center ${
                     isDraggingLogo ? 'border-primary bg-primary/5' : 'border-border'
