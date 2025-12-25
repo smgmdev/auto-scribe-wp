@@ -15,6 +15,7 @@ interface UserCredit {
   purchased: number;
   available: number;
   used: number;
+  refunded: number;
   email: string | null;
 }
 
@@ -179,7 +180,7 @@ export const AdminCreditManagementView = () => {
       // Fetch transactions to calculate used credits per user
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
-        .select('user_id, amount');
+        .select('user_id, amount, type');
 
       if (transactionsError) throw transactionsError;
 
@@ -188,11 +189,14 @@ export const AdminCreditManagementView = () => {
         emailMap.set(profile.id, profile.email);
       });
 
-      // Calculate purchased and used credits per user
+      // Calculate purchased, used, and refunded credits per user
       const purchasedMap = new Map<string, number>();
       const usedMap = new Map<string, number>();
+      const refundedMap = new Map<string, number>();
       transactionsData?.forEach(tx => {
-        if (tx.amount > 0) {
+        if (tx.type === 'refund') {
+          refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        } else if (tx.amount > 0) {
           purchasedMap.set(tx.user_id, (purchasedMap.get(tx.user_id) || 0) + tx.amount);
         } else {
           usedMap.set(tx.user_id, (usedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
@@ -204,6 +208,7 @@ export const AdminCreditManagementView = () => {
         purchased: purchasedMap.get(credit.user_id) || 0,
         available: credit.credits,
         used: usedMap.get(credit.user_id) || 0,
+        refunded: refundedMap.get(credit.user_id) || 0,
         email: emailMap.get(credit.user_id) || null
       }));
 
@@ -411,6 +416,7 @@ export const AdminCreditManagementView = () => {
                     <TableHead className="text-right">Purchased</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Used</TableHead>
+                    <TableHead className="text-right">Refunded</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -421,11 +427,12 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -438,6 +445,7 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                       </TableRow>
                     ))
                   )}
