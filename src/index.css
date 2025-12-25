@@ -113,12 +113,13 @@
   }
 
   html {
+    overflow-y: scroll;
     scrollbar-gutter: stable;
   }
 
   body {
     @apply bg-background text-foreground font-body antialiased text-sm;
-    scrollbar-gutter: stable;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -170,6 +171,19 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Prevent body scroll lock from affecting layout */
+html[data-scroll-locked],
+body[data-scroll-locked] {
+  overflow-y: scroll !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Prevent Radix RemoveScroll from adding padding */
+[data-radix-scroll-area-viewport] {
+  scrollbar-gutter: stable;
 }
 
 /* Disable default focus highlights and outlines */
