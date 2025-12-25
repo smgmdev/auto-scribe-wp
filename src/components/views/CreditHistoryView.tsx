@@ -125,7 +125,7 @@ export function CreditHistoryView() {
                   <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Available Credits
                   </CardTitle>
-                  <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                 </div>
               </TooltipTrigger>
               <TooltipContent 
@@ -160,7 +160,7 @@ export function CreditHistoryView() {
                   <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Total Purchased
                   </CardTitle>
-                  <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                 </div>
               </TooltipTrigger>
               <TooltipContent 
@@ -195,7 +195,7 @@ export function CreditHistoryView() {
                   <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Total Used
                   </CardTitle>
-                  <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                 </div>
               </TooltipTrigger>
               <TooltipContent 
@@ -230,7 +230,7 @@ export function CreditHistoryView() {
                   <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Total Transactions
                   </CardTitle>
-                  <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                 </div>
               </TooltipTrigger>
               <TooltipContent 
