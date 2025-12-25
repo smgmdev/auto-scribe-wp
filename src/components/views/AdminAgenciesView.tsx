@@ -133,18 +133,9 @@ export function AdminAgenciesView() {
   const [selectedApp, setSelectedApp] = useState<AgencyApplication | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [sendingInvite, setSendingInvite] = useState<string | null>(null);
-  const [openingLink, setOpeningLink] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [cleaningUp, setCleaningUp] = useState(false);
-  const [stripeAccountsDialogOpen, setStripeAccountsDialogOpen] = useState(false);
-  const [stripeAccounts, setStripeAccounts] = useState<StripeAccount[]>([]);
-  const [selectedStripeAccounts, setSelectedStripeAccounts] = useState<string[]>([]);
-  const [loadingStripeAccounts, setLoadingStripeAccounts] = useState(false);
-  const [deletingStripeAccounts, setDeletingStripeAccounts] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
-  const [activeSubTab, setActiveSubTab] = useState('stripe-connect');
   const [selectedVerification, setSelectedVerification] = useState<CustomVerification | null>(null);
   const [verificationDocUrls, setVerificationDocUrls] = useState<Record<string, string>>({});
   const [docViewerOpen, setDocViewerOpen] = useState(false);
@@ -278,15 +269,11 @@ export function AdminAgenciesView() {
   });
 
   // Split into sub-categories:
-  // Pending Verification: user hasn't submitted verification yet (Stripe Connect OR Custom without submission)
+  // Pending Verification: user hasn't submitted custom verification yet
   const agenciesPendingVerification = agenciesUnderVerification.filter(a => {
-    if (a.payout_method === 'custom') {
-      const verification = customVerifications.find(v => v.agency_payout_id === a.id);
-      // No verification submitted yet
-      return !verification || !verification.submitted_at;
-    }
-    // Stripe Connect - always pending verification until complete
-    return true;
+    const verification = customVerifications.find(v => v.agency_payout_id === a.id);
+    // No verification submitted yet
+    return !verification || !verification.submitted_at;
   });
 
   // Pending Approval: Custom payout agencies where user HAS submitted verification
@@ -361,53 +348,25 @@ export function AdminAgenciesView() {
           className: 'bg-blue-600 text-white border-blue-600'
         });
 
-        // Check payout method to determine which flow to use
-        const payoutMethod = selectedApp.payout_method || 'stripe';
-        
-        if (payoutMethod === 'custom') {
-          // Custom payout - use the new edge function
-          const response = await supabase.functions.invoke('approve-custom-payout', {
-            body: {
-              agency_name: selectedApp.agency_name,
-              email: selectedApp.email,
-              commission_percentage: 10,
-              user_id: selectedApp.user_id,
-              full_name: selectedApp.full_name
-            }
-          });
+        // All agencies now use custom payout flow
+        const response = await supabase.functions.invoke('approve-custom-payout', {
+          body: {
+            agency_name: selectedApp.agency_name,
+            email: selectedApp.email,
+            commission_percentage: 10,
+            user_id: selectedApp.user_id,
+            full_name: selectedApp.full_name
+          }
+        });
 
-          if (response.error) throw new Error(response.error.message);
-          if (response.data?.error) throw new Error(response.data.error);
+        if (response.error) throw new Error(response.error.message);
+        if (response.data?.error) throw new Error(response.data.error);
 
-          toast({
-            title: 'Application Pre-Approved',
-            description: 'Custom verification email sent to agency.',
-            className: 'bg-green-600 text-white border-green-600'
-          });
-        } else {
-          // Stripe Connect flow
-          const response = await supabase.functions.invoke('create-connect-account', {
-            body: {
-              agency_name: selectedApp.agency_name,
-              email: selectedApp.email,
-              commission_percentage: 10,
-              country: selectedApp.country,
-              user_id: selectedApp.user_id,
-              phone: selectedApp.whatsapp_phone,
-              website: selectedApp.agency_website,
-              representative_name: selectedApp.full_name
-            }
-          });
-
-          if (response.error) throw new Error(response.error.message);
-          if (response.data?.error) throw new Error(response.data.error);
-
-          toast({
-            title: 'Application Pre-Approved',
-            description: 'Stripe Connect invite sent to user.',
-            className: 'bg-green-600 text-white border-green-600'
-          });
-        }
+        toast({
+          title: 'Application Pre-Approved',
+          description: 'Custom verification email sent to agency.',
+          className: 'bg-green-600 text-white border-green-600'
+        });
       }
 
       if (status === 'rejected') {
@@ -433,53 +392,6 @@ export function AdminAgenciesView() {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setProcessing(false);
-    }
-  };
-
-  const handleResendInvite = async (agency: AgencyPayout) => {
-    if (!agency.stripe_account_id) return;
-
-    setSendingInvite(agency.id);
-    try {
-      const response = await supabase.functions.invoke('resend-agency-invite', {
-        body: { agency_id: agency.id }
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
-
-      toast({
-        title: 'Invite sent',
-        description: `Onboarding link sent to ${agency.email}`
-      });
-
-      fetchData();
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
-    } finally {
-      setSendingInvite(null);
-    }
-  };
-
-  const handleOpenOnboardingLink = async (agency: AgencyPayout) => {
-    if (!agency.stripe_account_id) return;
-
-    setOpeningLink(agency.id);
-    try {
-      const response = await supabase.functions.invoke('resend-agency-invite', {
-        body: { agency_id: agency.id }
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
-
-      if (response.data?.onboarding_url) {
-        window.open(response.data.onboarding_url, '_blank');
-      }
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
-    } finally {
-      setOpeningLink(null);
     }
   };
 
@@ -606,73 +518,6 @@ export function AdminAgenciesView() {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setUpdatingCommission(false);
-    }
-  };
-
-  const handleOpenStripeAccountsDialog = async () => {
-    setStripeAccountsDialogOpen(true);
-    setLoadingStripeAccounts(true);
-    setSelectedStripeAccounts([]);
-    try {
-      const response = await supabase.functions.invoke('cleanup-connect-accounts', {
-        body: { action: 'list' }
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
-
-      setStripeAccounts(response.data?.accounts || []);
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
-      setStripeAccountsDialogOpen(false);
-    } finally {
-      setLoadingStripeAccounts(false);
-    }
-  };
-
-  const handleDeleteSelectedStripeAccounts = async () => {
-    if (selectedStripeAccounts.length === 0) return;
-    
-    setDeletingStripeAccounts(true);
-    try {
-      const response = await supabase.functions.invoke('cleanup-connect-accounts', {
-        body: { action: 'delete', accountIds: selectedStripeAccounts }
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
-
-      const deletedCount = response.data?.results?.filter((r: any) => r.deleted).length || 0;
-      toast({
-        title: 'Accounts deleted',
-        description: `Successfully deleted ${deletedCount} Stripe account(s).`,
-        className: 'bg-green-600 text-white border-green-600'
-      });
-
-      // Remove deleted accounts from local state
-      setStripeAccounts(prev => prev.filter(acc => !selectedStripeAccounts.includes(acc.id)));
-      setSelectedStripeAccounts([]);
-      fetchData();
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
-    } finally {
-      setDeletingStripeAccounts(false);
-    }
-  };
-
-  const toggleStripeAccountSelection = (accountId: string) => {
-    setSelectedStripeAccounts(prev => 
-      prev.includes(accountId) 
-        ? prev.filter(id => id !== accountId)
-        : [...prev, accountId]
-    );
-  };
-
-  const toggleSelectAllStripeAccounts = () => {
-    if (selectedStripeAccounts.length === stripeAccounts.length) {
-      setSelectedStripeAccounts([]);
-    } else {
-      setSelectedStripeAccounts(stripeAccounts.map(acc => acc.id));
     }
   };
 
@@ -884,16 +729,8 @@ export function AdminAgenciesView() {
           </Badge>
         </div>
       );
-    }
     
-    // Stripe Connect agencies
-    if (agency.stripe_account_id) {
-      return (
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><AlertTriangle className="h-3 w-3 mr-1" />Pending Verification</Badge>
-          <Badge className="bg-black text-white">Stripe Connect</Badge>
-        </div>
-      );
+    return <Badge variant="secondary" className="bg-red-600/20 text-red-600"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
     }
     return <Badge variant="secondary" className="bg-red-600/20 text-red-600"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
   };
@@ -910,14 +747,6 @@ export function AdminAgenciesView() {
           <p className="mt-2 text-muted-foreground">Manage agency applications, approvals, and payouts</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleOpenStripeAccountsDialog}
-            className="hover:bg-black hover:text-white"
-          >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Manage Stripe Accounts
-          </Button>
           <Button
             variant="outline"
             className="bg-black text-white hover:bg-black/80 border-black gap-2"
@@ -1214,40 +1043,6 @@ export function AdminAgenciesView() {
                             <div className="flex items-center gap-4">
                               {getOnboardingStatus(agency)}
 
-                              <div className="flex gap-1">
-                                {agency.stripe_account_id && agency.payout_method !== 'custom' && (
-                                  <>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                                      onClick={(e) => { e.stopPropagation(); handleResendInvite(agency); }}
-                                      disabled={sendingInvite === agency.id}
-                                      title="Resend onboarding email"
-                                    >
-                                      {sendingInvite === agency.id ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        <Mail className="h-4 w-4" />
-                                      )}
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                                      onClick={(e) => { e.stopPropagation(); handleOpenOnboardingLink(agency); }}
-                                      disabled={openingLink === agency.id}
-                                      title="Open onboarding link"
-                                    >
-                                      {openingLink === agency.id ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        <ExternalLink className="h-4 w-4" />
-                                      )}
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
                             </div>
                           </div>
                         </CardContent>
@@ -1471,282 +1266,140 @@ export function AdminAgenciesView() {
         {/* Active Agencies Tab */}
         <TabsContent value="active" className="mt-6">
           <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
-          <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="stripe-connect">
-                Stripe Connect ({agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'stripe').length})
-              </TabsTrigger>
-              <TabsTrigger value="custom-payout">
-                Custom Payout ({agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'custom').length})
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Stripe Connect Agencies */}
-            <TabsContent value="stripe-connect" className="mt-4">
-              {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'stripe').length === 0 ? (
-                <Card className="border-dashed border-2">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Building2 className="h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-xl font-semibold">No Stripe Connect agencies</h3>
-                    <p className="mt-2 text-sm text-muted-foreground text-center">
-                      Agencies using Stripe Connect will appear here
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'stripe').map(agency => {
-                    const application = getAgencyWithApplication(agency);
-                      return (
-                      <Card 
-                        key={agency.id}
-                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
-                        onClick={() => {
-                          if (application) {
-                            handleOpenApplication(application);
-                          }
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
-                                <img 
-                                  src={logoUrls[application.id]} 
-                                  alt={agency.agency_name}
-                                  className="w-10 h-10 rounded-full object-cover"
-                                />
-                              ) : application && logoUrls[application.id] ? (
-                                <>
-                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                                  </div>
-                                  <img 
-                                    src={logoUrls[application.id]} 
-                                    alt=""
-                                    className="hidden"
-                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                  />
-                                </>
-                              ) : application && loadingLogoIds.has(application.id) ? (
-                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                                </div>
-                              ) : (
-                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                                  <CheckCircle className="h-5 w-5 text-green-500" />
-                                </div>
-                              )}
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h3 className="font-semibold">{agency.agency_name}</h3>
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                </div>
-                                <p className="text-sm text-muted-foreground">{agency.email}</p>
-                                {application && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {application.full_name} • {application.country}
-                                  </p>
-                                )}
+          {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
+            <Card className="border-dashed border-2">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mt-4 text-xl font-semibold">No active agencies</h3>
+                <p className="mt-2 text-sm text-muted-foreground text-center">
+                  Active agencies will appear here after completing verification
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {agencies.filter(a => a.onboarding_complete && !a.downgraded).map(agency => {
+                const application = getAgencyWithApplication(agency);
+                const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
+                return (
+                  <Card 
+                    key={agency.id}
+                    className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
+                    onClick={() => {
+                      if (application) {
+                        handleOpenApplication(application);
+                      }
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                            <img 
+                              src={logoUrls[application.id]} 
+                              alt={agency.agency_name}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : application && logoUrls[application.id] ? (
+                            <>
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                               </div>
+                              <img 
+                                src={logoUrls[application.id]} 
+                                alt=""
+                                className="hidden"
+                                onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                              />
+                            </>
+                          ) : application && loadingLogoIds.has(application.id) ? (
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                             </div>
-
-                            <div className="flex items-center gap-4">
-                              <div className="flex gap-2">
-                                <Badge className="bg-black text-white">
-                                  Stripe Connect
-                                </Badge>
-                              </div>
-
-                              <div className="flex gap-1">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 px-2 hover:bg-black hover:text-white"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleOpenCommissionDialog(agency);
-                                        }}
-                                        title="Edit commission"
-                                      >
-                                        <Percent className="h-3 w-3 mr-1" />
-                                        {agency.commission_percentage}%
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Click to edit commission</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 hover:bg-black hover:text-white"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenDowngradeDialog(agency);
-                                  }}
-                                  disabled={deleting === agency.id}
-                                  title="Downgrade agency"
-                                >
-                                  {deleting === agency.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <X className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </div>
+                          ) : (
+                            <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                              <CheckCircle className="h-5 w-5 text-green-500" />
                             </div>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="font-semibold">{agency.agency_name}</h3>
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            </div>
+                            <p className="text-sm text-muted-foreground">{agency.email}</p>
+                            {application && (
+                              <p className="text-xs text-muted-foreground">
+                                {application.full_name} • {application.country}
+                              </p>
+                            )}
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </TabsContent>
+                        </div>
 
-            {/* Custom Payout Agencies */}
-            <TabsContent value="custom-payout" className="mt-4">
-              {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'custom').length === 0 ? (
-                <Card className="border-dashed border-2">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Building2 className="h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-xl font-semibold">No Custom Payout agencies</h3>
-                    <p className="mt-2 text-sm text-muted-foreground text-center">
-                      Agencies using custom payouts will appear here
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {agencies.filter(a => a.onboarding_complete && !a.downgraded && a.payout_method === 'custom').map(agency => {
-                    const application = getAgencyWithApplication(agency);
-                    const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
-                    return (
-                      <Card 
-                        key={agency.id}
-                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors"
-                        onClick={() => {
-                          if (application) {
-                            handleOpenApplication(application);
-                          }
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
-                                <img 
-                                  src={logoUrls[application.id]} 
-                                  alt={agency.agency_name}
-                                  className="w-10 h-10 rounded-full object-cover"
-                                />
-                              ) : application && logoUrls[application.id] ? (
-                                <>
-                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                                  </div>
-                                  <img 
-                                    src={logoUrls[application.id]} 
-                                    alt=""
-                                    className="hidden"
-                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                  />
-                                </>
-                              ) : application && loadingLogoIds.has(application.id) ? (
-                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                                </div>
-                              ) : (
-                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                                  <CheckCircle className="h-5 w-5 text-green-500" />
-                                </div>
-                              )}
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h3 className="font-semibold">{agency.agency_name}</h3>
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                </div>
-                                <p className="text-sm text-muted-foreground">{agency.email}</p>
-                                {application && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {application.full_name} • {application.country}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex gap-2">
+                            {verification && (
+                              <Badge 
+                                className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenVerification(verification, e);
+                                }}
+                              >
+                                <FileText className="h-3 w-3 mr-1" />
+                                Details
+                              </Badge>
+                            )}
+                          </div>
 
-                            <div className="flex items-center gap-4">
-                              <div className="flex gap-2">
-                                {verification && (
-                                  <Badge 
-                                    className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
+                          <div className="flex gap-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 px-2 hover:bg-black hover:text-white"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleOpenVerification(verification, e);
+                                      handleOpenCommissionDialog(agency);
                                     }}
+                                    title="Edit commission"
                                   >
-                                    <FileText className="h-3 w-3 mr-1" />
-                                    Details
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <div className="flex gap-1">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 px-2 hover:bg-black hover:text-white"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleOpenCommissionDialog(agency);
-                                        }}
-                                        title="Edit commission"
-                                      >
-                                        <Percent className="h-3 w-3 mr-1" />
-                                        {agency.commission_percentage}%
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Click to edit commission</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 hover:bg-black hover:text-white"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenDowngradeDialog(agency);
-                                  }}
-                                  disabled={deleting === agency.id}
-                                  title="Downgrade agency"
-                                >
-                                  {deleting === agency.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <X className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </div>
-                            </div>
+                                    <Percent className="h-3 w-3 mr-1" />
+                                    {agency.commission_percentage}%
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Click to edit commission</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:bg-black hover:text-white"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDowngradeDialog(agency);
+                              }}
+                              disabled={deleting === agency.id}
+                              title="Downgrade agency"
+                            >
+                              {deleting === agency.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <X className="h-4 w-4" />
+                              )}
+                            </Button>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         {/* Rejected Applications Tab */}
@@ -2120,92 +1773,6 @@ export function AdminAgenciesView() {
         title={webViewTitle}
       />
 
-      {/* Stripe Accounts Management Dialog */}
-      <Dialog open={stripeAccountsDialogOpen} onOpenChange={setStripeAccountsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Manage Stripe Connect Accounts</DialogTitle>
-          </DialogHeader>
-          
-          {loadingStripeAccounts ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : stripeAccounts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <Building2 className="h-12 w-12 mb-4" />
-              <p>No Stripe Connect accounts found</p>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between py-2 border-b">
-                <div className="flex items-center gap-2">
-                  <Checkbox 
-                    checked={selectedStripeAccounts.length === stripeAccounts.length}
-                    onCheckedChange={toggleSelectAllStripeAccounts}
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {selectedStripeAccounts.length > 0 
-                      ? `${selectedStripeAccounts.length} selected` 
-                      : 'Select all'}
-                  </span>
-                </div>
-                <Badge variant="secondary">{stripeAccounts.length} account(s)</Badge>
-              </div>
-
-              <div className="flex-1 overflow-y-auto space-y-2 py-2">
-                {stripeAccounts.map(account => (
-                  <div 
-                    key={account.id}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                      selectedStripeAccounts.includes(account.id) 
-                        ? "bg-muted border-primary" 
-                        : "hover:bg-muted/50"
-                    )}
-                    onClick={() => toggleStripeAccountSelection(account.id)}
-                  >
-                    <Checkbox 
-                      checked={selectedStripeAccounts.includes(account.id)}
-                      onCheckedChange={() => toggleStripeAccountSelection(account.id)}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{account.name}</p>
-                        {account.chargesEnabled && account.payoutsEnabled && (
-                          <Badge className="bg-green-600 text-xs">Verified</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground truncate">{account.email}</p>
-                      <p className="text-xs text-muted-foreground">
-                        ID: {account.id} • Created: {format(new Date(account.created * 1000), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-between items-center pt-4 border-t">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setStripeAccountsDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  onClick={handleDeleteSelectedStripeAccounts}
-                  disabled={selectedStripeAccounts.length === 0 || deletingStripeAccounts}
-                >
-                  {deletingStripeAccounts && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected ({selectedStripeAccounts.length})
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Custom Verification Details Dialog */}
       <Dialog open={!!selectedVerification} onOpenChange={() => { setSelectedVerification(null); setVerificationDocUrls({}); }}>
