@@ -386,6 +386,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         logo_url: logoUrl,
         media_niches: niches,
         media_channels,
+        payout_method: 'custom',
         status: 'pending'
       } as any);
 
