@@ -768,7 +768,7 @@ export const AdminCreditManagementView = () => {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Search by agency name or email..."
+                        placeholder="Search by agency name..."
                         value={agencyBalancesSearchTerm}
                         onChange={(e) => setAgencyBalancesSearchTerm(e.target.value)}
                         className="pl-10"
@@ -808,8 +808,7 @@ export const AdminCreditManagementView = () => {
                         agencyBalances
                           .filter(agency => {
                             const searchLower = agencyBalancesSearchTerm.toLowerCase();
-                            return agency.agency_name.toLowerCase().includes(searchLower) ||
-                              (agency.email && agency.email.toLowerCase().includes(searchLower));
+                            return agency.agency_name.toLowerCase().includes(searchLower);
                           })
                           .map((agency) => (
                           <TableRow key={agency.id}>
