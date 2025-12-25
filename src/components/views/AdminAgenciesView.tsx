@@ -1527,7 +1527,7 @@ export function AdminAgenciesView() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Contact & Basic Info */}
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Full Name</p>
                     <p className="font-medium">{selectedApp.full_name}</p>
