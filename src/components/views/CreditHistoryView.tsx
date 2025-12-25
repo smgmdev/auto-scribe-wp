@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { History, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet } from 'lucide-react';
+import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -97,11 +97,11 @@ export function CreditHistoryView() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <History className="h-8 w-8" />
-            Credit History
+            <CreditCard className="h-8 w-8" />
+            Credit Management
           </h1>
           <p className="mt-2 text-muted-foreground">
-            View all your credit transactions and spending history
+            Manage your credits and view transaction history
           </p>
         </div>
         <Button 
