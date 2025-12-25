@@ -194,7 +194,7 @@ export function DashboardView() {
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {isAgency ? (
-          <Badge className="bg-green-500/20 text-black border-green-500/30 flex items-center gap-1 px-3 py-1">
+          <Badge className="bg-green-500/20 text-black border-green-500/30 flex items-center gap-1 px-3 py-1 hover:bg-green-500/20">
             <CheckCircle className="h-3 w-3" />
             Active Agency
           </Badge>
