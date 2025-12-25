@@ -188,6 +188,37 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       return;
     }
 
+    // Validate image dimensions (must be exactly 300x300)
+    const validateDimensions = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const img = new window.Image();
+        img.onload = () => {
+          if (img.width !== 300 || img.height !== 300) {
+            toast({
+              variant: 'destructive',
+              title: 'Invalid image dimensions',
+              description: 'Logo must be exactly 300x300 pixels'
+            });
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        };
+        img.onerror = () => {
+          toast({
+            variant: 'destructive',
+            title: 'Invalid image',
+            description: 'Could not read image file'
+          });
+          resolve(false);
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    };
+
+    const isValidDimensions = await validateDimensions();
+    if (!isValidDimensions) return;
+
     setUploadingLogo(true);
     setLogoFile(file);
 
