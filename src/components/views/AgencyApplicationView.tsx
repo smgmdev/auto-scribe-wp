@@ -273,7 +273,7 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-gray-500/30 bg-black p-6">
+          <div className="rounded-lg border border-gray-400 bg-black p-6">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-500/20">
                 <Clock className="h-6 w-6 text-gray-400" />
