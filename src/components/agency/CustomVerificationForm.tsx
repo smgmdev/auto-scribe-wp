@@ -71,12 +71,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
   const [formData, setFormData] = useState({
     // Personal info - prefilled from application
     full_name: prefillData?.full_name || '',
-    personal_country: prefillData?.country || '',
+    personal_country: '',
     phone: prefillData?.phone || '',
     email: prefillData?.email || '',
     // Company info
-    company_name: agencyName || '',
-    company_country: prefillData?.country || '',
+    company_name: '',
+    company_country: '',
     company_address: '',
     company_id: '',
     tax_number: '',
