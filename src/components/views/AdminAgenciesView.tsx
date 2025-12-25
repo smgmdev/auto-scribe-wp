@@ -1376,19 +1376,16 @@ export function AdminAgenciesView() {
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 px-2 hover:bg-black hover:text-white"
+                                      <Badge 
+                                        className="bg-muted text-foreground cursor-pointer hover:bg-muted/80"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleOpenCommissionDialog(agency);
                                         }}
-                                        title="Edit commission"
                                       >
                                         <Percent className="h-3 w-3 mr-1" />
                                         {agency.commission_percentage}%
-                                      </Button>
+                                      </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p>Click to edit commission</p>
