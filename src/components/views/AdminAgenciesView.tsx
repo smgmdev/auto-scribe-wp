@@ -674,27 +674,17 @@ export function AdminAgenciesView() {
       if (verification && verification.status === 'pending_review') {
         // Verification submitted - show green "Pending Review" badge
         return (
-          <div className="flex gap-2">
-            <Badge className="bg-green-600/20 text-green-600">
-              <Clock className="h-3 w-3 mr-1" />Pending Review
-            </Badge>
-            <Badge className="bg-black text-white">
-              Custom Payout
-            </Badge>
-          </div>
+          <Badge className="bg-green-600/20 text-green-600">
+            <Clock className="h-3 w-3 mr-1" />Pending Review
+          </Badge>
         );
       }
       
       // No verification submitted yet - show pending status
       return (
-        <div className="flex gap-2">
-          <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
-            <Clock className="h-3 w-3 mr-1" />Pending Verification
-          </Badge>
-          <Badge className="bg-black text-white">
-            Custom Payout
-          </Badge>
-        </div>
+        <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
+          <Clock className="h-3 w-3 mr-1" />Pending Verification
+        </Badge>
       );
     
     return <Badge variant="secondary" className="bg-red-600/20 text-red-600"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
@@ -1094,25 +1084,20 @@ export function AdminAgenciesView() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                              <div className="flex gap-2">
-                                <Badge 
-                                  className={`cursor-pointer transition-colors ${
-                                    verification?.read 
-                                      ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
-                                      : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
-                                  }`}
-                                  onClick={(e) => {
-                                    if (verification) {
-                                      handleOpenVerification(verification, e);
-                                    }
-                                  }}
-                                >
-                                  <Clock className="h-3 w-3 mr-1" />Pending Review
-                                </Badge>
-                                <Badge className="bg-black text-white">
-                                  Custom Payout
-                                </Badge>
-                              </div>
+                              <Badge 
+                                className={`cursor-pointer transition-colors ${
+                                  verification?.read 
+                                    ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
+                                    : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                                }`}
+                                onClick={(e) => {
+                                  if (verification) {
+                                    handleOpenVerification(verification, e);
+                                  }
+                                }}
+                              >
+                                <Clock className="h-3 w-3 mr-1" />Pending Review
+                              </Badge>
                             </div>
                           </div>
                         </CardContent>
