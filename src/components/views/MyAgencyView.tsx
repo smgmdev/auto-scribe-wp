@@ -112,13 +112,22 @@ export function MyAgencyView() {
 
         // Fetch logo signed URL if exists
         if (appData?.logo_url) {
-          const { data: signedUrlData } = await supabase.storage
+          // The logo_url is stored as just the path (e.g., "user-id/logo-123.png")
+          const logoPath = appData.logo_url.replace('agency-documents/', '');
+          const { data: signedUrlData, error: signedUrlError } = await supabase.storage
             .from('agency-documents')
-            .createSignedUrl(appData.logo_url.replace('agency-documents/', ''), 3600);
+            .createSignedUrl(logoPath, 3600);
           
-          if (signedUrlData?.signedUrl) {
+          if (signedUrlError) {
+            console.error('Error fetching logo signed URL:', signedUrlError);
+            setLogoLoading(false);
+          } else if (signedUrlData?.signedUrl) {
             setLogoUrl(signedUrlData.signedUrl);
+          } else {
+            setLogoLoading(false);
           }
+        } else {
+          setLogoLoading(false);
         }
 
         setAgency({
@@ -245,18 +254,25 @@ export function MyAgencyView() {
         <Card className="md:col-span-2">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3">
-              {logoLoading && agency.logo_url ? (
+              {logoUrl ? (
+                <div className="relative h-12 w-12">
+                  {logoLoading && (
+                    <div className="absolute inset-0 rounded-lg bg-muted flex items-center justify-center border border-border">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  <img 
+                    src={logoUrl} 
+                    alt={agency.agency_name} 
+                    className={`h-12 w-12 rounded-lg object-cover border border-border ${logoLoading ? 'opacity-0' : 'opacity-100'}`}
+                    onLoad={() => setLogoLoading(false)}
+                    onError={() => setLogoLoading(false)}
+                  />
+                </div>
+              ) : agency.logo_url && logoLoading ? (
                 <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center border border-border">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              ) : logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt={agency.agency_name} 
-                  className="h-12 w-12 rounded-lg object-cover border border-border"
-                  onLoad={() => setLogoLoading(false)}
-                  onError={() => setLogoLoading(false)}
-                />
               ) : (
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Building2 className="h-6 w-6 text-primary" />
