@@ -116,7 +116,7 @@ export function CreditHistoryView() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Available Credits
@@ -134,7 +134,7 @@ export function CreditHistoryView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Total Purchased
@@ -152,7 +152,7 @@ export function CreditHistoryView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Total Used
@@ -170,7 +170,7 @@ export function CreditHistoryView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3">
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Total Transactions
