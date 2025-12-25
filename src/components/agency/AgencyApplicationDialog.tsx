@@ -628,24 +628,6 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="agency_description">Agency Description <span className="text-muted-foreground font-normal text-xs">(max 150 characters)</span></Label>
-              <Textarea
-                id="agency_description"
-                placeholder="Write your achievements and show off! Describe what makes your agency stand out..."
-                value={agencyDescription}
-                onChange={(e) => {
-                  if (e.target.value.length <= 150) {
-                    setAgencyDescription(e.target.value);
-                  }
-                }}
-                disabled={submitting}
-                className="resize-none h-20"
-                maxLength={150}
-              />
-              <p className="text-xs text-muted-foreground text-right">{agencyDescription.length}/150</p>
-            </div>
-
-            <div className="space-y-2">
               <Label>What are the 3 media channels you would list at the start? *</Label>
               <div className="flex flex-col gap-3">
                 <div>
@@ -711,6 +693,23 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="agency_description">Agency Description <span className="text-muted-foreground font-normal text-xs">(max 150 characters)</span></Label>
+              <Textarea
+                id="agency_description"
+                placeholder="Write your achievements and show off! Describe what makes your agency stand out..."
+                value={agencyDescription}
+                onChange={(e) => {
+                  if (e.target.value.length <= 150) {
+                    setAgencyDescription(e.target.value);
+                  }
+                }}
+                disabled={submitting}
+                className="resize-none h-20"
+                maxLength={150}
+              />
+              <p className="text-xs text-muted-foreground text-right">{agencyDescription.length}/150</p>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
