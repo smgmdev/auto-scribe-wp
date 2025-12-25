@@ -207,7 +207,7 @@ export function AgencyStatusCard({
           </div>
           <div className="flex-1">
             <span className="font-medium text-yellow-400">Verification Required</span>
-            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your custom payout verification</p>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Complete your agency verification</p>
           </div>
         </div>
         
