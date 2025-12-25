@@ -63,8 +63,7 @@ export const AdminCreditBalancesView = () => {
   };
 
   const filteredCredits = userCredits.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.user_id.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalCredits = userCredits.reduce((sum, user) => sum + user.credits, 0);
@@ -112,7 +111,7 @@ export const AdminCreditBalancesView = () => {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by email or user ID..."
+          placeholder="Search by email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -126,7 +125,6 @@ export const AdminCreditBalancesView = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Email</TableHead>
-                <TableHead>User ID</TableHead>
                 <TableHead className="text-right">Credits</TableHead>
                 <TableHead>Last Updated</TableHead>
               </TableRow>
@@ -136,14 +134,13 @@ export const AdminCreditBalancesView = () => {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
               ) : filteredCredits.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
                     {searchTerm ? 'No users found matching your search' : 'No user credits found'}
                   </TableCell>
                 </TableRow>
@@ -152,9 +149,6 @@ export const AdminCreditBalancesView = () => {
                   <TableRow key={user.user_id}>
                     <TableCell className="font-medium">
                       {user.email || <span className="text-muted-foreground italic">No email</span>}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {user.user_id.slice(0, 8)}...
                     </TableCell>
                     <TableCell className="text-right font-semibold">
                       {user.credits.toLocaleString()}
