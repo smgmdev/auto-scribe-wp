@@ -170,31 +170,69 @@ export const AdminCreditManagementView = () => {
         {/* Balances Tab */}
         <TabsContent value="balances" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Total Users
+                      </CardTitle>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Total number of users with credit accounts</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Users className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userCredits.length}</div>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">{userCredits.length}</div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Users with Credits</CardTitle>
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
+
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Users with Credits
+                      </CardTitle>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Number of users with a positive credit balance</p>
+                  </TooltipContent>
+                </Tooltip>
+                <CreditCard className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{usersWithCredits}</div>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">{usersWithCredits}</div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Credits</CardTitle>
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
+
+            <Card className="transition-colors hover:border-[#4771d9] py-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Total Credits
+                      </CardTitle>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                    <p>Total credits across all user accounts</p>
+                  </TooltipContent>
+                </Tooltip>
+                <CreditCard className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalCredits.toLocaleString()}</div>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">{totalCredits.toLocaleString()}</div>
               </CardContent>
             </Card>
           </div>
