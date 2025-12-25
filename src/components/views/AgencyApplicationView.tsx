@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText } from 'lucide-react';
+import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { CustomVerificationForm } from '@/components/agency/CustomVerificationForm';
@@ -18,18 +18,22 @@ import {
 
 const faqItems = [
   {
+    icon: Building2,
     question: "Is the Agency Account the Right Fit for You?",
     answer: "You must be a formally incorporated media marketing agency that provides professional PR services with a focus on securing media coverage for clients. This account type is intended exclusively for established agencies with proven operations and a documented track record in the media industry."
   },
   {
+    icon: Gift,
     question: "What Are the Benefits for Agencies on Arcana Mace?",
     answer: "As an agency, you can list your own media channels for sale and promote them to a wide audience. With Arcana Mace, clients gain greater confidence when engaging agencies for media buying, while we ensure that agencies receive the support, protection, and guaranteed payment they deserve for their work."
   },
   {
+    icon: Workflow,
     question: "How Does the Model Work?",
     answer: "You will list your available media channels along with your service details. Clients can then contact you directly with questions about their orders, allowing you to provide guidance and feedback on their requirements. Once both you and the client agree on a media publishing plan, the client places the order and you proceed with delivery. Arcana Mace securely holds the payment during this process. After delivery, the client reviews and approves your work. Once approved, your payment is released to you. Simple and secure."
   },
   {
+    icon: CalendarClock,
     question: "What Is the Verification and Approval Timeline?",
     answer: "After submitting your application, our team will review your details and documentation. This process typically takes 1-3 business days. Once approved, you will need to complete payout verification. For Automatic Payout (Stripe Connect), you will be guided through Stripe's secure KYC verification process. For Custom Payout, you must complete additional verification within 3 days of approval, after which payments are processed manually within 1-7 business days. You will receive email notifications at each stage of the process."
   }
@@ -86,7 +90,12 @@ function AgencyFAQ() {
         >
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
-              <span className="font-medium text-foreground">{item.question}</span>
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <item.icon className="h-4 w-4 text-primary" />
+                </div>
+                <span className="font-medium text-foreground">{item.question}</span>
+              </div>
               <ChevronDown 
                 className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
                   openItems.includes(index) ? 'rotate-180' : ''
