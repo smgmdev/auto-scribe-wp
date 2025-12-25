@@ -63,6 +63,7 @@ export function MyAgencyView() {
   const [wordpressSites, setWordpressSites] = useState<WordPressSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async (text: string) => {
@@ -244,11 +245,17 @@ export function MyAgencyView() {
         <Card className="md:col-span-2">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3">
-              {logoUrl ? (
+              {logoLoading && agency.logo_url ? (
+                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center border border-border">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : logoUrl ? (
                 <img 
                   src={logoUrl} 
                   alt={agency.agency_name} 
                   className="h-12 w-12 rounded-lg object-cover border border-border"
+                  onLoad={() => setLogoLoading(false)}
+                  onError={() => setLogoLoading(false)}
                 />
               ) : (
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
