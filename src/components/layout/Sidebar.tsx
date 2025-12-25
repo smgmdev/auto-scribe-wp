@@ -29,7 +29,6 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       { id: 'headlines', label: 'Sources', icon: Newspaper },
       { id: 'articles', label: 'My Articles', icon: FileText },
       ...(isAdmin ? [
-        { id: 'admin-credits', label: 'Credit Management', icon: CreditCard },
         { id: 'settings', label: 'Settings', icon: Settings }
       ] : [])
     ]
@@ -58,14 +57,12 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     });
   }
 
-  // Add Credit History for non-admin users (after Agency Management)
-  if (!isAdmin) {
-    base.push({
-      id: 'credit-history',
-      label: 'Credit Management',
-      icon: CreditCard
-    });
-  }
+  // Add Credit Management for all users (after Agency Management)
+  base.push({
+    id: 'credit-history',
+    label: 'Credit Management',
+    icon: CreditCard
+  });
 
   if (isAdmin) {
     return [...base.filter(item => item.id !== 'b2b-media-buying'), {
@@ -144,7 +141,7 @@ export function Sidebar({
 
   // Auto-expand menus if current view is one of their submenu items
   useEffect(() => {
-    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings', 'admin-credits'];
+    const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     
