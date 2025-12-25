@@ -57,12 +57,14 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     });
   }
 
-  // Add Credit Management for all users (after Agency Management)
-  base.push({
-    id: 'credit-history',
-    label: 'Credit Management',
-    icon: CreditCard
-  });
+  // Add Credit Management for non-admin users only (after Agency Management)
+  if (!isAdmin) {
+    base.push({
+      id: 'credit-history',
+      label: 'Credit Management',
+      icon: CreditCard
+    });
+  }
 
   if (isAdmin) {
     return [...base.filter(item => item.id !== 'b2b-media-buying'), {
@@ -79,7 +81,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       icon: Building2,
       submenu: [
         { id: 'admin-agencies', label: 'Agency Management', icon: ClipboardList },
-        { id: 'admin-media-management', label: 'Media Management', icon: Library }
+        { id: 'admin-media-management', label: 'Media Management', icon: Library },
+        { id: 'credit-history', label: 'Credit Management', icon: CreditCard }
       ]
     }, {
       id: 'admin-users',
