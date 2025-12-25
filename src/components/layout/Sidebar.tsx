@@ -81,9 +81,12 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       icon: Building2,
       submenu: [
         { id: 'admin-agencies', label: 'Agency Management', icon: ClipboardList },
-        { id: 'admin-media-management', label: 'Media Management', icon: Library },
-        { id: 'credit-history', label: 'Credit Management', icon: CreditCard }
+        { id: 'admin-media-management', label: 'Media Management', icon: Library }
       ]
+    }, {
+      id: 'credit-history',
+      label: 'Credit Management',
+      icon: CreditCard
     }, {
       id: 'admin-users',
       label: 'Users',
