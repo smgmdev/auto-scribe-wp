@@ -287,7 +287,7 @@ export const AdminCreditManagementView = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                    <p>Total credits refunded to users</p>
+                    <p>Total refunds in USD value to users</p>
                   </TooltipContent>
                 </Tooltip>
                 <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
@@ -309,7 +309,7 @@ export const AdminCreditManagementView = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                    <p>Number of refund transactions processed</p>
+                    <p>Total number of refund requests</p>
                   </TooltipContent>
                 </Tooltip>
                 <RotateCcw className="h-4 w-4 text-muted-foreground/60" />
@@ -331,7 +331,7 @@ export const AdminCreditManagementView = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                    <p>Total number of credit transactions</p>
+                    <p>Total number of media site transactions including Local and Global Libraries</p>
                   </TooltipContent>
                 </Tooltip>
                 <CreditCard className="h-4 w-4 text-muted-foreground/60" />
