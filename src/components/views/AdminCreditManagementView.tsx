@@ -261,7 +261,7 @@ export const AdminCreditManagementView = () => {
                       <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Total Purchased
                       </CardTitle>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
@@ -283,7 +283,7 @@ export const AdminCreditManagementView = () => {
                       <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Total Refunds
                       </CardTitle>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
@@ -305,7 +305,7 @@ export const AdminCreditManagementView = () => {
                       <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Refund Requests
                       </CardTitle>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
@@ -327,7 +327,7 @@ export const AdminCreditManagementView = () => {
                       <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Transactions
                       </CardTitle>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                      <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
