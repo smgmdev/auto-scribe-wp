@@ -77,8 +77,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     agency_website: '',
     media_channel_1: '',
     media_channel_2: '',
-    media_channel_3: '',
-    payout_method: ''
+    media_channel_3: ''
   });
 
   useEffect(() => {
@@ -99,8 +98,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         agency_website: '',
         media_channel_1: '',
         media_channel_2: '',
-        media_channel_3: '',
-        payout_method: ''
+        media_channel_3: ''
       });
       setSelectedNiches([]);
       setOtherNiche('');
@@ -348,7 +346,6 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         logo_url: logoUrl,
         media_niches: niches,
         media_channels,
-        payout_method: formData.payout_method,
         status: 'pending'
       } as any);
 
@@ -634,31 +631,6 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="payout_method">How would you like to receive your payouts? *</Label>
-              <Select
-                value={formData.payout_method}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, payout_method: value }))}
-                disabled={submitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payout method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="custom" className="hover:bg-black hover:text-white focus:bg-black focus:text-white">Custom Payout</SelectItem>
-                </SelectContent>
-              </Select>
-              {!formData.payout_method && (
-                <p className="text-xs text-muted-foreground">
-                  Please select payout option to see details.
-                </p>
-              )}
-              {formData.payout_method === 'custom' && (
-                <p className="text-xs text-muted-foreground">
-                  Custom Payouts are manual payouts by wire transfer or USDT. You will be assigned an account manager to handle your payouts. Custom Payouts can take 1-7 days or more.
-                </p>
-              )}
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
