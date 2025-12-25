@@ -1380,7 +1380,6 @@ export function AdminAgenciesView() {
                                         handleOpenCommissionDialog(agency);
                                       }}
                                     >
-                                      <Percent className="h-3 w-3 mr-1" />
                                       {agency.commission_percentage}%
                                     </Badge>
                                   </TooltipTrigger>
