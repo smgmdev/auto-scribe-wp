@@ -522,7 +522,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
-  const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string } | null => {
+  const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string; delivery_deadline?: string } | null => {
     const match = message.match(/\[ORDER_PLACED\](.*?)\[\/ORDER_PLACED\]/);
     if (match) {
       try {
@@ -532,6 +532,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
     }
     return null;
+  };
+
+  const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boolean } => {
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diff = deadlineDate.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      return { text: 'Overdue', isOverdue: true };
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0 || parts.length === 0) parts.push(`${minutes}m`);
+    
+    return { text: parts.join(' '), isOverdue: false };
   };
 
   const parseOrderCancelled = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_refunded: number; order_id: string } | null => {
@@ -872,6 +893,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     // Handle order placed special message
     if (orderPlaced) {
+      const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
+      
       return (
         <div className="space-y-2">
           <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'}`}>
@@ -885,6 +908,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               {orderPlaced.credits_used} credits
             </p>
+            {timeInfo && (
+              <div className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
+                <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
+                <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
+                  {timeInfo.isOverdue ? 'Delivery overdue' : `Delivery in ${timeInfo.text}`}
+                </span>
+              </div>
+            )}
           </div>
           <p className="text-xs opacity-50 mt-1">
             {format(new Date(msg.created_at), 'HH:mm')}
