@@ -431,23 +431,33 @@ export function OrdersView() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
-                  <DropdownMenuItem 
-                    className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    onClick={() => {
-                      toast({
-                        title: "Coming Soon",
-                        description: "Dispute functionality will be available soon.",
-                      });
-                    }}
-                  >
-                    Open Dispute
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    onClick={() => setCancelOrderDialogOpen(true)}
-                  >
-                    Cancel Order
-                  </DropdownMenuItem>
+                  {(() => {
+                    const isDeliveryOverdue = selectedOrder.delivery_deadline 
+                      ? new Date(selectedOrder.delivery_deadline) < new Date() 
+                      : false;
+                    return (
+                      <>
+                        <DropdownMenuItem 
+                          className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          disabled={!isDeliveryOverdue}
+                          onClick={() => {
+                            toast({
+                              title: "Coming Soon",
+                              description: "Dispute functionality will be available soon.",
+                            });
+                          }}
+                        >
+                          Open Dispute
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          onClick={() => setCancelOrderDialogOpen(true)}
+                        >
+                          Request Cancellation
+                        </DropdownMenuItem>
+                      </>
+                    );
+                  })()}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
