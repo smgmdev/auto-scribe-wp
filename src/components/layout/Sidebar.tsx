@@ -118,6 +118,8 @@ export function Sidebar({
     setUnreadMediaSubmissionsCount,
     unreadOrdersCount,
     setUnreadOrdersCount,
+    unreadDisputesCount,
+    setUnreadDisputesCount,
     agencyUnreadWpSubmissionsCount,
     setAgencyUnreadWpSubmissionsCount,
     agencyUnreadMediaSubmissionsCount,
@@ -237,11 +239,19 @@ export function Sidebar({
           .eq('status', 'paid')
           .eq('read', false);
         
+        // Fetch unread disputes count
+        const { count: unreadDisputesCountResult } = await supabase
+          .from('disputes')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'open')
+          .eq('read', false);
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
           setUnreadMediaSubmissionsCount((wpSubmissionsCount || 0) + (mediaSubmissionsCount || 0));
           setUnreadOrdersCount(unreadOrdersCountResult || 0);
+          setUnreadDisputesCount(unreadDisputesCountResult || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -498,9 +508,9 @@ export function Sidebar({
                 const agencyManagementCount = item.id === 'agency-management'
                   ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount)
                   : 0;
-                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders)
+                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders + disputes)
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
-                  ? (isAdmin ? unreadOrdersCount : userUnreadEngagementsCount)
+                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount) : userUnreadEngagementsCount)
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
@@ -542,8 +552,9 @@ export function Sidebar({
                           const showServiceRequestsBadge = subItem.id === 'agency-requests' && agencyUnreadServiceRequestsCount > 0;
                           // User My Engagements shows unread message notifications
                           const showEngagementsBadge = subItem.id === 'my-requests' && userUnreadEngagementsCount > 0;
-                          // Admin Order Management shows unread orders notifications
-                          const showOrdersBadge = subItem.id === 'admin-orders' && unreadOrdersCount > 0;
+                          // Admin Order Management shows unread orders + disputes notifications
+                          const showOrdersBadge = subItem.id === 'admin-orders' && (unreadOrdersCount + unreadDisputesCount) > 0;
+                          const ordersBadgeCount = unreadOrdersCount + unreadDisputesCount;
                           
                           // Determine notification count for this submenu item
                           let notificationCount = 0;
@@ -552,7 +563,7 @@ export function Sidebar({
                           else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
                           else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount;
                           else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount;
-                          else if (showOrdersBadge) notificationCount = unreadOrdersCount;
+                          else if (showOrdersBadge) notificationCount = ordersBadgeCount;
                           
                           return (
                             <div key={subItem.id} className="relative">
