@@ -330,10 +330,16 @@ export function ChatListPanel() {
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
     
+    // Early return if no user - prevents false notifications
+    if (!user?.id) {
+      console.log('[ChatListPanel] No user.id for broadcast, skipping');
+      return;
+    }
+    
     const { request_id, sender_type, sender_id, message, title, media_site_name, media_site_favicon } = payload;
     
     // Skip if this is our own message (sender_id matches our user id or agency payout id)
-    if (sender_id === user?.id || sender_id === agencyPayoutIdRef.current) {
+    if (sender_id === user.id || sender_id === agencyPayoutIdRef.current) {
       console.log('[ChatListPanel] Skipping own message broadcast');
       return;
     }
@@ -505,13 +511,25 @@ export function ChatListPanel() {
             agencyPayoutId: agencyPayoutIdRef.current 
           });
           
-          // Skip if this is our own message - check sender_id directly
-          // For regular users: senderId would match user.id when they send
-          // For agencies: senderId would match agencyPayoutId when they send
+          // Skip if this is our own message
+          // Check sender_id against both user.id and agencyPayoutId
+          // This covers all cases: user sending as client, user sending as agency, admin sending
           const isOwnMessage = senderId === user?.id || 
                                (agencyPayoutIdRef.current && senderId === agencyPayoutIdRef.current);
           
-          console.log('[ChatListPanel] isOwnMessage check:', { isOwnMessage, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
+          console.log('[ChatListPanel] isOwnMessage check:', { 
+            isOwnMessage, 
+            senderId, 
+            senderType,
+            userId: user?.id, 
+            agencyPayoutId: agencyPayoutIdRef.current 
+          });
+          
+          // Early return if we can't identify the user - prevents false notifications
+          if (!user?.id) {
+            console.log('[ChatListPanel] No user.id available, skipping');
+            return;
+          }
           
           // Check if this belongs to our engagements or service requests from local state
           let isMyEngagement = myEngagementsRef.current.some(e => e.id === requestId);
