@@ -120,11 +120,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     setLocalPosition(chat.position);
   }, [chat.position]);
   
-  // Timer tick for live countdown updates (every minute)
+  // Timer tick for live countdown updates (every second)
   useEffect(() => {
     const interval = setInterval(() => {
       setTimerTick(tick => tick + 1);
-    }, 60000); // Update every minute
+    }, 1000); // Update every second
     
     return () => clearInterval(interval);
   }, []);
@@ -569,11 +569,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
     const parts = [];
     if (days > 0) parts.push(`${days}d`);
     if (hours > 0) parts.push(`${hours}h`);
-    if (minutes > 0 || parts.length === 0) parts.push(`${minutes}m`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
     
     return { text: parts.join(' '), isOverdue: false };
   };
