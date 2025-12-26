@@ -379,14 +379,8 @@ export function OrdersView() {
 
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader className="flex flex-row items-start justify-between">
-            <div>
-              <DialogTitle>Order Details</DialogTitle>
-              <DialogDescription>
-                Order ID: {selectedOrder?.id?.slice(0, 8)}...
-              </DialogDescription>
-            </div>
-            {selectedOrder && selectedOrder.delivery_status === 'pending' && selectedOrder.status !== 'cancelled' && (
+          {selectedOrder && selectedOrder.delivery_status === 'pending' && selectedOrder.status !== 'cancelled' && (
+            <div className="absolute right-10 top-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -418,7 +412,13 @@ export function OrdersView() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            </div>
+          )}
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>
+              Order ID: {selectedOrder?.id?.slice(0, 8)}...
+            </DialogDescription>
           </DialogHeader>
 
           {selectedOrder && (
