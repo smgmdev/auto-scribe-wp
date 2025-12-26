@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy, XCircle, Search } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy, XCircle, Search, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDistanceToNow, format, differenceInHours, differenceInDays } from 'date-fns';
@@ -187,8 +188,9 @@ export function AdminOrdersView() {
     }
   };
 
-  const handleInvestigate = async () => {
-    if (!selectedOrder) return;
+  const handleInvestigate = async (order?: Order) => {
+    const targetOrder = order || selectedOrder;
+    if (!targetOrder) return;
     
     setInvestigating(true);
     try {
@@ -201,7 +203,7 @@ export function AdminOrdersView() {
             id, name, favicon, price, publication_format, link, category, subcategory, about, agency
           )
         `)
-        .eq('order_id', selectedOrder.id)
+        .eq('order_id', targetOrder.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -237,12 +239,12 @@ export function AdminOrdersView() {
           about: serviceRequest.media_sites.about,
           agency: serviceRequest.media_sites.agency,
         } : null,
-        order: selectedOrder ? {
-          id: selectedOrder.id,
-          status: selectedOrder.status,
-          delivery_status: selectedOrder.delivery_status,
-          delivery_deadline: selectedOrder.delivery_deadline,
-        } : null,
+        order: {
+          id: targetOrder.id,
+          status: targetOrder.status,
+          delivery_status: targetOrder.delivery_status,
+          delivery_deadline: targetOrder.delivery_deadline,
+        },
       };
 
       // Open the chat as admin viewing agency requests
@@ -263,6 +265,11 @@ export function AdminOrdersView() {
     } finally {
       setInvestigating(false);
     }
+  };
+
+  const handleCardCancelOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setCancelDialogOpen(true);
   };
 
   const getStatusBadge = (status: string) => {
@@ -445,17 +452,37 @@ export function AdminOrdersView() {
                         {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                       </div>
 
-                      {order.status === 'paid' && order.delivery_status === 'pending' && (
-                        <Button 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openDeliveryDialog(order);
-                          }}
-                        >
-                          <Send className="h-4 w-4 mr-2" />
-                          Mark Delivered
-                        </Button>
+                      {order.status === 'paid' && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button size="sm" variant="outline">
+                              Action
+                              <ChevronDown className="h-4 w-4 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem 
+                              onClick={() => handleInvestigate(order)}
+                              className="hover:bg-foreground hover:text-background cursor-pointer"
+                            >
+                              Investigate
+                            </DropdownMenuItem>
+                            {order.delivery_status === 'pending' && (
+                              <DropdownMenuItem 
+                                onClick={() => openDeliveryDialog(order)}
+                                className="hover:bg-foreground hover:text-background cursor-pointer"
+                              >
+                                Mark Delivered
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem 
+                              onClick={() => handleCardCancelOrder(order)}
+                              className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer"
+                            >
+                              Cancel Order
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
 
                       {order.delivery_url && (
@@ -635,7 +662,7 @@ export function AdminOrdersView() {
                 <Button 
                   variant="outline"
                   className="w-full" 
-                  onClick={handleInvestigate}
+                  onClick={() => handleInvestigate()}
                   disabled={investigating}
                 >
                   {investigating ? (
