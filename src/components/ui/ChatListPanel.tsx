@@ -69,6 +69,8 @@ interface InvestigationItem {
   created_at: string;
   status: string;
   notes: string | null;
+  unreadCount: number; // Track unread messages for this investigation
+  lastMessageTime?: string; // Track last message time for sorting
   service_request: {
     id: string;
     title: string;
@@ -305,7 +307,7 @@ export function ChatListPanel() {
     }
   };
 
-  // Fetch investigations (admin only)
+  // Fetch investigations (admin only) - includes unread message tracking
   const fetchInvestigations = async () => {
     if (!user || !isAdmin) return;
 
@@ -323,6 +325,7 @@ export function ChatListPanel() {
           id,
           title,
           description,
+          read,
           media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency)
         ),
         order:orders(id, status, delivery_status)
@@ -331,9 +334,36 @@ export function ChatListPanel() {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setInvestigations(data as unknown as InvestigationItem[]);
+      // For each investigation, get last message time and count unread messages since admin joined
+      const investigationsWithUnread = await Promise.all(data.map(async (inv) => {
+        // Get messages since admin joined this investigation (created_at)
+        const { data: messages } = await supabase
+          .from('service_messages')
+          .select('id, created_at, sender_type')
+          .eq('request_id', inv.service_request_id)
+          .gt('created_at', inv.created_at)
+          .order('created_at', { ascending: false });
+        
+        // Count unread = messages from client or agency (not admin) since joining
+        const unreadCount = messages?.filter(m => m.sender_type !== 'admin').length || 0;
+        const lastMessageTime = messages?.[0]?.created_at;
+        
+        return {
+          ...inv,
+          unreadCount,
+          lastMessageTime
+        };
+      }));
+      
+      setInvestigations(investigationsWithUnread as unknown as InvestigationItem[]);
     }
   };
+  
+  // Ref for investigations to track in real-time
+  const investigationsRef = useRef<InvestigationItem[]>([]);
+  useEffect(() => {
+    investigationsRef.current = investigations;
+  }, [investigations]);
 
   // Check if user is an approved agency (must have onboarding_complete = true)
   // Admins are treated as having access to agency features
@@ -924,6 +954,49 @@ export function ChatListPanel() {
           fetchInvestigations();
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMsg = payload.new as any;
+          const requestId = newMsg.request_id;
+          const senderType = newMsg.sender_type;
+          
+          // Only track messages from client or agency (not admin's own messages)
+          if (senderType === 'admin') return;
+          
+          // Check if this request is in our investigations
+          const isInvestigation = investigationsRef.current.some(inv => inv.service_request_id === requestId);
+          if (!isInvestigation) return;
+          
+          console.log('[ChatListPanel] New message for investigation:', { requestId, senderType });
+          
+          // Check if this investigation's chat is currently open
+          const openChats = useAppStore.getState().openChats;
+          const isChatOpen = openChats.some(chat => chat.request.id === requestId);
+          
+          if (!isChatOpen) {
+            // Increment unread count for this investigation
+            setInvestigations(prev => prev.map(inv => 
+              inv.service_request_id === requestId 
+                ? { ...inv, unreadCount: (inv.unreadCount || 0) + 1, lastMessageTime: newMsg.created_at } 
+                : inv
+            ));
+            playMessageSound();
+          } else {
+            // Just update last message time if chat is open
+            setInvestigations(prev => prev.map(inv => 
+              inv.service_request_id === requestId 
+                ? { ...inv, lastMessageTime: newMsg.created_at } 
+                : inv
+            ));
+          }
+        }
+      )
       .subscribe();
 
     return () => {
@@ -1109,9 +1182,10 @@ export function ChatListPanel() {
     );
   };
 
-  // Calculate total unread - for admins only count disputes, for others count requests
+  // Calculate total unread - for admins count disputes + investigation unreads, for others count requests
+  const investigationsUnreadCount = investigations.reduce((acc, inv) => acc + (inv.unreadCount || 0), 0);
   const totalUnread = isAdmin 
-    ? disputes.filter(d => !d.read).length
+    ? disputes.filter(d => !d.read).length + investigationsUnreadCount
     : myEngagements.filter(e => !e.read).length + serviceRequests.filter(r => !r.read).length;
 
   // Filter and sort items based on search query and last message time
@@ -1302,9 +1376,9 @@ export function ChatListPanel() {
                 >
                   <Search className="h-3.5 w-3.5 mr-1" />
                   Investigations
-                  {investigations.length > 0 && (
+                  {investigationsUnreadCount > 0 && (
                     <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-blue-500 text-white px-1">
-                      {investigations.length}
+                      {investigationsUnreadCount}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -1441,53 +1515,69 @@ export function ChatListPanel() {
                       <p className="text-xs mt-1 text-center px-4">Enter a chat from Global Engagements or Order Management to start investigating</p>
                     </div>
                   ) : (
-                    investigations.map((investigation) => (
-                      <div
-                        key={investigation.id}
-                        className="flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 bg-blue-50 dark:bg-blue-950/30 border-l-2 border-l-blue-500"
-                        onClick={() => {
-                          if (investigation.service_request) {
-                            openGlobalChat({
-                              id: investigation.service_request_id,
-                              title: investigation.service_request.title,
-                              description: investigation.service_request.description,
-                              status: 'active',
-                              media_site: investigation.service_request.media_site,
-                              order: investigation.order
-                            } as unknown as GlobalChatRequest, 'agency-request');
-                          }
-                        }}
-                      >
-                        <div className="shrink-0 relative">
-                          {investigation.service_request?.media_site?.favicon ? (
-                            <img 
-                              src={investigation.service_request.media_site.favicon} 
-                              alt="" 
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                              <Search className="h-5 w-5 text-blue-500" />
-                            </div>
-                          )}
-                          <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-sm truncate text-foreground">
-                              {investigation.service_request?.media_site?.name || investigation.service_request?.title || 'Unknown'}
-                            </span>
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {formatTime(investigation.created_at)}
-                            </span>
+                    investigations.map((investigation) => {
+                      const hasUnread = (investigation.unreadCount || 0) > 0;
+                      return (
+                        <div
+                          key={investigation.id}
+                          className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 border-l-2 border-l-blue-500 ${hasUnread ? 'bg-blue-100 dark:bg-blue-950/50' : 'bg-blue-50 dark:bg-blue-950/30'}`}
+                          onClick={() => {
+                            if (investigation.service_request) {
+                              // Clear unread count locally when opening
+                              setInvestigations(prev => prev.map(inv => 
+                                inv.id === investigation.id ? { ...inv, unreadCount: 0 } : inv
+                              ));
+                              openGlobalChat({
+                                id: investigation.service_request_id,
+                                title: investigation.service_request.title,
+                                description: investigation.service_request.description,
+                                status: 'active',
+                                media_site: investigation.service_request.media_site,
+                                order: investigation.order
+                              } as unknown as GlobalChatRequest, 'agency-request');
+                            }
+                          }}
+                        >
+                          <div className="shrink-0 relative">
+                            {investigation.service_request?.media_site?.favicon ? (
+                              <img 
+                                src={investigation.service_request.media_site.favicon} 
+                                alt="" 
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                <Search className="h-5 w-5 text-blue-500" />
+                              </div>
+                            )}
+                            {hasUnread && (
+                              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card animate-pulse" />
+                            )}
                           </div>
-                          <p className="text-xs truncate mt-0.5 flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                            <Search className="h-3 w-3 shrink-0" />
-                            Active Investigation
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`font-medium text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
+                                {investigation.service_request?.media_site?.name || investigation.service_request?.title || 'Unknown'}
+                              </span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {hasUnread && (
+                                  <Badge className="h-4 min-w-[16px] text-[10px] bg-blue-500 text-white px-1">
+                                    {investigation.unreadCount}
+                                  </Badge>
+                                )}
+                                <span className="text-xs text-muted-foreground">
+                                  {formatTime(investigation.lastMessageTime || investigation.created_at)}
+                                </span>
+                              </div>
+                            </div>
+                            <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-blue-600/70 dark:text-blue-400/70'}`}>
+                              <Search className="h-3 w-3 shrink-0" />
+                              {hasUnread ? `${investigation.unreadCount} new message${investigation.unreadCount > 1 ? 's' : ''}` : 'Active Investigation'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </ScrollArea>
               </TabsContent>
