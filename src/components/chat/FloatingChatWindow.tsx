@@ -81,6 +81,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [cancelOrderReason, setCancelOrderReason] = useState('');
+  const [cancelOrderRequestDialogOpen, setCancelOrderRequestDialogOpen] = useState(false);
+  const [cancelOrderRequestReason, setCancelOrderRequestReason] = useState('');
+  const [sendingCancelRequest, setSendingCancelRequest] = useState(false);
+  const [acceptingCancellation, setAcceptingCancellation] = useState(false);
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
@@ -294,6 +298,111 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       });
     } finally {
       setCancellingOrder(false);
+    }
+  };
+
+  // Send cancellation request to counterparty
+  const handleSendCancelRequest = async () => {
+    if (!globalChatRequest?.order || !senderId) return;
+    
+    setSendingCancelRequest(true);
+    try {
+      const cancelRequestData = {
+        type: 'cancel_order_request',
+        order_id: globalChatRequest.order.id,
+        media_site_id: globalChatRequest.media_site?.id,
+        media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+        reason: cancelOrderRequestReason.trim() || undefined,
+        requester_type: senderType
+      };
+
+      const messageContent = `[CANCEL_ORDER_REQUEST]${JSON.stringify(cancelRequestData)}[/CANCEL_ORDER_REQUEST]`;
+
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: messageContent
+      });
+
+      if (error) throw error;
+
+      // Add to local messages
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: messageContent,
+        created_at: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, newMsg]);
+
+      toast({
+        title: "Cancellation Request Sent",
+        description: `Your request has been sent to the ${counterpartyLabel.toLowerCase()}.`,
+      });
+
+      setCancelOrderRequestDialogOpen(false);
+      setCancelOrderRequestReason('');
+    } catch (error: any) {
+      console.error('Error sending cancel request:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send cancellation request.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingCancelRequest(false);
+    }
+  };
+
+  // Accept cancellation request from counterparty
+  const handleAcceptCancellation = async (messageId: string) => {
+    if (!globalChatRequest?.order || !senderId) return;
+    
+    setAcceptingCancellation(true);
+    try {
+      // Call the cancel-order edge function
+      const { data, error } = await supabase.functions.invoke('cancel-order', {
+        body: { order_id: globalChatRequest.order.id }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Send acceptance message
+      const acceptData = {
+        type: 'cancel_order_accepted',
+        order_id: globalChatRequest.order.id,
+        media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+        credits_refunded: data.credits_refunded,
+        accepted_by: senderType
+      };
+
+      await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: `[CANCEL_ORDER_ACCEPTED]${JSON.stringify(acceptData)}[/CANCEL_ORDER_ACCEPTED]`
+      });
+      
+      // Update local state
+      updateGlobalChatRequest({ order: null }, globalChatRequest.id);
+      
+      toast({
+        title: "Order Cancelled",
+        description: `Order cancelled mutually. ${data.credits_refunded} credits refunded to client.`,
+      });
+    } catch (error: any) {
+      console.error('Error accepting cancellation:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to accept cancellation.",
+        variant: "destructive"
+      });
+    } finally {
+      setAcceptingCancellation(false);
     }
   };
 
@@ -591,6 +700,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
     return null;
   };
+
+  const parseCancelOrderRequest = (message: string): { type: string; order_id: string; media_site_id?: string; media_site_name: string; reason?: string; requester_type: string } | null => {
+    const match = message.match(/\[CANCEL_ORDER_REQUEST\](.*?)\[\/CANCEL_ORDER_REQUEST\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseCancelOrderAccepted = (message: string): { type: string; order_id: string; media_site_name: string; credits_refunded: number; accepted_by: string } | null => {
+    const match = message.match(/\[CANCEL_ORDER_ACCEPTED\](.*?)\[\/CANCEL_ORDER_ACCEPTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Check if there's a pending cancellation request in messages (from counterparty)
+  const hasPendingCancelRequest = messages.some(msg => {
+    if (msg.sender_type === senderType) return false; // Not from me
+    const cancelRequest = parseCancelOrderRequest(msg.message);
+    if (!cancelRequest) return false;
+    // Check if there's an acceptance message after this
+    const msgIndex = messages.findIndex(m => m.id === msg.id);
+    const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+    return !hasAcceptance;
+  });
+
+  // Check if I already sent a cancellation request that's pending
+  const hasSentPendingCancelRequest = messages.some(msg => {
+    if (msg.sender_type !== senderType) return false; // Not from me
+    const cancelRequest = parseCancelOrderRequest(msg.message);
+    if (!cancelRequest) return false;
+    // Check if there's an acceptance message after this
+    const msgIndex = messages.findIndex(m => m.id === msg.id);
+    const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+    return !hasAcceptance;
+  });
 
   const sendMessage = async () => {
     if (!user || !globalChatRequest || !senderId || !newMessage.trim()) return;
@@ -915,6 +1070,85 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const attachment = parseAttachment(msg.message);
     const orderPlaced = parseOrderPlaced(msg.message);
     const orderCancelled = parseOrderCancelled(msg.message);
+    const cancelRequest = parseCancelOrderRequest(msg.message);
+    const cancelAccepted = parseCancelOrderAccepted(msg.message);
+
+    // Handle cancel order request message
+    if (cancelRequest) {
+      // Check if this request has been accepted
+      const msgIndex = messages.findIndex(m => m.id === msg.id);
+      const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+      const isPending = !hasAcceptance;
+      const canAccept = !isOwnMessage && isPending && globalChatRequest?.order;
+
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <X className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-600 dark:text-orange-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-700 dark:text-orange-300'}`}>
+                Cancellation Request
+              </span>
+              {!isPending && (
+                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                  Accepted
+                </Badge>
+              )}
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {isOwnMessage ? 'You requested' : `${counterpartyLabel} requested`} to cancel the order for {cancelRequest.media_site_name}
+            </p>
+            {cancelRequest.reason && (
+              <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                Reason: {cancelRequest.reason}
+              </p>
+            )}
+            {canAccept && (
+              <div className="flex gap-2 mt-3 pt-2 border-t border-orange-200 dark:border-orange-800">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 h-7 text-xs bg-green-600 text-white border-green-600 hover:bg-green-700 hover:text-white"
+                  onClick={() => handleAcceptCancellation(msg.id)}
+                  disabled={acceptingCancellation}
+                >
+                  {acceptingCancellation ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                  Accept & Cancel Order
+                </Button>
+              </div>
+            )}
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle cancel order accepted message
+    if (cancelAccepted) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
+                Cancellation Accepted
+              </span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              Order for {cancelAccepted.media_site_name} has been cancelled mutually
+            </p>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              {cancelAccepted.credits_refunded} credits refunded to client
+            </p>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
     
     // Handle order placed special message
     if (orderPlaced) {
@@ -1124,12 +1358,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )
                   )}
                   {hasOrder && globalChatRequest.order?.delivery_status === 'pending' ? (
-                    <DropdownMenuItem 
-                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      onClick={() => setCancelOrderDialogOpen(true)}
-                    >
-                      Cancel Order
-                    </DropdownMenuItem>
+                    hasSentPendingCancelRequest ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-muted-foreground"
+                        disabled
+                      >
+                        Cancellation Pending...
+                      </DropdownMenuItem>
+                    ) : hasPendingCancelRequest ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        onClick={() => {
+                          // Find the pending request and accept it
+                          const pendingMsg = messages.find(msg => {
+                            if (msg.sender_type === senderType) return false;
+                            const cr = parseCancelOrderRequest(msg.message);
+                            if (!cr) return false;
+                            const msgIndex = messages.findIndex(m => m.id === msg.id);
+                            return !messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+                          });
+                          if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
+                        }}
+                        disabled={acceptingCancellation}
+                      >
+                        {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        onClick={() => setCancelOrderRequestDialogOpen(true)}
+                      >
+                        Request Cancellation
+                      </DropdownMenuItem>
+                    )
                   ) : (
                     <DropdownMenuItem 
                       className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
@@ -1471,6 +1732,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Cancel Order Request Dialog */}
+      <AlertDialog open={cancelOrderRequestDialogOpen} onOpenChange={setCancelOrderRequestDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Request Order Cancellation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your cancellation request will be sent to the {counterpartyLabel.toLowerCase()}. The order will be cancelled once they accept.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Input
+            placeholder="Reason for cancellation (optional)..."
+            value={cancelOrderRequestReason}
+            onChange={(e) => setCancelOrderRequestReason(e.target.value)}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Order</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleSendCancelRequest}
+              disabled={sendingCancelRequest}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {sendingCancelRequest ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Send Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Order Details Dialog */}
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
         <DialogContent className="max-w-md z-[250]" hideCloseButton>
@@ -1499,15 +1788,42 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   >
                     Open Dispute
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    onClick={() => {
-                      setOrderDetailsOpen(false);
-                      setCancelOrderDialogOpen(true);
-                    }}
-                  >
-                    Cancel Order
-                  </DropdownMenuItem>
+                  {hasSentPendingCancelRequest ? (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-muted-foreground"
+                      disabled
+                    >
+                      Cancellation Pending...
+                    </DropdownMenuItem>
+                  ) : hasPendingCancelRequest ? (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      onClick={() => {
+                        setOrderDetailsOpen(false);
+                        const pendingMsg = messages.find(msg => {
+                          if (msg.sender_type === senderType) return false;
+                          const cr = parseCancelOrderRequest(msg.message);
+                          if (!cr) return false;
+                          const msgIndex = messages.findIndex(m => m.id === msg.id);
+                          return !messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+                        });
+                        if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
+                      }}
+                      disabled={acceptingCancellation}
+                    >
+                      {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      onClick={() => {
+                        setOrderDetailsOpen(false);
+                        setCancelOrderRequestDialogOpen(true);
+                      }}
+                    >
+                      Request Cancellation
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
