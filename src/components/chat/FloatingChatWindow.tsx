@@ -1464,6 +1464,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
                 {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
                 {orderDetails.accepted_at && <p>Accepted: {new Date(orderDetails.accepted_at).toLocaleString()}</p>}
+                <p>Order ID: {orderDetails.id.slice(0, 8)}...</p>
               </div>
             </div>
           ) : (

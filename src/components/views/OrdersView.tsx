@@ -420,9 +420,6 @@ export function OrdersView() {
           </div>
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
-            <DialogDescription>
-              Order ID: {selectedOrder?.id?.slice(0, 8)}...
-            </DialogDescription>
           </DialogHeader>
 
           {selectedOrder && (
@@ -522,6 +519,7 @@ export function OrdersView() {
                 {selectedOrder.paid_at && <p>Paid: {new Date(selectedOrder.paid_at).toLocaleString()}</p>}
                 {selectedOrder.delivered_at && <p>Delivered: {new Date(selectedOrder.delivered_at).toLocaleString()}</p>}
                 {selectedOrder.accepted_at && <p>Accepted: {new Date(selectedOrder.accepted_at).toLocaleString()}</p>}
+                <p>Order ID: {selectedOrder.id.slice(0, 8)}...</p>
               </div>
             </div>
           )}
