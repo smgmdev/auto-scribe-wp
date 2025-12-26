@@ -255,13 +255,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .single();
       
       if (requestData) {
-        // Create/update investigation record
+        // Create/update investigation record (order_id can be null for engagements without orders)
         await supabase
           .from('admin_investigations')
           .upsert({
             admin_id: senderId,
             service_request_id: globalChatRequest.id,
-            order_id: requestData.order_id || globalChatRequest.order?.id || globalChatRequest.id,
+            order_id: requestData.order_id || globalChatRequest.order?.id || null,
             status: 'active'
           }, {
             onConflict: 'service_request_id'

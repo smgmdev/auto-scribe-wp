@@ -1438,7 +1438,7 @@ export function ChatListPanel() {
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <Search className="h-8 w-8 mb-2 opacity-50" />
                       <p className="text-sm">No active investigations</p>
-                      <p className="text-xs mt-1">Open an order chat from Order Management to start an investigation</p>
+                      <p className="text-xs mt-1 text-center px-4">Enter a chat from Global Engagements or Order Management to start investigating</p>
                     </div>
                   ) : (
                     investigations.map((investigation) => (
