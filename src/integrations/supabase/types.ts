@@ -529,6 +529,7 @@ export type Database = {
           delivery_url: string | null
           id: string
           media_site_id: string
+          order_number: string | null
           paid_at: string | null
           platform_fee_cents: number
           released_at: string | null
@@ -548,6 +549,7 @@ export type Database = {
           delivery_url?: string | null
           id?: string
           media_site_id: string
+          order_number?: string | null
           paid_at?: string | null
           platform_fee_cents?: number
           released_at?: string | null
@@ -567,6 +569,7 @@ export type Database = {
           delivery_url?: string | null
           id?: string
           media_site_id?: string
+          order_number?: string | null
           paid_at?: string | null
           platform_fee_cents?: number
           released_at?: string | null
