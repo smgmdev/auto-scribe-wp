@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, ChevronRight, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, ChevronRight, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send, MessageSquare } from 'lucide-react';
 
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
@@ -83,7 +83,7 @@ const PUBLISHING_TIME_OPTIONS = ['24h', 'within 3 days', 'within 7 days', 'withi
 
 export function SitesView() {
   const { sites, loading: sitesLoading, addSite, removeSite, refetchSites } = useSites();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const { targetTab, setTargetTab, targetSubcategory, setTargetSubcategory } = useAppStore();
   const [activeTab, setActiveTab] = useState('instant');
@@ -111,6 +111,9 @@ export function SitesView() {
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
   const [selectedAgency, setSelectedAgency] = useState<ActiveAgency | null>(null);
+  
+  // Track user's open engagements by media_site_id
+  const [openEngagements, setOpenEngagements] = useState<Set<string>>(new Set());
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -213,7 +216,26 @@ export function SitesView() {
 
   useEffect(() => {
     fetchMediaSites();
-  }, []);
+    fetchOpenEngagements();
+  }, [user]);
+
+  // Fetch user's open engagements to show indicator on media site cards
+  const fetchOpenEngagements = async () => {
+    if (!user) {
+      setOpenEngagements(new Set());
+      return;
+    }
+    
+    const { data } = await supabase
+      .from('service_requests')
+      .select('media_site_id')
+      .eq('user_id', user.id)
+      .not('status', 'in', '("cancelled","completed")');
+    
+    if (data) {
+      setOpenEngagements(new Set(data.map(r => r.media_site_id)));
+    }
+  };
 
   // Handle navigation from landing page with target tab and subcategory
   useEffect(() => {
@@ -1181,20 +1203,27 @@ export function SitesView() {
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
                 </a>
                 {!isAdmin && (
-                  <Button
-                    size="sm"
-                    className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setBriefMediaSite(site);
-                      setBriefDialogOpen(true);
-                    }}
-                  >
-                    I'm Interested
-                    <span className="inline-flex w-0 overflow-hidden group-hover/btn:w-4 group-hover/btn:ml-1 transition-all duration-200">
-                      <ChevronRight className="h-3 w-3 flex-shrink-0" />
-                    </span>
-                  </Button>
+                  openEngagements.has(site.id) ? (
+                    <Badge variant="secondary" className="text-xs flex items-center gap-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      <MessageSquare className="h-3 w-3" />
+                      Engagement Open
+                    </Badge>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBriefMediaSite(site);
+                        setBriefDialogOpen(true);
+                      }}
+                    >
+                      I'm Interested
+                      <span className="inline-flex w-0 overflow-hidden group-hover/btn:w-4 group-hover/btn:ml-1 transition-all duration-200">
+                        <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                      </span>
+                    </Button>
+                  )
                 )}
               </div>
             </div>
