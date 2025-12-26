@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowLeft, Send, UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ServiceRequest {
   id: string;
@@ -15,6 +18,8 @@ interface ServiceRequest {
   status: string;
   created_at: string;
   updated_at: string;
+  order_id: string | null;
+  cancellation_reason: string | null;
   media_sites: { name: string; favicon: string | null; price: number };
   profiles: { email: string; username: string | null };
   agency_payouts: { agency_name: string } | null;
@@ -28,14 +33,34 @@ interface ServiceMessage {
 }
 
 export function AdminEngagementsView() {
+  const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [activeTab, setActiveTab] = useState('active');
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const [joiningChat, setJoiningChat] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  useEffect(() => {
+    if (selectedRequest) {
+      checkIfJoined(selectedRequest.id);
+      scrollToBottom();
+    }
+  }, [selectedRequest, messages]);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -46,7 +71,6 @@ export function AdminEngagementsView() {
 
       if (error) throw error;
       
-      // Fetch profiles separately
       const userIds = [...new Set((data || []).map(r => r.user_id))];
       const { data: profiles } = await supabase.from('profiles').select('id, email, username').in('id', userIds);
       const profileMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
@@ -79,6 +103,73 @@ export function AdminEngagementsView() {
     }
   };
 
+  const checkIfJoined = async (requestId: string) => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('admin_investigations')
+      .select('id')
+      .eq('service_request_id', requestId)
+      .eq('admin_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+    setHasJoined(!!data);
+  };
+
+  const handleJoinChat = async () => {
+    if (!selectedRequest || !user) return;
+    setJoiningChat(true);
+    try {
+      // Create investigation record (without order_id since this is engagement-only)
+      const { error: invError } = await supabase
+        .from('admin_investigations')
+        .upsert({
+          admin_id: user.id,
+          service_request_id: selectedRequest.id,
+          order_id: selectedRequest.order_id || selectedRequest.id, // Use request id if no order
+          status: 'active'
+        }, { onConflict: 'service_request_id' });
+
+      if (invError) throw invError;
+
+      setHasJoined(true);
+      toast({ title: 'Joined chat', description: 'You can now participate in this engagement.' });
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setJoiningChat(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedRequest || !user) return;
+    setSending(true);
+    try {
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: selectedRequest.id,
+        sender_id: user.id,
+        sender_type: 'admin',
+        message: newMessage.trim()
+      });
+
+      if (error) throw error;
+
+      setMessages(prev => ({
+        ...prev,
+        [selectedRequest.id]: [...(prev[selectedRequest.id] || []), {
+          id: crypto.randomUUID(),
+          sender_type: 'admin',
+          message: newMessage.trim(),
+          created_at: new Date().toISOString()
+        }]
+      }));
+      setNewMessage('');
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setSending(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const badges: Record<string, React.ReactNode> = {
       pending_review: <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>,
@@ -86,11 +177,106 @@ export function AdminEngagementsView() {
       accepted: <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>,
       rejected: <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>,
       paid: <Badge className="bg-blue-600">Paid</Badge>,
+      cancelled: <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>,
     };
     return badges[status] || <Badge>{status}</Badge>;
   };
 
+  const activeRequests = requests.filter(r => r.status !== 'cancelled');
+  const cancelledRequests = requests.filter(r => r.status === 'cancelled');
+
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+
+  // Chat view when engagement is selected
+  if (selectedRequest) {
+    const isCancelled = selectedRequest.status === 'cancelled';
+    return (
+      <div className="h-[calc(100vh-200px)] flex flex-col">
+        {/* Header */}
+        <div className={`flex items-center justify-between p-4 border-b ${isCancelled ? 'bg-destructive/10' : ''}`}>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setSelectedRequest(null)}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            {selectedRequest.media_sites?.favicon && (
+              <img src={selectedRequest.media_sites.favicon} className="h-8 w-8 rounded" alt="" />
+            )}
+            <div>
+              <h3 className="font-medium">{selectedRequest.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                {selectedRequest.media_sites?.name} • {selectedRequest.profiles?.email}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {getStatusBadge(selectedRequest.status)}
+            {!hasJoined && !isCancelled && (
+              <Button size="sm" onClick={handleJoinChat} disabled={joiningChat}>
+                {joiningChat ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserPlus className="h-4 w-4 mr-1" />}
+                Join Chat
+              </Button>
+            )}
+            {hasJoined && <Badge variant="outline" className="bg-green-50 text-green-700">Joined</Badge>}
+          </div>
+        </div>
+
+        {/* Cancellation notice */}
+        {isCancelled && (
+          <div className="p-4 bg-destructive/5 border-b">
+            <p className="text-sm text-destructive font-medium">This engagement has been cancelled.</p>
+            {selectedRequest.cancellation_reason && (
+              <p className="text-sm text-muted-foreground mt-1">{selectedRequest.cancellation_reason}</p>
+            )}
+          </div>
+        )}
+
+        {/* Messages */}
+        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          <div className="space-y-4">
+            {(messages[selectedRequest.id] || []).map((m) => (
+              <div key={m.id} className={`flex ${m.sender_type === 'client' ? 'justify-start' : m.sender_type === 'admin' ? 'justify-center' : 'justify-end'}`}>
+                <div className={`max-w-[80%] p-3 rounded-lg ${
+                  m.sender_type === 'client' 
+                    ? 'bg-muted' 
+                    : m.sender_type === 'agency' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-amber-100 dark:bg-amber-900/30 border border-amber-300'
+                }`}>
+                  <p className="text-xs opacity-70 mb-1 capitalize">{m.sender_type}</p>
+                  <p className="text-sm whitespace-pre-wrap">{m.message}</p>
+                  <p className="text-xs opacity-50 mt-1">{format(new Date(m.created_at), 'MMM d, h:mm a')}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+
+        {/* Input */}
+        {hasJoined && !isCancelled && (
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                disabled={sending}
+              />
+              <Button onClick={handleSendMessage} disabled={sending || !newMessage.trim()}>
+                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!hasJoined && !isCancelled && (
+          <div className="p-4 border-t text-center text-muted-foreground text-sm">
+            Join the chat to send messages
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -99,46 +285,87 @@ export function AdminEngagementsView() {
         <p className="text-muted-foreground">Monitor all client-agency communications</p>
       </div>
 
-      {requests.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">No engagements yet</CardContent></Card>
-      ) : (
-        <div className="grid gap-4">
-          {requests.map((r) => (
-            <Card key={r.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedRequest(r)}>
-              <CardContent className="p-4 flex justify-between items-start">
-                <div>
-                  <h3 className="font-medium">{r.title}</h3>
-                  <p className="text-sm text-muted-foreground">{r.media_sites?.name} • {r.profiles?.email}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
-                </div>
-                <div className="text-right">
-                  {getStatusBadge(r.status)}
-                  <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="active">
+            Active
+            {activeRequests.length > 0 && (
+              <Badge variant="secondary" className="ml-2">{activeRequests.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="cancelled">
+            Cancelled
+            {cancelledRequests.length > 0 && (
+              <Badge variant="secondary" className="ml-2">{cancelledRequests.length}</Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>{selectedRequest?.title}</DialogTitle></DialogHeader>
-          {selectedRequest && (
-            <ScrollArea className="h-[400px] border rounded-lg p-4">
-              {(messages[selectedRequest.id] || []).map((m) => (
-                <div key={m.id} className={`mb-4 flex ${m.sender_type === 'client' ? 'justify-start' : 'justify-end'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-lg ${m.sender_type === 'client' ? 'bg-muted' : m.sender_type === 'agency' ? 'bg-primary text-primary-foreground' : 'bg-amber-100'}`}>
-                    <p className="text-xs opacity-70 mb-1">{m.sender_type}</p>
-                    <p className="text-sm">{m.message}</p>
-                    <p className="text-xs opacity-50 mt-1">{format(new Date(m.created_at), 'MMM d, h:mm a')}</p>
-                  </div>
-                </div>
+        <TabsContent value="active" className="mt-4">
+          {activeRequests.length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">No active engagements</CardContent></Card>
+          ) : (
+            <div className="grid gap-4">
+              {activeRequests.map((r) => (
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setSelectedRequest(r)}>
+                  <CardContent className="p-4 flex justify-between items-start">
+                    <div className="flex items-start gap-3">
+                      {r.media_sites?.favicon && (
+                        <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
+                      )}
+                      <div>
+                        <h3 className="font-medium">{r.title}</h3>
+                        <p className="text-sm text-muted-foreground">{r.media_sites?.name} • {r.profiles?.email}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {getStatusBadge(r.status)}
+                      <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
+                      <div className="flex items-center justify-end gap-1 mt-1 text-xs text-muted-foreground">
+                        <MessageSquare className="h-3 w-3" />
+                        {messages[r.id]?.length || 0}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
-            </ScrollArea>
+            </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </TabsContent>
+
+        <TabsContent value="cancelled" className="mt-4">
+          {cancelledRequests.length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
+          ) : (
+            <div className="grid gap-4">
+              {cancelledRequests.map((r) => (
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors border-destructive/20" onClick={() => setSelectedRequest(r)}>
+                  <CardContent className="p-4 flex justify-between items-start">
+                    <div className="flex items-start gap-3">
+                      {r.media_sites?.favicon && (
+                        <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1 opacity-50" alt="" />
+                      )}
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">{r.title}</h3>
+                        <p className="text-sm text-muted-foreground">{r.media_sites?.name} • {r.profiles?.email}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                        {r.cancellation_reason && (
+                          <p className="text-xs text-destructive mt-1">Reason: {r.cancellation_reason}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {getStatusBadge(r.status)}
+                      <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
