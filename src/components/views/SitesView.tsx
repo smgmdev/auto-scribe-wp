@@ -1167,16 +1167,29 @@ export function SitesView() {
 
               </div>
 
-              {/* Link below tags */}
-              <a 
-                href={site.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
-              >
-                <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
-                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </a>
+              {/* Link and Publish Now button row */}
+              <div className="flex items-center justify-between">
+                <a 
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                >
+                  <span className="truncate">{site.url.replace(/^https?:\/\//, '')}</span>
+                  <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                </a>
+                <Button
+                  size="sm"
+                  className="h-7 px-3 text-xs"
+                  onClick={() => {
+                    useAppStore.getState().setPreselectedSiteId(site.id);
+                    useAppStore.getState().setCurrentView('compose');
+                  }}
+                >
+                  <Send className="h-3 w-3 mr-1.5" />
+                  Publish Now
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
