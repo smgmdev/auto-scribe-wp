@@ -2038,11 +2038,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <ChevronDown className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-popover border shadow-lg z-[99999]">
-                          <DropdownMenuItem onClick={() => {
-                            setReplyToMessage(msg);
-                            setTimeout(() => inputRef.current?.focus(), 0);
-                          }}>
+                        <DropdownMenuContent 
+                          align={isOwnMessage ? "end" : "start"}
+                          side="top"
+                          sideOffset={5}
+                          collisionPadding={16}
+                          className="bg-popover border shadow-lg z-[99999]"
+                        >
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setReplyToMessage(msg);
+                              setTimeout(() => inputRef.current?.focus(), 0);
+                            }}
+                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          >
                             <Reply className="h-4 w-4 mr-2" />
                             Reply
                           </DropdownMenuItem>
