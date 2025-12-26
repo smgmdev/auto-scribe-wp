@@ -130,6 +130,7 @@ export function ChatListPanel() {
   // Refs to avoid stale closures in subscriptions
   const myEngagementsRef = useRef<ChatItem[]>([]);
   const serviceRequestsRef = useRef<ChatItem[]>([]);
+  const disputesRef = useRef<DisputeItem[]>([]);
   
   useEffect(() => {
     myEngagementsRef.current = myEngagements;
@@ -138,6 +139,10 @@ export function ChatListPanel() {
   useEffect(() => {
     serviceRequestsRef.current = serviceRequests;
   }, [serviceRequests]);
+
+  useEffect(() => {
+    disputesRef.current = disputes;
+  }, [disputes]);
 
   // Fetch my engagements (user's submitted requests)
   const fetchMyEngagements = async () => {
@@ -789,7 +794,10 @@ export function ChatListPanel() {
             }
           }
           
-          if (!isMyEngagement && !isServiceRequest) {
+          // Check if this is a disputed chat (admin only)
+          const isDisputedChat = isAdmin && disputesRef.current.some(d => d.service_request_id === requestId);
+          
+          if (!isMyEngagement && !isServiceRequest && !isDisputedChat) {
             console.log('[ChatListPanel] Request does not belong to this user, ignoring');
             return;
           }
@@ -819,6 +827,18 @@ export function ChatListPanel() {
                 return updated;
               });
             }
+            // Update disputes for admin's own messages
+            if (isDisputedChat) {
+              setDisputes(prev => {
+                const updated = prev.map(d => 
+                  d.service_request_id === requestId 
+                    ? { ...d, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    : d
+                );
+                disputesRef.current = updated;
+                return updated;
+              });
+            }
             return;
           }
           
@@ -842,6 +862,18 @@ export function ChatListPanel() {
                   : r
               );
               serviceRequestsRef.current = updated;
+              return updated;
+            });
+          }
+          // Update disputes for admin with received messages
+          if (isDisputedChat) {
+            setDisputes(prev => {
+              const updated = prev.map(d => 
+                d.service_request_id === requestId 
+                  ? { ...d, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  : d
+              );
+              disputesRef.current = updated;
               return updated;
             });
           }
