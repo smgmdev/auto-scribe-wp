@@ -88,28 +88,27 @@ export function OrdersView() {
   };
 
   const handleAcceptDelivery = async (order: Order) => {
-    if (!confirm('Are you sure you want to accept this delivery? This will release the payment to the agency.')) {
+    if (!confirm('Are you sure you want to accept this delivery? This will mark the order as completed.')) {
       return;
     }
 
     setReleasing(true);
 
     try {
-      const response = await supabase.functions.invoke('release-escrow-payment', {
-        body: { order_id: order.id }
-      });
+      // Update order delivery status to accepted
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          delivery_status: 'accepted',
+          released_at: new Date().toISOString()
+        })
+        .eq('id', order.id);
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
+      if (updateError) throw updateError;
 
       toast({
-        title: 'Payment released',
-        description: `$${(order.agency_payout_cents / 100).toFixed(2)} has been released to the agency.`
+        title: 'Delivery accepted',
+        description: 'The order has been marked as completed.'
       });
 
       setSelectedOrder(null);
@@ -117,7 +116,7 @@ export function OrdersView() {
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Error releasing payment',
+        title: 'Error accepting delivery',
         description: error.message
       });
     } finally {
@@ -293,7 +292,7 @@ export function OrdersView() {
           {isAdmin ? 'All Orders' : 'My Orders'}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {isAdmin ? 'Manage all escrow orders and payouts' : 'Track your media placement orders'}
+          {isAdmin ? 'Manage all orders and payouts' : 'Track your media placement orders'}
         </p>
       </div>
 
