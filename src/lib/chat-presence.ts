@@ -33,21 +33,25 @@ export class ChatPresenceTracker {
   private userType: 'agency' | 'client' | 'admin';
   private onlineUsers: Set<string> = new Set();
   private onPresenceChange?: (onlineUsers: string[]) => void;
+  private agencyPayoutId?: string;
 
   constructor(
     requestId: string, 
     userId: string, 
     userType: 'agency' | 'client' | 'admin',
-    onPresenceChange?: (onlineUsers: string[]) => void
+    onPresenceChange?: (onlineUsers: string[]) => void,
+    agencyPayoutId?: string
   ) {
     this.requestId = requestId;
     this.userId = userId;
     this.userType = userType;
     this.onPresenceChange = onPresenceChange;
+    this.agencyPayoutId = agencyPayoutId;
   }
 
   async join() {
-    const channelName = `chat-presence:${this.requestId}`;
+    // Use presence-{requestId} for consistency with admin chat
+    const channelName = `presence-${this.requestId}`;
     
     this.channel = supabase.channel(channelName, {
       config: {
@@ -101,6 +105,21 @@ export class ChatPresenceTracker {
   }
 
   async leave() {
+    const now = new Date().toISOString();
+    
+    // Update last_online_at in database based on user type
+    if (this.userType === 'client') {
+      await supabase
+        .from('profiles')
+        .update({ last_online_at: now })
+        .eq('id', this.userId);
+    } else if (this.userType === 'agency' && this.agencyPayoutId) {
+      await supabase
+        .from('agency_payouts')
+        .update({ last_online_at: now })
+        .eq('id', this.agencyPayoutId);
+    }
+    
     if (this.channel) {
       await this.channel.untrack();
       await supabase.removeChannel(this.channel);

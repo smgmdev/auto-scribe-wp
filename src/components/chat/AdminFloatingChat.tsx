@@ -139,8 +139,19 @@ export function AdminFloatingChat({
   const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const userPresenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  const [, setTimerTick] = useState(0); // Force re-render for last seen updates
+  
   const isCancelled = request.status === 'cancelled';
   const hasOrder = !!request.order_id;
+  
+  // Timer tick to update relative time display every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerTick(tick => tick + 1);
+    }, 60000); // Update every minute for "Xm ago" display
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Parse special message types
   const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string; delivery_deadline?: string } | null => {
@@ -304,6 +315,37 @@ export function AdminFloatingChat({
     };
   }, [request.id, user?.id, hasJoined]);
 
+  // Fetch initial last_online_at from database
+  useEffect(() => {
+    const fetchLastOnline = async () => {
+      // Fetch client's last_online_at from profiles
+      const { data: clientData } = await supabase
+        .from('profiles')
+        .select('last_online_at')
+        .eq('id', request.user_id)
+        .maybeSingle();
+      
+      if (clientData?.last_online_at) {
+        setClientPresence(prev => ({ ...prev, lastSeen: clientData.last_online_at }));
+      }
+      
+      // Fetch agency's last_online_at from agency_payouts
+      if (request.agency_payout_id) {
+        const { data: agencyData } = await supabase
+          .from('agency_payouts')
+          .select('last_online_at')
+          .eq('id', request.agency_payout_id)
+          .maybeSingle();
+        
+        if (agencyData?.last_online_at) {
+          setAgencyPresence(prev => ({ ...prev, lastSeen: agencyData.last_online_at }));
+        }
+      }
+    };
+    
+    fetchLastOnline();
+  }, [request.user_id, request.agency_payout_id]);
+
   // User presence tracking (client and agency online status)
   useEffect(() => {
     const channelName = `presence-${request.id}`;
@@ -314,38 +356,39 @@ export function AdminFloatingChat({
         const state = channel.presenceState();
         let clientOnline = false;
         let agencyOnline = false;
-        let clientLastSeen: string | null = null;
-        let agencyLastSeen: string | null = null;
         
         Object.values(state).forEach((presences: any) => {
           presences.forEach((p: any) => {
             if (p.user_type === 'client') {
               clientOnline = true;
-              clientLastSeen = p.online_at;
             } else if (p.user_type === 'agency') {
               agencyOnline = true;
-              agencyLastSeen = p.online_at;
             }
           });
         });
         
-        setClientPresence(prev => ({ 
-          online: clientOnline, 
-          lastSeen: clientOnline ? new Date().toISOString() : (prev.lastSeen || clientLastSeen)
-        }));
-        setAgencyPresence(prev => ({ 
-          online: agencyOnline, 
-          lastSeen: agencyOnline ? new Date().toISOString() : (prev.lastSeen || agencyLastSeen)
-        }));
+        setClientPresence(prev => ({ ...prev, online: clientOnline }));
+        setAgencyPresence(prev => ({ ...prev, online: agencyOnline }));
       })
-      .on('presence', { event: 'leave' }, ({ leftPresences }: any) => {
-        leftPresences.forEach((p: any) => {
+      .on('presence', { event: 'leave' }, async ({ leftPresences }: any) => {
+        for (const p of leftPresences) {
+          const now = new Date().toISOString();
           if (p.user_type === 'client') {
-            setClientPresence({ online: false, lastSeen: new Date().toISOString() });
-          } else if (p.user_type === 'agency') {
-            setAgencyPresence({ online: false, lastSeen: new Date().toISOString() });
+            setClientPresence({ online: false, lastSeen: now });
+            // Update database
+            await supabase
+              .from('profiles')
+              .update({ last_online_at: now })
+              .eq('id', request.user_id);
+          } else if (p.user_type === 'agency' && request.agency_payout_id) {
+            setAgencyPresence({ online: false, lastSeen: now });
+            // Update database
+            await supabase
+              .from('agency_payouts')
+              .update({ last_online_at: now })
+              .eq('id', request.agency_payout_id);
           }
-        });
+        }
       })
       .subscribe();
 
@@ -355,15 +398,7 @@ export function AdminFloatingChat({
       supabase.removeChannel(channel);
       userPresenceChannelRef.current = null;
     };
-  }, [request.id]);
-
-  // Compute last activity from messages as fallback
-  const getLastActivityFromMessages = useCallback((senderType: 'client' | 'agency') => {
-    const userMessages = messages
-      .filter(m => m.sender_type === senderType)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    return userMessages[0]?.created_at || null;
-  }, [messages]);
+  }, [request.id, request.user_id, request.agency_payout_id]);
 
   // Format relative time
   const formatLastSeen = (dateString: string) => {
@@ -381,9 +416,9 @@ export function AdminFloatingChat({
     return format(date, 'MMM d, HH:mm');
   };
 
-  // Get effective last seen (presence or last message)
-  const clientLastSeen = clientPresence.lastSeen || getLastActivityFromMessages('client');
-  const agencyLastSeen = agencyPresence.lastSeen || getLastActivityFromMessages('agency');
+  // Get last seen from presence state
+  const clientLastSeen = clientPresence.lastSeen;
+  const agencyLastSeen = agencyPresence.lastSeen;
 
   // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
