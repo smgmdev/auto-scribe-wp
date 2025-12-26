@@ -27,6 +27,7 @@ interface Order {
   delivery_status: string;
   delivery_notes: string | null;
   delivery_url: string | null;
+  delivery_deadline: string | null;
   created_at: string;
   paid_at: string | null;
   delivered_at: string | null;
@@ -43,6 +44,29 @@ interface Order {
   } | null;
 }
 
+// Format time remaining for delivery countdown
+const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boolean } => {
+  const now = new Date();
+  const deadlineDate = new Date(deadline);
+  const diffMs = deadlineDate.getTime() - now.getTime();
+  
+  if (diffMs <= 0) {
+    return { text: 'Overdue', isOverdue: true };
+  }
+  
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+  
+  if (hours > 0) {
+    return { text: `${hours}h ${minutes}m ${seconds}s`, isOverdue: false };
+  } else if (minutes > 0) {
+    return { text: `${minutes}m ${seconds}s`, isOverdue: false };
+  } else {
+    return { text: `${seconds}s`, isOverdue: false };
+  }
+};
+
 export function OrdersView() {
   const { user, isAdmin } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -53,7 +77,16 @@ export function OrdersView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [, setTimerTick] = useState(0); // Force re-render for countdown timer
   const { toast } = useToast();
+
+  // Timer tick for live countdown updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerTick(tick => tick + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -471,6 +504,23 @@ export function OrdersView() {
                   </>
                 )}
               </div>
+
+              {/* Delivery Countdown Timer */}
+              {selectedOrder.delivery_deadline && selectedOrder.delivery_status === 'pending' && selectedOrder.status === 'paid' && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Delivery Deadline</p>
+                  {(() => {
+                    const { text, isOverdue } = formatTimeRemaining(selectedOrder.delivery_deadline);
+                    return (
+                      <div className={`flex items-center gap-2 ${isOverdue ? 'text-destructive' : 'text-foreground'}`}>
+                        <Clock className="h-4 w-4" />
+                        <span className="font-mono font-semibold">{text}</span>
+                        {isOverdue && <Badge variant="destructive" className="text-xs">Overdue</Badge>}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               {selectedOrder.delivery_url && (
                 <div className="border-t pt-4">
