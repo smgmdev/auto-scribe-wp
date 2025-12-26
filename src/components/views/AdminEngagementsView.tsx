@@ -31,12 +31,19 @@ interface ServiceMessage {
   created_at: string;
 }
 
+interface OpenChat {
+  request: ServiceRequest;
+  position: { x: number; y: number };
+  zIndex: number;
+}
+
 export function AdminEngagementsView() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const [activeTab, setActiveTab] = useState('active');
+  const [nextZIndex, setNextZIndex] = useState(1000);
 
   useEffect(() => {
     fetchRequests();
@@ -90,6 +97,40 @@ export function AdminEngagementsView() {
     }));
   }, []);
 
+  const openChat = (request: ServiceRequest) => {
+    // Check if already open
+    const existingIndex = openChats.findIndex(c => c.request.id === request.id);
+    if (existingIndex !== -1) {
+      // Bring to front
+      bringToFront(request.id);
+      return;
+    }
+    
+    // Calculate offset position for stacking effect
+    const offset = openChats.length * 30;
+    const newChat: OpenChat = {
+      request,
+      position: { x: offset, y: offset },
+      zIndex: nextZIndex
+    };
+    
+    setOpenChats(prev => [...prev, newChat]);
+    setNextZIndex(prev => prev + 1);
+  };
+
+  const closeChat = (requestId: string) => {
+    setOpenChats(prev => prev.filter(c => c.request.id !== requestId));
+  };
+
+  const bringToFront = (requestId: string) => {
+    setOpenChats(prev => prev.map(chat => 
+      chat.request.id === requestId 
+        ? { ...chat, zIndex: nextZIndex }
+        : chat
+    ));
+    setNextZIndex(prev => prev + 1);
+  };
+
   const getStatusBadge = (status: string) => {
     const badges: Record<string, React.ReactNode> = {
       pending_review: <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>,
@@ -136,7 +177,7 @@ export function AdminEngagementsView() {
           ) : (
             <div className="grid gap-4">
               {activeRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setSelectedRequest(r)}>
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openChat(r)}>
                   <CardContent className="p-4 flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
@@ -169,7 +210,7 @@ export function AdminEngagementsView() {
           ) : (
             <div className="grid gap-4">
               {cancelledRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors border-destructive/20" onClick={() => setSelectedRequest(r)}>
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors border-destructive/20" onClick={() => openChat(r)}>
                   <CardContent className="p-4 flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
@@ -196,16 +237,18 @@ export function AdminEngagementsView() {
         </TabsContent>
       </Tabs>
 
-      {/* Floating Chat Window */}
-      {selectedRequest && (
+      {/* Multiple Floating Chat Windows */}
+      {openChats.map((chat) => (
         <AdminFloatingChat
-          request={selectedRequest}
-          messages={messages[selectedRequest.id] || []}
-          onClose={() => setSelectedRequest(null)}
+          key={chat.request.id}
+          request={chat.request}
+          messages={messages[chat.request.id] || []}
+          onClose={() => closeChat(chat.request.id)}
           onMessagesUpdate={handleMessagesUpdate}
-          zIndex={1000}
+          position={chat.position}
+          zIndex={chat.zIndex}
         />
-      )}
+      ))}
     </div>
   );
 }
