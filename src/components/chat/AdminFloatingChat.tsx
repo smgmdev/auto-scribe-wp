@@ -906,12 +906,6 @@ export function AdminFloatingChat({
                       View Order
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem 
-                    className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    onClick={() => fetchClientDetails()}
-                  >
-                    View Client
-                  </DropdownMenuItem>
                   {request.media_sites?.agency && (
                     <DropdownMenuItem 
                       className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
