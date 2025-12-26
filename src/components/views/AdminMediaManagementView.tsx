@@ -1520,7 +1520,7 @@ export function AdminMediaManagementView() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible">
           <TabsTrigger value="media" className="relative overflow-visible">
-            Media Sites
+            Media Sites ({mediaSites.length})
             {unreadMediaCount > 0 && (
               <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                 {unreadMediaCount}
@@ -1528,7 +1528,7 @@ export function AdminMediaManagementView() {
             )}
           </TabsTrigger>
           <TabsTrigger value="wordpress" className="relative overflow-visible">
-            WordPress Sites
+            WordPress Sites ({approvedSites.length})
             {unreadWpCount > 0 && (
               <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                 {unreadWpCount}
