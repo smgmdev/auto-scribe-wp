@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,12 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDistanceToNow, format, differenceInHours, differenceInDays } from 'date-fns';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 
 interface Order {
   id: string;
+  order_number: string | null;
   user_id: string;
   media_site_id: string;
   stripe_payment_intent_id: string | null;
@@ -49,6 +51,7 @@ export function AdminOrdersView() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const { toast } = useToast();
@@ -431,14 +434,19 @@ export function AdminOrdersView() {
 
       {/* Order Details Dialog */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" hideCloseButton>
+          <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
+            <DialogClose className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </div>
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
           </DialogHeader>
 
           {selectedOrder && (
             <div className="space-y-4">
-              {/* Media Site Info */}
               <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                 {selectedOrder.media_sites?.favicon ? (
                   <img 
@@ -452,120 +460,101 @@ export function AdminOrdersView() {
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-lg">{selectedOrder.media_sites?.name}</h3>
+                  <h3 className="font-semibold">{selectedOrder.media_sites?.name}</h3>
                   {selectedOrder.media_sites?.agency && (
-                    <p className="text-sm text-muted-foreground">{selectedOrder.media_sites.agency}</p>
+                    <p className="text-sm text-muted-foreground">via {selectedOrder.media_sites.agency}</p>
                   )}
                 </div>
               </div>
 
-              {/* Order Status */}
-              <div className="flex gap-2">
-                {getStatusBadge(selectedOrder.status)}
-                {getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.delivery_deadline)}
-              </div>
-
-              {/* Financial Details */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Order Amount</p>
-                  <p className="font-semibold text-lg">${(selectedOrder.amount_cents / 100).toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">Payment Status</p>
+                  <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Platform Fee</p>
-                  <p className="font-semibold text-lg text-green-600">${(selectedOrder.platform_fee_cents / 100).toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Agency Payout</p>
-                  <p className="font-semibold text-lg">${(selectedOrder.agency_payout_cents / 100).toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Order ID</p>
-                  <p className="font-mono text-sm">{selectedOrder.id.slice(0, 8)}...</p>
+                  <p className="text-sm text-muted-foreground">Delivery Status</p>
+                  <div className="mt-1">{getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.delivery_deadline)}</div>
                 </div>
               </div>
 
-              {/* Timeline */}
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">Timeline</h4>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Created</span>
-                    <span>{format(new Date(selectedOrder.created_at), 'MMM d, yyyy h:mm a')}</span>
-                  </div>
-                  {selectedOrder.paid_at && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Paid</span>
-                      <span>{format(new Date(selectedOrder.paid_at), 'MMM d, yyyy h:mm a')}</span>
-                    </div>
-                  )}
-                  {selectedOrder.delivered_at && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Delivered</span>
-                      <span>{format(new Date(selectedOrder.delivered_at), 'MMM d, yyyy h:mm a')}</span>
-                    </div>
-                  )}
-                  {selectedOrder.accepted_at && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Accepted</span>
-                      <span>{format(new Date(selectedOrder.accepted_at), 'MMM d, yyyy h:mm a')}</span>
-                    </div>
-                  )}
-                  {selectedOrder.released_at && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Payment Released</span>
-                      <span>{format(new Date(selectedOrder.released_at), 'MMM d, yyyy h:mm a')}</span>
-                    </div>
-                  )}
+              <div className="border-t pt-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Paid</span>
+                  <span className="font-semibold">${(selectedOrder.amount_cents / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="text-muted-foreground">Platform Fee</span>
+                  <span className="text-green-600">${(selectedOrder.platform_fee_cents / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="text-muted-foreground">Agency Payout</span>
+                  <span>${(selectedOrder.agency_payout_cents / 100).toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* Delivery Info */}
               {selectedOrder.delivery_url && (
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Delivery</h4>
-                  <div className="p-3 bg-muted/30 rounded-lg space-y-2">
-                    <a 
-                      href={selectedOrder.delivery_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1 text-sm"
-                    >
-                      {selectedOrder.delivery_url}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                    {selectedOrder.delivery_notes && (
-                      <p className="text-sm text-muted-foreground">{selectedOrder.delivery_notes}</p>
-                    )}
-                  </div>
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
+                  <button 
+                    onClick={() => setWebViewUrl(selectedOrder.delivery_url!)}
+                    className="text-sm text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {selectedOrder.delivery_url}
+                    <ExternalLink className="h-3 w-3" />
+                  </button>
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                {selectedOrder.media_sites?.link && (
+              {selectedOrder.delivery_notes && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Delivery Notes</p>
+                  <p className="text-sm">{selectedOrder.delivery_notes}</p>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              {selectedOrder.status === 'paid' && selectedOrder.delivery_status === 'pending' && (
+                <div className="border-t pt-4">
                   <Button 
-                    variant="outline" 
-                    onClick={() => window.open(selectedOrder.media_sites?.link, '_blank')}
+                    className="w-full" 
+                    onClick={() => {
+                      setDetailsDialogOpen(false);
+                      openDeliveryDialog(selectedOrder);
+                    }}
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Site
-                  </Button>
-                )}
-                {selectedOrder.status === 'paid' && selectedOrder.delivery_status === 'pending' && (
-                  <Button onClick={() => {
-                    setDetailsDialogOpen(false);
-                    openDeliveryDialog(selectedOrder);
-                  }}>
                     <Send className="h-4 w-4 mr-2" />
                     Mark Delivered
                   </Button>
-                )}
+                </div>
+              )}
+
+              <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
+                {selectedOrder.paid_at && <p>Paid: {new Date(selectedOrder.paid_at).toLocaleString()}</p>}
+                {selectedOrder.delivered_at && <p>Delivered: {new Date(selectedOrder.delivered_at).toLocaleString()}</p>}
+                {selectedOrder.accepted_at && <p>Accepted: {new Date(selectedOrder.accepted_at).toLocaleString()}</p>}
+                <p className="flex items-center gap-1">
+                  Order ID: {selectedOrder.order_number || selectedOrder.id.slice(0, 8)}
+                  <Copy 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedOrder.order_number || selectedOrder.id);
+                      toast({ title: "Copied", description: "Order ID copied to clipboard" });
+                    }}
+                  />
+                </p>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      <WebViewDialog
+        open={!!webViewUrl}
+        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        url={webViewUrl || ''}
+        title="Delivery"
+      />
     </div>
   );
 }
