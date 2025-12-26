@@ -2581,11 +2581,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {agencyDetails?.logo_url ? (
-                <img 
-                  src={agencyDetails.logo_url} 
-                  alt={agencyDetails.agency_name}
-                  className="h-12 w-12 rounded-xl bg-muted object-contain"
-                />
+                <div className="relative h-12 w-12">
+                  <img 
+                    src={agencyDetails.logo_url} 
+                    alt={agencyDetails.agency_name}
+                    className="h-12 w-12 rounded-xl bg-muted object-contain"
+                    onLoad={(e) => e.currentTarget.parentElement?.querySelector('.logo-spinner')?.classList.add('hidden')}
+                  />
+                  <div className="logo-spinner absolute inset-0 flex items-center justify-center rounded-xl bg-muted">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                </div>
               ) : (
                 <Building2 className="h-12 w-12 text-muted-foreground" />
               )}
