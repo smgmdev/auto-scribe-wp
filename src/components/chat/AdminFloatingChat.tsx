@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, Minus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply } from 'lucide-react';
+import { Loader2, Send, UserPlus, Minus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,8 @@ interface ServiceRequest {
   updated_at: string;
   order_id: string | null;
   cancellation_reason: string | null;
+  user_id: string;
+  agency_payout_id: string | null;
   media_sites: { 
     id?: string;
     name: string; 
@@ -41,6 +43,7 @@ interface ServiceRequest {
 interface ServiceMessage {
   id: string;
   sender_type: 'client' | 'agency' | 'admin';
+  sender_id?: string;
   message: string;
   created_at: string;
 }
@@ -66,6 +69,15 @@ interface AgencyDetails {
   onboarding_complete: boolean;
   created_at: string;
   logo_url: string | null;
+}
+
+interface ClientDetails {
+  id: string;
+  email: string | null;
+  username: string | null;
+  created_at: string;
+  email_verified: boolean;
+  suspended: boolean;
 }
 
 interface AdminFloatingChatProps {
@@ -107,6 +119,9 @@ export function AdminFloatingChat({
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
+  const [clientDetailsOpen, setClientDetailsOpen] = useState(false);
+  const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null);
+  const [loadingClient, setLoadingClient] = useState(false);
   
   // Drag state
   const [localPosition, setLocalPosition] = useState(initialPosition);
@@ -114,6 +129,7 @@ export function AdminFloatingChat({
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
@@ -416,11 +432,19 @@ export function AdminFloatingChat({
     sendTypingIndicator(false);
     
     try {
+      let messageContent = newMessage.trim();
+      
+      // If replying, prepend the quote
+      if (replyToMessage) {
+        const quoteText = replyToMessage.message.substring(0, 100);
+        messageContent = `> [${replyToMessage.id}]:${quoteText}\n\n${messageContent}`;
+      }
+      
       const { error } = await supabase.from('service_messages').insert({
         request_id: request.id,
         sender_id: user.id,
         sender_type: 'admin',
-        message: newMessage.trim()
+        message: messageContent
       });
 
       if (error) throw error;
@@ -428,7 +452,7 @@ export function AdminFloatingChat({
       const newMsg: ServiceMessage = {
         id: crypto.randomUUID(),
         sender_type: 'admin',
-        message: newMessage.trim(),
+        message: messageContent,
         created_at: new Date().toISOString()
       };
       
@@ -438,6 +462,7 @@ export function AdminFloatingChat({
         return updated;
       });
       setNewMessage('');
+      setReplyToMessage(null);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
@@ -501,6 +526,90 @@ export function AdminFloatingChat({
       console.error('Error fetching order:', error);
     } finally {
       setLoadingOrderDetails(false);
+    }
+  };
+
+  const fetchClientDetails = async (userId?: string) => {
+    const clientId = userId || request.user_id;
+    if (!clientId) return;
+    
+    setLoadingClient(true);
+    setClientDetailsOpen(true);
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, email, username, created_at, email_verified, suspended')
+        .eq('id', clientId)
+        .maybeSingle();
+      
+      setClientDetails(data);
+    } catch (error) {
+      console.error('Error fetching client:', error);
+    } finally {
+      setLoadingClient(false);
+    }
+  };
+
+  const fetchAgencyDetailsBySenderId = async (senderId: string) => {
+    setLoadingAgency(true);
+    setAgencyDetailsOpen(true);
+    try {
+      const { data } = await supabase
+        .from('agency_payouts')
+        .select('agency_name, email, onboarding_complete, created_at')
+        .eq('user_id', senderId)
+        .maybeSingle();
+      
+      if (data) {
+        const { data: appData } = await supabase
+          .from('agency_applications')
+          .select('logo_url')
+          .eq('agency_name', data.agency_name)
+          .maybeSingle();
+        
+        setAgencyDetails({
+          ...data,
+          logo_url: appData?.logo_url || null
+        });
+      } else {
+        // Fallback: try agency_payout_id from request
+        if (request.agency_payout_id) {
+          const { data: agencyData } = await supabase
+            .from('agency_payouts')
+            .select('agency_name, email, onboarding_complete, created_at')
+            .eq('id', request.agency_payout_id)
+            .maybeSingle();
+          
+          if (agencyData) {
+            const { data: appData } = await supabase
+              .from('agency_applications')
+              .select('logo_url')
+              .eq('agency_name', agencyData.agency_name)
+              .maybeSingle();
+            
+            setAgencyDetails({
+              ...agencyData,
+              logo_url: appData?.logo_url || null
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching agency:', error);
+    } finally {
+      setLoadingAgency(false);
+    }
+  };
+
+  const handleUserDetails = (msg: ServiceMessage) => {
+    if (msg.sender_type === 'client') {
+      fetchClientDetails(msg.sender_id);
+    } else if (msg.sender_type === 'agency') {
+      if (msg.sender_id) {
+        fetchAgencyDetailsBySenderId(msg.sender_id);
+      } else if (request.media_sites?.agency) {
+        fetchAgencyDetails(request.media_sites.agency);
+      }
     }
   };
 
@@ -894,7 +1003,7 @@ export function AdminFloatingChat({
                   id={`admin-msg-${request.id}-${m.id}`}
                   className={`flex ${isClient ? 'justify-start' : isAgency ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} transition-all duration-300 ${
+                  <div className={`group relative max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} transition-all duration-300 ${
                     isSpecialMessage ? '' : (
                       isAdmin 
                         ? 'bg-blue-500 text-white' 
@@ -903,8 +1012,45 @@ export function AdminFloatingChat({
                           : 'bg-muted'
                     )
                   } ${highlightedMessageId === m.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}>
+                    {/* Message Actions Dropdown */}
+                    {!isSpecialMessage && !isAdmin && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                              isAgency 
+                                ? 'text-primary-foreground hover:bg-primary-foreground/20' 
+                                : 'text-foreground hover:bg-background/50'
+                            }`}
+                          >
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover z-[9999]">
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setReplyToMessage(m);
+                              setTimeout(() => inputRef.current?.focus(), 0);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <Reply className="h-4 w-4 mr-2" />
+                            Reply
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleUserDetails(m)}
+                            className="cursor-pointer"
+                          >
+                            <User className="h-4 w-4 mr-2" />
+                            {m.sender_type === 'client' ? 'Client Details' : 'Agency Details'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                     {!isSpecialMessage && (
-                      <p className="text-xs font-medium mb-1 opacity-70 capitalize">
+                      <p className="text-xs font-medium mb-1 opacity-70 capitalize pr-5">
                         {isAdmin ? 'Arcana Mace Staff' : m.sender_type}
                       </p>
                     )}
@@ -955,21 +1101,42 @@ export function AdminFloatingChat({
                 </button>
               </div>
             ) : (
-              <div className="flex items-center">
-                <Input
-                  placeholder="Type your message..."
-                  value={newMessage}
-                  onChange={handleInputChange}
-                  disabled={sending}
-                  className="rounded-none border-0 flex-1"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
-                      e.preventDefault();
-                      sendTypingIndicator(false);
-                      handleSendMessage();
-                    }
-                  }}
-                />
+              <>
+                {replyToMessage && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-b">
+                    <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground">
+                        Replying to {replyToMessage.sender_type === 'admin' ? 'yourself' : replyToMessage.sender_type}
+                      </p>
+                      <p className="text-sm truncate">{replyToMessage.message.substring(0, 50)}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={() => setReplyToMessage(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <Input
+                    ref={inputRef}
+                    placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
+                    value={newMessage}
+                    onChange={handleInputChange}
+                    disabled={sending}
+                    className="rounded-none border-0 flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                        e.preventDefault();
+                        sendTypingIndicator(false);
+                        handleSendMessage();
+                      }
+                    }}
+                  />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -987,7 +1154,8 @@ export function AdminFloatingChat({
                   {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <LogOut className="h-3 w-3" />}
                   Leave
                 </button>
-              </div>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -1283,6 +1451,87 @@ export function AdminFloatingChat({
           ) : (
             <p className="text-center text-muted-foreground py-8">Order not found</p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Details Dialog */}
+      <Dialog open={clientDetailsOpen} onOpenChange={setClientDetailsOpen}>
+        <DialogContent className="sm:max-w-md z-[10000]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                <User className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <span>Client Details</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingClient ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : clientDetails ? (
+            <div className="space-y-4 mt-4">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-foreground">{clientDetails.email || 'No email'}</p>
+                </div>
+              </div>
+              
+              {clientDetails.username && (
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Username</p>
+                    <p className="text-foreground">{clientDetails.username}</p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Member Since</p>
+                  <p className="text-foreground">
+                    {new Date(clientDetails.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Email Status</p>
+                  <Badge variant={clientDetails.email_verified ? 'default' : 'secondary'} className={clientDetails.email_verified ? 'bg-green-600' : ''}>
+                    {clientDetails.email_verified ? 'Verified' : 'Unverified'}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Account Status</p>
+                  <Badge variant={clientDetails.suspended ? 'destructive' : 'default'} className={!clientDetails.suspended ? 'bg-green-600' : ''}>
+                    {clientDetails.suspended ? 'Suspended' : 'Active'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Client not found</p>
+          )}
+
+          <div className="flex justify-end mt-6">
+            <Button 
+              variant="outline"
+              onClick={() => setClientDetailsOpen(false)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
