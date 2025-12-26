@@ -1,16 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, Send, UserPlus } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useAuth } from '@/hooks/useAuth';
+import { AdminFloatingChat } from '@/components/chat/AdminFloatingChat';
 
 interface ServiceRequest {
   id: string;
@@ -34,125 +30,15 @@ interface ServiceMessage {
 }
 
 export function AdminEngagementsView() {
-  const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [activeTab, setActiveTab] = useState('active');
-  const [newMessage, setNewMessage] = useState('');
-  const [sending, setSending] = useState(false);
-  const [hasJoined, setHasJoined] = useState(false);
-  const [joiningChat, setJoiningChat] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<{ type: string; user_id: string }[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     fetchRequests();
   }, []);
-
-  useEffect(() => {
-    if (selectedRequest) {
-      checkIfJoined(selectedRequest.id);
-      scrollToBottom();
-
-      // Subscribe to realtime messages for selected request
-      const channel = supabase
-        .channel(`admin-engagement-${selectedRequest.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'service_messages',
-            filter: `request_id=eq.${selectedRequest.id}`
-          },
-          (payload) => {
-            const newMessage = payload.new as ServiceMessage;
-            setMessages(prev => {
-              const existing = prev[selectedRequest.id] || [];
-              if (existing.some(m => m.id === newMessage.id)) return prev;
-              return {
-                ...prev,
-                [selectedRequest.id]: [...existing, newMessage]
-              };
-            });
-          }
-        )
-        .subscribe();
-
-      // Subscribe to presence for typing indicators (use same keys as FloatingChatWindow)
-      const presenceChannel = supabase.channel(`typing-${selectedRequest.id}`)
-        .on('presence', { event: 'sync' }, () => {
-          const state = presenceChannel.presenceState();
-          const typing: { type: string; user_id: string }[] = [];
-          Object.values(state).forEach((presences: any) => {
-            presences.forEach((p: any) => {
-              if (p.is_typing && p.sender_id !== user?.id) {
-                typing.push({ type: p.sender_type, user_id: p.sender_id });
-              }
-            });
-          });
-          setTypingUsers(typing);
-        })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED' && hasJoined) {
-            await presenceChannel.track({
-              sender_id: user?.id,
-              sender_type: 'admin',
-              is_typing: false
-            });
-          }
-        });
-
-      presenceChannelRef.current = presenceChannel;
-
-      return () => {
-        supabase.removeChannel(channel);
-        supabase.removeChannel(presenceChannel);
-        presenceChannelRef.current = null;
-      };
-    }
-  }, [selectedRequest?.id, user?.id, hasJoined]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, selectedRequest?.id]);
-
-  const scrollToBottom = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  };
-
-  const sendTypingIndicator = (isTyping: boolean) => {
-    if (!presenceChannelRef.current || !user || !hasJoined) return;
-    presenceChannelRef.current.track({
-      sender_id: user.id,
-      sender_type: 'admin',
-      is_typing: isTyping
-    });
-  };
-
-  const handleInputChange = (value: string) => {
-    setNewMessage(value);
-    
-    if (value.trim()) {
-      sendTypingIndicator(true);
-      
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      typingTimeoutRef.current = setTimeout(() => {
-        sendTypingIndicator(false);
-      }, 2000);
-    } else {
-      sendTypingIndicator(false);
-    }
-  };
-
 
   const fetchRequests = async () => {
     try {
@@ -195,71 +81,12 @@ export function AdminEngagementsView() {
     }
   };
 
-  const checkIfJoined = async (requestId: string) => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('admin_investigations')
-      .select('id')
-      .eq('service_request_id', requestId)
-      .eq('admin_id', user.id)
-      .eq('status', 'active')
-      .maybeSingle();
-    setHasJoined(!!data);
-  };
-
-  const handleJoinChat = async () => {
-    if (!selectedRequest || !user) return;
-    setJoiningChat(true);
-    try {
-      const { error: invError } = await supabase
-        .from('admin_investigations')
-        .upsert({
-          admin_id: user.id,
-          service_request_id: selectedRequest.id,
-          order_id: selectedRequest.order_id || selectedRequest.id,
-          status: 'active'
-        }, { onConflict: 'service_request_id' });
-
-      if (invError) throw invError;
-
-      setHasJoined(true);
-      toast({ title: 'Joined chat', description: 'You can now participate in this engagement.' });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
-    } finally {
-      setJoiningChat(false);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedRequest || !user) return;
-    setSending(true);
-    try {
-      const { error } = await supabase.from('service_messages').insert({
-        request_id: selectedRequest.id,
-        sender_id: user.id,
-        sender_type: 'admin',
-        message: newMessage.trim()
-      });
-
-      if (error) throw error;
-
-      setMessages(prev => ({
-        ...prev,
-        [selectedRequest.id]: [...(prev[selectedRequest.id] || []), {
-          id: crypto.randomUUID(),
-          sender_type: 'admin',
-          message: newMessage.trim(),
-          created_at: new Date().toISOString()
-        }]
-      }));
-      setNewMessage('');
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
-    } finally {
-      setSending(false);
-    }
-  };
+  const handleMessagesUpdate = useCallback((requestId: string, updatedMessages: ServiceMessage[]) => {
+    setMessages(prev => ({
+      ...prev,
+      [requestId]: updatedMessages
+    }));
+  }, []);
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, React.ReactNode> = {
@@ -277,8 +104,6 @@ export function AdminEngagementsView() {
   const cancelledRequests = requests.filter(r => r.status === 'cancelled');
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-
-  const isCancelled = selectedRequest?.status === 'cancelled';
 
   return (
     <div className="space-y-6">
@@ -369,107 +194,16 @@ export function AdminEngagementsView() {
         </TabsContent>
       </Tabs>
 
-      {/* Chat Dialog */}
-      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
-          <DialogHeader className={`p-4 border-b ${isCancelled ? 'bg-destructive/10' : ''}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {selectedRequest?.media_sites?.favicon && (
-                  <img src={selectedRequest.media_sites.favicon} className="h-8 w-8 rounded" alt="" />
-                )}
-                <div>
-                  <DialogTitle>{selectedRequest?.title}</DialogTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRequest?.media_sites?.name} • {selectedRequest?.profiles?.email}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedRequest && getStatusBadge(selectedRequest.status)}
-                {!hasJoined && !isCancelled && (
-                  <Button size="sm" onClick={handleJoinChat} disabled={joiningChat}>
-                    {joiningChat ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserPlus className="h-4 w-4 mr-1" />}
-                    Join
-                  </Button>
-                )}
-                {hasJoined && <Badge variant="outline" className="bg-green-50 text-green-700">Joined</Badge>}
-              </div>
-            </div>
-          </DialogHeader>
-
-          {isCancelled && (
-            <div className="px-4 py-2 bg-destructive/5 border-b">
-              <p className="text-sm text-destructive font-medium">This engagement has been cancelled.</p>
-              {selectedRequest?.cancellation_reason && (
-                <p className="text-sm text-muted-foreground">{selectedRequest.cancellation_reason}</p>
-              )}
-            </div>
-          )}
-
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-            <div className="space-y-4">
-              {selectedRequest && (messages[selectedRequest.id] || []).map((m) => (
-                <div key={m.id} className={`flex ${m.sender_type === 'client' ? 'justify-start' : m.sender_type === 'admin' ? 'justify-center' : 'justify-end'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-lg ${
-                    m.sender_type === 'client' 
-                      ? 'bg-muted' 
-                      : m.sender_type === 'agency' 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-amber-100 dark:bg-amber-900/30 border border-amber-300'
-                  }`}>
-                    <p className="text-xs opacity-70 mb-1 capitalize">{m.sender_type}</p>
-                    <p className="text-sm whitespace-pre-wrap">{m.message}</p>
-                    <p className="text-xs opacity-50 mt-1">{format(new Date(m.created_at), 'MMM d, h:mm a')}</p>
-                  </div>
-                </div>
-              ))}
-              
-              {/* Typing indicators */}
-              {typingUsers.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                  <span>
-                    {typingUsers.map(u => u.type).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
-                  </span>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-
-          {hasJoined && !isCancelled && (
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      sendTypingIndicator(false);
-                      handleSendMessage();
-                    }
-                  }}
-                  disabled={sending}
-                />
-                <Button onClick={() => { sendTypingIndicator(false); handleSendMessage(); }} disabled={sending || !newMessage.trim()}>
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {!hasJoined && !isCancelled && (
-            <div className="p-4 border-t text-center text-muted-foreground text-sm">
-              Join the chat to send messages
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Floating Chat Window */}
+      {selectedRequest && (
+        <AdminFloatingChat
+          request={selectedRequest}
+          messages={messages[selectedRequest.id] || []}
+          onClose={() => setSelectedRequest(null)}
+          onMessagesUpdate={handleMessagesUpdate}
+          zIndex={1000}
+        />
+      )}
     </div>
   );
 }
