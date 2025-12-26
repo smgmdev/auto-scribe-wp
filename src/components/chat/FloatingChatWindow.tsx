@@ -4,7 +4,7 @@ import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -1336,9 +1336,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       {/* Order Details Dialog */}
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
-        <DialogContent className="max-w-md z-[250]">
-          <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle>Order Details</DialogTitle>
+        <DialogContent className="max-w-md z-[250]" hideCloseButton>
+          <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
             {orderDetails && orderDetails.delivery_status === 'pending' && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1375,6 +1374,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
+            <DialogClose className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </div>
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
           </DialogHeader>
           {loadingOrderDetails ? (
             <div className="flex items-center justify-center py-8">
@@ -1455,7 +1461,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
 
               <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
-                <p>Created: {new Date(orderDetails.created_at).toLocaleString()}</p>
                 {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
                 {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
                 {orderDetails.accepted_at && <p>Accepted: {new Date(orderDetails.accepted_at).toLocaleString()}</p>}
