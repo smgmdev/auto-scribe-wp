@@ -1149,7 +1149,7 @@ export function SitesView() {
               {/* Price badge - fixed width for alignment */}
               <div className="w-[85px] flex justify-end flex-shrink-0">
                 <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                  {site.price > 0 ? `${site.price} USD` : 'Free'}
+                  {site.price > 0 ? `$${site.price.toLocaleString()}` : 'Free'}
                 </Badge>
               </div>
               {/* Fixed width container for format */}
@@ -1585,7 +1585,7 @@ export function SitesView() {
                               </div>
                               <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
                                 {site.price > 0 && (
-                                  <span>{site.price} USD</span>
+                                  <span>${site.price.toLocaleString()}</span>
                                 )}
                                 <span>{site.publication_format}</span>
                                 {site.agency && (

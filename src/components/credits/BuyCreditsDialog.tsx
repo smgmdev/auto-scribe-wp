@@ -136,7 +136,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Price per credit</span>
-              <span className="font-medium">${PRICE_PER_CREDIT.toFixed(2)}</span>
+              <span className="font-medium">${PRICE_PER_CREDIT}</span>
             </div>
             <div className="flex items-center justify-between mt-2">
               <span className="text-sm text-muted-foreground">Credits</span>
@@ -146,7 +146,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             <div className="flex items-center justify-between">
               <span className="font-semibold">Total</span>
               <span className="text-2xl font-bold text-primary">
-                ${totalPrice.toFixed(2)}
+                ${totalPrice.toLocaleString()}
               </span>
             </div>
           </div>
@@ -163,7 +163,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 Processing...
               </>
             ) : (
-              `Buy ${parsedAmount || 0} Credits for $${totalPrice.toFixed(2)}`
+              `Buy ${parsedAmount || 0} Credits for $${totalPrice.toLocaleString()}`
             )}
           </Button>
 

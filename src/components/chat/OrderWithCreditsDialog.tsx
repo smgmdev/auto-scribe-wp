@@ -96,7 +96,7 @@ export function OrderWithCreditsDialog({
             Order Now
           </DialogTitle>
           <DialogDescription>
-            Use your platform credits to place this order
+            Use your credits to place this order (1 credit = $1)
           </DialogDescription>
         </DialogHeader>
 
@@ -113,6 +113,9 @@ export function OrderWithCreditsDialog({
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold truncate">{mediaSite.name}</h3>
               <p className="text-2xl font-bold text-primary">
+                ${creditCost.toLocaleString()}
+              </p>
+              <p className="text-xs text-muted-foreground">
                 {creditCost.toLocaleString()} credits
               </p>
             </div>
@@ -126,7 +129,7 @@ export function OrderWithCreditsDialog({
                 Your Balance
               </span>
               <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
-                {(credits || 0).toLocaleString()} credits
+                {(credits || 0).toLocaleString()} credits (${(credits || 0).toLocaleString()})
               </span>
             </div>
             <div className="flex items-center justify-between mt-2">
@@ -149,7 +152,7 @@ export function OrderWithCreditsDialog({
               <div>
                 <p className="font-medium text-destructive">Insufficient Credits</p>
                 <p className="text-sm text-muted-foreground">
-                  You need {(creditCost - (credits || 0)).toLocaleString()} more credits to place this order.
+                  You need {(creditCost - (credits || 0)).toLocaleString()} more credits (${(creditCost - (credits || 0)).toLocaleString()}) to place this order.
                 </p>
               </div>
             </div>
@@ -167,7 +170,7 @@ export function OrderWithCreditsDialog({
                 Processing...
               </>
             ) : hasEnoughCredits ? (
-              `Order for ${creditCost.toLocaleString()} Credits`
+              `Order for $${creditCost.toLocaleString()}`
             ) : (
               'Insufficient Credits'
             )}

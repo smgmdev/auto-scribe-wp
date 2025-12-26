@@ -385,7 +385,7 @@ export function MediaSiteDialog({
                 <div className="flex gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-foreground font-medium">${mediaSite.price} USD</p>
+                    <p className="text-foreground font-medium">${mediaSite.price.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Format</p>
@@ -457,7 +457,7 @@ export function MediaSiteDialog({
                       className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                       onClick={handleInterested}
                     >
-                      <span>I'm Interested - ${mediaSite.price}</span>
+                      <span>I'm Interested - ${mediaSite.price.toLocaleString()}</span>
                       <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
                         <ArrowRight className="h-4 w-4 shrink-0" />
                       </span>
@@ -508,7 +508,7 @@ export function MediaSiteDialog({
               />
               <div>
                 <p className="font-medium">{mediaSite.name}</p>
-                <p className="text-sm text-muted-foreground">${mediaSite.price} USD</p>
+                <p className="text-sm text-muted-foreground">${mediaSite.price.toLocaleString()}</p>
               </div>
             </div>
 
