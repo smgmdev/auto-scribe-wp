@@ -1337,8 +1337,44 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Order Details Dialog */}
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
         <DialogContent className="max-w-md z-[250]">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>Order Details</DialogTitle>
+            {orderDetails && orderDetails.delivery_status === 'pending' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
+                  >
+                    Action
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                  <DropdownMenuItem 
+                    className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                    onClick={() => {
+                      toast({
+                        title: "Coming Soon",
+                        description: "Dispute functionality will be available soon.",
+                      });
+                    }}
+                  >
+                    Open Dispute
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                    onClick={() => {
+                      setOrderDetailsOpen(false);
+                      setCancelOrderDialogOpen(true);
+                    }}
+                  >
+                    Cancel Order
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </DialogHeader>
           {loadingOrderDetails ? (
             <div className="flex items-center justify-center py-8">
