@@ -1437,7 +1437,7 @@ export function GlobalChatDialog() {
           
           {/* Order Status Banner */}
           {globalChatRequest.order && (
-            <div className="mx-4 mt-3 mb-0 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <div className="p-3 bg-green-500/10 border-y border-green-500/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
