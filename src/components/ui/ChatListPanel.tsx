@@ -106,6 +106,7 @@ export function ChatListPanel() {
       // Fetch last messages for each request
       const requestIds = data.map(r => r.id);
       let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
+      let allMessages: { request_id: string; sender_type: string }[] = [];
       
       if (requestIds.length > 0) {
         const { data: messagesData } = await supabase
@@ -115,6 +116,9 @@ export function ChatListPanel() {
           .order('created_at', { ascending: false });
         
         messagesData?.forEach(msg => {
+          // Track all messages for determining if agency has replied
+          allMessages.push({ request_id: msg.request_id, sender_type: msg.sender_type });
+          
           if (!lastMessages[msg.request_id]) {
             lastMessages[msg.request_id] = { 
               message: msg.message, 
@@ -127,9 +131,14 @@ export function ChatListPanel() {
 
       const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
+        // Check if this request has any agency messages (for determining unread count)
+        const hasAgencyMessage = allMessages.some(
+          m => m.request_id === item.id && m.sender_type !== 'client'
+        );
         return {
           ...item,
-          read: (item as any).client_read, // Map client_read to read for UI
+          // Only mark as unread if client_read is false AND has agency message
+          read: (item as any).client_read || !hasAgencyMessage,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount: 0,

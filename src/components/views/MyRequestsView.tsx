@@ -100,8 +100,27 @@ export function MyRequestsView() {
       })) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
 
-      // Count unread: simply count requests where client_read = false
-      const unreadCount = (requestsData || []).filter(r => !(r as any).client_read).length;
+      // Fetch messages to determine which requests have agency replies
+      const requestIds = (requestsData || []).map(r => r.id);
+      let messagesForUnread: { request_id: string; sender_type: string }[] = [];
+      if (requestIds.length > 0) {
+        const { data: msgData } = await supabase
+          .from('service_messages')
+          .select('request_id, sender_type')
+          .in('request_id', requestIds);
+        messagesForUnread = msgData || [];
+      }
+
+      // Count unread: only count requests where client_read = false AND has agency message AND not cancelled
+      const unreadCount = (requestsData || []).filter(r => {
+        if ((r as any).client_read) return false;
+        if (r.status === 'cancelled') return false;
+        // Check if this request has any agency message
+        const hasAgencyMessage = messagesForUnread.some(
+          m => m.request_id === r.id && m.sender_type !== 'client'
+        );
+        return hasAgencyMessage;
+      }).length;
       setUserUnreadEngagementsCount(unreadCount);
 
       // Fetch messages for all requests
