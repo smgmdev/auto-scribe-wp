@@ -98,6 +98,11 @@ interface AppState {
   setUnreadOrdersCount: (count: number) => void;
   decrementUnreadOrdersCount: () => void;
   
+  // Admin dispute notifications (synced between Order Management and Messaging Widget)
+  unreadDisputesCount: number;
+  setUnreadDisputesCount: (count: number) => void;
+  decrementUnreadDisputesCount: () => void;
+  
   // Agency media notifications (for agency users)
   agencyUnreadWpSubmissionsCount: number;
   setAgencyUnreadWpSubmissionsCount: (count: number) => void;
@@ -211,6 +216,13 @@ export const useAppStore = create<AppState>()((set) => ({
   setUnreadOrdersCount: (count) => set({ unreadOrdersCount: count }),
   decrementUnreadOrdersCount: () => set((state) => ({ 
     unreadOrdersCount: Math.max(0, state.unreadOrdersCount - 1) 
+  })),
+  
+  // Admin dispute notifications (synced between Order Management and Messaging Widget)
+  unreadDisputesCount: 0,
+  setUnreadDisputesCount: (count) => set({ unreadDisputesCount: count }),
+  decrementUnreadDisputesCount: () => set((state) => ({ 
+    unreadDisputesCount: Math.max(0, state.unreadDisputesCount - 1) 
   })),
   
   // Agency media notifications
