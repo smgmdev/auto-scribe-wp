@@ -286,8 +286,11 @@ button:focus-visible,
   background-color: inherit !important;
 }
 
-/* Disable hover effect on notification badges */
-.bg-red-500:hover,
+/* Disable hover effect on notification badges - keep red on hover */
+.bg-red-500:hover {
+  background-color: rgb(239 68 68) !important;
+}
+
 .bg-destructive:hover {
-  background-color: inherit !important;
+  background-color: hsl(var(--destructive)) !important;
 }
