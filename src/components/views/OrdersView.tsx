@@ -519,7 +519,6 @@ export function OrdersView() {
               )}
 
               <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
-                <p>Created: {new Date(selectedOrder.created_at).toLocaleString()}</p>
                 {selectedOrder.paid_at && <p>Paid: {new Date(selectedOrder.paid_at).toLocaleString()}</p>}
                 {selectedOrder.delivered_at && <p>Delivered: {new Date(selectedOrder.delivered_at).toLocaleString()}</p>}
                 {selectedOrder.accepted_at && <p>Accepted: {new Date(selectedOrder.accepted_at).toLocaleString()}</p>}
