@@ -1137,16 +1137,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
     if (adminJoinedMatch) {
       return (
-        <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-center">
-            <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-              {adminJoinedMatch[1]}
-            </p>
-          </div>
-          <p className="text-xs opacity-50 text-center">
-            {format(new Date(msg.created_at), 'HH:mm')}
-          </p>
-        </div>
+        <p className="text-xs text-muted-foreground text-center py-2">
+          {adminJoinedMatch[1]}
+        </p>
       );
     }
 
