@@ -38,6 +38,14 @@ export interface GlobalChatRequest {
   } | null;
 }
 
+// Open chat instance with position and z-index
+export interface OpenChat {
+  request: GlobalChatRequest;
+  type: 'agency-request' | 'my-request';
+  zIndex: number;
+  position: { x: number; y: number };
+}
+
 interface AppState {
   // Headlines (session state only)
   headlines: Headline[];
@@ -127,13 +135,17 @@ interface AppState {
   incrementUnreadMessageCount: (requestId: string) => void;
   clearUnreadMessageCount: (requestId: string) => void;
   
-  // Global chat overlay state
-  globalChatOpen: boolean;
-  globalChatRequest: GlobalChatRequest | null;
-  globalChatType: 'agency-request' | 'my-request' | null;
+  // Global chat overlay state - now supports multiple chats
+  openChats: OpenChat[];
+  globalChatOpen: boolean; // Keep for backwards compatibility - true if any chat is open
+  globalChatRequest: GlobalChatRequest | null; // Keep for backwards compatibility - first open chat
+  globalChatType: 'agency-request' | 'my-request' | null; // Keep for backwards compatibility
   openGlobalChat: (request: GlobalChatRequest, type: 'agency-request' | 'my-request') => void;
-  closeGlobalChat: () => void;
-  updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>) => void;
+  closeGlobalChat: (requestId?: string) => void;
+  closeAllChats: () => void;
+  focusChat: (requestId: string) => void;
+  updateChatPosition: (requestId: string, position: { x: number; y: number }) => void;
+  updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>, requestId?: string) => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -264,23 +276,111 @@ export const useAppStore = create<AppState>()((set) => ({
     return { unreadMessageCounts: rest };
   }),
   
-  // Global chat overlay state
+  // Global chat overlay state - supports multiple chats
+  openChats: [],
   globalChatOpen: false,
   globalChatRequest: null,
   globalChatType: null,
-  openGlobalChat: (request, type) => set({ 
-    globalChatOpen: true, 
-    globalChatRequest: request, 
-    globalChatType: type 
+  openGlobalChat: (request, type) => set((state) => {
+    // Check if chat is already open
+    const existingIndex = state.openChats.findIndex(c => c.request.id === request.id);
+    if (existingIndex >= 0) {
+      // Focus existing chat
+      const maxZ = Math.max(...state.openChats.map(c => c.zIndex), 0);
+      const updated = state.openChats.map((c, i) => 
+        i === existingIndex ? { ...c, zIndex: maxZ + 1 } : c
+      );
+      return { 
+        openChats: updated,
+        globalChatOpen: true,
+        globalChatRequest: request,
+        globalChatType: type
+      };
+    }
+    // Add new chat with offset position based on existing chats
+    const offset = state.openChats.length * 30;
+    const maxZ = Math.max(...state.openChats.map(c => c.zIndex), 99);
+    const newChat: OpenChat = {
+      request,
+      type,
+      zIndex: maxZ + 1,
+      position: { x: offset, y: offset }
+    };
+    const newChats = [...state.openChats, newChat];
+    return { 
+      openChats: newChats,
+      globalChatOpen: true,
+      globalChatRequest: request,
+      globalChatType: type
+    };
   }),
-  closeGlobalChat: () => set({ 
-    globalChatOpen: false, 
-    globalChatRequest: null, 
-    globalChatType: null 
+  closeGlobalChat: (requestId) => set((state) => {
+    if (!requestId) {
+      // Legacy behavior - close all or first chat
+      if (state.openChats.length <= 1) {
+        return { 
+          openChats: [],
+          globalChatOpen: false,
+          globalChatRequest: null,
+          globalChatType: null
+        };
+      }
+      // Close the most recently focused chat
+      const sorted = [...state.openChats].sort((a, b) => b.zIndex - a.zIndex);
+      const remaining = state.openChats.filter(c => c.request.id !== sorted[0].request.id);
+      return {
+        openChats: remaining,
+        globalChatOpen: remaining.length > 0,
+        globalChatRequest: remaining.length > 0 ? remaining[remaining.length - 1].request : null,
+        globalChatType: remaining.length > 0 ? remaining[remaining.length - 1].type : null
+      };
+    }
+    // Close specific chat
+    const remaining = state.openChats.filter(c => c.request.id !== requestId);
+    return {
+      openChats: remaining,
+      globalChatOpen: remaining.length > 0,
+      globalChatRequest: remaining.length > 0 ? remaining[remaining.length - 1].request : null,
+      globalChatType: remaining.length > 0 ? remaining[remaining.length - 1].type : null
+    };
   }),
-  updateGlobalChatRequest: (updates) => set((state) => ({
-    globalChatRequest: state.globalChatRequest 
-      ? { ...state.globalChatRequest, ...updates } 
-      : null
+  closeAllChats: () => set({
+    openChats: [],
+    globalChatOpen: false,
+    globalChatRequest: null,
+    globalChatType: null
+  }),
+  focusChat: (requestId) => set((state) => {
+    const maxZ = Math.max(...state.openChats.map(c => c.zIndex), 0);
+    const updated = state.openChats.map(c => 
+      c.request.id === requestId ? { ...c, zIndex: maxZ + 1 } : c
+    );
+    const focused = updated.find(c => c.request.id === requestId);
+    return { 
+      openChats: updated,
+      globalChatRequest: focused?.request || state.globalChatRequest,
+      globalChatType: focused?.type || state.globalChatType
+    };
+  }),
+  updateChatPosition: (requestId, position) => set((state) => ({
+    openChats: state.openChats.map(c => 
+      c.request.id === requestId ? { ...c, position } : c
+    )
   })),
+  updateGlobalChatRequest: (updates, requestId) => set((state) => {
+    // Update in openChats array
+    const updated = state.openChats.map(c => 
+      (!requestId || c.request.id === requestId) 
+        ? { ...c, request: { ...c.request, ...updates } } 
+        : c
+    );
+    // Also update legacy globalChatRequest if it matches
+    const updatedRequest = state.globalChatRequest && (!requestId || state.globalChatRequest.id === requestId)
+      ? { ...state.globalChatRequest, ...updates }
+      : state.globalChatRequest;
+    return { 
+      openChats: updated,
+      globalChatRequest: updatedRequest
+    };
+  }),
 }));

@@ -1,53 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw } from 'lucide-react';
-import amblackLogo from '@/assets/amblack-2.png';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { WebViewDialog } from '@/components/ui/WebViewDialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { OrderWithCreditsDialog } from '@/components/chat/OrderWithCreditsDialog';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
-import { useMinimizedChats } from '@/hooks/useMinimizedChats';
-import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
-
-interface ServiceMessage {
-  id: string;
-  request_id: string;
-  sender_type: 'client' | 'agency' | 'admin';
-  sender_id: string;
-  message: string;
-  created_at: string;
-}
-
-interface AgencyDetails {
-  agency_name: string;
-  email: string | null;
-  payout_method: string | null;
-  onboarding_complete: boolean;
-  created_at: string;
-}
+import { FloatingChatWindow } from './FloatingChatWindow';
 
 export function GlobalChatDialog() {
-  const { user } = useAuth();
-  const { 
-    globalChatOpen,
-    globalChatRequest,
-    globalChatType,
-    closeGlobalChat,
-    updateGlobalChatRequest,
-    clearUnreadMessageCount
-  } = useAppStore();
-  const { addMinimizedChat } = useMinimizedChats();
+  const { openChats, focusChat } = useAppStore();
+  
+  if (openChats.length === 0) return null;
+
+  return (
+    <>
+      {openChats.map((chat) => (
+        <FloatingChatWindow 
+          key={chat.request.id} 
+          chat={chat} 
+          onFocus={() => focusChat(chat.request.id)}
+        />
+      ))}
+    </>
+  );
+}
   
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
