@@ -17,6 +17,8 @@ interface ServiceRequest {
   updated_at: string;
   order_id: string | null;
   cancellation_reason: string | null;
+  user_id: string;
+  agency_payout_id: string | null;
   media_sites: { name: string; favicon: string | null; price: number };
   profiles: { email: string; username: string | null };
   agency_payouts: { agency_name: string } | null;
