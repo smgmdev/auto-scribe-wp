@@ -688,18 +688,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                    onMouseDown={(e) => e.stopPropagation()}
                   >
                     Action
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 z-[200]">
+                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   {globalChatType === 'agency-request' && (
                     <DropdownMenuItem 
                       className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
