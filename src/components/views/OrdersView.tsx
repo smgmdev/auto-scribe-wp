@@ -205,10 +205,17 @@ export function OrdersView() {
     }
   };
 
-  const getDeliveryBadge = (status: string) => {
+  const getDeliveryBadge = (status: string, deliveryDeadline?: string | null) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+        if (deliveryDeadline) {
+          const { text, isOverdue } = formatTimeRemaining(deliveryDeadline);
+          if (isOverdue) {
+            return <Badge variant="destructive"><Clock className="h-3 w-3 mr-1" />Overdue</Badge>;
+          }
+          return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery: {text}</Badge>;
+        }
+        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery</Badge>;
       case 'delivered':
         return <Badge variant="secondary" className="bg-purple-600/20 text-purple-600"><Truck className="h-3 w-3 mr-1" />Delivered</Badge>;
       case 'accepted':
@@ -293,7 +300,7 @@ export function OrdersView() {
             ) : (
               <>
                 {getStatusBadge(order.status)}
-                {getDeliveryBadge(order.delivery_status)}
+                {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
               </>
             )}
           </div>
@@ -482,7 +489,7 @@ export function OrdersView() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Status</p>
-                  <div className="mt-1">{getDeliveryBadge(selectedOrder.delivery_status)}</div>
+                  <div className="mt-1">{getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.delivery_deadline)}</div>
                 </div>
               </div>
 
