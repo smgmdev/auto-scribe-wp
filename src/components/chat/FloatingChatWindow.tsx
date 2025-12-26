@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -1464,7 +1464,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
                 {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
                 {orderDetails.accepted_at && <p>Accepted: {new Date(orderDetails.accepted_at).toLocaleString()}</p>}
-                <p>Order ID: {orderDetails.id.slice(0, 8)}...</p>
+                <p className="flex items-center gap-1">
+                  Order ID: {orderDetails.id.slice(0, 8)}...
+                  <Copy 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(orderDetails.id);
+                      toast({ title: "Copied", description: "Order ID copied to clipboard" });
+                    }}
+                  />
+                </p>
               </div>
             </div>
           ) : (
