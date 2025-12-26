@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy, XCircle, Search, ChevronDown } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -447,43 +447,43 @@ export function AdminOrdersView() {
                         </p>
                       </div>
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         {getStatusBadge(order.status)}
                         {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
-                      </div>
-
-                      {order.status === 'paid' && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Badge variant="outline" className="cursor-pointer hover:bg-muted gap-1">
-                              Action
-                              <ChevronDown className="h-3 w-3" />
-                            </Badge>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenuItem 
-                              onClick={() => handleInvestigate(order)}
-                              className="hover:bg-foreground hover:text-background cursor-pointer"
-                            >
-                              Investigate
-                            </DropdownMenuItem>
-                            {order.delivery_status === 'pending' && (
+                        
+                        {order.status === 'paid' && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+                              <Badge variant="outline" className="cursor-pointer hover:bg-muted gap-1">
+                                Action
+                                <ChevronDown className="h-3 w-3" />
+                              </Badge>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                               <DropdownMenuItem 
-                                onClick={() => openDeliveryDialog(order)}
+                                onClick={() => handleInvestigate(order)}
                                 className="hover:bg-foreground hover:text-background cursor-pointer"
                               >
-                                Mark Delivered
+                                Investigate
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem 
-                              onClick={() => handleCardCancelOrder(order)}
-                              className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer"
-                            >
-                              Cancel Order
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
+                              {order.delivery_status === 'pending' && (
+                                <DropdownMenuItem 
+                                  onClick={() => openDeliveryDialog(order)}
+                                  className="hover:bg-foreground hover:text-background cursor-pointer"
+                                >
+                                  Mark Delivered
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem 
+                                onClick={() => handleCardCancelOrder(order)}
+                                className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer"
+                              >
+                                Cancel Order
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
 
                       {order.delivery_url && (
                         <Button 
@@ -498,7 +498,7 @@ export function AdminOrdersView() {
                         </Button>
                       )}
 
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <Eye className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </CardContent>
                 </Card>
