@@ -906,6 +906,31 @@ export function ChatListPanel() {
     };
   }, [agencyPayoutId, handleBroadcastNotification]);
 
+  // Real-time subscription for admin investigations (admin only)
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const investigationsChannel = supabase
+      .channel('admin-investigations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'admin_investigations'
+        },
+        () => {
+          // Refresh investigations list when any change occurs
+          fetchInvestigations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(investigationsChannel);
+    };
+  }, [user?.id, isAdmin]);
+
   const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
     clearUnreadMessageCount(item.id);
     
