@@ -260,6 +260,7 @@ export type Database = {
           id: string
           invite_sent_at: string | null
           last_login_at: string | null
+          last_online_at: string | null
           onboarding_complete: boolean
           password_hash: string | null
           payout_method: string | null
@@ -276,6 +277,7 @@ export type Database = {
           id?: string
           invite_sent_at?: string | null
           last_login_at?: string | null
+          last_online_at?: string | null
           onboarding_complete?: boolean
           password_hash?: string | null
           payout_method?: string | null
@@ -292,6 +294,7 @@ export type Database = {
           id?: string
           invite_sent_at?: string | null
           last_login_at?: string | null
+          last_online_at?: string | null
           onboarding_complete?: boolean
           password_hash?: string | null
           payout_method?: string | null
@@ -747,6 +750,7 @@ export type Database = {
           email: string | null
           email_verified: boolean
           id: string
+          last_online_at: string | null
           pin_enabled: boolean
           pin_hash: string | null
           pin_salt: string | null
@@ -761,6 +765,7 @@ export type Database = {
           email?: string | null
           email_verified?: boolean
           id: string
+          last_online_at?: string | null
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
@@ -775,6 +780,7 @@ export type Database = {
           email?: string | null
           email_verified?: boolean
           id?: string
+          last_online_at?: string | null
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null

@@ -747,6 +747,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Presence tracking
   useEffect(() => {
     if (globalChatRequest && senderId) {
+      // For agency type, senderId IS the agencyPayoutId
+      const agencyPayoutId = globalChatType === 'agency-request' ? senderId : undefined;
+      
       const tracker = new ChatPresenceTracker(
         globalChatRequest.id,
         senderId,
@@ -754,7 +757,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         (onlineUsers) => {
           const hasOtherUser = onlineUsers.some(id => id !== senderId);
           setIsCounterpartyOnline(hasOtherUser);
-        }
+        },
+        agencyPayoutId
       );
       
       tracker.join();
@@ -766,7 +770,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         setIsCounterpartyOnline(false);
       };
     }
-  }, [globalChatRequest?.id, senderId, senderType]);
+  }, [globalChatRequest?.id, senderId, senderType, globalChatType]);
 
   // Typing indicator with presence
   useEffect(() => {
