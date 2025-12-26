@@ -982,13 +982,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </DropdownMenuItem>
                   )}
                   {globalChatType === 'my-request' && (
-                    <DropdownMenuItem 
-                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      disabled={hasOrder || isCancelled}
-                      onClick={() => setOrderWithCreditsOpen(true)}
-                    >
-                      Order Now
-                    </DropdownMenuItem>
+                    hasOrder ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        disabled={isCancelled}
+                        onClick={() => {
+                          // TODO: Implement Open Dispute functionality
+                          toast({
+                            title: "Coming Soon",
+                            description: "Dispute functionality will be available soon.",
+                          });
+                        }}
+                      >
+                        Open Dispute
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem 
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        disabled={isCancelled}
+                        onClick={() => setOrderWithCreditsOpen(true)}
+                      >
+                        Order Now
+                      </DropdownMenuItem>
+                    )
                   )}
                   {hasOrder && globalChatRequest.order?.delivery_status === 'pending' ? (
                     <DropdownMenuItem 
