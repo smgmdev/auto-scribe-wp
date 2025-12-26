@@ -1388,10 +1388,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .eq('agency_name', agencyName)
         .maybeSingle();
       
+      let logoSignedUrl: string | null = null;
+      if (appData?.logo_url) {
+        const logoPath = appData.logo_url.replace('agency-documents/', '');
+        const { data: signedData } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(logoPath, 3600);
+        if (signedData?.signedUrl) {
+          logoSignedUrl = signedData.signedUrl;
+        }
+      }
+      
       if (payoutData) {
         setAgencyDetails({
           ...payoutData,
-          logo_url: appData?.logo_url || null
+          logo_url: logoSignedUrl
         });
       } else {
         setAgencyDetails(null);
