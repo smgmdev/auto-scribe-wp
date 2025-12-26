@@ -220,20 +220,23 @@ export function MyRequestsView() {
               }
             }
             
-            // Only sync read status when client_read changes to true (not when agency sets agency_read)
+            // Sync client_read status changes (both directions - read and unread)
             const clientReadChanged = old?.client_read !== updated.client_read;
-            const markedAsRead = clientReadChanged && updated.client_read === true;
+            const statusChanged = old?.status !== updated.status;
             
-            // Update local state - only sync read if marking as read
+            // Update local state with the new read status
             setRequests(prev => {
-              const newRequests = prev.map(r => {
+              let newRequests = prev.map(r => {
                 if (r.id === updated.id) {
-                  const newRead = markedAsRead ? true : r.read;
+                  // Sync client_read to local read state when it changes
+                  const newRead = clientReadChanged ? updated.client_read : r.read;
                   return { ...r, read: newRead, status: updated.status };
                 }
                 return r;
               });
-              // Recalculate unread count (exclude cancelled)
+              
+              // Note: Don't remove cancelled from MyRequestsView - they go to Cancelled tab
+              // But still recalculate unread count excluding cancelled
               const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
               setUserUnreadEngagementsCount(newUnreadCount);
               return newRequests;
