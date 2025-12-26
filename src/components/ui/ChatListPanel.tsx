@@ -99,6 +99,7 @@ export function ChatListPanel() {
         order:orders(id, status, delivery_status)
       `)
       .eq('user_id', user.id)
+      .neq('status', 'cancelled')
       .order('updated_at', { ascending: false });
 
     if (!error && data) {
@@ -160,6 +161,7 @@ export function ChatListPanel() {
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
         order:orders(id, status, delivery_status)
       `)
+      .neq('status', 'cancelled')
       .order('updated_at', { ascending: false });
 
     // Filter by agency for non-admins
