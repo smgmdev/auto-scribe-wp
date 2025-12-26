@@ -280,3 +280,8 @@ button:focus-visible,
 .scrollbar-thin:hover::-webkit-scrollbar-thumb {
   background-color: hsl(220 10% 50%);
 }
+
+/* Disable hover background on toast notifications globally */
+[data-sonner-toast]:hover {
+  background-color: inherit !important;
+}
