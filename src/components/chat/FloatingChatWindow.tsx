@@ -234,6 +234,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setJoiningChat(false);
     }
   };
+
+  // Handle admin leaving chat
+  const [leavingChat, setLeavingChat] = useState(false);
+  const handleAdminLeaveChat = async () => {
+    if (!senderId || !globalChatRequest) return;
+    
+    setLeavingChat(true);
+    try {
+      const leaveMessage = '[ADMIN_LEFT]Arcana Mace Staff has left the chat.[/ADMIN_LEFT]';
+      
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: 'admin',
+        sender_id: senderId,
+        message: leaveMessage
+      });
+
+      if (error) throw error;
+
+      // Add to local messages
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: 'admin',
+        sender_id: senderId,
+        message: leaveMessage,
+        created_at: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, newMsg]);
+      setAdminJoined(false);
+      
+      toast({
+        title: "Left Chat",
+        description: "You have left the conversation.",
+      });
+    } catch (error: any) {
+      console.error('Error leaving chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to leave chat.",
+        variant: "destructive"
+      });
+    } finally {
+      setLeavingChat(false);
+    }
+  };
   
   // Check if there's an existing order request in messages (sent by agency)
   const existingOrderMessage = messages.find(msg => {
@@ -1581,6 +1627,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   );
                 }
                 
+                // Check for admin left message - render as independent centered text
+                const adminLeftMatch = msg.message.match(/\[ADMIN_LEFT\](.*?)\[\/ADMIN_LEFT\]/);
+                if (adminLeftMatch) {
+                  return (
+                    <p key={msg.id} className="text-xs text-muted-foreground text-center py-2">
+                      {adminLeftMatch[1]}
+                    </p>
+                  );
+                }
+                
                 return (
                   <div
                     key={msg.id}
@@ -1745,6 +1801,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   >
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
+                  {isAdmin && adminJoined && (
+                    <button
+                      onClick={handleAdminLeaveChat}
+                      disabled={leavingChat}
+                      className="text-muted-foreground hover:text-destructive text-xs px-3 flex items-center gap-1 disabled:opacity-50"
+                    >
+                      {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                      Leave
+                    </button>
+                  )}
                 </div>
               </>
             )}
