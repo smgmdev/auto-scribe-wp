@@ -562,10 +562,6 @@ export function AgencyRequestsView() {
                             )}
                           </div>
                           <CardTitle className="text-base text-muted-foreground">{request.media_site?.name || request.title}</CardTitle>
-                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Cancelled
-                          </Badge>
                         </div>
                         <div className="flex items-center gap-3 text-sm text-muted-foreground">
                           {request.media_site?.price !== undefined && (
