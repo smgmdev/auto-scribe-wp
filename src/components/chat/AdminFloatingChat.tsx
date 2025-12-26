@@ -242,10 +242,20 @@ export function AdminFloatingChat({
   }, [request.id, user?.id]);
 
   // Scroll to bottom when messages change
+  const initialScrollDoneRef = useRef(false);
+  
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (!scrollRef.current || messages.length === 0) return;
+    
+    // Use longer delay for initial scroll to ensure content is rendered
+    const delay = initialScrollDoneRef.current ? 50 : 200;
+    
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+      initialScrollDoneRef.current = true;
+    }, delay);
   }, [messages]);
 
   // Real-time message subscription
