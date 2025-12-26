@@ -44,7 +44,10 @@ export function AdminEngagementsView() {
   const [sending, setSending] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
   const [joiningChat, setJoiningChat] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<{ type: string; user_id: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     fetchRequests();
@@ -80,11 +83,31 @@ export function AdminEngagementsView() {
         )
         .subscribe();
 
+      // Subscribe to presence for typing indicators
+      const presenceChannel = supabase.channel(`typing-${selectedRequest.id}`)
+        .on('presence', { event: 'sync' }, () => {
+          const state = presenceChannel.presenceState();
+          const typing: { type: string; user_id: string }[] = [];
+          Object.values(state).forEach((presences: any) => {
+            presences.forEach((p: any) => {
+              if (p.is_typing && p.user_id !== user?.id) {
+                typing.push({ type: p.user_type, user_id: p.user_id });
+              }
+            });
+          });
+          setTypingUsers(typing);
+        })
+        .subscribe();
+
+      presenceChannelRef.current = presenceChannel;
+
       return () => {
         supabase.removeChannel(channel);
+        supabase.removeChannel(presenceChannel);
+        presenceChannelRef.current = null;
       };
     }
-  }, [selectedRequest?.id]);
+  }, [selectedRequest?.id, user?.id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -95,6 +118,33 @@ export function AdminEngagementsView() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
+
+  const sendTypingIndicator = (isTyping: boolean) => {
+    if (!presenceChannelRef.current || !user || !hasJoined) return;
+    presenceChannelRef.current.track({
+      user_id: user.id,
+      user_type: 'admin',
+      is_typing: isTyping
+    });
+  };
+
+  const handleInputChange = (value: string) => {
+    setNewMessage(value);
+    
+    if (value.trim()) {
+      sendTypingIndicator(true);
+      
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      typingTimeoutRef.current = setTimeout(() => {
+        sendTypingIndicator(false);
+      }, 2000);
+    } else {
+      sendTypingIndicator(false);
+    }
+  };
+
 
   const fetchRequests = async () => {
     try {
@@ -366,6 +416,20 @@ export function AdminEngagementsView() {
                   </div>
                 </div>
               ))}
+              
+              {/* Typing indicators */}
+              {typingUsers.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                  <span>
+                    {typingUsers.map(u => u.type).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+                  </span>
+                </div>
+              )}
             </div>
           </ScrollArea>
 
@@ -375,11 +439,16 @@ export function AdminEngagementsView() {
                 <Input
                   placeholder="Type a message..."
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      sendTypingIndicator(false);
+                      handleSendMessage();
+                    }
+                  }}
                   disabled={sending}
                 />
-                <Button onClick={handleSendMessage} disabled={sending || !newMessage.trim()}>
+                <Button onClick={() => { sendTypingIndicator(false); handleSendMessage(); }} disabled={sending || !newMessage.trim()}>
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </div>
