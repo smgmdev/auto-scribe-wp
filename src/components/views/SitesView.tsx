@@ -1180,7 +1180,8 @@ export function SitesView() {
                 </a>
                 <Button
                   size="sm"
-                  className="h-7 px-3 text-xs group/btn"
+                  variant="outline"
+                  className="h-7 px-3 text-xs group/btn border-[rgba(34,197,94,0.3)] text-[rgb(34,197,94)] bg-[rgba(34,197,94,0.08)] hover:bg-[rgba(34,197,94,0.15)] hover:border-[rgba(34,197,94,0.5)]"
                   onClick={() => {
                     useAppStore.getState().setPreselectedSiteId(site.id);
                     useAppStore.getState().setCurrentView('compose');
