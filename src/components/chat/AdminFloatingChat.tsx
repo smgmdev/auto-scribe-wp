@@ -133,7 +133,7 @@ export function AdminFloatingChat({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -245,15 +245,13 @@ export function AdminFloatingChat({
   const initialScrollDoneRef = useRef(false);
   
   useEffect(() => {
-    if (!scrollRef.current || messages.length === 0) return;
+    if (messages.length === 0) return;
     
     // Use longer delay for initial scroll to ensure content is rendered
     const delay = initialScrollDoneRef.current ? 50 : 200;
     
     setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       initialScrollDoneRef.current = true;
     }, delay);
   }, [messages]);
@@ -1164,7 +1162,7 @@ export function AdminFloatingChat({
 
         {/* Messages */}
         <ScrollArea className="flex-1">
-          <div className="space-y-2 p-3" ref={scrollRef}>
+          <div className="space-y-2 p-3">
             {messages.map((m) => {
               // Check for admin joined message
               const adminJoinedMatch = m.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
@@ -1268,6 +1266,9 @@ export function AdminFloatingChat({
             {messages.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
             )}
+            
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 
