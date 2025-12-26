@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy, XCircle } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy, XCircle, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDistanceToNow, format, differenceInHours, differenceInDays } from 'date-fns';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
+import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
 interface Order {
   id: string;
@@ -47,6 +48,7 @@ interface Order {
 
 export function AdminOrdersView() {
   const { isAdmin } = useAuth();
+  const { openGlobalChat } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -56,6 +58,7 @@ export function AdminOrdersView() {
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [investigating, setInvestigating] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const { toast } = useToast();
 
@@ -181,6 +184,84 @@ export function AdminOrdersView() {
       });
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleInvestigate = async () => {
+    if (!selectedOrder) return;
+    
+    setInvestigating(true);
+    try {
+      // Fetch the service request associated with this order
+      const { data: serviceRequest, error } = await supabase
+        .from('service_requests')
+        .select(`
+          *,
+          media_sites (
+            id, name, favicon, price, publication_format, link, category, subcategory, about, agency
+          )
+        `)
+        .eq('order_id', selectedOrder.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!serviceRequest) {
+        toast({
+          variant: 'destructive',
+          title: "No Chat Found",
+          description: "No engagement chat is associated with this order.",
+        });
+        return;
+      }
+
+      // Build the GlobalChatRequest object
+      const chatRequest: GlobalChatRequest = {
+        id: serviceRequest.id,
+        title: serviceRequest.title,
+        description: serviceRequest.description,
+        status: serviceRequest.status,
+        read: serviceRequest.read,
+        created_at: serviceRequest.created_at,
+        updated_at: serviceRequest.updated_at,
+        cancellation_reason: serviceRequest.cancellation_reason,
+        media_site: serviceRequest.media_sites ? {
+          id: serviceRequest.media_sites.id,
+          name: serviceRequest.media_sites.name,
+          favicon: serviceRequest.media_sites.favicon,
+          price: serviceRequest.media_sites.price,
+          publication_format: serviceRequest.media_sites.publication_format,
+          link: serviceRequest.media_sites.link,
+          category: serviceRequest.media_sites.category,
+          subcategory: serviceRequest.media_sites.subcategory,
+          about: serviceRequest.media_sites.about,
+          agency: serviceRequest.media_sites.agency,
+        } : null,
+        order: selectedOrder ? {
+          id: selectedOrder.id,
+          status: selectedOrder.status,
+          delivery_status: selectedOrder.delivery_status,
+          delivery_deadline: selectedOrder.delivery_deadline,
+        } : null,
+      };
+
+      // Open the chat as admin viewing agency requests
+      openGlobalChat(chatRequest, 'agency-request');
+      setDetailsDialogOpen(false);
+      
+      toast({
+        title: "Chat Opened",
+        description: "Viewing the engagement chat for this order.",
+      });
+    } catch (error: any) {
+      console.error('Error investigating order:', error);
+      toast({
+        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to open chat.",
+      });
+    } finally {
+      setInvestigating(false);
     }
   };
 
@@ -550,30 +631,46 @@ export function AdminOrdersView() {
               )}
 
               {/* Action buttons */}
-              {selectedOrder.status === 'paid' && (
-                <div className="border-t pt-4 space-y-2">
-                  {selectedOrder.delivery_status === 'pending' && (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => {
-                        setDetailsDialogOpen(false);
-                        openDeliveryDialog(selectedOrder);
-                      }}
-                    >
-                      <Send className="h-4 w-4 mr-2" />
-                      Mark Delivered
-                    </Button>
+              <div className="border-t pt-4 space-y-2">
+                <Button 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={handleInvestigate}
+                  disabled={investigating}
+                >
+                  {investigating ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4 mr-2" />
                   )}
-                  <Button 
-                    variant="destructive"
-                    className="w-full" 
-                    onClick={() => setCancelDialogOpen(true)}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Cancel Order
-                  </Button>
-                </div>
-              )}
+                  Investigate
+                </Button>
+                
+                {selectedOrder.status === 'paid' && (
+                  <>
+                    {selectedOrder.delivery_status === 'pending' && (
+                      <Button 
+                        className="w-full" 
+                        onClick={() => {
+                          setDetailsDialogOpen(false);
+                          openDeliveryDialog(selectedOrder);
+                        }}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Mark Delivered
+                      </Button>
+                    )}
+                    <Button 
+                      variant="destructive"
+                      className="w-full" 
+                      onClick={() => setCancelDialogOpen(true)}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Cancel Order
+                    </Button>
+                  </>
+                )}
+              </div>
 
               <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
                 {selectedOrder.paid_at && <p>Paid: {new Date(selectedOrder.paid_at).toLocaleString()}</p>}
