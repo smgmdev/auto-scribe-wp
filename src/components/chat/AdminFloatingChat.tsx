@@ -879,7 +879,7 @@ export function AdminFloatingChat({
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                <DropdownMenuContent align="end" className="w-40 bg-popover border shadow-lg" style={{ zIndex: 99999 }}>
                   {!hasJoined && !isCancelled && (
                     <DropdownMenuItem 
                       className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
@@ -904,6 +904,20 @@ export function AdminFloatingChat({
                       onClick={fetchOrderDetails}
                     >
                       View Order
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem 
+                    className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                    onClick={() => fetchClientDetails()}
+                  >
+                    View Client
+                  </DropdownMenuItem>
+                  {request.media_sites?.agency && (
+                    <DropdownMenuItem 
+                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      onClick={() => fetchAgencyDetails(request.media_sites!.agency!)}
+                    >
+                      View Agency
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -1057,7 +1071,7 @@ export function AdminFloatingChat({
                   } ${highlightedMessageId === m.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}>
                     {/* Message Actions Dropdown */}
                     {!isSpecialMessage && !isAdmin && (
-                      <DropdownMenu>
+                      <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
@@ -1071,20 +1085,25 @@ export function AdminFloatingChat({
                             <ChevronDown className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-popover z-[9999]">
+                        <DropdownMenuContent 
+                          align="end" 
+                          className="bg-popover border shadow-lg"
+                          style={{ zIndex: 99999 }}
+                          sideOffset={5}
+                        >
                           <DropdownMenuItem 
                             onClick={() => {
                               setReplyToMessage(m);
                               setTimeout(() => inputRef.current?.focus(), 0);
                             }}
-                            className="cursor-pointer"
+                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                           >
                             <Reply className="h-4 w-4 mr-2" />
                             Reply
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleUserDetails(m)}
-                            className="cursor-pointer"
+                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                           >
                             <User className="h-4 w-4 mr-2" />
                             {m.sender_type === 'client' ? 'Client Details' : 'Agency Details'}
