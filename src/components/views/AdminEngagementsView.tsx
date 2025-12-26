@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,22 +6,40 @@ import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { AdminFloatingChat } from '@/components/chat/AdminFloatingChat';
+import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
 interface ServiceRequest {
   id: string;
   title: string;
   description: string;
   status: string;
+  read: boolean;
   created_at: string;
   updated_at: string;
   order_id: string | null;
   cancellation_reason: string | null;
   user_id: string;
   agency_payout_id: string | null;
-  media_sites: { name: string; favicon: string | null; price: number };
+  media_sites: { 
+    id: string;
+    name: string; 
+    favicon: string | null; 
+    price: number;
+    publication_format: string;
+    link: string;
+    category: string;
+    subcategory: string | null;
+    about: string | null;
+    agency: string | null;
+  };
   profiles: { email: string; username: string | null };
   agency_payouts: { agency_name: string } | null;
+  orders: { 
+    id: string;
+    status: string;
+    delivery_status: string;
+    delivery_deadline: string | null;
+  } | null;
 }
 
 interface ServiceMessage {
@@ -31,19 +49,12 @@ interface ServiceMessage {
   created_at: string;
 }
 
-interface OpenChat {
-  request: ServiceRequest;
-  position: { x: number; y: number };
-  zIndex: number;
-}
-
 export function AdminEngagementsView() {
+  const { openGlobalChat } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
-  const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const [activeTab, setActiveTab] = useState('active');
-  const [nextZIndex, setNextZIndex] = useState(1000);
 
   useEffect(() => {
     fetchRequests();
@@ -53,7 +64,12 @@ export function AdminEngagementsView() {
     try {
       const { data, error } = await supabase
         .from('service_requests')
-        .select(`*, media_sites (name, favicon, price), agency_payouts (agency_name)`)
+        .select(`
+          *,
+          media_sites (id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
+          agency_payouts (agency_name),
+          orders (id, status, delivery_status, delivery_deadline)
+        `)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -90,45 +106,39 @@ export function AdminEngagementsView() {
     }
   };
 
-  const handleMessagesUpdate = useCallback((requestId: string, updatedMessages: ServiceMessage[]) => {
-    setMessages(prev => ({
-      ...prev,
-      [requestId]: updatedMessages
-    }));
-  }, []);
-
-  const openChat = (request: ServiceRequest) => {
-    // Check if already open
-    const existingIndex = openChats.findIndex(c => c.request.id === request.id);
-    if (existingIndex !== -1) {
-      // Bring to front
-      bringToFront(request.id);
-      return;
-    }
-    
-    // Calculate offset position for stacking effect
-    const offset = openChats.length * 30;
-    const newChat: OpenChat = {
-      request,
-      position: { x: offset, y: offset },
-      zIndex: nextZIndex
+  const handleOpenChat = (request: ServiceRequest) => {
+    // Build the GlobalChatRequest object to use the global chat system
+    const chatRequest: GlobalChatRequest = {
+      id: request.id,
+      title: request.title,
+      description: request.description,
+      status: request.status,
+      read: request.read,
+      created_at: request.created_at,
+      updated_at: request.updated_at,
+      cancellation_reason: request.cancellation_reason,
+      media_site: request.media_sites ? {
+        id: request.media_sites.id,
+        name: request.media_sites.name,
+        favicon: request.media_sites.favicon,
+        price: request.media_sites.price,
+        publication_format: request.media_sites.publication_format,
+        link: request.media_sites.link,
+        category: request.media_sites.category,
+        subcategory: request.media_sites.subcategory,
+        about: request.media_sites.about,
+        agency: request.media_sites.agency,
+      } : null,
+      order: request.orders ? {
+        id: request.orders.id,
+        status: request.orders.status,
+        delivery_status: request.orders.delivery_status,
+        delivery_deadline: request.orders.delivery_deadline,
+      } : null,
     };
-    
-    setOpenChats(prev => [...prev, newChat]);
-    setNextZIndex(prev => prev + 1);
-  };
 
-  const closeChat = (requestId: string) => {
-    setOpenChats(prev => prev.filter(c => c.request.id !== requestId));
-  };
-
-  const bringToFront = (requestId: string) => {
-    setOpenChats(prev => prev.map(chat => 
-      chat.request.id === requestId 
-        ? { ...chat, zIndex: nextZIndex }
-        : chat
-    ));
-    setNextZIndex(prev => prev + 1);
+    // Open as admin viewing agency requests (same as Investigate in Order Management)
+    openGlobalChat(chatRequest, 'agency-request');
   };
 
   const getStatusBadge = (status: string) => {
@@ -177,7 +187,7 @@ export function AdminEngagementsView() {
           ) : (
             <div className="grid gap-4">
               {activeRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openChat(r)}>
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleOpenChat(r)}>
                   <CardContent className="p-4 flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
@@ -210,7 +220,7 @@ export function AdminEngagementsView() {
           ) : (
             <div className="grid gap-4">
               {cancelledRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors border-destructive/20" onClick={() => openChat(r)}>
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors border-destructive/20" onClick={() => handleOpenChat(r)}>
                   <CardContent className="p-4 flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
@@ -236,19 +246,6 @@ export function AdminEngagementsView() {
           )}
         </TabsContent>
       </Tabs>
-
-      {/* Multiple Floating Chat Windows */}
-      {openChats.map((chat) => (
-        <AdminFloatingChat
-          key={chat.request.id}
-          request={chat.request}
-          messages={messages[chat.request.id] || []}
-          onClose={() => closeChat(chat.request.id)}
-          onMessagesUpdate={handleMessagesUpdate}
-          position={chat.position}
-          zIndex={chat.zIndex}
-        />
-      ))}
     </div>
   );
 }
