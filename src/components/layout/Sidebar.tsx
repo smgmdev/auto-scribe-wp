@@ -470,7 +470,8 @@ export function Sidebar({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-4 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
+          <nav className="flex-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
+            <div className="space-y-1 px-4">
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
@@ -603,6 +604,7 @@ export function Sidebar({
                 </Button>
               );
             })}
+            </div>
           </nav>
 
           {/* Agency Status & Account */}
