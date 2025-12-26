@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search, ChevronDown, X } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -519,7 +519,16 @@ export function OrdersView() {
                 {selectedOrder.paid_at && <p>Paid: {new Date(selectedOrder.paid_at).toLocaleString()}</p>}
                 {selectedOrder.delivered_at && <p>Delivered: {new Date(selectedOrder.delivered_at).toLocaleString()}</p>}
                 {selectedOrder.accepted_at && <p>Accepted: {new Date(selectedOrder.accepted_at).toLocaleString()}</p>}
-                <p>Order ID: {selectedOrder.id.slice(0, 8)}...</p>
+                <p className="flex items-center gap-1">
+                  Order ID: {selectedOrder.id.slice(0, 8)}...
+                  <Copy 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedOrder.id);
+                      toast({ title: "Copied", description: "Order ID copied to clipboard" });
+                    }}
+                  />
+                </p>
               </div>
             </div>
           )}
