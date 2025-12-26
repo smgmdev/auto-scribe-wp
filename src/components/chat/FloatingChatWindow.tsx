@@ -2038,7 +2038,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <ChevronDown className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-popover z-[200]">
+                        <DropdownMenuContent align="end" className="bg-popover border shadow-lg z-[99999]">
                           <DropdownMenuItem onClick={() => {
                             setReplyToMessage(msg);
                             setTimeout(() => inputRef.current?.focus(), 0);
