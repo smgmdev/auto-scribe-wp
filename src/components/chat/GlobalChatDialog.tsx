@@ -78,6 +78,20 @@ export function GlobalChatDialog() {
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
+  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const [orderDetails, setOrderDetails] = useState<{
+    id: string;
+    amount_cents: number;
+    status: string;
+    delivery_status: string;
+    delivery_url: string | null;
+    delivery_notes: string | null;
+    created_at: string;
+    paid_at: string | null;
+    delivered_at: string | null;
+    accepted_at: string | null;
+  } | null>(null);
+  const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   
   // Drag state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -1454,9 +1468,17 @@ export function GlobalChatDialog() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => {
-                      closeGlobalChat();
-                      useAppStore.getState().setCurrentView('orders');
+                    onClick={async () => {
+                      if (!globalChatRequest.order) return;
+                      setLoadingOrderDetails(true);
+                      setOrderDetailsOpen(true);
+                      const { data } = await supabase
+                        .from('orders')
+                        .select('id, amount_cents, status, delivery_status, delivery_url, delivery_notes, created_at, paid_at, delivered_at, accepted_at')
+                        .eq('id', globalChatRequest.order.id)
+                        .maybeSingle();
+                      setOrderDetails(data);
+                      setLoadingOrderDetails(false);
                     }}
                     className="text-xs text-primary hover:underline flex items-center gap-1"
                   >
@@ -1979,6 +2001,107 @@ export function GlobalChatDialog() {
           updateGlobalChatRequest({ order: { id: 'temp' } as any });
         }}
       />
+
+      {/* Order Details Dialog */}
+      <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+          </DialogHeader>
+          {loadingOrderDetails ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : orderDetails ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                {globalChatRequest?.media_site?.favicon ? (
+                  <img 
+                    src={globalChatRequest.media_site.favicon} 
+                    alt="" 
+                    className="w-12 h-12 rounded object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                    <ShoppingCart className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold">{globalChatRequest?.media_site?.name}</h3>
+                  {globalChatRequest?.media_site?.agency && (
+                    <p className="text-sm text-muted-foreground">via {globalChatRequest.media_site.agency}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Payment Status</p>
+                  <Badge variant="secondary" className="mt-1 bg-blue-600/20 text-blue-600">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Paid
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Delivery Status</p>
+                  <Badge 
+                    variant="secondary" 
+                    className={`mt-1 ${
+                      orderDetails.delivery_status === 'accepted' 
+                        ? 'bg-green-600 text-white' 
+                        : orderDetails.delivery_status === 'delivered'
+                        ? 'bg-purple-600/20 text-purple-600'
+                        : 'bg-yellow-600/20 text-yellow-600'
+                    }`}
+                  >
+                    {orderDetails.delivery_status === 'accepted' && 'Accepted'}
+                    {orderDetails.delivery_status === 'delivered' && 'Delivered'}
+                    {orderDetails.delivery_status === 'pending' && 'Pending'}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Amount Paid</span>
+                  <span className="font-semibold">${(orderDetails.amount_cents / 100).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {orderDetails.delivery_url && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
+                  <a 
+                    href={orderDetails.delivery_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline flex items-center gap-1"
+                  >
+                    {orderDetails.delivery_url}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
+
+              {orderDetails.delivery_notes && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Delivery Notes</p>
+                  <p className="text-sm">{orderDetails.delivery_notes}</p>
+                </div>
+              )}
+
+              <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
+                <p>Created: {new Date(orderDetails.created_at).toLocaleString()}</p>
+                {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
+                {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
+                {orderDetails.accepted_at && <p>Accepted: {new Date(orderDetails.accepted_at).toLocaleString()}</p>}
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Order not found</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
