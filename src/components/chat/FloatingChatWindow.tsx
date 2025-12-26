@@ -79,8 +79,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [imagePreview, setImagePreview] = useState<{ url: string; name: string } | null>(null);
   const [fileWebView, setFileWebView] = useState<{ url: string; name: string } | null>(null);
   const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
-  const [cancelOrderMessageId, setCancelOrderMessageId] = useState<string | null>(null);
   const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [cancelOrderReason, setCancelOrderReason] = useState('');
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
@@ -247,6 +247,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       });
     } finally {
       setRemoving(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!globalChatRequest?.order) return;
+    
+    setCancellingOrder(true);
+    try {
+      // Update order status to cancelled
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ 
+          status: 'cancelled',
+          delivery_status: 'cancelled'
+        })
+        .eq('id', globalChatRequest.order.id);
+      
+      if (orderError) throw orderError;
+      
+      // Clear the order_id from service_request
+      const { error: requestError } = await supabase
+        .from('service_requests')
+        .update({ order_id: null })
+        .eq('id', globalChatRequest.id);
+      
+      if (requestError) throw requestError;
+      
+      // Update local state
+      updateGlobalChatRequest({ order: null }, globalChatRequest.id);
+      
+      toast({
+        title: "Order Cancelled",
+        description: "The order has been cancelled.",
+      });
+      
+      setCancelOrderDialogOpen(false);
+      setCancelOrderReason('');
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel order. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setCancellingOrder(false);
     }
   };
 
@@ -944,6 +990,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       Order Now
                     </DropdownMenuItem>
                   )}
+                  {hasOrder && globalChatRequest.order?.delivery_status === 'pending' && (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      onClick={() => setCancelOrderDialogOpen(true)}
+                    >
+                      Cancel Order
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem 
                     className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                     disabled={hasOrder || isCancelled}
@@ -1235,6 +1289,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             >
               {removing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel Order Dialog */}
+      <AlertDialog open={cancelOrderDialogOpen} onOpenChange={setCancelOrderDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Order</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelOrder}
+              disabled={cancellingOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancellingOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancel Order
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
