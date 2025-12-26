@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, ChevronRight, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send } from 'lucide-react';
 
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
@@ -1180,14 +1180,14 @@ export function SitesView() {
                 </a>
                 <Button
                   size="sm"
-                  className="h-7 px-3 text-xs"
+                  className="h-7 px-3 text-xs group/btn"
                   onClick={() => {
                     useAppStore.getState().setPreselectedSiteId(site.id);
                     useAppStore.getState().setCurrentView('compose');
                   }}
                 >
-                  <Send className="h-3 w-3 mr-1.5" />
-                  Publish Now
+                  Publish New Article
+                  <ChevronRight className="h-3 w-3 ml-1 opacity-0 -translate-x-1 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all duration-200" />
                 </Button>
               </div>
             </div>
