@@ -977,51 +977,9 @@ export function SitesView() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {editingCredits === site.id ? (
-                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={creditInput}
-                    onChange={(e) => setCreditInput(e.target.value)}
-                    className="w-20 h-7 text-xs"
-                  />
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="h-7 px-2"
-                    onClick={() => handleSaveCredits(site.id)}
-                  >
-                    Save
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="h-7 px-2"
-                    onClick={() => setEditingCredits(null)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {siteCredits[site.id] || 1} USD
-                  {isAdmin && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-4 w-4 p-0 ml-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingCredits(site.id);
-                        setCreditInput((siteCredits[site.id] || 1).toString());
-                      }}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                  )}
-                </Badge>
-              )}
+              <Badge variant="secondary">
+                {siteCredits[site.id] || 1} USD
+              </Badge>
 
               {/* Agency info */}
               {site.agency && (
