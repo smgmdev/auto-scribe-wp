@@ -613,9 +613,7 @@ export function MyRequestsView() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {getStatusBadge(request.status)}
-                          </div>
+                          {/* No status badge in cancelled tab - redundant */}
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
