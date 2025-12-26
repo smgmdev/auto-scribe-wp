@@ -1155,7 +1155,7 @@ export function ChatListPanel() {
       case 'delivery':
         return <Truck className="h-3 w-3 shrink-0 text-purple-500" />;
       case 'status':
-        return <Bell className="h-3 w-3 shrink-0 text-amber-500" />;
+        return <Bell className="h-3 w-3 shrink-0 text-muted-foreground" />;
       default:
         return null;
     }
