@@ -1801,14 +1801,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       {hasExistingOrderRequest ? 'Resend Order' : 'Send Order'}
                     </DropdownMenuItem>
                   )}
-                  {globalChatType === 'my-request' && (
+                  {hasOpenDispute && (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-muted-foreground"
+                      disabled
+                    >
+                      Dispute Opened
+                    </DropdownMenuItem>
+                  )}
+                  {globalChatType === 'my-request' && !hasOpenDispute && (
                     hasOrder ? (
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        disabled={isCancelled || !isDeliveryOverdue || hasOpenDispute}
+                        disabled={isCancelled || !isDeliveryOverdue}
                         onClick={() => setDisputeDialogOpen(true)}
                       >
-                        {hasOpenDispute ? 'Dispute Open' : 'Open Dispute'}
+                        Open Dispute
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem 
@@ -2370,13 +2378,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
-                  <DropdownMenuItem 
-                    className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    disabled={!isDeliveryOverdue || hasOpenDispute}
-                    onClick={() => setDisputeDialogOpen(true)}
-                  >
-                    {hasOpenDispute ? 'Dispute Open' : 'Open Dispute'}
-                  </DropdownMenuItem>
+                  {hasOpenDispute ? (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-muted-foreground"
+                      disabled
+                    >
+                      Dispute Opened
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem 
+                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      disabled={!isDeliveryOverdue}
+                      onClick={() => setDisputeDialogOpen(true)}
+                    >
+                      Open Dispute
+                    </DropdownMenuItem>
+                  )}
                   {hasSentPendingCancelRequest ? (
                     <DropdownMenuItem 
                       className="cursor-pointer text-muted-foreground"
