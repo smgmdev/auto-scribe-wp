@@ -804,13 +804,19 @@ export function ChatListPanel() {
 
   // Format preview message - make it user-friendly by cleaning up technical content
   // Returns { text, type } where type can be used for icon display
-  const formatPreviewMessage = (message: string | undefined, description: string, title: string): { text: string; type: 'order' | 'payment' | 'delivery' | 'status' | 'normal' } => {
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'payment' | 'delivery' | 'status' | 'normal' } => {
     if (message) {
       let cleanMessage = message;
       
       // Check for special message types first
       if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
         return { text: 'Order Request', type: 'order' };
+      }
+      if (cleanMessage.startsWith('[ORDER_PLACED]')) {
+        return { text: 'Order Placed', type: 'order_placed' };
+      }
+      if (cleanMessage.startsWith('[ORDER_CANCELLED]')) {
+        return { text: 'Order Cancelled', type: 'order_cancelled' };
       }
       if (cleanMessage.startsWith('[PAYMENT_')) {
         return { text: 'Payment Update', type: 'payment' };
@@ -865,10 +871,14 @@ export function ChatListPanel() {
   };
 
   // Get icon for message type
-  const getMessageTypeIcon = (type: 'order' | 'payment' | 'delivery' | 'status' | 'normal') => {
+  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'payment' | 'delivery' | 'status' | 'normal') => {
     switch (type) {
       case 'order':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
+      case 'order_placed':
+        return <ShoppingCart className="h-3 w-3 shrink-0 text-green-500" />;
+      case 'order_cancelled':
+        return <ShoppingCart className="h-3 w-3 shrink-0 text-red-500" />;
       case 'payment':
         return <CreditCard className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'delivery':
