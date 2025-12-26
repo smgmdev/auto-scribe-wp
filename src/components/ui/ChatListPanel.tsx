@@ -1064,6 +1064,12 @@ export function ChatListPanel() {
       let cleanMessage = message;
       
       // Check for special message types first
+      if (cleanMessage.startsWith('[ADMIN_JOINED]')) {
+        return { text: 'Arcana Mace Staff has entered the chat', type: 'status' };
+      }
+      if (cleanMessage.startsWith('[ADMIN_LEFT]')) {
+        return { text: 'Arcana Mace Staff has left the chat', type: 'status' };
+      }
       if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
         return { text: 'Order Request', type: 'order' };
       }
@@ -1580,17 +1586,11 @@ export function ChatListPanel() {
                               </div>
                             </div>
                             <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                              {(() => {
-                                const msg = investigation.lastMessage || '';
-                                // Clean up system message tags for display
-                                if (msg.startsWith('[ADMIN_JOINED]')) {
-                                  return 'Arcana Mace Staff has entered the chat';
-                                }
-                                if (msg.startsWith('[ADMIN_LEFT]')) {
-                                  return 'Arcana Mace Staff has left the chat';
-                                }
-                                return msg || investigation.service_request?.description || 'No messages yet';
-                              })()}
+                              {formatPreviewMessage(
+                                investigation.lastMessage, 
+                                investigation.service_request?.description || '', 
+                                investigation.service_request?.title || ''
+                              ).text}
                             </p>
                           </div>
                         </div>
