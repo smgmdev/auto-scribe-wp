@@ -129,6 +129,7 @@ export function OrdersView() {
     
     setCancellingOrder(true);
     try {
+      // Cancel the order
       const { error: orderError } = await supabase
         .from('orders')
         .update({ 
@@ -139,15 +140,22 @@ export function OrdersView() {
       
       if (orderError) throw orderError;
       
-      // Clear the order_id from service_request if linked
-      await supabase
+      // Also cancel the linked service_request (engagement)
+      const { error: requestError } = await supabase
         .from('service_requests')
-        .update({ order_id: null })
+        .update({ 
+          status: 'cancelled',
+          cancellation_reason: 'Order was cancelled by user'
+        })
         .eq('order_id', selectedOrder.id);
+      
+      if (requestError) {
+        console.error('Error cancelling linked engagement:', requestError);
+      }
       
       toast({
         title: "Order Cancelled",
-        description: "The order has been cancelled.",
+        description: "The order and linked engagement have been cancelled.",
       });
       
       setCancelOrderDialogOpen(false);
