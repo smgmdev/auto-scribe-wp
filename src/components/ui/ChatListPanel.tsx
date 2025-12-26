@@ -990,9 +990,10 @@ export function ChatListPanel() {
     );
   };
 
-  // Calculate total unread - simply count unread requests
-  const totalUnread = myEngagements.filter(e => !e.read).length + 
-                      serviceRequests.filter(r => !r.read).length;
+  // Calculate total unread - for admins only count disputes, for others count requests
+  const totalUnread = isAdmin 
+    ? disputes.filter(d => !d.read).length
+    : myEngagements.filter(e => !e.read).length + serviceRequests.filter(r => !r.read).length;
 
   // Filter and sort items based on search query and last message time
   const filterAndSortItems = (items: ChatItem[]) => {
