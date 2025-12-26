@@ -18,6 +18,7 @@ interface ServiceRequest {
   description: string;
   status: string;
   read: boolean;
+  cancellation_reason?: string | null;
   created_at: string;
   updated_at: string;
   media_site: {
@@ -94,6 +95,7 @@ export function AgencyRequestsView() {
         description,
         status,
         agency_read,
+        cancellation_reason,
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
