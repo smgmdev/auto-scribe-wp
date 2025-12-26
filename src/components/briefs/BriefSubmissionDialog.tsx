@@ -125,6 +125,25 @@ export function BriefSubmissionDialog({
     setIsSubmitting(true);
 
     try {
+      // Check for existing open engagement with this media site
+      const { data: existingRequest } = await supabase
+        .from('service_requests')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('media_site_id', mediaSite.id)
+        .not('status', 'in', '("cancelled","completed")')
+        .maybeSingle();
+
+      if (existingRequest) {
+        toast({
+          variant: 'destructive',
+          title: 'Engagement already exists',
+          description: 'You already have an open engagement for this media site. Please use the existing chat.',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Find the agency_payout_id based on agency name
       let agencyPayoutId = null;
       if (mediaSite.agency) {
