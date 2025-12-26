@@ -1839,10 +1839,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   >
                     <div
                       className={`relative group max-w-[80%] rounded-lg p-3 transition-all duration-300 ${
-                        isOwnMessage
-                          ? 'bg-primary text-primary-foreground'
-                          : msg.sender_type === 'admin'
+                        msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
+                          : isOwnMessage
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
                       } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                     >
@@ -1871,7 +1871,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <p className="text-xs font-medium mb-1 opacity-70 pr-5">
-                        {isOwnMessage ? 'You' : msg.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}
+                        {msg.sender_type === 'admin' ? 'Arcana Mace Staff' : isOwnMessage ? 'You' : counterpartyLabel}
                       </p>
                       {renderMessageContent(msg, isOwnMessage, quote)}
                     </div>
