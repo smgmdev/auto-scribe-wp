@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight, Copy, XCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDistanceToNow, format, differenceInHours, differenceInDays } from 'date-fns';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
@@ -51,8 +52,10 @@ export function AdminOrdersView() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const { toast } = useToast();
 
@@ -146,6 +149,39 @@ export function AdminOrdersView() {
       delivery_notes: order.delivery_notes || ''
     });
     setDeliveryDialogOpen(true);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!selectedOrder) return;
+    
+    setCancelling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-order', {
+        body: { order_id: selectedOrder.id }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: "Order Cancelled",
+        description: `Order cancelled. ${data.credits_refunded} credits refunded to user.`,
+      });
+      
+      setCancelDialogOpen(false);
+      setDetailsDialogOpen(false);
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (error: any) {
+      console.error('Error cancelling order:', error);
+      toast({
+        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to cancel order.",
+      });
+    } finally {
+      setCancelling(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -514,17 +550,27 @@ export function AdminOrdersView() {
               )}
 
               {/* Action buttons */}
-              {selectedOrder.status === 'paid' && selectedOrder.delivery_status === 'pending' && (
-                <div className="border-t pt-4">
+              {selectedOrder.status === 'paid' && (
+                <div className="border-t pt-4 space-y-2">
+                  {selectedOrder.delivery_status === 'pending' && (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => {
+                        setDetailsDialogOpen(false);
+                        openDeliveryDialog(selectedOrder);
+                      }}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Mark Delivered
+                    </Button>
+                  )}
                   <Button 
+                    variant="destructive"
                     className="w-full" 
-                    onClick={() => {
-                      setDetailsDialogOpen(false);
-                      openDeliveryDialog(selectedOrder);
-                    }}
+                    onClick={() => setCancelDialogOpen(true)}
                   >
-                    <Send className="h-4 w-4 mr-2" />
-                    Mark Delivered
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Cancel Order
                   </Button>
                 </div>
               )}
@@ -548,6 +594,29 @@ export function AdminOrdersView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Order Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order? This will refund {selectedOrder ? Math.round(selectedOrder.amount_cents / 100) : 0} credits to the user's account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Order</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelOrder}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <WebViewDialog
         open={!!webViewUrl}
