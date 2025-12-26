@@ -907,16 +907,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
       
       return (
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'}`}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
-                <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
-              </div>
-              <span className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'text-muted-foreground'}`}>
-                {format(new Date(msg.created_at), 'HH:mm')}
-              </span>
+            <div className="flex items-center gap-2 mb-2">
+              <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
             </div>
             <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderPlaced.media_site_name}
@@ -933,6 +928,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             )}
           </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
         </div>
       );
     }
