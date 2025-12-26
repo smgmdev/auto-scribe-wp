@@ -1175,7 +1175,7 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              {isAgency && (
+              {isAgency && !isAdmin && (
                 <TabsTrigger 
                   value="service-requests" 
                   className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
@@ -1188,17 +1188,19 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              <TabsTrigger 
-                value="my-engagements" 
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
-              >
-                My Engagements
-                {userUnreadEngagementsCount > 0 && (
-                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1">
-                    {userUnreadEngagementsCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
+              {!isAdmin && (
+                <TabsTrigger 
+                  value="my-engagements" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
+                >
+                  My Engagements
+                  {userUnreadEngagementsCount > 0 && (
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1">
+                      {userUnreadEngagementsCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {isAdmin && (
@@ -1295,7 +1297,7 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            {isAgency && (
+            {isAgency && !isAdmin && (
               <TabsContent value="service-requests" className="m-0">
                 <ScrollArea className="h-[300px]">
                   {renderChatList(filteredServiceRequests, 'agency-request')}
@@ -1303,11 +1305,13 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            <TabsContent value="my-engagements" className="m-0">
-              <ScrollArea className="h-[300px]">
-                {renderChatList(filteredEngagements, 'my-request')}
-              </ScrollArea>
-            </TabsContent>
+            {!isAdmin && (
+              <TabsContent value="my-engagements" className="m-0">
+                <ScrollArea className="h-[300px]">
+                  {renderChatList(filteredEngagements, 'my-request')}
+                </ScrollArea>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       )}
