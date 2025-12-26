@@ -956,6 +956,7 @@ export type Database = {
       }
       wordpress_sites: {
         Row: {
+          agency: string | null
           app_password: string
           connected: boolean
           created_at: string
@@ -970,6 +971,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          agency?: string | null
           app_password: string
           connected?: boolean
           created_at?: string
@@ -984,6 +986,7 @@ export type Database = {
           username: string
         }
         Update: {
+          agency?: string | null
           app_password?: string
           connected?: boolean
           created_at?: string
