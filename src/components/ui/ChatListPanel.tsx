@@ -886,9 +886,9 @@ export function ChatListPanel() {
       case 'order_cancelled':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-red-500" />;
       case 'cancel_request':
-        return <XCircle className="h-3 w-3 shrink-0 text-orange-500" />;
+        return <XCircle className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'cancel_accepted':
-        return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
+        return <XCircle className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'payment':
         return <CreditCard className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'delivery':
