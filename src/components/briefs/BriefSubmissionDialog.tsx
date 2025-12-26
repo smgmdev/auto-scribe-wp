@@ -163,27 +163,38 @@ export function BriefSubmissionDialog({
         message: description.trim()
       });
 
-      // Broadcast notification to agency
+      // Broadcast notification to agency (but not if the user owns this agency)
       if (agencyPayoutId) {
-        const notifyChannel = supabase.channel(`notify-${agencyPayoutId}`);
-        notifyChannel.subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await notifyChannel.send({
-              type: 'broadcast',
-              event: 'new-message',
-              payload: {
-                request_id: request.id,
-                sender_type: 'client',
-                sender_id: user.id,
-                message: description.trim(),
-                title: mediaSite.name,
-                media_site_name: mediaSite.name,
-                media_site_favicon: mediaSite.favicon
-              }
-            });
-            setTimeout(() => supabase.removeChannel(notifyChannel), 500);
-          }
-        });
+        // Check if user owns this agency - if so, don't send notification to themselves
+        const { data: userAgency } = await supabase
+          .from('agency_payouts')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('id', agencyPayoutId)
+          .maybeSingle();
+        
+        // Only broadcast if user doesn't own this agency
+        if (!userAgency) {
+          const notifyChannel = supabase.channel(`notify-${agencyPayoutId}`);
+          notifyChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await notifyChannel.send({
+                type: 'broadcast',
+                event: 'new-message',
+                payload: {
+                  request_id: request.id,
+                  sender_type: 'client',
+                  sender_id: user.id,
+                  message: description.trim(),
+                  title: mediaSite.name,
+                  media_site_name: mediaSite.name,
+                  media_site_favicon: mediaSite.favicon
+                }
+              });
+              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+            }
+          });
+        }
       }
 
       toast({

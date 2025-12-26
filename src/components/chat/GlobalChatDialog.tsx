@@ -805,7 +805,10 @@ export function GlobalChatDialog() {
           ? requestData.agency_payout_id // Notify agency
           : requestData.user_id; // Notify client
         
-        if (recipientId) {
+        // Don't broadcast if recipient is the sender (e.g., user messaging their own agency)
+        const isSelfNotification = recipientId === senderId || recipientId === user.id;
+        
+        if (recipientId && !isSelfNotification) {
           console.log('[GlobalChatDialog] Broadcasting notification to:', recipientId);
           const notifyChannel = supabase.channel(`notify-${recipientId}`);
           
@@ -830,6 +833,8 @@ export function GlobalChatDialog() {
               setTimeout(() => supabase.removeChannel(notifyChannel), 500);
             }
           });
+        } else if (isSelfNotification) {
+          console.log('[GlobalChatDialog] Skipping self-notification');
         }
       }
       
@@ -905,30 +910,35 @@ export function GlobalChatDialog() {
         .maybeSingle();
 
       if (requestData?.user_id) {
-        await supabase
-          .from('service_requests')
-          .update({ read: false })
-          .eq('id', globalChatRequest.id);
+        // Don't notify if sender is the recipient (user messaging their own agency)
+        const isSelfNotification = requestData.user_id === senderId || requestData.user_id === user?.id;
+        
+        if (!isSelfNotification) {
+          await supabase
+            .from('service_requests')
+            .update({ read: false })
+            .eq('id', globalChatRequest.id);
 
-        const notifyChannel = supabase.channel(`notify-${requestData.user_id}`);
-        notifyChannel.subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await notifyChannel.send({
-              type: 'broadcast',
-              event: 'new-message',
-              payload: {
-                request_id: globalChatRequest.id,
-                sender_type: senderType,
-                sender_id: senderId,
-                message: 'Sent you an order request',
-                title: globalChatRequest.title,
-                media_site_name: globalChatRequest.media_site?.name || 'Unknown',
-                media_site_favicon: globalChatRequest.media_site?.favicon
-              }
-            });
-            setTimeout(() => supabase.removeChannel(notifyChannel), 500);
-          }
-        });
+          const notifyChannel = supabase.channel(`notify-${requestData.user_id}`);
+          notifyChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await notifyChannel.send({
+                type: 'broadcast',
+                event: 'new-message',
+                payload: {
+                  request_id: globalChatRequest.id,
+                  sender_type: senderType,
+                  sender_id: senderId,
+                  message: 'Sent you an order request',
+                  title: globalChatRequest.title,
+                  media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                  media_site_favicon: globalChatRequest.media_site?.favicon
+                }
+              });
+              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+            }
+          });
+        }
       }
 
       setSendOrderDialogOpen(false);
@@ -1106,7 +1116,10 @@ export function GlobalChatDialog() {
           ? requestData.agency_payout_id 
           : requestData.user_id;
         
-        if (recipientId) {
+        // Don't notify if recipient is the sender (user messaging their own agency)
+        const isSelfNotification = recipientId === senderId || recipientId === user?.id;
+        
+        if (recipientId && !isSelfNotification) {
           const notifyChannel = supabase.channel(`notify-${recipientId}`);
           notifyChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
