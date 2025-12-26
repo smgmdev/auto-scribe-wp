@@ -1688,7 +1688,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           transform: 'translate(-50%, -50%)',
           zIndex: chat.zIndex + 100
         }}
-        onClick={handleWindowClick}
+        onMouseDown={handleWindowClick}
       >
         {/* Header */}
         <div 
