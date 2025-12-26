@@ -168,16 +168,10 @@ export function AdminEngagementsView() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 max-w-md">
           <TabsTrigger value="active">
-            Active
-            {activeRequests.length > 0 && (
-              <Badge variant="secondary" className="ml-2">{activeRequests.length}</Badge>
-            )}
+            Active ({activeRequests.length})
           </TabsTrigger>
           <TabsTrigger value="cancelled">
-            Cancelled
-            {cancelledRequests.length > 0 && (
-              <Badge variant="secondary" className="ml-2">{cancelledRequests.length}</Badge>
-            )}
+            Cancelled ({cancelledRequests.length})
           </TabsTrigger>
         </TabsList>
 
