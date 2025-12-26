@@ -567,12 +567,26 @@ export function AdminOrdersView() {
             </Card>
           ) : (
             <div className="space-y-2">
-              {filteredOrders.map(order => (
+              {filteredOrders.map(order => {
+                // Determine if this order has unread notification
+                const isDisputedOrder = disputedOrderIds.has(order.id);
+                const dispute = disputes.find(d => d.order_id === order.id);
+                const hasUnreadNotification = isDisputedOrder 
+                  ? (dispute && !dispute.read) 
+                  : (!order.read && order.status === 'paid');
+                
+                return (
                 <Card 
                   key={order.id} 
-                  className={`cursor-pointer hover:bg-muted/30 transition-colors ${!order.read && order.status === 'paid' ? 'border-l-4 border-l-red-500 bg-red-500/5' : ''}`}
+                  className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${hasUnreadNotification ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
                   onClick={() => openDetailsDialog(order)}
                 >
+                  {/* Unread notification badge */}
+                  {hasUnreadNotification && (
+                    <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center z-10">
+                      <span className="sr-only">Unread</span>
+                    </div>
+                  )}
                   <CardContent className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-4">
                       {order.media_sites?.favicon ? (
@@ -658,7 +672,8 @@ export function AdminOrdersView() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              );
+              })}
             </div>
           )}
         </TabsContent>
