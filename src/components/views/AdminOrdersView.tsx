@@ -25,6 +25,7 @@ interface Order {
   delivery_status: string;
   delivery_notes: string | null;
   delivery_url: string | null;
+  delivery_deadline: string | null;
   created_at: string;
   paid_at: string | null;
   delivered_at: string | null;
@@ -157,27 +158,44 @@ export function AdminOrdersView() {
     }
   };
 
-  const getAwaitingDuration = (paidAt: string | null) => {
-    if (!paidAt) return '';
-    const now = new Date();
-    const paidDate = new Date(paidAt);
-    const hours = differenceInHours(now, paidDate);
-    const days = differenceInDays(now, paidDate);
+  const getRemainingTime = (deliveryDeadline: string | null) => {
+    if (!deliveryDeadline) return { text: 'Pending', isOverdue: false };
     
-    if (days > 0) {
-      return `${days}d ${hours % 24}h`;
+    const now = new Date();
+    const deadline = new Date(deliveryDeadline);
+    const diffMs = deadline.getTime() - now.getTime();
+    
+    if (diffMs <= 0) {
+      // Overdue
+      const overdueDays = Math.abs(differenceInDays(now, deadline));
+      const overdueHours = Math.abs(differenceInHours(now, deadline)) % 24;
+      const overdueText = overdueDays > 0 ? `${overdueDays}d ${overdueHours}h` : `${overdueHours}h`;
+      return { text: `Overdue ${overdueText}`, isOverdue: true };
     }
-    return `${hours}h`;
+    
+    // Remaining time
+    const days = differenceInDays(deadline, now);
+    const hours = differenceInHours(deadline, now) % 24;
+    const remainingText = days > 0 ? `${days}d ${hours}h` : `${hours}h`;
+    return { text: remainingText, isOverdue: false };
   };
 
-  const getDeliveryBadge = (status: string, paidAt: string | null) => {
+  const getDeliveryBadge = (status: string, deliveryDeadline: string | null) => {
     switch (status) {
       case 'pending':
-        const duration = getAwaitingDuration(paidAt);
+        const { text, isOverdue } = getRemainingTime(deliveryDeadline);
+        if (isOverdue) {
+          return (
+            <Badge variant="destructive" className="gap-1">
+              <Clock className="h-3 w-3" />
+              {text}
+            </Badge>
+          );
+        }
         return (
           <Badge variant="outline" className="gap-1">
             <Clock className="h-3 w-3" />
-            {duration ? `Awaiting ${duration}` : 'Pending'}
+            {deliveryDeadline ? `Remaining: ${text}` : text}
           </Badge>
         );
       case 'delivered':
@@ -299,7 +317,7 @@ export function AdminOrdersView() {
                       
                       <div className="flex gap-2">
                         {getStatusBadge(order.status)}
-                        {getDeliveryBadge(order.delivery_status, order.paid_at)}
+                        {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                       </div>
 
                       {order.status === 'paid' && order.delivery_status === 'pending' && (
@@ -439,7 +457,7 @@ export function AdminOrdersView() {
               {/* Order Status */}
               <div className="flex gap-2">
                 {getStatusBadge(selectedOrder.status)}
-                {getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.paid_at)}
+                {getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.delivery_deadline)}
               </div>
 
               {/* Financial Details */}
