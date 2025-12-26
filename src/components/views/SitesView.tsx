@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Copy } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send } from 'lucide-react';
 
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getFaviconUrl, extractDomain, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
+import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
 import type { SEOPlugin } from '@/types';
 
 interface SiteCredit {
@@ -124,6 +125,10 @@ export function SitesView() {
   
   // Media site dialog state (uses shared component from landing page)
   const [mediaSiteDialogOpen, setMediaSiteDialogOpen] = useState(false);
+  
+  // Brief submission dialog state
+  const [briefDialogOpen, setBriefDialogOpen] = useState(false);
+  const [briefMediaSite, setBriefMediaSite] = useState<MediaSite | null>(null);
 
   // WebView state removed - now using direct _blank links
 
@@ -1266,16 +1271,32 @@ export function SitesView() {
                   {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                 </p>
               )}
-              {/* Link at the bottom */}
-              <a 
-                href={ensureHttps(site.link)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
-              >
-                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              </a>
+              {/* Link and button row */}
+              <div className="flex items-center justify-between">
+                <a 
+                  href={ensureHttps(site.link)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                >
+                  <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                  <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                </a>
+                {!isAdmin && (
+                  <Button
+                    size="sm"
+                    className="bg-black text-white hover:bg-gray-800 transition-colors h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setBriefMediaSite(site);
+                      setBriefDialogOpen(true);
+                    }}
+                  >
+                    <Send className="h-3 w-3 mr-1.5" />
+                    I'm Interested
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
@@ -2423,6 +2444,23 @@ export function SitesView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Brief Submission Dialog */}
+      <BriefSubmissionDialog
+        open={briefDialogOpen}
+        onOpenChange={setBriefDialogOpen}
+        mediaSite={briefMediaSite ? {
+          id: briefMediaSite.id,
+          name: briefMediaSite.name,
+          price: briefMediaSite.price,
+          agency: briefMediaSite.agency,
+          favicon: briefMediaSite.favicon || getFaviconUrl(briefMediaSite.link)
+        } : null}
+        onSuccess={() => {
+          setBriefDialogOpen(false);
+          setBriefMediaSite(null);
+        }}
+      />
     </div>
   );
 }
