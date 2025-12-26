@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, DollarSign, Send, ExternalLink } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format, differenceInHours, differenceInDays } from 'date-fns';
 
 interface Order {
   id: string;
@@ -47,6 +47,7 @@ export function AdminOrdersView() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const { toast } = useToast();
@@ -148,7 +149,7 @@ export function AdminOrdersView() {
       case 'pending_payment':
         return <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
       case 'paid':
-        return <Badge variant="secondary" className="bg-blue-600/20 text-blue-600"><DollarSign className="h-3 w-3 mr-1" />Paid</Badge>;
+        return <Badge variant="secondary" className="bg-blue-600/20 text-blue-600"><CreditCard className="h-3 w-3 mr-1" />Paid</Badge>;
       case 'completed':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       default:
@@ -156,10 +157,29 @@ export function AdminOrdersView() {
     }
   };
 
-  const getDeliveryBadge = (status: string) => {
+  const getAwaitingDuration = (paidAt: string | null) => {
+    if (!paidAt) return '';
+    const now = new Date();
+    const paidDate = new Date(paidAt);
+    const hours = differenceInHours(now, paidDate);
+    const days = differenceInDays(now, paidDate);
+    
+    if (days > 0) {
+      return `${days}d ${hours % 24}h`;
+    }
+    return `${hours}h`;
+  };
+
+  const getDeliveryBadge = (status: string, paidAt: string | null) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+        const duration = getAwaitingDuration(paidAt);
+        return (
+          <Badge variant="outline" className="gap-1">
+            <Clock className="h-3 w-3" />
+            {duration ? `Awaiting ${duration}` : 'Pending'}
+          </Badge>
+        );
       case 'delivered':
         return <Badge variant="secondary" className="bg-purple-600/20 text-purple-600"><Truck className="h-3 w-3 mr-1" />Delivered</Badge>;
       case 'accepted':
@@ -167,6 +187,11 @@ export function AdminOrdersView() {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const openDetailsDialog = (order: Order) => {
+    setSelectedOrder(order);
+    setDetailsDialogOpen(true);
   };
 
   const filteredOrders = orders.filter(order => {
@@ -237,7 +262,11 @@ export function AdminOrdersView() {
           ) : (
             <div className="space-y-2">
               {filteredOrders.map(order => (
-                <Card key={order.id}>
+                <Card 
+                  key={order.id} 
+                  className="cursor-pointer hover:bg-muted/30 transition-colors"
+                  onClick={() => openDetailsDialog(order)}
+                >
                   <CardContent className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-4">
                       {order.media_sites?.favicon ? (
@@ -270,13 +299,16 @@ export function AdminOrdersView() {
                       
                       <div className="flex gap-2">
                         {getStatusBadge(order.status)}
-                        {getDeliveryBadge(order.delivery_status)}
+                        {getDeliveryBadge(order.delivery_status, order.paid_at)}
                       </div>
 
                       {order.status === 'paid' && order.delivery_status === 'pending' && (
                         <Button 
                           size="sm"
-                          onClick={() => openDeliveryDialog(order)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeliveryDialog(order);
+                          }}
                         >
                           <Send className="h-4 w-4 mr-2" />
                           Mark Delivered
@@ -287,11 +319,16 @@ export function AdminOrdersView() {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => window.open(order.delivery_url!, '_blank')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(order.delivery_url!, '_blank');
+                          }}
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                       )}
+
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </CardContent>
                 </Card>
@@ -366,6 +403,144 @@ export function AdminOrdersView() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Details Dialog */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-4">
+              {/* Media Site Info */}
+              <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                {selectedOrder.media_sites?.favicon ? (
+                  <img 
+                    src={selectedOrder.media_sites.favicon} 
+                    alt="" 
+                    className="w-12 h-12 rounded object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                    <Package className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedOrder.media_sites?.name}</h3>
+                  {selectedOrder.media_sites?.agency && (
+                    <p className="text-sm text-muted-foreground">{selectedOrder.media_sites.agency}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Order Status */}
+              <div className="flex gap-2">
+                {getStatusBadge(selectedOrder.status)}
+                {getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.paid_at)}
+              </div>
+
+              {/* Financial Details */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                <div>
+                  <p className="text-sm text-muted-foreground">Order Amount</p>
+                  <p className="font-semibold text-lg">${(selectedOrder.amount_cents / 100).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Platform Fee</p>
+                  <p className="font-semibold text-lg text-green-600">${(selectedOrder.platform_fee_cents / 100).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Agency Payout</p>
+                  <p className="font-semibold text-lg">${(selectedOrder.agency_payout_cents / 100).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Order ID</p>
+                  <p className="font-mono text-sm">{selectedOrder.id.slice(0, 8)}...</p>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Timeline</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Created</span>
+                    <span>{format(new Date(selectedOrder.created_at), 'MMM d, yyyy h:mm a')}</span>
+                  </div>
+                  {selectedOrder.paid_at && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Paid</span>
+                      <span>{format(new Date(selectedOrder.paid_at), 'MMM d, yyyy h:mm a')}</span>
+                    </div>
+                  )}
+                  {selectedOrder.delivered_at && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Delivered</span>
+                      <span>{format(new Date(selectedOrder.delivered_at), 'MMM d, yyyy h:mm a')}</span>
+                    </div>
+                  )}
+                  {selectedOrder.accepted_at && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Accepted</span>
+                      <span>{format(new Date(selectedOrder.accepted_at), 'MMM d, yyyy h:mm a')}</span>
+                    </div>
+                  )}
+                  {selectedOrder.released_at && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Payment Released</span>
+                      <span>{format(new Date(selectedOrder.released_at), 'MMM d, yyyy h:mm a')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Delivery Info */}
+              {selectedOrder.delivery_url && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Delivery</h4>
+                  <div className="p-3 bg-muted/30 rounded-lg space-y-2">
+                    <a 
+                      href={selectedOrder.delivery_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline flex items-center gap-1 text-sm"
+                    >
+                      {selectedOrder.delivery_url}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                    {selectedOrder.delivery_notes && (
+                      <p className="text-sm text-muted-foreground">{selectedOrder.delivery_notes}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                {selectedOrder.media_sites?.link && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.open(selectedOrder.media_sites?.link, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Site
+                  </Button>
+                )}
+                {selectedOrder.status === 'paid' && selectedOrder.delivery_status === 'pending' && (
+                  <Button onClick={() => {
+                    setDetailsDialogOpen(false);
+                    openDeliveryDialog(selectedOrder);
+                  }}>
+                    <Send className="h-4 w-4 mr-2" />
+                    Mark Delivered
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
