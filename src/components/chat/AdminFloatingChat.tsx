@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2, Send, UserPlus, Minus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar } from 'lucide-react';
+import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -102,6 +103,7 @@ export function AdminFloatingChat({
   const { incrementUnreadMessageCount } = useAppStore();
   
   const [messages, setMessages] = useState<ServiceMessage[]>(initialMessages);
+  const [loadingMessages, setLoadingMessages] = useState(initialMessages.length === 0);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -142,6 +144,29 @@ export function AdminFloatingChat({
   const [, setTimerTick] = useState(0); // Force re-render for last seen updates
   
   const isCancelled = request.status === 'cancelled';
+  
+  // Fetch messages if not provided
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+      setLoadingMessages(false);
+      return;
+    }
+    
+    const fetchMessages = async () => {
+      setLoadingMessages(true);
+      const { data } = await supabase
+        .from('service_messages')
+        .select('*')
+        .eq('request_id', request.id)
+        .order('created_at', { ascending: true });
+      
+      setMessages((data as ServiceMessage[]) || []);
+      setLoadingMessages(false);
+    };
+    
+    fetchMessages();
+  }, [request.id, initialMessages]);
   const hasOrder = !!request.order_id;
   
   // Timer tick to update relative time display every minute
@@ -1162,114 +1187,121 @@ export function AdminFloatingChat({
 
         {/* Messages */}
         <ScrollArea className="flex-1">
-          <div className="space-y-2 p-3">
-            {messages.map((m) => {
-              // Check for admin joined message
-              const adminJoinedMatch = m.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
-              if (adminJoinedMatch) {
+          {loadingMessages ? (
+            <div className="flex flex-col items-center justify-center h-full py-12">
+              <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
+              <p className="text-sm text-muted-foreground">Loading Messages...</p>
+            </div>
+          ) : (
+            <div className="space-y-2 p-3">
+              {messages.map((m) => {
+                // Check for admin joined message
+                const adminJoinedMatch = m.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
+                if (adminJoinedMatch) {
+                  return (
+                    <p key={m.id} className="text-xs text-muted-foreground text-center py-2">
+                      {adminJoinedMatch[1]}
+                    </p>
+                  );
+                }
+                
+                // Check for admin left message
+                const adminLeftMatch = m.message.match(/\[ADMIN_LEFT\](.*?)\[\/ADMIN_LEFT\]/);
+                if (adminLeftMatch) {
+                  return (
+                    <p key={m.id} className="text-xs text-muted-foreground text-center py-2">
+                      {adminLeftMatch[1]}
+                    </p>
+                  );
+                }
+
+                const isAdmin = m.sender_type === 'admin';
+                const isClient = m.sender_type === 'client';
+                const isAgency = m.sender_type === 'agency';
+
+                // Check for special message types
+                const orderPlaced = parseOrderPlaced(m.message);
+                const orderCancelled = parseOrderCancelled(m.message);
+                const cancelRequest = parseCancelOrderRequest(m.message);
+                const cancelAccepted = parseCancelOrderAccepted(m.message);
+                const isSpecialMessage = orderPlaced || orderCancelled || cancelRequest || cancelAccepted;
+
                 return (
-                  <p key={m.id} className="text-xs text-muted-foreground text-center py-2">
-                    {adminJoinedMatch[1]}
-                  </p>
-                );
-              }
-              
-              // Check for admin left message
-              const adminLeftMatch = m.message.match(/\[ADMIN_LEFT\](.*?)\[\/ADMIN_LEFT\]/);
-              if (adminLeftMatch) {
-                return (
-                  <p key={m.id} className="text-xs text-muted-foreground text-center py-2">
-                    {adminLeftMatch[1]}
-                  </p>
-                );
-              }
-
-              const isAdmin = m.sender_type === 'admin';
-              const isClient = m.sender_type === 'client';
-              const isAgency = m.sender_type === 'agency';
-
-              // Check for special message types
-              const orderPlaced = parseOrderPlaced(m.message);
-              const orderCancelled = parseOrderCancelled(m.message);
-              const cancelRequest = parseCancelOrderRequest(m.message);
-              const cancelAccepted = parseCancelOrderAccepted(m.message);
-              const isSpecialMessage = orderPlaced || orderCancelled || cancelRequest || cancelAccepted;
-
-              return (
-                <div 
-                  key={m.id} 
-                  id={`admin-msg-${request.id}-${m.id}`}
-                  className={`flex ${isClient ? 'justify-start' : isAgency ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`group relative max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} transition-all duration-300 ${
-                    isSpecialMessage ? '' : (
-                      isAdmin 
-                        ? 'bg-blue-500 text-white' 
-                        : isAgency 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted'
-                    )
-                  } ${highlightedMessageId === m.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}>
-                    {/* Message Actions Dropdown */}
-                    {!isSpecialMessage && !isAdmin && (
-                      <DropdownMenu modal={false}>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                              isAgency 
-                                ? 'text-primary-foreground hover:bg-primary-foreground/20' 
-                                : 'text-foreground hover:bg-background/50'
-                            }`}
+                  <div 
+                    key={m.id} 
+                    id={`admin-msg-${request.id}-${m.id}`}
+                    className={`flex ${isClient ? 'justify-start' : isAgency ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`group relative max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} transition-all duration-300 ${
+                      isSpecialMessage ? '' : (
+                        isAdmin 
+                          ? 'bg-blue-500 text-white' 
+                          : isAgency 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'bg-muted'
+                      )
+                    } ${highlightedMessageId === m.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}>
+                      {/* Message Actions Dropdown */}
+                      {!isSpecialMessage && !isAdmin && (
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                                isAgency 
+                                  ? 'text-primary-foreground hover:bg-primary-foreground/20' 
+                                  : 'text-foreground hover:bg-background/50'
+                              }`}
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            align="end" 
+                            className="bg-popover border shadow-lg"
+                            style={{ zIndex: 99999 }}
+                            sideOffset={5}
                           >
-                            <ChevronDown className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent 
-                          align="end" 
-                          className="bg-popover border shadow-lg"
-                          style={{ zIndex: 99999 }}
-                          sideOffset={5}
-                        >
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setReplyToMessage(m);
-                              setTimeout(() => inputRef.current?.focus(), 0);
-                            }}
-                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          >
-                            <Reply className="h-4 w-4 mr-2" />
-                            Reply
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleUserDetails(m)}
-                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          >
-                            <User className="h-4 w-4 mr-2" />
-                            {m.sender_type === 'client' ? 'Client Details' : 'Agency Details'}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                    {!isSpecialMessage && (
-                      <p className="text-xs font-medium mb-1 opacity-70 capitalize pr-5">
-                        {isAdmin ? 'Arcana Mace Staff' : m.sender_type}
-                      </p>
-                    )}
-                    {renderMessageContent(m, isAgency || isAdmin)}
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setReplyToMessage(m);
+                                setTimeout(() => inputRef.current?.focus(), 0);
+                              }}
+                              className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                            >
+                              <Reply className="h-4 w-4 mr-2" />
+                              Reply
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleUserDetails(m)}
+                              className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                            >
+                              <User className="h-4 w-4 mr-2" />
+                              {m.sender_type === 'client' ? 'Client Details' : 'Agency Details'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                      {!isSpecialMessage && (
+                        <p className="text-xs font-medium mb-1 opacity-70 capitalize pr-5">
+                          {isAdmin ? 'Arcana Mace Staff' : m.sender_type}
+                        </p>
+                      )}
+                      {renderMessageContent(m, isAgency || isAdmin)}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-            
-            {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
-            )}
-            
-            {/* Scroll anchor */}
-            <div ref={messagesEndRef} />
-          </div>
+                );
+              })}
+              
+              {messages.length === 0 && !loadingMessages && (
+                <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
+              )}
+              
+              {/* Scroll anchor */}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
         </ScrollArea>
 
         {/* Typing indicators */}
