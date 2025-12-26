@@ -2469,68 +2469,89 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       {/* Media Listing Dialog */}
       <Dialog open={mediaListingOpen} onOpenChange={setMediaListingOpen}>
-        <DialogContent className="max-w-md z-[300]">
+        <DialogContent className="sm:max-w-lg z-[300]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              {globalChatRequest?.media_site?.favicon && (
-                <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded" />
-              )}
+              <img
+                src={globalChatRequest?.media_site?.favicon || ''}
+                alt={globalChatRequest?.media_site?.name}
+                className="h-12 w-12 rounded-xl bg-muted object-contain"
+              />
               <span>{globalChatRequest?.media_site?.name}</span>
             </DialogTitle>
           </DialogHeader>
+
           {globalChatRequest?.media_site && (
-            <div className="space-y-4">
-              {globalChatRequest.media_site.about && (
+            <div className="space-y-4 mt-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Website</p>
+                <a 
+                  href={globalChatRequest.media_site.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline flex items-center gap-1"
+                >
+                  {(() => {
+                    try {
+                      return new URL(globalChatRequest.media_site.link).hostname.replace('www.', '');
+                    } catch {
+                      return globalChatRequest.media_site.link;
+                    }
+                  })()}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              
+              <div className="flex gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">About</p>
-                  <p className="text-sm">{globalChatRequest.media_site.about}</p>
+                  <p className="text-sm text-muted-foreground">Price</p>
+                  <p className="text-foreground font-medium">${globalChatRequest.media_site.price.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Format</p>
+                  <Badge variant="secondary">{globalChatRequest.media_site.publication_format}</Badge>
+                </div>
+              </div>
+              
+              {globalChatRequest.media_site.category && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Category</p>
+                  <p className="text-foreground">{globalChatRequest.media_site.category}</p>
                 </div>
               )}
               
-              <div className="grid grid-cols-2 gap-4">
+              {globalChatRequest.media_site.subcategory && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Category</p>
-                  <p className="text-sm font-medium">{globalChatRequest.media_site.category}</p>
-                </div>
-                {globalChatRequest.media_site.subcategory && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Subcategory</p>
-                    <p className="text-sm font-medium">{globalChatRequest.media_site.subcategory}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Price</p>
-                  <p className="text-sm font-medium">${globalChatRequest.media_site.price}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Publication Format</p>
-                  <p className="text-sm font-medium capitalize">{globalChatRequest.media_site.publication_format}</p>
-                </div>
-              </div>
-
-              {globalChatRequest.media_site.agency && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Agency</p>
-                  <p className="text-sm font-medium">{globalChatRequest.media_site.agency}</p>
+                  <p className="text-sm text-muted-foreground">Subcategory</p>
+                  <p className="text-foreground">{globalChatRequest.media_site.subcategory}</p>
                 </div>
               )}
-
-              <div className="pt-2 border-t">
-                <a 
-                  href={globalChatRequest.media_site.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-primary hover:underline"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Visit Website
-                </a>
-              </div>
+              
+              {globalChatRequest.media_site.agency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Agency</p>
+                  <p className="text-foreground">{globalChatRequest.media_site.agency}</p>
+                </div>
+              )}
+              
+              {globalChatRequest.media_site.about && (
+                <div>
+                  <p className="text-sm text-muted-foreground">About</p>
+                  <p className="text-foreground text-sm">{globalChatRequest.media_site.about}</p>
+                </div>
+              )}
             </div>
           )}
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="outline"
+              onClick={() => setMediaListingOpen(false)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
