@@ -67,6 +67,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
+  const [mediaListingOpen, setMediaListingOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
@@ -1745,13 +1746,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-              {globalChatRequest.media_site?.agency && (
+              {globalChatRequest.media_site && (
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                  onClick={() => fetchAgencyDetails(globalChatRequest.media_site!.agency!)}
-                  title="Agency Info"
+                  onClick={() => setMediaListingOpen(true)}
+                  title="Media Listing Info"
                 >
                   <Info className="h-4 w-4" />
                 </Button>
@@ -2465,6 +2466,73 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         title={fileWebView?.name || 'Document'}
         downloadUrl={fileWebView?.url}
       />
+
+      {/* Media Listing Dialog */}
+      <Dialog open={mediaListingOpen} onOpenChange={setMediaListingOpen}>
+        <DialogContent className="max-w-md z-[300]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {globalChatRequest?.media_site?.favicon && (
+                <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded" />
+              )}
+              <span>{globalChatRequest?.media_site?.name}</span>
+            </DialogTitle>
+          </DialogHeader>
+          {globalChatRequest?.media_site && (
+            <div className="space-y-4">
+              {globalChatRequest.media_site.about && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">About</p>
+                  <p className="text-sm">{globalChatRequest.media_site.about}</p>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Category</p>
+                  <p className="text-sm font-medium">{globalChatRequest.media_site.category}</p>
+                </div>
+                {globalChatRequest.media_site.subcategory && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Subcategory</p>
+                    <p className="text-sm font-medium">{globalChatRequest.media_site.subcategory}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Price</p>
+                  <p className="text-sm font-medium">${globalChatRequest.media_site.price}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Publication Format</p>
+                  <p className="text-sm font-medium capitalize">{globalChatRequest.media_site.publication_format}</p>
+                </div>
+              </div>
+
+              {globalChatRequest.media_site.agency && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Agency</p>
+                  <p className="text-sm font-medium">{globalChatRequest.media_site.agency}</p>
+                </div>
+              )}
+
+              <div className="pt-2 border-t">
+                <a 
+                  href={globalChatRequest.media_site.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Visit Website
+                </a>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
