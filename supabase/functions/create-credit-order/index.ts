@@ -83,7 +83,7 @@ serve(async (req) => {
     console.log(`Processing credit order for user: ${user.id}`);
 
     // Parse request body
-    const { media_site_id, service_request_id } = await req.json();
+    const { media_site_id, service_request_id, delivery_duration } = await req.json();
     
     if (!media_site_id) {
       return new Response(
@@ -242,13 +242,24 @@ serve(async (req) => {
       // Don't fail the request, just log
     }
 
+    // Calculate delivery deadline if duration was provided
+    let deliveryDeadline = null;
+    if (delivery_duration) {
+      const { days = 0, hours = 0, minutes = 0 } = delivery_duration;
+      const totalMs = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60) * 1000;
+      if (totalMs > 0) {
+        deliveryDeadline = new Date(Date.now() + totalMs).toISOString();
+      }
+    }
+
     // Send a chat message from the client indicating the order was placed
     const orderConfirmationMessage = JSON.stringify({
       type: 'order_placed',
       media_site_id: media_site_id,
       media_site_name: mediaSite.name,
       credits_used: creditCost,
-      order_id: order.id
+      order_id: order.id,
+      delivery_deadline: deliveryDeadline
     });
 
     await supabaseAdmin
