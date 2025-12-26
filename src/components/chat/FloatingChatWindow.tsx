@@ -267,40 +267,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     setCancellingOrder(true);
     try {
-      // Update order status to cancelled
-      const { error: orderError } = await supabase
-        .from('orders')
-        .update({ 
-          status: 'cancelled',
-          delivery_status: 'cancelled'
-        })
-        .eq('id', globalChatRequest.order.id);
+      // Call the cancel-order edge function which handles credit refunds and notifications
+      const { data, error } = await supabase.functions.invoke('cancel-order', {
+        body: { order_id: globalChatRequest.order.id }
+      });
       
-      if (orderError) throw orderError;
-      
-      // Clear the order_id from service_request
-      const { error: requestError } = await supabase
-        .from('service_requests')
-        .update({ order_id: null })
-        .eq('id', globalChatRequest.id);
-      
-      if (requestError) throw requestError;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       
       // Update local state
       updateGlobalChatRequest({ order: null }, globalChatRequest.id);
       
       toast({
         title: "Order Cancelled",
-        description: "The order has been cancelled.",
+        description: `Order cancelled. ${data.credits_refunded} credits refunded.`,
       });
       
       setCancelOrderDialogOpen(false);
       setCancelOrderReason('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error cancelling order:', error);
       toast({
         title: "Error",
-        description: "Failed to cancel order. Please try again.",
+        description: error.message || "Failed to cancel order. Please try again.",
         variant: "destructive"
       });
     } finally {
