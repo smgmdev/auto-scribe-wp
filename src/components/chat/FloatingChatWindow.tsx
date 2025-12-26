@@ -1570,6 +1570,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {messages.map((msg) => {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
+                
+                // Check for admin joined message - render as independent centered text
+                const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
+                if (adminJoinedMatch) {
+                  return (
+                    <p key={msg.id} className="text-xs text-muted-foreground text-center py-2">
+                      {adminJoinedMatch[1]}
+                    </p>
+                  );
+                }
+                
                 return (
                   <div
                     key={msg.id}
