@@ -169,6 +169,11 @@ export function AdminOrdersView() {
       // Overdue
       const overdueDays = Math.abs(differenceInDays(now, deadline));
       const overdueHours = Math.abs(differenceInHours(now, deadline)) % 24;
+      
+      if (overdueDays === 0 && overdueHours === 0) {
+        return { text: 'Overdue', isOverdue: true };
+      }
+      
       const overdueText = overdueDays > 0 ? `${overdueDays}d ${overdueHours}h` : `${overdueHours}h`;
       return { text: `Overdue ${overdueText}`, isOverdue: true };
     }
