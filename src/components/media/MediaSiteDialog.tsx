@@ -292,15 +292,32 @@ export function MediaSiteDialog({
         }
       }
 
+      // Update state to show "Engagement Open" button immediately
+      setOpenEngagementData({
+        id: request.id,
+        title: request.title,
+        description: request.description,
+        status: request.status,
+        client_read: true,
+        created_at: request.created_at,
+        updated_at: request.updated_at,
+        media_site_id: mediaSite.id,
+        media_site: mediaSite,
+        order: null
+      });
+      
+      // Switch back to detail view to show the updated button
+      setCurrentView('detail');
+      setDescription('');
+      setFiles([]);
+
       toast({
         title: 'Request submitted!',
         description: 'Your brief has been sent to the agency for review.',
         className: 'bg-green-600 text-white border-green-600',
       });
 
-      onOpenChange(false);
       onSuccess?.();
-      navigate('/dashboard', { state: { targetView: 'my-requests' } });
     } catch (error: any) {
       toast({
         variant: 'destructive',
