@@ -61,6 +61,38 @@ interface DisputeItem {
   } | null;
 }
 
+interface InvestigationItem {
+  id: string;
+  admin_id: string;
+  service_request_id: string;
+  order_id: string;
+  created_at: string;
+  status: string;
+  notes: string | null;
+  service_request: {
+    id: string;
+    title: string;
+    description: string;
+    media_site: {
+      id: string;
+      name: string;
+      favicon: string | null;
+      price: number;
+      publication_format: string;
+      link: string;
+      category: string;
+      subcategory: string | null;
+      about: string | null;
+      agency: string | null;
+    } | null;
+  } | null;
+  order: {
+    id: string;
+    status: string;
+    delivery_status: string;
+  } | null;
+}
+
 export function ChatListPanel() {
   const { user, isAdmin } = useAuth();
   const { 
@@ -80,11 +112,12 @@ export function ChatListPanel() {
   } = useAppStore();
   
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'disputes' | 'my-engagements' | 'service-requests'>('my-engagements');
+  const [activeTab, setActiveTab] = useState<'disputes' | 'investigations' | 'my-engagements' | 'service-requests'>('my-engagements');
   const [searchQuery, setSearchQuery] = useState('');
   const [myEngagements, setMyEngagements] = useState<ChatItem[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ChatItem[]>([]);
   const [disputes, setDisputes] = useState<DisputeItem[]>([]);
+  const [investigations, setInvestigations] = useState<InvestigationItem[]>([]);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -272,6 +305,36 @@ export function ChatListPanel() {
     }
   };
 
+  // Fetch investigations (admin only)
+  const fetchInvestigations = async () => {
+    if (!user || !isAdmin) return;
+
+    const { data, error } = await supabase
+      .from('admin_investigations')
+      .select(`
+        id,
+        admin_id,
+        service_request_id,
+        order_id,
+        created_at,
+        status,
+        notes,
+        service_request:service_requests(
+          id,
+          title,
+          description,
+          media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency)
+        ),
+        order:orders(id, status, delivery_status)
+      `)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setInvestigations(data as unknown as InvestigationItem[]);
+    }
+  };
+
   // Check if user is an approved agency (must have onboarding_complete = true)
   // Admins are treated as having access to agency features
   useEffect(() => {
@@ -323,6 +386,7 @@ export function ChatListPanel() {
       fetchMyEngagements();
       if (isAdmin) {
         fetchDisputes();
+        fetchInvestigations();
       }
     }
   }, [user, isAdmin]);
@@ -1206,6 +1270,20 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
+              {isAdmin && (
+                <TabsTrigger 
+                  value="investigations" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
+                >
+                  <Search className="h-3.5 w-3.5 mr-1" />
+                  Investigations
+                  {investigations.length > 0 && (
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-blue-500 text-white px-1">
+                      {investigations.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )}
               {isAgency && !isAdmin && (
                 <TabsTrigger 
                   value="service-requests" 
@@ -1319,6 +1397,68 @@ export function ChatListPanel() {
                           <p className="text-xs truncate mt-0.5 flex items-center gap-1 text-destructive">
                             <AlertTriangle className="h-3 w-3 shrink-0" />
                             Dispute - {dispute.reason?.slice(0, 30) || 'Delivery overdue'}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </TabsContent>
+            )}
+
+            {isAdmin && (
+              <TabsContent value="investigations" className="m-0">
+                <ScrollArea className="h-[300px]">
+                  {investigations.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Search className="h-8 w-8 mb-2 opacity-50" />
+                      <p className="text-sm">No active investigations</p>
+                      <p className="text-xs mt-1">Open an order chat from Order Management to start an investigation</p>
+                    </div>
+                  ) : (
+                    investigations.map((investigation) => (
+                      <div
+                        key={investigation.id}
+                        className="flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 bg-blue-50 dark:bg-blue-950/30 border-l-2 border-l-blue-500"
+                        onClick={() => {
+                          if (investigation.service_request) {
+                            openGlobalChat({
+                              id: investigation.service_request_id,
+                              title: investigation.service_request.title,
+                              description: investigation.service_request.description,
+                              status: 'active',
+                              media_site: investigation.service_request.media_site,
+                              order: investigation.order
+                            } as unknown as GlobalChatRequest, 'agency-request');
+                          }
+                        }}
+                      >
+                        <div className="shrink-0 relative">
+                          {investigation.service_request?.media_site?.favicon ? (
+                            <img 
+                              src={investigation.service_request.media_site.favicon} 
+                              alt="" 
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                              <Search className="h-5 w-5 text-blue-500" />
+                            </div>
+                          )}
+                          <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-sm truncate text-foreground">
+                              {investigation.service_request?.media_site?.name || investigation.service_request?.title || 'Unknown'}
+                            </span>
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {formatTime(investigation.created_at)}
+                            </span>
+                          </div>
+                          <p className="text-xs truncate mt-0.5 flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                            <Search className="h-3 w-3 shrink-0" />
+                            Active Investigation
                           </p>
                         </div>
                       </div>
