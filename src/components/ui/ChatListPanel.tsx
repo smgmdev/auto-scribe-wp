@@ -1520,7 +1520,7 @@ export function ChatListPanel() {
                       return (
                         <div
                           key={investigation.id}
-                          className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 border-l-2 border-l-blue-500 ${hasUnread ? 'bg-blue-100 dark:bg-blue-950/50' : 'bg-blue-50 dark:bg-blue-950/30'}`}
+                          className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${hasUnread ? 'bg-blue-100 dark:bg-blue-950/50 border-l-2 border-l-blue-500' : ''}`}
                           onClick={() => {
                             if (investigation.service_request) {
                               // Clear unread count locally when opening
