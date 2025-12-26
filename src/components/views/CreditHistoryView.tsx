@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet, HelpCircle } from 'lucide-react';
+import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet, HelpCircle, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -65,10 +65,21 @@ export function CreditHistoryView() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalSpent = transactions
-    .filter(t => t.type === 'usage' || t.type === 'deduction')
+    .filter(t => t.type === 'usage' || t.type === 'deduction' || t.type === 'order')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const totalOrders = transactions
+    .filter(t => t.type === 'order')
+    .length;
+
+  const totalOrderCredits = transactions
+    .filter(t => t.type === 'order')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const getTransactionIcon = (type: string, amount: number) => {
+    if (type === 'order') {
+      return <ShoppingBag className="h-5 w-5 text-blue-500" />;
+    }
     if (type === 'purchase' || amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
     }
@@ -79,8 +90,10 @@ export function CreditHistoryView() {
     switch (type) {
       case 'purchase':
         return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Purchase</Badge>;
+      case 'order':
+        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Order</Badge>;
       case 'usage':
-        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Usage</Badge>;
+        return <Badge variant="secondary" className="bg-orange-500/10 text-orange-500 border-orange-500/30">Usage</Badge>;
       case 'deduction':
         return <Badge variant="secondary" className="bg-orange-500/10 text-orange-500 border-orange-500/30">Deduction</Badge>;
       case 'refund':
@@ -116,7 +129,7 @@ export function CreditHistoryView() {
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <Tooltip delayDuration={100}>
@@ -136,7 +149,7 @@ export function CreditHistoryView() {
                 avoidCollisions={true}
                 className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
               >
-                <p>Your current credit balance available for publishing</p>
+                <p>Your current credit balance available for orders</p>
               </TooltipContent>
             </Tooltip>
             <Wallet className="h-4 w-4 text-muted-foreground/60" />
@@ -146,7 +159,7 @@ export function CreditHistoryView() {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : (
-                availableCredits
+                availableCredits.toLocaleString()
               )}
             </div>
           </CardContent>
@@ -181,7 +194,7 @@ export function CreditHistoryView() {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : (
-                totalPurchased
+                totalPurchased.toLocaleString()
               )}
             </div>
           </CardContent>
@@ -206,7 +219,7 @@ export function CreditHistoryView() {
                 avoidCollisions={true}
                 className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
               >
-                <p>Total credits spent on publishing articles</p>
+                <p>Total credits spent on orders and other usage</p>
               </TooltipContent>
             </Tooltip>
             <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
@@ -216,7 +229,7 @@ export function CreditHistoryView() {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : (
-                totalSpent
+                totalSpent.toLocaleString()
               )}
             </div>
           </CardContent>
@@ -228,7 +241,7 @@ export function CreditHistoryView() {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1.5 cursor-help">
                   <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Total Transactions
+                    Total Orders
                   </CardTitle>
                   <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
                 </div>
@@ -241,7 +254,42 @@ export function CreditHistoryView() {
                 avoidCollisions={true}
                 className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
               >
-                <p>Number of credit transactions in your history</p>
+                <p>Number of media site orders placed using credits ({totalOrderCredits.toLocaleString()} credits)</p>
+              </TooltipContent>
+            </Tooltip>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground/60" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                totalOrders
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Transactions
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent 
+                side="right" 
+                align="start"
+                sideOffset={8}
+                collisionPadding={16}
+                avoidCollisions={true}
+                className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+              >
+                <p>Total number of credit transactions</p>
               </TooltipContent>
             </Tooltip>
             <Coins className="h-4 w-4 text-muted-foreground/60" />
@@ -268,6 +316,7 @@ export function CreditHistoryView() {
           <SelectContent>
             <SelectItem value="all">All Transactions</SelectItem>
             <SelectItem value="purchase">Purchases</SelectItem>
+            <SelectItem value="order">Orders</SelectItem>
             <SelectItem value="usage">Usage</SelectItem>
             <SelectItem value="deduction">Deductions</SelectItem>
             <SelectItem value="refund">Refunds</SelectItem>
