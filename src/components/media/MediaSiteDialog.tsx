@@ -30,7 +30,7 @@ interface MediaSiteDialogProps {
   onOpenChange: (open: boolean) => void;
   mediaSite: MediaSite | null;
   agencyLogos?: Record<string, string>;
-  onSuccess?: () => void;
+  onSuccess?: (engagement?: { id: string; media_site_id: string; [key: string]: any }) => void;
 }
 
 type DialogView = 'detail' | 'brief';
@@ -317,7 +317,18 @@ export function MediaSiteDialog({
         className: 'bg-green-600 text-white border-green-600',
       });
 
-      onSuccess?.();
+      onSuccess?.({
+        id: request.id,
+        media_site_id: mediaSite.id,
+        title: request.title,
+        description: request.description,
+        status: request.status,
+        client_read: true,
+        created_at: request.created_at,
+        updated_at: request.updated_at,
+        media_site: mediaSite,
+        order: null
+      });
     } catch (error: any) {
       toast({
         variant: 'destructive',
