@@ -196,19 +196,26 @@ export function AgencyRequestsView() {
           const updated = payload.new as any;
           const old = payload.old as any;
           
-          // Only sync agency_read status when it changes to true (not when client sets client_read)
+          // Sync agency_read status changes (both directions - read and unread)
           const agencyReadChanged = old?.agency_read !== updated.agency_read;
-          const markedAsRead = agencyReadChanged && updated.agency_read === true;
+          const statusChanged = old?.status !== updated.status;
           
-          // Update local state with the new read status - only sync if marking as read
+          // Update local state with the new read status
           setRequests(prev => {
-            const newRequests = prev.map(r => {
+            let newRequests = prev.map(r => {
               if (r.id === updated.id) {
-                const newRead = markedAsRead ? true : r.read;
+                // Sync agency_read to local read state when it changes
+                const newRead = agencyReadChanged ? updated.agency_read : r.read;
                 return { ...r, read: newRead, status: updated.status };
               }
               return r;
             });
+            
+            // Remove cancelled requests from the list
+            if (statusChanged && updated.status === 'cancelled') {
+              newRequests = newRequests.filter(r => r.id !== updated.id);
+            }
+            
             // Recalculate unread count (exclude cancelled)
             const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
             setAgencyUnreadServiceRequestsCount(newUnreadCount);

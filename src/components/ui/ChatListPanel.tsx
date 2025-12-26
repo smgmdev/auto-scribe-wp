@@ -469,40 +469,64 @@ export function ChatListPanel() {
           const updated = payload.new as any;
           const old = payload.old as any;
           
-          // Only sync read status when it changes TO true (marking as read)
-          // This prevents false "unread" states when counterparty marks their copy as unread
-          const readChanged = old?.read !== updated.read;
-          const markedAsRead = readChanged && updated.read === true;
-          
-          // For my engagements: only update if user_id matches
+          // For my engagements: sync client_read and status
           if (updated.user_id === user?.id) {
+            const clientReadChanged = old?.client_read !== updated.client_read;
+            const statusChanged = old?.status !== updated.status;
+            
             setMyEngagements(prev => {
-              const newEngagements = prev.map(e => {
+              let newEngagements = prev.map(e => {
                 if (e.id === updated.id) {
-                  // Only update read status if marked as read (not unread from external source)
-                  const newRead = markedAsRead ? true : e.read;
+                  // Sync client_read to local read state
+                  const newRead = clientReadChanged ? updated.client_read : e.read;
                   return { ...e, read: newRead, status: updated.status };
                 }
                 return e;
               });
+              
+              // Remove cancelled requests from the list
+              if (statusChanged && updated.status === 'cancelled') {
+                newEngagements = newEngagements.filter(e => e.id !== updated.id);
+              }
+              
               myEngagementsRef.current = newEngagements;
               return newEngagements;
             });
+            
+            // Recalculate user unread count
+            const currentEngagements = myEngagementsRef.current;
+            const unreadCount = currentEngagements.filter(e => !e.read && e.status !== 'cancelled').length;
+            setUserUnreadEngagementsCount(unreadCount);
           }
           
-          // For service requests: only update if agency_payout_id matches
+          // For service requests: sync agency_read and status
           if (agencyPayoutIdRef.current && updated.agency_payout_id === agencyPayoutIdRef.current) {
+            const agencyReadChanged = old?.agency_read !== updated.agency_read;
+            const statusChanged = old?.status !== updated.status;
+            
             setServiceRequests(prev => {
-              const newRequests = prev.map(r => {
+              let newRequests = prev.map(r => {
                 if (r.id === updated.id) {
-                  const newRead = markedAsRead ? true : r.read;
+                  // Sync agency_read to local read state
+                  const newRead = agencyReadChanged ? updated.agency_read : r.read;
                   return { ...r, read: newRead, status: updated.status };
                 }
                 return r;
               });
+              
+              // Remove cancelled requests from the list
+              if (statusChanged && updated.status === 'cancelled') {
+                newRequests = newRequests.filter(r => r.id !== updated.id);
+              }
+              
               serviceRequestsRef.current = newRequests;
               return newRequests;
             });
+            
+            // Recalculate agency unread count
+            const currentRequests = serviceRequestsRef.current;
+            const unreadCount = currentRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+            setAgencyUnreadServiceRequestsCount(unreadCount);
           }
         }
       )
