@@ -93,13 +93,6 @@ export function MyRequestsView() {
 
       if (reqError) throw reqError;
 
-      // Map client_read to read for the interface and set data
-      const mappedRequests = (requestsData || []).map(r => ({
-        ...r,
-        read: (r as any).client_read
-      })) as unknown as ServiceRequest[];
-      setRequests(mappedRequests);
-
       // Fetch messages to determine which requests have agency replies
       const requestIds = (requestsData || []).map(r => r.id);
       let messagesForUnread: { request_id: string; sender_type: string }[] = [];
@@ -111,16 +104,22 @@ export function MyRequestsView() {
         messagesForUnread = msgData || [];
       }
 
-      // Count unread: only count requests where client_read = false AND has agency message AND not cancelled
-      const unreadCount = (requestsData || []).filter(r => {
-        if ((r as any).client_read) return false;
-        if (r.status === 'cancelled') return false;
-        // Check if this request has any agency message
+      // Map client_read to read for the interface - only show as unread if has agency message
+      const mappedRequests = (requestsData || []).map(r => {
         const hasAgencyMessage = messagesForUnread.some(
           m => m.request_id === r.id && m.sender_type !== 'client'
         );
-        return hasAgencyMessage;
-      }).length;
+        // Only mark as unread if client_read is false AND there's an agency message
+        const isRead = (r as any).client_read || !hasAgencyMessage;
+        return {
+          ...r,
+          read: isRead
+        };
+      }) as unknown as ServiceRequest[];
+      setRequests(mappedRequests);
+
+      // Count unread: only count requests where client_read = false AND has agency message AND not cancelled
+      const unreadCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
       setUserUnreadEngagementsCount(unreadCount);
 
       // Fetch messages for all requests
@@ -234,8 +233,8 @@ export function MyRequestsView() {
                 }
                 return r;
               });
-              // Recalculate unread count
-              const newUnreadCount = newRequests.filter(r => !r.read).length;
+              // Recalculate unread count (exclude cancelled)
+              const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
               setUserUnreadEngagementsCount(newUnreadCount);
               return newRequests;
             });
