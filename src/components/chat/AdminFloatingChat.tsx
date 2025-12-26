@@ -505,9 +505,11 @@ export function AdminFloatingChat({
         
         // Get signed URL for logo if exists
         if (appData?.logo_url) {
+          console.log('Fetching signed URL for logo:', appData.logo_url);
           const { data: signed, error: signError } = await supabase.storage
             .from('agency-documents')
             .createSignedUrl(appData.logo_url, 3600);
+          console.log('Signed URL result:', { signed, signError });
           if (!signError && signed?.signedUrl) {
             logoUrl = signed.signedUrl;
           }
@@ -586,9 +588,11 @@ export function AdminFloatingChat({
         
         // Get signed URL for logo if exists
         if (appData?.logo_url) {
+          console.log('fetchAgencyDetailsBySenderId - Fetching signed URL for logo:', appData.logo_url);
           const { data: signed, error: signError } = await supabase.storage
             .from('agency-documents')
             .createSignedUrl(appData.logo_url, 3600);
+          console.log('fetchAgencyDetailsBySenderId - Signed URL result:', { signed, signError });
           if (!signError && signed?.signedUrl) {
             logoUrl = signed.signedUrl;
           }
@@ -1306,7 +1310,11 @@ export function AdminFloatingChat({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <div className="relative h-12 w-12">
-                {agencyDetails?.logo_url ? (
+                {loadingAgency ? (
+                  <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : agencyDetails?.logo_url ? (
                   <>
                     {logoLoading && (
                       <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
@@ -1317,7 +1325,6 @@ export function AdminFloatingChat({
                       src={agencyDetails.logo_url} 
                       alt={agencyDetails.agency_name}
                       className={`h-12 w-12 rounded-xl bg-muted object-contain ${logoLoading ? 'opacity-0' : 'opacity-100'}`}
-                      onLoadStart={() => setLogoLoading(true)}
                       onLoad={() => setLogoLoading(false)}
                       onError={() => setLogoLoading(false)}
                     />
