@@ -124,6 +124,10 @@ export function AdminFloatingChat({
   const [loadingClient, setLoadingClient] = useState(false);
   const [logoLoading, setLogoLoading] = useState(false);
   
+  // Presence tracking
+  const [clientPresence, setClientPresence] = useState<{ online: boolean; lastSeen: string | null }>({ online: false, lastSeen: null });
+  const [agencyPresence, setAgencyPresence] = useState<{ online: boolean; lastSeen: string | null }>({ online: false, lastSeen: null });
+  
   // Drag state
   const [localPosition, setLocalPosition] = useState(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
@@ -133,6 +137,7 @@ export function AdminFloatingChat({
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const userPresenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const isCancelled = request.status === 'cancelled';
   const hasOrder = !!request.order_id;
@@ -298,6 +303,59 @@ export function AdminFloatingChat({
       presenceChannelRef.current = null;
     };
   }, [request.id, user?.id, hasJoined]);
+
+  // User presence tracking (client and agency online status)
+  useEffect(() => {
+    const channelName = `presence-${request.id}`;
+    const channel = supabase.channel(channelName);
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        let clientOnline = false;
+        let agencyOnline = false;
+        let clientLastSeen: string | null = null;
+        let agencyLastSeen: string | null = null;
+        
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p.user_type === 'client') {
+              clientOnline = true;
+              clientLastSeen = p.online_at;
+            } else if (p.user_type === 'agency') {
+              agencyOnline = true;
+              agencyLastSeen = p.online_at;
+            }
+          });
+        });
+        
+        setClientPresence(prev => ({ 
+          online: clientOnline, 
+          lastSeen: clientOnline ? new Date().toISOString() : (prev.lastSeen || clientLastSeen)
+        }));
+        setAgencyPresence(prev => ({ 
+          online: agencyOnline, 
+          lastSeen: agencyOnline ? new Date().toISOString() : (prev.lastSeen || agencyLastSeen)
+        }));
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }: any) => {
+        leftPresences.forEach((p: any) => {
+          if (p.user_type === 'client') {
+            setClientPresence({ online: false, lastSeen: new Date().toISOString() });
+          } else if (p.user_type === 'agency') {
+            setAgencyPresence({ online: false, lastSeen: new Date().toISOString() });
+          }
+        });
+      })
+      .subscribe();
+
+    userPresenceChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      userPresenceChannelRef.current = null;
+    };
+  }, [request.id]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
@@ -860,10 +918,36 @@ export function AdminFloatingChat({
               )}
               <div className="flex flex-col">
                 <h3 className="font-semibold text-sm">{request.media_sites?.name || request.title}</h3>
-                <span className="text-xs text-muted-foreground">
-                  {request.profiles?.email}
-                  {request.agency_payouts?.agency_name && ` • ${request.agency_payouts.agency_name}`}
-                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <span className="font-medium">Client:</span>
+                    {clientPresence.online ? (
+                      <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Online now
+                      </span>
+                    ) : clientPresence.lastSeen ? (
+                      <span>Last seen {format(new Date(clientPresence.lastSeen), 'MMM d, HH:mm')}</span>
+                    ) : (
+                      <span>—</span>
+                    )}
+                  </span>
+                  {request.agency_payouts?.agency_name && (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <span className="font-medium">Agency:</span>
+                      {agencyPresence.online ? (
+                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                          Online now
+                        </span>
+                      ) : agencyPresence.lastSeen ? (
+                        <span>Last seen {format(new Date(agencyPresence.lastSeen), 'MMM d, HH:mm')}</span>
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1">
