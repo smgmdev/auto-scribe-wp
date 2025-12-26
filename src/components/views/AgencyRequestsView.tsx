@@ -298,9 +298,17 @@ export function AgencyRequestsView() {
     openGlobalChat(request as unknown as GlobalChatRequest, 'agency-request');
   };
 
-  // Filter and sort requests
+  // Filter and sort requests - separate active from cancelled
+  const activeRequests = useMemo(() => {
+    return requests.filter(r => r.status !== 'cancelled');
+  }, [requests]);
+
+  const cancelledRequests = useMemo(() => {
+    return requests.filter(r => r.status === 'cancelled');
+  }, [requests]);
+
   const sortedRequests = useMemo(() => {
-    const filtered = requests.filter((request) => {
+    const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       const titleMatch = request.title.toLowerCase().includes(query);
@@ -326,7 +334,21 @@ export function AgencyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [requests, messages, sortBy, searchQuery]);
+  }, [activeRequests, messages, sortBy, searchQuery]);
+
+  const sortedCancelledRequests = useMemo(() => {
+    const filtered = cancelledRequests.filter((request) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const titleMatch = request.title.toLowerCase().includes(query);
+      const siteMatch = request.media_site?.name.toLowerCase().includes(query);
+      return titleMatch || siteMatch;
+    });
+    
+    return filtered.sort((a, b) => {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    });
+  }, [cancelledRequests, searchQuery]);
 
   // Calculate order counts
   const activeOrders = useMemo(() => 
@@ -386,10 +408,14 @@ export function AgencyRequestsView() {
       </div>
 
       <Tabs defaultValue="requests" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="requests" className="gap-2">
             <MessageSquare className="h-4 w-4" />
-            Requests ({requests.length})
+            Requests ({activeRequests.length})
+          </TabsTrigger>
+          <TabsTrigger value="cancelled" className="gap-2">
+            <XCircle className="h-4 w-4" />
+            Cancelled ({cancelledRequests.length})
           </TabsTrigger>
           <TabsTrigger value="orders" className="gap-2">
             <ShoppingBag className="h-4 w-4" />
@@ -399,12 +425,12 @@ export function AgencyRequestsView() {
 
         <TabsContent value="requests" className="mt-6 space-y-4">
 
-          {requests.length === 0 ? (
+          {activeRequests.length === 0 ? (
             <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
                 <p className="text-muted-foreground text-center">
-                  No client requests yet. When clients submit briefs for your media sites, they'll appear here.
+                  No active client requests. When clients submit briefs for your media sites, they'll appear here.
                 </p>
               </CardContent>
             </Card>
@@ -480,6 +506,76 @@ export function AgencyRequestsView() {
                             <Clock className="h-3 w-3" />
                             <span>Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}</span>
                           </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="cancelled" className="mt-6 space-y-4">
+          {cancelledRequests.length === 0 ? (
+            <Card className="border-border/50">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground text-center">
+                  No cancelled requests. Cancelled engagements will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {sortedCancelledRequests.map((request) => {
+                const requestMessages = messages[request.id] || [];
+                const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
+                
+                return (
+                  <Card 
+                    key={request.id} 
+                    className="relative border-border/50 hover:border-border transition-colors cursor-pointer"
+                    onClick={() => handleCardClick(request)}
+                  >
+                    <CardHeader className="py-3 px-4 bg-red-500/10">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            {request.media_site?.favicon ? (
+                              <img 
+                                src={request.media_site.favicon} 
+                                alt="" 
+                                className="h-8 w-8 rounded object-cover opacity-60"
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <CardTitle className="text-base text-muted-foreground">{request.media_site?.name || request.title}</CardTitle>
+                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Cancelled
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          {request.media_site?.price !== undefined && (
+                            <span>${request.media_site.price}</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="py-3 px-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          Cancelled: {format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
+                        </span>
+                        {requestMessages.length > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                          </span>
                         )}
                       </div>
                     </CardContent>
