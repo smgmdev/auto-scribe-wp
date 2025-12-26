@@ -99,6 +99,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     accepted_at: string | null;
   } | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
+  const [, setTimerTick] = useState(0); // Force re-render for countdown timer
   
   // Drag state - use position from chat object
   const [localPosition, setLocalPosition] = useState(chat.position);
@@ -117,6 +118,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   useEffect(() => {
     setLocalPosition(chat.position);
   }, [chat.position]);
+  
+  // Timer tick for live countdown updates (every minute)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerTick(tick => tick + 1);
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, []);
   
   // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
