@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowLeft, Send, UserPlus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, Send, UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -119,13 +120,12 @@ export function AdminEngagementsView() {
     if (!selectedRequest || !user) return;
     setJoiningChat(true);
     try {
-      // Create investigation record (without order_id since this is engagement-only)
       const { error: invError } = await supabase
         .from('admin_investigations')
         .upsert({
           admin_id: user.id,
           service_request_id: selectedRequest.id,
-          order_id: selectedRequest.order_id || selectedRequest.id, // Use request id if no order
+          order_id: selectedRequest.order_id || selectedRequest.id,
           status: 'active'
         }, { onConflict: 'service_request_id' });
 
@@ -187,96 +187,7 @@ export function AdminEngagementsView() {
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
-  // Chat view when engagement is selected
-  if (selectedRequest) {
-    const isCancelled = selectedRequest.status === 'cancelled';
-    return (
-      <div className="h-[calc(100vh-200px)] flex flex-col">
-        {/* Header */}
-        <div className={`flex items-center justify-between p-4 border-b ${isCancelled ? 'bg-destructive/10' : ''}`}>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setSelectedRequest(null)}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            {selectedRequest.media_sites?.favicon && (
-              <img src={selectedRequest.media_sites.favicon} className="h-8 w-8 rounded" alt="" />
-            )}
-            <div>
-              <h3 className="font-medium">{selectedRequest.title}</h3>
-              <p className="text-sm text-muted-foreground">
-                {selectedRequest.media_sites?.name} • {selectedRequest.profiles?.email}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {getStatusBadge(selectedRequest.status)}
-            {!hasJoined && !isCancelled && (
-              <Button size="sm" onClick={handleJoinChat} disabled={joiningChat}>
-                {joiningChat ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserPlus className="h-4 w-4 mr-1" />}
-                Join Chat
-              </Button>
-            )}
-            {hasJoined && <Badge variant="outline" className="bg-green-50 text-green-700">Joined</Badge>}
-          </div>
-        </div>
-
-        {/* Cancellation notice */}
-        {isCancelled && (
-          <div className="p-4 bg-destructive/5 border-b">
-            <p className="text-sm text-destructive font-medium">This engagement has been cancelled.</p>
-            {selectedRequest.cancellation_reason && (
-              <p className="text-sm text-muted-foreground mt-1">{selectedRequest.cancellation_reason}</p>
-            )}
-          </div>
-        )}
-
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-          <div className="space-y-4">
-            {(messages[selectedRequest.id] || []).map((m) => (
-              <div key={m.id} className={`flex ${m.sender_type === 'client' ? 'justify-start' : m.sender_type === 'admin' ? 'justify-center' : 'justify-end'}`}>
-                <div className={`max-w-[80%] p-3 rounded-lg ${
-                  m.sender_type === 'client' 
-                    ? 'bg-muted' 
-                    : m.sender_type === 'agency' 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-amber-100 dark:bg-amber-900/30 border border-amber-300'
-                }`}>
-                  <p className="text-xs opacity-70 mb-1 capitalize">{m.sender_type}</p>
-                  <p className="text-sm whitespace-pre-wrap">{m.message}</p>
-                  <p className="text-xs opacity-50 mt-1">{format(new Date(m.created_at), 'MMM d, h:mm a')}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-
-        {/* Input */}
-        {hasJoined && !isCancelled && (
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Type a message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                disabled={sending}
-              />
-              <Button onClick={handleSendMessage} disabled={sending || !newMessage.trim()}>
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {!hasJoined && !isCancelled && (
-          <div className="p-4 border-t text-center text-muted-foreground text-sm">
-            Join the chat to send messages
-          </div>
-        )}
-      </div>
-    );
-  }
+  const isCancelled = selectedRequest?.status === 'cancelled';
 
   return (
     <div className="space-y-6">
@@ -366,6 +277,89 @@ export function AdminEngagementsView() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Chat Dialog */}
+      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+        <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
+          <DialogHeader className={`p-4 border-b ${isCancelled ? 'bg-destructive/10' : ''}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {selectedRequest?.media_sites?.favicon && (
+                  <img src={selectedRequest.media_sites.favicon} className="h-8 w-8 rounded" alt="" />
+                )}
+                <div>
+                  <DialogTitle>{selectedRequest?.title}</DialogTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedRequest?.media_sites?.name} • {selectedRequest?.profiles?.email}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedRequest && getStatusBadge(selectedRequest.status)}
+                {!hasJoined && !isCancelled && (
+                  <Button size="sm" onClick={handleJoinChat} disabled={joiningChat}>
+                    {joiningChat ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserPlus className="h-4 w-4 mr-1" />}
+                    Join
+                  </Button>
+                )}
+                {hasJoined && <Badge variant="outline" className="bg-green-50 text-green-700">Joined</Badge>}
+              </div>
+            </div>
+          </DialogHeader>
+
+          {isCancelled && (
+            <div className="px-4 py-2 bg-destructive/5 border-b">
+              <p className="text-sm text-destructive font-medium">This engagement has been cancelled.</p>
+              {selectedRequest?.cancellation_reason && (
+                <p className="text-sm text-muted-foreground">{selectedRequest.cancellation_reason}</p>
+              )}
+            </div>
+          )}
+
+          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+            <div className="space-y-4">
+              {selectedRequest && (messages[selectedRequest.id] || []).map((m) => (
+                <div key={m.id} className={`flex ${m.sender_type === 'client' ? 'justify-start' : m.sender_type === 'admin' ? 'justify-center' : 'justify-end'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-lg ${
+                    m.sender_type === 'client' 
+                      ? 'bg-muted' 
+                      : m.sender_type === 'agency' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-amber-100 dark:bg-amber-900/30 border border-amber-300'
+                  }`}>
+                    <p className="text-xs opacity-70 mb-1 capitalize">{m.sender_type}</p>
+                    <p className="text-sm whitespace-pre-wrap">{m.message}</p>
+                    <p className="text-xs opacity-50 mt-1">{format(new Date(m.created_at), 'MMM d, h:mm a')}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          {hasJoined && !isCancelled && (
+            <div className="p-4 border-t">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Type a message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  disabled={sending}
+                />
+                <Button onClick={handleSendMessage} disabled={sending || !newMessage.trim()}>
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!hasJoined && !isCancelled && (
+            <div className="p-4 border-t text-center text-muted-foreground text-sm">
+              Join the chat to send messages
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
