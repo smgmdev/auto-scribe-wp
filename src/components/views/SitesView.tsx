@@ -1319,15 +1319,17 @@ export function SitesView() {
                 {!isAdmin && (
                   <Button
                     size="sm"
-                    className="bg-black text-white hover:bg-gray-800 transition-colors h-7 text-xs"
+                    className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
                     onClick={(e) => {
                       e.stopPropagation();
                       setBriefMediaSite(site);
                       setBriefDialogOpen(true);
                     }}
                   >
-                    <Send className="h-3 w-3 mr-1.5" />
                     I'm Interested
+                    <span className="inline-flex w-0 overflow-hidden group-hover/btn:w-4 group-hover/btn:ml-1 transition-all duration-200">
+                      <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                    </span>
                   </Button>
                 )}
               </div>
