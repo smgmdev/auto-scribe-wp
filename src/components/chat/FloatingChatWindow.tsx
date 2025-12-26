@@ -1745,6 +1745,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+              {globalChatRequest.media_site?.agency && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                  onClick={() => fetchAgencyDetails(globalChatRequest.media_site!.agency!)}
+                  title="Agency Info"
+                >
+                  <Info className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
