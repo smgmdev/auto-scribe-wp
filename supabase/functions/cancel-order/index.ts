@@ -62,7 +62,7 @@ serve(async (req) => {
       .from("orders")
       .select(`
         *,
-        media_sites (name)
+        media_sites (id, name)
       `)
       .eq("id", order_id)
       .single();
@@ -167,6 +167,13 @@ serve(async (req) => {
 
     logStep("Credit refund recorded", { creditRefund, newCredits });
 
+    // Get the linked service request to send a cancellation message
+    const { data: serviceRequest } = await supabaseAdmin
+      .from("service_requests")
+      .select("id")
+      .eq("order_id", order_id)
+      .maybeSingle();
+
     // Cancel the linked service request (engagement)
     const { error: requestError } = await supabaseAdmin
       .from("service_requests")
@@ -180,6 +187,34 @@ serve(async (req) => {
     if (requestError) {
       logStep("Error cancelling linked engagement", { error: requestError.message });
       // Don't fail - order is already cancelled
+    }
+
+    // Send cancellation message to chat
+    if (serviceRequest) {
+      const cancellationMessage = JSON.stringify({
+        type: 'order_cancelled',
+        media_site_id: order.media_sites?.id,
+        media_site_name: mediaSiteName,
+        credits_refunded: creditRefund,
+        order_id: order_id
+      });
+
+      await supabaseAdmin
+        .from("service_messages")
+        .insert({
+          request_id: serviceRequest.id,
+          sender_type: 'client',
+          sender_id: user.id,
+          message: `[ORDER_CANCELLED]${cancellationMessage}[/ORDER_CANCELLED]`
+        });
+
+      // Mark request as unread for agency
+      await supabaseAdmin
+        .from("service_requests")
+        .update({ agency_read: false })
+        .eq("id", serviceRequest.id);
+
+      logStep("Cancellation message sent to chat");
     }
 
     logStep("Order cancelled successfully", { order_id, creditRefund });
