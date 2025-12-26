@@ -86,6 +86,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [sendingCancelRequest, setSendingCancelRequest] = useState(false);
   const [acceptingCancellation, setAcceptingCancellation] = useState(false);
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
+  const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
@@ -1340,13 +1341,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         disabled={isCancelled || !isDeliveryOverdue}
-                        onClick={() => {
-                          // TODO: Implement Open Dispute functionality
-                          toast({
-                            title: "Coming Soon",
-                            description: "Dispute functionality will be available soon.",
-                          });
-                        }}
+                        onClick={() => setDisputeDialogOpen(true)}
                       >
                         Open Dispute
                       </DropdownMenuItem>
@@ -1763,7 +1758,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Order Details Dialog */}
+      {/* Open Dispute Dialog */}
+      <AlertDialog open={disputeDialogOpen} onOpenChange={setDisputeDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Open Dispute</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                This will send a request to the dispute team of Arcana Mace. A staff member will join this chat to help resolve your issue.
+              </p>
+              <p className="text-foreground font-medium">
+                Estimated response time: 6-24 hours
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                toast({
+                  title: "Dispute Request Sent",
+                  description: "A staff member will join this chat within 6-24 hours.",
+                });
+                setDisputeDialogOpen(false);
+              }}
+            >
+              Submit Dispute Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
         <DialogContent className="max-w-md z-[250]" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
@@ -1783,12 +1808,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <DropdownMenuItem 
                     className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                     disabled={!isDeliveryOverdue}
-                    onClick={() => {
-                      toast({
-                        title: "Coming Soon",
-                        description: "Dispute functionality will be available soon.",
-                      });
-                    }}
+                    onClick={() => setDisputeDialogOpen(true)}
                   >
                     Open Dispute
                   </DropdownMenuItem>
