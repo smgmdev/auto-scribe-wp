@@ -46,6 +46,16 @@ serve(async (req) => {
 
     logStep("User authenticated", { userId: user.id });
 
+    // Check if user is admin
+    const { data: roleData } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
+    
+    const isAdmin = roleData?.role === "admin";
+    logStep("Admin check", { isAdmin });
+
     const { order_id } = await req.json();
 
     if (!order_id) {
@@ -75,9 +85,9 @@ serve(async (req) => {
       );
     }
 
-    // Check if user owns this order
-    if (order.user_id !== user.id) {
-      logStep("Unauthorized - user doesn't own order");
+    // Check if user owns this order OR is admin
+    if (order.user_id !== user.id && !isAdmin) {
+      logStep("Unauthorized - user doesn't own order and is not admin");
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
@@ -99,16 +109,16 @@ serve(async (req) => {
       );
     }
 
-    // Calculate credit refund (amount_cents = credits since 1 credit = 1 cent = $0.01... wait, 1 credit = $1 = 100 cents)
-    // Based on the code, amount_cents = creditCost * 100, so creditCost = amount_cents / 100
+    // Calculate credit refund (amount_cents = creditCost * 100, so creditCost = amount_cents / 100)
     const creditRefund = Math.round(order.amount_cents / 100);
     logStep("Calculated credit refund", { amount_cents: order.amount_cents, creditRefund });
 
-    // Get current user credits
+    // Get current user credits for the order owner (not the admin if admin is cancelling)
+    const orderOwnerId = order.user_id;
     const { data: userCredits, error: creditsError } = await supabaseAdmin
       .from("user_credits")
       .select("credits")
-      .eq("user_id", user.id)
+      .eq("user_id", orderOwnerId)
       .single();
 
     if (creditsError) {
@@ -140,29 +150,30 @@ serve(async (req) => {
       );
     }
 
-    // Refund credits to user
+    // Refund credits to order owner
     const { error: updateCreditsError } = await supabaseAdmin
       .from("user_credits")
       .update({ 
         credits: newCredits, 
         updated_at: new Date().toISOString() 
       })
-      .eq("user_id", user.id);
+      .eq("user_id", orderOwnerId);
 
     if (updateCreditsError) {
       logStep("Error refunding credits", { error: updateCreditsError.message });
       // Don't fail - order is already cancelled
     }
 
-    // Record credit refund transaction
+    // Record credit refund transaction for the order owner
     const mediaSiteName = order.media_sites?.name || 'Unknown';
+    const cancelledBy = isAdmin ? 'admin' : 'user';
     await supabaseAdmin
       .from("credit_transactions")
       .insert({
-        user_id: user.id,
+        user_id: orderOwnerId,
         amount: creditRefund,
         type: "refund",
-        description: `Order cancelled - ${mediaSiteName}`
+        description: `Order cancelled by ${cancelledBy} - ${mediaSiteName}`
       });
 
     logStep("Credit refund recorded", { creditRefund, newCredits });
