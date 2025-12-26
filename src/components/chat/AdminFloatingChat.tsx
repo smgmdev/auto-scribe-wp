@@ -565,10 +565,10 @@ export function AdminFloatingChat({
         message: leaveMessage
       });
 
-      // Update investigation status
+      // Delete investigation record when admin leaves
       await supabase
         .from('admin_investigations')
-        .update({ status: 'left' })
+        .delete()
         .eq('service_request_id', request.id)
         .eq('admin_id', user.id);
 
