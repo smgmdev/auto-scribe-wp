@@ -1578,7 +1578,7 @@ export function GlobalChatDialog() {
               <div className="p-4 text-center text-muted-foreground bg-muted/50 border-t space-y-1">
                 <p>This engagement has been cancelled.</p>
                 {globalChatRequest?.cancellation_reason && (
-                  <p className="text-sm italic">Reason: {globalChatRequest.cancellation_reason}</p>
+                  <p className="text-sm">Reason: {globalChatRequest.cancellation_reason}</p>
                 )}
               </div>
             ) : null}
