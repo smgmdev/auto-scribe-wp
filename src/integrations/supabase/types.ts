@@ -524,6 +524,7 @@ export type Database = {
           amount_cents: number
           created_at: string
           delivered_at: string | null
+          delivery_deadline: string | null
           delivery_notes: string | null
           delivery_status: string
           delivery_url: string | null
@@ -544,6 +545,7 @@ export type Database = {
           amount_cents: number
           created_at?: string
           delivered_at?: string | null
+          delivery_deadline?: string | null
           delivery_notes?: string | null
           delivery_status?: string
           delivery_url?: string | null
@@ -564,6 +566,7 @@ export type Database = {
           amount_cents?: number
           created_at?: string
           delivered_at?: string | null
+          delivery_deadline?: string | null
           delivery_notes?: string | null
           delivery_status?: string
           delivery_url?: string | null
