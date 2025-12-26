@@ -93,7 +93,7 @@ export function AgencyRequestsView() {
         title,
         description,
         status,
-        read,
+        agency_read,
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
@@ -103,7 +103,12 @@ export function AgencyRequestsView() {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setRequests(data as unknown as ServiceRequest[]);
+      // Map agency_read to read for the interface
+      const mappedRequests = data.map(r => ({
+        ...r,
+        read: (r as any).agency_read
+      })) as unknown as ServiceRequest[];
+      setRequests(mappedRequests);
 
       // Fetch messages for all requests
       let messagesByRequest: Record<string, ServiceMessage[]> = {};
@@ -124,9 +129,8 @@ export function AgencyRequestsView() {
         setMessages(messagesByRequest);
       }
 
-      // Count unread: simply count requests where read = false
-      // (new requests start as unread, and we mark as unread when new client message arrives)
-      const unreadCount = data.filter(r => !r.read).length;
+      // Count unread: simply count requests where agency_read = false
+      const unreadCount = data.filter(r => !(r as any).agency_read).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
 
       // Fetch orders for this agency's service requests
@@ -192,9 +196,9 @@ export function AgencyRequestsView() {
           const updated = payload.new as any;
           const old = payload.old as any;
           
-          // Only sync read status when marked as read (not unread from external source)
-          const readChanged = old?.read !== updated.read;
-          const markedAsRead = readChanged && updated.read === true;
+          // Only sync agency_read status when it changes to true (not when client sets client_read)
+          const agencyReadChanged = old?.agency_read !== updated.agency_read;
+          const markedAsRead = agencyReadChanged && updated.agency_read === true;
           
           // Update local state with the new read status - only sync if marking as read
           setRequests(prev => {
@@ -275,7 +279,7 @@ export function AgencyRequestsView() {
   const markAsRead = async (requestId: string) => {
     await supabase
       .from('service_requests')
-      .update({ read: true })
+      .update({ agency_read: true })
       .eq('id', requestId);
     
     setRequests(prev => prev.map(r => 

@@ -223,21 +223,25 @@ export function GlobalChatDialog() {
     }
   };
 
-  // Clear unread when dialog opens and mark request as read
+  // Clear unread when dialog opens and mark request as read for the appropriate party
   useEffect(() => {
     if (globalChatOpen && globalChatRequest) {
       clearUnreadMessageCount(globalChatRequest.id);
       
-      // Mark request as read in database
+      // Mark request as read in database - use client_read for clients, agency_read for agencies
+      const updateField = globalChatType === 'agency-request' 
+        ? { agency_read: true } 
+        : { client_read: true };
+      
       supabase
         .from('service_requests')
-        .update({ read: true })
+        .update(updateField)
         .eq('id', globalChatRequest.id)
         .then(() => {
-          console.log('[GlobalChatDialog] Marked request as read:', globalChatRequest.id);
+          console.log('[GlobalChatDialog] Marked request as read:', globalChatRequest.id, globalChatType);
         });
     }
-  }, [globalChatOpen, globalChatRequest?.id, clearUnreadMessageCount]);
+  }, [globalChatOpen, globalChatRequest?.id, globalChatType, clearUnreadMessageCount]);
 
   // Fetch sender ID (agency_payout_id or user_id)
   useEffect(() => {
@@ -793,11 +797,15 @@ export function GlobalChatDialog() {
         .single();
       
       if (requestData) {
-        // Mark the request as unread for the recipient in the database
-        // This ensures the unread state persists even if they're offline
+        // Mark the request as unread for the RECIPIENT in the database
+        // If sender is client, mark agency_read as false. If sender is agency, mark client_read as false.
+        const updateField = senderType === 'client' 
+          ? { agency_read: false } 
+          : { client_read: false };
+        
         await supabase
           .from('service_requests')
-          .update({ read: false })
+          .update(updateField)
           .eq('id', globalChatRequest.id);
         
         // Determine recipient based on sender type
@@ -914,9 +922,10 @@ export function GlobalChatDialog() {
         const isSelfNotification = requestData.user_id === senderId || requestData.user_id === user?.id;
         
         if (!isSelfNotification) {
+          // Mark client_read as false since agency is sending order to client
           await supabase
             .from('service_requests')
-            .update({ read: false })
+            .update({ client_read: false })
             .eq('id', globalChatRequest.id);
 
           const notifyChannel = supabase.channel(`notify-${requestData.user_id}`);
@@ -1107,9 +1116,15 @@ export function GlobalChatDialog() {
         .single();
       
       if (requestData) {
+        // Mark the request as unread for the RECIPIENT
+        // If sender is client, mark agency_read as false. If sender is agency, mark client_read as false.
+        const updateField = senderType === 'client' 
+          ? { agency_read: false } 
+          : { client_read: false };
+        
         await supabase
           .from('service_requests')
-          .update({ read: false })
+          .update(updateField)
           .eq('id', globalChatRequest.id);
         
         const recipientId = senderType === 'client' 
