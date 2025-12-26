@@ -61,7 +61,6 @@ export function MyRequestsView() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
-  const [paying, setPaying] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -276,37 +275,6 @@ export function MyRequestsView() {
     };
   }, [user?.id]);
 
-  const proceedToPayment = async (e: React.MouseEvent, request: ServiceRequest) => {
-    e.stopPropagation();
-    setPaying(request.id);
-    try {
-      const response = await supabase.functions.invoke('create-escrow-payment', {
-        body: { 
-          media_site_id: request.media_site ? request.media_site.name : request.id,
-          service_request_id: request.id
-        }
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
-
-      if (response.data?.url) {
-        window.open(response.data.url, '_blank');
-        toast({
-          title: 'Redirecting to checkout',
-          description: 'Complete your payment in the new tab.',
-        });
-      }
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Payment failed',
-        description: error.message,
-      });
-    } finally {
-      setPaying(null);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -527,23 +495,6 @@ export function MyRequestsView() {
                           </div>
                           <div className="flex items-center gap-3">
                             {getStatusBadge(request.status)}
-                            {request.status === 'accepted' && (
-                              <Button 
-                                size="sm"
-                                className="bg-green-600 hover:bg-green-700"
-                                onClick={(e) => proceedToPayment(e, request)}
-                                disabled={paying === request.id}
-                              >
-                                {paying === request.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <>
-                                    <CreditCard className="h-4 w-4 mr-1" />
-                                    Pay ${request.media_site?.price}
-                                  </>
-                                )}
-                              </Button>
-                            )}
                           </div>
                         </div>
                       </CardHeader>
