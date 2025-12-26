@@ -263,8 +263,14 @@ export function OrdersView() {
           </div>
           
           <div className="flex gap-2">
-            {getStatusBadge(order.status)}
-            {getDeliveryBadge(order.delivery_status)}
+            {order.status === 'cancelled' ? (
+              <Badge variant="destructive">Cancelled</Badge>
+            ) : (
+              <>
+                {getStatusBadge(order.status)}
+                {getDeliveryBadge(order.delivery_status)}
+              </>
+            )}
           </div>
 
           <Button variant="ghost" size="icon" className="h-8 w-8">
