@@ -496,15 +496,13 @@ export function Sidebar({
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-between px-4 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        "w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                         isActive && "text-[#3872e0] font-medium"
                       )}
                       onClick={() => toggleMenu(item.id)}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
-                        <span className="truncate">{item.label}</span>
-                      </div>
+                      <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
+                      <span className="truncate flex-1 text-left">{item.label}</span>
                       <div className="flex items-center gap-2">
                         {agencyDropdownCount > 0 && (
                           <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
@@ -549,15 +547,13 @@ export function Sidebar({
                               key={subItem.id}
                               variant="ghost"
                               className={cn(
-                                "w-full justify-between px-4 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                "w-full justify-start gap-3 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                                 isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                               )}
                               onClick={() => handleNavClick(subItem.id)}
                             >
-                              <div className="flex items-center gap-3">
-                                <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
-                                <span className="truncate">{subItem.label}</span>
-                              </div>
+                              <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
+                              <span className="truncate flex-1 text-left">{subItem.label}</span>
                               {showAgencyBadge && (
                                 <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyBadgeCount}
@@ -597,15 +593,13 @@ export function Sidebar({
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    "w-full justify-between px-4 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    "w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                     isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                   )}
                   onClick={() => handleNavClick(item.id)}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
-                    <span className="truncate">{item.label}</span>
-                  </div>
+                  <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
+                  <span className="truncate">{item.label}</span>
                 </Button>
               );
             })}
