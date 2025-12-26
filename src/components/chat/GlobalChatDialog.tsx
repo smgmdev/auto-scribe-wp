@@ -1434,8 +1434,43 @@ export function GlobalChatDialog() {
               </div>
             </div>
           </DialogHeader>
+          
+          {/* Order Status Banner */}
+          {globalChatRequest.order && (
+            <div className="mx-4 mt-3 mb-0 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Order Placed</p>
+                    <p className="text-xs text-muted-foreground">
+                      {globalChatRequest.order.delivery_status === 'pending' && 'Awaiting delivery'}
+                      {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered - Awaiting acceptance'}
+                      {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
+                    </p>
+                  </div>
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className={
+                    globalChatRequest.order.delivery_status === 'accepted' 
+                      ? 'bg-green-600 text-white' 
+                      : globalChatRequest.order.delivery_status === 'delivered'
+                      ? 'bg-purple-600/20 text-purple-600'
+                      : 'bg-blue-600/20 text-blue-600'
+                  }
+                >
+                  {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
+                  {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered'}
+                  {globalChatRequest.order.delivery_status === 'pending' && 'In Progress'}
+                </Badge>
+              </div>
+            </div>
+          )}
+          
           <div className="px-4 pt-0">
-            {/* Messages */}
             <ScrollArea className="h-[450px] w-full border-y -mx-4 px-4" style={{ width: 'calc(100% + 2rem)' }}>
               {loadingMessages ? (
                 <div className="flex flex-col items-center justify-center h-full py-12">
