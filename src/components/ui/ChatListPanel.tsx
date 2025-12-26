@@ -92,7 +92,7 @@ export function ChatListPanel() {
         title,
         description,
         status,
-        read,
+        client_read,
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
@@ -128,6 +128,7 @@ export function ChatListPanel() {
         const lastMsg = lastMessages[item.id];
         return {
           ...item,
+          read: (item as any).client_read, // Map client_read to read for UI
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount: 0,
@@ -153,7 +154,7 @@ export function ChatListPanel() {
         title,
         description,
         status,
-        read,
+        agency_read,
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
@@ -195,6 +196,7 @@ export function ChatListPanel() {
         const lastMsg = lastMessages[item.id];
         return {
           ...item,
+          read: (item as any).agency_read, // Map agency_read to read for UI
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount: 0,
@@ -398,23 +400,26 @@ export function ChatListPanel() {
       useAppStore.getState().incrementMinimizedChatUnread(request_id);
       playMessageSound();
     } else if (!isDialogOpen) {
-      // Mark request as unread in database (async, non-blocking)
-      supabase
-        .from('service_requests')
-        .update({ read: false })
-        .eq('id', request_id);
-      
-      incrementUnreadMessageCount(request_id);
-      
-      // For user engagements (receiving from agency)
+      // Mark request as unread for the appropriate party in database (async, non-blocking)
+      // For user engagements (receiving from agency), mark client_read as false
+      // For agency requests (receiving from client), mark agency_read as false
       if (isMyEngagement && isFromAgency) {
+        supabase
+          .from('service_requests')
+          .update({ client_read: false })
+          .eq('id', request_id);
         incrementUserUnreadEngagementsCount();
       }
       
-      // For agency service requests (receiving from client)
       if (isServiceRequest && isFromClient) {
+        supabase
+          .from('service_requests')
+          .update({ agency_read: false })
+          .eq('id', request_id);
         incrementAgencyUnreadServiceRequestsCount();
       }
+      
+      incrementUnreadMessageCount(request_id);
       
       toast({
         title: isFromAgency ? 'New Message' : 'New Client Message',
@@ -631,23 +636,26 @@ export function ChatListPanel() {
           } else if (!isDialogOpen) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
-            // Mark request as unread in database - this triggers sync to all views
-            await supabase
-              .from('service_requests')
-              .update({ read: false })
-              .eq('id', requestId);
-            
-            incrementUnreadMessageCount(requestId);
-            
-            // For user engagements receiving from agency, increment sidebar count
+            // Mark request as unread for the appropriate party in database
+            // For user engagements receiving from agency, mark client_read as false
+            // For agency service requests receiving from client, mark agency_read as false
             if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
+              await supabase
+                .from('service_requests')
+                .update({ client_read: false })
+                .eq('id', requestId);
               incrementUserUnreadEngagementsCount();
             }
             
-            // For agency service requests receiving from client, increment sidebar count
             if (isServiceRequest && senderType === 'client') {
+              await supabase
+                .from('service_requests')
+                .update({ agency_read: false })
+                .eq('id', requestId);
               incrementAgencyUnreadServiceRequestsCount();
             }
+            
+            incrementUnreadMessageCount(requestId);
             
             // Get request info for toast
             const request = myEngagementsRef.current.find(e => e.id === requestId) ||
@@ -720,18 +728,21 @@ export function ChatListPanel() {
     openGlobalChat(item as unknown as GlobalChatRequest, type);
     
     // Mark as read in database asynchronously (don't await)
+    // Use client_read for my-request (user's engagements) and agency_read for agency-request
     if (!item.read) {
-      supabase
-        .from('service_requests')
-        .update({ read: true })
-        .eq('id', item.id);
-      
-      // Update local state immediately
       if (type === 'my-request') {
+        supabase
+          .from('service_requests')
+          .update({ client_read: true })
+          .eq('id', item.id);
         setMyEngagements(prev => prev.map(e => 
           e.id === item.id ? { ...e, read: true } : e
         ));
       } else {
+        supabase
+          .from('service_requests')
+          .update({ agency_read: true })
+          .eq('id', item.id);
         setServiceRequests(prev => prev.map(r => 
           r.id === item.id ? { ...r, read: true } : r
         ));

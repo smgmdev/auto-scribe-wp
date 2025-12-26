@@ -82,7 +82,7 @@ export function MyRequestsView() {
           title,
           description,
           status,
-          read,
+          client_read,
           created_at,
           updated_at,
           media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
@@ -93,10 +93,15 @@ export function MyRequestsView() {
 
       if (reqError) throw reqError;
 
-      setRequests((requestsData as unknown as ServiceRequest[]) || []);
+      // Map client_read to read for the interface and set data
+      const mappedRequests = (requestsData || []).map(r => ({
+        ...r,
+        read: (r as any).client_read
+      })) as unknown as ServiceRequest[];
+      setRequests(mappedRequests);
 
-      // Count unread: simply count requests where read = false
-      const unreadCount = (requestsData || []).filter(r => !r.read).length;
+      // Count unread: simply count requests where client_read = false
+      const unreadCount = (requestsData || []).filter(r => !(r as any).client_read).length;
       setUserUnreadEngagementsCount(unreadCount);
 
       // Fetch messages for all requests
@@ -197,10 +202,9 @@ export function MyRequestsView() {
               }
             }
             
-            // Only sync read status when marked as read (not unread from external source)
-            // This prevents the agency's unread state from affecting the user
-            const readChanged = old?.read !== updated.read;
-            const markedAsRead = readChanged && updated.read === true;
+            // Only sync read status when client_read changes to true (not when agency sets agency_read)
+            const clientReadChanged = old?.client_read !== updated.client_read;
+            const markedAsRead = clientReadChanged && updated.client_read === true;
             
             // Update local state - only sync read if marking as read
             setRequests(prev => {
@@ -309,10 +313,11 @@ export function MyRequestsView() {
     openGlobalChat(request as unknown as GlobalChatRequest, 'my-request');
     
     // Mark the request as read in the database asynchronously (don't await)
+    // Use client_read for user's engagements
     if (!request.read) {
       supabase
         .from('service_requests')
-        .update({ read: true })
+        .update({ client_read: true })
         .eq('id', request.id)
         .then(() => {
           // Decrement the sidebar notification count
