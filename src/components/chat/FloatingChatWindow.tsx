@@ -1648,19 +1648,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {!isCancelled && globalChatRequest.status !== 'rejected' && (
           <div className="border-t">
             {isAdminInvestigating ? (
-              <div className="flex items-center justify-center p-4 bg-muted/30">
-                <Button
+              <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
+                <button
                   onClick={handleAdminJoinChat}
                   disabled={joiningChat}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {joiningChat ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <MessageSquare className="h-4 w-4 mr-2" />
+                    <MessageSquare className="h-3.5 w-3.5" />
                   )}
                   Join Chat
-                </Button>
+                </button>
               </div>
             ) : (
               <>
