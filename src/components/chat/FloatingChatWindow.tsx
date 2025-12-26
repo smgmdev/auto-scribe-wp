@@ -2083,11 +2083,31 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {/* Input */}
         {!isCancelled && globalChatRequest.status !== 'rejected' && (
           <div className="border-t">
-            {hasOpenDispute ? (
+            {hasOpenDispute && !isAdmin ? (
               <div className="py-2 px-4 text-center bg-muted/30">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Client has opened a dispute. Arcana Mace Staff will take 6-24h to investigate the dispute. Arcana Mace Staff may contact Client and the Agency separately for details.
                 </p>
+              </div>
+            ) : hasOpenDispute && isAdmin && !adminJoined ? (
+              <div className="py-2 px-4 bg-muted/30">
+                <p className="text-xs text-muted-foreground leading-relaxed text-center mb-2">
+                  Client has opened a dispute. Arcana Mace Staff will take 6-24h to investigate the dispute.
+                </p>
+                <div className="flex items-center justify-center">
+                  <button
+                    onClick={handleAdminJoinChat}
+                    disabled={joiningChat}
+                    className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {joiningChat ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <MessageSquare className="h-3.5 w-3.5" />
+                    )}
+                    Join Chat
+                  </button>
+                </div>
               </div>
             ) : isAdminInvestigating ? (
               <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
