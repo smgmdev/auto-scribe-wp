@@ -122,6 +122,17 @@
     overflow-x: hidden;
   }
 
+  /* Prevent scroll chaining on all scrollable elements */
+  [data-radix-scroll-area-viewport],
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-scroll,
+  .overflow-y-scroll,
+  .overflow-x-scroll {
+    overscroll-behavior: contain;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-body;
   }
