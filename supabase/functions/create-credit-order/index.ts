@@ -206,6 +206,30 @@ serve(async (req) => {
       // Don't fail the request, just log
     }
 
+    // Send a chat message from the client indicating the order was placed
+    const orderConfirmationMessage = JSON.stringify({
+      type: 'order_placed',
+      media_site_id: media_site_id,
+      media_site_name: mediaSite.name,
+      credits_used: creditCost,
+      order_id: order.id
+    });
+
+    await supabaseAdmin
+      .from("service_messages")
+      .insert({
+        request_id: service_request_id,
+        sender_type: 'client',
+        sender_id: user.id,
+        message: `[ORDER_PLACED]${orderConfirmationMessage}[/ORDER_PLACED]`
+      });
+
+    // Mark request as unread for agency
+    await supabaseAdmin
+      .from("service_requests")
+      .update({ agency_read: false })
+      .eq("id", service_request_id);
+
     console.log(`Successfully created order ${order.id} for user ${user.id}. Credits deducted: ${creditCost}. New balance: ${newCredits}`);
 
     return new Response(

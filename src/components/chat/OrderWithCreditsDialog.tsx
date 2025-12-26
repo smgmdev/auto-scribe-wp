@@ -5,6 +5,7 @@ import { Loader2, Coins, ShoppingCart, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAppStore } from '@/stores/appStore';
 
 interface MediaSiteInfo {
   id: string;
@@ -31,6 +32,7 @@ export function OrderWithCreditsDialog({
   const [purchasing, setPurchasing] = useState(false);
   const { credits, refreshCredits } = useAuth();
   const { toast } = useToast();
+  const { updateGlobalChatRequest } = useAppStore();
 
   const creditCost = mediaSite?.price || 0;
   const hasEnoughCredits = (credits || 0) >= creditCost;
@@ -52,6 +54,16 @@ export function OrderWithCreditsDialog({
 
       if (data?.success) {
         await refreshCredits();
+        
+        // Update the global chat request to reflect that an order exists
+        updateGlobalChatRequest({ 
+          order: { 
+            id: data.order_id, 
+            status: 'paid',
+            delivery_status: 'pending'
+          } 
+        });
+        
         toast({
           title: "Order Placed",
           description: `Successfully ordered from ${mediaSite.name}. ${data.credits_deducted} credits used.`,

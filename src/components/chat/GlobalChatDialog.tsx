@@ -474,6 +474,18 @@ export function GlobalChatDialog() {
     return null;
   };
 
+  const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string } | null => {
+    const match = message.match(/\[ORDER_PLACED\](.*?)\[\/ORDER_PLACED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const handleBuyOrder = async (orderData: { media_site_id: string; request_id: string }) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -557,7 +569,37 @@ export function GlobalChatDialog() {
 
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: { originalId: string | null; quoteText: string; replyText: string } | null) => {
     const orderData = parseOrderRequest(msg.message);
+    const orderPlacedData = parseOrderPlaced(msg.message);
     const attachmentData = parseFileAttachment(msg.message);
+
+    // Handle ORDER_PLACED messages (confirmation from client)
+    if (orderPlacedData) {
+      return (
+        <div className="w-full">
+          <div className={`rounded-lg border p-3.5 ${isOwnMessage ? 'bg-green-500/20 border-green-500/40' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'}`}>
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isOwnMessage ? 'bg-green-500/30' : 'bg-green-100 dark:bg-green-800'}`}>
+                <CheckCircle className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className={`font-semibold ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  Order Placed
+                </h4>
+                <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  {orderPlacedData.media_site_name}
+                </p>
+                <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                  {orderPlacedData.credits_used.toLocaleString()} credits used
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs opacity-50 mt-2">
+            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+          </p>
+        </div>
+      );
+    }
 
     if (orderData) {
       return (
