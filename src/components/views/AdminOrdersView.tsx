@@ -476,11 +476,28 @@ export function AdminOrdersView() {
     }
   };
 
-  const openDetailsDialog = (order: Order) => {
+  const openDetailsDialog = async (order: Order) => {
     setSelectedOrder(order);
     setDetailsDialogOpen(true);
     // Mark order as read when opening details
     markOrderAsRead(order.id);
+    
+    // Also mark dispute as read if this is a disputed order
+    const dispute = disputes.find(d => d.order_id === order.id);
+    if (dispute && !dispute.read) {
+      await supabase
+        .from('disputes')
+        .update({ read: true })
+        .eq('id', dispute.id);
+      
+      // Update local state
+      setDisputes(prev => prev.map(d => 
+        d.id === dispute.id ? { ...d, read: true } : d
+      ));
+      
+      // Decrement global count
+      decrementUnreadDisputesCount();
+    }
   };
 
   const filteredOrders = orders.filter(order => {
