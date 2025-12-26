@@ -129,44 +129,28 @@ export function OrdersView() {
     
     setCancellingOrder(true);
     try {
-      // Cancel the order
-      const { error: orderError } = await supabase
-        .from('orders')
-        .update({ 
-          status: 'cancelled',
-          delivery_status: 'cancelled'
-        })
-        .eq('id', selectedOrder.id);
-      
-      if (orderError) throw orderError;
-      
-      // Also cancel the linked service_request (engagement)
-      const { error: requestError } = await supabase
-        .from('service_requests')
-        .update({ 
-          status: 'cancelled',
-          cancellation_reason: 'Order was cancelled by user'
-        })
-        .eq('order_id', selectedOrder.id);
-      
-      if (requestError) {
-        console.error('Error cancelling linked engagement:', requestError);
-      }
-      
+      // Call edge function to cancel order and refund credits
+      const { data, error } = await supabase.functions.invoke('cancel-order', {
+        body: { order_id: selectedOrder.id }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
       toast({
         title: "Order Cancelled",
-        description: "The order and linked engagement have been cancelled.",
+        description: `Order cancelled. ${data.credits_refunded} credits have been refunded to your account.`,
       });
       
       setCancelOrderDialogOpen(false);
       setSelectedOrder(null);
       fetchOrders();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error cancelling order:', error);
       toast({
         variant: 'destructive',
         title: "Error",
-        description: "Failed to cancel order. Please try again.",
+        description: error.message || "Failed to cancel order. Please try again.",
       });
     } finally {
       setCancellingOrder(false);
