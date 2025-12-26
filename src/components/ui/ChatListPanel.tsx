@@ -1508,6 +1508,9 @@ export function ChatListPanel() {
                               {formatTime(dispute.created_at)}
                             </span>
                           </div>
+                          {!dispute.read && (
+                            <p className="text-xs text-destructive font-medium mt-0.5">New Dispute</p>
+                          )}
                           <p className="text-xs truncate mt-0.5 flex items-center gap-1 text-destructive">
                             <AlertTriangle className="h-3 w-3 shrink-0" />
                             Dispute - {dispute.reason?.slice(0, 30) || 'Delivery overdue'}
