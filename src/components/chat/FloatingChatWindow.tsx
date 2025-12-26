@@ -130,6 +130,31 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     setLocalPosition(chat.position);
   }, [chat.position]);
   
+  // Escape key to close the focused chat
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // Only close if this is the topmost chat (highest z-index)
+        const allChats = document.querySelectorAll('[data-chat-window]');
+        let maxZ = 0;
+        let topChatId = '';
+        allChats.forEach((el) => {
+          const z = parseInt((el as HTMLElement).style.zIndex || '0', 10);
+          if (z > maxZ) {
+            maxZ = z;
+            topChatId = el.getAttribute('data-chat-id') || '';
+          }
+        });
+        if (topChatId === globalChatRequest.id) {
+          closeGlobalChat(globalChatRequest.id);
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [globalChatRequest.id, closeGlobalChat]);
+  
   // Timer tick for live countdown updates (every second)
   useEffect(() => {
     const interval = setInterval(() => {
@@ -1677,6 +1702,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     <>
       {/* Floating Chat Window */}
       <div
+        data-chat-window
+        data-chat-id={globalChatRequest.id}
         className="fixed bg-background border rounded-t-lg shadow-2xl shadow-black/25 flex flex-col overflow-hidden"
         style={{
           width: '600px',
