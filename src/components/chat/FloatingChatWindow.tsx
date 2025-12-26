@@ -351,6 +351,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     fetchMessages();
   }, [globalChatRequest?.id]);
 
+  // Fetch latest order data to ensure delivery_deadline is loaded
+  useEffect(() => {
+    const fetchOrderData = async () => {
+      if (!globalChatRequest?.order?.id) return;
+      
+      const { data } = await supabase
+        .from('orders')
+        .select('id, status, delivery_status, delivery_deadline')
+        .eq('id', globalChatRequest.order.id)
+        .maybeSingle();
+      
+      if (data && data.delivery_deadline !== globalChatRequest.order.delivery_deadline) {
+        updateGlobalChatRequest({ 
+          order: { 
+            ...globalChatRequest.order,
+            delivery_deadline: data.delivery_deadline 
+          } 
+        }, globalChatRequest.id);
+      }
+    };
+    fetchOrderData();
+  }, [globalChatRequest?.order?.id]);
+
   // Real-time message subscription
   useEffect(() => {
     if (!globalChatRequest) return;
