@@ -992,40 +992,32 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={async () => {
-                    if (!globalChatRequest.order) return;
-                    setLoadingOrderDetails(true);
-                    setOrderDetailsOpen(true);
-                    const { data } = await supabase
-                      .from('orders')
-                      .select('id, amount_cents, status, delivery_status, delivery_url, delivery_notes, created_at, paid_at, delivered_at, accepted_at')
-                      .eq('id', globalChatRequest.order.id)
-                      .maybeSingle();
-                    setOrderDetails(data);
-                    setLoadingOrderDetails(false);
-                  }}
-                  className="text-xs text-white/80 hover:text-white hover:underline flex items-center gap-1"
-                >
-                  View Details
-                  <ExternalLink className="h-3 w-3" />
-                </button>
-                <Badge 
-                  variant="secondary" 
-                  className={
-                    globalChatRequest.order.delivery_status === 'accepted' 
-                      ? 'bg-green-500 text-white' 
-                      : globalChatRequest.order.delivery_status === 'delivered'
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-white text-black'
-                  }
-                >
-                  {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
-                  {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered'}
-                  {globalChatRequest.order.delivery_status === 'pending' && 'In Progress'}
-                </Badge>
-              </div>
+              <Badge 
+                variant="secondary" 
+                className={`cursor-pointer ${
+                  globalChatRequest.order.delivery_status === 'accepted' 
+                    ? 'bg-green-500 text-white hover:bg-green-600' 
+                    : globalChatRequest.order.delivery_status === 'delivered'
+                    ? 'bg-purple-500 text-white hover:bg-purple-600'
+                    : 'bg-white text-black hover:bg-white/80'
+                }`}
+                onClick={async () => {
+                  if (!globalChatRequest.order) return;
+                  setLoadingOrderDetails(true);
+                  setOrderDetailsOpen(true);
+                  const { data } = await supabase
+                    .from('orders')
+                    .select('id, amount_cents, status, delivery_status, delivery_url, delivery_notes, created_at, paid_at, delivered_at, accepted_at')
+                    .eq('id', globalChatRequest.order.id)
+                    .maybeSingle();
+                  setOrderDetails(data);
+                  setLoadingOrderDetails(false);
+                }}
+              >
+                {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
+                {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered'}
+                {globalChatRequest.order.delivery_status === 'pending' && 'View Details'}
+              </Badge>
             </div>
           </div>
         )}
