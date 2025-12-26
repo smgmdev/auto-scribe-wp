@@ -978,31 +978,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .single();
       
       if (requestData) {
-        const updateField = senderType === 'client' 
-          ? { agency_read: false } 
-          : { client_read: false };
-        
-        await supabase
-          .from('service_requests')
-          .update(updateField)
-          .eq('id', globalChatRequest.id);
-        
-        const recipientId = senderType === 'client' 
-          ? requestData.agency_payout_id 
-          : requestData.user_id;
-        
-        const isSelfNotification = recipientId === senderId || recipientId === user?.id;
-        
-        if (recipientId && !isSelfNotification) {
-          const notifyChannel = supabase.channel(`notify-${recipientId}`);
-          notifyChannel.subscribe(async (status) => {
+        // For admin messages, notify both client and agency
+        if (senderType === 'admin') {
+          // Mark both as unread
+          await supabase
+            .from('service_requests')
+            .update({ client_read: false, agency_read: false })
+            .eq('id', globalChatRequest.id);
+          
+          // Notify client
+          const clientNotifyChannel = supabase.channel(`notify-${requestData.user_id}`);
+          clientNotifyChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-              await notifyChannel.send({
+              await clientNotifyChannel.send({
                 type: 'broadcast',
                 event: 'new-message',
                 payload: {
                   request_id: globalChatRequest.id,
-                  sender_type: senderType,
+                  sender_type: 'admin',
                   sender_id: senderId,
                   message: newMessage.trim().substring(0, 100),
                   title: globalChatRequest.title,
@@ -1010,9 +1003,70 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   media_site_favicon: globalChatRequest.media_site?.favicon
                 }
               });
-              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+              setTimeout(() => supabase.removeChannel(clientNotifyChannel), 500);
             }
           });
+          
+          // Notify agency
+          if (requestData.agency_payout_id) {
+            const agencyNotifyChannel = supabase.channel(`notify-${requestData.agency_payout_id}`);
+            agencyNotifyChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await agencyNotifyChannel.send({
+                  type: 'broadcast',
+                  event: 'new-message',
+                  payload: {
+                    request_id: globalChatRequest.id,
+                    sender_type: 'admin',
+                    sender_id: senderId,
+                    message: newMessage.trim().substring(0, 100),
+                    title: globalChatRequest.title,
+                    media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                    media_site_favicon: globalChatRequest.media_site?.favicon
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 500);
+              }
+            });
+          }
+        } else {
+          // Regular client/agency message - notify the other party
+          const updateField = senderType === 'client' 
+            ? { agency_read: false } 
+            : { client_read: false };
+          
+          await supabase
+            .from('service_requests')
+            .update(updateField)
+            .eq('id', globalChatRequest.id);
+          
+          const recipientId = senderType === 'client' 
+            ? requestData.agency_payout_id 
+            : requestData.user_id;
+          
+          const isSelfNotification = recipientId === senderId || recipientId === user?.id;
+          
+          if (recipientId && !isSelfNotification) {
+            const notifyChannel = supabase.channel(`notify-${recipientId}`);
+            notifyChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await notifyChannel.send({
+                  type: 'broadcast',
+                  event: 'new-message',
+                  payload: {
+                    request_id: globalChatRequest.id,
+                    sender_type: senderType,
+                    sender_id: senderId,
+                    message: newMessage.trim().substring(0, 100),
+                    title: globalChatRequest.title,
+                    media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                    media_site_favicon: globalChatRequest.media_site?.favicon
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+              }
+            });
+          }
         }
       }
       
@@ -1146,31 +1200,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .single();
 
       if (requestData) {
-        const updateField = senderType === 'client' 
-          ? { agency_read: false } 
-          : { client_read: false };
-
-        await supabase
-          .from('service_requests')
-          .update(updateField)
-          .eq('id', globalChatRequest.id);
-
-        const recipientId = senderType === 'client' 
-          ? requestData.agency_payout_id 
-          : requestData.user_id;
-
-        const isSelfNotification = recipientId === senderId || recipientId === user?.id;
-
-        if (recipientId && !isSelfNotification) {
-          const notifyChannel = supabase.channel(`notify-${recipientId}`);
-          notifyChannel.subscribe(async (status) => {
+        // For admin messages, notify both client and agency
+        if (senderType === 'admin') {
+          // Mark both as unread
+          await supabase
+            .from('service_requests')
+            .update({ client_read: false, agency_read: false })
+            .eq('id', globalChatRequest.id);
+          
+          // Notify client
+          const clientNotifyChannel = supabase.channel(`notify-${requestData.user_id}`);
+          clientNotifyChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-              await notifyChannel.send({
+              await clientNotifyChannel.send({
                 type: 'broadcast',
                 event: 'new-message',
                 payload: {
                   request_id: globalChatRequest.id,
-                  sender_type: senderType,
+                  sender_type: 'admin',
                   sender_id: senderId,
                   message: (newMessage.trim() || 'Sent an attachment').substring(0, 100),
                   title: globalChatRequest.title,
@@ -1178,9 +1225,70 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   media_site_favicon: globalChatRequest.media_site?.favicon
                 }
               });
-              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+              setTimeout(() => supabase.removeChannel(clientNotifyChannel), 500);
             }
           });
+          
+          // Notify agency
+          if (requestData.agency_payout_id) {
+            const agencyNotifyChannel = supabase.channel(`notify-${requestData.agency_payout_id}`);
+            agencyNotifyChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await agencyNotifyChannel.send({
+                  type: 'broadcast',
+                  event: 'new-message',
+                  payload: {
+                    request_id: globalChatRequest.id,
+                    sender_type: 'admin',
+                    sender_id: senderId,
+                    message: (newMessage.trim() || 'Sent an attachment').substring(0, 100),
+                    title: globalChatRequest.title,
+                    media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                    media_site_favicon: globalChatRequest.media_site?.favicon
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 500);
+              }
+            });
+          }
+        } else {
+          // Regular client/agency message - notify the other party
+          const updateField = senderType === 'client' 
+            ? { agency_read: false } 
+            : { client_read: false };
+
+          await supabase
+            .from('service_requests')
+            .update(updateField)
+            .eq('id', globalChatRequest.id);
+
+          const recipientId = senderType === 'client' 
+            ? requestData.agency_payout_id 
+            : requestData.user_id;
+
+          const isSelfNotification = recipientId === senderId || recipientId === user?.id;
+
+          if (recipientId && !isSelfNotification) {
+            const notifyChannel = supabase.channel(`notify-${recipientId}`);
+            notifyChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await notifyChannel.send({
+                  type: 'broadcast',
+                  event: 'new-message',
+                  payload: {
+                    request_id: globalChatRequest.id,
+                    sender_type: senderType,
+                    sender_id: senderId,
+                    message: (newMessage.trim() || 'Sent an attachment').substring(0, 100),
+                    title: globalChatRequest.title,
+                    media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                    media_site_favicon: globalChatRequest.media_site?.favicon
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+              }
+            });
+          }
         }
       }
 
