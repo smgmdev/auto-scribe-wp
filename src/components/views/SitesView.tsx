@@ -331,7 +331,7 @@ export function SitesView() {
     );
 
     if (Object.keys(logos).length > 0) {
-      setAgencyLogos(logos);
+      setAgencyLogos(prev => ({ ...prev, ...logos }));
     }
   };
 
