@@ -1030,7 +1030,7 @@ export function ChatListPanel() {
             </div>
             <span className="font-medium text-sm">Messaging</span>
             {totalUnread > 0 && (
-              <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5">
+              <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive hover:bg-destructive text-destructive-foreground text-xs px-1.5">
                 {totalUnread}
               </Badge>
             )}
@@ -1051,7 +1051,7 @@ export function ChatListPanel() {
               <MessageSquare className="h-5 w-5" />
               <span className="font-semibold">Messaging</span>
               {totalUnread > 0 && (
-                <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive text-destructive-foreground text-xs px-1.5">
+                <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-destructive hover:bg-destructive text-destructive-foreground text-xs px-1.5">
                   {totalUnread}
                 </Badge>
               )}

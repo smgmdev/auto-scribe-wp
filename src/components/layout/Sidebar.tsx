@@ -507,17 +507,17 @@ export function Sidebar({
                       </div>
                       <div className="flex items-center gap-2">
                         {agencyDropdownCount > 0 && (
-                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                          <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                             {agencyDropdownCount}
                           </Badge>
                         )}
                         {agencyManagementCount > 0 && (
-                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                          <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                             {agencyManagementCount}
                           </Badge>
                         )}
                         {b2bMediaBuyingCount > 0 && (
-                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                          <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                             {b2bMediaBuyingCount}
                           </Badge>
                         )}
@@ -559,27 +559,27 @@ export function Sidebar({
                                 <span className="truncate">{subItem.label}</span>
                               </div>
                               {showAgencyBadge && (
-                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyBadgeCount}
                                 </Badge>
                               )}
                               {showMediaBadge && (
-                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {unreadMediaSubmissionsCount}
                                 </Badge>
                               )}
                               {showAgencyMediaBadge && (
-                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyMediaBadgeCount}
                                 </Badge>
                               )}
                               {showServiceRequestsBadge && (
-                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {agencyUnreadServiceRequestsCount}
                                 </Badge>
                               )}
                               {showEngagementsBadge && (
-                                <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {userUnreadEngagementsCount}
                                 </Badge>
                               )}
