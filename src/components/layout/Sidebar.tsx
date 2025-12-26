@@ -321,7 +321,8 @@ export function Sidebar({
                 .from('service_requests')
                 .select('*', { count: 'exact', head: true })
                 .eq('agency_payout_id', agencyPayoutData.id)
-                .eq('read', false);
+                .eq('agency_read', false)
+                .neq('status', 'cancelled');
               serviceRequestsCount = requestsCount || 0;
             }
             
