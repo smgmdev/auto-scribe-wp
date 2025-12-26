@@ -380,7 +380,7 @@ export function OrdersView() {
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
         <DialogContent className="max-w-lg">
           {selectedOrder && selectedOrder.delivery_status === 'pending' && selectedOrder.status !== 'cancelled' && (
-            <div className="absolute right-10 top-4">
+            <div className="absolute right-12 top-4 z-10">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
