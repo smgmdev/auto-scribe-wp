@@ -119,18 +119,16 @@ export function AdminOrdersView() {
             setDisputes(prev => {
               // If dispute is now resolved (not open), remove it
               if (updated.status !== 'open') {
-                return prev.filter(d => d.id !== updated.id);
+                const newDisputes = prev.filter(d => d.id !== updated.id);
+                // Recalculate and sync unread count when disputes are resolved
+                const unreadCount = newDisputes.filter(d => !d.read).length;
+                setUnreadDisputesCount(unreadCount);
+                return newDisputes;
               }
-              // Otherwise update the dispute
+              // Otherwise update the dispute - unread count is already synced by the component that marked it read
               return prev.map(d => 
                 d.id === updated.id ? { ...d, ...updated } : d
               );
-            });
-            // Recalculate unread count
-            setDisputes(prev => {
-              const unreadCount = prev.filter(d => !d.read).length;
-              setUnreadDisputesCount(unreadCount);
-              return prev;
             });
           }
         )
