@@ -90,6 +90,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
+  const [adminJoined, setAdminJoined] = useState(false);
+  const [joiningChat, setJoiningChat] = useState(false);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<{
     id: string;
@@ -186,6 +188,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const isDeliveryOverdue = hasOrder && globalChatRequest?.order?.delivery_deadline 
     ? new Date(globalChatRequest.order.delivery_deadline) < new Date() 
     : false;
+  const isAdminInvestigating = isAdmin && globalChatType === 'agency-request' && !adminJoined;
+
+  // Handle admin joining chat
+  const handleAdminJoinChat = async () => {
+    if (!senderId || !globalChatRequest) return;
+    
+    setJoiningChat(true);
+    try {
+      const joinMessage = '[ADMIN_JOINED]Arcana Mace Staff has entered the chat.[/ADMIN_JOINED]';
+      
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: 'admin',
+        sender_id: senderId,
+        message: joinMessage
+      });
+
+      if (error) throw error;
+
+      // Add to local messages
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: 'admin',
+        sender_id: senderId,
+        message: joinMessage,
+        created_at: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, newMsg]);
+      setAdminJoined(true);
+      
+      toast({
+        title: "Joined Chat",
+        description: "You have joined the conversation.",
+      });
+    } catch (error: any) {
+      console.error('Error joining chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to join chat.",
+        variant: "destructive"
+      });
+    } finally {
+      setJoiningChat(false);
+    }
+  };
   
   // Check if there's an existing order request in messages (sent by agency)
   const existingOrderMessage = messages.find(msg => {
@@ -1085,6 +1133,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const cancelRequest = parseCancelOrderRequest(msg.message);
     const cancelAccepted = parseCancelOrderAccepted(msg.message);
 
+    // Handle admin joined message
+    const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
+    if (adminJoinedMatch) {
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-center">
+            <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+              {adminJoinedMatch[1]}
+            </p>
+          </div>
+          <p className="text-xs opacity-50 text-center">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
     // Handle cancel order request message
     if (cancelRequest) {
       // Check if this request has been accepted
@@ -1523,7 +1588,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         isOwnMessage
                           ? 'bg-primary text-primary-foreground'
                           : msg.sender_type === 'admin'
-                          ? 'bg-amber-100 text-amber-900'
+                          ? 'bg-blue-500 text-white'
                           : 'bg-muted'
                       } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                     >
@@ -1552,7 +1617,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <p className="text-xs font-medium mb-1 opacity-70 pr-5">
-                        {isOwnMessage ? 'You' : msg.sender_type === 'admin' ? 'Admin' : counterpartyLabel}
+                        {isOwnMessage ? 'You' : msg.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}
                       </p>
                       {renderMessageContent(msg, isOwnMessage, quote)}
                     </div>
@@ -1582,84 +1647,103 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {/* Input */}
         {!isCancelled && globalChatRequest.status !== 'rejected' && (
           <div className="border-t">
-            {replyToMessage && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50">
-                <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">
-                    Replying to {replyToMessage.sender_type === senderType ? 'yourself' : counterpartyLabel}
-                  </p>
-                  <p className="text-sm truncate">{getMessageWithoutAttachment(replyToMessage.message)}</p>
+            {isAdminInvestigating ? (
+              <div className="flex items-center justify-center p-4 bg-muted/30">
+                <Button
+                  onClick={handleAdminJoinChat}
+                  disabled={joiningChat}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  {joiningChat ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                  )}
+                  Join Chat
+                </Button>
+              </div>
+            ) : (
+              <>
+                {replyToMessage && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/50">
+                    <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground">
+                        Replying to {replyToMessage.sender_type === senderType ? 'yourself' : counterpartyLabel}
+                      </p>
+                      <p className="text-sm truncate">{getMessageWithoutAttachment(replyToMessage.message)}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={() => setReplyToMessage(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                {selectedFile && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 border-b">
+                    {getFileIcon(selectedFile)}
+                    <span className="text-sm truncate flex-1">{selectedFile.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {(selectedFile.size / 1024).toFixed(1)} KB
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={() => setSelectedFile(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    onChange={handleFileSelect}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={sending}
+                    title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    ref={inputRef}
+                    placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
+                    value={newMessage}
+                    onChange={handleInputChange}
+                    disabled={sending}
+                    className="rounded-none border-0 flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
+                        e.preventDefault();
+                        uploadFileAndSendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                    disabled={sending || (!newMessage.trim() && !selectedFile)}
+                    onClick={uploadFileAndSendMessage}
+                  >
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 shrink-0"
-                  onClick={() => setReplyToMessage(null)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
+              </>
             )}
-            {selectedFile && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 border-b">
-                {getFileIcon(selectedFile)}
-                <span className="text-sm truncate flex-1">{selectedFile.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {(selectedFile.size / 1024).toFixed(1)} KB
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 shrink-0"
-                  onClick={() => setSelectedFile(null)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-            <div className="flex items-center">
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                onChange={handleFileSelect}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={sending}
-                title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
-              <Input
-                ref={inputRef}
-                placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
-                value={newMessage}
-                onChange={handleInputChange}
-                disabled={sending}
-                className="rounded-none border-0 flex-1"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
-                    e.preventDefault();
-                    uploadFileAndSendMessage();
-                  }
-                }}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                disabled={sending || (!newMessage.trim() && !selectedFile)}
-                onClick={uploadFileAndSendMessage}
-              >
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              </Button>
-            </div>
           </div>
         )}
       </div>
