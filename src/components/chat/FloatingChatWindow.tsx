@@ -1391,21 +1391,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const isPending = !hasAcceptance;
       const canAccept = !isOwnMessage && isPending && globalChatRequest?.order;
 
-      const isAgencyOrAdmin = senderType === 'agency' || senderType === 'admin';
-      const useBlackStyle = !isOwnMessage && isAgencyOrAdmin;
-
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : useBlackStyle 
-              ? 'bg-black text-white border-black'
               : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <X className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-orange-600 dark:text-orange-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-orange-700 dark:text-orange-300'}`}>
+              <X className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-600 dark:text-orange-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-700 dark:text-orange-300'}`}>
                 Cancellation Request
               </span>
               {!isPending && (
@@ -1414,16 +1409,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Badge>
               )}
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : useBlackStyle ? 'text-white/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {isOwnMessage ? 'You requested' : `${counterpartyLabel} requested`} to cancel the order for {cancelRequest.media_site_name}
             </p>
             {cancelRequest.reason && (
-              <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : useBlackStyle ? 'text-white/60' : 'text-muted-foreground'}`}>
+              <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                 Reason: {cancelRequest.reason}
               </p>
             )}
             {canAccept && (
-              <div className={`flex gap-2 mt-3 pt-2 border-t ${useBlackStyle ? 'border-white/20' : 'border-orange-200 dark:border-orange-800'}`}>
+              <div className="flex gap-2 mt-3 pt-2 border-t border-orange-200 dark:border-orange-800">
                 <Button
                   size="sm"
                   variant="outline"
@@ -1446,28 +1441,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // Handle cancel order accepted message
     if (cancelAccepted) {
-      const isAgencyOrAdmin = senderType === 'agency' || senderType === 'admin';
-      const useBlackStyle = !isOwnMessage && isAgencyOrAdmin;
-
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : useBlackStyle 
-              ? 'bg-black text-white border-black'
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-green-600 dark:text-green-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>
+              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                 Cancellation Accepted
               </span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : useBlackStyle ? 'text-white/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               Order for {cancelAccepted.media_site_name} has been cancelled mutually
             </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : useBlackStyle ? 'text-white/60' : 'text-muted-foreground'}`}>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               {cancelAccepted.credits_refunded} credits refunded to client
             </p>
           </div>
@@ -1481,32 +1471,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle order placed special message
     if (orderPlaced) {
       const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
-      const isAgencyOrAdmin = senderType === 'agency' || senderType === 'admin';
-      const useBlackStyle = !isOwnMessage && isAgencyOrAdmin;
       
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : useBlackStyle 
-              ? 'bg-black text-white border-black'
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-green-600 dark:text-green-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
+              <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : useBlackStyle ? 'text-white/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderPlaced.media_site_name}
             </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : useBlackStyle ? 'text-white/60' : 'text-muted-foreground'}`}>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               {orderPlaced.credits_used} credits
             </p>
             {timeInfo && (
-              <div className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : useBlackStyle ? 'border-white/20' : 'border-green-200 dark:border-green-800'}`}>
-                <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : useBlackStyle ? 'text-white/70' : 'text-green-600 dark:text-green-400'}`} />
-                <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : useBlackStyle ? 'text-white/70' : 'text-green-600 dark:text-green-400'}`}>
+              <div className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
+                <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
+                <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
                   {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
                 </span>
               </div>
@@ -1521,26 +1507,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // Handle order cancelled special message
     if (orderCancelled) {
-      const isAgencyOrAdmin = senderType === 'agency' || senderType === 'admin';
-      const useBlackStyle = !isOwnMessage && isAgencyOrAdmin;
-
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : useBlackStyle 
-              ? 'bg-black text-white border-black'
               : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-red-600 dark:text-red-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : useBlackStyle ? 'text-white' : 'text-red-700 dark:text-red-300'}`}>Order Cancelled</span>
+              <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>Order Cancelled</span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : useBlackStyle ? 'text-white/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderCancelled.media_site_name}
             </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : useBlackStyle ? 'text-white/60' : 'text-muted-foreground'}`}>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               {orderCancelled.credits_refunded} credits refunded
             </p>
           </div>
