@@ -180,6 +180,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   
   const isCancelled = globalChatRequest?.status === 'cancelled';
   const hasOrder = !!globalChatRequest?.order;
+  const isDeliveryOverdue = hasOrder && globalChatRequest?.order?.delivery_deadline 
+    ? new Date(globalChatRequest.order.delivery_deadline) < new Date() 
+    : false;
   
   // Check if there's an existing order request in messages (sent by agency)
   const existingOrderMessage = messages.find(msg => {
@@ -1336,7 +1339,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     hasOrder ? (
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        disabled={isCancelled}
+                        disabled={isCancelled || !isDeliveryOverdue}
                         onClick={() => {
                           // TODO: Implement Open Dispute functionality
                           toast({
@@ -1779,6 +1782,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   <DropdownMenuItem 
                     className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                    disabled={!isDeliveryOverdue}
                     onClick={() => {
                       toast({
                         title: "Coming Soon",
