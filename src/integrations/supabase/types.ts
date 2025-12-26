@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_investigations: {
+        Row: {
+          admin_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string
+          service_request_id: string
+          status: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id: string
+          service_request_id: string
+          status?: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+          service_request_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_investigations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_investigations_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: true
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_applications: {
         Row: {
           admin_notes: string | null

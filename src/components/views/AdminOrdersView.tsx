@@ -217,6 +217,27 @@ export function AdminOrdersView() {
         return;
       }
 
+      // Get current user for admin_id
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Create investigation record (upsert to avoid duplicates)
+      const { error: investigationError } = await supabase
+        .from('admin_investigations')
+        .upsert({
+          admin_id: user.id,
+          service_request_id: serviceRequest.id,
+          order_id: targetOrder.id,
+          status: 'active'
+        }, {
+          onConflict: 'service_request_id'
+        });
+
+      if (investigationError) {
+        console.error('Error creating investigation:', investigationError);
+        // Don't throw - still open the chat even if investigation record fails
+      }
+
       // Build the GlobalChatRequest object
       const chatRequest: GlobalChatRequest = {
         id: serviceRequest.id,
@@ -252,8 +273,8 @@ export function AdminOrdersView() {
       setDetailsDialogOpen(false);
       
       toast({
-        title: "Chat Opened",
-        description: "Viewing the engagement chat for this order.",
+        title: "Investigation Started",
+        description: "Chat opened and added to Investigations tab in messaging.",
       });
     } catch (error: any) {
       console.error('Error investigating order:', error);
