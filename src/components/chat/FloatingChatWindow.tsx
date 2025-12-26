@@ -2530,7 +2530,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {globalChatRequest.media_site.agency && (
                 <div>
                   <p className="text-sm text-muted-foreground">Agency</p>
-                  <p className="text-foreground">{globalChatRequest.media_site.agency}</p>
+                  <p 
+                    className="text-foreground hover:text-accent cursor-pointer hover:underline transition-colors"
+                    onClick={() => fetchAgencyDetails(globalChatRequest.media_site!.agency!)}
+                  >
+                    {globalChatRequest.media_site.agency}
+                  </p>
                 </div>
               )}
               
@@ -2547,6 +2552,72 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <Button 
               variant="outline"
               onClick={() => setMediaListingOpen(false)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agency Details Dialog */}
+      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
+        <DialogContent className="sm:max-w-md z-[350]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <Building2 className="h-8 w-8 text-muted-foreground" />
+              <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingAgency ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : agencyDetails ? (
+            <div className="space-y-4 mt-4">
+              {agencyDetails.email && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-foreground">{agencyDetails.email}</p>
+                </div>
+              )}
+              
+              {agencyDetails.payout_method && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Payout Method</p>
+                  <Badge variant="secondary" className="capitalize">
+                    {agencyDetails.payout_method === 'stripe' ? 'Stripe Connect' : 'Custom Payout'}
+                  </Badge>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Member Since</p>
+                <p className="text-foreground">
+                  {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Onboarding Status</p>
+                <Badge variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}>
+                  {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
+                </Badge>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Agency not found</p>
+          )}
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="outline"
+              onClick={() => setAgencyDetailsOpen(false)}
               className="hover:bg-black hover:text-white transition-colors"
             >
               Close
