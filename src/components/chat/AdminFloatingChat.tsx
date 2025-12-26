@@ -985,6 +985,13 @@ export function AdminFloatingChat({
 
   return (
     <>
+      {/* Backdrop for click outside to close */}
+      <div 
+        className="fixed inset-0 bg-transparent" 
+        style={{ zIndex: zIndex - 1 }}
+        onClick={onClose}
+      />
+      
       {/* Floating Chat Window */}
       <div
         className="fixed bg-background border rounded-t-lg shadow-2xl shadow-black/25 flex flex-col overflow-hidden"
