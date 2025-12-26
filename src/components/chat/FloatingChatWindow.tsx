@@ -938,7 +938,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle order cancelled special message
     if (orderCancelled) {
       return (
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'}`}>
             <div className="flex items-center gap-2 mb-2">
               <X className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
@@ -951,7 +951,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {orderCancelled.credits_refunded} credits refunded
             </p>
           </div>
-          <p className="text-xs opacity-50 mt-1">
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
           </p>
         </div>
