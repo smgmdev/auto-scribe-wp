@@ -122,6 +122,7 @@ export function AdminFloatingChat({
   const [clientDetailsOpen, setClientDetailsOpen] = useState(false);
   const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null);
   const [loadingClient, setLoadingClient] = useState(false);
+  const [logoLoading, setLogoLoading] = useState(false);
   
   // Drag state
   const [localPosition, setLocalPosition] = useState(initialPosition);
@@ -1259,19 +1260,36 @@ export function AdminFloatingChat({
       </Dialog>
 
       {/* Agency Details Dialog */}
-      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
+      <Dialog open={agencyDetailsOpen} onOpenChange={(open) => {
+        setAgencyDetailsOpen(open);
+        if (!open) setLogoLoading(false);
+      }}>
         <DialogContent className="sm:max-w-md z-[10000]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              {agencyDetails?.logo_url ? (
-                <img 
-                  src={agencyDetails.logo_url} 
-                  alt={agencyDetails.agency_name}
-                  className="h-12 w-12 rounded-xl bg-muted object-contain"
-                />
-              ) : (
-                <Building2 className="h-12 w-12 text-muted-foreground" />
-              )}
+              <div className="relative h-12 w-12">
+                {agencyDetails?.logo_url ? (
+                  <>
+                    {logoLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                    <img 
+                      src={agencyDetails.logo_url} 
+                      alt={agencyDetails.agency_name}
+                      className={`h-12 w-12 rounded-xl bg-muted object-contain ${logoLoading ? 'opacity-0' : 'opacity-100'}`}
+                      onLoadStart={() => setLogoLoading(true)}
+                      onLoad={() => setLogoLoading(false)}
+                      onError={() => setLogoLoading(false)}
+                    />
+                  </>
+                ) : (
+                  <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                    <Building2 className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
               <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
             </DialogTitle>
           </DialogHeader>
