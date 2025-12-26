@@ -238,7 +238,7 @@ export function SitesView() {
         updated_at,
         media_site_id,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-        order:orders(id, status, delivery_status)
+        order:orders(id, status, delivery_status, delivery_deadline)
       `)
       .eq('user_id', user.id)
       .not('status', 'in', '("cancelled","completed")');

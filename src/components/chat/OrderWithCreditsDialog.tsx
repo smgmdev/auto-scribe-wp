@@ -71,7 +71,8 @@ export function OrderWithCreditsDialog({
           order: { 
             id: data.order_id, 
             status: 'paid',
-            delivery_status: 'pending'
+            delivery_status: 'pending',
+            delivery_deadline: data.delivery_deadline || null
           } 
         });
         

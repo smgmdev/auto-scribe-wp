@@ -1148,11 +1148,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Order Placed</p>
-                  <p className="text-xs text-white/70">
-                    {globalChatRequest.order.delivery_status === 'pending' && 'Awaiting delivery'}
-                    {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered - Awaiting acceptance'}
-                    {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
-                  </p>
+                  {globalChatRequest.order.delivery_status === 'pending' && globalChatRequest.order.delivery_deadline && (() => {
+                    const timeInfo = formatTimeRemaining(globalChatRequest.order.delivery_deadline);
+                    return (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
+                        <p className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                          {timeInfo.isOverdue ? 'Delivery overdue' : `Delivery in: ${timeInfo.text}`}
+                        </p>
+                      </div>
+                    );
+                  })()}
+                  {globalChatRequest.order.delivery_status === 'pending' && !globalChatRequest.order.delivery_deadline && (
+                    <p className="text-xs text-white/70">Awaiting delivery</p>
+                  )}
+                  {globalChatRequest.order.delivery_status === 'delivered' && (
+                    <p className="text-xs text-white/70">Delivered - Awaiting acceptance</p>
+                  )}
+                  {globalChatRequest.order.delivery_status === 'accepted' && (
+                    <p className="text-xs text-white/70">Completed</p>
+                  )}
                 </div>
               </div>
               <Badge 

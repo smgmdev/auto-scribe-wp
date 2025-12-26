@@ -97,7 +97,7 @@ export function ChatListPanel() {
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-        order:orders(id, status, delivery_status)
+        order:orders(id, status, delivery_status, delivery_deadline)
       `)
       .eq('user_id', user.id)
       .neq('status', 'cancelled')
@@ -170,7 +170,7 @@ export function ChatListPanel() {
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-        order:orders(id, status, delivery_status)
+        order:orders(id, status, delivery_status, delivery_deadline)
       `)
       .neq('status', 'cancelled')
       .order('updated_at', { ascending: false });
