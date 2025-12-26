@@ -496,7 +496,7 @@ export function Sidebar({
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-between px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        "w-full justify-between py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                         isActive && "text-[#3872e0] font-medium"
                       )}
                       onClick={() => toggleMenu(item.id)}
@@ -549,7 +549,7 @@ export function Sidebar({
                               key={subItem.id}
                               variant="ghost"
                               className={cn(
-                                "w-full justify-between px-3 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                "w-full justify-between py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                                 isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                               )}
                               onClick={() => handleNavClick(subItem.id)}
@@ -597,7 +597,7 @@ export function Sidebar({
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    "w-full justify-between px-3 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    "w-full justify-between py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                     isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                   )}
                   onClick={() => handleNavClick(item.id)}
