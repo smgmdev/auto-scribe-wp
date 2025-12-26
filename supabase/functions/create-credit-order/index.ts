@@ -226,6 +226,25 @@ serve(async (req) => {
       .update({ agency_read: false })
       .eq("id", service_request_id);
 
+    // Send email notification to agency (don't await to not block response)
+    if (mediaSite.agency && supabaseUrl && supabaseAnonKey) {
+      fetch(`${supabaseUrl}/functions/v1/notify-agency-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          order_id: order.id,
+          agency_name: mediaSite.agency,
+          media_site_name: mediaSite.name,
+          amount_dollars: creditCost,
+          client_email: user.email,
+          service_request_id: service_request_id,
+        }),
+      }).catch((err) => console.error("Failed to send agency notification:", err));
+    }
+
     console.log(`Successfully created order ${order.id} for user ${user.id}. Credits deducted: ${creditCost}. New balance: ${newCredits}`);
 
     return new Response(
