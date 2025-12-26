@@ -1000,8 +1000,7 @@ export function SitesView() {
                 </div>
               ) : (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  <Coins className="h-3 w-3" />
-                  {siteCredits[site.id] || 1} credits
+                  {siteCredits[site.id] || 1} USD
                   {isAdmin && (
                     <Button
                       size="sm"
