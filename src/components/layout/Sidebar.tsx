@@ -503,7 +503,7 @@ export function Sidebar({
                     >
                       <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                       <span className="truncate flex-1 text-left">{item.label}</span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 ml-auto flex-shrink-0">
                         {agencyDropdownCount > 0 && (
                           <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                             {agencyDropdownCount}
