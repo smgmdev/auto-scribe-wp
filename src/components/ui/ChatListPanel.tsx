@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -42,6 +42,25 @@ interface ChatItem {
   } | null;
 }
 
+interface DisputeItem {
+  id: string;
+  order_id: string;
+  service_request_id: string;
+  user_id: string;
+  status: string;
+  reason: string | null;
+  created_at: string;
+  read: boolean;
+  service_request: {
+    id: string;
+    title: string;
+    media_site: {
+      name: string;
+      favicon: string | null;
+    } | null;
+  } | null;
+}
+
 export function ChatListPanel() {
   const { user, isAdmin } = useAuth();
   const { 
@@ -61,10 +80,11 @@ export function ChatListPanel() {
   } = useAppStore();
   
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'my-engagements' | 'service-requests'>('my-engagements');
+  const [activeTab, setActiveTab] = useState<'disputes' | 'my-engagements' | 'service-requests'>('my-engagements');
   const [searchQuery, setSearchQuery] = useState('');
   const [myEngagements, setMyEngagements] = useState<ChatItem[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ChatItem[]>([]);
+  const [disputes, setDisputes] = useState<DisputeItem[]>([]);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -223,6 +243,35 @@ export function ChatListPanel() {
     }
   };
 
+  // Fetch disputes (admin only)
+  const fetchDisputes = async () => {
+    if (!user || !isAdmin) return;
+
+    const { data, error } = await supabase
+      .from('disputes')
+      .select(`
+        id,
+        order_id,
+        service_request_id,
+        user_id,
+        status,
+        reason,
+        created_at,
+        read,
+        service_request:service_requests(
+          id,
+          title,
+          media_site:media_sites(name, favicon)
+        )
+      `)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setDisputes(data as unknown as DisputeItem[]);
+    }
+  };
+
   // Check if user is an approved agency (must have onboarding_complete = true)
   // Admins are treated as having access to agency features
   useEffect(() => {
@@ -259,19 +308,24 @@ export function ChatListPanel() {
     checkAgency();
   }, [user, isAdmin]);
 
-  // Set default tab to service-requests for agencies
+  // Set default tab to disputes for admins, service-requests for agencies
   useEffect(() => {
-    if (isAgency) {
+    if (isAdmin) {
+      setActiveTab('disputes');
+    } else if (isAgency) {
       setActiveTab('service-requests');
     }
-  }, [isAgency]);
+  }, [isAgency, isAdmin]);
 
   // Fetch data and sync notification counts on mount
   useEffect(() => {
     if (user) {
       fetchMyEngagements();
+      if (isAdmin) {
+        fetchDisputes();
+      }
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   // Listen for engagement-removed event to refresh list
   useEffect(() => {
@@ -1107,6 +1161,20 @@ export function ChatListPanel() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
             <TabsList className="w-full rounded-none border-b border-border bg-transparent h-auto p-0">
+              {isAdmin && (
+                <TabsTrigger 
+                  value="disputes" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                  Disputes
+                  {disputes.filter(d => !d.read).length > 0 && (
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-destructive text-destructive-foreground px-1">
+                      {disputes.filter(d => !d.read).length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )}
               {isAgency && (
                 <TabsTrigger 
                   value="service-requests" 
@@ -1132,6 +1200,100 @@ export function ChatListPanel() {
                 )}
               </TabsTrigger>
             </TabsList>
+
+            {isAdmin && (
+              <TabsContent value="disputes" className="m-0">
+                <ScrollArea className="h-[300px]">
+                  {disputes.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <AlertTriangle className="h-8 w-8 mb-2 opacity-50" />
+                      <p className="text-sm">No open disputes</p>
+                    </div>
+                  ) : (
+                    disputes.map((dispute) => (
+                      <div
+                        key={dispute.id}
+                        className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
+                          !dispute.read ? 'bg-red-50 dark:bg-red-950/30 border-l-2 border-l-red-500' : ''
+                        }`}
+                        onClick={() => {
+                          // Mark as read
+                          supabase
+                            .from('disputes')
+                            .update({ read: true })
+                            .eq('id', dispute.id);
+                          
+                          // Find the service request and open the chat
+                          const serviceRequest = serviceRequests.find(r => r.id === dispute.service_request_id) 
+                            || myEngagements.find(e => e.id === dispute.service_request_id);
+                          
+                          if (serviceRequest) {
+                            handleOpenChat(serviceRequest, 'agency-request');
+                          } else if (dispute.service_request) {
+                            // Construct minimal chat item from dispute data
+                            openGlobalChat({
+                              id: dispute.service_request_id,
+                              title: dispute.service_request.title,
+                              description: dispute.reason || 'Dispute opened',
+                              status: 'open',
+                              media_site: dispute.service_request.media_site ? {
+                                id: '',
+                                name: dispute.service_request.media_site.name,
+                                favicon: dispute.service_request.media_site.favicon,
+                                price: 0,
+                                publication_format: '',
+                                link: '',
+                                category: '',
+                                subcategory: null,
+                                about: null,
+                                agency: null
+                              } : null,
+                              order: null
+                            } as unknown as GlobalChatRequest, 'agency-request');
+                          }
+                          
+                          // Update local state
+                          setDisputes(prev => prev.map(d => 
+                            d.id === dispute.id ? { ...d, read: true } : d
+                          ));
+                        }}
+                      >
+                        <div className="shrink-0 relative">
+                          {dispute.service_request?.media_site?.favicon ? (
+                            <img 
+                              src={dispute.service_request.media_site.favicon} 
+                              alt="" 
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
+                              <AlertTriangle className="h-5 w-5 text-destructive" />
+                            </div>
+                          )}
+                          {!dispute.read && (
+                            <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-destructive rounded-full border-2 border-card animate-pulse" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`font-medium text-sm truncate ${!dispute.read ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
+                              {dispute.service_request?.media_site?.name || dispute.service_request?.title || 'Unknown'}
+                            </span>
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {formatTime(dispute.created_at)}
+                            </span>
+                          </div>
+                          <p className="text-xs truncate mt-0.5 flex items-center gap-1 text-destructive">
+                            <AlertTriangle className="h-3 w-3 shrink-0" />
+                            Dispute - {dispute.reason?.slice(0, 30) || 'Delivery overdue'}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </TabsContent>
+            )}
 
             {isAgency && (
               <TabsContent value="service-requests" className="m-0">

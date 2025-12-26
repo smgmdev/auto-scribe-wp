@@ -87,6 +87,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [acceptingCancellation, setAcceptingCancellation] = useState(false);
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
+  const [submittingDispute, setSubmittingDispute] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
@@ -1780,16 +1781,44 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={submittingDispute}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => {
-                toast({
-                  title: "Dispute Request Sent",
-                  description: "A staff member will join this chat within 6-24 hours.",
-                });
-                setDisputeDialogOpen(false);
+              disabled={submittingDispute}
+              onClick={async () => {
+                if (!globalChatRequest?.order?.id || !user) return;
+                
+                setSubmittingDispute(true);
+                try {
+                  const { error } = await supabase
+                    .from('disputes')
+                    .insert({
+                      order_id: globalChatRequest.order.id,
+                      service_request_id: globalChatRequest.id,
+                      user_id: user.id,
+                      status: 'open',
+                      reason: 'Delivery overdue - dispute opened by client'
+                    });
+                  
+                  if (error) throw error;
+                  
+                  toast({
+                    title: "Dispute Request Sent",
+                    description: "A staff member will join this chat within 6-24 hours.",
+                  });
+                  setDisputeDialogOpen(false);
+                } catch (error: any) {
+                  console.error('Error creating dispute:', error);
+                  toast({
+                    variant: 'destructive',
+                    title: "Error",
+                    description: error.message || "Failed to submit dispute. Please try again.",
+                  });
+                } finally {
+                  setSubmittingDispute(false);
+                }
               }}
             >
+              {submittingDispute ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Submit Dispute Request
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -379,6 +379,63 @@ export type Database = {
         }
         Relationships: []
       }
+      disputes: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          order_id: string
+          read: boolean
+          reason: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          service_request_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          read?: boolean
+          reason?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          service_request_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          read?: boolean
+          reason?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          service_request_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_site_submissions: {
         Row: {
           admin_notes: string | null
