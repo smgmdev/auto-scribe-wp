@@ -1271,6 +1271,8 @@ export function GlobalChatDialog() {
           className="sm:max-w-2xl max-h-[90vh] p-0 !rounded-b-none gap-0 shadow-2xl shadow-black/25" 
           hideCloseButton 
           overlayClassName="bg-transparent pointer-events-none"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
           style={{ 
             left: `calc(50% + ${dragPosition.x}px)`,
             top: `calc(50% + ${dragPosition.y}px)`
