@@ -646,7 +646,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .eq('request_id', globalChatRequest.id)
         .order('created_at', { ascending: true });
       
-      setMessages((data as ServiceMessage[]) || []);
+      const fetchedMessages = (data as ServiceMessage[]) || [];
+      setMessages(fetchedMessages);
+      
+      // Check if admin is still in chat based on message history
+      // Find the last ADMIN_JOINED and ADMIN_LEFT messages
+      let lastJoinedIndex = -1;
+      let lastLeftIndex = -1;
+      
+      fetchedMessages.forEach((msg, index) => {
+        if (msg.message.includes('[ADMIN_JOINED]')) {
+          lastJoinedIndex = index;
+        }
+        if (msg.message.includes('[ADMIN_LEFT]')) {
+          lastLeftIndex = index;
+        }
+      });
+      
+      // Admin is in chat if there's a join message after the last leave message (or no leave at all)
+      if (lastJoinedIndex > -1 && lastJoinedIndex > lastLeftIndex) {
+        setAdminJoined(true);
+      } else {
+        setAdminJoined(false);
+      }
+      
       setLoadingMessages(false);
     };
     fetchMessages();
