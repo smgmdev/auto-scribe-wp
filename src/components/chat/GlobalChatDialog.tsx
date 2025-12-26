@@ -1452,20 +1452,32 @@ export function GlobalChatDialog() {
                     </p>
                   </div>
                 </div>
-                <Badge 
-                  variant="secondary" 
-                  className={
-                    globalChatRequest.order.delivery_status === 'accepted' 
-                      ? 'bg-green-600 text-white' 
-                      : globalChatRequest.order.delivery_status === 'delivered'
-                      ? 'bg-purple-600/20 text-purple-600'
-                      : 'bg-blue-600/20 text-blue-600'
-                  }
-                >
-                  {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
-                  {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered'}
-                  {globalChatRequest.order.delivery_status === 'pending' && 'In Progress'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      closeGlobalChat();
+                      useAppStore.getState().setCurrentView('orders');
+                    }}
+                    className="text-xs text-primary hover:underline flex items-center gap-1"
+                  >
+                    View Details
+                    <ExternalLink className="h-3 w-3" />
+                  </button>
+                  <Badge 
+                    variant="secondary" 
+                    className={
+                      globalChatRequest.order.delivery_status === 'accepted' 
+                        ? 'bg-green-600 text-white' 
+                        : globalChatRequest.order.delivery_status === 'delivered'
+                        ? 'bg-purple-600/20 text-purple-600'
+                        : 'bg-blue-600/20 text-blue-600'
+                    }
+                  >
+                    {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
+                    {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered'}
+                    {globalChatRequest.order.delivery_status === 'pending' && 'In Progress'}
+                  </Badge>
+                </div>
               </div>
             </div>
           )}
