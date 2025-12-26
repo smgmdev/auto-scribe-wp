@@ -990,21 +990,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       Order Now
                     </DropdownMenuItem>
                   )}
-                  {hasOrder && globalChatRequest.order?.delivery_status === 'pending' && (
+                  {hasOrder && globalChatRequest.order?.delivery_status === 'pending' ? (
                     <DropdownMenuItem 
                       className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                       onClick={() => setCancelOrderDialogOpen(true)}
                     >
                       Cancel Order
                     </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      disabled={hasOrder || isCancelled}
+                      onClick={() => setCancelDialogOpen(true)}
+                    >
+                      Cancel Engagement
+                    </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem 
-                    className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    disabled={hasOrder || isCancelled}
-                    onClick={() => setCancelDialogOpen(true)}
-                  >
-                    Cancel Engagement
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
