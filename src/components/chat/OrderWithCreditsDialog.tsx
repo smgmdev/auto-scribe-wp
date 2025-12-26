@@ -1,0 +1,167 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2, Coins, ShoppingCart, AlertTriangle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+
+interface MediaSiteInfo {
+  id: string;
+  name: string;
+  price: number;
+  favicon?: string;
+}
+
+interface OrderWithCreditsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mediaSite: MediaSiteInfo | null;
+  serviceRequestId: string;
+  onSuccess: () => void;
+}
+
+export function OrderWithCreditsDialog({ 
+  open, 
+  onOpenChange, 
+  mediaSite,
+  serviceRequestId,
+  onSuccess 
+}: OrderWithCreditsDialogProps) {
+  const [purchasing, setPurchasing] = useState(false);
+  const { credits, refreshCredits } = useAuth();
+  const { toast } = useToast();
+
+  const creditCost = mediaSite?.price || 0;
+  const hasEnoughCredits = (credits || 0) >= creditCost;
+
+  const handlePurchase = async () => {
+    if (!mediaSite || !hasEnoughCredits) return;
+
+    setPurchasing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-credit-order', {
+        body: {
+          media_site_id: mediaSite.id,
+          service_request_id: serviceRequestId
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        await refreshCredits();
+        toast({
+          title: "Order Placed",
+          description: `Successfully ordered from ${mediaSite.name}. ${data.credits_deducted} credits used.`,
+        });
+        onOpenChange(false);
+        onSuccess();
+      } else if (data?.error) {
+        throw new Error(data.error);
+      }
+    } catch (error: any) {
+      console.error('Order error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Order Failed',
+        description: error.message || 'Failed to place order.',
+      });
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  if (!mediaSite) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            Order Now
+          </DialogTitle>
+          <DialogDescription>
+            Use your platform credits to place this order
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* Media Site Info */}
+          <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
+            {mediaSite.favicon && (
+              <img 
+                src={mediaSite.favicon} 
+                alt="" 
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold truncate">{mediaSite.name}</h3>
+              <p className="text-2xl font-bold text-primary">
+                {creditCost.toLocaleString()} credits
+              </p>
+            </div>
+          </div>
+
+          {/* Credit Balance */}
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <Coins className="h-4 w-4" />
+                Your Balance
+              </span>
+              <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
+                {(credits || 0).toLocaleString()} credits
+              </span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-sm text-muted-foreground">Order Cost</span>
+              <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
+            </div>
+            <div className="border-t border-border my-3" />
+            <div className="flex items-center justify-between">
+              <span className="font-medium">After Order</span>
+              <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
+                {Math.max(0, (credits || 0) - creditCost).toLocaleString()} credits
+              </span>
+            </div>
+          </div>
+
+          {/* Insufficient Credits Warning */}
+          {!hasEnoughCredits && (
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+              <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-destructive">Insufficient Credits</p>
+                <p className="text-sm text-muted-foreground">
+                  You need {(creditCost - (credits || 0)).toLocaleString()} more credits to place this order.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <Button
+            onClick={handlePurchase}
+            disabled={purchasing || !hasEnoughCredits}
+            className="w-full"
+            size="lg"
+          >
+            {purchasing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Processing...
+              </>
+            ) : hasEnoughCredits ? (
+              `Order for ${creditCost.toLocaleString()} Credits`
+            ) : (
+              'Insufficient Credits'
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

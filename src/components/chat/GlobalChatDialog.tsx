@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { OrderWithCreditsDialog } from '@/components/chat/OrderWithCreditsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -74,6 +75,7 @@ export function GlobalChatDialog() {
   const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
   const [cancelOrderMessageId, setCancelOrderMessageId] = useState<string | null>(null);
   const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
   
@@ -1277,12 +1279,7 @@ export function GlobalChatDialog() {
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         disabled={hasOrder || isCancelled}
-                        onClick={() => {
-                          toast({
-                            title: "Order Now",
-                            description: "Order functionality coming soon",
-                          });
-                        }}
+                        onClick={() => setOrderWithCreditsOpen(true)}
                       >
                         Order Now
                       </DropdownMenuItem>
@@ -1875,6 +1872,23 @@ export function GlobalChatDialog() {
         title={fileWebView?.name || 'File Preview'}
         downloadUrl={fileWebView?.url}
         downloadName={fileWebView?.name}
+      />
+
+      {/* Order With Credits Dialog */}
+      <OrderWithCreditsDialog
+        open={orderWithCreditsOpen}
+        onOpenChange={setOrderWithCreditsOpen}
+        mediaSite={globalChatRequest?.media_site ? {
+          id: globalChatRequest.media_site.id,
+          name: globalChatRequest.media_site.name,
+          price: globalChatRequest.media_site.price || 0,
+          favicon: globalChatRequest.media_site.favicon
+        } : null}
+        serviceRequestId={globalChatRequest?.id || ''}
+        onSuccess={() => {
+          // Update local state to reflect order was placed
+          updateGlobalChatRequest({ order: { id: 'temp' } as any });
+        }}
       />
     </>
   );
