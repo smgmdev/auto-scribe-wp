@@ -6,6 +6,41 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Generate a unique 15-character alphanumeric order ID
+const generateOrderId = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 15; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+// Generate a unique order ID that doesn't exist in the database
+const generateUniqueOrderId = async (supabase: any): Promise<string> => {
+  let orderId = generateOrderId();
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  while (attempts < maxAttempts) {
+    const { data } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("id", orderId)
+      .maybeSingle();
+    
+    if (!data) {
+      return orderId;
+    }
+    
+    orderId = generateOrderId();
+    attempts++;
+  }
+  
+  // If we've exhausted attempts, add timestamp to ensure uniqueness
+  return generateOrderId() + Date.now().toString(36).slice(-3);
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -161,10 +196,15 @@ serve(async (req) => {
         description: `Order for ${mediaSite.name}`
       });
 
+    // Generate unique order ID
+    const orderId = await generateUniqueOrderId(supabaseAdmin);
+    console.log(`Generated unique order ID: ${orderId}`);
+
     // Create order
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
       .insert({
+        id: orderId,
         user_id: user.id,
         media_site_id: media_site_id,
         amount_cents: amountCents,
