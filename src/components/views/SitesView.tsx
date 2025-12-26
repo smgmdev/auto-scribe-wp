@@ -112,8 +112,8 @@ export function SitesView() {
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
   const [selectedAgency, setSelectedAgency] = useState<ActiveAgency | null>(null);
   
-  // Track user's open engagements by media_site_id
-  const [openEngagements, setOpenEngagements] = useState<Set<string>>(new Set());
+  // Track user's open engagements by media_site_id (stores full request data for opening chat)
+  const [openEngagements, setOpenEngagements] = useState<Record<string, any>>({});
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -222,20 +222,37 @@ export function SitesView() {
   // Fetch user's open engagements to show indicator on media site cards
   const fetchOpenEngagements = async () => {
     if (!user) {
-      setOpenEngagements(new Set());
+      setOpenEngagements({});
       return;
     }
     
     const { data } = await supabase
       .from('service_requests')
-      .select('media_site_id')
+      .select(`
+        id,
+        title,
+        description,
+        status,
+        client_read,
+        created_at,
+        updated_at,
+        media_site_id,
+        media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
+        order:orders(id, status, delivery_status)
+      `)
       .eq('user_id', user.id)
       .not('status', 'in', '("cancelled","completed")');
     
     if (data) {
-      setOpenEngagements(new Set(data.map(r => r.media_site_id)));
+      const engagementsMap: Record<string, any> = {};
+      data.forEach(r => {
+        engagementsMap[r.media_site_id] = r;
+      });
+      setOpenEngagements(engagementsMap);
     }
   };
+  
+  const { openGlobalChat, clearUnreadMessageCount } = useAppStore();
 
   // Handle navigation from landing page with target tab and subcategory
   useEffect(() => {
@@ -1203,8 +1220,17 @@ export function SitesView() {
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
                 </a>
                 {!isAdmin && (
-                  openEngagements.has(site.id) ? (
-                    <Badge variant="secondary" className="text-xs flex items-center gap-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  openEngagements[site.id] ? (
+                    <Badge 
+                      variant="secondary" 
+                      className="text-xs flex items-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const engagement = openEngagements[site.id];
+                        clearUnreadMessageCount(engagement.id);
+                        openGlobalChat(engagement, 'my-request');
+                      }}
+                    >
                       <MessageSquare className="h-3 w-3" />
                       Engagement Open
                     </Badge>
