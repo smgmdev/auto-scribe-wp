@@ -906,14 +906,6 @@ export function AdminFloatingChat({
                       View Order
                     </DropdownMenuItem>
                   )}
-                  {request.media_sites?.agency && (
-                    <DropdownMenuItem 
-                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      onClick={() => fetchAgencyDetails(request.media_sites!.agency!)}
-                    >
-                      View Agency
-                    </DropdownMenuItem>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               {request.media_sites && (
