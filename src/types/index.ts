@@ -10,6 +10,7 @@ export interface WordPressSite {
   connected: boolean;
   lastSync?: Date;
   favicon?: string;
+  agency?: string;
 }
 
 export interface WPCategory {
