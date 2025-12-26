@@ -51,6 +51,8 @@ interface DisputeItem {
   reason: string | null;
   created_at: string;
   read: boolean;
+  lastMessage?: string;
+  lastMessageTime?: string;
   service_request: {
     id: string;
     title: string;
@@ -304,7 +306,34 @@ export function ChatListPanel() {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setDisputes(data as unknown as DisputeItem[]);
+      // Fetch last messages for each dispute's service request
+      const requestIds = data.map(d => d.service_request_id);
+      let lastMessages: Record<string, { message: string; created_at: string }> = {};
+      
+      if (requestIds.length > 0) {
+        const { data: messagesData } = await supabase
+          .from('service_messages')
+          .select('request_id, message, created_at')
+          .in('request_id', requestIds)
+          .order('created_at', { ascending: false });
+        
+        messagesData?.forEach(msg => {
+          if (!lastMessages[msg.request_id]) {
+            lastMessages[msg.request_id] = { 
+              message: msg.message, 
+              created_at: msg.created_at
+            };
+          }
+        });
+      }
+
+      const disputesWithMessages = data.map(dispute => ({
+        ...dispute,
+        lastMessage: lastMessages[dispute.service_request_id]?.message,
+        lastMessageTime: lastMessages[dispute.service_request_id]?.created_at
+      }));
+
+      setDisputes(disputesWithMessages as unknown as DisputeItem[]);
     }
   };
 
@@ -1511,9 +1540,11 @@ export function ChatListPanel() {
                           {!dispute.read && (
                             <p className="text-xs text-destructive font-medium mt-0.5">New Dispute</p>
                           )}
-                          <p className="text-xs truncate mt-0.5 flex items-center gap-1 text-destructive">
-                            <AlertTriangle className="h-3 w-3 shrink-0" />
-                            Dispute - {dispute.reason?.slice(0, 30) || 'Delivery overdue'}
+                          <p className="text-xs truncate mt-0.5 text-muted-foreground">
+                            {dispute.lastMessage 
+                              ? formatPreviewMessage(dispute.lastMessage, dispute.reason || '', dispute.service_request?.title || '').text
+                              : `Dispute - ${dispute.reason?.slice(0, 30) || 'Delivery overdue'}`
+                            }
                           </p>
                         </div>
                       </div>
