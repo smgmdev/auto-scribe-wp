@@ -79,14 +79,12 @@ serve(async (req) => {
       );
     }
 
-    // The price in the media_sites table is in cents, we use it directly as credits
-    // e.g., $999 = 99900 cents = 99900 credits required... 
-    // Actually, based on user's answer, price directly = credits. So $999 = 999 credits
-    // The price field shows 5999 for Bloomberg TV Bulgaria, which would mean 5999 credits
-    // Wait - let me check the price field again. It says price: 5999 and user said "use price directly"
-    // So 5999 = 5999 credits required (not cents conversion)
+    // The price field in media_sites represents the dollar amount (e.g., 999 = $999)
+    // For credits: price directly equals credits needed (999 price = 999 credits)
+    // For orders: amount_cents needs to be in cents (999 * 100 = 99900 cents = $999)
     const creditCost = mediaSite.price;
-    console.log(`Credit cost for site ${media_site_id}: ${creditCost}`);
+    const amountCents = mediaSite.price * 100; // Convert to cents for order storage
+    console.log(`Credit cost for site ${media_site_id}: ${creditCost}, Amount cents: ${amountCents}`);
 
     if (creditCost <= 0) {
       return new Response(
@@ -134,8 +132,6 @@ serve(async (req) => {
       .maybeSingle();
 
     const commissionPercentage = agencyPayout?.commission_percentage || 10;
-    // Convert credits to cents for order record (1 credit = 1 cent for order tracking)
-    const amountCents = creditCost;
     const platformFeeCents = Math.round(amountCents * (commissionPercentage / 100));
     const agencyPayoutCents = amountCents - platformFeeCents;
 
