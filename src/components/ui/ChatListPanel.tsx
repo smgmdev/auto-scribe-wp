@@ -876,7 +876,7 @@ export function ChatListPanel() {
       case 'order':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_placed':
-        return <ShoppingCart className="h-3 w-3 shrink-0 text-green-500" />;
+        return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_cancelled':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-red-500" />;
       case 'payment':
