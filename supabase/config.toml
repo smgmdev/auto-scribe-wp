@@ -108,3 +108,9 @@ verify_jwt = true
 
 [functions.deduct-publish-credits]
 verify_jwt = true
+
+[functions.create-credit-order]
+verify_jwt = true
+
+[functions.notify-agency-order]
+verify_jwt = false
