@@ -89,6 +89,11 @@ const Index = () => {
     }
   }, []);
 
+  // Scroll to top when view changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentView]);
+
   // Check if user is an approved agency
   useEffect(() => {
     const checkAgencyStatus = async () => {
