@@ -782,6 +782,21 @@ export function ChatListPanel() {
         console.log('[ChatListPanel] Received broadcast on user channel:', payload);
         handleBroadcastNotification(payload.payload);
       })
+      .on('broadcast', { event: 'admin-joined' }, (payload) => {
+        console.log('[ChatListPanel] Admin joined chat:', payload);
+        playMessageSound();
+        toast({
+          title: "Staff Joined",
+          description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
+        });
+      })
+      .on('broadcast', { event: 'admin-left' }, (payload) => {
+        console.log('[ChatListPanel] Admin left chat:', payload);
+        toast({
+          title: "Staff Left",
+          description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
+        });
+      })
       .subscribe((status) => {
         console.log('[ChatListPanel] User broadcast channel status:', status);
       });
@@ -802,6 +817,21 @@ export function ChatListPanel() {
       .on('broadcast', { event: 'new-message' }, (payload) => {
         console.log('[ChatListPanel] Received broadcast on AGENCY channel:', payload);
         handleBroadcastNotification(payload.payload);
+      })
+      .on('broadcast', { event: 'admin-joined' }, (payload) => {
+        console.log('[ChatListPanel] Admin joined chat (agency):', payload);
+        playMessageSound();
+        toast({
+          title: "Staff Joined",
+          description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
+        });
+      })
+      .on('broadcast', { event: 'admin-left' }, (payload) => {
+        console.log('[ChatListPanel] Admin left chat (agency):', payload);
+        toast({
+          title: "Staff Left",
+          description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
+        });
       })
       .subscribe((status) => {
         console.log('[ChatListPanel] Agency broadcast channel status:', status);
