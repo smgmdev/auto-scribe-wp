@@ -51,7 +51,7 @@ interface Order {
 
 export function AdminOrdersView() {
   const { isAdmin } = useAuth();
-  const { openGlobalChat, setUnreadOrdersCount } = useAppStore();
+  const { openGlobalChat, setUnreadOrdersCount, setUnreadDisputesCount, decrementUnreadDisputesCount } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -63,7 +63,7 @@ export function AdminOrdersView() {
   const [cancelling, setCancelling] = useState(false);
   const [investigating, setInvestigating] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
-  const [disputedOrderIds, setDisputedOrderIds] = useState<Set<string>>(new Set());
+  const [disputes, setDisputes] = useState<{ id: string; order_id: string; service_request_id: string; read: boolean }[]>([]);
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -98,7 +98,46 @@ export function AdminOrdersView() {
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'INSERT',
+            schema: 'public',
+            table: 'disputes'
+          },
+          () => {
+            fetchDisputedOrders();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'disputes'
+          },
+          (payload) => {
+            const updated = payload.new as { id: string; order_id: string; service_request_id: string; read: boolean; status: string };
+            // Update local state for read status changes
+            setDisputes(prev => {
+              // If dispute is now resolved (not open), remove it
+              if (updated.status !== 'open') {
+                return prev.filter(d => d.id !== updated.id);
+              }
+              // Otherwise update the dispute
+              return prev.map(d => 
+                d.id === updated.id ? { ...d, ...updated } : d
+              );
+            });
+            // Recalculate unread count
+            setDisputes(prev => {
+              const unreadCount = prev.filter(d => !d.read).length;
+              setUnreadDisputesCount(unreadCount);
+              return prev;
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
             schema: 'public',
             table: 'disputes'
           },
@@ -118,13 +157,19 @@ export function AdminOrdersView() {
   const fetchDisputedOrders = async () => {
     const { data } = await supabase
       .from('disputes')
-      .select('order_id')
+      .select('id, order_id, service_request_id, read')
       .eq('status', 'open');
     
     if (data) {
-      setDisputedOrderIds(new Set(data.map(d => d.order_id)));
+      setDisputes(data);
+      // Sync unread count to store
+      const unreadCount = data.filter(d => !d.read).length;
+      setUnreadDisputesCount(unreadCount);
     }
   };
+
+  // Helper to get disputedOrderIds from disputes state
+  const disputedOrderIds = new Set(disputes.map(d => d.order_id));
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -291,6 +336,23 @@ export function AdminOrdersView() {
         return;
       }
 
+      // Mark the dispute as read when investigating (if there's a dispute for this order)
+      const dispute = disputes.find(d => d.order_id === targetOrder.id);
+      if (dispute && !dispute.read) {
+        await supabase
+          .from('disputes')
+          .update({ read: true })
+          .eq('id', dispute.id);
+        
+        // Update local state
+        setDisputes(prev => prev.map(d => 
+          d.id === dispute.id ? { ...d, read: true } : d
+        ));
+        
+        // Decrement global count
+        decrementUnreadDisputesCount();
+      }
+
       // Build the GlobalChatRequest object
       const chatRequest: GlobalChatRequest = {
         id: serviceRequest.id,
@@ -443,7 +505,8 @@ export function AdminOrdersView() {
   
   // Calculate unread counts for notifications
   const unreadPendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !o.read).length;
-  const unreadDisputesCount = orders.filter(o => disputedOrderIds.has(o.id) && !o.read).length;
+  // Use dispute.read for unread disputes count (not order.read)
+  const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
   if (!isAdmin) {
     return <div className="text-center py-12 text-muted-foreground">Admin access required</div>;

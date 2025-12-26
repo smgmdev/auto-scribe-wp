@@ -113,7 +113,9 @@ export function ChatListPanel() {
     incrementUserUnreadEngagementsCount,
     globalChatOpen,
     globalChatRequest,
-    minimizedChats
+    minimizedChats,
+    setUnreadDisputesCount,
+    decrementUnreadDisputesCount
   } = useAppStore();
   
   const [isExpanded, setIsExpanded] = useState(false);
@@ -339,6 +341,10 @@ export function ChatListPanel() {
       }));
 
       setDisputes(disputesWithMessages as unknown as DisputeItem[]);
+      
+      // Sync unread count to store
+      const unreadCount = data.filter(d => !d.read).length;
+      setUnreadDisputesCount(unreadCount);
     }
   };
 
@@ -721,6 +727,50 @@ export function ChatListPanel() {
             const unreadCount = currentRequests.filter(r => !r.read && r.status !== 'cancelled').length;
             setAgencyUnreadServiceRequestsCount(unreadCount);
           }
+        }
+      )
+      // Subscribe to dispute updates for admin (sync read status)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'disputes'
+        },
+        (payload) => {
+          if (!isAdmin) return;
+          
+          const updated = payload.new as { id: string; service_request_id: string; read: boolean; status: string };
+          
+          setDisputes(prev => {
+            // If dispute is resolved, remove it
+            if (updated.status !== 'open') {
+              const newDisputes = prev.filter(d => d.id !== updated.id);
+              const unreadCount = newDisputes.filter(d => !d.read).length;
+              setUnreadDisputesCount(unreadCount);
+              return newDisputes;
+            }
+            // Update the dispute read status
+            const newDisputes = prev.map(d => 
+              d.id === updated.id ? { ...d, read: updated.read } : d
+            );
+            const unreadCount = newDisputes.filter(d => !d.read).length;
+            setUnreadDisputesCount(unreadCount);
+            return newDisputes;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'disputes'
+        },
+        () => {
+          if (!isAdmin) return;
+          // Refetch disputes when a new one is created
+          fetchDisputes();
         }
       )
       .on(
@@ -1502,12 +1552,23 @@ export function ChatListPanel() {
                         className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
                           !dispute.read ? 'bg-red-50 dark:bg-red-950/30 border-l-2 border-l-red-500' : ''
                         }`}
-                        onClick={() => {
-                          // Mark as read
-                          supabase
-                            .from('disputes')
-                            .update({ read: true })
-                            .eq('id', dispute.id);
+                        onClick={async () => {
+                          // Only mark as read and decrement if currently unread
+                          if (!dispute.read) {
+                            // Mark as read in database
+                            await supabase
+                              .from('disputes')
+                              .update({ read: true })
+                              .eq('id', dispute.id);
+                            
+                            // Decrement global count (synced with AdminOrdersView)
+                            decrementUnreadDisputesCount();
+                            
+                            // Update local state
+                            setDisputes(prev => prev.map(d => 
+                              d.id === dispute.id ? { ...d, read: true } : d
+                            ));
+                          }
                           
                           // Find the service request and open the chat
                           const serviceRequest = serviceRequests.find(r => r.id === dispute.service_request_id) 
@@ -1537,11 +1598,6 @@ export function ChatListPanel() {
                               order: null
                             } as unknown as GlobalChatRequest, 'agency-request');
                           }
-                          
-                          // Update local state
-                          setDisputes(prev => prev.map(d => 
-                            d.id === dispute.id ? { ...d, read: true } : d
-                          ));
                         }}
                       >
                         <div className="shrink-0 relative">
