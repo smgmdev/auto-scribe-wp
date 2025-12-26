@@ -90,6 +90,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
+  const [hasOpenDispute, setHasOpenDispute] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
   const [adminJoined, setAdminJoined] = useState(false);
@@ -637,6 +638,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setAcceptingCancellation(false);
     }
   };
+
+  // Check if there's an open dispute for this order
+  useEffect(() => {
+    const checkDispute = async () => {
+      if (!globalChatRequest?.order?.id) {
+        setHasOpenDispute(false);
+        return;
+      }
+      
+      const { data } = await supabase
+        .from('disputes')
+        .select('id')
+        .eq('order_id', globalChatRequest.order.id)
+        .eq('status', 'open')
+        .maybeSingle();
+      
+      setHasOpenDispute(!!data);
+    };
+    checkDispute();
+  }, [globalChatRequest?.order?.id]);
 
   // Clear unread when chat opens
   useEffect(() => {
@@ -1784,10 +1805,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     hasOrder ? (
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        disabled={isCancelled || !isDeliveryOverdue}
+                        disabled={isCancelled || !isDeliveryOverdue || hasOpenDispute}
                         onClick={() => setDisputeDialogOpen(true)}
                       >
-                        Open Dispute
+                        {hasOpenDispute ? 'Dispute Open' : 'Open Dispute'}
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem 
@@ -2054,7 +2075,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {/* Input */}
         {!isCancelled && globalChatRequest.status !== 'rejected' && (
           <div className="border-t">
-            {isAdminInvestigating ? (
+            {hasOpenDispute ? (
+              <div className="py-6 px-4 text-center bg-muted/30">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Client has opened a dispute. Arcana Mace Staff will take 6-24h to investigate the dispute. Arcana Mace Staff may contact Client and the Agency separately for details.
+                </p>
+              </div>
+            ) : isAdminInvestigating ? (
               <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
                 <button
                   onClick={handleAdminJoinChat}
@@ -2302,6 +2329,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (error) throw error;
                   
+                  setHasOpenDispute(true);
                   toast({
                     title: "Dispute Request Sent",
                     description: "A staff member will join this chat within 6-24 hours.",
@@ -2344,10 +2372,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   <DropdownMenuItem 
                     className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                    disabled={!isDeliveryOverdue}
+                    disabled={!isDeliveryOverdue || hasOpenDispute}
                     onClick={() => setDisputeDialogOpen(true)}
                   >
-                    Open Dispute
+                    {hasOpenDispute ? 'Dispute Open' : 'Open Dispute'}
                   </DropdownMenuItem>
                   {hasSentPendingCancelRequest ? (
                     <DropdownMenuItem 
