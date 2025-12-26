@@ -1180,15 +1180,14 @@ export function SitesView() {
                 </a>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="h-7 px-3 text-xs group/btn border-[rgba(34,197,94,0.3)] text-[rgb(34,197,94)] bg-[rgba(34,197,94,0.08)] hover:bg-[rgba(34,197,94,0.15)] hover:border-[rgba(34,197,94,0.5)]"
+                  className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200"
                   onClick={() => {
                     useAppStore.getState().setPreselectedSiteId(site.id);
                     useAppStore.getState().setCurrentView('compose');
                   }}
                 >
                   Publish New Article
-                  <ChevronRight className="h-3 w-3 ml-1 opacity-0 -translate-x-1 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all duration-200" />
+                  <ChevronRight className="h-3 w-3 w-0 opacity-0 group-hover/btn:w-3 group-hover/btn:ml-1 group-hover/btn:opacity-100 transition-all duration-200" />
                 </Button>
               </div>
             </div>
