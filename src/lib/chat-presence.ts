@@ -30,14 +30,14 @@ export class ChatPresenceTracker {
   private channel: RealtimeChannel | null = null;
   private requestId: string;
   private userId: string;
-  private userType: 'agency' | 'client';
+  private userType: 'agency' | 'client' | 'admin';
   private onlineUsers: Set<string> = new Set();
   private onPresenceChange?: (onlineUsers: string[]) => void;
 
   constructor(
     requestId: string, 
     userId: string, 
-    userType: 'agency' | 'client',
+    userType: 'agency' | 'client' | 'admin',
     onPresenceChange?: (onlineUsers: string[]) => void
   ) {
     this.requestId = requestId;
