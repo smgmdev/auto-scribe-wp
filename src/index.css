@@ -285,3 +285,9 @@ button:focus-visible,
 [data-sonner-toast]:hover {
   background-color: inherit !important;
 }
+
+/* Disable hover effect on notification badges */
+.bg-red-500:hover,
+.bg-destructive:hover {
+  background-color: inherit !important;
+}
