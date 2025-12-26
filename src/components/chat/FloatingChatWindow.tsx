@@ -847,11 +847,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, []);
 
-  // Scroll to bottom
+  // Scroll to bottom when messages load or update
+  const initialScrollDoneRef = useRef(false);
+  
   useEffect(() => {
+    if (messages.length === 0) return;
+    
+    // Use longer delay for initial scroll to ensure content is rendered
+    const delay = initialScrollDoneRef.current ? 50 : 150;
+    
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-    }, 50);
+      initialScrollDoneRef.current = true;
+    }, delay);
   }, [messages]);
 
   const parseQuote = (message: string): { originalId: string | null; quoteText: string; replyText: string } | null => {
