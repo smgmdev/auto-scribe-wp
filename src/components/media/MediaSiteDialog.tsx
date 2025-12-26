@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image } from 'lucide-react';
+import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -44,6 +44,8 @@ export function MediaSiteDialog({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DialogView>('detail');
+  const [hasOpenEngagement, setHasOpenEngagement] = useState(false);
+  const [checkingEngagement, setCheckingEngagement] = useState(false);
   
   // Brief form state
   const [description, setDescription] = useState('');
@@ -124,7 +126,7 @@ export function MediaSiteDialog({
     return ['png', 'jpg', 'jpeg'].includes(ext || '');
   };
 
-  // Reset to detail view when dialog opens/closes
+  // Reset to detail view when dialog opens/closes and check for open engagement
   useEffect(() => {
     if (!open) {
       // Delay reset to allow close animation
@@ -132,10 +134,25 @@ export function MediaSiteDialog({
         setCurrentView('detail');
         setDescription('');
         setFiles([]);
+        setHasOpenEngagement(false);
       }, 200);
       return () => clearTimeout(timer);
+    } else if (open && mediaSite && user) {
+      // Check if user has an open engagement for this media site
+      setCheckingEngagement(true);
+      supabase
+        .from('service_requests')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('media_site_id', mediaSite.id)
+        .not('status', 'in', '("cancelled","completed")')
+        .maybeSingle()
+        .then(({ data }) => {
+          setHasOpenEngagement(!!data);
+          setCheckingEngagement(false);
+        });
     }
-  }, [open]);
+  }, [open, mediaSite?.id, user]);
 
   const extractDomain = (url: string) => {
     try {
@@ -173,6 +190,25 @@ export function MediaSiteDialog({
     setIsSubmitting(true);
 
     try {
+      // Check for existing open engagement with this media site
+      const { data: existingRequest } = await supabase
+        .from('service_requests')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('media_site_id', mediaSite.id)
+        .not('status', 'in', '("cancelled","completed")')
+        .maybeSingle();
+
+      if (existingRequest) {
+        toast({
+          variant: 'destructive',
+          title: 'Engagement already exists',
+          description: 'You already have an open engagement for this media site. Please use the existing chat.',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       let agencyPayoutId = null;
       if (mediaSite.agency) {
         const { data: agencyData } = await supabase
@@ -355,15 +391,27 @@ export function MediaSiteDialog({
               </Button>
               {!isAgency && (
                 user ? (
-                  <Button 
-                    className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
-                    onClick={handleInterested}
-                  >
-                    <span>I'm Interested - ${mediaSite.price}</span>
-                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </span>
-                  </Button>
+                  checkingEngagement ? (
+                    <Button disabled className="bg-black text-white">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Checking...
+                    </Button>
+                  ) : hasOpenEngagement ? (
+                    <Badge variant="secondary" className="text-sm flex items-center gap-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 py-2 px-3">
+                      <MessageSquare className="h-4 w-4" />
+                      Engagement Open
+                    </Badge>
+                  ) : (
+                    <Button 
+                      className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
+                      onClick={handleInterested}
+                    >
+                      <span>I'm Interested - ${mediaSite.price}</span>
+                      <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                        <ArrowRight className="h-4 w-4 shrink-0" />
+                      </span>
+                    </Button>
+                  )
                 ) : (
                   <Button 
                     className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
