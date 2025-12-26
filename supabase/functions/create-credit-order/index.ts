@@ -190,6 +190,16 @@ serve(async (req) => {
     const orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
     console.log(`Generated unique order number: ${orderNumber}`);
 
+    // Calculate delivery deadline if duration was provided
+    let deliveryDeadline = null;
+    if (delivery_duration) {
+      const { days = 0, hours = 0, minutes = 0 } = delivery_duration;
+      const totalMs = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60) * 1000;
+      if (totalMs > 0) {
+        deliveryDeadline = new Date(Date.now() + totalMs).toISOString();
+      }
+    }
+
     // Create order BEFORE recording transaction
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
@@ -202,7 +212,8 @@ serve(async (req) => {
         agency_payout_cents: agencyPayoutCents,
         status: "paid",
         paid_at: new Date().toISOString(),
-        delivery_status: "pending"
+        delivery_status: "pending",
+        delivery_deadline: deliveryDeadline
       })
       .select()
       .single();
@@ -240,16 +251,6 @@ serve(async (req) => {
     if (linkError) {
       console.error("Error linking order to service request:", linkError);
       // Don't fail the request, just log
-    }
-
-    // Calculate delivery deadline if duration was provided
-    let deliveryDeadline = null;
-    if (delivery_duration) {
-      const { days = 0, hours = 0, minutes = 0 } = delivery_duration;
-      const totalMs = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60) * 1000;
-      if (totalMs > 0) {
-        deliveryDeadline = new Date(Date.now() + totalMs).toISOString();
-      }
     }
 
     // Send a chat message from the client indicating the order was placed

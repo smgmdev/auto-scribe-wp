@@ -93,6 +93,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     delivery_status: string;
     delivery_url: string | null;
     delivery_notes: string | null;
+    delivery_deadline: string | null;
     created_at: string;
     paid_at: string | null;
     delivered_at: string | null;
@@ -1182,7 +1183,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setOrderDetailsOpen(true);
                   const { data } = await supabase
                     .from('orders')
-                    .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, created_at, paid_at, delivered_at, accepted_at')
+                    .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
                     .eq('id', globalChatRequest.order.id)
                     .maybeSingle();
                   setOrderDetails(data);
@@ -1534,6 +1535,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Badge>
                 </div>
               </div>
+
+              {orderDetails.delivery_deadline && orderDetails.delivery_status === 'pending' && (
+                <div className="border-t pt-4">
+                  {(() => {
+                    const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
+                    return (
+                      <div className="flex justify-between text-sm items-center">
+                        <span className="text-muted-foreground flex items-center gap-1.5">
+                          <Clock className="h-4 w-4" />
+                          Expected Delivery
+                        </span>
+                        <span className={`font-semibold ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600'}`}>
+                          {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
