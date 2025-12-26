@@ -566,6 +566,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       setNewMessage('');
       setReplyToMessage(null);
+      setSelectedFile(null);
+      
+      // Auto-focus input after sending
+      setTimeout(() => inputRef.current?.focus(), 0);
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -575,6 +579,190 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     } finally {
       setSending(false);
     }
+  };
+
+  const ALLOWED_FILE_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/png',
+    'image/jpeg'
+  ];
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file type',
+        description: 'Only Word (.doc, .docx), PDF, PNG, and JPG files are allowed.',
+      });
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        variant: 'destructive',
+        title: 'File too large',
+        description: 'Maximum file size is 2MB.',
+      });
+      e.target.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+    e.target.value = '';
+  };
+
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
+    if (file.type === 'application/pdf') return <FileText className="h-4 w-4 text-red-500" />;
+    return <FileText className="h-4 w-4 text-blue-500" />;
+  };
+
+  const uploadFileAndSendMessage = async () => {
+    if (!user || !globalChatRequest || !senderId) return;
+    if (!newMessage.trim() && !selectedFile) return;
+
+    setSending(true);
+    broadcastTyping(false);
+
+    try {
+      let fileUrl = '';
+      let fileName = '';
+
+      if (selectedFile) {
+        setUploadingFile(true);
+        const fileExt = selectedFile.name.split('.').pop();
+        const filePath = `${globalChatRequest.id}/${crypto.randomUUID()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('chat-attachments')
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('chat-attachments')
+          .getPublicUrl(filePath);
+
+        fileUrl = urlData.publicUrl;
+        fileName = selectedFile.name;
+        setUploadingFile(false);
+      }
+
+      let fullMessage = replyToMessage 
+        ? `> [${replyToMessage.id}]:${replyToMessage.message}\n\n${newMessage.trim()}`
+        : newMessage.trim();
+
+      if (fileUrl) {
+        const fileData = JSON.stringify({ url: fileUrl, name: fileName, type: selectedFile?.type });
+        fullMessage = fullMessage 
+          ? `${fullMessage}\n[ATTACHMENT]${fileData}[/ATTACHMENT]`
+          : `[ATTACHMENT]${fileData}[/ATTACHMENT]`;
+      }
+
+      const { error } = await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: fullMessage
+      });
+
+      if (error) throw error;
+
+      const newMsg: ServiceMessage = {
+        id: crypto.randomUUID(),
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: fullMessage,
+        created_at: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, newMsg]);
+
+      // Notify recipient
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id, agency_payout_id')
+        .eq('id', globalChatRequest.id)
+        .single();
+
+      if (requestData) {
+        const updateField = senderType === 'client' 
+          ? { agency_read: false } 
+          : { client_read: false };
+
+        await supabase
+          .from('service_requests')
+          .update(updateField)
+          .eq('id', globalChatRequest.id);
+
+        const recipientId = senderType === 'client' 
+          ? requestData.agency_payout_id 
+          : requestData.user_id;
+
+        const isSelfNotification = recipientId === senderId || recipientId === user?.id;
+
+        if (recipientId && !isSelfNotification) {
+          const notifyChannel = supabase.channel(`notify-${recipientId}`);
+          notifyChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await notifyChannel.send({
+                type: 'broadcast',
+                event: 'new-message',
+                payload: {
+                  request_id: globalChatRequest.id,
+                  sender_type: senderType,
+                  sender_id: senderId,
+                  message: (newMessage.trim() || 'Sent an attachment').substring(0, 100),
+                  title: globalChatRequest.title,
+                  media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                  media_site_favicon: globalChatRequest.media_site?.favicon
+                }
+              });
+              setTimeout(() => supabase.removeChannel(notifyChannel), 500);
+            }
+          });
+        }
+      }
+
+      setNewMessage('');
+      setReplyToMessage(null);
+      setSelectedFile(null);
+
+      setTimeout(() => inputRef.current?.focus(), 0);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to send message',
+        description: error.message,
+      });
+    } finally {
+      setSending(false);
+      setUploadingFile(false);
+    }
+  };
+
+  const parseAttachment = (message: string): { url: string; name: string; type: string } | null => {
+    const match = message.match(/\[ATTACHMENT\](.*?)\[\/ATTACHMENT\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const getMessageWithoutAttachment = (message: string): string => {
+    return message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
   };
 
   const handleMinimize = () => {
@@ -619,11 +807,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Render message content (simplified version)
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: ReturnType<typeof parseQuote>) => {
     let displayMessage = msg.message;
+    const attachment = parseAttachment(msg.message);
     
     // Handle quoted replies
     if (quote) {
       displayMessage = quote.replyText;
     }
+    
+    // Remove attachment tag from display message
+    displayMessage = getMessageWithoutAttachment(displayMessage);
 
     return (
       <div className="space-y-2">
@@ -639,7 +831,40 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <p className="opacity-70 line-clamp-2">{quote.quoteText}</p>
           </div>
         )}
-        <p className="text-sm whitespace-pre-wrap break-words">{displayMessage}</p>
+        {displayMessage && (
+          <p className="text-sm whitespace-pre-wrap break-words">{displayMessage}</p>
+        )}
+        {attachment && (
+          <div className="mt-2">
+            {attachment.type.startsWith('image/') ? (
+              <div 
+                className="cursor-pointer"
+                onClick={() => setImagePreview({ url: attachment.url, name: attachment.name })}
+              >
+                <img 
+                  src={attachment.url} 
+                  alt={attachment.name}
+                  className="max-h-40 rounded-lg object-cover"
+                />
+                <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
+                  <ImageIcon className="h-3 w-3" />
+                  {attachment.name}
+                </p>
+              </div>
+            ) : (
+              <div 
+                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+                  isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
+                }`}
+                onClick={() => setFileWebView({ url: attachment.url, name: attachment.name })}
+              >
+                <FileText className={`h-5 w-5 ${attachment.type === 'application/pdf' ? 'text-red-500' : 'text-blue-500'}`} />
+                <span className="text-sm truncate flex-1">{attachment.name}</span>
+                <Download className="h-4 w-4 opacity-70" />
+              </div>
+            )}
+          </div>
+        )}
         <p className="text-xs opacity-50 mt-1">
           {format(new Date(msg.created_at), 'HH:mm')}
         </p>
@@ -897,7 +1122,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <p className="text-xs text-muted-foreground">
                     Replying to {replyToMessage.sender_type === senderType ? 'yourself' : counterpartyLabel}
                   </p>
-                  <p className="text-sm truncate">{replyToMessage.message}</p>
+                  <p className="text-sm truncate">{getMessageWithoutAttachment(replyToMessage.message)}</p>
                 </div>
                 <Button
                   variant="ghost"
@@ -909,7 +1134,41 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Button>
               </div>
             )}
+            {selectedFile && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 border-b">
+                {getFileIcon(selectedFile)}
+                <span className="text-sm truncate flex-1">{selectedFile.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {(selectedFile.size / 1024).toFixed(1)} KB
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0"
+                  onClick={() => setSelectedFile(null)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
             <div className="flex items-center">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                onChange={handleFileSelect}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending}
+                title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
               <Input
                 ref={inputRef}
                 placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
@@ -918,9 +1177,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 disabled={sending}
                 className="rounded-none border-0 flex-1"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                  if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
                     e.preventDefault();
-                    sendMessage();
+                    uploadFileAndSendMessage();
                   }
                 }}
               />
@@ -928,8 +1187,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                disabled={sending || !newMessage.trim()}
-                onClick={sendMessage}
+                disabled={sending || (!newMessage.trim() && !selectedFile)}
+                onClick={uploadFileAndSendMessage}
               >
                 {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
@@ -1100,6 +1359,44 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         onSuccess={() => {
           updateGlobalChatRequest({ order: { id: 'temp' } as any }, globalChatRequest.id);
         }}
+      />
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview(null)}>
+        <DialogContent className="max-w-3xl z-[300]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5" />
+              {imagePreview?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4">
+            <img 
+              src={imagePreview?.url} 
+              alt={imagePreview?.name}
+              className="max-h-[60vh] object-contain rounded-lg"
+            />
+            <a
+              href={imagePreview?.url}
+              download={imagePreview?.name}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-primary hover:underline"
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* File WebView Dialog */}
+      <WebViewDialog
+        open={!!fileWebView}
+        onOpenChange={() => setFileWebView(null)}
+        url={fileWebView?.url ? `https://docs.google.com/viewer?url=${encodeURIComponent(fileWebView.url)}&embedded=true` : ''}
+        title={fileWebView?.name || 'Document'}
+        downloadUrl={fileWebView?.url}
       />
     </>
   );
