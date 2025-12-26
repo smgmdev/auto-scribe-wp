@@ -650,7 +650,8 @@ export function AdminOrdersView() {
                   <>
                     {selectedOrder.delivery_status === 'pending' && (
                       <Button 
-                        className="w-full" 
+                        variant="outline"
+                        className="w-full hover:bg-foreground hover:text-background" 
                         onClick={() => {
                           setDetailsDialogOpen(false);
                           openDeliveryDialog(selectedOrder);
@@ -661,8 +662,8 @@ export function AdminOrdersView() {
                       </Button>
                     )}
                     <Button 
-                      variant="destructive"
-                      className="w-full" 
+                      variant="outline"
+                      className="w-full hover:bg-destructive hover:text-destructive-foreground hover:border-destructive" 
                       onClick={() => setCancelDialogOpen(true)}
                     >
                       <XCircle className="h-4 w-4 mr-2" />
