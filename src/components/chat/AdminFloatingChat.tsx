@@ -118,6 +118,55 @@ export function AdminFloatingChat({
   const isCancelled = request.status === 'cancelled';
   const hasOrder = !!request.order_id;
 
+  // Parse special message types
+  const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string; delivery_deadline?: string } | null => {
+    const match = message.match(/\[ORDER_PLACED\](.*?)\[\/ORDER_PLACED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseOrderCancelled = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_refunded: number; order_id: string } | null => {
+    const match = message.match(/\[ORDER_CANCELLED\](.*?)\[\/ORDER_CANCELLED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseCancelOrderRequest = (message: string): { type: string; order_id: string; media_site_id?: string; media_site_name: string; reason?: string; requester_type: string } | null => {
+    const match = message.match(/\[CANCEL_ORDER_REQUEST\](.*?)\[\/CANCEL_ORDER_REQUEST\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseCancelOrderAccepted = (message: string): { type: string; order_id: string; media_site_name: string; credits_refunded: number; accepted_by: string } | null => {
+    const match = message.match(/\[CANCEL_ORDER_ACCEPTED\](.*?)\[\/CANCEL_ORDER_ACCEPTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   // Check if admin has joined
   useEffect(() => {
     if (!user) return;
@@ -447,6 +496,142 @@ export function AdminFloatingChat({
     return { text: `${hours}h ${minutes}m`, isOverdue: false };
   };
 
+  // Render message content with special message handling
+  const renderMessageContent = (msg: ServiceMessage) => {
+    const orderPlaced = parseOrderPlaced(msg.message);
+    const orderCancelled = parseOrderCancelled(msg.message);
+    const cancelRequest = parseCancelOrderRequest(msg.message);
+    const cancelAccepted = parseCancelOrderAccepted(msg.message);
+
+    // Admin messages are never "own" for styling purposes in admin view
+    const isClientMessage = msg.sender_type === 'client';
+    
+    // Handle cancel order request message
+    if (cancelRequest) {
+      const msgIndex = messages.findIndex(m => m.id === msg.id);
+      const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+      const isPending = !hasAcceptance;
+
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+            <div className="flex items-center gap-2 mb-2">
+              <X className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              <span className="font-semibold text-sm text-orange-700 dark:text-orange-300">
+                Cancellation Request
+              </span>
+              {!isPending && (
+                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                  Accepted
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {cancelRequest.requester_type === 'client' ? 'Client' : 'Agency'} requested to cancel the order for {cancelRequest.media_site_name}
+            </p>
+            {cancelRequest.reason && (
+              <p className="text-xs mt-1 italic text-muted-foreground">
+                Reason: {cancelRequest.reason}
+              </p>
+            )}
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle cancel order accepted message
+    if (cancelAccepted) {
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="font-semibold text-sm text-green-700 dark:text-green-300">
+                Cancellation Accepted
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Order for {cancelAccepted.media_site_name} has been cancelled mutually
+            </p>
+            <p className="text-xs mt-1 text-muted-foreground">
+              {cancelAccepted.credits_refunded} credits refunded to client
+            </p>
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+    
+    // Handle order placed special message
+    if (orderPlaced) {
+      const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
+      
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2 mb-2">
+              <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="font-semibold text-sm text-green-700 dark:text-green-300">Order Placed</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {orderPlaced.media_site_name}
+            </p>
+            <p className="text-xs mt-1 text-muted-foreground">
+              {orderPlaced.credits_used} credits
+            </p>
+            {timeInfo && (
+              <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-green-200 dark:border-green-800">
+                <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`} />
+                <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
+                  {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
+                </span>
+              </div>
+            )}
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle order cancelled special message
+    if (orderCancelled) {
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
+            <div className="flex items-center gap-2 mb-2">
+              <ShoppingCart className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <span className="font-semibold text-sm text-red-700 dark:text-red-300">Order Cancelled</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {orderCancelled.media_site_name}
+            </p>
+            <p className="text-xs mt-1 text-muted-foreground">
+              {orderCancelled.credits_refunded} credits refunded
+            </p>
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Regular message
+    return (
+      <div className="space-y-1">
+        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+        <p className="text-xs opacity-50">{format(new Date(msg.created_at), 'HH:mm')}</p>
+      </div>
+    );
+  };
+
   return (
     <>
       {/* Floating Chat Window */}
@@ -651,20 +836,30 @@ export function AdminFloatingChat({
               const isClient = m.sender_type === 'client';
               const isAgency = m.sender_type === 'agency';
 
+              // Check for special message types
+              const orderPlaced = parseOrderPlaced(m.message);
+              const orderCancelled = parseOrderCancelled(m.message);
+              const cancelRequest = parseCancelOrderRequest(m.message);
+              const cancelAccepted = parseCancelOrderAccepted(m.message);
+              const isSpecialMessage = orderPlaced || orderCancelled || cancelRequest || cancelAccepted;
+
               return (
                 <div key={m.id} className={`flex ${isClient ? 'justify-start' : isAgency ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-lg ${
-                    isAdmin 
-                      ? 'bg-blue-500 text-white' 
-                      : isAgency 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted'
+                  <div className={`max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} ${
+                    isSpecialMessage ? '' : (
+                      isAdmin 
+                        ? 'bg-blue-500 text-white' 
+                        : isAgency 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted'
+                    )
                   }`}>
-                    <p className="text-xs font-medium mb-1 opacity-70 capitalize">
-                      {isAdmin ? 'Arcana Mace Staff' : m.sender_type}
-                    </p>
-                    <p className="text-sm whitespace-pre-wrap">{m.message}</p>
-                    <p className="text-xs opacity-50 mt-1">{format(new Date(m.created_at), 'MMM d, h:mm a')}</p>
+                    {!isSpecialMessage && (
+                      <p className="text-xs font-medium mb-1 opacity-70 capitalize">
+                        {isAdmin ? 'Arcana Mace Staff' : m.sender_type}
+                      </p>
+                    )}
+                    {renderMessageContent(m)}
                   </div>
                 </div>
               );
