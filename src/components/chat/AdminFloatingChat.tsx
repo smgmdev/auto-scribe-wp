@@ -357,6 +357,34 @@ export function AdminFloatingChat({
     };
   }, [request.id]);
 
+  // Compute last activity from messages as fallback
+  const getLastActivityFromMessages = useCallback((senderType: 'client' | 'agency') => {
+    const userMessages = messages
+      .filter(m => m.sender_type === senderType)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return userMessages[0]?.created_at || null;
+  }, [messages]);
+
+  // Format relative time
+  const formatLastSeen = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return format(date, 'MMM d, HH:mm');
+  };
+
+  // Get effective last seen (presence or last message)
+  const clientLastSeen = clientPresence.lastSeen || getLastActivityFromMessages('client');
+  const agencyLastSeen = agencyPresence.lastSeen || getLastActivityFromMessages('agency');
+
   // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
@@ -926,8 +954,8 @@ export function AdminFloatingChat({
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                         Online now
                       </span>
-                    ) : clientPresence.lastSeen ? (
-                      <span>Last seen {format(new Date(clientPresence.lastSeen), 'MMM d, HH:mm')}</span>
+                    ) : clientLastSeen ? (
+                      <span>Last seen {formatLastSeen(clientLastSeen)}</span>
                     ) : (
                       <span>—</span>
                     )}
@@ -940,8 +968,8 @@ export function AdminFloatingChat({
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                           Online now
                         </span>
-                      ) : agencyPresence.lastSeen ? (
-                        <span>Last seen {format(new Date(agencyPresence.lastSeen), 'MMM d, HH:mm')}</span>
+                      ) : agencyLastSeen ? (
+                        <span>Last seen {formatLastSeen(agencyLastSeen)}</span>
                       ) : (
                         <span>—</span>
                       )}
