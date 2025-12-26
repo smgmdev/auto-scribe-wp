@@ -71,8 +71,40 @@ export function AdminOrdersView() {
   useEffect(() => {
     if (isAdmin) {
       fetchOrders();
+      
+      // Subscribe to disputes changes to refresh the list
+      const disputesChannel = supabase
+        .channel('admin-orders-disputes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'disputes'
+          },
+          () => {
+            // Refresh disputed order IDs when disputes change
+            fetchDisputedOrders();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(disputesChannel);
+      };
     }
   }, [isAdmin]);
+
+  const fetchDisputedOrders = async () => {
+    const { data } = await supabase
+      .from('disputes')
+      .select('order_id')
+      .eq('status', 'open');
+    
+    if (data) {
+      setDisputedOrderIds(new Set(data.map(d => d.order_id)));
+    }
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -345,12 +377,22 @@ export function AdminOrdersView() {
     setDetailsDialogOpen(true);
   };
 
+  // Track orders with open disputes
+  const [disputedOrderIds, setDisputedOrderIds] = useState<Set<string>>(new Set());
+
+  // Initial fetch of disputed orders
+  useEffect(() => {
+    if (isAdmin) {
+      fetchDisputedOrders();
+    }
+  }, [isAdmin, orders]);
+
   const filteredOrders = orders.filter(order => {
     switch (activeTab) {
       case 'pending':
         return order.status === 'paid' && order.delivery_status === 'pending';
-      case 'delivered':
-        return order.delivery_status === 'delivered';
+      case 'disputes':
+        return disputedOrderIds.has(order.id);
       case 'completed':
         return order.status === 'completed';
       case 'all':
@@ -360,7 +402,7 @@ export function AdminOrdersView() {
   });
 
   const pendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending').length;
-  const deliveredCount = orders.filter(o => o.delivery_status === 'delivered').length;
+  const disputesCount = orders.filter(o => disputedOrderIds.has(o.id)).length;
 
   if (!isAdmin) {
     return <div className="text-center py-12 text-muted-foreground">Admin access required</div>;
@@ -381,10 +423,10 @@ export function AdminOrdersView() {
               <span className="ml-2 bg-yellow-600 text-white text-xs px-1.5 py-0.5 rounded-full">{pendingCount}</span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="delivered" className="relative">
-            Awaiting Acceptance
-            {deliveredCount > 0 && (
-              <span className="ml-2 bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded-full">{deliveredCount}</span>
+          <TabsTrigger value="disputes" className="relative">
+            Open Disputes
+            {disputesCount > 0 && (
+              <span className="ml-2 bg-destructive text-destructive-foreground text-xs px-1.5 py-0.5 rounded-full">{disputesCount}</span>
             )}
           </TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -404,8 +446,8 @@ export function AdminOrdersView() {
                 <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
                   {activeTab === 'pending' 
                     ? 'No orders pending delivery'
-                    : activeTab === 'delivered'
-                    ? 'No orders awaiting acceptance'
+                    : activeTab === 'disputes'
+                    ? 'No open disputes'
                     : 'No orders in this category'}
                 </p>
               </CardContent>
