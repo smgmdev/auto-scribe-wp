@@ -14,6 +14,7 @@ import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { MinimizedChats } from '@/components/ui/MinimizedChats';
+import { ChatListPanel } from '@/components/ui/ChatListPanel';
 import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import amblack from '@/assets/amblack.png';
 
@@ -904,6 +905,7 @@ const Landing = () => {
     {/* Global Chat Components for logged-in users */}
     {user && (
       <>
+        <ChatListPanel />
         <MinimizedChats onOpenChat={async (chat: MinimizedChat) => {
           removeMinimizedChat(chat.id);
           clearUnreadMessageCount(chat.id);
