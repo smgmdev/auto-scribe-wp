@@ -534,6 +534,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
+  const parseOrderCancelled = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_refunded: number; order_id: string } | null => {
+    const match = message.match(/\[ORDER_CANCELLED\](.*?)\[\/ORDER_CANCELLED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const sendMessage = async () => {
     if (!user || !globalChatRequest || !senderId || !newMessage.trim()) return;
     
@@ -855,6 +867,54 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: ReturnType<typeof parseQuote>) => {
     let displayMessage = msg.message;
     const attachment = parseAttachment(msg.message);
+    const orderPlaced = parseOrderPlaced(msg.message);
+    const orderCancelled = parseOrderCancelled(msg.message);
+    
+    // Handle order placed special message
+    if (orderPlaced) {
+      return (
+        <div className="space-y-2">
+          <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {orderPlaced.media_site_name}
+            </p>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              {orderPlaced.credits_used} credits
+            </p>
+          </div>
+          <p className="text-xs opacity-50 mt-1">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle order cancelled special message
+    if (orderCancelled) {
+      return (
+        <div className="space-y-2">
+          <div className={`rounded-lg border p-3 ${isOwnMessage ? 'bg-primary-foreground/10 border-primary-foreground/30' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <X className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>Order Cancelled</span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {orderCancelled.media_site_name}
+            </p>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              {orderCancelled.credits_refunded} credits refunded
+            </p>
+          </div>
+          <p className="text-xs opacity-50 mt-1">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
     
     // Handle quoted replies
     if (quote) {
