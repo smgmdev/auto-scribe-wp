@@ -485,6 +485,7 @@ export function AdminFloatingChat({
 
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
+    setLogoLoading(true);
     setAgencyDetailsOpen(true);
     try {
       const { data } = await supabase
@@ -500,9 +501,21 @@ export function AdminFloatingChat({
           .eq('agency_name', agencyName)
           .maybeSingle();
         
+        let logoUrl: string | null = null;
+        
+        // Get signed URL for logo if exists
+        if (appData?.logo_url) {
+          const { data: signed, error: signError } = await supabase.storage
+            .from('agency-documents')
+            .createSignedUrl(appData.logo_url, 3600);
+          if (!signError && signed?.signedUrl) {
+            logoUrl = signed.signedUrl;
+          }
+        }
+        
         setAgencyDetails({
           ...data,
-          logo_url: appData?.logo_url || null
+          logo_url: logoUrl
         });
       }
     } catch (error) {
@@ -553,6 +566,7 @@ export function AdminFloatingChat({
 
   const fetchAgencyDetailsBySenderId = async (senderId: string) => {
     setLoadingAgency(true);
+    setLogoLoading(true);
     setAgencyDetailsOpen(true);
     try {
       const { data } = await supabase
@@ -568,9 +582,21 @@ export function AdminFloatingChat({
           .eq('agency_name', data.agency_name)
           .maybeSingle();
         
+        let logoUrl: string | null = null;
+        
+        // Get signed URL for logo if exists
+        if (appData?.logo_url) {
+          const { data: signed, error: signError } = await supabase.storage
+            .from('agency-documents')
+            .createSignedUrl(appData.logo_url, 3600);
+          if (!signError && signed?.signedUrl) {
+            logoUrl = signed.signedUrl;
+          }
+        }
+        
         setAgencyDetails({
           ...data,
-          logo_url: appData?.logo_url || null
+          logo_url: logoUrl
         });
       } else {
         // Fallback: try agency_payout_id from request
@@ -588,9 +614,21 @@ export function AdminFloatingChat({
               .eq('agency_name', agencyData.agency_name)
               .maybeSingle();
             
+            let logoUrl: string | null = null;
+            
+            // Get signed URL for logo if exists
+            if (appData?.logo_url) {
+              const { data: signed, error: signError } = await supabase.storage
+                .from('agency-documents')
+                .createSignedUrl(appData.logo_url, 3600);
+              if (!signError && signed?.signedUrl) {
+                logoUrl = signed.signedUrl;
+              }
+            }
+            
             setAgencyDetails({
               ...agencyData,
-              logo_url: appData?.logo_url || null
+              logo_url: logoUrl
             });
           }
         }
