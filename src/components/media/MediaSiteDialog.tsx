@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl } from '@/lib/favicon';
+import { useAppStore } from '@/stores/appStore';
 
 interface MediaSite {
   id: string;
@@ -44,7 +45,7 @@ export function MediaSiteDialog({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DialogView>('detail');
-  const [hasOpenEngagement, setHasOpenEngagement] = useState(false);
+  const [openEngagementData, setOpenEngagementData] = useState<any>(null);
   const [checkingEngagement, setCheckingEngagement] = useState(false);
   
   // Brief form state
@@ -134,7 +135,7 @@ export function MediaSiteDialog({
         setCurrentView('detail');
         setDescription('');
         setFiles([]);
-        setHasOpenEngagement(false);
+        setOpenEngagementData(null);
       }, 200);
       return () => clearTimeout(timer);
     } else if (open && mediaSite && user) {
@@ -142,13 +143,24 @@ export function MediaSiteDialog({
       setCheckingEngagement(true);
       supabase
         .from('service_requests')
-        .select('id')
+        .select(`
+          id,
+          title,
+          description,
+          status,
+          client_read,
+          created_at,
+          updated_at,
+          media_site_id,
+          media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
+          order:orders(id, status, delivery_status)
+        `)
         .eq('user_id', user.id)
         .eq('media_site_id', mediaSite.id)
         .not('status', 'in', '("cancelled","completed")')
         .maybeSingle()
         .then(({ data }) => {
-          setHasOpenEngagement(!!data);
+          setOpenEngagementData(data);
           setCheckingEngagement(false);
         });
     }
@@ -396,8 +408,17 @@ export function MediaSiteDialog({
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Checking...
                     </Button>
-                  ) : hasOpenEngagement ? (
-                    <Badge variant="secondary" className="text-sm flex items-center gap-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 py-2 px-3">
+                  ) : openEngagementData ? (
+                    <Badge 
+                      variant="secondary" 
+                      className="text-sm flex items-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors py-2 px-3"
+                      onClick={() => {
+                        const { openGlobalChat, clearUnreadMessageCount } = useAppStore.getState();
+                        clearUnreadMessageCount(openEngagementData.id);
+                        openGlobalChat(openEngagementData, 'my-request');
+                        onOpenChange(false);
+                      }}
+                    >
                       <MessageSquare className="h-4 w-4" />
                       Engagement Open
                     </Badge>
