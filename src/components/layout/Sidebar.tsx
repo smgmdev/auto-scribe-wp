@@ -521,7 +521,7 @@ export function Sidebar({
                       )} />
                     </Button>
                     {totalDropdownCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                         {totalDropdownCount}
                       </span>
                     )}
