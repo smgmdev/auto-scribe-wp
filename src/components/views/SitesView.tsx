@@ -2291,9 +2291,16 @@ export function SitesView() {
         }}
         mediaSite={selectedMediaSite}
         agencyLogos={agencyLogos}
-        onSuccess={() => {
+        onSuccess={(engagement) => {
           setSelectedMediaSite(null);
           setMediaSiteDialogOpen(false);
+          // Update openEngagements immediately with the new engagement
+          if (engagement) {
+            setOpenEngagements(prev => ({
+              ...prev,
+              [engagement.media_site_id]: engagement
+            }));
+          }
           toast({ title: 'Brief submitted! View it in My Engagements.' });
         }}
       />
@@ -2411,9 +2418,16 @@ export function SitesView() {
           agency: briefMediaSite.agency,
           favicon: briefMediaSite.favicon || getFaviconUrl(briefMediaSite.link)
         } : null}
-        onSuccess={() => {
+        onSuccess={(engagement) => {
           setBriefDialogOpen(false);
           setBriefMediaSite(null);
+          // Update openEngagements immediately with the new engagement
+          if (engagement) {
+            setOpenEngagements(prev => ({
+              ...prev,
+              [engagement.media_site_id]: engagement
+            }));
+          }
         }}
       />
     </div>

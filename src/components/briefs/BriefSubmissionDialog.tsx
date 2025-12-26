@@ -20,7 +20,7 @@ interface BriefSubmissionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mediaSite: MediaSite | null;
-  onSuccess: () => void;
+  onSuccess: (engagement?: { id: string; media_site_id: string; [key: string]: any }) => void;
   onBack?: () => void;
 }
 
@@ -167,7 +167,9 @@ export function BriefSubmissionDialog({
           agency_payout_id: agencyPayoutId,
           title: mediaSite.name,
           description: description.trim(),
-          status: 'pending_review'
+          status: 'pending_review',
+          client_read: true, // User created the request, so they've already "read" it
+          agency_read: false // Agency needs to see the notification
         })
         .select()
         .single();
@@ -225,7 +227,19 @@ export function BriefSubmissionDialog({
       setDescription('');
       setFiles([]);
       onOpenChange(false);
-      onSuccess();
+      // Pass the new engagement data so parent can update state immediately
+      onSuccess({
+        id: request.id,
+        media_site_id: mediaSite.id,
+        title: request.title,
+        description: request.description,
+        status: request.status,
+        client_read: true,
+        created_at: request.created_at,
+        updated_at: request.updated_at,
+        media_site: mediaSite,
+        order: null
+      });
     } catch (error: any) {
       toast({
         variant: 'destructive',
