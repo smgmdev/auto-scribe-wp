@@ -1010,17 +1010,6 @@ export type Database = {
       check_email_verified: { Args: { check_email: string }; Returns: boolean }
       check_user_status: { Args: { check_email: string }; Returns: string }
       check_user_suspended: { Args: { check_email: string }; Returns: boolean }
-      get_public_sites: {
-        Args: never
-        Returns: {
-          connected: boolean
-          favicon: string
-          id: string
-          name: string
-          seo_plugin: string
-          url: string
-        }[]
-      }
       get_user_credits: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
