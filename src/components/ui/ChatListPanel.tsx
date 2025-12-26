@@ -1580,7 +1580,17 @@ export function ChatListPanel() {
                               </div>
                             </div>
                             <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                              {investigation.lastMessage || investigation.service_request?.description || 'No messages yet'}
+                              {(() => {
+                                const msg = investigation.lastMessage || '';
+                                // Clean up system message tags for display
+                                if (msg.startsWith('[ADMIN_JOINED]')) {
+                                  return 'Arcana Mace Staff has entered the chat';
+                                }
+                                if (msg.startsWith('[ADMIN_LEFT]')) {
+                                  return 'Arcana Mace Staff has left the chat';
+                                }
+                                return msg || investigation.service_request?.description || 'No messages yet';
+                              })()}
                             </p>
                           </div>
                         </div>
