@@ -512,23 +512,6 @@ export function OrdersView() {
                 )}
               </div>
 
-              {/* Delivery Countdown Timer */}
-              {selectedOrder.delivery_deadline && selectedOrder.delivery_status === 'pending' && selectedOrder.status === 'paid' && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Delivery Deadline</p>
-                  {(() => {
-                    const { text, isOverdue } = formatTimeRemaining(selectedOrder.delivery_deadline);
-                    return (
-                      <div className={`flex items-center gap-2 ${isOverdue ? 'text-destructive' : 'text-foreground'}`}>
-                        <Clock className="h-4 w-4" />
-                        <span className="font-mono font-semibold">{text}</span>
-                        {isOverdue && <Badge variant="destructive" className="text-xs">Overdue</Badge>}
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-
               {selectedOrder.delivery_url && (
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
