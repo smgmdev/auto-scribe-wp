@@ -43,7 +43,7 @@ interface FloatingChatWindowProps {
 }
 
 export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { 
     closeGlobalChat,
     updateGlobalChatRequest,
@@ -176,7 +176,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, [isDragging, localPosition, globalChatRequest.id, updateChatPosition]);
 
-  const senderType = globalChatType === 'agency-request' ? 'agency' : 'client';
+  // Admins send as 'admin' type, agencies as 'agency', clients as 'client'
+  const senderType = isAdmin && globalChatType === 'agency-request' ? 'admin' : (globalChatType === 'agency-request' ? 'agency' : 'client');
   const counterpartyLabel = globalChatType === 'agency-request' ? 'Client' : 'Agency';
   
   const isCancelled = globalChatRequest?.status === 'cancelled';
@@ -432,6 +433,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const fetchSenderId = async () => {
       if (!user) return;
       
+      // Admins always use their user.id as sender_id
+      if (isAdmin) {
+        setSenderId(user.id);
+        return;
+      }
+      
       if (globalChatType === 'agency-request') {
         const { data } = await supabase
           .from('agency_payouts')
@@ -444,7 +451,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
     };
     fetchSenderId();
-  }, [user, globalChatType]);
+  }, [user, globalChatType, isAdmin]);
 
   // Fetch messages
   useEffect(() => {
