@@ -2077,7 +2077,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className="border-t">
             {hasOpenDispute ? (
               <div className="py-2 px-4 text-center bg-muted/30">
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Client has opened a dispute. Arcana Mace Staff will take 6-24h to investigate the dispute. Arcana Mace Staff may contact Client and the Agency separately for details.
                 </p>
               </div>
