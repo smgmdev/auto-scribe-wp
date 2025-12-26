@@ -99,7 +99,7 @@ export function OrderWithCreditsDialog({
   if (!mediaSite) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => !purchasing && onOpenChange(newOpen)}>
       <DialogContent className="sm:max-w-md z-[9999]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
