@@ -246,14 +246,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setMessages(prev => [...prev, newMsg]);
       setAdminJoined(true);
       
-      // Fetch user_id and agency_payout_id for notifications
+      // Create investigation record when admin joins
+      // First get the order_id from the service_request
       const { data: requestData } = await supabase
         .from('service_requests')
-        .select('user_id, agency_payout_id')
+        .select('user_id, agency_payout_id, order_id')
         .eq('id', globalChatRequest.id)
         .single();
       
       if (requestData) {
+        // Create/update investigation record
+        await supabase
+          .from('admin_investigations')
+          .upsert({
+            admin_id: senderId,
+            service_request_id: globalChatRequest.id,
+            order_id: requestData.order_id || globalChatRequest.order?.id || globalChatRequest.id,
+            status: 'active'
+          }, {
+            onConflict: 'service_request_id'
+          });
+        
         // Notify client (user_id)
         const clientNotifyChannel = supabase.channel(`notify-${requestData.user_id}`);
         clientNotifyChannel.subscribe(async (status) => {
@@ -334,6 +347,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       };
       setMessages(prev => [...prev, newMsg]);
       setAdminJoined(false);
+      
+      // Delete investigation record when admin leaves
+      await supabase
+        .from('admin_investigations')
+        .delete()
+        .eq('service_request_id', globalChatRequest.id);
       
       // Fetch user_id and agency_payout_id for notifications
       const { data: requestData } = await supabase
