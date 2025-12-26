@@ -36,6 +36,7 @@ interface Order {
   delivered_at: string | null;
   accepted_at: string | null;
   released_at: string | null;
+  read: boolean;
   media_sites: {
     name: string;
     agency: string | null;
@@ -47,9 +48,10 @@ interface Order {
   } | null;
 }
 
+
 export function AdminOrdersView() {
   const { isAdmin } = useAuth();
-  const { openGlobalChat } = useAppStore();
+  const { openGlobalChat, setUnreadOrdersCount } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -61,6 +63,7 @@ export function AdminOrdersView() {
   const [cancelling, setCancelling] = useState(false);
   const [investigating, setInvestigating] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const [disputedOrderIds, setDisputedOrderIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -71,6 +74,23 @@ export function AdminOrdersView() {
   useEffect(() => {
     if (isAdmin) {
       fetchOrders();
+      fetchDisputedOrders();
+      
+      // Subscribe to orders changes to refresh the list
+      const ordersChannel = supabase
+        .channel('admin-orders-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders'
+          },
+          () => {
+            fetchOrders();
+          }
+        )
+        .subscribe();
       
       // Subscribe to disputes changes to refresh the list
       const disputesChannel = supabase
@@ -83,13 +103,13 @@ export function AdminOrdersView() {
             table: 'disputes'
           },
           () => {
-            // Refresh disputed order IDs when disputes change
             fetchDisputedOrders();
           }
         )
         .subscribe();
 
       return () => {
+        supabase.removeChannel(ordersChannel);
         supabase.removeChannel(disputesChannel);
       };
     }
@@ -124,9 +144,31 @@ export function AdminOrdersView() {
         description: error.message
       });
     } else {
-      setOrders(data || []);
+      setOrders((data as Order[]) || []);
+      // Update unread count in store
+      const unreadCount = (data || []).filter((o: Order) => o.status === 'paid' && !o.read).length;
+      setUnreadOrdersCount(unreadCount);
     }
     setLoading(false);
+  };
+
+  // Mark order as read when viewing details
+  const markOrderAsRead = async (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order && !order.read) {
+      await supabase
+        .from('orders')
+        .update({ read: true })
+        .eq('id', orderId);
+      
+      // Update local state
+      setOrders(prev => prev.map(o => 
+        o.id === orderId ? { ...o, read: true } : o
+      ));
+      
+      // Decrement unread count
+      setUnreadOrdersCount(Math.max(0, orders.filter(o => o.status === 'paid' && !o.read).length - 1));
+    }
   };
 
   const handleMarkDelivered = async () => {
@@ -375,17 +417,9 @@ export function AdminOrdersView() {
   const openDetailsDialog = (order: Order) => {
     setSelectedOrder(order);
     setDetailsDialogOpen(true);
+    // Mark order as read when opening details
+    markOrderAsRead(order.id);
   };
-
-  // Track orders with open disputes
-  const [disputedOrderIds, setDisputedOrderIds] = useState<Set<string>>(new Set());
-
-  // Initial fetch of disputed orders
-  useEffect(() => {
-    if (isAdmin) {
-      fetchDisputedOrders();
-    }
-  }, [isAdmin, orders]);
 
   const filteredOrders = orders.filter(order => {
     switch (activeTab) {
@@ -401,8 +435,15 @@ export function AdminOrdersView() {
     }
   });
 
+  // Calculate counts for all tabs
   const pendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending').length;
   const disputesCount = orders.filter(o => disputedOrderIds.has(o.id)).length;
+  const completedCount = orders.filter(o => o.status === 'completed').length;
+  const allOrdersCount = orders.length;
+  
+  // Calculate unread counts for notifications
+  const unreadPendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !o.read).length;
+  const unreadDisputesCount = orders.filter(o => disputedOrderIds.has(o.id) && !o.read).length;
 
   if (!isAdmin) {
     return <div className="text-center py-12 text-muted-foreground">Admin access required</div>;
@@ -419,18 +460,30 @@ export function AdminOrdersView() {
         <TabsList>
           <TabsTrigger value="pending" className="relative">
             Pending Delivery
-            {pendingCount > 0 && (
-              <span className="ml-2 bg-yellow-600 text-white text-xs px-1.5 py-0.5 rounded-full">{pendingCount}</span>
+            <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">{pendingCount}</span>
+            {unreadPendingCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                {unreadPendingCount}
+              </span>
             )}
           </TabsTrigger>
           <TabsTrigger value="disputes" className="relative">
             Open Disputes
-            {disputesCount > 0 && (
-              <span className="ml-2 bg-destructive text-destructive-foreground text-xs px-1.5 py-0.5 rounded-full">{disputesCount}</span>
+            <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">{disputesCount}</span>
+            {unreadDisputesCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                {unreadDisputesCount}
+              </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="all">All Orders</TabsTrigger>
+          <TabsTrigger value="completed">
+            Completed
+            <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">{completedCount}</span>
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            All Orders
+            <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">{allOrdersCount}</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6">
@@ -457,7 +510,7 @@ export function AdminOrdersView() {
               {filteredOrders.map(order => (
                 <Card 
                   key={order.id} 
-                  className="cursor-pointer hover:bg-muted/30 transition-colors"
+                  className={`cursor-pointer hover:bg-muted/30 transition-colors ${!order.read && order.status === 'paid' ? 'border-l-4 border-l-red-500 bg-red-500/5' : ''}`}
                   onClick={() => openDetailsDialog(order)}
                 >
                   <CardContent className="flex items-center justify-between px-4 py-3">

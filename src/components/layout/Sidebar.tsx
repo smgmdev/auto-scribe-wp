@@ -116,6 +116,8 @@ export function Sidebar({
     setUnreadCustomVerificationsCount,
     unreadMediaSubmissionsCount,
     setUnreadMediaSubmissionsCount,
+    unreadOrdersCount,
+    setUnreadOrdersCount,
     agencyUnreadWpSubmissionsCount,
     setAgencyUnreadWpSubmissionsCount,
     agencyUnreadMediaSubmissionsCount,
@@ -228,10 +230,18 @@ export function Sidebar({
           .eq('status', 'pending')
           .eq('read', false);
         
+        // Fetch unread orders (paid orders that haven't been read)
+        const { count: unreadOrdersCountResult } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'paid')
+          .eq('read', false);
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
           setUnreadMediaSubmissionsCount((wpSubmissionsCount || 0) + (mediaSubmissionsCount || 0));
+          setUnreadOrdersCount(unreadOrdersCountResult || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -488,9 +498,9 @@ export function Sidebar({
                 const agencyManagementCount = item.id === 'agency-management'
                   ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount)
                   : 0;
-                // Calculate notification count for B2B Media Buying dropdown (user engagements)
-                const b2bMediaBuyingCount = item.id === 'b2b-media-buying' && !isAdmin
-                  ? userUnreadEngagementsCount
+                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders)
+                const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
+                  ? (isAdmin ? unreadOrdersCount : userUnreadEngagementsCount)
                   : 0;
                 return (
                   <div key={item.id}>
@@ -543,6 +553,8 @@ export function Sidebar({
                           const showServiceRequestsBadge = subItem.id === 'agency-requests' && agencyUnreadServiceRequestsCount > 0;
                           // User My Engagements shows unread message notifications
                           const showEngagementsBadge = subItem.id === 'my-requests' && userUnreadEngagementsCount > 0;
+                          // Admin Order Management shows unread orders notifications
+                          const showOrdersBadge = subItem.id === 'admin-orders' && unreadOrdersCount > 0;
                           return (
                             <Button
                               key={subItem.id}
@@ -578,6 +590,11 @@ export function Sidebar({
                               {showEngagementsBadge && (
                                 <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
                                   {userUnreadEngagementsCount}
+                                </Badge>
+                              )}
+                              {showOrdersBadge && (
+                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+                                  {unreadOrdersCount}
                                 </Badge>
                               )}
                             </Button>

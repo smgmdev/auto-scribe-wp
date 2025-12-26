@@ -638,6 +638,7 @@ export type Database = {
           order_number: string | null
           paid_at: string | null
           platform_fee_cents: number
+          read: boolean
           released_at: string | null
           status: string
           stripe_payment_intent_id: string | null
@@ -659,6 +660,7 @@ export type Database = {
           order_number?: string | null
           paid_at?: string | null
           platform_fee_cents?: number
+          read?: boolean
           released_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
@@ -680,6 +682,7 @@ export type Database = {
           order_number?: string | null
           paid_at?: string | null
           platform_fee_cents?: number
+          read?: boolean
           released_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
