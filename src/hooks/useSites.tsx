@@ -15,6 +15,7 @@ interface DbSite {
   connected: boolean;
   created_at: string;
   updated_at: string;
+  agency: string | null;
 }
 
 // Public site data from RPC function (no credentials)
@@ -25,6 +26,7 @@ interface PublicSite {
   seo_plugin: string;
   favicon: string | null;
   connected: boolean;
+  agency: string | null;
 }
 
 const mapDbSiteToSite = (dbSite: DbSite): WordPressSite => ({
@@ -36,6 +38,7 @@ const mapDbSiteToSite = (dbSite: DbSite): WordPressSite => ({
   seoPlugin: dbSite.seo_plugin as SEOPlugin,
   favicon: dbSite.favicon || undefined,
   connected: dbSite.connected,
+  agency: dbSite.agency || undefined,
 });
 
 const mapPublicSiteToSite = (site: PublicSite): WordPressSite => ({
@@ -47,6 +50,7 @@ const mapPublicSiteToSite = (site: PublicSite): WordPressSite => ({
   seoPlugin: site.seo_plugin as SEOPlugin,
   favicon: site.favicon || undefined,
   connected: site.connected,
+  agency: site.agency || undefined,
 });
 
 export function useSites() {
