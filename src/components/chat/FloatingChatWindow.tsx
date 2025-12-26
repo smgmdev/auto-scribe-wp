@@ -927,7 +927,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
                 <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
                 <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
-                  {timeInfo.isOverdue ? 'Delivery overdue' : `Delivery in ${timeInfo.text}`}
+                  {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
                 </span>
               </div>
             )}
