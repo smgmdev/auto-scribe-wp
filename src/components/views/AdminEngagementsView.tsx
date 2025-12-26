@@ -54,8 +54,41 @@ export function AdminEngagementsView() {
     if (selectedRequest) {
       checkIfJoined(selectedRequest.id);
       scrollToBottom();
+
+      // Subscribe to realtime messages for selected request
+      const channel = supabase
+        .channel(`admin-engagement-${selectedRequest.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'service_messages',
+            filter: `request_id=eq.${selectedRequest.id}`
+          },
+          (payload) => {
+            const newMessage = payload.new as ServiceMessage;
+            setMessages(prev => {
+              const existing = prev[selectedRequest.id] || [];
+              if (existing.some(m => m.id === newMessage.id)) return prev;
+              return {
+                ...prev,
+                [selectedRequest.id]: [...existing, newMessage]
+              };
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
-  }, [selectedRequest, messages]);
+  }, [selectedRequest?.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, selectedRequest?.id]);
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
