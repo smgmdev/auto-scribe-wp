@@ -455,10 +455,10 @@ export function AdminOrdersView() {
                       {order.status === 'paid' && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button size="sm" variant="outline">
+                            <Badge variant="outline" className="cursor-pointer hover:bg-muted gap-1">
                               Action
-                              <ChevronDown className="h-4 w-4 ml-1" />
-                            </Button>
+                              <ChevronDown className="h-3 w-3" />
+                            </Badge>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             <DropdownMenuItem 
