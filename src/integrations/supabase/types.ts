@@ -20,7 +20,7 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
-          order_id: string
+          order_id: string | null
           service_request_id: string
           status: string
         }
@@ -29,7 +29,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
-          order_id: string
+          order_id?: string | null
           service_request_id: string
           status?: string
         }
@@ -38,7 +38,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
-          order_id?: string
+          order_id?: string | null
           service_request_id?: string
           status?: string
         }
