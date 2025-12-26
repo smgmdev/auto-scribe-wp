@@ -64,16 +64,60 @@ serve(async (req) => {
 
         logStep("Order updated to paid status");
 
+        // Get the order details to find the service request
+        const { data: order } = await supabase
+          .from("orders")
+          .select("user_id, media_site_id, amount_cents")
+          .eq("id", orderId)
+          .single();
+
+        // Get media site name for the message
+        let mediaSiteName = "Media Site";
+        if (order?.media_site_id) {
+          const { data: mediaSite } = await supabase
+            .from("media_sites")
+            .select("name")
+            .eq("id", order.media_site_id)
+            .single();
+          if (mediaSite) {
+            mediaSiteName = mediaSite.name;
+          }
+        }
+
         // Also update the linked service request status to "paid"
-        const { error: requestError } = await supabase
+        const { data: serviceRequest, error: requestError } = await supabase
           .from("service_requests")
-          .update({ status: "paid" })
-          .eq("order_id", orderId);
+          .update({ status: "paid", agency_read: false })
+          .eq("order_id", orderId)
+          .select("id")
+          .single();
 
         if (requestError) {
           logStep("Service request update failed", { error: requestError.message });
         } else {
           logStep("Service request updated to paid status");
+
+          // Send auto message about order placement
+          if (serviceRequest && order) {
+            const orderPlacedMessage = JSON.stringify({
+              type: 'order_placed',
+              media_site_id: order.media_site_id,
+              media_site_name: mediaSiteName,
+              amount_cents: order.amount_cents,
+              order_id: orderId
+            });
+
+            await supabase
+              .from("service_messages")
+              .insert({
+                request_id: serviceRequest.id,
+                sender_type: 'client',
+                sender_id: order.user_id,
+                message: `[ORDER_PLACED]${orderPlacedMessage}[/ORDER_PLACED]`
+              });
+
+            logStep("Order placed message sent to chat");
+          }
         }
       }
     }
