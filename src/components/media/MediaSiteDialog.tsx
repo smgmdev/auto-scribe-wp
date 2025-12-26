@@ -242,7 +242,9 @@ export function MediaSiteDialog({
           agency_payout_id: agencyPayoutId,
           title: mediaSite.name,
           description: description.trim(),
-          status: 'pending_review'
+          status: 'pending_review',
+          client_read: true, // User created the request, so they've already "read" it
+          agency_read: false // Agency needs to see the notification
         })
         .select()
         .single();
