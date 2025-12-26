@@ -64,6 +64,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [senderId, setSenderId] = useState<string | null>(null);
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
   const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
@@ -767,20 +768,36 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest?.id, senderId, senderType]);
 
-  // Typing indicator
+  // Typing indicator with presence
   useEffect(() => {
     if (!globalChatRequest || !senderId) return;
 
-    const channelName = `typing:${globalChatRequest.id}`;
+    const channelName = `typing-${globalChatRequest.id}`;
     const channel = supabase.channel(channelName);
 
     channel
-      .on('broadcast', { event: 'typing' }, ({ payload }) => {
-        if (payload.sender_id !== senderId) {
-          setIsCounterpartyTyping(payload.is_typing);
-        }
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const typing: { sender_id: string; sender_type: string }[] = [];
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p.is_typing && p.sender_id !== senderId) {
+              typing.push({ sender_id: p.sender_id, sender_type: p.sender_type });
+            }
+          });
+        });
+        setTypingUsers(typing);
+        setIsCounterpartyTyping(typing.length > 0);
       })
-      .subscribe();
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            sender_id: senderId,
+            sender_type: senderType,
+            is_typing: false
+          });
+        }
+      });
 
     typingChannelRef.current = channel;
 
@@ -788,19 +805,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       supabase.removeChannel(channel);
       typingChannelRef.current = null;
       setIsCounterpartyTyping(false);
+      setTypingUsers([]);
     };
-  }, [globalChatRequest?.id, senderId]);
+  }, [globalChatRequest?.id, senderId, senderType]);
 
   const broadcastTyping = useCallback((isTyping: boolean) => {
     if (typingChannelRef.current && senderId) {
-      typingChannelRef.current.send({
-        type: 'broadcast',
-        event: 'typing',
-        payload: {
-          sender_id: senderId,
-          sender_type: senderType,
-          is_typing: isTyping
-        }
+      typingChannelRef.current.track({
+        sender_id: senderId,
+        sender_type: senderType,
+        is_typing: isTyping
       });
     }
   }, [senderId, senderType]);
@@ -1964,14 +1978,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </ScrollArea>
 
         {/* Typing Indicator */}
-        {isCounterpartyTyping && (
+        {typingUsers.length > 0 && (
           <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground border-t">
             <div className="flex gap-1">
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span>{counterpartyLabel} is typing...</span>
+            <span>
+              {typingUsers.map(u => 
+                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? 'Agency' : 'Client'
+              ).filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+            </span>
           </div>
         )}
 

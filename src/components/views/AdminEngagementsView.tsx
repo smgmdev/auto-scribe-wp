@@ -83,21 +83,29 @@ export function AdminEngagementsView() {
         )
         .subscribe();
 
-      // Subscribe to presence for typing indicators
+      // Subscribe to presence for typing indicators (use same keys as FloatingChatWindow)
       const presenceChannel = supabase.channel(`typing-${selectedRequest.id}`)
         .on('presence', { event: 'sync' }, () => {
           const state = presenceChannel.presenceState();
           const typing: { type: string; user_id: string }[] = [];
           Object.values(state).forEach((presences: any) => {
             presences.forEach((p: any) => {
-              if (p.is_typing && p.user_id !== user?.id) {
-                typing.push({ type: p.user_type, user_id: p.user_id });
+              if (p.is_typing && p.sender_id !== user?.id) {
+                typing.push({ type: p.sender_type, user_id: p.sender_id });
               }
             });
           });
           setTypingUsers(typing);
         })
-        .subscribe();
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED' && hasJoined) {
+            await presenceChannel.track({
+              sender_id: user?.id,
+              sender_type: 'admin',
+              is_typing: false
+            });
+          }
+        });
 
       presenceChannelRef.current = presenceChannel;
 
@@ -107,7 +115,7 @@ export function AdminEngagementsView() {
         presenceChannelRef.current = null;
       };
     }
-  }, [selectedRequest?.id, user?.id]);
+  }, [selectedRequest?.id, user?.id, hasJoined]);
 
   useEffect(() => {
     scrollToBottom();
@@ -122,8 +130,8 @@ export function AdminEngagementsView() {
   const sendTypingIndicator = (isTyping: boolean) => {
     if (!presenceChannelRef.current || !user || !hasJoined) return;
     presenceChannelRef.current.track({
-      user_id: user.id,
-      user_type: 'admin',
+      sender_id: user.id,
+      sender_type: 'admin',
       is_typing: isTyping
     });
   };
