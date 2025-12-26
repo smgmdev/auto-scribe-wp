@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, Coins, ShoppingCart, AlertTriangle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Loader2, Coins, ShoppingCart, AlertTriangle, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +33,9 @@ export function OrderWithCreditsDialog({
   onSuccess 
 }: OrderWithCreditsDialogProps) {
   const [purchasing, setPurchasing] = useState(false);
+  const [deliveryDays, setDeliveryDays] = useState<number>(0);
+  const [deliveryHours, setDeliveryHours] = useState<number>(0);
+  const [deliveryMinutes, setDeliveryMinutes] = useState<number>(0);
   const { credits, refreshCredits } = useAuth();
   const { toast } = useToast();
   const { updateGlobalChatRequest } = useAppStore();
@@ -46,7 +52,12 @@ export function OrderWithCreditsDialog({
       const { data, error } = await supabase.functions.invoke('create-credit-order', {
         body: {
           media_site_id: mediaSite.id,
-          service_request_id: serviceRequestId
+          service_request_id: serviceRequestId,
+          delivery_duration: {
+            days: deliveryDays,
+            hours: deliveryHours,
+            minutes: deliveryMinutes
+          }
         },
       });
 
@@ -118,6 +129,60 @@ export function OrderWithCreditsDialog({
               <p className="text-xs text-muted-foreground">
                 {creditCost.toLocaleString()} credits
               </p>
+            </div>
+          </div>
+
+          {/* Agreed Delivery Duration */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium">Agreed Delivery Duration</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Confirm with the agency on the delivery time.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="days" className="text-xs text-muted-foreground">Days</Label>
+                <Input
+                  id="days"
+                  type="number"
+                  min="0"
+                  value={deliveryDays}
+                  onChange={(e) => setDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="hours" className="text-xs text-muted-foreground">Hours</Label>
+                <Input
+                  id="hours"
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={deliveryHours}
+                  onChange={(e) => setDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
+                  className="text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="minutes" className="text-xs text-muted-foreground">Minutes</Label>
+                <Input
+                  id="minutes"
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={deliveryMinutes}
+                  onChange={(e) => setDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                  className="text-center"
+                />
+              </div>
             </div>
           </div>
 
