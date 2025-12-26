@@ -71,6 +71,7 @@ interface InvestigationItem {
   notes: string | null;
   unreadCount: number; // Track unread messages for this investigation
   lastMessageTime?: string; // Track last message time for sorting
+  lastMessage?: string; // Last message content for preview
   service_request: {
     id: string;
     title: string;
@@ -334,24 +335,32 @@ export function ChatListPanel() {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      // For each investigation, get last message time and count unread messages since admin joined
+      // For each investigation, get last message and count unread messages since admin joined
       const investigationsWithUnread = await Promise.all(data.map(async (inv) => {
-        // Get messages since admin joined this investigation (created_at)
-        const { data: messages } = await supabase
+        // Get all messages for this request to find the last one
+        const { data: allMessages } = await supabase
           .from('service_messages')
-          .select('id, created_at, sender_type')
+          .select('id, created_at, sender_type, message')
+          .eq('request_id', inv.service_request_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        // Get messages since admin joined for unread count
+        const { data: unreadMessages } = await supabase
+          .from('service_messages')
+          .select('id, sender_type')
           .eq('request_id', inv.service_request_id)
           .gt('created_at', inv.created_at)
-          .order('created_at', { ascending: false });
+          .neq('sender_type', 'admin');
         
-        // Count unread = messages from client or agency (not admin) since joining
-        const unreadCount = messages?.filter(m => m.sender_type !== 'admin').length || 0;
-        const lastMessageTime = messages?.[0]?.created_at;
+        const unreadCount = unreadMessages?.length || 0;
+        const lastMsg = allMessages?.[0];
         
         return {
           ...inv,
           unreadCount,
-          lastMessageTime
+          lastMessageTime: lastMsg?.created_at,
+          lastMessage: lastMsg?.message
         };
       }));
       
@@ -980,18 +989,18 @@ export function ChatListPanel() {
           const isChatOpen = openChats.some(chat => chat.request.id === requestId);
           
           if (!isChatOpen) {
-            // Increment unread count for this investigation
+            // Increment unread count for this investigation and update last message
             setInvestigations(prev => prev.map(inv => 
               inv.service_request_id === requestId 
-                ? { ...inv, unreadCount: (inv.unreadCount || 0) + 1, lastMessageTime: newMsg.created_at } 
+                ? { ...inv, unreadCount: (inv.unreadCount || 0) + 1, lastMessageTime: newMsg.created_at, lastMessage: newMsg.message } 
                 : inv
             ));
             playMessageSound();
           } else {
-            // Just update last message time if chat is open
+            // Just update last message if chat is open
             setInvestigations(prev => prev.map(inv => 
               inv.service_request_id === requestId 
-                ? { ...inv, lastMessageTime: newMsg.created_at } 
+                ? { ...inv, lastMessageTime: newMsg.created_at, lastMessage: newMsg.message } 
                 : inv
             ));
           }
@@ -1570,9 +1579,8 @@ export function ChatListPanel() {
                                 </span>
                               </div>
                             </div>
-                            <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-blue-600/70 dark:text-blue-400/70'}`}>
-                              <Search className="h-3 w-3 shrink-0" />
-                              {hasUnread ? `${investigation.unreadCount} new message${investigation.unreadCount > 1 ? 's' : ''}` : 'Active Investigation'}
+                            <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                              {investigation.lastMessage || investigation.service_request?.description || 'No messages yet'}
                             </p>
                           </div>
                         </div>
