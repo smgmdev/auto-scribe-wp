@@ -16,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface Order {
   id: string;
+  order_number: string | null;
   user_id: string;
   media_site_id: string;
   stripe_payment_intent_id: string | null;
@@ -518,11 +519,11 @@ export function OrdersView() {
                 {selectedOrder.delivered_at && <p>Delivered: {new Date(selectedOrder.delivered_at).toLocaleString()}</p>}
                 {selectedOrder.accepted_at && <p>Accepted: {new Date(selectedOrder.accepted_at).toLocaleString()}</p>}
                 <p className="flex items-center gap-1">
-                  Order ID: {selectedOrder.id.slice(0, 8)}...
+                  Order ID: {selectedOrder.order_number || selectedOrder.id.slice(0, 8)}
                   <Copy 
                     className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
                     onClick={() => {
-                      navigator.clipboard.writeText(selectedOrder.id);
+                      navigator.clipboard.writeText(selectedOrder.order_number || selectedOrder.id);
                       toast({ title: "Copied", description: "Order ID copied to clipboard" });
                     }}
                   />

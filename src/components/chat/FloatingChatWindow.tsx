@@ -87,6 +87,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<{
     id: string;
+    order_number: string | null;
     amount_cents: number;
     status: string;
     delivery_status: string;
@@ -1078,7 +1079,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setOrderDetailsOpen(true);
                   const { data } = await supabase
                     .from('orders')
-                    .select('id, amount_cents, status, delivery_status, delivery_url, delivery_notes, created_at, paid_at, delivered_at, accepted_at')
+                    .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, created_at, paid_at, delivered_at, accepted_at')
                     .eq('id', globalChatRequest.order.id)
                     .maybeSingle();
                   setOrderDetails(data);
@@ -1465,11 +1466,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
                 {orderDetails.accepted_at && <p>Accepted: {new Date(orderDetails.accepted_at).toLocaleString()}</p>}
                 <p className="flex items-center gap-1">
-                  Order ID: {orderDetails.id.slice(0, 8)}...
+                  Order ID: {orderDetails.order_number || orderDetails.id.slice(0, 8)}
                   <Copy 
                     className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
                     onClick={() => {
-                      navigator.clipboard.writeText(orderDetails.id);
+                      navigator.clipboard.writeText(orderDetails.order_number || orderDetails.id);
                       toast({ title: "Copied", description: "Order ID copied to clipboard" });
                     }}
                   />

@@ -16,24 +16,24 @@ const generateOrderId = (): string => {
   return result;
 };
 
-// Generate a unique order ID that doesn't exist in the database
-const generateUniqueOrderId = async (supabase: any): Promise<string> => {
-  let orderId = generateOrderId();
+// Generate a unique order number that doesn't exist in the database
+const generateUniqueOrderNumber = async (supabase: any): Promise<string> => {
+  let orderNumber = generateOrderId();
   let attempts = 0;
   const maxAttempts = 10;
   
   while (attempts < maxAttempts) {
     const { data } = await supabase
       .from("orders")
-      .select("id")
-      .eq("id", orderId)
+      .select("order_number")
+      .eq("order_number", orderNumber)
       .maybeSingle();
     
     if (!data) {
-      return orderId;
+      return orderNumber;
     }
     
-    orderId = generateOrderId();
+    orderNumber = generateOrderId();
     attempts++;
   }
   
@@ -196,15 +196,15 @@ serve(async (req) => {
         description: `Order for ${mediaSite.name}`
       });
 
-    // Generate unique order ID
-    const orderId = await generateUniqueOrderId(supabaseAdmin);
-    console.log(`Generated unique order ID: ${orderId}`);
+    // Generate unique order number
+    const orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
+    console.log(`Generated unique order number: ${orderNumber}`);
 
     // Create order
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
       .insert({
-        id: orderId,
+        order_number: orderNumber,
         user_id: user.id,
         media_site_id: media_site_id,
         amount_cents: amountCents,
