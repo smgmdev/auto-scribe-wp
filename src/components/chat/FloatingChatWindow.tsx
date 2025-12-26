@@ -1148,19 +1148,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Order Placed</p>
-                  {globalChatRequest.order.delivery_status === 'pending' && globalChatRequest.order.delivery_deadline && (() => {
-                    const timeInfo = formatTimeRemaining(globalChatRequest.order.delivery_deadline);
-                    return (
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
-                        <p className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                          {timeInfo.isOverdue ? 'Delivery overdue' : `Delivery in: ${timeInfo.text}`}
-                        </p>
-                      </div>
-                    );
-                  })()}
-                  {globalChatRequest.order.delivery_status === 'pending' && !globalChatRequest.order.delivery_deadline && (
-                    <p className="text-xs text-white/70">Awaiting delivery</p>
+                  {globalChatRequest.order.delivery_status === 'pending' && (
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {globalChatRequest.order.delivery_deadline ? (() => {
+                        const timeInfo = formatTimeRemaining(globalChatRequest.order.delivery_deadline);
+                        return (
+                          <>
+                            <span className="text-xs text-white/70">Awaiting delivery</span>
+                            <span className="text-white/40">•</span>
+                            <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
+                            <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                              {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                            </span>
+                          </>
+                        );
+                      })() : (
+                        <span className="text-xs text-white/70">Awaiting delivery</span>
+                      )}
+                    </div>
                   )}
                   {globalChatRequest.order.delivery_status === 'delivered' && (
                     <p className="text-xs text-white/70">Delivered - Awaiting acceptance</p>
