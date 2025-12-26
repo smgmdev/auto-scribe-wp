@@ -977,15 +977,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
         {/* Order Status Banner */}
         {globalChatRequest.order && (
-          <div className="p-3 bg-green-500/10 border-b border-green-500/20">
+          <div className="p-3 bg-black text-white border-b border-black">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-400">Order Placed</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm font-medium text-white">Order Placed</p>
+                  <p className="text-xs text-white/70">
                     {globalChatRequest.order.delivery_status === 'pending' && 'Awaiting delivery'}
                     {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered - Awaiting acceptance'}
                     {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
@@ -1006,7 +1006,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setOrderDetails(data);
                     setLoadingOrderDetails(false);
                   }}
-                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                  className="text-xs text-white/80 hover:text-white hover:underline flex items-center gap-1"
                 >
                   View Details
                   <ExternalLink className="h-3 w-3" />
@@ -1015,10 +1015,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   variant="secondary" 
                   className={
                     globalChatRequest.order.delivery_status === 'accepted' 
-                      ? 'bg-green-600 text-white' 
+                      ? 'bg-green-500 text-white' 
                       : globalChatRequest.order.delivery_status === 'delivered'
-                      ? 'bg-purple-600/20 text-purple-600'
-                      : 'bg-blue-600/20 text-blue-600'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-white text-black'
                   }
                 >
                   {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
