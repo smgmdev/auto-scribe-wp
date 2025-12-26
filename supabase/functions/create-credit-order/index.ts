@@ -171,7 +171,7 @@ serve(async (req) => {
     const agencyPayoutCents = amountCents - platformFeeCents;
 
     // Start transaction: deduct credits, create order, link to service request
-    // Deduct credits
+    // Deduct credits first
     const newCredits = currentCredits - creditCost;
     const { error: updateError } = await supabaseAdmin
       .from("user_credits")
@@ -186,21 +186,11 @@ serve(async (req) => {
       );
     }
 
-    // Record credit transaction
-    await supabaseAdmin
-      .from("credit_transactions")
-      .insert({
-        user_id: user.id,
-        amount: -creditCost,
-        type: "order",
-        description: `Order for ${mediaSite.name}`
-      });
-
     // Generate unique order number
     const orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
     console.log(`Generated unique order number: ${orderNumber}`);
 
-    // Create order
+    // Create order BEFORE recording transaction
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
       .insert({
@@ -230,6 +220,16 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
+
+    // Record credit transaction ONLY after order is successfully created
+    await supabaseAdmin
+      .from("credit_transactions")
+      .insert({
+        user_id: user.id,
+        amount: -creditCost,
+        type: "order",
+        description: `Order for ${mediaSite.name}`
+      });
 
     // Link order to service request
     const { error: linkError } = await supabaseAdmin
