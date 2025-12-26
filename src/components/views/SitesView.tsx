@@ -111,6 +111,7 @@ export function SitesView() {
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
   const [selectedAgency, setSelectedAgency] = useState<ActiveAgency | null>(null);
+  const [wpSiteAgencies, setWpSiteAgencies] = useState<Record<string, { name: string; logo: string | null }>>({});
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -182,6 +183,7 @@ export function SitesView() {
   useEffect(() => {
     fetchSiteCredits();
     fetchSiteTags();
+    fetchWpSiteAgencies();
   }, [sites]);
 
   // Subscribe to site_credits changes for real-time price updates
@@ -328,6 +330,77 @@ export function SitesView() {
     if (Object.keys(logos).length > 0) {
       setAgencyLogos(logos);
     }
+  };
+
+  // Fetch agency info for WordPress sites based on user_id
+  const fetchWpSiteAgencies = async () => {
+    // Get all WordPress sites with user_id
+    const { data: wpSites, error: wpError } = await supabase
+      .from('wordpress_sites')
+      .select('id, user_id')
+      .eq('connected', true)
+      .not('user_id', 'is', null);
+
+    if (wpError || !wpSites || wpSites.length === 0) return;
+
+    // Get unique user_ids
+    const userIds = [...new Set(wpSites.filter(s => s.user_id).map(s => s.user_id as string))];
+    if (userIds.length === 0) return;
+
+    // Fetch agency_payouts to get agency names by user_id
+    const { data: payouts } = await supabase
+      .from('agency_payouts')
+      .select('user_id, agency_name')
+      .in('user_id', userIds)
+      .eq('onboarding_complete', true)
+      .eq('downgraded', false);
+
+    if (!payouts || payouts.length === 0) return;
+
+    // Create user_id to agency_name mapping
+    const userIdToAgency: Record<string, string> = {};
+    payouts.forEach(p => {
+      if (p.user_id) userIdToAgency[p.user_id] = p.agency_name;
+    });
+
+    // Fetch logos for these agencies
+    const agencyNames = [...new Set(Object.values(userIdToAgency))];
+    const { data: appData } = await supabase
+      .from('agency_applications')
+      .select('agency_name, logo_url')
+      .in('agency_name', agencyNames)
+      .eq('status', 'approved');
+
+    // Create signed URLs for logos
+    const agencyToLogo: Record<string, string | null> = {};
+    if (appData) {
+      await Promise.all(
+        appData.map(async (app) => {
+          if (app.logo_url) {
+            const { data: signed } = await supabase.storage
+              .from('agency-documents')
+              .createSignedUrl(app.logo_url, 3600);
+            agencyToLogo[app.agency_name] = signed?.signedUrl || null;
+          } else {
+            agencyToLogo[app.agency_name] = null;
+          }
+        })
+      );
+    }
+
+    // Build site_id to agency info mapping
+    const siteAgencies: Record<string, { name: string; logo: string | null }> = {};
+    wpSites.forEach(site => {
+      if (site.user_id && userIdToAgency[site.user_id]) {
+        const agencyName = userIdToAgency[site.user_id];
+        siteAgencies[site.id] = {
+          name: agencyName,
+          logo: agencyToLogo[agencyName] || null
+        };
+      }
+    });
+
+    setWpSiteAgencies(siteAgencies);
   };
 
   const fetchSiteCredits = async () => {
@@ -1016,6 +1089,21 @@ export function SitesView() {
                     </Button>
                   )}
                 </Badge>
+              )}
+
+              {/* Agency info */}
+              {wpSiteAgencies[site.id] && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <span>via</span>
+                  <span className="text-foreground truncate max-w-[80px]">{wpSiteAgencies[site.id].name}</span>
+                  {wpSiteAgencies[site.id].logo && (
+                    <img 
+                      src={wpSiteAgencies[site.id].logo!} 
+                      alt={wpSiteAgencies[site.id].name} 
+                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                    />
+                  )}
+                </div>
               )}
 
               {isAdmin && (
