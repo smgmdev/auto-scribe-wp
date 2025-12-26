@@ -396,13 +396,17 @@ export function Sidebar({
     if (!user || isAdmin) return;
 
     const fetchUnreadEngagements = async () => {
-      // Get all user's service requests
+      // Get all user's active service requests (exclude cancelled)
       const { data: requests } = await supabase
         .from('service_requests')
-        .select('id, read')
-        .eq('user_id', user.id);
+        .select('id, client_read')
+        .eq('user_id', user.id)
+        .neq('status', 'cancelled');
 
-      if (!requests || requests.length === 0) return;
+      if (!requests || requests.length === 0) {
+        setUserUnreadEngagementsCount(0);
+        return;
+      }
 
       // Get all messages for these requests
       const requestIds = requests.map(r => r.id);
@@ -417,7 +421,7 @@ export function Sidebar({
         const hasAgencyMessages = messages?.some(
           m => m.request_id === request.id && m.sender_type !== 'client'
         );
-        if (hasAgencyMessages && !request.read) {
+        if (hasAgencyMessages && !(request as any).client_read) {
           unreadCount++;
         }
       });
