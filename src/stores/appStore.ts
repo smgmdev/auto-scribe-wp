@@ -18,6 +18,7 @@ export interface GlobalChatRequest {
   read: boolean;
   created_at: string;
   updated_at: string;
+  cancellation_reason?: string | null;
   media_site: {
     id: string;
     name: string;

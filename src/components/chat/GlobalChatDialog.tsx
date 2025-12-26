@@ -61,6 +61,7 @@ export function GlobalChatDialog() {
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -151,25 +152,32 @@ export function GlobalChatDialog() {
   const hasExistingOrderRequest = !!existingOrderMessage;
 
   const handleCancelEngagement = async () => {
-    if (!globalChatRequest) return;
+    if (!globalChatRequest || !cancellationReason.trim()) return;
     
     setCancelling(true);
     try {
       const { error } = await supabase
         .from('service_requests')
-        .update({ status: 'cancelled' })
+        .update({ 
+          status: 'cancelled',
+          cancellation_reason: cancellationReason.trim()
+        })
         .eq('id', globalChatRequest.id);
       
       if (error) throw error;
       
-      updateGlobalChatRequest({ status: 'cancelled' });
+      updateGlobalChatRequest({ 
+        status: 'cancelled',
+        cancellation_reason: cancellationReason.trim()
+      });
       
       toast({
         title: "Engagement Cancelled",
-        description: "This engagement has been cancelled and the chat is now closed.",
+        description: "This engagement has been cancelled.",
       });
       
       setCancelDialogOpen(false);
+      setCancellationReason('');
     } catch (error) {
       console.error('Error cancelling engagement:', error);
       toast({
@@ -1567,8 +1575,11 @@ export function GlobalChatDialog() {
                 </div>
               </div>
             ) : isCancelled ? (
-              <div className="p-4 text-center text-muted-foreground bg-muted/50 border-t">
-                This engagement has been cancelled.
+              <div className="p-4 text-center text-muted-foreground bg-muted/50 border-t space-y-1">
+                <p>This engagement has been cancelled.</p>
+                {globalChatRequest?.cancellation_reason && (
+                  <p className="text-sm italic">Reason: {globalChatRequest.cancellation_reason}</p>
+                )}
               </div>
             ) : null}
           </div>
@@ -1704,14 +1715,25 @@ export function GlobalChatDialog() {
       </Dialog>
 
       {/* Cancel Engagement Confirmation */}
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <AlertDialog open={cancelDialogOpen} onOpenChange={(open) => {
+        setCancelDialogOpen(open);
+        if (!open) setCancellationReason('');
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Engagement?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel this engagement? This action cannot be undone and the chat will be disabled for further communication.
+              Please provide a reason for cancelling this engagement. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="py-2">
+            <textarea 
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              placeholder="Enter reason for cancellation..."
+              className="w-full min-h-[80px] p-3 border rounded-md bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel 
               disabled={cancelling}
@@ -1721,8 +1743,8 @@ export function GlobalChatDialog() {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleCancelEngagement}
-              disabled={cancelling}
-              className="bg-destructive text-destructive-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+              disabled={cancelling || !cancellationReason.trim()}
+              className="bg-destructive text-destructive-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black disabled:opacity-50"
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, cancel engagement

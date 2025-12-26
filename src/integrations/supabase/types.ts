@@ -717,6 +717,7 @@ export type Database = {
         Row: {
           agency_payout_id: string | null
           agency_read: boolean
+          cancellation_reason: string | null
           client_read: boolean
           created_at: string
           description: string
@@ -732,6 +733,7 @@ export type Database = {
         Insert: {
           agency_payout_id?: string | null
           agency_read?: boolean
+          cancellation_reason?: string | null
           client_read?: boolean
           created_at?: string
           description: string
@@ -747,6 +749,7 @@ export type Database = {
         Update: {
           agency_payout_id?: string | null
           agency_read?: boolean
+          cancellation_reason?: string | null
           client_read?: boolean
           created_at?: string
           description?: string
