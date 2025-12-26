@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search, ChevronDown } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -48,6 +50,8 @@ export function OrdersView() {
   const [releasing, setReleasing] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
+  const [cancellingOrder, setCancellingOrder] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -117,6 +121,47 @@ export function OrdersView() {
       });
     } finally {
       setReleasing(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!selectedOrder) return;
+    
+    setCancellingOrder(true);
+    try {
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ 
+          status: 'cancelled',
+          delivery_status: 'cancelled'
+        })
+        .eq('id', selectedOrder.id);
+      
+      if (orderError) throw orderError;
+      
+      // Clear the order_id from service_request if linked
+      await supabase
+        .from('service_requests')
+        .update({ order_id: null })
+        .eq('order_id', selectedOrder.id);
+      
+      toast({
+        title: "Order Cancelled",
+        description: "The order has been cancelled.",
+      });
+      
+      setCancelOrderDialogOpen(false);
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast({
+        variant: 'destructive',
+        title: "Error",
+        description: "Failed to cancel order. Please try again.",
+      });
+    } finally {
+      setCancellingOrder(false);
     }
   };
 
@@ -334,11 +379,46 @@ export function OrdersView() {
 
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-            <DialogDescription>
-              Order ID: {selectedOrder?.id?.slice(0, 8)}...
-            </DialogDescription>
+          <DialogHeader className="flex flex-row items-start justify-between">
+            <div>
+              <DialogTitle>Order Details</DialogTitle>
+              <DialogDescription>
+                Order ID: {selectedOrder?.id?.slice(0, 8)}...
+              </DialogDescription>
+            </div>
+            {selectedOrder && selectedOrder.delivery_status === 'pending' && selectedOrder.status !== 'cancelled' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
+                  >
+                    Action
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                  <DropdownMenuItem 
+                    className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                    onClick={() => {
+                      toast({
+                        title: "Coming Soon",
+                        description: "Dispute functionality will be available soon.",
+                      });
+                    }}
+                  >
+                    Open Dispute
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                    onClick={() => setCancelOrderDialogOpen(true)}
+                  >
+                    Cancel Order
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </DialogHeader>
 
           {selectedOrder && (
@@ -451,6 +531,29 @@ export function OrdersView() {
         url={webViewUrl || ''}
         title="Delivery"
       />
+
+      {/* Cancel Order Dialog */}
+      <AlertDialog open={cancelOrderDialogOpen} onOpenChange={setCancelOrderDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Order</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelOrder}
+              disabled={cancellingOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancellingOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
