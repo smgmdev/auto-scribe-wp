@@ -502,8 +502,9 @@ export function Sidebar({
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
                   ? (isAdmin ? unreadOrdersCount : userUnreadEngagementsCount)
                   : 0;
+                const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
-                  <div key={item.id}>
+                  <div key={item.id} className="relative">
                     <Button
                       variant="ghost"
                       className={cn(
@@ -514,28 +515,16 @@ export function Sidebar({
                     >
                       <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                       <span className="truncate flex-1 text-left">{item.label}</span>
-                      <div className="flex items-center gap-2 ml-auto flex-shrink-0">
-                        {agencyDropdownCount > 0 && (
-                          <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                            {agencyDropdownCount}
-                          </Badge>
-                        )}
-                        {agencyManagementCount > 0 && (
-                          <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                            {agencyManagementCount}
-                          </Badge>
-                        )}
-                        {b2bMediaBuyingCount > 0 && (
-                          <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                            {b2bMediaBuyingCount}
-                          </Badge>
-                        )}
-                        <ChevronDown className={cn(
-                          "h-4 w-4 transition-transform duration-200",
-                          isExpanded && "rotate-180"
-                        )} />
-                      </div>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 transition-transform duration-200 ml-auto flex-shrink-0",
+                        isExpanded && "rotate-180"
+                      )} />
                     </Button>
+                    {totalDropdownCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                        {totalDropdownCount}
+                      </span>
+                    )}
                     {isExpanded && (
                       <div className="ml-4 mt-1 space-y-1">
                         {item.submenu?.map(subItem => {
@@ -555,49 +544,35 @@ export function Sidebar({
                           const showEngagementsBadge = subItem.id === 'my-requests' && userUnreadEngagementsCount > 0;
                           // Admin Order Management shows unread orders notifications
                           const showOrdersBadge = subItem.id === 'admin-orders' && unreadOrdersCount > 0;
+                          
+                          // Determine notification count for this submenu item
+                          let notificationCount = 0;
+                          if (showAgencyBadge) notificationCount = agencyBadgeCount;
+                          else if (showMediaBadge) notificationCount = unreadMediaSubmissionsCount;
+                          else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
+                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount;
+                          else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount;
+                          else if (showOrdersBadge) notificationCount = unreadOrdersCount;
+                          
                           return (
-                            <Button
-                              key={subItem.id}
-                              variant="ghost"
-                              className={cn(
-                                "w-full justify-start gap-3 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                                isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                            <div key={subItem.id} className="relative">
+                              <Button
+                                variant="ghost"
+                                className={cn(
+                                  "w-full justify-start gap-3 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                  isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                                )}
+                                onClick={() => handleNavClick(subItem.id)}
+                              >
+                                <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
+                                <span className="truncate flex-1 text-left">{subItem.label}</span>
+                              </Button>
+                              {notificationCount > 0 && (
+                                <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                                  {notificationCount}
+                                </span>
                               )}
-                              onClick={() => handleNavClick(subItem.id)}
-                            >
-                              <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
-                              <span className="truncate flex-1 text-left">{subItem.label}</span>
-                              {showAgencyBadge && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                                  {agencyBadgeCount}
-                                </Badge>
-                              )}
-                              {showMediaBadge && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                                  {unreadMediaSubmissionsCount}
-                                </Badge>
-                              )}
-                              {showAgencyMediaBadge && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                                  {agencyMediaBadgeCount}
-                                </Badge>
-                              )}
-                              {showServiceRequestsBadge && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                                  {agencyUnreadServiceRequestsCount}
-                                </Badge>
-                              )}
-                              {showEngagementsBadge && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                                  {userUnreadEngagementsCount}
-                                </Badge>
-                              )}
-                              {showOrdersBadge && (
-                                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-1.5 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
-                                  {unreadOrdersCount}
-                                </Badge>
-                              )}
-                            </Button>
+                            </div>
                           );
                         })}
                       </div>
