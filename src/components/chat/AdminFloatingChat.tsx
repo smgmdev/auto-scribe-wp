@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, Minus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy } from 'lucide-react';
+import { Loader2, Send, UserPlus, Minus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -96,6 +96,8 @@ export function AdminFloatingChat({
   const [joiningChat, setJoiningChat] = useState(false);
   const [leavingChat, setLeavingChat] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ type: string; user_id: string }[]>([]);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+  const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
   
   // Dialogs
   const [mediaListingOpen, setMediaListingOpen] = useState(false);
@@ -165,6 +167,29 @@ export function AdminFloatingChat({
       }
     }
     return null;
+  };
+
+  // Parse quoted/reply messages
+  const parseQuote = (message: string): { originalId: string | null; quoteText: string; replyText: string } | null => {
+    if (!message.startsWith('> ')) return null;
+    const parts = message.split('\n\n');
+    const quotePart = parts[0].substring(2);
+    const replyText = parts.slice(1).join('\n\n');
+    
+    const idMatch = quotePart.match(/^\[([^\]]+)\]:(.*)$/);
+    if (idMatch) {
+      return { originalId: idMatch[1], quoteText: idMatch[2], replyText };
+    }
+    return { originalId: null, quoteText: quotePart, replyText };
+  };
+
+  const scrollToMessage = (messageId: string) => {
+    const element = document.getElementById(`admin-msg-${request.id}-${messageId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightedMessageId(messageId);
+      setTimeout(() => setHighlightedMessageId(null), 2000);
+    }
   };
 
   // Check if admin has joined
@@ -497,14 +522,12 @@ export function AdminFloatingChat({
   };
 
   // Render message content with special message handling
-  const renderMessageContent = (msg: ServiceMessage) => {
+  const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean) => {
     const orderPlaced = parseOrderPlaced(msg.message);
     const orderCancelled = parseOrderCancelled(msg.message);
     const cancelRequest = parseCancelOrderRequest(msg.message);
     const cancelAccepted = parseCancelOrderAccepted(msg.message);
-
-    // Admin messages are never "own" for styling purposes in admin view
-    const isClientMessage = msg.sender_type === 'client';
+    const quote = parseQuote(msg.message);
     
     // Handle cancel order request message
     if (cancelRequest) {
@@ -623,11 +646,33 @@ export function AdminFloatingChat({
       );
     }
 
-    // Regular message
+    // Get display message (handle quoted messages)
+    let displayMessage = msg.message;
+    if (quote) {
+      displayMessage = quote.replyText;
+    }
+
+    // Regular message with quote support
     return (
-      <div className="space-y-1">
-        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-        <p className="text-xs opacity-50">{format(new Date(msg.created_at), 'HH:mm')}</p>
+      <div className="space-y-2">
+        {quote && (
+          <div 
+            className={`text-xs p-2 rounded border-l-2 cursor-pointer ${
+              isOwnMessage 
+                ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+                : 'bg-muted/50 border-muted-foreground/30'
+            }`}
+            onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
+          >
+            <p className="opacity-70 line-clamp-2">{quote.quoteText}</p>
+          </div>
+        )}
+        {displayMessage && (
+          <p className="text-sm whitespace-pre-wrap break-words">{displayMessage}</p>
+        )}
+        <p className="text-xs opacity-50 mt-1">
+          {format(new Date(msg.created_at), 'HH:mm')}
+        </p>
       </div>
     );
   };
@@ -844,8 +889,12 @@ export function AdminFloatingChat({
               const isSpecialMessage = orderPlaced || orderCancelled || cancelRequest || cancelAccepted;
 
               return (
-                <div key={m.id} className={`flex ${isClient ? 'justify-start' : isAgency ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} ${
+                <div 
+                  key={m.id} 
+                  id={`admin-msg-${request.id}-${m.id}`}
+                  className={`flex ${isClient ? 'justify-start' : isAgency ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[80%] ${isSpecialMessage ? '' : 'p-3 rounded-lg'} transition-all duration-300 ${
                     isSpecialMessage ? '' : (
                       isAdmin 
                         ? 'bg-blue-500 text-white' 
@@ -853,13 +902,13 @@ export function AdminFloatingChat({
                           ? 'bg-primary text-primary-foreground' 
                           : 'bg-muted'
                     )
-                  }`}>
+                  } ${highlightedMessageId === m.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}>
                     {!isSpecialMessage && (
                       <p className="text-xs font-medium mb-1 opacity-70 capitalize">
                         {isAdmin ? 'Arcana Mace Staff' : m.sender_type}
                       </p>
                     )}
-                    {renderMessageContent(m)}
+                    {renderMessageContent(m, isAgency || isAdmin)}
                   </div>
                 </div>
               );
