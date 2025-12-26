@@ -470,7 +470,7 @@ export function Sidebar({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-4 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
+          <nav className="flex-1 space-y-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
@@ -496,7 +496,7 @@ export function Sidebar({
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-between py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        "w-full justify-between px-4 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                         isActive && "text-[#3872e0] font-medium"
                       )}
                       onClick={() => toggleMenu(item.id)}
@@ -549,7 +549,7 @@ export function Sidebar({
                               key={subItem.id}
                               variant="ghost"
                               className={cn(
-                                "w-full justify-between py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                "w-full justify-between px-4 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                                 isSubActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                               )}
                               onClick={() => handleNavClick(subItem.id)}
@@ -597,7 +597,7 @@ export function Sidebar({
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    "w-full justify-between py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    "w-full justify-between px-4 py-2.5 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                     isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
                   )}
                   onClick={() => handleNavClick(item.id)}
@@ -612,7 +612,7 @@ export function Sidebar({
           </nav>
 
           {/* Agency Status & Account */}
-          <div className="border-t border-sidebar-border p-4 space-y-3">
+          <div className="border-t border-sidebar-border py-4 space-y-3">
             {/* Agency Status Card - Only for non-admin users */}
             {!isAdmin && !agencyDataLoaded && (
               <div className="flex items-center justify-center py-4">
