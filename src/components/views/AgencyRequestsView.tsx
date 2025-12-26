@@ -129,8 +129,8 @@ export function AgencyRequestsView() {
         setMessages(messagesByRequest);
       }
 
-      // Count unread: simply count requests where agency_read = false
-      const unreadCount = data.filter(r => !(r as any).agency_read).length;
+      // Count unread: count requests where agency_read = false AND not cancelled
+      const unreadCount = data.filter(r => !(r as any).agency_read && r.status !== 'cancelled').length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
 
       // Fetch orders for this agency's service requests
@@ -209,8 +209,8 @@ export function AgencyRequestsView() {
               }
               return r;
             });
-            // Recalculate unread count
-            const newUnreadCount = newRequests.filter(r => !r.read).length;
+            // Recalculate unread count (exclude cancelled)
+            const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
             setAgencyUnreadServiceRequestsCount(newUnreadCount);
             return newRequests;
           });
@@ -286,7 +286,7 @@ export function AgencyRequestsView() {
       r.id === requestId ? { ...r, read: true } : r
     ));
     
-    const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId).length;
+    const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId && r.status !== 'cancelled').length;
     setAgencyUnreadServiceRequestsCount(newUnreadCount);
   };
 
