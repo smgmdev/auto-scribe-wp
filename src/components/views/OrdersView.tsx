@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -70,6 +70,7 @@ const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boole
 export function OrdersView() {
   const { user, isAdmin } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [releasing, setReleasing] = useState(false);
@@ -91,6 +92,7 @@ export function OrdersView() {
   useEffect(() => {
     if (user) {
       fetchOrders();
+      fetchUserDisputes();
     }
   }, [user, isAdmin]);
 
@@ -118,6 +120,22 @@ export function OrdersView() {
       setOrders(data || []);
     }
     setLoading(false);
+  };
+
+  // Fetch user's open disputes to identify which orders are in dispute
+  const fetchUserDisputes = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('disputes')
+      .select('order_id')
+      .eq('user_id', user.id)
+      .eq('status', 'open');
+    
+    if (!error && data) {
+      const orderIds = new Set(data.map(d => d.order_id));
+      setDisputeOrderIds(orderIds);
+    }
   };
 
   const handleAcceptDelivery = async (order: Order) => {
@@ -237,16 +255,22 @@ export function OrdersView() {
   };
 
   // Calculate order counts for tabs
-  // Active: paid orders waiting for delivery
+  // Active: paid orders waiting for delivery (excluding orders in dispute)
   const activeOrders = useMemo(() => 
-    orders.filter(o => o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted'), 
-    [orders]
+    orders.filter(o => o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id)), 
+    [orders, disputeOrderIds]
   );
   
-  // Completed: delivered or accepted orders
+  // Open Disputes: orders that user has submitted for dispute
+  const disputeOrders = useMemo(() => 
+    orders.filter(o => disputeOrderIds.has(o.id)), 
+    [orders, disputeOrderIds]
+  );
+  
+  // Completed: delivered or accepted orders (excluding orders in dispute)
   const completedOrders = useMemo(() => 
-    orders.filter(o => o.delivery_status === 'delivered' || o.delivery_status === 'accepted'), 
-    [orders]
+    orders.filter(o => (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id)), 
+    [orders, disputeOrderIds]
   );
   
   // History: cancelled orders
@@ -257,6 +281,7 @@ export function OrdersView() {
 
   // Filtered orders for display
   const filteredActiveOrders = useMemo(() => filterOrders(activeOrders), [activeOrders, searchQuery]);
+  const filteredDisputeOrders = useMemo(() => filterOrders(disputeOrders), [disputeOrders, searchQuery]);
   const filteredCompletedOrders = useMemo(() => filterOrders(completedOrders), [completedOrders, searchQuery]);
   const filteredHistoryOrders = useMemo(() => filterOrders(historyOrders), [historyOrders, searchQuery]);
 
@@ -355,10 +380,14 @@ export function OrdersView() {
           )}
 
           <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full max-w-xl grid-cols-3">
+            <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="disputes" className="gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Open Disputes ({disputeOrders.length})
               </TabsTrigger>
               <TabsTrigger value="completed" className="gap-2">
                 <CheckCircle2 className="h-4 w-4" />
@@ -380,6 +409,18 @@ export function OrdersView() {
               ) : (
                 <div className="space-y-2">
                   {filteredActiveOrders.map(renderOrderCard)}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="disputes" className="mt-6">
+              {filteredDisputeOrders.length === 0 ? (
+                renderEmptyState(searchQuery 
+                  ? 'No matching disputed orders found'
+                  : 'You have no open disputes')
+              ) : (
+                <div className="space-y-2">
+                  {filteredDisputeOrders.map(renderOrderCard)}
                 </div>
               )}
             </TabsContent>
