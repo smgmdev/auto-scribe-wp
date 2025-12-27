@@ -1147,14 +1147,23 @@ export function ChatListPanel() {
           }
           
           // Check if chat is open or minimized - use openChatsRef for multi-chat support
-          const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
+          const minimizedChat = minimizedChatsRef.current.find(c => c.id === requestId);
+          const isMinimized = !!minimizedChat;
           const isDialogOpen = openChatsRef.current.some(c => c.request.id === requestId);
           
-          console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, senderType });
+          // Also check minimized chat type to handle cases where the chat
+          // is minimized but not in the current serviceRequests/myEngagements lists
+          const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
+          const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
+          
+          console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, isServiceRequest, isMinimizedAgencyRequest, isMinimizedMyRequest, senderType });
           
           // Only increment unread for minimized chats when message is from counterparty
+          // Check both local lists AND minimized chat type
           const isFromCounterparty = (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) || 
-                                     (isServiceRequest && senderType === 'client');
+                                     (isServiceRequest && senderType === 'client') ||
+                                     (isMinimizedMyRequest && (senderType === 'agency' || senderType === 'admin')) ||
+                                     (isMinimizedAgencyRequest && senderType === 'client');
           
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, incrementing unread');
