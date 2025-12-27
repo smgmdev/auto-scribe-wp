@@ -132,10 +132,8 @@ export function AgencyRequestsView() {
         // Count client messages (counterparty messages for agency)
         const clientMessageCount = requestMessages.filter(m => m.sender_type === 'client').length;
         
-        // Set actual unread count for this request
-        if (isUnread && clientMessageCount > 0) {
-          setUnreadMessageCount(r.id, clientMessageCount);
-        }
+        // Don't set unreadMessageCounts here - that's for tracking NEW messages
+        // while a chat is open/minimized. The initial unread state is tracked via item.read
         
         return {
           ...r,
