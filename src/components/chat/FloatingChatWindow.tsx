@@ -1063,8 +1063,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     broadcastTyping(false);
     
     try {
+      const replyContent = replyToMessage ? getReplyContentOnly(replyToMessage.message) : '';
       const fullMessage = replyToMessage 
-        ? `> [${replyToMessage.id}]:${replyToMessage.message}\n\n${newMessage.trim()}`
+        ? `> [${replyToMessage.id}]:${replyContent}\n\n${newMessage.trim()}`
         : newMessage.trim();
 
       const { error } = await supabase.from('service_messages').insert({
@@ -1301,8 +1302,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         setUploadingFile(false);
       }
 
+      const replyContent = replyToMessage ? getReplyContentOnly(replyToMessage.message) : '';
       let fullMessage = replyToMessage 
-        ? `> [${replyToMessage.id}]:${replyToMessage.message}\n\n${newMessage.trim()}`
+        ? `> [${replyToMessage.id}]:${replyContent}\n\n${newMessage.trim()}`
         : newMessage.trim();
 
       if (fileUrl) {
@@ -1489,6 +1491,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     let cleanMessage = message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
     // Remove quote prefixes like "> [uuid]:message\n\n" at the start
     cleanMessage = cleanMessage.replace(/^> \[[^\]]+\]:.*?\n\n/s, '').trim();
+    return cleanMessage;
+  };
+
+  // Get the actual reply content from a message, excluding any quoted content
+  const getReplyContentOnly = (message: string): string => {
+    // Remove attachment tags first
+    let cleanMessage = message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
+    // If message starts with quote format, extract only the reply part (after \n\n)
+    if (cleanMessage.startsWith('> ')) {
+      const parts = cleanMessage.split('\n\n');
+      if (parts.length > 1) {
+        return parts.slice(1).join('\n\n').trim();
+      }
+    }
     return cleanMessage;
   };
 
