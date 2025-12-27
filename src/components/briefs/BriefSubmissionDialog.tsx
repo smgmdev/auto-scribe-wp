@@ -7,6 +7,7 @@ import { Loader2, Send, Upload, X, FileText, Image, ArrowLeft } from 'lucide-rea
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 
 interface MediaSite {
   id: string;
@@ -32,6 +33,7 @@ export function BriefSubmissionDialog({
   onBack
 }: BriefSubmissionDialogProps) {
   const { user } = useAuth();
+  const { addMinimizedChat } = useMinimizedChats();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -217,6 +219,15 @@ export function BriefSubmissionDialog({
           });
         }
       }
+
+      // Add to minimized chats widget so user can access the chat immediately
+      addMinimizedChat({
+        id: request.id,
+        title: mediaSite.name,
+        favicon: mediaSite.favicon,
+        type: 'my-request',
+        unreadCount: 0
+      });
 
       toast({
         title: 'Request submitted!',
