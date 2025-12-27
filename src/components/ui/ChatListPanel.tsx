@@ -746,7 +746,7 @@ export function ChatListPanel() {
                          (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient);
     
     if (isMinimized && shouldNotify) {
-      console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id);
+      console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id, 'minimizedChat:', minimizedChat);
       // Use store's action directly for reliability
       useAppStore.getState().incrementMinimizedChatUnread(request_id);
       playMessageSound();
