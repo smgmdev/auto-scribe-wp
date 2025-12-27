@@ -114,6 +114,7 @@ export function ChatListPanel() {
     incrementUserUnreadEngagementsCount,
     globalChatOpen,
     globalChatRequest,
+    openChats,
     minimizedChats,
     setUnreadDisputesCount,
     decrementUnreadDisputesCount
@@ -642,8 +643,7 @@ export function ChatListPanel() {
 
   // Use refs to avoid re-subscribing when these values change
   const minimizedChatsRef = useRef(minimizedChats);
-  const globalChatOpenRef = useRef(globalChatOpen);
-  const globalChatRequestRef = useRef(globalChatRequest);
+  const openChatsRef = useRef(openChats);
   const agencyPayoutIdRef = useRef(agencyPayoutId);
 
   useEffect(() => {
@@ -652,12 +652,8 @@ export function ChatListPanel() {
   }, [minimizedChats]);
 
   useEffect(() => {
-    globalChatOpenRef.current = globalChatOpen;
-  }, [globalChatOpen]);
-
-  useEffect(() => {
-    globalChatRequestRef.current = globalChatRequest;
-  }, [globalChatRequest]);
+    openChatsRef.current = openChats;
+  }, [openChats]);
 
   useEffect(() => {
     agencyPayoutIdRef.current = agencyPayoutId;
@@ -682,8 +678,10 @@ export function ChatListPanel() {
     
     // Get fresh minimized chats state directly from store
     const currentMinimizedChats = useAppStore.getState().minimizedChats;
+    const currentOpenChats = useAppStore.getState().openChats;
     const isMinimized = currentMinimizedChats.some(c => c.id === request_id);
-    const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === request_id;
+    // Check if any open chat matches this request_id
+    const isDialogOpen = currentOpenChats.some(c => c.request.id === request_id);
     
     // Determine if this is for user engagement or agency service request
     const isFromAgency = sender_type === 'agency' || sender_type === 'admin';
@@ -1143,9 +1141,9 @@ export function ChatListPanel() {
             });
           }
           
-          // Check if chat is open or minimized
+          // Check if chat is open or minimized - use openChatsRef for multi-chat support
           const isMinimized = minimizedChatsRef.current.some(c => c.id === requestId);
-          const isDialogOpen = globalChatOpenRef.current && globalChatRequestRef.current?.id === requestId;
+          const isDialogOpen = openChatsRef.current.some(c => c.request.id === requestId);
           
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, senderType });
           

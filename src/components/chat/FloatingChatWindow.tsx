@@ -247,10 +247,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return `Last seen ${format(date, 'MMM d, h:mm a')}`;
   };
 
-  // Fetch counterparty's last seen
+  // Fetch counterparty's last seen - use actualSenderType for correct counterparty
   useEffect(() => {
     const fetchLastSeen = async () => {
-      if (!globalChatRequest) return;
+      if (!globalChatRequest || !senderId) return;
       
       try {
         // First get the service request to find the counterparty
@@ -262,7 +262,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         
         if (!requestData) return;
         
-        if (globalChatType === 'my-request') {
+        if (actualSenderType === 'client') {
           // Client viewing - counterparty is agency, get from agency_payouts
           if (requestData.agency_payout_id) {
             const { data } = await supabase
@@ -272,8 +272,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               .maybeSingle();
             setCounterpartyLastSeen(data?.last_online_at || null);
           }
-        } else if (globalChatType === 'agency-request') {
-          // Agency viewing - counterparty is client, get from profiles
+        } else if (actualSenderType === 'agency' || actualSenderType === 'admin') {
+          // Agency/Admin viewing - counterparty is client, get from profiles
           const { data } = await supabase
             .from('profiles')
             .select('last_online_at')
@@ -302,7 +302,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (!requestData) return;
       
-      if (globalChatType === 'my-request' && requestData.agency_payout_id) {
+      if (actualSenderType === 'client' && requestData.agency_payout_id) {
         // Client viewing - subscribe to agency_payouts changes
         channel = supabase
           .channel(`agency-presence-${requestData.agency_payout_id}`)
@@ -321,8 +321,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             }
           )
           .subscribe();
-      } else if (globalChatType === 'agency-request') {
-        // Agency viewing - subscribe to profiles changes
+      } else if (actualSenderType === 'agency' || actualSenderType === 'admin') {
+        // Agency/Admin viewing - subscribe to profiles changes
         channel = supabase
           .channel(`client-presence-${requestData.user_id}`)
           .on(
@@ -350,7 +350,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         supabase.removeChannel(channel);
       }
     };
-  }, [globalChatRequest?.id, globalChatType]);
+  }, [globalChatRequest?.id, actualSenderType, senderId]);
 
   // Handle admin joining chat
   const handleAdminJoinChat = async () => {
@@ -793,22 +793,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     checkDispute();
   }, [globalChatRequest?.order?.id]);
 
-  // Clear unread when chat opens
+  // Clear unread when chat opens - use actualSenderType for correct field
   useEffect(() => {
-    if (globalChatRequest) {
+    if (globalChatRequest && senderId) {
       clearUnreadMessageCount(globalChatRequest.id);
       
-      const updateField = globalChatType === 'agency-request' 
+      // Use actualSenderType to determine which read field to update
+      // Client updates client_read, agency updates agency_read
+      const updateField = actualSenderType === 'agency' 
         ? { agency_read: true } 
-        : { client_read: true };
+        : actualSenderType === 'client'
+          ? { client_read: true }
+          : {}; // Admin doesn't update read fields
       
-      supabase
-        .from('service_requests')
-        .update(updateField)
-        .eq('id', globalChatRequest.id)
-        .then(() => {});
+      if (Object.keys(updateField).length > 0) {
+        supabase
+          .from('service_requests')
+          .update(updateField)
+          .eq('id', globalChatRequest.id)
+          .then(() => {
+            console.log('[FloatingChatWindow] Marked as read:', updateField);
+          });
+      }
     }
-  }, [globalChatRequest?.id, globalChatType, clearUnreadMessageCount]);
+  }, [globalChatRequest?.id, actualSenderType, senderId, clearUnreadMessageCount]);
 
   // Fetch sender ID and verify correct sender type based on actual data
   useEffect(() => {
@@ -981,11 +989,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, [globalChatRequest?.id, senderType]);
 
-  // Presence tracking
+  // Presence tracking - use actualSenderType to determine agencyPayoutId
   useEffect(() => {
     if (globalChatRequest && senderId) {
       // For agency type, senderId IS the agencyPayoutId
-      const agencyPayoutId = globalChatType === 'agency-request' ? senderId : undefined;
+      const agencyPayoutId = actualSenderType === 'agency' ? senderId : undefined;
       
       const tracker = new ChatPresenceTracker(
         globalChatRequest.id,
@@ -1007,7 +1015,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         setIsCounterpartyOnline(false);
       };
     }
-  }, [globalChatRequest?.id, senderId, senderType, globalChatType]);
+  }, [globalChatRequest?.id, senderId, senderType, actualSenderType]);
 
   // Typing indicator with presence
   useEffect(() => {
@@ -1259,7 +1267,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setMessages(prev => [...prev, newMsg]);
       
       // Dispatch event to sync with ChatListPanel (messaging widget)
-      if (globalChatType === 'my-request') {
+      // Use actualSenderType to determine correct event type
+      if (actualSenderType === 'client') {
         window.dispatchEvent(new CustomEvent('my-engagement-updated', {
           detail: {
             id: globalChatRequest.id,
@@ -1269,7 +1278,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             senderType: senderType
           }
         }));
-      } else if (globalChatType === 'agency-request') {
+      } else if (actualSenderType === 'agency') {
         window.dispatchEvent(new CustomEvent('service-request-updated', {
           detail: {
             id: globalChatRequest.id,
@@ -1505,7 +1514,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setMessages(prev => [...prev, newMsg]);
       
       // Dispatch event to sync with ChatListPanel (messaging widget)
-      if (globalChatType === 'my-request') {
+      // Use actualSenderType to determine correct event type
+      if (actualSenderType === 'client') {
         window.dispatchEvent(new CustomEvent('my-engagement-updated', {
           detail: {
             id: globalChatRequest.id,
@@ -1515,7 +1525,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             senderType: senderType
           }
         }));
-      } else if (globalChatType === 'agency-request') {
+      } else if (actualSenderType === 'agency') {
         window.dispatchEvent(new CustomEvent('service-request-updated', {
           detail: {
             id: globalChatRequest.id,
@@ -1680,11 +1690,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   const handleMinimize = () => {
     if (globalChatRequest) {
+      // Use actualSenderType to determine correct type for minimized chat
+      const chatType = actualSenderType === 'client' ? 'my-request' : 'agency-request';
       addMinimizedChat({
         id: globalChatRequest.id,
         title: globalChatRequest.media_site?.name || globalChatRequest.title,
         favicon: globalChatRequest.media_site?.favicon,
-        type: globalChatType || 'agency-request'
+        type: chatType
       });
       closeGlobalChat(globalChatRequest.id);
     }
