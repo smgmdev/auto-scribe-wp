@@ -97,17 +97,15 @@ export function useMinimizedChats() {
           
           // For user's engagements: only show unread if client_read is false AND has agency messages
           // For agency requests: only show unread if agency_read is false
+          // Only show 1 as unread count since we can't track actual unread messages without a last-read timestamp
           let isUnread = false;
-          let unreadCount = 0;
           
           if (isMyEngagement) {
             const agencyCount = agencyMessageCounts[chat.request_id] || 0;
             isUnread = !reqInfo?.client_read && agencyCount > 0;
-            unreadCount = isUnread ? agencyCount : 0;
           } else {
             const clientCount = clientMessageCounts[chat.request_id] || 0;
-            isUnread = !reqInfo?.agency_read;
-            unreadCount = isUnread ? clientCount : 0;
+            isUnread = !reqInfo?.agency_read && clientCount > 0;
           }
           
           addToStore({
@@ -115,12 +113,12 @@ export function useMinimizedChats() {
             title: chat.title,
             favicon: chat.media_site_favicon,
             type: chat.chat_type as 'agency-request' | 'my-request',
-            unreadCount,
+            unreadCount: isUnread ? 1 : 0,
           });
           
           // Also set the unreadMessageCounts for consistency
-          if (isUnread && unreadCount > 0) {
-            setUnreadMessageCount(chat.request_id, unreadCount);
+          if (isUnread) {
+            setUnreadMessageCount(chat.request_id, 1);
           }
         }
       });

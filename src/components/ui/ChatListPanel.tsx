@@ -205,14 +205,14 @@ export function ChatListPanel() {
         );
         const hasAgencyMessage = agencyMessages.length > 0;
         
-        // If client_read is false and there are agency messages, count unread agency messages
+        // If client_read is false and there are agency messages, mark as unread
         // We count agency messages that are unread (since client_read tracks if user has seen them)
         const isUnread = !(item as any).client_read && hasAgencyMessage;
         
-        // For unread engagements, set the count of agency messages as unread
-        // This gives users a visual indication of how many messages they haven't read
-        if (isUnread && agencyMessages.length > 0) {
-          setUnreadMessageCount(item.id, agencyMessages.length);
+        // For unread engagements, set count to 1 to indicate there are unread messages
+        // We can't accurately count how many are truly unread without a last-read timestamp
+        if (isUnread) {
+          setUnreadMessageCount(item.id, 1);
         }
         
         return {
@@ -221,7 +221,7 @@ export function ChatListPanel() {
           read: !isUnread,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: isUnread ? agencyMessages.length : 0,
+          unreadCount: isUnread ? 1 : 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
@@ -295,10 +295,12 @@ export function ChatListPanel() {
         const clientMessages = allMessages.filter(
           m => m.request_id === item.id && m.sender_type === 'client'
         );
+        const hasClientMessage = clientMessages.length > 0;
         
-        // For unread requests, set the count of client messages as unread
-        if (isUnread && clientMessages.length > 0) {
-          setUnreadMessageCount(item.id, clientMessages.length);
+        // For unread requests, set count to 1 to indicate there are unread messages
+        // We can't accurately count how many are truly unread without a last-read timestamp
+        if (isUnread && hasClientMessage) {
+          setUnreadMessageCount(item.id, 1);
         }
         
         return {
@@ -306,7 +308,7 @@ export function ChatListPanel() {
           read: (item as any).agency_read, // Map agency_read to read for UI
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: isUnread ? clientMessages.length : 0,
+          unreadCount: isUnread && hasClientMessage ? 1 : 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
