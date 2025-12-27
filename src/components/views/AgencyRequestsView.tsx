@@ -163,6 +163,61 @@ export function AgencyRequestsView() {
     fetchRequests();
   }, [user]);
 
+  // Listen for service request sync events from ChatListPanel
+  useEffect(() => {
+    const handleServiceRequestUpdated = (event: CustomEvent) => {
+      const { id, read, status, lastMessage, lastMessageTime } = event.detail || {};
+      if (id) {
+        setRequests(prev => {
+          const updated = prev.map(r => {
+            if (r.id === id) {
+              return { 
+                ...r, 
+                read: read !== undefined ? read : r.read,
+                status: status || r.status
+              };
+            }
+            return r;
+          });
+          
+          // Recalculate unread count
+          const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+          setAgencyUnreadServiceRequestsCount(newUnreadCount);
+          
+          return updated;
+        });
+        
+        // Update messages if provided
+        if (lastMessage) {
+          setMessages(prev => {
+            const existing = prev[id] || [];
+            // Add new message if it doesn't already exist (check by timestamp)
+            const alreadyExists = existing.some(m => m.created_at === lastMessageTime);
+            if (!alreadyExists && lastMessageTime) {
+              return {
+                ...prev,
+                [id]: [...existing, { 
+                  id: `temp-${Date.now()}`, 
+                  request_id: id, 
+                  sender_type: 'client' as const, 
+                  sender_id: '', 
+                  message: lastMessage, 
+                  created_at: lastMessageTime 
+                }]
+              };
+            }
+            return prev;
+          });
+        }
+      }
+    };
+
+    window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+    return () => {
+      window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+    };
+  }, [setAgencyUnreadServiceRequestsCount]);
+
   // Real-time subscription for new requests and status/read sync
   // This syncs read status across all views/tabs when updated from any source
   useEffect(() => {
@@ -297,6 +352,14 @@ export function AgencyRequestsView() {
     
     const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId && r.status !== 'cancelled').length;
     setAgencyUnreadServiceRequestsCount(newUnreadCount);
+    
+    // Dispatch event to sync with ChatListPanel messaging widget
+    window.dispatchEvent(new CustomEvent('service-request-updated', {
+      detail: {
+        id: requestId,
+        read: true
+      }
+    }));
   };
 
   const handleCardClick = (request: ServiceRequest) => {

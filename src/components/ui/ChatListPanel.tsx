@@ -519,11 +519,35 @@ export function ChatListPanel() {
       }
     };
 
+    // Listen for service request updates from AgencyRequestsView
+    const handleServiceRequestUpdated = (event: CustomEvent) => {
+      const { id, read, lastMessage, lastMessageTime } = event.detail || {};
+      if (id) {
+        setServiceRequests(prev => {
+          const updated = prev.map(r => {
+            if (r.id === id) {
+              return { 
+                ...r, 
+                read: read !== undefined ? read : r.read,
+                lastMessage: lastMessage || r.lastMessage,
+                lastMessageTime: lastMessageTime || r.lastMessageTime
+              };
+            }
+            return r;
+          });
+          serviceRequestsRef.current = updated;
+          return updated;
+        });
+      }
+    };
+
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
     window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
+    window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
       window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
+      window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
     };
   }, []);
 
@@ -619,15 +643,26 @@ export function ChatListPanel() {
       });
     }
     if (isServiceRequest && isFromClient) {
+      const messageTime = new Date().toISOString();
       setServiceRequests(prev => {
         const updated = prev.map(r => 
           r.id === request_id 
-            ? { ...r, lastMessage: message, lastMessageTime: new Date().toISOString(), read: false }
+            ? { ...r, lastMessage: message, lastMessageTime: messageTime, read: false }
             : r
         );
         serviceRequestsRef.current = updated;
         return updated;
       });
+      
+      // Dispatch event to sync with AgencyRequestsView
+      window.dispatchEvent(new CustomEvent('service-request-updated', {
+        detail: {
+          id: request_id,
+          read: false,
+          lastMessage: message,
+          lastMessageTime: messageTime
+        }
+      }));
     }
     
     console.log('[ChatListPanel] Broadcast: isMinimized check', { 
@@ -983,6 +1018,18 @@ export function ChatListPanel() {
               serviceRequestsRef.current = updated;
               return updated;
             });
+            
+            // Dispatch event to sync with AgencyRequestsView
+            if (isFromClient) {
+              window.dispatchEvent(new CustomEvent('service-request-updated', {
+                detail: {
+                  id: requestId,
+                  read: false,
+                  lastMessage: newMsg.message,
+                  lastMessageTime: newMsg.created_at
+                }
+              }));
+            }
           }
           // Update disputes for admin with received messages
           if (isDisputedChat) {
@@ -1229,6 +1276,14 @@ export function ChatListPanel() {
         setServiceRequests(prev => prev.map(r => 
           r.id === item.id ? { ...r, read: true } : r
         ));
+        
+        // Dispatch event to sync with AgencyRequestsView
+        window.dispatchEvent(new CustomEvent('service-request-updated', {
+          detail: {
+            id: item.id,
+            read: true
+          }
+        }));
       }
     }
   };
