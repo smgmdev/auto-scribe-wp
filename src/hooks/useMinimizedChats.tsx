@@ -54,7 +54,7 @@ export function useMinimizedChats() {
         .select('id, client_read, agency_read, user_id')
         .in('id', requestIds);
 
-      // Get messages to check if there are any agency/admin replies
+      // Get messages to count unread messages from counterparty
       const { data: messagesData } = await supabase
         .from('service_messages')
         .select('request_id, sender_type')
@@ -70,11 +70,14 @@ export function useMinimizedChats() {
         };
       });
 
-      // Create set of requests that have agency/admin replies
-      const hasAgencyReply: Record<string, boolean> = {};
+      // Count messages from counterparty for each request
+      const agencyMessageCounts: Record<string, number> = {};
+      const clientMessageCounts: Record<string, number> = {};
       messagesData?.forEach(msg => {
         if (msg.sender_type !== 'client') {
-          hasAgencyReply[msg.request_id] = true;
+          agencyMessageCounts[msg.request_id] = (agencyMessageCounts[msg.request_id] || 0) + 1;
+        } else {
+          clientMessageCounts[msg.request_id] = (clientMessageCounts[msg.request_id] || 0) + 1;
         }
       });
 
@@ -92,13 +95,19 @@ export function useMinimizedChats() {
           const reqInfo = requestInfoMap[chat.request_id];
           const isMyEngagement = chat.chat_type === 'my-request';
           
-          // For user's engagements: only show unread if client_read is false AND has agency reply
+          // For user's engagements: only show unread if client_read is false AND has agency messages
           // For agency requests: only show unread if agency_read is false
           let isUnread = false;
+          let unreadCount = 0;
+          
           if (isMyEngagement) {
-            isUnread = !reqInfo?.client_read && hasAgencyReply[chat.request_id] === true;
+            const agencyCount = agencyMessageCounts[chat.request_id] || 0;
+            isUnread = !reqInfo?.client_read && agencyCount > 0;
+            unreadCount = isUnread ? agencyCount : 0;
           } else {
+            const clientCount = clientMessageCounts[chat.request_id] || 0;
             isUnread = !reqInfo?.agency_read;
+            unreadCount = isUnread ? clientCount : 0;
           }
           
           addToStore({
@@ -106,12 +115,12 @@ export function useMinimizedChats() {
             title: chat.title,
             favicon: chat.media_site_favicon,
             type: chat.chat_type as 'agency-request' | 'my-request',
-            unreadCount: isUnread ? 1 : 0,
+            unreadCount,
           });
           
           // Also set the unreadMessageCounts for consistency
-          if (isUnread) {
-            setUnreadMessageCount(chat.request_id, 1);
+          if (isUnread && unreadCount > 0) {
+            setUnreadMessageCount(chat.request_id, unreadCount);
           }
         }
       });
