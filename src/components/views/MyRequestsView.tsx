@@ -335,11 +335,26 @@ export function MyRequestsView() {
           // Only process agency messages (not our own)
           if (newMsg.sender_type === 'client') return;
           
-          // Add message to local state
-          setMessages(prev => ({
-            ...prev,
-            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg as ServiceMessage]
-          }));
+          // Add message to local state (avoid duplicates from event sync)
+          setMessages(prev => {
+            const existingMsgs = prev[newMsg.request_id] || [];
+            // Check if message already exists (by ID or by content+timestamp for temp messages)
+            const isDuplicate = existingMsgs.some(m => 
+              m.id === newMsg.id || 
+              (m.message === newMsg.message && m.created_at === newMsg.created_at)
+            );
+            if (isDuplicate) return prev;
+            
+            // Also remove any temp message with same content/timestamp
+            const filteredMsgs = existingMsgs.filter(m => 
+              !(m.id.startsWith('temp-') && m.message === newMsg.message && m.created_at === newMsg.created_at)
+            );
+            
+            return {
+              ...prev,
+              [newMsg.request_id]: [...filteredMsgs, newMsg as ServiceMessage]
+            };
+          });
         }
       )
       .subscribe();
