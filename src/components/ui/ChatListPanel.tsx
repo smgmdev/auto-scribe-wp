@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle, Paperclip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -1405,7 +1405,7 @@ export function ChatListPanel() {
 
   // Format preview message - make it user-friendly by cleaning up technical content
   // Returns { text, type } where type can be used for icon display
-  const formatPreviewMessage = (message: string | undefined, description: string, title: string): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'payment' | 'delivery' | 'status' | 'normal' } => {
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal' } => {
     if (message) {
       let cleanMessage = message;
       
@@ -1439,6 +1439,9 @@ export function ChatListPanel() {
       }
       if (cleanMessage.startsWith('[STATUS_')) {
         return { text: 'Status Update', type: 'status' };
+      }
+      if (cleanMessage.startsWith('[ATTACHMENT]')) {
+        return { text: 'Attachment', type: 'attachment' };
       }
       
       // Remove reply quotes - formats like "> quoted text\nactual message" or ":quoted actual"
@@ -1484,7 +1487,7 @@ export function ChatListPanel() {
   };
 
   // Get icon for message type
-  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'payment' | 'delivery' | 'status' | 'normal') => {
+  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal') => {
     switch (type) {
       case 'order':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
@@ -1502,6 +1505,8 @@ export function ChatListPanel() {
         return <Truck className="h-3 w-3 shrink-0 text-purple-500" />;
       case 'status':
         return <Bell className="h-3 w-3 shrink-0 text-muted-foreground" />;
+      case 'attachment':
+        return <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />;
       default:
         return null;
     }
@@ -1533,8 +1538,11 @@ export function ChatListPanel() {
     const typeIcon = getMessageTypeIcon(preview.type);
     const isReply = isReplyMessage(message);
     
+    // Attachment type should always show in grey/muted color
+    const isAttachment = preview.type === 'attachment';
+    
     return (
-      <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+      <p className={`text-xs truncate mt-0.5 flex items-center gap-1 ${isAttachment ? 'text-muted-foreground' : hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
         {typeIcon || (isReply && (
           <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
         ))}
