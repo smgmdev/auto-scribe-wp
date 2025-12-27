@@ -2094,16 +2094,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                     >
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="absolute top-0 right-0 outline-none">
-                          <div
-                            className={`h-8 w-8 flex items-center justify-center cursor-pointer rounded-tr-lg rounded-bl-lg hover:bg-black/10 dark:hover:bg-white/10 ${
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            className={`absolute top-0 right-0 h-8 w-8 flex items-center justify-center cursor-pointer rounded-tr-lg rounded-bl-lg hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent ${
                               isOwnMessage 
                                 ? 'text-primary-foreground/70' 
                                 : 'text-muted-foreground'
                             }`}
                           >
-                            <ChevronDown className="h-4 w-4 pointer-events-none" />
-                          </div>
+                            <ChevronDown className="h-4 w-4" />
+                          </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
                           align={isOwnMessage ? "end" : "start"}
