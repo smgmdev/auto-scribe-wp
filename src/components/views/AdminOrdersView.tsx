@@ -588,7 +588,7 @@ export function AdminOrdersView() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
         <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <Tooltip delayDuration={100}>
