@@ -223,19 +223,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   // Format last seen time
   const formatLastSeen = (lastSeenDate: string | null): string => {
-    if (!lastSeenDate) return 'Offline';
+    if (!lastSeenDate) return 'Last seen: Unknown';
     const date = new Date(lastSeenDate);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
     
-    if (diffMins < 1) return 'Last seen just now';
-    if (diffMins < 60) return `Last seen ${diffMins}m ago`;
-    if (diffHours < 24) return `Last seen ${diffHours}h ago`;
-    if (diffDays < 7) return `Last seen ${diffDays}d ago`;
-    return `Last seen ${format(date, 'MMM d')}`;
+    if (diffSecs < 60) return 'Last seen just now';
+    if (diffMins === 1) return 'Last seen 1 minute ago';
+    if (diffMins < 60) return `Last seen ${diffMins} minutes ago`;
+    if (diffHours === 1) return 'Last seen 1 hour ago';
+    if (diffHours < 24) return `Last seen ${diffHours} hours ago`;
+    if (diffDays === 1) return 'Last seen yesterday';
+    if (diffDays < 7) return `Last seen ${diffDays} days ago`;
+    return `Last seen ${format(date, 'MMM d, h:mm a')}`;
   };
 
   // Fetch counterparty's last seen
