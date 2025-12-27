@@ -54,6 +54,7 @@ export function AgencyRequestsView() {
   const { 
     setAgencyUnreadServiceRequestsCount, 
     unreadMessageCounts,
+    setUnreadMessageCount,
     clearUnreadMessageCount,
     openGlobalChat
   } = useAppStore();
@@ -105,14 +106,7 @@ export function AgencyRequestsView() {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      // Map agency_read to read for the interface
-      const mappedRequests = data.map(r => ({
-        ...r,
-        read: (r as any).agency_read
-      })) as unknown as ServiceRequest[];
-      setRequests(mappedRequests);
-
-      // Fetch messages for all requests
+      // Fetch messages for all requests first
       let messagesByRequest: Record<string, ServiceMessage[]> = {};
       if (data.length > 0) {
         const requestIds = data.map(r => r.id);
@@ -130,6 +124,25 @@ export function AgencyRequestsView() {
         });
         setMessages(messagesByRequest);
       }
+
+      // Map agency_read to read and calculate unread message counts
+      const mappedRequests = data.map(r => {
+        const isUnread = !(r as any).agency_read;
+        const requestMessages = messagesByRequest[r.id] || [];
+        // Count client messages (counterparty messages for agency)
+        const clientMessageCount = requestMessages.filter(m => m.sender_type === 'client').length;
+        
+        // Set actual unread count for this request
+        if (isUnread && clientMessageCount > 0) {
+          setUnreadMessageCount(r.id, clientMessageCount);
+        }
+        
+        return {
+          ...r,
+          read: (r as any).agency_read
+        };
+      }) as unknown as ServiceRequest[];
+      setRequests(mappedRequests);
 
       // Count unread: count requests where agency_read = false AND not cancelled
       const unreadCount = data.filter(r => !(r as any).agency_read && r.status !== 'cancelled').length;

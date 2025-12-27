@@ -199,29 +199,26 @@ export function ChatListPanel() {
 
       const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
-        // Check if this request has any agency/admin messages (for determining unread count)
+        // Count agency/admin messages (messages from counterparty)
         const agencyMessages = allMessages.filter(
           m => m.request_id === item.id && m.sender_type !== 'client'
         );
-        const hasAgencyMessage = agencyMessages.length > 0;
+        const agencyMessageCount = agencyMessages.length;
         
         // If client_read is false and there are agency messages, mark as unread
-        // We count agency messages that are unread (since client_read tracks if user has seen them)
-        const isUnread = !(item as any).client_read && hasAgencyMessage;
+        const isUnread = !(item as any).client_read && agencyMessageCount > 0;
         
-        // For unread engagements, set count to 1 to indicate there are unread messages
-        // We can't accurately count how many are truly unread without a last-read timestamp
+        // Set the actual count of unread messages from counterparty
         if (isUnread) {
-          setUnreadMessageCount(item.id, 1);
+          setUnreadMessageCount(item.id, agencyMessageCount);
         }
         
         return {
           ...item,
-          // Only mark as unread if client_read is false AND has agency message
           read: !isUnread,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: isUnread ? 1 : 0,
+          unreadCount: isUnread ? agencyMessageCount : 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
@@ -291,24 +288,23 @@ export function ChatListPanel() {
         const lastMsg = lastMessages[item.id];
         const isUnread = !(item as any).agency_read;
         
-        // Count client messages for unread service requests
+        // Count client messages (messages from counterparty for agency)
         const clientMessages = allMessages.filter(
           m => m.request_id === item.id && m.sender_type === 'client'
         );
-        const hasClientMessage = clientMessages.length > 0;
+        const clientMessageCount = clientMessages.length;
         
-        // For unread requests, set count to 1 to indicate there are unread messages
-        // We can't accurately count how many are truly unread without a last-read timestamp
-        if (isUnread && hasClientMessage) {
-          setUnreadMessageCount(item.id, 1);
+        // Set the actual count of unread messages from counterparty
+        if (isUnread && clientMessageCount > 0) {
+          setUnreadMessageCount(item.id, clientMessageCount);
         }
         
         return {
           ...item,
-          read: (item as any).agency_read, // Map agency_read to read for UI
+          read: (item as any).agency_read,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: isUnread && hasClientMessage ? 1 : 0,
+          unreadCount: isUnread && clientMessageCount > 0 ? clientMessageCount : 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
