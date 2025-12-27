@@ -2097,13 +2097,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"
-                            className={`absolute top-0 right-0 h-8 w-8 flex items-center justify-center cursor-pointer rounded-tr-lg rounded-bl-lg hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent ${
+                            className={`absolute top-0.5 right-0.5 h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent ${
                               isOwnMessage 
                                 ? 'text-primary-foreground/70' 
                                 : 'text-muted-foreground'
                             }`}
                           >
-                            <ChevronDown className="h-4 w-4 pointer-events-none" />
+                            <ChevronDown className="h-3 w-3 pointer-events-none" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
