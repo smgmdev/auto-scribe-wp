@@ -62,6 +62,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [senderId, setSenderId] = useState<string | null>(null);
+  // Verified sender type based on actual request data (client, agency, or admin)
+  const [actualSenderType, setActualSenderType] = useState<'client' | 'agency' | 'admin'>(
+    isAdmin ? 'admin' : (globalChatType === 'agency-request' ? 'agency' : 'client')
+  );
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
   const [counterpartyLastSeen, setCounterpartyLastSeen] = useState<string | null>(null);
   const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
@@ -210,9 +214,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, [isDragging, localPosition, globalChatRequest.id, updateChatPosition]);
 
-  // Admins send as 'admin' type, agencies as 'agency', clients as 'client'
-  const senderType = isAdmin && globalChatType === 'agency-request' ? 'admin' : (globalChatType === 'agency-request' ? 'agency' : 'client');
-  const counterpartyLabel = globalChatType === 'agency-request' ? 'Client' : 'Agency';
+  // Use actualSenderType which is verified against actual request data (set in fetchSenderId effect)
+  // This is the initial value, but actualSenderType will be corrected after data fetch
+  const senderType = actualSenderType;
+  const counterpartyLabel = actualSenderType === 'client' ? 'Agency' : 'Client';
   
   const isCancelled = globalChatRequest?.status === 'cancelled';
   const hasOrder = !!globalChatRequest?.order;
@@ -805,30 +810,68 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest?.id, globalChatType, clearUnreadMessageCount]);
 
-  // Fetch sender ID
+  // Fetch sender ID and verify correct sender type based on actual data
   useEffect(() => {
     const fetchSenderId = async () => {
-      if (!user) return;
+      if (!user || !globalChatRequest) return;
       
       // Admins always use their user.id as sender_id
       if (isAdmin) {
         setSenderId(user.id);
+        setActualSenderType('admin');
         return;
       }
       
-      if (globalChatType === 'agency-request') {
-        const { data } = await supabase
+      // Fetch the actual request to verify ownership
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id, agency_payout_id')
+        .eq('id', globalChatRequest.id)
+        .maybeSingle();
+      
+      if (!requestData) {
+        console.error('[FloatingChatWindow] Could not fetch request data for sender verification');
+        return;
+      }
+      
+      // Check if user is the client (owner of the request)
+      const isClient = requestData.user_id === user.id;
+      
+      // Check if user is the agency handling this request
+      let isAgencyHandler = false;
+      let agencyId: string | null = null;
+      
+      if (requestData.agency_payout_id) {
+        const { data: agencyData } = await supabase
           .from('agency_payouts')
           .select('id')
+          .eq('id', requestData.agency_payout_id)
           .eq('user_id', user.id)
           .maybeSingle();
-        setSenderId(data?.id || null);
-      } else {
+        
+        if (agencyData) {
+          isAgencyHandler = true;
+          agencyId = agencyData.id;
+        }
+      }
+      
+      // Determine correct sender type based on actual relationship to the request
+      if (isClient) {
         setSenderId(user.id);
+        setActualSenderType('client');
+        console.log('[FloatingChatWindow] User verified as client for this request');
+      } else if (isAgencyHandler && agencyId) {
+        setSenderId(agencyId);
+        setActualSenderType('agency');
+        console.log('[FloatingChatWindow] User verified as agency handler for this request');
+      } else {
+        console.error('[FloatingChatWindow] User is neither client nor agency for this request');
+        // This shouldn't happen in normal flow - the chat shouldn't have been opened
+        setSenderId(null);
       }
     };
     fetchSenderId();
-  }, [user, globalChatType, isAdmin]);
+  }, [user, globalChatRequest?.id, isAdmin]);
 
   // Fetch messages
   useEffect(() => {
