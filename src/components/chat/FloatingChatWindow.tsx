@@ -2109,7 +2109,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         )}
 
         {/* Input */}
-        {!isCancelled && globalChatRequest.status !== 'rejected' && (
+        {isCancelled ? (
+          <div className="border-t py-3 px-4 bg-muted/30">
+            <p className="text-sm text-muted-foreground text-center">
+              This engagement was cancelled.
+              {globalChatRequest.cancellation_reason && (
+                <span className="block mt-1 text-xs">
+                  Reason: {globalChatRequest.cancellation_reason}
+                </span>
+              )}
+            </p>
+          </div>
+        ) : globalChatRequest.status !== 'rejected' && (
           <div className="border-t">
             {hasOpenDispute && !isAdmin ? (
               <div className="py-2 px-4 text-center bg-muted/30">
