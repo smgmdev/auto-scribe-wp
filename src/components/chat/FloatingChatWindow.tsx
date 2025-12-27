@@ -2116,15 +2116,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <DropdownMenuItem 
                             onSelect={() => {
                               setReplyToMessage(msg);
-                              // Use requestAnimationFrame + setTimeout for reliable focus
-                              requestAnimationFrame(() => {
-                                setTimeout(() => {
-                                  if (inputRef.current) {
-                                    inputRef.current.focus();
-                                    inputRef.current.click();
-                                  }
-                                }, 50);
-                              });
+                              // Use longer timeout to ensure dropdown fully closes before focusing
+                              setTimeout(() => {
+                                if (inputRef.current) {
+                                  inputRef.current.focus();
+                                }
+                              }, 150);
                             }}
                             className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                           >
