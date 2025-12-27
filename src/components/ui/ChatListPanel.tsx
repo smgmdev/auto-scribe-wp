@@ -104,6 +104,7 @@ export function ChatListPanel() {
     openGlobalChat, 
     clearUnreadMessageCount, 
     unreadMessageCounts,
+    setUnreadMessageCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
     agencyUnreadServiceRequestsCount,
@@ -172,7 +173,7 @@ export function ChatListPanel() {
       // Fetch last messages for each request
       const requestIds = data.map(r => r.id);
       let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
-      let allMessages: { request_id: string; sender_type: string }[] = [];
+      let allMessages: { request_id: string; sender_type: string; created_at: string }[] = [];
       
       if (requestIds.length > 0) {
         const { data: messagesData } = await supabase
@@ -183,7 +184,7 @@ export function ChatListPanel() {
         
         messagesData?.forEach(msg => {
           // Track all messages for determining if agency has replied
-          allMessages.push({ request_id: msg.request_id, sender_type: msg.sender_type });
+          allMessages.push({ request_id: msg.request_id, sender_type: msg.sender_type, created_at: msg.created_at });
           
           if (!lastMessages[msg.request_id]) {
             lastMessages[msg.request_id] = { 
@@ -197,17 +198,29 @@ export function ChatListPanel() {
 
       const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
-        // Check if this request has any agency messages (for determining unread count)
-        const hasAgencyMessage = allMessages.some(
+        // Check if this request has any agency/admin messages (for determining unread count)
+        const agencyMessages = allMessages.filter(
           m => m.request_id === item.id && m.sender_type !== 'client'
         );
+        const hasAgencyMessage = agencyMessages.length > 0;
+        
+        // If client_read is false and there are agency messages, count unread agency messages
+        // We count agency messages that are unread (since client_read tracks if user has seen them)
+        const isUnread = !(item as any).client_read && hasAgencyMessage;
+        
+        // For unread engagements, set the count of agency messages as unread
+        // This gives users a visual indication of how many messages they haven't read
+        if (isUnread && agencyMessages.length > 0) {
+          setUnreadMessageCount(item.id, agencyMessages.length);
+        }
+        
         return {
           ...item,
           // Only mark as unread if client_read is false AND has agency message
-          read: (item as any).client_read || !hasAgencyMessage,
+          read: !isUnread,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: 0,
+          unreadCount: isUnread ? agencyMessages.length : 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
@@ -248,9 +261,10 @@ export function ChatListPanel() {
     const { data, error } = await query;
 
     if (!error && data) {
-      // Fetch last messages for each request
+      // Fetch all messages for each request to calculate unread counts
       const requestIds = data.map(r => r.id);
       let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
+      let allMessages: { request_id: string; sender_type: string }[] = [];
       
       if (requestIds.length > 0) {
         const { data: messagesData } = await supabase
@@ -260,6 +274,8 @@ export function ChatListPanel() {
           .order('created_at', { ascending: false });
         
         messagesData?.forEach(msg => {
+          allMessages.push({ request_id: msg.request_id, sender_type: msg.sender_type });
+          
           if (!lastMessages[msg.request_id]) {
             lastMessages[msg.request_id] = { 
               message: msg.message, 
@@ -272,12 +288,24 @@ export function ChatListPanel() {
 
       const requests = data.map(item => {
         const lastMsg = lastMessages[item.id];
+        const isUnread = !(item as any).agency_read;
+        
+        // Count client messages for unread service requests
+        const clientMessages = allMessages.filter(
+          m => m.request_id === item.id && m.sender_type === 'client'
+        );
+        
+        // For unread requests, set the count of client messages as unread
+        if (isUnread && clientMessages.length > 0) {
+          setUnreadMessageCount(item.id, clientMessages.length);
+        }
+        
         return {
           ...item,
           read: (item as any).agency_read, // Map agency_read to read for UI
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: 0,
+          unreadCount: isUnread ? clientMessages.length : 0,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
