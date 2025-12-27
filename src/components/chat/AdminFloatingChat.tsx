@@ -1471,7 +1471,7 @@ export function AdminFloatingChat({
                     onClick={() => fetchAgencyDetails(request.media_sites.agency!)}
                   >
                     {request.media_sites.agency}
-                    <ExternalLink className="h-3 w-3" />
+                    <Info className="h-3 w-3" />
                   </p>
                 </div>
               )}

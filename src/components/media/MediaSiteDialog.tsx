@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image, MessageSquare, Building2 } from 'lucide-react';
+import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image, MessageSquare, Building2, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -474,7 +474,7 @@ export function MediaSiteDialog({
                     onClick={() => fetchAgencyDetails(mediaSite.agency!)}
                   >
                     {mediaSite.agency}
-                    <ExternalLink className="h-3 w-3" />
+                    <Info className="h-3 w-3" />
                   </p>
                 </div>
               )}
