@@ -563,14 +563,14 @@ export function AdminOrdersView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="cancelled">
-            Cancelled ({cancelledCount})
-          </TabsTrigger>
           <TabsTrigger value="completed">
             Completed ({completedCount})
           </TabsTrigger>
           <TabsTrigger value="all">
             All Orders ({allOrdersCount})
+          </TabsTrigger>
+          <TabsTrigger value="cancelled">
+            Cancelled ({cancelledCount})
           </TabsTrigger>
         </TabsList>
 
