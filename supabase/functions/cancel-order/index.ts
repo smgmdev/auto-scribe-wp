@@ -200,6 +200,25 @@ serve(async (req) => {
       // Don't fail - order is already cancelled
     }
 
+    // Close any open disputes for this order
+    const { error: disputeError } = await supabaseAdmin
+      .from("disputes")
+      .update({
+        status: "cancelled",
+        resolved_at: new Date().toISOString(),
+        resolved_by: user.id,
+        admin_notes: "Order was cancelled"
+      })
+      .eq("order_id", order_id)
+      .eq("status", "open");
+
+    if (disputeError) {
+      logStep("Error closing dispute", { error: disputeError.message });
+      // Don't fail - order is already cancelled
+    } else {
+      logStep("Closed open disputes for order");
+    }
+
     // Send cancellation message to chat
     if (serviceRequest) {
       const cancellationMessage = JSON.stringify({

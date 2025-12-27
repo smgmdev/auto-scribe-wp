@@ -68,6 +68,41 @@ serve(async (req) => {
 
     logStep("Order marked as delivered", { orderId: order.id });
 
+    // Close any open disputes for this order and mark as resolved/delivered
+    const { error: disputeError } = await supabaseClient
+      .from("disputes")
+      .update({
+        status: "resolved",
+        resolved_at: new Date().toISOString(),
+        resolved_by: userData.user.id,
+        admin_notes: "Order was marked as delivered by admin"
+      })
+      .eq("order_id", order_id)
+      .eq("status", "open");
+
+    if (disputeError) {
+      logStep("Error closing dispute", { error: disputeError.message });
+      // Don't fail - order is already updated
+    } else {
+      logStep("Closed open disputes for order");
+    }
+
+    // Also update the order status to completed when admin force-delivers
+    const { error: completeError } = await supabaseClient
+      .from("orders")
+      .update({
+        status: "completed",
+        accepted_at: new Date().toISOString(),
+        released_at: new Date().toISOString(),
+      })
+      .eq("id", order_id);
+
+    if (completeError) {
+      logStep("Error completing order", { error: completeError.message });
+    } else {
+      logStep("Order marked as completed");
+    }
+
     return new Response(JSON.stringify({ 
       success: true,
       order 
