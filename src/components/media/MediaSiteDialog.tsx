@@ -47,6 +47,7 @@ export function MediaSiteDialog({
   const [currentView, setCurrentView] = useState<DialogView>('detail');
   const [openEngagementData, setOpenEngagementData] = useState<any>(null);
   const [checkingEngagement, setCheckingEngagement] = useState(false);
+  const [userAgencyName, setUserAgencyName] = useState<string | null>(null);
   
   // Brief form state
   const [description, setDescription] = useState('');
@@ -153,6 +154,18 @@ export function MediaSiteDialog({
     } else if (open && mediaSite && user) {
       // Check if user has an open engagement for this media site
       setCheckingEngagement(true);
+      
+      // Check if user owns the agency for this media site
+      supabase
+        .from('agency_payouts')
+        .select('agency_name')
+        .eq('user_id', user.id)
+        .eq('onboarding_complete', true)
+        .maybeSingle()
+        .then(({ data }) => {
+          setUserAgencyName(data?.agency_name || null);
+        });
+      
       supabase
         .from('service_requests')
         .select(`
@@ -499,7 +512,7 @@ export function MediaSiteDialog({
               >
                 Close
               </Button>
-              {!isAgency && (
+              {!isAgency && !(userAgencyName && mediaSite.agency === userAgencyName) && (
                 user ? (
                   checkingEngagement ? (
                     <Button disabled className="bg-black text-white">

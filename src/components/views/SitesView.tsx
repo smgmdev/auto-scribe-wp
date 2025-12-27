@@ -114,6 +114,9 @@ export function SitesView() {
   
   // Track user's open engagements by media_site_id (stores full request data for opening chat)
   const [openEngagements, setOpenEngagements] = useState<Record<string, any>>({});
+  
+  // Track user's agency name (if they are an agency)
+  const [userAgencyName, setUserAgencyName] = useState<string | null>(null);
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -217,7 +220,25 @@ export function SitesView() {
   useEffect(() => {
     fetchMediaSites();
     fetchOpenEngagements();
+    fetchUserAgency();
   }, [user]);
+
+  // Fetch user's agency name if they are an agency
+  const fetchUserAgency = async () => {
+    if (!user) {
+      setUserAgencyName(null);
+      return;
+    }
+    
+    const { data } = await supabase
+      .from('agency_payouts')
+      .select('agency_name')
+      .eq('user_id', user.id)
+      .eq('onboarding_complete', true)
+      .maybeSingle();
+    
+    setUserAgencyName(data?.agency_name || null);
+  };
 
   // Fetch user's open engagements to show indicator on media site cards
   const fetchOpenEngagements = async () => {
@@ -1219,7 +1240,7 @@ export function SitesView() {
                   <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
                 </a>
-                {!isAdmin && (
+                {!isAdmin && !(userAgencyName && site.agency === userAgencyName) && (
                   openEngagements[site.id] ? (
                     <Badge 
                       variant="secondary" 
