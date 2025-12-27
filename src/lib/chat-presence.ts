@@ -83,10 +83,25 @@ export class ChatPresenceTracker {
 
     await this.channel.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
+        const now = new Date().toISOString();
+        
+        // Update last_online_at when joining to mark user as active
+        if (this.userType === 'client') {
+          await supabase
+            .from('profiles')
+            .update({ last_online_at: now })
+            .eq('id', this.userId);
+        } else if (this.userType === 'agency' && this.agencyPayoutId) {
+          await supabase
+            .from('agency_payouts')
+            .update({ last_online_at: now })
+            .eq('id', this.agencyPayoutId);
+        }
+        
         await this.channel?.track({
           user_id: this.userId,
           user_type: this.userType,
-          online_at: new Date().toISOString(),
+          online_at: now,
         });
       }
     });
