@@ -1991,7 +1991,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
                 <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
                   <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {counterpartyLabel} {isCounterpartyOnline ? 'Online' : formatLastSeen(counterpartyLastSeen)}
+                  {isCounterpartyOnline ? 'Online' : formatLastSeen(counterpartyLastSeen)}
                 </span>
               </div>
             </div>
