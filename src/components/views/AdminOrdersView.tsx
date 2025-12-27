@@ -63,6 +63,7 @@ export function AdminOrdersView() {
   const [cancelling, setCancelling] = useState(false);
   const [investigating, setInvestigating] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const [historySubTab, setHistorySubTab] = useState<'all' | 'cancelled'>('all');
   const [disputes, setDisputes] = useState<{ id: string; order_id: string; service_request_id: string; read: boolean }[]>([]);
   const { toast } = useToast();
 
@@ -512,11 +513,14 @@ export function AdminOrdersView() {
         return order.status === 'paid' && order.delivery_status === 'pending' && !disputedOrderIds.has(order.id);
       case 'disputes':
         return disputedOrderIds.has(order.id);
-      case 'cancelled':
-        return order.status === 'cancelled';
       case 'completed':
         return order.status === 'completed';
-      case 'all':
+      case 'history':
+        // Sub-filter based on historySubTab
+        if (historySubTab === 'cancelled') {
+          return order.status === 'cancelled';
+        }
+        return true; // 'all' shows everything
       default:
         return true;
     }
@@ -566,13 +570,30 @@ export function AdminOrdersView() {
           <TabsTrigger value="completed">
             Completed ({completedCount})
           </TabsTrigger>
-          <TabsTrigger value="all">
-            All Orders ({allOrdersCount})
-          </TabsTrigger>
-          <TabsTrigger value="cancelled">
-            Cancelled ({cancelledCount})
+          <TabsTrigger value="history">
+            Order History ({allOrdersCount})
           </TabsTrigger>
         </TabsList>
+
+        {/* Sub-tabs for Order History */}
+        {activeTab === 'history' && (
+          <div className="mt-4 flex gap-2">
+            <Button
+              variant={historySubTab === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setHistorySubTab('all')}
+            >
+              All ({allOrdersCount})
+            </Button>
+            <Button
+              variant={historySubTab === 'cancelled' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setHistorySubTab('cancelled')}
+            >
+              Cancelled ({cancelledCount})
+            </Button>
+          </div>
+        )}
 
         <TabsContent value={activeTab} className="mt-6">
           {loading ? (
