@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -558,6 +558,23 @@ export function AdminOrdersView() {
   // Use dispute.read for unread disputes count (not order.read)
   const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
+  // Calculate value stats
+  const pendingValue = orders
+    .filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !disputedOrderIds.has(o.id))
+    .reduce((sum, o) => sum + o.amount_cents, 0);
+  
+  const disputeValue = orders
+    .filter(o => disputedOrderIds.has(o.id))
+    .reduce((sum, o) => sum + o.amount_cents, 0);
+  
+  const deliveredValue = orders
+    .filter(o => o.status === 'completed')
+    .reduce((sum, o) => sum + o.amount_cents, 0);
+  
+  const totalFeeEarnings = orders
+    .filter(o => o.status === 'completed')
+    .reduce((sum, o) => sum + o.platform_fee_cents, 0);
+
   if (!isAdmin) {
     return <div className="text-center py-12 text-muted-foreground">Admin access required</div>;
   }
@@ -567,6 +584,65 @@ export function AdminOrdersView() {
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
         <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Delivery</p>
+                <p className="text-2xl font-bold">${(pendingValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Open Disputes</p>
+                <p className="text-2xl font-bold">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Delivered Orders</p>
+                <p className="text-2xl font-bold">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <DollarSign className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Fee Earnings</p>
+                <p className="text-2xl font-bold text-green-600">${(totalFeeEarnings / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="relative w-full mb-2">
