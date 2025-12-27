@@ -198,8 +198,11 @@ export function MyRequestsView() {
 
     // Listen for updates from ChatListPanel (messaging widget)
     const handleMyEngagementUpdated = (event: CustomEvent) => {
-      const { id, read } = event.detail || {};
-      if (id && read !== undefined) {
+      const { id, read, lastMessage, lastMessageTime } = event.detail || {};
+      if (!id) return;
+      
+      // Update read status if provided
+      if (read !== undefined) {
         setRequests(prev => {
           const updated = prev.map(r => r.id === id ? { ...r, read } : r);
           // Recalculate unread count
@@ -212,6 +215,30 @@ export function MyRequestsView() {
         if (read === true) {
           clearUnreadMessageCount(id);
         }
+      }
+      
+      // Update last message if provided (for real-time sync)
+      if (lastMessage && lastMessageTime) {
+        setMessages(prev => {
+          const existingMsgs = prev[id] || [];
+          // Avoid duplicate messages by checking if last message matches
+          const lastExisting = existingMsgs[existingMsgs.length - 1];
+          if (lastExisting?.message === lastMessage && lastExisting?.created_at === lastMessageTime) {
+            return prev; // Already have this message
+          }
+          // Add new message to the end
+          return {
+            ...prev,
+            [id]: [...existingMsgs, {
+              id: `temp-${Date.now()}`,
+              request_id: id,
+              sender_type: 'agency' as const,
+              sender_id: 'unknown',
+              message: lastMessage,
+              created_at: lastMessageTime
+            }]
+          };
+        });
       }
     };
 
