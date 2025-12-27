@@ -488,15 +488,20 @@ export function ChatListPanel() {
   }, [isAgency, isAdmin]);
 
   // Fetch data and sync notification counts on mount
+  // Wait for loading to complete so we know if user is an agency
   useEffect(() => {
-    if (user) {
+    if (!user || loading) return;
+    
+    // For agencies, skip fetching their own engagements unless they also act as users
+    // Agencies should only see their service requests, not user engagement data
+    if (!isAgency) {
       fetchMyEngagements();
-      if (isAdmin) {
-        fetchDisputes();
-        fetchInvestigations();
-      }
     }
-  }, [user, isAdmin]);
+    if (isAdmin) {
+      fetchDisputes();
+      fetchInvestigations();
+    }
+  }, [user, isAdmin, isAgency, loading]);
 
   // Listen for engagement-removed event to refresh list
   useEffect(() => {
@@ -1756,7 +1761,8 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              {!isAdmin && (
+              {/* Only show My Engagements tab for non-admin users who are NOT agencies, or agencies who have personal engagements */}
+              {!isAdmin && (!isAgency || myEngagements.length > 0) && (
                 <TabsTrigger 
                   value="my-engagements" 
                   className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
@@ -1965,7 +1971,8 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            {!isAdmin && (
+            {/* Only show My Engagements content for non-admin users who are NOT agencies, or agencies who have personal engagements */}
+            {!isAdmin && (!isAgency || myEngagements.length > 0) && (
               <TabsContent value="my-engagements" className="m-0">
                 <ScrollArea className="h-[300px]">
                   {renderChatList(filteredEngagements, 'my-request')}
