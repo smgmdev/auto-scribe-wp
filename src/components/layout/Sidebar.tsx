@@ -141,6 +141,7 @@ export function Sidebar({
   } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
+  const [hasUserNavigated, setHasUserNavigated] = useState(false);
   
   const [payoutMethod, setPayoutMethod] = useState<string | null>(null);
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
@@ -149,11 +150,15 @@ export function Sidebar({
 
   const navigation = getNavigation(isAdmin, isAgencyOnboarded);
 
-  // Auto-expand menus if current view is one of their submenu items
+  // Auto-expand menus ONLY if user has navigated (not on initial login)
+  // This keeps dropdowns closed by default after login
   useEffect(() => {
+    if (!hasUserNavigated) return;
+    
     const instantPublishingIds = ['headlines', 'compose', 'articles', 'settings'];
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
+    const adminAgenciesIds = ['admin-agencies', 'admin-media-management'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
@@ -164,13 +169,16 @@ export function Sidebar({
     if (agencyManagementIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'agency-management': true }));
     }
-  }, [currentView]);
+    if (adminAgenciesIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'admin-agencies': true }));
+    }
+  }, [currentView, hasUserNavigated]);
 
   const toggleMenu = (menuId: string) => {
     setExpandedMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
   };
 
-  // Reset agency data when user changes
+  // Reset state when user changes (logout/login)
   useEffect(() => {
     if (!user?.id) {
       setAgencyDataLoaded(false);
@@ -179,6 +187,9 @@ export function Sidebar({
       setApplicationId(null);
       setRejectionSeen(false);
       setUserCustomVerificationStatus(null);
+      // Reset sidebar dropdowns and navigation state on logout
+      setExpandedMenus({});
+      setHasUserNavigated(false);
     }
   }, [user?.id]);
 
@@ -454,6 +465,9 @@ export function Sidebar({
   }, [user?.id, isAdmin]);
 
   const handleNavClick = (viewId: string) => {
+    // Mark that user has navigated (enables auto-expand for submenus)
+    setHasUserNavigated(true);
+    
     // Clear editing state when navigating away from compose
     if (viewId !== 'compose') {
       setEditingArticle(null);
