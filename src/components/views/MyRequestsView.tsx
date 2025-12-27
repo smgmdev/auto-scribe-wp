@@ -403,36 +403,27 @@ export function MyRequestsView() {
         )}
       </div>
 
-      {requests.length === 0 ? (
-        <Card className="border-border/50">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">No engagements yet</p>
-            <p className="text-sm text-muted-foreground text-center">Browse media sites and submit a brief to get started</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div>
-          <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search engagements..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-full"
-            />
-          </div>
-          <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="active" className="gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Active ({activeRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="cancelled" className="gap-2">
-              <History className="h-4 w-4" />
-              Cancelled ({cancelledRequests.length})
-            </TabsTrigger>
-          </TabsList>
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search engagements..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 w-full max-w-md"
+        />
+      </div>
+
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="active" className="gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Active ({activeRequests.length})
+          </TabsTrigger>
+          <TabsTrigger value="cancelled" className="gap-2">
+            <History className="h-4 w-4" />
+            Cancelled ({cancelledRequests.length})
+          </TabsTrigger>
+        </TabsList>
 
           <TabsContent value="active" className="mt-6">
             {sortedActiveRequests.length === 0 ? (
@@ -591,8 +582,6 @@ export function MyRequestsView() {
             )}
           </TabsContent>
         </Tabs>
-        </div>
-      )}
     </div>
   );
 }
