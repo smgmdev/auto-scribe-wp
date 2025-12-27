@@ -368,7 +368,7 @@ export function OrdersView() {
       ) : (
         <>
           {orders.length > 0 && (
-            <div className="relative">
+            <div className="relative mb-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search orders by site name or agency..."
@@ -379,7 +379,7 @@ export function OrdersView() {
             </div>
           )}
 
-          <Tabs defaultValue="active" className="w-full">
+          <Tabs defaultValue="active" className="w-full -mt-6">
             <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
