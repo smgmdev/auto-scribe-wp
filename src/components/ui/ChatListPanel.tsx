@@ -1583,8 +1583,7 @@ export function ChatListPanel() {
     }
 
     return items.map((item) => {
-      const unreadCount = unreadMessageCounts[item.id] || 0;
-      const hasUnread = !item.read || unreadCount > 0;
+      const hasUnread = !item.read;
       
       return (
         <div
@@ -1630,13 +1629,6 @@ export function ChatListPanel() {
               hasUnread={hasUnread}
             />
           </div>
-
-          {/* Unread badge */}
-          {unreadCount > 0 && (
-            <Badge className="h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5 shrink-0 animate-pulse">
-              {unreadCount}
-            </Badge>
-          )}
         </div>
       );
     });

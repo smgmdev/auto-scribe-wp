@@ -531,7 +531,6 @@ export function MyRequestsView() {
             ) : (
               <div className="space-y-2">
                 {sortedActiveRequests.map((request) => {
-                  const unreadCount = unreadMessageCounts[request.id] || 0;
                   const requestMessages = messages[request.id] || [];
                   const hasUnread = !request.read;
                   
@@ -543,13 +542,6 @@ export function MyRequestsView() {
                       }`}
                       onClick={() => handleCardClick(request)}
                     >
-                      {(unreadCount > 0 || hasUnread) && (
-                        <Badge 
-                          className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center bg-blue-500 text-white text-xs px-1.5"
-                        >
-                          {unreadCount > 0 ? unreadCount : '•'}
-                        </Badge>
-                      )}
                       <CardHeader className="py-3 px-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
