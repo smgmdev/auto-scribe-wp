@@ -158,7 +158,7 @@ export function MyRequestsView() {
     }
   }, [user]);
 
-  // Listen for engagement-removed and engagement-added events to sync list
+  // Listen for engagement-removed, engagement-added, and my-engagement-updated events to sync list
   useEffect(() => {
     const handleEngagementRemoved = (event: CustomEvent) => {
       const removedId = event.detail?.id;
@@ -196,13 +196,34 @@ export function MyRequestsView() {
       }
     };
 
+    // Listen for updates from ChatListPanel (messaging widget)
+    const handleMyEngagementUpdated = (event: CustomEvent) => {
+      const { id, read } = event.detail || {};
+      if (id && read !== undefined) {
+        setRequests(prev => {
+          const updated = prev.map(r => r.id === id ? { ...r, read } : r);
+          // Recalculate unread count
+          const unreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+          setUserUnreadEngagementsCount(unreadCount);
+          return updated;
+        });
+        
+        // Clear unread count if marked as read
+        if (read === true) {
+          clearUnreadMessageCount(id);
+        }
+      }
+    };
+
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
     window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
+    window.addEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
       window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
+      window.removeEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
     };
-  }, []);
+  }, [clearUnreadMessageCount, setUserUnreadEngagementsCount]);
 
   // Real-time subscription for status updates and read status sync (service_requests table)
   // This syncs read status across all views/tabs when updated from any source
@@ -345,6 +366,11 @@ export function MyRequestsView() {
       setRequests(prev => prev.map(r => 
         r.id === request.id ? { ...r, read: true } : r
       ));
+      
+      // Dispatch event to sync with ChatListPanel (messaging widget)
+      window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+        detail: { id: request.id, read: true }
+      }));
     }
   };
 
