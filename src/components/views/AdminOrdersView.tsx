@@ -187,7 +187,11 @@ export function AdminOrdersView() {
         description: error.message
       });
     } else {
-      setOrders((data as Order[]) || []);
+      // Ensure no duplicates by using Map with unique IDs
+      const uniqueOrders = Array.from(
+        new Map((data || []).map((order: Order) => [order.id, order])).values()
+      ) as Order[];
+      setOrders(uniqueOrders);
       // Update unread count in store
       const unreadCount = (data || []).filter((o: Order) => o.status === 'paid' && !o.read).length;
       setUnreadOrdersCount(unreadCount);
