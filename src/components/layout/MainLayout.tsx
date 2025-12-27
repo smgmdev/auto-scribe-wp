@@ -30,6 +30,29 @@ export function MainLayout({
     removeMinimizedChat(chat.id);
     clearUnreadMessageCount(chat.id);
     
+    // Mark as read in database and dispatch event immediately
+    if (chat.type === 'my-request') {
+      supabase
+        .from('service_requests')
+        .update({ client_read: true })
+        .eq('id', chat.id);
+      
+      // Dispatch event to sync with ChatListPanel and MyRequestsView
+      window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+        detail: { id: chat.id, read: true }
+      }));
+    } else {
+      supabase
+        .from('service_requests')
+        .update({ agency_read: true })
+        .eq('id', chat.id);
+      
+      // Dispatch event to sync with ChatListPanel and AgencyRequestsView
+      window.dispatchEvent(new CustomEvent('service-request-updated', {
+        detail: { id: chat.id, read: true }
+      }));
+    }
+    
     try {
       // Fetch the full request data
       const { data, error } = await supabase
