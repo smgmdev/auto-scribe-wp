@@ -1743,7 +1743,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return counterpartyLabel;
     };
     
+    // Clean up quote text - remove any "> [id]:" format that might be nested
+    const getCleanQuoteText = () => {
+      if (!quote) return '';
+      let text = quote.quoteText;
+      // Remove any leading "> " and "[id]:" patterns
+      text = text.replace(/^> /, '');
+      text = text.replace(/^\[[^\]]+\]:/, '');
+      return text.trim();
+    };
+    
     const quoteSenderLabel = getQuoteSenderLabel();
+    const cleanQuoteText = getCleanQuoteText();
     
     return (
       <div className="space-y-2">
@@ -1759,7 +1770,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             {quoteSenderLabel && (
               <p className="font-medium opacity-80 mb-0.5">{quoteSenderLabel}</p>
             )}
-            <p className="opacity-70 line-clamp-2">{quote.quoteText}</p>
+            <p className="opacity-70 line-clamp-2">{cleanQuoteText}</p>
           </div>
         )}
         {displayMessage && (
