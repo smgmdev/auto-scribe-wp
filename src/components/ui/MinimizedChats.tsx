@@ -3,13 +3,15 @@ import { MessageSquare, X, Maximize2 } from 'lucide-react';
 import { MinimizedChat, useAppStore } from '@/stores/appStore';
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MinimizedChatsProps {
   onOpenChat: (chat: MinimizedChat) => void;
 }
 
 export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
+  const isMobile = useIsMobile();
+  
   // Use the hook for loading/syncing with DB and removing chats
   const { removeMinimizedChat } = useMinimizedChats();
   
@@ -55,7 +57,13 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
     };
   }, [clearMinimizedChatUnread, clearUnreadMessageCount]);
 
+  // Don't render on mobile/tablet
+  if (isMobile) return null;
+  
   if (minimizedChats.length === 0) return null;
+
+  // Limit to max 3 chats on desktop
+  const displayedChats = minimizedChats.slice(0, 3);
 
   const handleOpenChat = (chat: MinimizedChat) => {
     // Clear unread counts from both sources when opening the chat
@@ -70,7 +78,7 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
   
   return (
     <div className="fixed bottom-0 right-[312px] z-50 flex flex-row-reverse gap-2">
-      {minimizedChats.map((chat) => {
+      {displayedChats.map((chat) => {
         // Check both sources for unread messages
         const minimizedUnread = chat.unreadCount ?? 0;
         const messageUnread = unreadMessageCounts[chat.id] ?? 0;
