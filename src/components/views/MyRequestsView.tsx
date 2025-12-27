@@ -575,9 +575,15 @@ export function MyRequestsView() {
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
                         <div className="space-y-0.5">
+                          {requestMessages.length > 0 && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, h:mm a')}</span>
+                            </div>
+                          )}
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">
-                              Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                              Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                             {requestMessages.length > 0 && (
                               <span className="text-xs text-muted-foreground">
@@ -585,11 +591,6 @@ export function MyRequestsView() {
                               </span>
                             )}
                           </div>
-                          {requestMessages.length > 0 && (
-                            <span className="text-xs text-muted-foreground">
-                              Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
