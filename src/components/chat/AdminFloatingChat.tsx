@@ -143,6 +143,20 @@ export function AdminFloatingChat({
 
   const [, setTimerTick] = useState(0); // Force re-render for last seen updates
   
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    // Small delay to ensure the input is rendered
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Auto-focus when this chat is clicked/focused
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [zIndex]);
+  
   const isCancelled = request.status === 'cancelled';
   
   // Fetch messages if not provided
