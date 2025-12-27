@@ -92,6 +92,7 @@ const Landing = () => {
     logo_url: string | null;
   } | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
+  const [logoLoading, setLogoLoading] = useState(true);
 
   const handlePublishNewArticle = (siteId: string) => {
     setPreselectedSiteId(siteId);
@@ -250,6 +251,7 @@ const Landing = () => {
   // Fetch agency details
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
+    setLogoLoading(true);
     setAgencyDetailsOpen(true);
     
     try {
@@ -947,11 +949,20 @@ const Landing = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {agencyDetails?.logo_url ? (
-                <img 
-                  src={agencyDetails.logo_url} 
-                  alt={agencyDetails.agency_name}
-                  className="h-12 w-12 rounded-xl bg-muted object-contain"
-                />
+                <div className="relative h-12 w-12">
+                  {logoLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  <img 
+                    src={agencyDetails.logo_url} 
+                    alt={agencyDetails.agency_name}
+                    className={`h-12 w-12 rounded-xl bg-muted object-contain ${logoLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
+                    onLoad={() => setLogoLoading(false)}
+                    onError={() => setLogoLoading(false)}
+                  />
+                </div>
               ) : (
                 <Building2 className="h-12 w-12 text-muted-foreground" />
               )}
