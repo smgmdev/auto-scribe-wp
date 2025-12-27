@@ -415,6 +415,8 @@ export function AdminOrdersView() {
         return <Badge variant="secondary" className="bg-blue-600/20 text-blue-600"><CreditCard className="h-3 w-3 mr-1" />Paid</Badge>;
       case 'completed':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
