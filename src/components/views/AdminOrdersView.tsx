@@ -293,6 +293,7 @@ export function AdminOrdersView() {
       setDetailsDialogOpen(false);
       setSelectedOrder(null);
       fetchOrders();
+      fetchDisputedOrders();
     } catch (error: any) {
       console.error('Error cancelling order:', error);
       toast({
