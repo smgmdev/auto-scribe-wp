@@ -563,13 +563,13 @@ export function AdminOrdersView() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
         <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
       </div>
 
-      <div className="relative w-full sm:w-72">
+      <div className="relative w-full">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by site, order number..."
