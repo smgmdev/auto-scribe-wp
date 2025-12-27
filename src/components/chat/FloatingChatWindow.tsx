@@ -2098,13 +2098,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                            className={`absolute top-0 right-0 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-bl-lg ${
                               isOwnMessage 
                                 ? 'text-primary-foreground hover:bg-primary-foreground/20' 
                                 : 'text-foreground hover:bg-background/50'
                             }`}
                           >
-                            <ChevronDown className="h-3 w-3" />
+                            <ChevronDown className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
@@ -2115,13 +2115,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           className="bg-popover border shadow-lg z-[99999]"
                         >
                           <DropdownMenuItem 
-                            onSelect={(e) => {
-                              e.preventDefault();
+                            onSelect={() => {
                               setReplyToMessage(msg);
-                              // Delay focus to ensure dropdown fully closes first
-                              setTimeout(() => {
-                                inputRef.current?.focus();
-                              }, 150);
+                              // Use requestAnimationFrame + setTimeout for reliable focus
+                              requestAnimationFrame(() => {
+                                setTimeout(() => {
+                                  if (inputRef.current) {
+                                    inputRef.current.focus();
+                                    inputRef.current.click();
+                                  }
+                                }, 50);
+                              });
                             }}
                             className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                           >
