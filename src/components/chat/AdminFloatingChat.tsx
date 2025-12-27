@@ -640,7 +640,6 @@ export function AdminFloatingChat({
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
     setLogoLoading(true);
-    setAgencyDetailsOpen(true);
     try {
       const { data } = await supabase
         .from('agency_payouts')
@@ -673,6 +672,7 @@ export function AdminFloatingChat({
           ...data,
           logo_url: logoUrl
         });
+        setAgencyDetailsOpen(true);
       }
     } catch (error) {
       console.error('Error fetching agency:', error);
