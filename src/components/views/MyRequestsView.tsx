@@ -158,7 +158,7 @@ export function MyRequestsView() {
     }
   }, [user]);
 
-  // Listen for engagement-removed event to refresh list
+  // Listen for engagement-removed and engagement-added events to sync list
   useEffect(() => {
     const handleEngagementRemoved = (event: CustomEvent) => {
       const removedId = event.detail?.id;
@@ -172,9 +172,35 @@ export function MyRequestsView() {
       }
     };
 
+    const handleEngagementAdded = (event: CustomEvent) => {
+      const newEngagement = event.detail;
+      if (newEngagement?.id) {
+        // Add to local state immediately for instant UI update
+        const newRequest: ServiceRequest = {
+          id: newEngagement.id,
+          title: newEngagement.title || '',
+          description: newEngagement.description || '',
+          status: 'pending_review',
+          read: true,
+          cancellation_reason: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          media_site: newEngagement.media_site || null,
+          order: null,
+        };
+        setRequests(prev => {
+          // Avoid duplicates
+          if (prev.some(r => r.id === newEngagement.id)) return prev;
+          return [newRequest, ...prev];
+        });
+      }
+    };
+
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+    window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+      window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
     };
   }, []);
 

@@ -373,6 +373,17 @@ export function MediaSiteDialog({
         unreadCount: 0
       });
 
+      // Dispatch event for real-time sync across all views (ChatListPanel, MyRequestsView)
+      window.dispatchEvent(new CustomEvent('engagement-added', {
+        detail: {
+          id: request.id,
+          title: request.title,
+          description: request.description,
+          favicon: mediaSite.favicon || getFaviconUrl(mediaSite.link),
+          media_site: mediaSite
+        }
+      }));
+
       // Update state to show "Engagement Open" button immediately
       setOpenEngagementData({
         id: request.id,
