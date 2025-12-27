@@ -238,6 +238,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Update last_online_at before signing out
+    if (user) {
+      try {
+        const now = new Date().toISOString();
+        await supabase
+          .from('profiles')
+          .update({ last_online_at: now })
+          .eq('id', user.id);
+        // Also update agency_payouts if user is an agency
+        await supabase
+          .from('agency_payouts')
+          .update({ last_online_at: now })
+          .eq('user_id', user.id);
+      } catch (err) {
+        console.log('Error updating last online:', err);
+      }
+    }
+    
     // Clear local state first
     setSession(null);
     setUser(null);
@@ -253,6 +271,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Sign out completed (session may have already been cleared)');
     }
   };
+
+  // Update last_online_at periodically while user is active
+  useEffect(() => {
+    if (!user) return;
+    
+    const updateLastOnline = async () => {
+      try {
+        const now = new Date().toISOString();
+        
+        // Update user profile
+        await supabase
+          .from('profiles')
+          .update({ last_online_at: now })
+          .eq('id', user.id);
+        
+        // Also update agency_payouts if user is an agency
+        await supabase
+          .from('agency_payouts')
+          .update({ last_online_at: now })
+          .eq('user_id', user.id);
+      } catch (err) {
+        // Ignore errors
+      }
+    };
+    
+    // Update immediately on mount
+    updateLastOnline();
+    
+    // Update every 5 minutes
+    const interval = setInterval(updateLastOnline, 5 * 60 * 1000);
+    
+    // Update on page unload
+    const handleBeforeUnload = () => {
+      updateLastOnline();
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Update one last time on cleanup
+      updateLastOnline();
+    };
+  }, [user?.id]);
 
   return (
     <AuthContext.Provider

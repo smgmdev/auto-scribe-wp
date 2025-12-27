@@ -63,6 +63,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [senderId, setSenderId] = useState<string | null>(null);
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
+  const [counterpartyLastSeen, setCounterpartyLastSeen] = useState<string | null>(null);
   const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
@@ -219,6 +220,68 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     ? new Date(globalChatRequest.order.delivery_deadline) < new Date() 
     : false;
   const isAdminInvestigating = isAdmin && globalChatType === 'agency-request' && !adminJoined;
+
+  // Format last seen time
+  const formatLastSeen = (lastSeenDate: string | null): string => {
+    if (!lastSeenDate) return 'Offline';
+    const date = new Date(lastSeenDate);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Last seen just now';
+    if (diffMins < 60) return `Last seen ${diffMins}m ago`;
+    if (diffHours < 24) return `Last seen ${diffHours}h ago`;
+    if (diffDays < 7) return `Last seen ${diffDays}d ago`;
+    return `Last seen ${format(date, 'MMM d')}`;
+  };
+
+  // Fetch counterparty's last seen
+  useEffect(() => {
+    const fetchLastSeen = async () => {
+      if (!globalChatRequest) return;
+      
+      try {
+        // First get the service request to find the counterparty
+        const { data: requestData } = await supabase
+          .from('service_requests')
+          .select('user_id, agency_payout_id')
+          .eq('id', globalChatRequest.id)
+          .maybeSingle();
+        
+        if (!requestData) return;
+        
+        if (globalChatType === 'my-request') {
+          // Client viewing - counterparty is agency, get from agency_payouts
+          if (requestData.agency_payout_id) {
+            const { data } = await supabase
+              .from('agency_payouts')
+              .select('last_online_at')
+              .eq('id', requestData.agency_payout_id)
+              .maybeSingle();
+            setCounterpartyLastSeen(data?.last_online_at || null);
+          }
+        } else if (globalChatType === 'agency-request') {
+          // Agency viewing - counterparty is client, get from profiles
+          const { data } = await supabase
+            .from('profiles')
+            .select('last_online_at')
+            .eq('id', requestData.user_id)
+            .maybeSingle();
+          setCounterpartyLastSeen(data?.last_online_at || null);
+        }
+      } catch (error) {
+        console.error('Error fetching last seen:', error);
+      }
+    };
+    
+    fetchLastSeen();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchLastSeen, 60000);
+    return () => clearInterval(interval);
+  }, [globalChatRequest?.id, globalChatType]);
 
   // Handle admin joining chat
   const handleAdminJoinChat = async () => {
@@ -1868,7 +1931,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
                 <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
                   <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {counterpartyLabel} {isCounterpartyOnline ? 'Online' : 'Offline'}
+                  {counterpartyLabel} {isCounterpartyOnline ? 'Online' : formatLastSeen(counterpartyLastSeen)}
                 </span>
               </div>
             </div>
