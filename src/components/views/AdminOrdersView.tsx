@@ -512,6 +512,8 @@ export function AdminOrdersView() {
         return order.status === 'paid' && order.delivery_status === 'pending' && !disputedOrderIds.has(order.id);
       case 'disputes':
         return disputedOrderIds.has(order.id);
+      case 'cancelled':
+        return order.status === 'cancelled';
       case 'completed':
         return order.status === 'completed';
       case 'all':
@@ -523,6 +525,7 @@ export function AdminOrdersView() {
   // Calculate counts for all tabs (exclude disputed orders from pending)
   const pendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !disputedOrderIds.has(o.id)).length;
   const disputesCount = orders.filter(o => disputedOrderIds.has(o.id)).length;
+  const cancelledCount = orders.filter(o => o.status === 'cancelled').length;
   const completedCount = orders.filter(o => o.status === 'completed').length;
   const allOrdersCount = orders.length;
   
@@ -559,6 +562,9 @@ export function AdminOrdersView() {
                 {unreadDisputesCount}
               </span>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="cancelled">
+            Cancelled ({cancelledCount})
           </TabsTrigger>
           <TabsTrigger value="completed">
             Completed ({completedCount})
