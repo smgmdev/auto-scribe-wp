@@ -1034,7 +1034,9 @@ export function ChatListPanel() {
                 detail: {
                   id: requestId,
                   lastMessage: newMsg.message,
-                  lastMessageTime: newMsg.created_at
+                  lastMessageTime: newMsg.created_at,
+                  senderId: newMsg.sender_id,
+                  senderType: newMsg.sender_type
                 }
               }));
             }
@@ -1093,7 +1095,9 @@ export function ChatListPanel() {
                 id: requestId,
                 read: isFromAgency ? false : undefined,
                 lastMessage: newMsg.message,
-                lastMessageTime: newMsg.created_at
+                lastMessageTime: newMsg.created_at,
+                senderId: newMsg.sender_id,
+                senderType: newMsg.sender_type
               }
             }));
           }

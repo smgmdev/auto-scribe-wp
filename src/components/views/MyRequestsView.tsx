@@ -198,7 +198,7 @@ export function MyRequestsView() {
 
     // Listen for updates from ChatListPanel (messaging widget)
     const handleMyEngagementUpdated = (event: CustomEvent) => {
-      const { id, read, lastMessage, lastMessageTime } = event.detail || {};
+      const { id, read, lastMessage, lastMessageTime, senderId, senderType } = event.detail || {};
       if (!id) return;
       
       // Update read status if provided
@@ -232,8 +232,8 @@ export function MyRequestsView() {
             [id]: [...existingMsgs, {
               id: `temp-${Date.now()}`,
               request_id: id,
-              sender_type: 'agency' as const,
-              sender_id: 'unknown',
+              sender_type: (senderType || 'agency') as 'client' | 'agency' | 'admin',
+              sender_id: senderId || 'unknown',
               message: lastMessage,
               created_at: lastMessageTime
             }]
