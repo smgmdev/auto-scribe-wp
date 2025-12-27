@@ -2102,7 +2102,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 : 'text-muted-foreground'
                             }`}
                           >
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-4 w-4 pointer-events-none" />
                           </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
