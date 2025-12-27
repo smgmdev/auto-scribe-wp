@@ -416,11 +416,11 @@ export function AgencyRequestsView() {
         )}
       </div>
 
-      <Tabs defaultValue="requests" className="w-full">
+      <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full max-w-lg grid-cols-3">
-          <TabsTrigger value="requests" className="gap-2">
+          <TabsTrigger value="active" className="gap-2">
             <MessageSquare className="h-4 w-4" />
-            Requests ({activeRequests.length})
+            Active ({activeRequests.length})
           </TabsTrigger>
           <TabsTrigger value="cancelled" className="gap-2">
             <XCircle className="h-4 w-4" />
@@ -432,7 +432,7 @@ export function AgencyRequestsView() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="requests" className="mt-6 space-y-4">
+        <TabsContent value="active" className="mt-6 space-y-4">
 
           {activeRequests.length === 0 ? (
             <Card className="border-border/50">
