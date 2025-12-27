@@ -228,7 +228,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   // Format last seen time
   const formatLastSeen = (lastSeenDate: string | null): string => {
-    if (!lastSeenDate) return 'Last seen: Unknown';
+    if (!lastSeenDate) return 'Offline';
     const date = new Date(lastSeenDate);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
