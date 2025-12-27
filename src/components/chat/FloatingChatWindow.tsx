@@ -1485,7 +1485,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
 
   const getMessageWithoutAttachment = (message: string): string => {
-    return message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
+    // Remove attachment tags
+    let cleanMessage = message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
+    // Remove quote prefixes like "> [uuid]:message\n\n" at the start
+    cleanMessage = cleanMessage.replace(/^> \[[^\]]+\]:.*?\n\n/s, '').trim();
+    return cleanMessage;
   };
 
   const handleMinimize = () => {
