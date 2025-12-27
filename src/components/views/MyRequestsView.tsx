@@ -444,7 +444,7 @@ export function MyRequestsView() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {sortedActiveRequests.map((request) => {
                   const unreadCount = unreadMessageCounts[request.id] || 0;
                   const requestMessages = messages[request.id] || [];
@@ -531,7 +531,7 @@ export function MyRequestsView() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {sortedCancelledRequests.map((request) => {
                   const requestMessages = messages[request.id] || [];
                   
