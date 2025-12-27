@@ -79,15 +79,16 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
   return (
     <div className="fixed bottom-0 right-[312px] z-50 flex flex-row-reverse gap-2">
       {displayedChats.map((chat) => {
-        // Only use minimizedChat.unreadCount for minimized chats
-        // This tracks NEW messages received while the chat is minimized
-        // unreadMessageCounts is for chats that haven't been opened yet (in the chat list)
-        const unreadCount = chat.unreadCount ?? 0;
-        const hasUnread = unreadCount > 0;
+        // Combine both sources for unread count:
+        // - chat.unreadCount: NEW messages received while the chat is minimized
+        // - unreadMessageCounts[chat.id]: messages not yet read (from chat list)
+        const minimizedUnread = chat.unreadCount ?? 0;
+        const listUnread = unreadMessageCounts[chat.id] ?? 0;
+        const hasUnread = minimizedUnread > 0 || listUnread > 0;
         
         return (
           <div
-            key={`${chat.id}-${unreadCount}`}
+            key={`${chat.id}-${minimizedUnread}-${listUnread}`}
             className={`relative flex items-center gap-2 rounded-t-lg border border-border/50 shadow-lg p-2 pr-3 hover:shadow-xl transition-all cursor-pointer group ${
               hasUnread 
                 ? 'bg-[#4771d9] text-white' 
