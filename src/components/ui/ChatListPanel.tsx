@@ -736,7 +736,14 @@ export function ChatListPanel() {
     });
     
     // Only increment unread for minimized chats when message is from counterparty
-    const shouldNotify = (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient);
+    // Check both local lists AND minimized chat type to handle cases where the chat
+    // is minimized but not in the current serviceRequests/myEngagements lists
+    const minimizedChat = currentMinimizedChats.find(c => c.id === request_id);
+    const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
+    const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
+    
+    const shouldNotify = (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient) ||
+                         (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient);
     
     if (isMinimized && shouldNotify) {
       console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id);
