@@ -2394,7 +2394,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
         <DialogContent className="max-w-md z-[250]" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
-            {orderDetails && orderDetails.delivery_status === 'pending' && (
+            {orderDetails && orderDetails.delivery_status === 'pending' && !isAdmin && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
