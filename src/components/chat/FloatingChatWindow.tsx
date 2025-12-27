@@ -1780,12 +1780,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             <div className="flex items-center gap-1">
               <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger asChild disabled={isAdmin}>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
+                    className={`h-7 px-2 gap-1 text-xs ${isAdmin ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black'}`}
                     onMouseDown={(e) => e.stopPropagation()}
+                    disabled={isAdmin}
                   >
                     Action
                     <ChevronDown className="h-3 w-3" />
@@ -2394,13 +2395,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
         <DialogContent className="max-w-md z-[250]" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
-            {orderDetails && orderDetails.delivery_status === 'pending' && !isAdmin && (
+            {orderDetails && orderDetails.delivery_status === 'pending' && (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger asChild disabled={isAdmin}>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
+                    className={`h-7 px-2 gap-1 text-xs ${isAdmin ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black'}`}
+                    disabled={isAdmin}
                   >
                     Action
                     <ChevronDown className="h-3 w-3" />
