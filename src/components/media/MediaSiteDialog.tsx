@@ -190,7 +190,6 @@ export function MediaSiteDialog({
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
     setLogoLoading(true);
-    setAgencyDetailsOpen(true);
     
     try {
       const { data, error } = await supabase
@@ -223,6 +222,7 @@ export function MediaSiteDialog({
         ...data,
         logo_url: logoUrl
       });
+      setAgencyDetailsOpen(true);
     } catch (error) {
       console.error('Error fetching agency details:', error);
       setAgencyDetails(null);

@@ -252,7 +252,6 @@ const Landing = () => {
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
     setLogoLoading(true);
-    setAgencyDetailsOpen(true);
     
     try {
       const { data, error } = await supabase
@@ -285,6 +284,7 @@ const Landing = () => {
         ...data,
         logo_url: logoUrl
       });
+      setAgencyDetailsOpen(true);
     } catch (error) {
       console.error('Error fetching agency details:', error);
       setAgencyDetails(null);

@@ -1464,7 +1464,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
-    setAgencyDetailsOpen(true);
     
     try {
       // Fetch from agency_payouts for basic info
@@ -1497,6 +1496,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           ...payoutData,
           logo_url: logoSignedUrl
         });
+        setAgencyDetailsOpen(true);
       } else {
         setAgencyDetails(null);
       }
