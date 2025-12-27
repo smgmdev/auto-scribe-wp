@@ -1467,11 +1467,15 @@ export function AdminFloatingChat({
                 <div>
                   <p className="text-sm text-muted-foreground">Agency</p>
                   <p 
-                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
+                    className={`text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1 ${loadingAgency ? 'pointer-events-none opacity-70' : ''}`}
                     onClick={() => fetchAgencyDetails(request.media_sites.agency!)}
                   >
                     {request.media_sites.agency}
-                    <Info className="h-3 w-3" />
+                    {loadingAgency ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Info className="h-3 w-3" />
+                    )}
                   </p>
                 </div>
               )}
