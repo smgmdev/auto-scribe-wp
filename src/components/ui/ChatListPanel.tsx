@@ -208,10 +208,8 @@ export function ChatListPanel() {
         // If client_read is false and there are agency messages, mark as unread
         const isUnread = !(item as any).client_read && agencyMessageCount > 0;
         
-        // Set the actual count of unread messages from counterparty
-        if (isUnread) {
-          setUnreadMessageCount(item.id, agencyMessageCount);
-        }
+        // Don't set unreadMessageCounts here - that's for tracking NEW messages
+        // while a chat is open/minimized. The initial unread state is in item.read
         
         return {
           ...item,
@@ -294,10 +292,8 @@ export function ChatListPanel() {
         );
         const clientMessageCount = clientMessages.length;
         
-        // Set the actual count of unread messages from counterparty
-        if (isUnread && clientMessageCount > 0) {
-          setUnreadMessageCount(item.id, clientMessageCount);
-        }
+        // Don't set unreadMessageCounts here - that's for tracking NEW messages
+        // while a chat is open/minimized. The initial unread state is in item.read
         
         return {
           ...item,
