@@ -91,6 +91,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [hasOpenDispute, setHasOpenDispute] = useState(false);
+  const [actionDropdownOpen, setActionDropdownOpen] = useState(false);
+  const [orderDetailsActionDropdownOpen, setOrderDetailsActionDropdownOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
   const [adminJoined, setAdminJoined] = useState(false);
@@ -1779,7 +1781,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <DropdownMenu modal={false}>
+              <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
@@ -1796,7 +1798,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <DropdownMenuItem 
                       className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       disabled={hasOrder || isCancelled || isAdmin}
-                      onClick={() => setSendOrderDialogOpen(true)}
+                      onSelect={() => {
+                        setActionDropdownOpen(false);
+                        setSendOrderDialogOpen(true);
+                      }}
                     >
                       {hasExistingOrderRequest ? 'Resend Order' : 'Send Order'}
                     </DropdownMenuItem>
@@ -1814,7 +1819,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <DropdownMenuItem 
                         className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                         disabled={isCancelled || !isDeliveryOverdue || isAdmin}
-                        onClick={() => setDisputeDialogOpen(true)}
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
+                          setDisputeDialogOpen(true);
+                        }}
                       >
                         Open Dispute
                       </DropdownMenuItem>
@@ -1822,7 +1830,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <DropdownMenuItem 
                         className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                         disabled={isCancelled || isAdmin}
-                        onClick={() => setOrderWithCreditsOpen(true)}
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
+                          setOrderWithCreditsOpen(true);
+                        }}
                       >
                         Order Now
                       </DropdownMenuItem>
@@ -1839,7 +1850,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     ) : hasPendingCancelRequest ? (
                       <DropdownMenuItem 
                         className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        onClick={() => {
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
                           // Find the pending request and accept it
                           const pendingMsg = messages.find(msg => {
                             if (msg.sender_type === senderType) return false;
@@ -1858,7 +1870,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <DropdownMenuItem 
                         className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                         disabled={isAdmin}
-                        onClick={() => setCancelOrderRequestDialogOpen(true)}
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
+                          setCancelOrderRequestDialogOpen(true);
+                        }}
                       >
                         Request Cancellation
                       </DropdownMenuItem>
@@ -1867,7 +1882,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <DropdownMenuItem 
                       className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       disabled={hasOrder || isCancelled || isAdmin}
-                      onClick={() => setCancelDialogOpen(true)}
+                      onSelect={() => {
+                        setActionDropdownOpen(false);
+                        setCancelDialogOpen(true);
+                      }}
                     >
                       Cancel Engagement
                     </DropdownMenuItem>
@@ -2396,7 +2414,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         <DialogContent className="max-w-md z-[250]" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
             {orderDetails && orderDetails.delivery_status === 'pending' && (
-              <DropdownMenu>
+              <DropdownMenu open={orderDetailsActionDropdownOpen} onOpenChange={setOrderDetailsActionDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
@@ -2419,7 +2437,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <DropdownMenuItem 
                       className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       disabled={!isDeliveryOverdue || isAdmin}
-                      onClick={() => setDisputeDialogOpen(true)}
+                      onSelect={() => {
+                        setOrderDetailsActionDropdownOpen(false);
+                        setDisputeDialogOpen(true);
+                      }}
                     >
                       Open Dispute
                     </DropdownMenuItem>
@@ -2434,7 +2455,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   ) : hasPendingCancelRequest ? (
                     <DropdownMenuItem 
                       className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      onClick={() => {
+                      onSelect={() => {
+                        setOrderDetailsActionDropdownOpen(false);
                         setOrderDetailsOpen(false);
                         const pendingMsg = messages.find(msg => {
                           if (msg.sender_type === senderType) return false;
@@ -2453,7 +2475,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <DropdownMenuItem 
                       className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       disabled={isAdmin}
-                      onClick={() => {
+                      onSelect={() => {
+                        setOrderDetailsActionDropdownOpen(false);
                         setOrderDetailsOpen(false);
                         setCancelOrderRequestDialogOpen(true);
                       }}
