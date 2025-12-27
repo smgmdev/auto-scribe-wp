@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image, MessageSquare } from 'lucide-react';
+import { ExternalLink, ArrowRight, ArrowLeft, Loader2, Send, Upload, X, FileText, Image, MessageSquare, Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -54,6 +54,18 @@ export function MediaSiteDialog({
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Agency details popup state
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetails, setAgencyDetails] = useState<{
+    agency_name: string;
+    email: string | null;
+    onboarding_complete: boolean;
+    created_at: string;
+    logo_url: string | null;
+  } | null>(null);
+  const [loadingAgency, setLoadingAgency] = useState(false);
+  const [logoLoading, setLogoLoading] = useState(true);
 
   const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total
   const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'];
@@ -171,6 +183,51 @@ export function MediaSiteDialog({
       return new URL(url).hostname.replace('www.', '');
     } catch {
       return url;
+    }
+  };
+
+  // Fetch agency details
+  const fetchAgencyDetails = async (agencyName: string) => {
+    setLoadingAgency(true);
+    setLogoLoading(true);
+    setAgencyDetailsOpen(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('agency_payouts')
+        .select('agency_name, email, onboarding_complete, created_at')
+        .eq('agency_name', agencyName)
+        .single();
+      
+      if (error) throw error;
+      
+      // Try to get logo from agency_applications
+      let logoUrl: string | null = null;
+      const { data: appData } = await supabase
+        .from('agency_applications')
+        .select('logo_url')
+        .eq('agency_name', agencyName)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      if (appData?.logo_url) {
+        const { data: signed } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(appData.logo_url, 3600);
+        if (signed?.signedUrl) {
+          logoUrl = signed.signedUrl;
+        }
+      }
+      
+      setAgencyDetails({
+        ...data,
+        logo_url: logoUrl
+      });
+    } catch (error) {
+      console.error('Error fetching agency details:', error);
+      setAgencyDetails(null);
+    } finally {
+      setLoadingAgency(false);
     }
   };
 
@@ -345,6 +402,7 @@ export function MediaSiteDialog({
   const isAgency = mediaSite.category === 'Agencies/People';
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg z-[200] overflow-hidden">
         <div className="relative">
@@ -411,7 +469,12 @@ export function MediaSiteDialog({
               {mediaSite.agency && (
                 <div>
                   <p className="text-sm text-muted-foreground">Agency</p>
-                  <p className="text-foreground">{mediaSite.agency}</p>
+                  <p 
+                    className="text-foreground hover:text-accent cursor-pointer hover:underline transition-colors"
+                    onClick={() => fetchAgencyDetails(mediaSite.agency!)}
+                  >
+                    {mediaSite.agency}
+                  </p>
                 </div>
               )}
               
@@ -621,5 +684,80 @@ export function MediaSiteDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Agency Details Dialog */}
+    <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
+      <DialogContent className="sm:max-w-md z-[250]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            {agencyDetails?.logo_url ? (
+              <div className="relative h-12 w-12">
+                {logoLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                <img 
+                  src={agencyDetails.logo_url} 
+                  alt={agencyDetails.agency_name}
+                  className={`h-12 w-12 rounded-xl bg-muted object-contain ${logoLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
+                  onLoad={() => setLogoLoading(false)}
+                  onError={() => setLogoLoading(false)}
+                />
+              </div>
+            ) : (
+              <Building2 className="h-12 w-12 text-muted-foreground" />
+            )}
+            <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        {loadingAgency ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : agencyDetails ? (
+          <div className="space-y-4 mt-4">
+            {agencyDetails.email && (
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="text-foreground">{agencyDetails.email}</p>
+              </div>
+            )}
+            
+            <div>
+              <p className="text-sm text-muted-foreground">Member Since</p>
+              <p className="text-foreground">
+                {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-muted-foreground">Status</p>
+              <Badge variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}>
+                {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
+              </Badge>
+            </div>
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-8">Agency not found</p>
+        )}
+
+        <div className="flex justify-end gap-3 mt-6">
+          <Button 
+            variant="outline"
+            onClick={() => setAgencyDetailsOpen(false)}
+            className="hover:bg-black hover:text-white transition-colors"
+          >
+            Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
