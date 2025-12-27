@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Building2, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ interface WPSite {
   url: string;
   favicon: string | null;
   credits_required: number;
+  agency: string | null;
 }
 
 interface MediaSite {
@@ -80,8 +81,17 @@ const Landing = () => {
   
   // Media site dialog state (unified with brief submission)
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
-  // WebView state removed - now using direct _blank links
-
+  
+  // Agency details popup state
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetails, setAgencyDetails] = useState<{
+    agency_name: string;
+    email: string | null;
+    onboarding_complete: boolean;
+    created_at: string;
+    logo_url: string | null;
+  } | null>(null);
+  const [loadingAgency, setLoadingAgency] = useState(false);
 
   const handlePublishNewArticle = (siteId: string) => {
     setPreselectedSiteId(siteId);
@@ -236,6 +246,50 @@ const Landing = () => {
 
     fetchSites();
   }, []);
+
+  // Fetch agency details
+  const fetchAgencyDetails = async (agencyName: string) => {
+    setLoadingAgency(true);
+    setAgencyDetailsOpen(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('agency_payouts')
+        .select('agency_name, email, onboarding_complete, created_at')
+        .eq('agency_name', agencyName)
+        .single();
+      
+      if (error) throw error;
+      
+      // Try to get logo from agency_applications
+      let logoUrl: string | null = null;
+      const { data: appData } = await supabase
+        .from('agency_applications')
+        .select('logo_url')
+        .eq('agency_name', agencyName)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      if (appData?.logo_url) {
+        const { data: signed } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(appData.logo_url, 3600);
+        if (signed?.signedUrl) {
+          logoUrl = signed.signedUrl;
+        }
+      }
+      
+      setAgencyDetails({
+        ...data,
+        logo_url: logoUrl
+      });
+    } catch (error) {
+      console.error('Error fetching agency details:', error);
+      setAgencyDetails(null);
+    } finally {
+      setLoadingAgency(false);
+    }
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -841,6 +895,17 @@ const Landing = () => {
                 <p className="text-sm text-muted-foreground">Price</p>
                 <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
               </div>
+              {(selectedSite as WPSite).agency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Agency</p>
+                  <p 
+                    className="text-foreground hover:text-accent cursor-pointer hover:underline transition-colors"
+                    onClick={() => fetchAgencyDetails((selectedSite as WPSite).agency!)}
+                  >
+                    {(selectedSite as WPSite).agency}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -875,6 +940,71 @@ const Landing = () => {
         agencyLogos={agencyLogos}
         onSuccess={() => setSelectedMediaSite(null)}
       />
+
+      {/* Agency Details Dialog */}
+      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
+        <DialogContent className="sm:max-w-md z-[250]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {agencyDetails?.logo_url ? (
+                <img 
+                  src={agencyDetails.logo_url} 
+                  alt={agencyDetails.agency_name}
+                  className="h-12 w-12 rounded-xl bg-muted object-contain"
+                />
+              ) : (
+                <Building2 className="h-12 w-12 text-muted-foreground" />
+              )}
+              <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingAgency ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : agencyDetails ? (
+            <div className="space-y-4 mt-4">
+              {agencyDetails.email && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-foreground">{agencyDetails.email}</p>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Member Since</p>
+                <p className="text-foreground">
+                  {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Status</p>
+                <Badge variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}>
+                  {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
+                </Badge>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Agency not found</p>
+          )}
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="outline"
+              onClick={() => setAgencyDetailsOpen(false)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="border-t border-border bg-card mt-12">
