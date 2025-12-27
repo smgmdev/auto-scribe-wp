@@ -1608,6 +1608,7 @@ export function ChatListPanel() {
 
     return items.map((item) => {
       const hasUnread = !item.read;
+      const unreadCount = unreadMessageCounts[item.id] || 0;
       
       return (
         <div
@@ -1617,7 +1618,7 @@ export function ChatListPanel() {
           }`}
           onClick={() => handleOpenChat(item, type)}
         >
-          {/* Avatar/Favicon with notification dot */}
+          {/* Avatar/Favicon with notification badge */}
           <div className="shrink-0 relative">
             {item.media_site?.favicon ? (
               <img 
@@ -1630,9 +1631,11 @@ export function ChatListPanel() {
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
-            {/* Notification dot for unread with pulse animation */}
-            {hasUnread && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card animate-pulse" />
+            {/* Unread count badge */}
+            {(hasUnread || unreadCount > 0) && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-blue-500 text-white text-[10px] font-bold rounded-full border-2 border-card">
+                {unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount) : '•'}
+              </span>
             )}
           </div>
 
@@ -1642,9 +1645,16 @@ export function ChatListPanel() {
               <span className={`font-medium text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
                 {item.media_site?.name || item.title}
               </span>
-              <span className="text-xs text-muted-foreground shrink-0">
-                {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
-              </span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {unreadCount > 0 && (
+                  <Badge className="h-4 min-w-[16px] text-[10px] bg-blue-500 text-white px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Badge>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
+                </span>
+              </div>
             </div>
             <MessagePreview 
               message={item.lastMessage} 
