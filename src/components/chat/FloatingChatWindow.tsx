@@ -1087,6 +1087,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       setMessages(prev => [...prev, newMsg]);
       
+      // Dispatch event to sync with ChatListPanel (messaging widget)
+      if (globalChatType === 'my-request') {
+        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+          detail: {
+            id: globalChatRequest.id,
+            lastMessage: fullMessage,
+            lastMessageTime: newMsg.created_at,
+            senderId: senderId,
+            senderType: senderType
+          }
+        }));
+      } else if (globalChatType === 'agency-request') {
+        window.dispatchEvent(new CustomEvent('service-request-updated', {
+          detail: {
+            id: globalChatRequest.id,
+            lastMessage: fullMessage,
+            lastMessageTime: newMsg.created_at,
+            senderId: senderId,
+            senderType: senderType
+          }
+        }));
+      }
+      
       // Notify recipient
       const { data: requestData } = await supabase
         .from('service_requests')
@@ -1308,6 +1331,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       };
 
       setMessages(prev => [...prev, newMsg]);
+      
+      // Dispatch event to sync with ChatListPanel (messaging widget)
+      if (globalChatType === 'my-request') {
+        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+          detail: {
+            id: globalChatRequest.id,
+            lastMessage: fullMessage,
+            lastMessageTime: newMsg.created_at,
+            senderId: senderId,
+            senderType: senderType
+          }
+        }));
+      } else if (globalChatType === 'agency-request') {
+        window.dispatchEvent(new CustomEvent('service-request-updated', {
+          detail: {
+            id: globalChatRequest.id,
+            lastMessage: fullMessage,
+            lastMessageTime: newMsg.created_at,
+            senderId: senderId,
+            senderType: senderType
+          }
+        }));
+      }
 
       // Notify recipient
       const { data: requestData } = await supabase
