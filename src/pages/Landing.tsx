@@ -838,8 +838,8 @@ const Landing = () => {
                 <p className="text-foreground">Article</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Credits Required</p>
-              <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
               </div>
             </div>
           )}
