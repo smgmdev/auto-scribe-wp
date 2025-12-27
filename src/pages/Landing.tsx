@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Building2, Loader2 } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Building2, Loader2, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -905,7 +905,7 @@ const Landing = () => {
                     onClick={() => fetchAgencyDetails((selectedSite as WPSite).agency!)}
                   >
                     {(selectedSite as WPSite).agency}
-                    <ExternalLink className="h-3 w-3" />
+                    <Info className="h-3 w-3" />
                   </p>
                 </div>
               )}
