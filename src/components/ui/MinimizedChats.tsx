@@ -27,6 +27,34 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
     });
   }, [minimizedChats, unreadMessageCounts]);
 
+  // Listen for engagement updates to sync unread counts
+  useEffect(() => {
+    const handleEngagementUpdated = (event: CustomEvent) => {
+      const { id, read } = event.detail || {};
+      if (id && read === true) {
+        // Clear unread for this minimized chat
+        clearMinimizedChatUnread(id);
+        clearUnreadMessageCount(id);
+      }
+    };
+
+    const handleServiceRequestUpdated = (event: CustomEvent) => {
+      const { id, read } = event.detail || {};
+      if (id && read === true) {
+        // Clear unread for this minimized chat
+        clearMinimizedChatUnread(id);
+        clearUnreadMessageCount(id);
+      }
+    };
+
+    window.addEventListener('my-engagement-updated', handleEngagementUpdated as EventListener);
+    window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+    return () => {
+      window.removeEventListener('my-engagement-updated', handleEngagementUpdated as EventListener);
+      window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+    };
+  }, [clearMinimizedChatUnread, clearUnreadMessageCount]);
+
   if (minimizedChats.length === 0) return null;
 
   const handleOpenChat = (chat: MinimizedChat) => {

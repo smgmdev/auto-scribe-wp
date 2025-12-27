@@ -566,18 +566,52 @@ export function ChatListPanel() {
           serviceRequestsRef.current = updated;
           return updated;
         });
+        
+        // Clear unread count if marked as read
+        if (read === true) {
+          clearUnreadMessageCount(id);
+        }
+      }
+    };
+
+    // Listen for my engagement updates from MyRequestsView
+    const handleMyEngagementUpdated = (event: CustomEvent) => {
+      const { id, read, lastMessage, lastMessageTime } = event.detail || {};
+      if (id) {
+        setMyEngagements(prev => {
+          const updated = prev.map(e => {
+            if (e.id === id) {
+              return { 
+                ...e, 
+                read: read !== undefined ? read : e.read,
+                lastMessage: lastMessage || e.lastMessage,
+                lastMessageTime: lastMessageTime || e.lastMessageTime
+              };
+            }
+            return e;
+          });
+          myEngagementsRef.current = updated;
+          return updated;
+        });
+        
+        // Clear unread count if marked as read
+        if (read === true) {
+          clearUnreadMessageCount(id);
+        }
       }
     };
 
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
     window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
     window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+    window.addEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
       window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
       window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+      window.removeEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
     };
-  }, []);
+  }, [clearUnreadMessageCount]);
 
   useEffect(() => {
     // Fetch for agencies or admins
@@ -1296,6 +1330,11 @@ export function ChatListPanel() {
         setMyEngagements(prev => prev.map(e => 
           e.id === item.id ? { ...e, read: true } : e
         ));
+        
+        // Dispatch event to sync with MyRequestsView
+        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+          detail: { id: item.id, read: true }
+        }));
       } else {
         supabase
           .from('service_requests')
