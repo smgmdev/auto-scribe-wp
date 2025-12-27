@@ -2098,10 +2098,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={`absolute top-0 right-0 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-bl-lg ${
+                            className={`absolute top-0 right-0 h-7 w-7 rounded-bl-lg ${
                               isOwnMessage 
-                                ? 'text-primary-foreground hover:bg-primary-foreground/20' 
-                                : 'text-foreground hover:bg-background/50'
+                                ? 'text-primary-foreground/70 hover:bg-transparent' 
+                                : 'text-muted-foreground hover:bg-transparent'
                             }`}
                           >
                             <ChevronDown className="h-4 w-4" />
