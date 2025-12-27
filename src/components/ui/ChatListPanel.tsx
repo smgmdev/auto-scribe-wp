@@ -1018,7 +1018,14 @@ export function ChatListPanel() {
           // Check if this is a disputed chat (admin only)
           const isDisputedChat = isAdmin && disputesRef.current.some(d => d.service_request_id === requestId);
           
-          if (!isMyEngagement && !isServiceRequest && !isDisputedChat) {
+          // Check if chat is minimized - need to do this BEFORE the early return
+          // to handle cases where the chat is minimized but not in the current lists
+          const minimizedChat = minimizedChatsRef.current.find(c => c.id === requestId);
+          const isMinimized = !!minimizedChat;
+          const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
+          const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
+          
+          if (!isMyEngagement && !isServiceRequest && !isDisputedChat && !isMinimized) {
             console.log('[ChatListPanel] Request does not belong to this user, ignoring');
             return;
           }
@@ -1146,15 +1153,8 @@ export function ChatListPanel() {
             });
           }
           
-          // Check if chat is open or minimized - use openChatsRef for multi-chat support
-          const minimizedChat = minimizedChatsRef.current.find(c => c.id === requestId);
-          const isMinimized = !!minimizedChat;
+          // Check if chat dialog is open
           const isDialogOpen = openChatsRef.current.some(c => c.request.id === requestId);
-          
-          // Also check minimized chat type to handle cases where the chat
-          // is minimized but not in the current serviceRequests/myEngagements lists
-          const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
-          const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
           
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, isServiceRequest, isMinimizedAgencyRequest, isMinimizedMyRequest, senderType });
           
