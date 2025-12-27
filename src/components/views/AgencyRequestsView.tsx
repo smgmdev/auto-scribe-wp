@@ -416,7 +416,7 @@ export function AgencyRequestsView() {
         )}
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="active" className="w-full -mt-4">
         <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="active" className="gap-2">
             <MessageSquare className="h-4 w-4" />
