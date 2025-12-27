@@ -373,7 +373,7 @@ export function OrdersView() {
               placeholder="Search orders by site name or agency..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-full max-w-md"
+              className="pl-9 w-full"
             />
           </div>
 
