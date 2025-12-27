@@ -488,9 +488,42 @@ export function ChatListPanel() {
       }
     };
 
+    // Listen for new engagement added (from BriefSubmissionDialog/MediaSiteDialog)
+    const handleEngagementAdded = (event: CustomEvent) => {
+      const newEngagement = event.detail;
+      if (newEngagement?.id) {
+        console.log('[ChatListPanel] New engagement added via event:', newEngagement.id);
+        // Add to local state immediately for instant UI update
+        const chatItem: ChatItem = {
+          id: newEngagement.id,
+          title: newEngagement.title || '',
+          description: newEngagement.description || '',
+          status: 'pending_review',
+          read: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          lastMessage: undefined,
+          lastMessageTime: undefined,
+          unreadCount: 0,
+          favicon: newEngagement.favicon,
+          media_site: newEngagement.media_site || null,
+          order: null,
+        };
+        setMyEngagements(prev => {
+          // Avoid duplicates
+          if (prev.some(e => e.id === newEngagement.id)) return prev;
+          const updated = [chatItem, ...prev];
+          myEngagementsRef.current = updated;
+          return updated;
+        });
+      }
+    };
+
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+    window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
+      window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
     };
   }, []);
 
@@ -771,6 +804,29 @@ export function ChatListPanel() {
           if (!isAdmin) return;
           // Refetch disputes when a new one is created
           fetchDisputes();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        async (payload) => {
+          const newRequest = payload.new as any;
+          
+          // For user's own new engagements
+          if (newRequest.user_id === user?.id) {
+            console.log('[ChatListPanel] New engagement created by user, refreshing list');
+            fetchMyEngagements();
+          }
+          
+          // For agency's new service requests
+          if (agencyPayoutIdRef.current && newRequest.agency_payout_id === agencyPayoutIdRef.current) {
+            console.log('[ChatListPanel] New service request for agency, refreshing list');
+            fetchServiceRequests();
+          }
         }
       )
       .on(

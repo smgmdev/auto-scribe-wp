@@ -229,6 +229,17 @@ export function BriefSubmissionDialog({
         unreadCount: 0
       });
 
+      // Dispatch event for real-time sync across all views (ChatListPanel, MyRequestsView)
+      window.dispatchEvent(new CustomEvent('engagement-added', {
+        detail: {
+          id: request.id,
+          title: request.title,
+          description: request.description,
+          favicon: mediaSite.favicon,
+          media_site: mediaSite
+        }
+      }));
+
       toast({
         title: 'Request submitted!',
         description: 'Your brief has been sent to the agency for review.',
