@@ -901,10 +901,11 @@ const Landing = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Agency</p>
                   <p 
-                    className="text-foreground hover:text-accent cursor-pointer hover:underline transition-colors"
+                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
                     onClick={() => fetchAgencyDetails((selectedSite as WPSite).agency!)}
                   >
                     {(selectedSite as WPSite).agency}
+                    <ExternalLink className="h-3 w-3" />
                   </p>
                 </div>
               )}
