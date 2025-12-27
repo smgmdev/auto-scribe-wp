@@ -65,6 +65,7 @@ export function AdminOrdersView() {
   const [activeTab, setActiveTab] = useState('pending');
   const [historySubTab, setHistorySubTab] = useState<'all' | 'cancelled'>('all');
   const [disputes, setDisputes] = useState<{ id: string; order_id: string; service_request_id: string; read: boolean }[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -507,23 +508,42 @@ export function AdminOrdersView() {
   };
 
   const filteredOrders = orders.filter(order => {
+    // First apply tab filter
+    let matchesTab = false;
     switch (activeTab) {
       case 'pending':
-        // Exclude disputed orders from pending delivery
-        return order.status === 'paid' && order.delivery_status === 'pending' && !disputedOrderIds.has(order.id);
+        matchesTab = order.status === 'paid' && order.delivery_status === 'pending' && !disputedOrderIds.has(order.id);
+        break;
       case 'disputes':
-        return disputedOrderIds.has(order.id);
+        matchesTab = disputedOrderIds.has(order.id);
+        break;
       case 'completed':
-        return order.status === 'completed';
+        matchesTab = order.status === 'completed';
+        break;
       case 'history':
-        // Sub-filter based on historySubTab
         if (historySubTab === 'cancelled') {
-          return order.status === 'cancelled';
+          matchesTab = order.status === 'cancelled';
+        } else {
+          matchesTab = true;
         }
-        return true; // 'all' shows everything
+        break;
       default:
-        return true;
+        matchesTab = true;
     }
+    
+    if (!matchesTab) return false;
+    
+    // Then apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      const siteName = order.media_sites?.name?.toLowerCase() || '';
+      const orderNumber = order.order_number?.toLowerCase() || '';
+      const agency = order.media_sites?.agency?.toLowerCase() || '';
+      
+      return siteName.includes(query) || orderNumber.includes(query) || agency.includes(query);
+    }
+    
+    return true;
   });
 
   // Calculate counts for all tabs (exclude disputed orders from pending)
@@ -544,9 +564,20 @@ export function AdminOrdersView() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
-        <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
+          <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by site, order number..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
