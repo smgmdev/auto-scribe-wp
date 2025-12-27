@@ -218,11 +218,23 @@ export function ComposeView() {
     }
   }, [editingArticle]);
 
+  // Track previous site to detect site changes
+  const previousSiteIdRef = useRef<string | null>(null);
+
   // Fetch categories and tags when site is selected
   useEffect(() => {
+    const siteChanged = previousSiteIdRef.current !== null && previousSiteIdRef.current !== currentSite?.id;
     
     if (currentSite) {
       setFetchError(null);
+      
+      // Reset selected categories and tags when site changes (but not on initial load)
+      if (siteChanged) {
+        setSelectedCategories([]);
+        setSelectedTagIds([]);
+        setFocusKeyword('');
+        setMetaDescription('');
+      }
 
       // Fetch categories
       setIsLoadingCategories(true);
@@ -248,7 +260,7 @@ export function ComposeView() {
       });
 
       // Fetch SEO data if editing an existing WP post
-      if (editingArticle?.wpPostId) {
+      if (editingArticle?.wpPostId && !siteChanged) {
         setIsLoadingSEO(true);
         fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
           setFocusKeyword(seoData.focusKeyword);
@@ -269,6 +281,9 @@ export function ComposeView() {
       setMetaDescription('');
       setFetchError(null);
     }
+    
+    // Update the ref after processing
+    previousSiteIdRef.current = currentSite?.id || null;
   }, [currentSite?.id, editingArticle]);
 
   // Don't clear editingArticle on unmount - it causes issues with remounting
