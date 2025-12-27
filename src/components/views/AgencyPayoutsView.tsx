@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
@@ -127,50 +128,74 @@ export function AgencyPayoutsView() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-green-500/30 bg-green-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
-                <TrendingUp className="h-5 w-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Earnings</p>
-                <p className="text-2xl font-semibold text-foreground">
-                  ${(summary.totalEarnings / 100).toFixed(2)}
-                </p>
-              </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Total Earnings
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Total amount earned from all completed orders</p>
+              </TooltipContent>
+            </Tooltip>
+            <TrendingUp className="h-4 w-4 text-muted-foreground/60" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">
+              ${(summary.totalEarnings / 100).toFixed(2)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-yellow-500/30 bg-yellow-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20">
-                <Clock className="h-5 w-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Pending Payouts</p>
-                <p className="text-2xl font-semibold text-foreground">
-                  ${(summary.pendingPayouts / 100).toFixed(2)}
-                </p>
-              </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Pending Payouts
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Payouts awaiting processing or transfer</p>
+              </TooltipContent>
+            </Tooltip>
+            <Clock className="h-4 w-4 text-muted-foreground/60" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">
+              ${(summary.pendingPayouts / 100).toFixed(2)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-blue-500/30 bg-blue-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
-                <CheckCircle className="h-5 w-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Completed Payouts</p>
-                <p className="text-2xl font-semibold text-foreground">
-                  ${(summary.completedPayouts / 100).toFixed(2)}
-                </p>
-              </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Completed Payouts
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Successfully transferred payouts to your account</p>
+              </TooltipContent>
+            </Tooltip>
+            <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">
+              ${(summary.completedPayouts / 100).toFixed(2)}
             </div>
           </CardContent>
         </Card>
