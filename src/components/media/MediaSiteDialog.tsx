@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { getFaviconUrl } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
+import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 
 interface MediaSite {
   id: string;
@@ -44,6 +45,7 @@ export function MediaSiteDialog({
 }: MediaSiteDialogProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { addMinimizedChat } = useMinimizedChats();
   const [currentView, setCurrentView] = useState<DialogView>('detail');
   const [openEngagementData, setOpenEngagementData] = useState<any>(null);
   const [checkingEngagement, setCheckingEngagement] = useState(false);
@@ -361,6 +363,15 @@ export function MediaSiteDialog({
           });
         }
       }
+
+      // Add to minimized chats widget so user can access the chat immediately
+      addMinimizedChat({
+        id: request.id,
+        title: mediaSite.name,
+        favicon: mediaSite.favicon || getFaviconUrl(mediaSite.link),
+        type: 'my-request',
+        unreadCount: 0
+      });
 
       // Update state to show "Engagement Open" button immediately
       setOpenEngagementData({
