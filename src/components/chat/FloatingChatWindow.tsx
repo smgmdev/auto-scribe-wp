@@ -1780,19 +1780,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             <div className="flex items-center gap-1">
               <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild disabled={isAdmin}>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`h-7 px-2 gap-1 text-xs ${isAdmin ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black'}`}
+                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
                     onMouseDown={(e) => e.stopPropagation()}
-                    disabled={isAdmin}
                   >
                     Action
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                <DropdownMenuContent align="end" className={`w-40 z-[9999] bg-popover border shadow-lg ${isAdmin ? 'pointer-events-none opacity-60' : ''}`}>
                   {globalChatType === 'agency-request' && (
                     <DropdownMenuItem 
                       className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
@@ -2397,18 +2396,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
             {orderDetails && orderDetails.delivery_status === 'pending' && (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild disabled={isAdmin}>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`h-7 px-2 gap-1 text-xs ${isAdmin ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black'}`}
-                    disabled={isAdmin}
+                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
                   >
                     Action
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                <DropdownMenuContent align="end" className={`w-40 z-[9999] bg-popover border shadow-lg ${isAdmin ? 'pointer-events-none opacity-60' : ''}`}>
                   {hasOpenDispute ? (
                     <DropdownMenuItem 
                       className="cursor-pointer text-muted-foreground"
