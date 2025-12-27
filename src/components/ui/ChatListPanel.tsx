@@ -646,12 +646,21 @@ export function ChatListPanel() {
       // Mark request as unread for the appropriate party in database (async, non-blocking)
       // For user engagements (receiving from agency), mark client_read as false
       // For agency requests (receiving from client), mark agency_read as false
+      
+      // Only increment unread for messages FROM the counterparty
       if (isMyEngagement && isFromAgency) {
         supabase
           .from('service_requests')
           .update({ client_read: false })
           .eq('id', request_id);
         incrementUserUnreadEngagementsCount();
+        incrementUnreadMessageCount(request_id);
+        
+        toast({
+          title: 'New Message',
+          description: `Message for "${title}" (${media_site_name})`,
+        });
+        playMessageSound();
       }
       
       if (isServiceRequest && isFromClient) {
@@ -660,16 +669,14 @@ export function ChatListPanel() {
           .update({ agency_read: false })
           .eq('id', request_id);
         incrementAgencyUnreadServiceRequestsCount();
+        incrementUnreadMessageCount(request_id);
+        
+        toast({
+          title: 'New Client Message',
+          description: `Message for "${title}" (${media_site_name})`,
+        });
+        playMessageSound();
       }
-      
-      incrementUnreadMessageCount(request_id);
-      
-      toast({
-        title: isFromAgency ? 'New Message' : 'New Client Message',
-        description: `Message for "${title}" (${media_site_name})`,
-      });
-      
-      playMessageSound();
     }
     
     // Refresh the lists to get latest data (non-blocking)
@@ -1000,12 +1007,23 @@ export function ChatListPanel() {
             // Mark request as unread for the appropriate party in database
             // For user engagements receiving from agency, mark client_read as false
             // For agency service requests receiving from client, mark agency_read as false
+            
+            // Only increment unread for messages FROM the counterparty (not own messages)
             if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
               await supabase
                 .from('service_requests')
                 .update({ client_read: false })
                 .eq('id', requestId);
               incrementUserUnreadEngagementsCount();
+              incrementUnreadMessageCount(requestId);
+              
+              // Get request info for toast
+              const request = myEngagementsRef.current.find(e => e.id === requestId);
+              toast({
+                title: 'New Message from Agency',
+                description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
+              });
+              playMessageSound();
             }
             
             if (isServiceRequest && senderType === 'client') {
@@ -1014,20 +1032,16 @@ export function ChatListPanel() {
                 .update({ agency_read: false })
                 .eq('id', requestId);
               incrementAgencyUnreadServiceRequestsCount();
+              incrementUnreadMessageCount(requestId);
+              
+              // Get request info for toast
+              const request = serviceRequestsRef.current.find(r => r.id === requestId);
+              toast({
+                title: 'New Client Message',
+                description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
+              });
+              playMessageSound();
             }
-            
-            incrementUnreadMessageCount(requestId);
-            
-            // Get request info for toast
-            const request = myEngagementsRef.current.find(e => e.id === requestId) ||
-                           serviceRequestsRef.current.find(r => r.id === requestId);
-            
-            toast({
-              title: isMyEngagement ? 'New Message from Agency' : 'New Client Message',
-              description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
-            });
-            
-            playMessageSound();
           } else {
             console.log('[ChatListPanel] Chat is already open, not showing notification');
           }
