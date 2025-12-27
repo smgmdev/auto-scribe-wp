@@ -1733,6 +1733,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Remove attachment tag from display message
     displayMessage = getMessageWithoutAttachment(displayMessage);
 
+    // Find the original message to get sender info for the quote
+    const getQuoteSenderLabel = () => {
+      if (!quote?.originalId) return null;
+      const originalMsg = messages.find(m => m.id === quote.originalId);
+      if (!originalMsg) return null;
+      if (originalMsg.sender_type === 'admin') return 'Arcana Mace Staff';
+      if (originalMsg.sender_type === senderType) return 'You';
+      return counterpartyLabel;
+    };
+    
+    const quoteSenderLabel = getQuoteSenderLabel();
+    
     return (
       <div className="space-y-2">
         {quote && (
@@ -1744,6 +1756,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             }`}
             onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
           >
+            {quoteSenderLabel && (
+              <p className="font-medium opacity-80 mb-0.5">{quoteSenderLabel}</p>
+            )}
             <p className="opacity-70 line-clamp-2">{quote.quoteText}</p>
           </div>
         )}
