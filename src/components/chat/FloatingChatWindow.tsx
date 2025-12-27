@@ -254,17 +254,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return 'Online';
     }
     
+    // Show loader only while actually loading
+    if (loadingLastSeen) {
+      return (
+        <span className="flex items-center gap-1">
+          Last seen <Loader2 className="h-3 w-3 animate-spin" />
+        </span>
+      );
+    }
+    
     const formattedLastSeen = formatLastSeen(counterpartyLastSeen);
     if (formattedLastSeen) {
       return formattedLastSeen;
     }
     
-    // Show "Last seen" with loader as fallback
-    return (
-      <span className="flex items-center gap-1">
-        Last seen <Loader2 className="h-3 w-3 animate-spin" />
-      </span>
-    );
+    // No data after loading - show offline
+    return 'Offline';
   };
 
   // Fetch counterparty's last seen - use actualSenderType for correct counterparty
