@@ -68,6 +68,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   );
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
   const [counterpartyLastSeen, setCounterpartyLastSeen] = useState<string | null>(null);
+  const [loadingLastSeen, setLoadingLastSeen] = useState(true);
   const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
@@ -226,9 +227,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     : false;
   const isAdminInvestigating = isAdmin && globalChatType === 'agency-request' && !adminJoined;
 
-  // Format last seen time
-  const formatLastSeen = (lastSeenDate: string | null): string => {
-    if (!lastSeenDate) return 'Offline';
+  // Format last seen time - returns null if still loading (handled separately in UI)
+  const formatLastSeen = (lastSeenDate: string | null): string | null => {
+    if (!lastSeenDate) return null; // Will show loader as fallback
     const date = new Date(lastSeenDate);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -247,11 +248,31 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return `Last seen ${format(date, 'MMM d, h:mm a')}`;
   };
 
+  // Render the last seen status with loading state
+  const renderLastSeenStatus = () => {
+    if (isCounterpartyOnline) {
+      return 'Online';
+    }
+    
+    const formattedLastSeen = formatLastSeen(counterpartyLastSeen);
+    if (formattedLastSeen) {
+      return formattedLastSeen;
+    }
+    
+    // Show "Last seen" with loader as fallback
+    return (
+      <span className="flex items-center gap-1">
+        Last seen <Loader2 className="h-3 w-3 animate-spin" />
+      </span>
+    );
+  };
+
   // Fetch counterparty's last seen - use actualSenderType for correct counterparty
   useEffect(() => {
     const fetchLastSeen = async () => {
       if (!globalChatRequest || !senderId) return;
       
+      setLoadingLastSeen(true);
       try {
         // First get the service request to find the counterparty
         const { data: requestData } = await supabase
@@ -260,7 +281,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           .eq('id', globalChatRequest.id)
           .maybeSingle();
         
-        if (!requestData) return;
+        if (!requestData) {
+          setLoadingLastSeen(false);
+          return;
+        }
         
         if (actualSenderType === 'client') {
           // Client viewing - counterparty is agency, get from agency_payouts
@@ -283,6 +307,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }
       } catch (error) {
         console.error('Error fetching last seen:', error);
+      } finally {
+        setLoadingLastSeen(false);
       }
     };
     
@@ -2050,7 +2076,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
                 <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
                   <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {isCounterpartyOnline ? 'Online' : formatLastSeen(counterpartyLastSeen)}
+                  {renderLastSeenStatus()}
                 </span>
               </div>
             </div>
