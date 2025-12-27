@@ -376,8 +376,8 @@ export function MyRequestsView() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
+    <div className="animate-fade-in">
+      <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
             <ClipboardList className="h-8 w-8" />
@@ -403,7 +403,7 @@ export function MyRequestsView() {
         )}
       </div>
 
-      <div className="relative">
+      <div className="relative mb-2">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search engagements..."
