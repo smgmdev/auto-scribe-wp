@@ -604,7 +604,7 @@ export function AdminOrdersView() {
                 <p>Total value of orders awaiting delivery</p>
               </TooltipContent>
             </Tooltip>
-            <Clock className="h-4 w-4 text-yellow-500" />
+            <Clock className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
             <div className="text-2xl font-semibold text-foreground">${(pendingValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
@@ -626,7 +626,7 @@ export function AdminOrdersView() {
                 <p>Total value of orders with active disputes</p>
               </TooltipContent>
             </Tooltip>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <AlertTriangle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
             <div className="text-2xl font-semibold text-foreground">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
@@ -648,7 +648,7 @@ export function AdminOrdersView() {
                 <p>Total value of successfully completed orders</p>
               </TooltipContent>
             </Tooltip>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
             <div className="text-2xl font-semibold text-foreground">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
@@ -670,7 +670,7 @@ export function AdminOrdersView() {
                 <p>Platform fee earnings from completed orders</p>
               </TooltipContent>
             </Tooltip>
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <DollarSign className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
             <div className="text-2xl font-semibold text-green-600">${(totalFeeEarnings / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
