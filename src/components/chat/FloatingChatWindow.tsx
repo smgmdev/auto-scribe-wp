@@ -1791,11 +1791,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={`w-40 z-[9999] bg-popover border shadow-lg ${isAdmin ? 'pointer-events-none opacity-60' : ''}`}>
+                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   {globalChatType === 'agency-request' && (
                     <DropdownMenuItem 
-                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      disabled={hasOrder || isCancelled}
+                      className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={hasOrder || isCancelled || isAdmin}
                       onClick={() => setSendOrderDialogOpen(true)}
                     >
                       {hasExistingOrderRequest ? 'Resend Order' : 'Send Order'}
@@ -1803,7 +1803,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   {hasOpenDispute && (
                     <DropdownMenuItem 
-                      className="cursor-pointer text-muted-foreground"
+                      className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
                       disabled
                     >
                       Dispute Opened
@@ -1812,16 +1812,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   {globalChatType === 'my-request' && !hasOpenDispute && (
                     hasOrder ? (
                       <DropdownMenuItem 
-                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        disabled={isCancelled || !isDeliveryOverdue}
+                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled={isCancelled || !isDeliveryOverdue || isAdmin}
                         onClick={() => setDisputeDialogOpen(true)}
                       >
                         Open Dispute
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem 
-                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        disabled={isCancelled}
+                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled={isCancelled || isAdmin}
                         onClick={() => setOrderWithCreditsOpen(true)}
                       >
                         Order Now
@@ -1831,14 +1831,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   {hasOrder && globalChatRequest.order?.delivery_status === 'pending' ? (
                     hasSentPendingCancelRequest ? (
                       <DropdownMenuItem 
-                        className="cursor-pointer text-muted-foreground"
+                        className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
                         disabled
                       >
                         Cancellation Pending...
                       </DropdownMenuItem>
                     ) : hasPendingCancelRequest ? (
                       <DropdownMenuItem 
-                        className="cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                         onClick={() => {
                           // Find the pending request and accept it
                           const pendingMsg = messages.find(msg => {
@@ -1850,13 +1850,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           });
                           if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
                         }}
-                        disabled={acceptingCancellation}
+                        disabled={acceptingCancellation || isAdmin}
                       >
                         {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem 
-                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled={isAdmin}
                         onClick={() => setCancelOrderRequestDialogOpen(true)}
                       >
                         Request Cancellation
@@ -1864,8 +1865,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )
                   ) : (
                     <DropdownMenuItem 
-                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      disabled={hasOrder || isCancelled}
+                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={hasOrder || isCancelled || isAdmin}
                       onClick={() => setCancelDialogOpen(true)}
                     >
                       Cancel Engagement
@@ -2406,18 +2407,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={`w-40 z-[9999] bg-popover border shadow-lg ${isAdmin ? 'pointer-events-none opacity-60' : ''}`}>
+                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   {hasOpenDispute ? (
                     <DropdownMenuItem 
-                      className="cursor-pointer text-muted-foreground"
+                      className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
                       disabled
                     >
                       Dispute Opened
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem 
-                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      disabled={!isDeliveryOverdue}
+                      className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={!isDeliveryOverdue || isAdmin}
                       onClick={() => setDisputeDialogOpen(true)}
                     >
                       Open Dispute
@@ -2425,14 +2426,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   {hasSentPendingCancelRequest ? (
                     <DropdownMenuItem 
-                      className="cursor-pointer text-muted-foreground"
+                      className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
                       disabled
                     >
                       Cancellation Pending...
                     </DropdownMenuItem>
                   ) : hasPendingCancelRequest ? (
                     <DropdownMenuItem 
-                      className="cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       onClick={() => {
                         setOrderDetailsOpen(false);
                         const pendingMsg = messages.find(msg => {
@@ -2444,13 +2445,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         });
                         if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
                       }}
-                      disabled={acceptingCancellation}
+                      disabled={acceptingCancellation || isAdmin}
                     >
                       {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem 
-                      className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={isAdmin}
                       onClick={() => {
                         setOrderDetailsOpen(false);
                         setCancelOrderRequestDialogOpen(true);
