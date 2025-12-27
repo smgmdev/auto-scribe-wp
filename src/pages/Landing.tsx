@@ -442,7 +442,7 @@ const Landing = () => {
         </p>
       </div>
       <Badge variant="outline" className="text-xs text-accent border-accent/30 flex-shrink-0">
-        ${site.credits_required} USD
+        {site.credits_required} USD
       </Badge>
     </div>
   );
