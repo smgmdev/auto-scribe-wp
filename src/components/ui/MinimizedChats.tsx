@@ -84,7 +84,8 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
         // - unreadMessageCounts[chat.id]: messages not yet read (from chat list)
         const minimizedUnread = chat.unreadCount ?? 0;
         const listUnread = unreadMessageCounts[chat.id] ?? 0;
-        const hasUnread = minimizedUnread > 0 || listUnread > 0;
+        const totalUnread = minimizedUnread + listUnread;
+        const hasUnread = totalUnread > 0;
         
         return (
           <div
@@ -96,9 +97,11 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
             }`}
             onClick={() => handleOpenChat(chat)}
           >
-            {/* Red circle indicator */}
+            {/* Unread count badge */}
             {hasUnread && (
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full" />
+              <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full">
+                {totalUnread > 99 ? '99+' : totalUnread}
+              </span>
             )}
             <div className="relative shrink-0">
               {chat.favicon ? (
