@@ -606,8 +606,8 @@ export function ChatListPanel() {
       request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isMyEngagement, isServiceRequest 
     });
     
-    // Update local state immediately to show unread UI
-    if (isMyEngagement) {
+    // Update local state immediately to show unread UI (only for counterparty messages)
+    if (isMyEngagement && isFromAgency) {
       setMyEngagements(prev => {
         const updated = prev.map(e => 
           e.id === request_id 
@@ -618,7 +618,7 @@ export function ChatListPanel() {
         return updated;
       });
     }
-    if (isServiceRequest) {
+    if (isServiceRequest && isFromClient) {
       setServiceRequests(prev => {
         const updated = prev.map(r => 
           r.id === request_id 
@@ -637,7 +637,10 @@ export function ChatListPanel() {
       request_id 
     });
     
-    if (isMinimized) {
+    // Only increment unread for minimized chats when message is from counterparty
+    const shouldNotify = (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient);
+    
+    if (isMinimized && shouldNotify) {
       console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id);
       // Use store's action directly for reliability
       useAppStore.getState().incrementMinimizedChatUnread(request_id);
@@ -956,11 +959,13 @@ export function ChatListPanel() {
           }
           
           // For received messages (not own), update last message AND mark as unread locally
+          // Only mark as unread when message is FROM the counterparty
           if (isMyEngagement) {
+            const isFromAgency = senderType === 'agency' || senderType === 'admin';
             setMyEngagements(prev => {
               const updated = prev.map(e => 
                 e.id === requestId 
-                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: false }
+                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: isFromAgency ? false : e.read }
                   : e
               );
               myEngagementsRef.current = updated;
@@ -968,10 +973,11 @@ export function ChatListPanel() {
             });
           }
           if (isServiceRequest) {
+            const isFromClient = senderType === 'client';
             setServiceRequests(prev => {
               const updated = prev.map(r => 
                 r.id === requestId 
-                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: false }
+                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: isFromClient ? false : r.read }
                   : r
               );
               serviceRequestsRef.current = updated;
@@ -997,7 +1003,11 @@ export function ChatListPanel() {
           
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, senderType });
           
-          if (isMinimized) {
+          // Only increment unread for minimized chats when message is from counterparty
+          const isFromCounterparty = (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) || 
+                                     (isServiceRequest && senderType === 'client');
+          
+          if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, incrementing unread');
             useAppStore.getState().incrementMinimizedChatUnread(requestId);
             playMessageSound();

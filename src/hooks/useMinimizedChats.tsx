@@ -45,17 +45,37 @@ export function useMinimizedChats() {
         return;
       }
 
-      // Fetch read status for all minimized chat requests
+      // Fetch read status and check for agency replies for all minimized chat requests
       const requestIds = data.map(chat => chat.request_id);
+      
+      // Get service requests with client_read status
       const { data: requestsData } = await supabase
         .from('service_requests')
-        .select('id, read')
+        .select('id, client_read, agency_read, user_id')
         .in('id', requestIds);
 
-      // Create a map of request_id -> read status
-      const readStatusMap: Record<string, boolean> = {};
+      // Get messages to check if there are any agency/admin replies
+      const { data: messagesData } = await supabase
+        .from('service_messages')
+        .select('request_id, sender_type')
+        .in('request_id', requestIds);
+
+      // Create maps for read status and agency replies
+      const requestInfoMap: Record<string, { client_read: boolean; agency_read: boolean; user_id: string }> = {};
       requestsData?.forEach(req => {
-        readStatusMap[req.id] = req.read;
+        requestInfoMap[req.id] = { 
+          client_read: req.client_read, 
+          agency_read: req.agency_read,
+          user_id: req.user_id
+        };
+      });
+
+      // Create set of requests that have agency/admin replies
+      const hasAgencyReply: Record<string, boolean> = {};
+      messagesData?.forEach(msg => {
+        if (msg.sender_type !== 'client') {
+          hasAgencyReply[msg.request_id] = true;
+        }
       });
 
       // Mark as loaded for this user BEFORE modifying state
@@ -69,8 +89,17 @@ export function useMinimizedChats() {
       data?.forEach(chat => {
         const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
-          // If request is unread, set unread count to 1 to trigger the UI
-          const isUnread = readStatusMap[chat.request_id] === false;
+          const reqInfo = requestInfoMap[chat.request_id];
+          const isMyEngagement = chat.chat_type === 'my-request';
+          
+          // For user's engagements: only show unread if client_read is false AND has agency reply
+          // For agency requests: only show unread if agency_read is false
+          let isUnread = false;
+          if (isMyEngagement) {
+            isUnread = !reqInfo?.client_read && hasAgencyReply[chat.request_id] === true;
+          } else {
+            isUnread = !reqInfo?.agency_read;
+          }
           
           addToStore({
             id: chat.request_id,
