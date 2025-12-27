@@ -839,24 +839,8 @@ const Landing = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Credits Required</p>
-                <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} Credits</p>
+              <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
               </div>
-              {siteTags[(selectedSite as WPSite).id]?.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Tags</p>
-                  <div className="flex flex-wrap gap-2">
-                    {siteTags[(selectedSite as WPSite).id].map(tag => (
-                      <Badge 
-                        key={tag.id} 
-                        style={{ backgroundColor: tag.color }}
-                        className="text-white text-xs"
-                      >
-                        {tag.label}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
