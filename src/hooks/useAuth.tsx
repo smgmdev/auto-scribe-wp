@@ -299,8 +299,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Update immediately on mount
     updateLastOnline();
     
-    // Update every 5 minutes
-    const interval = setInterval(updateLastOnline, 5 * 60 * 1000);
+    // Update every 30 seconds for real-time presence
+    const interval = setInterval(updateLastOnline, 30 * 1000);
     
     // Update on page unload
     const handleBeforeUnload = () => {

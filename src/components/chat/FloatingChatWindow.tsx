@@ -278,9 +278,69 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
     
     fetchLastSeen();
-    // Refresh every 60 seconds
-    const interval = setInterval(fetchLastSeen, 60000);
-    return () => clearInterval(interval);
+    
+    // Subscribe to real-time changes for counterparty's last_online_at
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    
+    const setupRealtimeSubscription = async () => {
+      if (!globalChatRequest) return;
+      
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('user_id, agency_payout_id')
+        .eq('id', globalChatRequest.id)
+        .maybeSingle();
+      
+      if (!requestData) return;
+      
+      if (globalChatType === 'my-request' && requestData.agency_payout_id) {
+        // Client viewing - subscribe to agency_payouts changes
+        channel = supabase
+          .channel(`agency-presence-${requestData.agency_payout_id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'agency_payouts',
+              filter: `id=eq.${requestData.agency_payout_id}`
+            },
+            (payload) => {
+              if (payload.new && 'last_online_at' in payload.new) {
+                setCounterpartyLastSeen(payload.new.last_online_at as string | null);
+              }
+            }
+          )
+          .subscribe();
+      } else if (globalChatType === 'agency-request') {
+        // Agency viewing - subscribe to profiles changes
+        channel = supabase
+          .channel(`client-presence-${requestData.user_id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${requestData.user_id}`
+            },
+            (payload) => {
+              if (payload.new && 'last_online_at' in payload.new) {
+                setCounterpartyLastSeen(payload.new.last_online_at as string | null);
+              }
+            }
+          )
+          .subscribe();
+      }
+    };
+    
+    setupRealtimeSubscription();
+    
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [globalChatRequest?.id, globalChatType]);
 
   // Handle admin joining chat
