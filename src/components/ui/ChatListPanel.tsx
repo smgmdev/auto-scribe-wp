@@ -1028,6 +1028,15 @@ export function ChatListPanel() {
                 myEngagementsRef.current = updated;
                 return updated;
               });
+              
+              // Dispatch event to sync with MyRequestsView
+              window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+                detail: {
+                  id: requestId,
+                  lastMessage: newMsg.message,
+                  lastMessageTime: newMsg.created_at
+                }
+              }));
             }
             if (isServiceRequest) {
               setServiceRequests(prev => {
@@ -1039,6 +1048,15 @@ export function ChatListPanel() {
                 serviceRequestsRef.current = updated;
                 return updated;
               });
+              
+              // Dispatch event to sync with AgencyRequestsView
+              window.dispatchEvent(new CustomEvent('service-request-updated', {
+                detail: {
+                  id: requestId,
+                  lastMessage: newMsg.message,
+                  lastMessageTime: newMsg.created_at
+                }
+              }));
             }
             // Update disputes for admin's own messages
             if (isDisputedChat) {
@@ -1068,6 +1086,16 @@ export function ChatListPanel() {
               myEngagementsRef.current = updated;
               return updated;
             });
+            
+            // Dispatch event to sync with MyRequestsView
+            window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+              detail: {
+                id: requestId,
+                read: isFromAgency ? false : undefined,
+                lastMessage: newMsg.message,
+                lastMessageTime: newMsg.created_at
+              }
+            }));
           }
           if (isServiceRequest) {
             const isFromClient = senderType === 'client';
