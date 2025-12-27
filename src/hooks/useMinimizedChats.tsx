@@ -86,7 +86,6 @@ export function useMinimizedChats() {
       
       // Get current state directly from store to check existing chats
       const currentChats = useAppStore.getState().minimizedChats;
-      const setUnreadMessageCount = useAppStore.getState().setUnreadMessageCount;
       
       // Only add chats that aren't already in the store
       data?.forEach(chat => {
@@ -127,10 +126,9 @@ export function useMinimizedChats() {
             unreadCount: isUnread ? 1 : 0,
           });
           
-          // Also set the unreadMessageCounts for consistency
-          if (isUnread) {
-            setUnreadMessageCount(chat.request_id, 1);
-          }
+          // DON'T set unreadMessageCounts here - that's for tracking NEW messages
+          // while the chat is minimized. The initial unread state is handled
+          // by the chat.unreadCount property set above.
         }
       });
     };
