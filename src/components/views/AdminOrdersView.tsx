@@ -667,8 +667,8 @@ export function AdminOrdersView() {
                       </div>
                       
                       <div className="flex gap-2 items-center">
-                        {/* Hide status badge in Order History tab to avoid duplication */}
-                        {activeTab !== 'history' && getStatusBadge(order.status)}
+                        {getStatusBadge(order.status)}
+                        {/* Hide delivery badge in Order History tab to avoid duplication */}
                         {activeTab !== 'history' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                         
                         {order.status === 'paid' && (
