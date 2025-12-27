@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -588,59 +589,91 @@ export function AdminOrdersView() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-500/10 rounded-lg">
-                <Clock className="h-5 w-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pending Delivery</p>
-                <p className="text-2xl font-bold">${(pendingValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              </div>
-            </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Pending Delivery
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Total value of orders awaiting delivery</p>
+              </TooltipContent>
+            </Tooltip>
+            <Clock className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">${(pendingValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-500/10 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Open Disputes</p>
-                <p className="text-2xl font-bold">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              </div>
-            </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Open Disputes
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Total value of orders with active disputes</p>
+              </TooltipContent>
+            </Tooltip>
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Delivered Orders</p>
-                <p className="text-2xl font-bold">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              </div>
-            </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Delivered Orders
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Total value of successfully completed orders</p>
+              </TooltipContent>
+            </Tooltip>
+            <CheckCircle className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-foreground">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <DollarSign className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Fee Earnings</p>
-                <p className="text-2xl font-bold text-green-600">${(totalFeeEarnings / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              </div>
-            </div>
+        <Card className="transition-colors hover:border-[#4771d9] py-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-help">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Total Fee Earnings
+                  </CardTitle>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+                <p>Platform fee earnings from completed orders</p>
+              </TooltipContent>
+            </Tooltip>
+            <DollarSign className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent className="pt-0 pb-0 px-4">
+            <div className="text-2xl font-semibold text-green-600">${(totalFeeEarnings / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
           </CardContent>
         </Card>
       </div>
