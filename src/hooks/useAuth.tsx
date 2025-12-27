@@ -238,6 +238,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Import appStore to clear chat state
+    const { useAppStore } = await import('@/stores/appStore');
+    const store = useAppStore.getState();
+    
+    // Clear all chat state FIRST before anything else
+    store.closeAllChats();
+    store.clearMinimizedChats();
+    store.setUserUnreadEngagementsCount(0);
+    store.setAgencyUnreadServiceRequestsCount(0);
+    store.setUnreadAgencyApplicationsCount(0);
+    store.setUnreadCustomVerificationsCount(0);
+    store.setUnreadMediaSubmissionsCount(0);
+    store.setUnreadOrdersCount(0);
+    store.setUnreadDisputesCount(0);
+    store.setAgencyUnreadWpSubmissionsCount(0);
+    store.setAgencyUnreadMediaSubmissionsCount(0);
+    store.setUserApplicationStatus(null);
+    store.setUserCustomVerificationStatus(null);
+    
     // Update last_online_at before signing out
     if (user) {
       try {
@@ -256,7 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Clear local state first
+    // Clear local state
     setSession(null);
     setUser(null);
     setRole(null);
