@@ -564,20 +564,19 @@ export function AdminOrdersView() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
-          <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
-        </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by site, order number..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+      <div>
+        <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
+        <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
+      </div>
+
+      <div className="relative w-full sm:w-72">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by site, order number..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
