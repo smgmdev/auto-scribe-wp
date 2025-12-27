@@ -68,7 +68,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   );
   const [isCounterpartyOnline, setIsCounterpartyOnline] = useState(false);
   const [counterpartyLastSeen, setCounterpartyLastSeen] = useState<string | null>(null);
-  const [loadingLastSeen, setLoadingLastSeen] = useState(true);
+  const [loadingLastSeen, setLoadingLastSeen] = useState(false); // Start as false, set to true when fetching
   const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
@@ -252,6 +252,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const renderLastSeenStatus = () => {
     if (isCounterpartyOnline) {
       return 'Online';
+    }
+    
+    // If we don't have senderId yet, we're still determining identity
+    if (!senderId) {
+      return (
+        <span className="flex items-center gap-1">
+          Last seen <Loader2 className="h-3 w-3 animate-spin" />
+        </span>
+      );
     }
     
     // Show loader only while actually loading
