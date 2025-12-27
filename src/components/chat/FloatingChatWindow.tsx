@@ -2743,10 +2743,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div>
                   <p className="text-sm text-muted-foreground">Agency</p>
                   <p 
-                    className="text-foreground hover:text-accent cursor-pointer hover:underline transition-colors"
+                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
                     onClick={() => fetchAgencyDetails(globalChatRequest.media_site!.agency!)}
                   >
                     {globalChatRequest.media_site.agency}
+                    <ExternalLink className="h-3 w-3" />
                   </p>
                 </div>
               )}
