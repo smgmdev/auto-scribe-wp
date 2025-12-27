@@ -379,8 +379,8 @@ export function AgencyRequestsView() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
+    <div className="animate-fade-in">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <ClipboardList className="h-8 w-8" />
           Client Requests
@@ -390,7 +390,7 @@ export function AgencyRequestsView() {
         </p>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 mb-2">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -416,7 +416,7 @@ export function AgencyRequestsView() {
         )}
       </div>
 
-      <Tabs defaultValue="active" className="w-full -mt-4">
+      <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="active" className="gap-2">
             <MessageSquare className="h-4 w-4" />
