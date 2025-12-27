@@ -241,6 +241,19 @@ export function AdminFloatingChat({
     return { originalId: null, quoteText: quotePart, replyText };
   };
 
+  // Get the actual reply content from a message, excluding any quoted content
+  const getReplyContentOnly = (message: string): string => {
+    let cleanMessage = message;
+    // If message starts with quote format, extract only the reply part (after \n\n)
+    if (cleanMessage.startsWith('> ')) {
+      const parts = cleanMessage.split('\n\n');
+      if (parts.length > 1) {
+        return parts.slice(1).join('\n\n').trim();
+      }
+    }
+    return cleanMessage;
+  };
+
   const scrollToMessage = (messageId: string) => {
     const element = document.getElementById(`admin-msg-${request.id}-${messageId}`);
     if (element) {
@@ -589,9 +602,9 @@ export function AdminFloatingChat({
     try {
       let messageContent = newMessage.trim();
       
-      // If replying, prepend the quote
+      // If replying, prepend the quote (only include the reply content, not nested quotes)
       if (replyToMessage) {
-        const quoteText = replyToMessage.message.substring(0, 100);
+        const quoteText = getReplyContentOnly(replyToMessage.message).substring(0, 100);
         messageContent = `> [${replyToMessage.id}]:${quoteText}\n\n${messageContent}`;
       }
       
@@ -958,6 +971,29 @@ export function AdminFloatingChat({
       displayMessage = quote.replyText;
     }
 
+    // Find the original message to get sender info for the quote
+    const getQuoteSenderLabel = () => {
+      if (!quote?.originalId) return null;
+      const originalMsg = messages.find(m => m.id === quote.originalId);
+      if (!originalMsg) return null;
+      if (originalMsg.sender_type === 'admin') return 'You';
+      if (originalMsg.sender_type === 'agency') return 'Agency';
+      return 'Client';
+    };
+    
+    // Clean up quote text - remove any "> [id]:" format that might be nested
+    const getCleanQuoteText = () => {
+      if (!quote) return '';
+      let text = quote.quoteText;
+      // Remove any leading "> " and "[id]:" patterns
+      text = text.replace(/^> /, '');
+      text = text.replace(/^\[[^\]]+\]:/, '');
+      return text.trim();
+    };
+    
+    const quoteSenderLabel = getQuoteSenderLabel();
+    const cleanQuoteText = getCleanQuoteText();
+
     // Regular message with quote support
     return (
       <div className="space-y-2">
@@ -970,7 +1006,10 @@ export function AdminFloatingChat({
             }`}
             onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
           >
-            <p className="opacity-70 line-clamp-2">{quote.quoteText}</p>
+            {quoteSenderLabel && (
+              <p className="font-medium opacity-80 mb-0.5">{quoteSenderLabel}</p>
+            )}
+            <p className="opacity-70 line-clamp-2">{cleanQuoteText}</p>
           </div>
         )}
         {displayMessage && (
