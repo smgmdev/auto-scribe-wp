@@ -487,11 +487,9 @@ export function ChatListPanel() {
   useEffect(() => {
     if (!user || loading) return;
     
-    // For agencies, skip fetching their own engagements unless they also act as users
-    // Agencies should only see their service requests, not user engagement data
-    if (!isAgency) {
-      fetchMyEngagements();
-    }
+    // Fetch my engagements for all users (including agencies who may also be clients)
+    fetchMyEngagements();
+    
     if (isAdmin) {
       fetchDisputes();
       fetchInvestigations();
