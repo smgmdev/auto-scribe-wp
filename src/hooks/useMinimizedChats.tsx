@@ -53,6 +53,13 @@ export function useMinimizedChats() {
         .select('id, client_read, agency_read, user_id')
         .in('id', requestIds);
 
+      // Get all messages for these requests to count unread
+      const { data: messagesData } = await supabase
+        .from('service_messages')
+        .select('request_id, sender_type, created_at')
+        .in('request_id', requestIds)
+        .order('created_at', { ascending: false });
+
       // Create map for read status
       const requestInfoMap: Record<string, { client_read: boolean; agency_read: boolean; user_id: string }> = {};
       requestsData?.forEach(req => {
@@ -61,6 +68,20 @@ export function useMinimizedChats() {
           agency_read: req.agency_read,
           user_id: req.user_id
         };
+      });
+
+      // Count unread messages per request
+      // For user engagements: count consecutive messages from agency at the end
+      // For agency requests: count consecutive messages from client at the end
+      const unreadCountMap: Record<string, number> = {};
+      
+      // Group messages by request_id (already sorted by created_at desc)
+      const messagesByRequest: Record<string, { sender_type: string }[]> = {};
+      messagesData?.forEach(msg => {
+        if (!messagesByRequest[msg.request_id]) {
+          messagesByRequest[msg.request_id] = [];
+        }
+        messagesByRequest[msg.request_id].push({ sender_type: msg.sender_type });
       });
 
       // Mark as loaded for this user BEFORE modifying state
@@ -75,19 +96,27 @@ export function useMinimizedChats() {
         if (!existingChat) {
           const isMyEngagement = chat.chat_type === 'my-request';
           const reqInfo = requestInfoMap[chat.request_id];
+          const messages = messagesByRequest[chat.request_id] || [];
           
           // Use persisted unread count from DB first
           let unreadCount = chat.unread_count || 0;
           
-          // If persisted count is 0, check the read status from service_requests
-          // This syncs with ChatListPanel's unread state
+          // If persisted count is 0, check the read status and count unread messages
           if (unreadCount === 0 && reqInfo) {
-            if (isMyEngagement && !reqInfo.client_read) {
-              // User's engagement: show unread if client hasn't read
-              unreadCount = 1;
-            } else if (!isMyEngagement && !reqInfo.agency_read) {
-              // Agency request: show unread if agency hasn't read
-              unreadCount = 1;
+            const hasUnread = isMyEngagement ? !reqInfo.client_read : !reqInfo.agency_read;
+            
+            if (hasUnread && messages.length > 0) {
+              // Count consecutive messages from counterparty at the end
+              const counterpartySenderType = isMyEngagement ? 'agency' : 'client';
+              
+              for (const msg of messages) {
+                if (msg.sender_type === counterpartySenderType || msg.sender_type === 'admin') {
+                  unreadCount++;
+                } else {
+                  // Stop counting when we hit a message from the current party
+                  break;
+                }
+              }
             }
           }
           
