@@ -275,27 +275,35 @@ export const useAppStore = create<AppState>()((set) => ({
     );
     console.log('[AppStore] Updated chats:', updated.map(c => ({ id: c.id, unreadCount: c.unreadCount })));
     
-    // Persist to database
+    // Persist to database - use RPC or direct update
     const newCount = updated.find(c => c.id === id)?.unreadCount || 0;
-    supabase
-      .from('minimized_chats')
-      .update({ unread_count: newCount })
-      .eq('request_id', id)
-      .then(({ error }) => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase
+          .from('minimized_chats')
+          .update({ unread_count: newCount })
+          .eq('request_id', id)
+          .eq('user_id', user.id);
         if (error) console.error('[AppStore] Error persisting unread count:', error);
-      });
+      }
+    })();
     
     return { minimizedChats: updated };
   }),
   clearMinimizedChatUnread: (id) => set((state) => {
     // Persist to database
-    supabase
-      .from('minimized_chats')
-      .update({ unread_count: 0 })
-      .eq('request_id', id)
-      .then(({ error }) => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase
+          .from('minimized_chats')
+          .update({ unread_count: 0 })
+          .eq('request_id', id)
+          .eq('user_id', user.id);
         if (error) console.error('[AppStore] Error clearing unread count:', error);
-      });
+      }
+    })();
     
     return {
       minimizedChats: state.minimizedChats.map(c => 

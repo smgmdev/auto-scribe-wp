@@ -45,6 +45,25 @@ export function useMinimizedChats() {
         return;
       }
 
+      // Fetch read status for all minimized chat requests to calculate unread
+      const requestIds = data.map(chat => chat.request_id);
+      
+      // Get service requests with read status
+      const { data: requestsData } = await supabase
+        .from('service_requests')
+        .select('id, client_read, agency_read, user_id')
+        .in('id', requestIds);
+
+      // Create map for read status
+      const requestInfoMap: Record<string, { client_read: boolean; agency_read: boolean; user_id: string }> = {};
+      requestsData?.forEach(req => {
+        requestInfoMap[req.id] = { 
+          client_read: req.client_read, 
+          agency_read: req.agency_read,
+          user_id: req.user_id
+        };
+      });
+
       // Mark as loaded for this user BEFORE modifying state
       loadedUserIdRef.current = user.id;
       
@@ -52,16 +71,42 @@ export function useMinimizedChats() {
       const currentChats = useAppStore.getState().minimizedChats;
       
       // Only add chats that aren't already in the store
-      // Load the persisted unread_count from the database
       data?.forEach(chat => {
         const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
+          const reqInfo = requestInfoMap[chat.request_id];
+          const isMyEngagement = chat.chat_type === 'my-request';
+          
+          // Get persisted unread count from DB
+          let unreadCount = (chat as any).unread_count || 0;
+          
+          // If persisted count is 0, check if there are unread messages based on read status
+          // This handles cases where the chat was minimized before we had persistence
+          if (unreadCount === 0) {
+            if (isMyEngagement && reqInfo && !reqInfo.client_read) {
+              // User's engagement has unread messages from agency
+              unreadCount = 1; // Show indicator that there are unread messages
+            } else if (!isMyEngagement && reqInfo && !reqInfo.agency_read) {
+              // Agency request has unread messages from client
+              unreadCount = 1; // Show indicator that there are unread messages
+            }
+          }
+          
+          console.log('[useMinimizedChats] Loading chat:', {
+            chatId: chat.request_id,
+            type: chat.chat_type,
+            persistedCount: (chat as any).unread_count,
+            finalUnreadCount: unreadCount,
+            client_read: reqInfo?.client_read,
+            agency_read: reqInfo?.agency_read
+          });
+          
           addToStore({
             id: chat.request_id,
             title: chat.title,
             favicon: chat.media_site_favicon,
             type: chat.chat_type as 'agency-request' | 'my-request',
-            unreadCount: (chat as any).unread_count || 0,
+            unreadCount,
           });
         }
       });
