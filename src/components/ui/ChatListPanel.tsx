@@ -519,6 +519,36 @@ export function ChatListPanel() {
     }
   }, [isAgency, isAdmin]);
 
+  // Sync minimized chats with myEngagements/serviceRequests unread counts
+  // This runs whenever the main data changes to keep everything in sync
+  useEffect(() => {
+    const currentMinimizedChats = useAppStore.getState().minimizedChats;
+    if (currentMinimizedChats.length === 0) return;
+    
+    let hasChanges = false;
+    const updatedMinimizedChats = currentMinimizedChats.map(chat => {
+      if (chat.type === 'my-request') {
+        const engagement = myEngagements.find(e => e.id === chat.id);
+        if (engagement && chat.unreadCount !== engagement.unreadCount) {
+          hasChanges = true;
+          return { ...chat, unreadCount: engagement.unreadCount };
+        }
+      } else if (chat.type === 'agency-request') {
+        const request = serviceRequests.find(r => r.id === chat.id);
+        if (request && chat.unreadCount !== request.unreadCount) {
+          hasChanges = true;
+          return { ...chat, unreadCount: request.unreadCount };
+        }
+      }
+      return chat;
+    });
+    
+    if (hasChanges) {
+      console.log('[ChatListPanel] Syncing minimized chats with updated unread counts');
+      useAppStore.setState({ minimizedChats: updatedMinimizedChats });
+    }
+  }, [myEngagements, serviceRequests]);
+
   // Fetch data and sync notification counts on mount
   // Wait for loading to complete so we know if user is an agency
   useEffect(() => {
