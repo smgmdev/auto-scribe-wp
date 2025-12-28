@@ -1652,12 +1652,12 @@ export function ChatListPanel() {
           .replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '')
           .trim();
         
-        // If there's text besides the attachment, show that text with attachment indicator
+        // If there's text besides the attachment, show that text with "Attachment" indicator
         if (textWithoutAttachment) {
           const text = textWithoutAttachment.length > 40 
-            ? textWithoutAttachment.slice(0, 40) + '... 📎' 
-            : textWithoutAttachment + ' 📎';
-          return { text, type: 'attachment' };
+            ? textWithoutAttachment.slice(0, 40) + '...' 
+            : textWithoutAttachment;
+          return { text: text + ' + Attachment', type: 'attachment' };
         }
         // Pure attachment message
         return { text: 'Attachment', type: 'attachment' };
