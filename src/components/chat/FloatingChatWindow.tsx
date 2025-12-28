@@ -2973,30 +2973,35 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview(null)}>
-        <DialogContent className="max-w-3xl z-[300]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-3xl z-[300] p-0 gap-0 overflow-hidden" hideCloseButton>
+          <div className="flex items-center justify-between px-4 py-2 border-b">
+            <div className="flex items-center gap-2">
               <ImageIcon className="h-5 w-5" />
-              {imagePreview?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center gap-4">
-            <img 
-              src={imagePreview?.url} 
-              alt={imagePreview?.name}
-              className="max-h-[60vh] object-contain rounded-lg"
-            />
-            <a
-              href={imagePreview?.url}
-              download={imagePreview?.name}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-primary hover:underline"
-            >
-              <Download className="h-4 w-4" />
-              Download
-            </a>
+              <span className="font-semibold">{imagePreview?.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={imagePreview?.url}
+                download={imagePreview?.name}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 hover:bg-muted rounded-md transition-colors"
+              >
+                <Download className="h-5 w-5" />
+              </a>
+              <button
+                onClick={() => setImagePreview(null)}
+                className="p-1.5 hover:bg-muted rounded-md transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
+          <img 
+            src={imagePreview?.url} 
+            alt={imagePreview?.name}
+            className="w-full max-h-[70vh] object-contain"
+          />
         </DialogContent>
       </Dialog>
 
