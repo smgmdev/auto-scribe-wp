@@ -51,6 +51,7 @@ const usePreventBodyStyleChanges = () => {
 
 const App = () => {
   usePreventBodyStyleChanges();
+
   
   return (
     <QueryClientProvider client={queryClient}>
