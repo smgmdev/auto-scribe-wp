@@ -1089,7 +1089,8 @@ export function ChatListPanel() {
           }
           
           // For received messages (not own), update last message and increment unread count
-          if (isMyEngagement) {
+          // Only increment if message is from counterparty
+          if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
             setMyEngagements(prev => {
               const updated = prev.map(e => 
                 e.id === requestId 
@@ -1106,7 +1107,7 @@ export function ChatListPanel() {
               return updated;
             });
             
-            // Dispatch event to sync with MyRequestsView (last message only)
+            // Dispatch event to sync with MyRequestsView
             window.dispatchEvent(new CustomEvent('my-engagement-updated', {
               detail: {
                 id: requestId,
@@ -1116,8 +1117,20 @@ export function ChatListPanel() {
                 senderType: newMsg.sender_type
               }
             }));
+          } else if (isMyEngagement) {
+            // Message from client (user's own message echoed back) - just update last message
+            setMyEngagements(prev => {
+              const updated = prev.map(e => 
+                e.id === requestId 
+                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  : e
+              );
+              myEngagementsRef.current = updated;
+              return updated;
+            });
           }
-          if (isServiceRequest) {
+          
+          if (isServiceRequest && senderType === 'client') {
             setServiceRequests(prev => {
               const updated = prev.map(r => 
                 r.id === requestId 
@@ -1134,7 +1147,7 @@ export function ChatListPanel() {
               return updated;
             });
             
-            // Dispatch event to sync with AgencyRequestsView (last message only)
+            // Dispatch event to sync with AgencyRequestsView
             window.dispatchEvent(new CustomEvent('service-request-updated', {
               detail: {
                 id: requestId,
@@ -1142,6 +1155,17 @@ export function ChatListPanel() {
                 lastMessageTime: newMsg.created_at
               }
             }));
+          } else if (isServiceRequest) {
+            // Message from agency (agency's own message echoed back) - just update last message
+            setServiceRequests(prev => {
+              const updated = prev.map(r => 
+                r.id === requestId 
+                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  : r
+              );
+              serviceRequestsRef.current = updated;
+              return updated;
+            });
           }
           // Update disputes for admin with received messages
           if (isDisputedChat) {
