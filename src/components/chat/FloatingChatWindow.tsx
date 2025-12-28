@@ -2974,26 +2974,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Image Preview Dialog */}
       <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview(null)}>
         <DialogContent className="max-w-3xl z-[300] p-0 gap-0 overflow-hidden" hideCloseButton>
-          <div className="flex items-center justify-between px-4 py-2 border-b">
+          <div className="flex items-center justify-between px-2 py-1 border-b">
             <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5" />
-              <span className="font-semibold">{imagePreview?.name}</span>
+              <ImageIcon className="h-4 w-4" />
+              <span className="font-medium text-sm">{imagePreview?.name}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <a
-                href={imagePreview?.url}
-                download={imagePreview?.name}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1.5 hover:bg-muted rounded-md transition-colors"
+            <div className="flex items-center gap-1">
+              <button
+                onClick={async () => {
+                  if (!imagePreview?.url) return;
+                  try {
+                    const response = await fetch(imagePreview.url);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = imagePreview.name || 'image';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                  } catch {
+                    window.open(imagePreview.url, '_blank');
+                  }
+                }}
+                className="p-1 hover:bg-muted rounded-md transition-colors"
               >
-                <Download className="h-5 w-5" />
-              </a>
+                <Download className="h-4 w-4" />
+              </button>
               <button
                 onClick={() => setImagePreview(null)}
-                className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                className="p-1 hover:bg-muted rounded-md transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           </div>
