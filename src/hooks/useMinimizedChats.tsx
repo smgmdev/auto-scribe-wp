@@ -89,8 +89,8 @@ export function useMinimizedChats() {
             if (isMyEngagement && lastMsg.sender_type === 'agency') {
               // User's engagement: unread if last message from agency
               unreadCount = 1;
-            } else if (!isMyEngagement && lastMsg.sender_type === 'user') {
-              // Agency request: unread if last message from user
+            } else if (!isMyEngagement && lastMsg.sender_type === 'client') {
+              // Agency request: unread if last message from client
               unreadCount = 1;
             }
           }
