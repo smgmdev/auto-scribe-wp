@@ -104,6 +104,12 @@ interface AppState {
   setUnreadDisputesCount: (count: number) => void;
   decrementUnreadDisputesCount: () => void;
   
+  // Admin engagement notifications (for Global Engagements)
+  adminUnreadEngagementsCount: number;
+  setAdminUnreadEngagementsCount: (count: number) => void;
+  incrementAdminUnreadEngagementsCount: () => void;
+  decrementAdminUnreadEngagementsCount: () => void;
+  
   // Agency media notifications (for agency users)
   agencyUnreadWpSubmissionsCount: number;
   setAgencyUnreadWpSubmissionsCount: (count: number) => void;
@@ -224,6 +230,16 @@ export const useAppStore = create<AppState>()((set) => ({
   setUnreadDisputesCount: (count) => set({ unreadDisputesCount: count }),
   decrementUnreadDisputesCount: () => set((state) => ({ 
     unreadDisputesCount: Math.max(0, state.unreadDisputesCount - 1) 
+  })),
+  
+  // Admin engagement notifications
+  adminUnreadEngagementsCount: 0,
+  setAdminUnreadEngagementsCount: (count) => set({ adminUnreadEngagementsCount: count }),
+  incrementAdminUnreadEngagementsCount: () => set((state) => ({ 
+    adminUnreadEngagementsCount: state.adminUnreadEngagementsCount + 1 
+  })),
+  decrementAdminUnreadEngagementsCount: () => set((state) => ({ 
+    adminUnreadEngagementsCount: Math.max(0, state.adminUnreadEngagementsCount - 1) 
   })),
   
   // Agency media notifications

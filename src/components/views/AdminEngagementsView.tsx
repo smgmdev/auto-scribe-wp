@@ -50,7 +50,7 @@ interface ServiceMessage {
 }
 
 export function AdminEngagementsView() {
-  const { openGlobalChat } = useAppStore();
+  const { openGlobalChat, decrementAdminUnreadEngagementsCount } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
@@ -106,14 +106,30 @@ export function AdminEngagementsView() {
     }
   };
 
-  const handleOpenChat = (request: ServiceRequest) => {
+  const handleOpenChat = async (request: ServiceRequest) => {
+    // Mark as read if not already
+    if (!request.read) {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ read: true })
+        .eq('id', request.id);
+      
+      if (!error) {
+        // Update local state
+        setRequests(prev => prev.map(r => 
+          r.id === request.id ? { ...r, read: true } : r
+        ));
+        decrementAdminUnreadEngagementsCount();
+      }
+    }
+
     // Build the GlobalChatRequest object to use the global chat system
     const chatRequest: GlobalChatRequest = {
       id: request.id,
       title: request.title,
       description: request.description,
       status: request.status,
-      read: request.read,
+      read: true,
       created_at: request.created_at,
       updated_at: request.updated_at,
       cancellation_reason: request.cancellation_reason,

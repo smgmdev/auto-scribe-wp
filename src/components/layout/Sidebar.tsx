@@ -128,6 +128,10 @@ export function Sidebar({
     setAgencyUnreadServiceRequestsCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
+    adminUnreadEngagementsCount,
+    setAdminUnreadEngagementsCount,
+    incrementAdminUnreadEngagementsCount,
+    decrementAdminUnreadEngagementsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -257,12 +261,20 @@ export function Sidebar({
           .eq('status', 'open')
           .eq('read', false);
         
+        // Fetch unread engagements count (service requests that are unread by admin)
+        const { count: unreadEngagementsCountResult } = await supabase
+          .from('service_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('read', false)
+          .neq('status', 'cancelled');
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
           setUnreadMediaSubmissionsCount((wpSubmissionsCount || 0) + (mediaSubmissionsCount || 0));
           setUnreadOrdersCount(unreadOrdersCountResult || 0);
           setUnreadDisputesCount(unreadDisputesCountResult || 0);
+          setAdminUnreadEngagementsCount(unreadEngagementsCountResult || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -423,6 +435,50 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
+  // Real-time subscription for admin engagement notifications
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-engagements-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        (payload) => {
+          console.log('[Sidebar] New service request created:', payload.new);
+          // Increment the admin engagement count when a new request is created
+          if (payload.new && (payload.new as any).status !== 'cancelled') {
+            incrementAdminUnreadEngagementsCount();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        (payload) => {
+          // When a service request is marked as read, update the count
+          const oldData = payload.old as { read?: boolean };
+          const newData = payload.new as { read?: boolean; status?: string };
+          if (oldData.read === false && newData.read === true) {
+            decrementAdminUnreadEngagementsCount();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
   // Fetch initial unread engagement count for regular users
   useEffect(() => {
     if (!user || isAdmin) return;
@@ -522,9 +578,9 @@ export function Sidebar({
                 const agencyManagementCount = item.id === 'agency-management'
                   ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount)
                   : 0;
-                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders + disputes)
+                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders + disputes + engagements)
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
-                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount) : userUnreadEngagementsCount)
+                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount) : userUnreadEngagementsCount)
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
@@ -569,6 +625,8 @@ export function Sidebar({
                           // Admin Order Management shows unread orders + disputes notifications
                           const showOrdersBadge = subItem.id === 'admin-orders' && (unreadOrdersCount + unreadDisputesCount) > 0;
                           const ordersBadgeCount = unreadOrdersCount + unreadDisputesCount;
+                          // Admin Global Engagements shows unread engagement notifications
+                          const showAdminEngagementsBadge = subItem.id === 'admin-engagements' && adminUnreadEngagementsCount > 0;
                           
                           // Determine notification count for this submenu item
                           let notificationCount = 0;
@@ -578,6 +636,7 @@ export function Sidebar({
                           else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount;
                           else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
+                          else if (showAdminEngagementsBadge) notificationCount = adminUnreadEngagementsCount;
                           
                           return (
                             <div key={subItem.id} className="relative">
