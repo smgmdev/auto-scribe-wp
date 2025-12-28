@@ -197,14 +197,21 @@ export function AdminEngagementsView() {
           ) : (
             <div className="grid gap-4">
               {activeRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleOpenChat(r)}>
-                  <CardContent className="p-4 flex justify-between items-start">
+                <Card 
+                  key={r.id} 
+                  className={`cursor-pointer hover:bg-muted/50 transition-colors relative ${!r.read ? 'bg-blue-500/5 border-blue-500/30' : ''}`} 
+                  onClick={() => handleOpenChat(r)}
+                >
+                  {!r.read && (
+                    <div className="absolute top-3 left-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                  )}
+                  <CardContent className={`p-4 flex justify-between items-start ${!r.read ? 'pl-8' : ''}`}>
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
                         <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
                       )}
                       <div>
-                        <h3 className="font-medium">{r.title}</h3>
+                        <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
                         <p className="text-sm text-muted-foreground">{r.media_sites?.name} • {r.profiles?.email}</p>
                         <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                       </div>
