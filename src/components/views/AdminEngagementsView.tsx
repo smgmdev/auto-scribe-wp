@@ -50,7 +50,7 @@ interface ServiceMessage {
 }
 
 export function AdminEngagementsView() {
-  const { openGlobalChat, decrementAdminUnreadEngagementsCount } = useAppStore();
+  const { openGlobalChat } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
@@ -115,11 +115,10 @@ export function AdminEngagementsView() {
         .eq('id', request.id);
       
       if (!error) {
-        // Update local state
+        // Update local state - real-time subscription will handle the notification count
         setRequests(prev => prev.map(r => 
           r.id === request.id ? { ...r, read: true } : r
         ));
-        decrementAdminUnreadEngagementsCount();
       }
     }
 
