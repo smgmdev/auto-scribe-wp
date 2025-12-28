@@ -77,29 +77,10 @@ export function useMinimizedChats() {
           const reqInfo = requestInfoMap[chat.request_id];
           const isMyEngagement = chat.chat_type === 'my-request';
           
-          // Get persisted unread count from DB
-          let unreadCount = (chat as any).unread_count || 0;
-          
-          // If persisted count is 0, check if there are unread messages based on read status
-          // This handles cases where the chat was minimized before we had persistence
-          if (unreadCount === 0) {
-            if (isMyEngagement && reqInfo && !reqInfo.client_read) {
-              // User's engagement has unread messages from agency
-              unreadCount = 1; // Show indicator that there are unread messages
-            } else if (!isMyEngagement && reqInfo && !reqInfo.agency_read) {
-              // Agency request has unread messages from client
-              unreadCount = 1; // Show indicator that there are unread messages
-            }
-          }
-          
-          console.log('[useMinimizedChats] Loading chat:', {
-            chatId: chat.request_id,
-            type: chat.chat_type,
-            persistedCount: (chat as any).unread_count,
-            finalUnreadCount: unreadCount,
-            client_read: reqInfo?.client_read,
-            agency_read: reqInfo?.agency_read
-          });
+          // Use only the persisted unread count from DB
+          // Don't try to infer from client_read/agency_read as those flags 
+          // indicate if user has read, not if there are new messages
+          const unreadCount = (chat as any).unread_count || 0;
           
           addToStore({
             id: chat.request_id,
