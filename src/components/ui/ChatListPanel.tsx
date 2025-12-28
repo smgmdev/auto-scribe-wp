@@ -228,6 +228,20 @@ export function ChatListPanel() {
       
       setMyEngagements(engagements);
       myEngagementsRef.current = engagements;
+      
+      // Sync minimized chat unread counts with freshly calculated data
+      const currentMinimizedChats = useAppStore.getState().minimizedChats;
+      engagements.forEach(engagement => {
+        const minimizedChat = currentMinimizedChats.find(c => c.id === engagement.id && c.type === 'my-request');
+        if (minimizedChat && minimizedChat.unreadCount !== engagement.unreadCount) {
+          // Update the minimized chat's unread count to match
+          useAppStore.setState(state => ({
+            minimizedChats: state.minimizedChats.map(c => 
+              c.id === engagement.id ? { ...c, unreadCount: engagement.unreadCount } : c
+            )
+          }));
+        }
+      });
     }
   };
 
@@ -317,6 +331,20 @@ export function ChatListPanel() {
       setServiceRequests(requests);
       // Update ref immediately to avoid race conditions
       serviceRequestsRef.current = requests;
+      
+      // Sync minimized chat unread counts with freshly calculated data (for agency-request type)
+      const currentMinimizedChats = useAppStore.getState().minimizedChats;
+      requests.forEach(request => {
+        const minimizedChat = currentMinimizedChats.find(c => c.id === request.id && c.type === 'agency-request');
+        if (minimizedChat && minimizedChat.unreadCount !== request.unreadCount) {
+          // Update the minimized chat's unread count to match
+          useAppStore.setState(state => ({
+            minimizedChats: state.minimizedChats.map(c => 
+              c.id === request.id ? { ...c, unreadCount: request.unreadCount } : c
+            )
+          }));
+        }
+      });
     }
   };
 
