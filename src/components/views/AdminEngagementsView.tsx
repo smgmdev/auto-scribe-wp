@@ -159,7 +159,7 @@ export function AdminEngagementsView() {
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, React.ReactNode> = {
-      pending_review: <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>,
+      pending_review: <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Open</Badge>,
       changes_requested: <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes</Badge>,
       accepted: <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>,
       rejected: <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>,
