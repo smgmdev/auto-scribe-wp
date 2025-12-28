@@ -47,24 +47,20 @@ export function useMinimizedChats() {
 
       const requestIds = data.map(chat => chat.request_id);
       
-      // Get the last message for each request to determine if there are unread messages
-      // We need to check if the last message was sent by someone other than us
-      const { data: messagesData } = await supabase
-        .from('service_messages')
-        .select('request_id, sender_id, sender_type, created_at')
-        .in('request_id', requestIds)
-        .order('created_at', { ascending: false });
+      // Get service requests with read status to sync with ChatListPanel
+      const { data: requestsData } = await supabase
+        .from('service_requests')
+        .select('id, client_read, agency_read, user_id')
+        .in('id', requestIds);
 
-      // Create map of request_id -> last message info
-      const lastMessageMap: Record<string, { sender_id: string; sender_type: string }> = {};
-      messagesData?.forEach(msg => {
-        // Only keep the first (most recent) message per request
-        if (!lastMessageMap[msg.request_id]) {
-          lastMessageMap[msg.request_id] = { 
-            sender_id: msg.sender_id, 
-            sender_type: msg.sender_type 
-          };
-        }
+      // Create map for read status
+      const requestInfoMap: Record<string, { client_read: boolean; agency_read: boolean; user_id: string }> = {};
+      requestsData?.forEach(req => {
+        requestInfoMap[req.id] = { 
+          client_read: req.client_read, 
+          agency_read: req.agency_read,
+          user_id: req.user_id
+        };
       });
 
       // Mark as loaded for this user BEFORE modifying state
@@ -78,19 +74,19 @@ export function useMinimizedChats() {
         const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
           const isMyEngagement = chat.chat_type === 'my-request';
-          const lastMsg = lastMessageMap[chat.request_id];
+          const reqInfo = requestInfoMap[chat.request_id];
           
           // Use persisted unread count from DB first
           let unreadCount = chat.unread_count || 0;
           
-          // If persisted count is 0, check if last message was from counterparty
-          // This handles chats minimized before persistence was added
-          if (unreadCount === 0 && lastMsg) {
-            if (isMyEngagement && lastMsg.sender_type === 'agency') {
-              // User's engagement: unread if last message from agency
+          // If persisted count is 0, check the read status from service_requests
+          // This syncs with ChatListPanel's unread state
+          if (unreadCount === 0 && reqInfo) {
+            if (isMyEngagement && !reqInfo.client_read) {
+              // User's engagement: show unread if client hasn't read
               unreadCount = 1;
-            } else if (!isMyEngagement && lastMsg.sender_type === 'client') {
-              // Agency request: unread if last message from client
+            } else if (!isMyEngagement && !reqInfo.agency_read) {
+              // Agency request: show unread if agency hasn't read
               unreadCount = 1;
             }
           }
