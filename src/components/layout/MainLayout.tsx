@@ -35,7 +35,10 @@ export function MainLayout({
       supabase
         .from('service_requests')
         .update({ client_read: true, client_last_read_at: new Date().toISOString() })
-        .eq('id', chat.id);
+        .eq('id', chat.id)
+        .then(({ error }) => {
+          if (error) console.error('[MainLayout] Error updating client_read:', error);
+        });
       
       // Dispatch event to sync with ChatListPanel and MyRequestsView
       window.dispatchEvent(new CustomEvent('my-engagement-updated', {
@@ -45,7 +48,10 @@ export function MainLayout({
       supabase
         .from('service_requests')
         .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
-        .eq('id', chat.id);
+        .eq('id', chat.id)
+        .then(({ error }) => {
+          if (error) console.error('[MainLayout] Error updating agency_read:', error);
+        });
       
       // Dispatch event to sync with ChatListPanel and AgencyRequestsView
       window.dispatchEvent(new CustomEvent('service-request-updated', {
