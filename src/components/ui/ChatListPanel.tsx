@@ -522,6 +522,7 @@ export function ChatListPanel() {
   // Sync minimized chats with myEngagements/serviceRequests unread counts
   // This runs whenever the main data changes to keep everything in sync
   useEffect(() => {
+    // Get fresh state from store to ensure we have latest minimized chats
     const currentMinimizedChats = useAppStore.getState().minimizedChats;
     if (currentMinimizedChats.length === 0) return;
     
@@ -530,12 +531,14 @@ export function ChatListPanel() {
       if (chat.type === 'my-request') {
         const engagement = myEngagements.find(e => e.id === chat.id);
         if (engagement && chat.unreadCount !== engagement.unreadCount) {
+          console.log('[ChatListPanel] Sync my-request:', chat.id, 'from', chat.unreadCount, 'to', engagement.unreadCount);
           hasChanges = true;
           return { ...chat, unreadCount: engagement.unreadCount };
         }
       } else if (chat.type === 'agency-request') {
         const request = serviceRequests.find(r => r.id === chat.id);
         if (request && chat.unreadCount !== request.unreadCount) {
+          console.log('[ChatListPanel] Sync agency-request:', chat.id, 'from', chat.unreadCount, 'to', request.unreadCount);
           hasChanges = true;
           return { ...chat, unreadCount: request.unreadCount };
         }
@@ -548,6 +551,41 @@ export function ChatListPanel() {
       useAppStore.setState({ minimizedChats: updatedMinimizedChats });
     }
   }, [myEngagements, serviceRequests]);
+  
+  // Also subscribe to store changes for minimized chats to trigger re-sync when they're added
+  useEffect(() => {
+    const unsubscribe = useAppStore.subscribe((state, prevState) => {
+      // If a new minimized chat was added, sync its unread count from engagements/requests
+      if (state.minimizedChats.length > prevState.minimizedChats.length) {
+        const newChats = state.minimizedChats.filter(
+          c => !prevState.minimizedChats.some(p => p.id === c.id)
+        );
+        
+        newChats.forEach(newChat => {
+          let correctUnreadCount = newChat.unreadCount;
+          
+          if (newChat.type === 'my-request') {
+            const engagement = myEngagementsRef.current.find(e => e.id === newChat.id);
+            if (engagement) correctUnreadCount = engagement.unreadCount;
+          } else if (newChat.type === 'agency-request') {
+            const request = serviceRequestsRef.current.find(r => r.id === newChat.id);
+            if (request) correctUnreadCount = request.unreadCount;
+          }
+          
+          if (correctUnreadCount !== newChat.unreadCount) {
+            console.log('[ChatListPanel] New minimized chat synced:', newChat.id, 'corrected unread from', newChat.unreadCount, 'to', correctUnreadCount);
+            useAppStore.setState(s => ({
+              minimizedChats: s.minimizedChats.map(c => 
+                c.id === newChat.id ? { ...c, unreadCount: correctUnreadCount } : c
+              )
+            }));
+          }
+        });
+      }
+    });
+    
+    return () => unsubscribe();
+  }, []);
 
   // Fetch data and sync notification counts on mount
   // Wait for loading to complete so we know if user is an agency
@@ -806,10 +844,35 @@ export function ChatListPanel() {
     const shouldNotify = (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient) ||
                          (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient);
     
+    // For minimized chats: update the engagement/request state which will sync to minimized chat
+    // Also play sound for immediate feedback
     if (isMinimized && shouldNotify) {
-      console.log('[ChatListPanel] Broadcast: Chat is minimized, incrementing unread for', request_id, 'minimizedChat:', minimizedChat);
-      // Use store's action directly for reliability
-      useAppStore.getState().incrementMinimizedChatUnread(request_id);
+      console.log('[ChatListPanel] Broadcast: Chat is minimized, updating engagement/request and playing sound');
+      
+      // Update the underlying engagement/request - the sync effect will update minimized chat
+      if (isMinimizedMyRequest || isMyEngagement) {
+        setMyEngagements(prev => {
+          const updated = prev.map(e => 
+            e.id === request_id 
+              ? { ...e, unreadCount: e.unreadCount + 1, read: false, lastMessage: message, lastMessageTime: new Date().toISOString() }
+              : e
+          );
+          myEngagementsRef.current = updated;
+          return updated;
+        });
+      }
+      if (isMinimizedAgencyRequest || isServiceRequest) {
+        setServiceRequests(prev => {
+          const updated = prev.map(r => 
+            r.id === request_id 
+              ? { ...r, unreadCount: r.unreadCount + 1, read: false, lastMessage: message, lastMessageTime: new Date().toISOString() }
+              : r
+          );
+          serviceRequestsRef.current = updated;
+          return updated;
+        });
+      }
+      
       playMessageSound();
     } else if (!isDialogOpen) {
       // Mark request as unread for the appropriate party in database
@@ -827,19 +890,6 @@ export function ChatListPanel() {
           return updated;
         });
         
-        // Sync minimized chat if exists
-        const updatedEngagement = myEngagementsRef.current.find(e => e.id === request_id);
-        if (updatedEngagement) {
-          const minChat = useAppStore.getState().minimizedChats.find(c => c.id === request_id);
-          if (minChat) {
-            useAppStore.setState(state => ({
-              minimizedChats: state.minimizedChats.map(c => 
-                c.id === request_id ? { ...c, unreadCount: updatedEngagement.unreadCount } : c
-              )
-            }));
-          }
-        }
-        
         supabase
           .from('service_requests')
           .update({ client_read: false })
@@ -853,7 +903,7 @@ export function ChatListPanel() {
       }
       
       if (isServiceRequest && isFromClient) {
-        // Update local state immediately
+        // Update local state immediately - sync effect will update minimized chat
         setServiceRequests(prev => {
           const updated = prev.map(r => 
             r.id === request_id 
@@ -863,19 +913,6 @@ export function ChatListPanel() {
           serviceRequestsRef.current = updated;
           return updated;
         });
-        
-        // Sync minimized chat if exists
-        const updatedRequest = serviceRequestsRef.current.find(r => r.id === request_id);
-        if (updatedRequest) {
-          const minChat = useAppStore.getState().minimizedChats.find(c => c.id === request_id);
-          if (minChat) {
-            useAppStore.setState(state => ({
-              minimizedChats: state.minimizedChats.map(c => 
-                c.id === request_id ? { ...c, unreadCount: updatedRequest.unreadCount } : c
-              )
-            }));
-          }
-        }
         
         supabase
           .from('service_requests')
@@ -1212,19 +1249,7 @@ export function ChatListPanel() {
               myEngagementsRef.current = updated;
               return updated;
             });
-            
-            // Sync minimized chat unread count in real-time
-            const updatedEngagement = myEngagementsRef.current.find(e => e.id === requestId);
-            if (updatedEngagement) {
-              const minimizedChat = useAppStore.getState().minimizedChats.find(c => c.id === requestId);
-              if (minimizedChat && minimizedChat.unreadCount !== updatedEngagement.unreadCount) {
-                useAppStore.setState(state => ({
-                  minimizedChats: state.minimizedChats.map(c => 
-                    c.id === requestId ? { ...c, unreadCount: updatedEngagement.unreadCount } : c
-                  )
-                }));
-              }
-            }
+            // Sync effect will update minimized chat
             
             // Dispatch event to sync with MyRequestsView
             window.dispatchEvent(new CustomEvent('my-engagement-updated', {
@@ -1265,19 +1290,7 @@ export function ChatListPanel() {
               serviceRequestsRef.current = updated;
               return updated;
             });
-            
-            // Sync minimized chat unread count in real-time
-            const updatedRequest = serviceRequestsRef.current.find(r => r.id === requestId);
-            if (updatedRequest) {
-              const minimizedChat = useAppStore.getState().minimizedChats.find(c => c.id === requestId);
-              if (minimizedChat && minimizedChat.unreadCount !== updatedRequest.unreadCount) {
-                useAppStore.setState(state => ({
-                  minimizedChats: state.minimizedChats.map(c => 
-                    c.id === requestId ? { ...c, unreadCount: updatedRequest.unreadCount } : c
-                  )
-                }));
-              }
-            }
+            // Sync effect will update minimized chat
             
             // Dispatch event to sync with AgencyRequestsView
             window.dispatchEvent(new CustomEvent('service-request-updated', {
@@ -1324,9 +1337,10 @@ export function ChatListPanel() {
                                      (isMinimizedMyRequest && (senderType === 'agency' || senderType === 'admin')) ||
                                      (isMinimizedAgencyRequest && senderType === 'client');
           
+          // For minimized chats: the unread count was already synced from engagements/requests above
+          // Just play the sound notification - no separate increment needed
           if (isMinimized && isFromCounterparty) {
-            console.log('[ChatListPanel] Chat is minimized, incrementing unread');
-            useAppStore.getState().incrementMinimizedChatUnread(requestId);
+            console.log('[ChatListPanel] Chat is minimized, playing sound (unread already synced from engagement/request)');
             playMessageSound();
           } else if (!isDialogOpen) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
