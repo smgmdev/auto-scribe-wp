@@ -203,9 +203,9 @@ export function AdminEngagementsView() {
                   onClick={() => handleOpenChat(r)}
                 >
                   {!r.read && (
-                    <div className="absolute top-3 left-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                    <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
                   )}
-                  <CardContent className={`p-4 flex justify-between items-start ${!r.read ? 'pl-8' : ''}`}>
+                  <CardContent className="p-4 flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
                         <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
