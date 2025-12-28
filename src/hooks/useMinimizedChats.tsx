@@ -101,23 +101,21 @@ export function useMinimizedChats() {
           const reqInfo = requestInfoMap[chat.request_id];
           const messages = messagesByRequest[chat.request_id] || [];
           
-          // Use persisted unread count from DB first
-          let unreadCount = chat.unread_count || 0;
+          // Always count messages after last_read_at to sync with messaging widget
+          let unreadCount = 0;
           
-          // If persisted count is 0, count messages after last_read_at
-          if (unreadCount === 0 && reqInfo) {
-            const hasUnread = isMyEngagement ? !reqInfo.client_read : !reqInfo.agency_read;
+          if (reqInfo && messages.length > 0) {
             const lastReadAt = isMyEngagement ? reqInfo.client_last_read_at : reqInfo.agency_last_read_at;
             
-            if (hasUnread && messages.length > 0) {
-              const counterpartySenderType = isMyEngagement ? 'agency' : 'client';
+            for (const msg of messages) {
+              // For my engagements, count agency/admin messages; for agency requests, count client messages
+              const isCountable = isMyEngagement 
+                ? (msg.sender_type === 'agency' || msg.sender_type === 'admin')
+                : msg.sender_type === 'client';
               
-              for (const msg of messages) {
-                if (msg.sender_type === counterpartySenderType || (isMyEngagement && msg.sender_type === 'admin')) {
-                  // Count if no lastReadAt or message is after lastReadAt
-                  if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
-                    unreadCount++;
-                  }
+              if (isCountable) {
+                if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                  unreadCount++;
                 }
               }
             }
