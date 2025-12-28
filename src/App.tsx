@@ -52,7 +52,7 @@ const usePreventBodyStyleChanges = () => {
 const App = () => {
   usePreventBodyStyleChanges();
   
-  // HMR refresh
+  // HMR refresh v2
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
