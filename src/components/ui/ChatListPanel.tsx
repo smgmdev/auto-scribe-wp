@@ -1657,10 +1657,10 @@ export function ChatListPanel() {
           const text = textWithoutAttachment.length > 30 
             ? textWithoutAttachment.slice(0, 30) + '...' 
             : textWithoutAttachment;
-          return { text: '📎 Attachment: ' + text, type: 'attachment' };
+          return { text: 'Attachment: ' + text, type: 'attachment' };
         }
         // Pure attachment message
-        return { text: '📎 Attachment', type: 'attachment' };
+        return { text: 'Attachment', type: 'attachment' };
       }
       
       // Remove reply quotes - formats like "> quoted text\nactual message" or ":quoted actual"
