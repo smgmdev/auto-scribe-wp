@@ -260,7 +260,8 @@ export const useAppStore = create<AppState>()((set) => ({
     // Don't add if already minimized
     if (state.minimizedChats.some(c => c.id === chat.id)) return state;
     // Max 4 chats, remove oldest if needed
-    const newChats = [...state.minimizedChats, { ...chat, unreadCount: 0 }].slice(-4);
+    // Preserve the unreadCount from the chat if provided, otherwise default to 0
+    const newChats = [...state.minimizedChats, { ...chat, unreadCount: chat.unreadCount ?? 0 }].slice(-4);
     return { minimizedChats: newChats };
   }),
   removeMinimizedChat: (id) => set((state) => ({
