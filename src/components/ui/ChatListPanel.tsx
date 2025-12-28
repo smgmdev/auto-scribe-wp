@@ -689,12 +689,13 @@ export function ChatListPanel() {
       request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isMyEngagement, isServiceRequest 
     });
     
-    // Update local state immediately to show unread UI (only for counterparty messages)
+    // Update last message in local state immediately for UI responsiveness
+    // Don't set read: false here - let the postgres_changes subscription handle it after DB update
     if (isMyEngagement && isFromAgency) {
       setMyEngagements(prev => {
         const updated = prev.map(e => 
           e.id === request_id 
-            ? { ...e, lastMessage: message, lastMessageTime: new Date().toISOString(), read: false }
+            ? { ...e, lastMessage: message, lastMessageTime: new Date().toISOString() }
             : e
         );
         myEngagementsRef.current = updated;
@@ -706,18 +707,17 @@ export function ChatListPanel() {
       setServiceRequests(prev => {
         const updated = prev.map(r => 
           r.id === request_id 
-            ? { ...r, lastMessage: message, lastMessageTime: messageTime, read: false }
+            ? { ...r, lastMessage: message, lastMessageTime: messageTime }
             : r
         );
         serviceRequestsRef.current = updated;
         return updated;
       });
       
-      // Dispatch event to sync with AgencyRequestsView
+      // Dispatch event to sync with AgencyRequestsView (for last message only)
       window.dispatchEvent(new CustomEvent('service-request-updated', {
         detail: {
           id: request_id,
-          read: false,
           lastMessage: message,
           lastMessageTime: messageTime
         }
@@ -747,18 +747,14 @@ export function ChatListPanel() {
       useAppStore.getState().incrementMinimizedChatUnread(request_id);
       playMessageSound();
     } else if (!isDialogOpen) {
-      // Mark request as unread for the appropriate party in database (async, non-blocking)
-      // For user engagements (receiving from agency), mark client_read as false
-      // For agency requests (receiving from client), mark agency_read as false
+      // Mark request as unread for the appropriate party in database
+      // The postgres_changes subscription will sync the read state to local state
       
-      // Only increment unread for messages FROM the counterparty
       if (isMyEngagement && isFromAgency) {
         supabase
           .from('service_requests')
           .update({ client_read: false })
           .eq('id', request_id);
-        incrementUserUnreadEngagementsCount();
-        incrementUnreadMessageCount(request_id);
         
         toast({
           title: 'New Message',
@@ -772,8 +768,6 @@ export function ChatListPanel() {
           .from('service_requests')
           .update({ agency_read: false })
           .eq('id', request_id);
-        incrementAgencyUnreadServiceRequestsCount();
-        incrementUnreadMessageCount(request_id);
         
         toast({
           title: 'New Client Message',
@@ -1086,25 +1080,23 @@ export function ChatListPanel() {
             return;
           }
           
-          // For received messages (not own), update last message AND mark as unread locally
-          // Only mark as unread when message is FROM the counterparty
+          // For received messages (not own), update last message only
+          // Don't set read: false locally - let the postgres_changes subscription for service_requests handle it
           if (isMyEngagement) {
-            const isFromAgency = senderType === 'agency' || senderType === 'admin';
             setMyEngagements(prev => {
               const updated = prev.map(e => 
                 e.id === requestId 
-                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: isFromAgency ? false : e.read }
+                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
                   : e
               );
               myEngagementsRef.current = updated;
               return updated;
             });
             
-            // Dispatch event to sync with MyRequestsView
+            // Dispatch event to sync with MyRequestsView (last message only)
             window.dispatchEvent(new CustomEvent('my-engagement-updated', {
               detail: {
                 id: requestId,
-                read: isFromAgency ? false : undefined,
                 lastMessage: newMsg.message,
                 lastMessageTime: newMsg.created_at,
                 senderId: newMsg.sender_id,
@@ -1113,28 +1105,24 @@ export function ChatListPanel() {
             }));
           }
           if (isServiceRequest) {
-            const isFromClient = senderType === 'client';
             setServiceRequests(prev => {
               const updated = prev.map(r => 
                 r.id === requestId 
-                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, read: isFromClient ? false : r.read }
+                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
                   : r
               );
               serviceRequestsRef.current = updated;
               return updated;
             });
             
-            // Dispatch event to sync with AgencyRequestsView
-            if (isFromClient) {
-              window.dispatchEvent(new CustomEvent('service-request-updated', {
-                detail: {
-                  id: requestId,
-                  read: false,
-                  lastMessage: newMsg.message,
-                  lastMessageTime: newMsg.created_at
-                }
-              }));
-            }
+            // Dispatch event to sync with AgencyRequestsView (last message only)
+            window.dispatchEvent(new CustomEvent('service-request-updated', {
+              detail: {
+                id: requestId,
+                lastMessage: newMsg.message,
+                lastMessageTime: newMsg.created_at
+              }
+            }));
           }
           // Update disputes for admin with received messages
           if (isDisputedChat) {
@@ -1169,17 +1157,13 @@ export function ChatListPanel() {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
             // Mark request as unread for the appropriate party in database
-            // For user engagements receiving from agency, mark client_read as false
-            // For agency service requests receiving from client, mark agency_read as false
+            // The postgres_changes subscription will sync the read state to local state
             
-            // Only increment unread for messages FROM the counterparty (not own messages)
             if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
               await supabase
                 .from('service_requests')
                 .update({ client_read: false })
                 .eq('id', requestId);
-              incrementUserUnreadEngagementsCount();
-              incrementUnreadMessageCount(requestId);
               
               // Get request info for toast
               const request = myEngagementsRef.current.find(e => e.id === requestId);
@@ -1195,8 +1179,6 @@ export function ChatListPanel() {
                 .from('service_requests')
                 .update({ agency_read: false })
                 .eq('id', requestId);
-              incrementAgencyUnreadServiceRequestsCount();
-              incrementUnreadMessageCount(requestId);
               
               // Get request info for toast
               const request = serviceRequestsRef.current.find(r => r.id === requestId);
@@ -1603,8 +1585,8 @@ export function ChatListPanel() {
     }
 
     return items.map((item) => {
+      // Use item.read from database (synced via postgres_changes)
       const hasUnread = !item.read;
-      const unreadCount = unreadMessageCounts[item.id] || 0;
       
       return (
         <div
@@ -1614,7 +1596,7 @@ export function ChatListPanel() {
           }`}
           onClick={() => handleOpenChat(item, type)}
         >
-          {/* Avatar/Favicon with notification badge */}
+          {/* Avatar/Favicon with notification indicator */}
           <div className="shrink-0 relative">
             {item.media_site?.favicon ? (
               <img 
@@ -1627,11 +1609,9 @@ export function ChatListPanel() {
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
-            {/* Unread count badge */}
-            {(hasUnread || unreadCount > 0) && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-blue-500 text-white text-[10px] font-bold rounded-full border-2 border-card">
-                {unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount) : '•'}
-              </span>
+            {/* Unread indicator dot */}
+            {hasUnread && (
+              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
             )}
           </div>
 
@@ -1641,16 +1621,9 @@ export function ChatListPanel() {
               <span className={`font-medium text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
                 {item.media_site?.name || item.title}
               </span>
-              <div className="flex items-center gap-1.5 shrink-0">
-                {unreadCount > 0 && (
-                  <Badge className="h-4 min-w-[16px] text-[10px] bg-blue-500 text-white px-1">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </Badge>
-                )}
-                <span className="text-xs text-muted-foreground">
-                  {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
-                </span>
-              </div>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
+              </span>
             </div>
             <MessagePreview 
               message={item.lastMessage} 
