@@ -200,24 +200,30 @@ export function ChatListPanel() {
 
       const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
-        // Count agency/admin messages (messages from counterparty)
-        const agencyMessages = allMessages.filter(
-          m => m.request_id === item.id && m.sender_type !== 'client'
-        );
-        const agencyMessageCount = agencyMessages.length;
+        const isUnread = !(item as any).client_read;
         
-        // If client_read is false and there are agency messages, mark as unread
-        const isUnread = !(item as any).client_read && agencyMessageCount > 0;
+        // Count consecutive messages from counterparty at the end of conversation
+        // Messages are already sorted by created_at DESC, so we count from the start
+        const itemMessages = allMessages.filter(m => m.request_id === item.id);
+        let unreadCount = 0;
         
-        // Don't set unreadMessageCounts here - that's for tracking NEW messages
-        // while a chat is open/minimized. The initial unread state is in item.read
+        if (isUnread) {
+          for (const msg of itemMessages) {
+            if (msg.sender_type === 'agency' || msg.sender_type === 'admin') {
+              unreadCount++;
+            } else {
+              // Stop counting when we hit a message from the client
+              break;
+            }
+          }
+        }
         
         return {
           ...item,
           read: !isUnread,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: isUnread ? agencyMessageCount : 0,
+          unreadCount,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
@@ -287,21 +293,28 @@ export function ChatListPanel() {
         const lastMsg = lastMessages[item.id];
         const isUnread = !(item as any).agency_read;
         
-        // Count client messages (messages from counterparty for agency)
-        const clientMessages = allMessages.filter(
-          m => m.request_id === item.id && m.sender_type === 'client'
-        );
-        const clientMessageCount = clientMessages.length;
+        // Count consecutive messages from client at the end of conversation
+        // Messages are already sorted by created_at DESC, so we count from the start
+        const itemMessages = allMessages.filter(m => m.request_id === item.id);
+        let unreadCount = 0;
         
-        // Don't set unreadMessageCounts here - that's for tracking NEW messages
-        // while a chat is open/minimized. The initial unread state is in item.read
+        if (isUnread) {
+          for (const msg of itemMessages) {
+            if (msg.sender_type === 'client') {
+              unreadCount++;
+            } else {
+              // Stop counting when we hit a message from the agency
+              break;
+            }
+          }
+        }
         
         return {
           ...item,
           read: (item as any).agency_read,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
-          unreadCount: isUnread && clientMessageCount > 0 ? clientMessageCount : 0,
+          unreadCount,
           favicon: item.media_site?.favicon,
         };
       }) as ChatItem[];
@@ -1621,9 +1634,11 @@ export function ChatListPanel() {
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
-            {/* Unread indicator dot */}
+            {/* Unread indicator with count */}
             {hasUnread && !isOpening && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-blue-500 text-white text-[10px] font-bold rounded-full border-2 border-card">
+                {item.unreadCount > 0 ? (item.unreadCount > 99 ? '99+' : item.unreadCount) : ''}
+              </span>
             )}
           </div>
 
