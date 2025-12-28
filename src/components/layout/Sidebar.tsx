@@ -131,7 +131,6 @@ export function Sidebar({
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
     incrementAdminUnreadEngagementsCount,
-    decrementAdminUnreadEngagementsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -435,7 +434,7 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
-  // Real-time subscription for admin engagement notifications
+  // Real-time subscription for admin engagement notifications (new requests only)
   useEffect(() => {
     if (!user || !isAdmin) return;
 
@@ -453,22 +452,6 @@ export function Sidebar({
           // Increment the admin engagement count when a new request is created
           if (payload.new && (payload.new as any).status !== 'cancelled') {
             incrementAdminUnreadEngagementsCount();
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'service_requests'
-        },
-        (payload) => {
-          // When a service request is marked as read, update the count
-          const oldData = payload.old as { read?: boolean };
-          const newData = payload.new as { read?: boolean; status?: string };
-          if (oldData.read === false && newData.read === true) {
-            decrementAdminUnreadEngagementsCount();
           }
         }
       )
