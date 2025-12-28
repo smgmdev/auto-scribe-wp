@@ -1401,7 +1401,10 @@ export function ChatListPanel() {
           supabase
             .from('service_requests')
             .update({ client_read: true, client_last_read_at: new Date().toISOString() })
-            .eq('id', item.id);
+            .eq('id', item.id)
+            .then(({ error }) => {
+              if (error) console.error('[ChatListPanel] Error updating client_read:', error);
+            });
           setMyEngagements(prev => {
             const updated = prev.map(e => 
               e.id === item.id ? { ...e, read: true, unreadCount: 0 } : e
@@ -1418,7 +1421,10 @@ export function ChatListPanel() {
           supabase
             .from('service_requests')
             .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
-            .eq('id', item.id);
+            .eq('id', item.id)
+            .then(({ error }) => {
+              if (error) console.error('[ChatListPanel] Error updating agency_read:', error);
+            });
           setServiceRequests(prev => {
             const updated = prev.map(r => 
               r.id === item.id ? { ...r, read: true, unreadCount: 0 } : r
