@@ -34,7 +34,7 @@ export function MainLayout({
     if (chat.type === 'my-request') {
       supabase
         .from('service_requests')
-        .update({ client_read: true })
+        .update({ client_read: true, client_last_read_at: new Date().toISOString() })
         .eq('id', chat.id);
       
       // Dispatch event to sync with ChatListPanel and MyRequestsView
@@ -44,7 +44,7 @@ export function MainLayout({
     } else {
       supabase
         .from('service_requests')
-        .update({ agency_read: true })
+        .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
         .eq('id', chat.id);
       
       // Dispatch event to sync with ChatListPanel and AgencyRequestsView

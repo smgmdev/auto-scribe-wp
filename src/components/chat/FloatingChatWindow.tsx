@@ -854,10 +854,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       // Use actualSenderType to determine which read field to update
       // Client updates client_read, agency updates agency_read
+      const now = new Date().toISOString();
       const updateField = actualSenderType === 'agency' 
-        ? { agency_read: true } 
+        ? { agency_read: true, agency_last_read_at: now } 
         : actualSenderType === 'client'
-          ? { client_read: true }
+          ? { client_read: true, client_last_read_at: now }
           : {}; // Admin doesn't update read fields
       
       if (Object.keys(updateField).length > 0) {

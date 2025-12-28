@@ -835,9 +835,11 @@ export type Database = {
       }
       service_requests: {
         Row: {
+          agency_last_read_at: string | null
           agency_payout_id: string | null
           agency_read: boolean
           cancellation_reason: string | null
+          client_last_read_at: string | null
           client_read: boolean
           created_at: string
           description: string
@@ -851,9 +853,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          agency_last_read_at?: string | null
           agency_payout_id?: string | null
           agency_read?: boolean
           cancellation_reason?: string | null
+          client_last_read_at?: string | null
           client_read?: boolean
           created_at?: string
           description: string
@@ -867,9 +871,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          agency_last_read_at?: string | null
           agency_payout_id?: string | null
           agency_read?: boolean
           cancellation_reason?: string | null
+          client_last_read_at?: string | null
           client_read?: boolean
           created_at?: string
           description?: string

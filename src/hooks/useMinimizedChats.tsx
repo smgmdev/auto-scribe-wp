@@ -47,10 +47,10 @@ export function useMinimizedChats() {
 
       const requestIds = data.map(chat => chat.request_id);
       
-      // Get service requests with read status to sync with ChatListPanel
+      // Get service requests with read status and timestamps
       const { data: requestsData } = await supabase
         .from('service_requests')
-        .select('id, client_read, agency_read, user_id')
+        .select('id, client_read, agency_read, client_last_read_at, agency_last_read_at, user_id')
         .in('id', requestIds);
 
       // Get all messages for these requests to count unread
@@ -61,27 +61,30 @@ export function useMinimizedChats() {
         .order('created_at', { ascending: false });
 
       // Create map for read status
-      const requestInfoMap: Record<string, { client_read: boolean; agency_read: boolean; user_id: string }> = {};
+      const requestInfoMap: Record<string, { 
+        client_read: boolean; 
+        agency_read: boolean; 
+        client_last_read_at: string | null;
+        agency_last_read_at: string | null;
+        user_id: string 
+      }> = {};
       requestsData?.forEach(req => {
         requestInfoMap[req.id] = { 
           client_read: req.client_read, 
           agency_read: req.agency_read,
+          client_last_read_at: req.client_last_read_at,
+          agency_last_read_at: req.agency_last_read_at,
           user_id: req.user_id
         };
       });
 
-      // Count unread messages per request
-      // For user engagements: count consecutive messages from agency at the end
-      // For agency requests: count consecutive messages from client at the end
-      const unreadCountMap: Record<string, number> = {};
-      
       // Group messages by request_id (already sorted by created_at desc)
-      const messagesByRequest: Record<string, { sender_type: string }[]> = {};
+      const messagesByRequest: Record<string, { sender_type: string; created_at: string }[]> = {};
       messagesData?.forEach(msg => {
         if (!messagesByRequest[msg.request_id]) {
           messagesByRequest[msg.request_id] = [];
         }
-        messagesByRequest[msg.request_id].push({ sender_type: msg.sender_type });
+        messagesByRequest[msg.request_id].push({ sender_type: msg.sender_type, created_at: msg.created_at });
       });
 
       // Mark as loaded for this user BEFORE modifying state
@@ -101,20 +104,20 @@ export function useMinimizedChats() {
           // Use persisted unread count from DB first
           let unreadCount = chat.unread_count || 0;
           
-          // If persisted count is 0, check the read status and count unread messages
+          // If persisted count is 0, count messages after last_read_at
           if (unreadCount === 0 && reqInfo) {
             const hasUnread = isMyEngagement ? !reqInfo.client_read : !reqInfo.agency_read;
+            const lastReadAt = isMyEngagement ? reqInfo.client_last_read_at : reqInfo.agency_last_read_at;
             
             if (hasUnread && messages.length > 0) {
-              // Count consecutive messages from counterparty at the end
               const counterpartySenderType = isMyEngagement ? 'agency' : 'client';
               
               for (const msg of messages) {
-                if (msg.sender_type === counterpartySenderType || msg.sender_type === 'admin') {
-                  unreadCount++;
-                } else {
-                  // Stop counting when we hit a message from the current party
-                  break;
+                if (msg.sender_type === counterpartySenderType || (isMyEngagement && msg.sender_type === 'admin')) {
+                  // Count if no lastReadAt or message is after lastReadAt
+                  if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                    unreadCount++;
+                  }
                 }
               }
             }
