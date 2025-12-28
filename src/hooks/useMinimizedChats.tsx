@@ -45,42 +45,6 @@ export function useMinimizedChats() {
         return;
       }
 
-      // Fetch read status and check for agency replies for all minimized chat requests
-      const requestIds = data.map(chat => chat.request_id);
-      
-      // Get service requests with client_read status
-      const { data: requestsData } = await supabase
-        .from('service_requests')
-        .select('id, client_read, agency_read, user_id')
-        .in('id', requestIds);
-
-      // Get messages to count unread messages from counterparty
-      const { data: messagesData } = await supabase
-        .from('service_messages')
-        .select('request_id, sender_type')
-        .in('request_id', requestIds);
-
-      // Create maps for read status and agency replies
-      const requestInfoMap: Record<string, { client_read: boolean; agency_read: boolean; user_id: string }> = {};
-      requestsData?.forEach(req => {
-        requestInfoMap[req.id] = { 
-          client_read: req.client_read, 
-          agency_read: req.agency_read,
-          user_id: req.user_id
-        };
-      });
-
-      // Count messages from counterparty for each request
-      const agencyMessageCounts: Record<string, number> = {};
-      const clientMessageCounts: Record<string, number> = {};
-      messagesData?.forEach(msg => {
-        if (msg.sender_type !== 'client') {
-          agencyMessageCounts[msg.request_id] = (agencyMessageCounts[msg.request_id] || 0) + 1;
-        } else {
-          clientMessageCounts[msg.request_id] = (clientMessageCounts[msg.request_id] || 0) + 1;
-        }
-      });
-
       // Mark as loaded for this user BEFORE modifying state
       loadedUserIdRef.current = user.id;
       
@@ -88,52 +52,17 @@ export function useMinimizedChats() {
       const currentChats = useAppStore.getState().minimizedChats;
       
       // Only add chats that aren't already in the store
+      // Load the persisted unread_count from the database
       data?.forEach(chat => {
         const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
-          const reqInfo = requestInfoMap[chat.request_id];
-          const isMyEngagement = chat.chat_type === 'my-request';
-          
-          // Calculate unread count based on unread messages from counterparty
-          let unreadCount = 0;
-          
-          if (isMyEngagement) {
-            // For user's engagements: count is based on client_read being false AND having agency messages
-            const agencyCount = agencyMessageCounts[chat.request_id] || 0;
-            if (!reqInfo?.client_read && agencyCount > 0) {
-              unreadCount = agencyCount;
-            }
-            console.log('[useMinimizedChats] My engagement unread check:', {
-              chatId: chat.request_id,
-              client_read: reqInfo?.client_read,
-              agencyCount,
-              unreadCount
-            });
-          } else {
-            // For agency requests: count is based on agency_read being false AND having client messages
-            const clientCount = clientMessageCounts[chat.request_id] || 0;
-            if (!reqInfo?.agency_read && clientCount > 0) {
-              unreadCount = clientCount;
-            }
-            console.log('[useMinimizedChats] Agency request unread check:', {
-              chatId: chat.request_id,
-              agency_read: reqInfo?.agency_read,
-              clientCount,
-              unreadCount
-            });
-          }
-          
           addToStore({
             id: chat.request_id,
             title: chat.title,
             favicon: chat.media_site_favicon,
             type: chat.chat_type as 'agency-request' | 'my-request',
-            unreadCount,
+            unreadCount: (chat as any).unread_count || 0,
           });
-          
-          // DON'T set unreadMessageCounts here - that's for tracking NEW messages
-          // while the chat is minimized. The initial unread state is handled
-          // by the chat.unreadCount property set above.
         }
       });
     };
@@ -148,7 +77,7 @@ export function useMinimizedChats() {
     // Add to store immediately for responsive UI
     addToStore(chat);
 
-    // Check if already exists (upsert behavior)
+    // Check if already exists (upsert behavior) - save with initial unread count
     const { error } = await supabase
       .from('minimized_chats')
       .upsert({
@@ -157,6 +86,7 @@ export function useMinimizedChats() {
         title: chat.title,
         media_site_favicon: chat.favicon,
         chat_type: chat.type,
+        unread_count: chat.unreadCount || 0,
       }, {
         onConflict: 'user_id,request_id',
       });
