@@ -10,10 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
-import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore';
-import { useMinimizedChats } from '@/hooks/useMinimizedChats';
+import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
-import { MinimizedChats } from '@/components/ui/MinimizedChats';
 import { ChatListPanel } from '@/components/ui/ChatListPanel';
 import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import amblack from '@/assets/amblack.png';
@@ -64,8 +62,7 @@ const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaig
 const Landing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { setPreselectedSiteId, setCurrentView, openGlobalChat, clearUnreadMessageCount } = useAppStore();
-  const { removeMinimizedChat } = useMinimizedChats();
+  const { setPreselectedSiteId, setCurrentView } = useAppStore();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
@@ -1036,30 +1033,6 @@ const Landing = () => {
     {user && (
       <>
         <ChatListPanel />
-        <MinimizedChats onOpenChat={async (chat: MinimizedChat) => {
-          removeMinimizedChat(chat.id);
-          clearUnreadMessageCount(chat.id);
-          
-          const { data } = await supabase
-            .from('service_requests')
-            .select(`
-              id,
-              title,
-              description,
-              status,
-              read,
-              created_at,
-              updated_at,
-              media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-              order:orders(id, status, delivery_status, delivery_deadline)
-            `)
-            .eq('id', chat.id)
-            .single();
-
-          if (data) {
-            openGlobalChat(data as unknown as GlobalChatRequest, chat.type);
-          }
-        }} />
         <GlobalChatDialog />
       </>
     )}

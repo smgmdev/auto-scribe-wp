@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Minus, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
-import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
 
 interface ServiceMessage {
@@ -50,7 +49,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     clearUnreadMessageCount,
     updateChatPosition
   } = useAppStore();
-  const { addMinimizedChat } = useMinimizedChats();
   
   const globalChatRequest = chat.request;
   const globalChatType = chat.type;
@@ -1765,20 +1763,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return cleanMessage;
   };
 
-  const handleMinimize = () => {
-    if (globalChatRequest) {
-      // Use actualSenderType to determine correct type for minimized chat
-      const chatType = actualSenderType === 'client' ? 'my-request' : 'agency-request';
-      addMinimizedChat({
-        id: globalChatRequest.id,
-        title: globalChatRequest.media_site?.name || globalChatRequest.title,
-        favicon: globalChatRequest.media_site?.favicon,
-        type: chatType
-      });
-      closeGlobalChat(globalChatRequest.id);
-    }
-  };
-
   const handleClose = () => {
     closeGlobalChat(globalChatRequest.id);
   };
@@ -2254,15 +2238,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <Info className="h-4 w-4" />
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                onClick={handleMinimize}
-                title="Minimize"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
