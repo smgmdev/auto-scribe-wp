@@ -598,6 +598,7 @@ export type Database = {
           media_site_name: string | null
           request_id: string
           title: string
+          unread_count: number
           user_id: string
         }
         Insert: {
@@ -608,6 +609,7 @@ export type Database = {
           media_site_name?: string | null
           request_id: string
           title: string
+          unread_count?: number
           user_id: string
         }
         Update: {
@@ -618,6 +620,7 @@ export type Database = {
           media_site_name?: string | null
           request_id?: string
           title?: string
+          unread_count?: number
           user_id?: string
         }
         Relationships: []

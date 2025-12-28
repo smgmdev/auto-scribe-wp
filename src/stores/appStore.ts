@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Headline, Article } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface MinimizedChat {
   id: string;
@@ -273,13 +274,35 @@ export const useAppStore = create<AppState>()((set) => ({
       c.id === id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
     );
     console.log('[AppStore] Updated chats:', updated.map(c => ({ id: c.id, unreadCount: c.unreadCount })));
+    
+    // Persist to database
+    const newCount = updated.find(c => c.id === id)?.unreadCount || 0;
+    supabase
+      .from('minimized_chats')
+      .update({ unread_count: newCount })
+      .eq('request_id', id)
+      .then(({ error }) => {
+        if (error) console.error('[AppStore] Error persisting unread count:', error);
+      });
+    
     return { minimizedChats: updated };
   }),
-  clearMinimizedChatUnread: (id) => set((state) => ({
-    minimizedChats: state.minimizedChats.map(c => 
-      c.id === id ? { ...c, unreadCount: 0 } : c
-    )
-  })),
+  clearMinimizedChatUnread: (id) => set((state) => {
+    // Persist to database
+    supabase
+      .from('minimized_chats')
+      .update({ unread_count: 0 })
+      .eq('request_id', id)
+      .then(({ error }) => {
+        if (error) console.error('[AppStore] Error clearing unread count:', error);
+      });
+    
+    return {
+      minimizedChats: state.minimizedChats.map(c => 
+        c.id === id ? { ...c, unreadCount: 0 } : c
+      )
+    };
+  }),
   clearMinimizedChats: () => set({ minimizedChats: [] }),
   
   // Pending chat to open
