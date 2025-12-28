@@ -397,7 +397,7 @@ export function MyRequestsView() {
     if (!request.read) {
       supabase
         .from('service_requests')
-        .update({ client_read: true })
+        .update({ client_read: true, client_last_read_at: new Date().toISOString() })
         .eq('id', request.id)
         .then(() => {
           // Decrement the sidebar notification count

@@ -161,6 +161,7 @@ export function ChatListPanel() {
         description,
         status,
         client_read,
+        client_last_read_at,
         cancellation_reason,
         created_at,
         updated_at,
@@ -201,19 +202,19 @@ export function ChatListPanel() {
       const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
         const isUnread = !(item as any).client_read;
+        const lastReadAt = (item as any).client_last_read_at;
         
-        // Count consecutive messages from counterparty at the end of conversation
-        // Messages are already sorted by created_at DESC, so we count from the start
+        // Count messages from counterparty sent after last_read_at
         const itemMessages = allMessages.filter(m => m.request_id === item.id);
         let unreadCount = 0;
         
         if (isUnread) {
           for (const msg of itemMessages) {
+            // Only count messages from agency/admin that are after last_read_at
             if (msg.sender_type === 'agency' || msg.sender_type === 'admin') {
-              unreadCount++;
-            } else {
-              // Stop counting when we hit a message from the client
-              break;
+              if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                unreadCount++;
+              }
             }
           }
         }
@@ -247,6 +248,7 @@ export function ChatListPanel() {
         description,
         status,
         agency_read,
+        agency_last_read_at,
         cancellation_reason,
         created_at,
         updated_at,
@@ -267,7 +269,7 @@ export function ChatListPanel() {
       // Fetch all messages for each request to calculate unread counts
       const requestIds = data.map(r => r.id);
       let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
-      let allMessages: { request_id: string; sender_type: string }[] = [];
+      let allMessages: { request_id: string; sender_type: string; created_at: string }[] = [];
       
       if (requestIds.length > 0) {
         const { data: messagesData } = await supabase
@@ -277,7 +279,7 @@ export function ChatListPanel() {
           .order('created_at', { ascending: false });
         
         messagesData?.forEach(msg => {
-          allMessages.push({ request_id: msg.request_id, sender_type: msg.sender_type });
+          allMessages.push({ request_id: msg.request_id, sender_type: msg.sender_type, created_at: msg.created_at });
           
           if (!lastMessages[msg.request_id]) {
             lastMessages[msg.request_id] = { 
@@ -292,19 +294,18 @@ export function ChatListPanel() {
       const requests = data.map(item => {
         const lastMsg = lastMessages[item.id];
         const isUnread = !(item as any).agency_read;
+        const lastReadAt = (item as any).agency_last_read_at;
         
-        // Count consecutive messages from client at the end of conversation
-        // Messages are already sorted by created_at DESC, so we count from the start
+        // Count messages from client sent after last_read_at
         const itemMessages = allMessages.filter(m => m.request_id === item.id);
         let unreadCount = 0;
         
         if (isUnread) {
           for (const msg of itemMessages) {
             if (msg.sender_type === 'client') {
-              unreadCount++;
-            } else {
-              // Stop counting when we hit a message from the agency
-              break;
+              if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                unreadCount++;
+              }
             }
           }
         }
@@ -1370,7 +1371,7 @@ export function ChatListPanel() {
         if (type === 'my-request') {
           supabase
             .from('service_requests')
-            .update({ client_read: true })
+            .update({ client_read: true, client_last_read_at: new Date().toISOString() })
             .eq('id', item.id);
           setMyEngagements(prev => prev.map(e => 
             e.id === item.id ? { ...e, read: true } : e
@@ -1383,7 +1384,7 @@ export function ChatListPanel() {
         } else {
           supabase
             .from('service_requests')
-            .update({ agency_read: true })
+            .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
             .eq('id', item.id);
           setServiceRequests(prev => prev.map(r => 
             r.id === item.id ? { ...r, read: true } : r
@@ -1634,9 +1635,11 @@ export function ChatListPanel() {
                 <MessageSquare className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
-            {/* Unread indicator dot - just a dot, no count since we can't accurately track on load */}
+            {/* Unread indicator with count */}
             {hasUnread && !isOpening && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-blue-500 text-white text-[10px] font-bold rounded-full border-2 border-card">
+                {item.unreadCount > 0 ? (item.unreadCount > 99 ? '99+' : item.unreadCount) : ''}
+              </span>
             )}
           </div>
 
