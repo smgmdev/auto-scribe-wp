@@ -1088,13 +1088,18 @@ export function ChatListPanel() {
             return;
           }
           
-          // For received messages (not own), update last message only
-          // Don't set read: false locally - let the postgres_changes subscription for service_requests handle it
+          // For received messages (not own), update last message and increment unread count
           if (isMyEngagement) {
             setMyEngagements(prev => {
               const updated = prev.map(e => 
                 e.id === requestId 
-                  ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  ? { 
+                      ...e, 
+                      lastMessage: newMsg.message, 
+                      lastMessageTime: newMsg.created_at,
+                      unreadCount: e.unreadCount + 1,
+                      read: false
+                    }
                   : e
               );
               myEngagementsRef.current = updated;
@@ -1116,7 +1121,13 @@ export function ChatListPanel() {
             setServiceRequests(prev => {
               const updated = prev.map(r => 
                 r.id === requestId 
-                  ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                  ? { 
+                      ...r, 
+                      lastMessage: newMsg.message, 
+                      lastMessageTime: newMsg.created_at,
+                      unreadCount: r.unreadCount + 1,
+                      read: false
+                    }
                   : r
               );
               serviceRequestsRef.current = updated;
@@ -1361,15 +1372,19 @@ export function ChatListPanel() {
       
       // Mark as read in database asynchronously (don't await)
       // Use client_read for my-request (user's engagements) and agency_read for agency-request
-      if (!item.read) {
+      if (!item.read || item.unreadCount > 0) {
         if (type === 'my-request') {
           supabase
             .from('service_requests')
             .update({ client_read: true, client_last_read_at: new Date().toISOString() })
             .eq('id', item.id);
-          setMyEngagements(prev => prev.map(e => 
-            e.id === item.id ? { ...e, read: true } : e
-          ));
+          setMyEngagements(prev => {
+            const updated = prev.map(e => 
+              e.id === item.id ? { ...e, read: true, unreadCount: 0 } : e
+            );
+            myEngagementsRef.current = updated;
+            return updated;
+          });
           
           // Dispatch event to sync with MyRequestsView
           window.dispatchEvent(new CustomEvent('my-engagement-updated', {
@@ -1380,9 +1395,13 @@ export function ChatListPanel() {
             .from('service_requests')
             .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
             .eq('id', item.id);
-          setServiceRequests(prev => prev.map(r => 
-            r.id === item.id ? { ...r, read: true } : r
-          ));
+          setServiceRequests(prev => {
+            const updated = prev.map(r => 
+              r.id === item.id ? { ...r, read: true, unreadCount: 0 } : r
+            );
+            serviceRequestsRef.current = updated;
+            return updated;
+          });
           
           // Dispatch event to sync with AgencyRequestsView
           window.dispatchEvent(new CustomEvent('service-request-updated', {
@@ -1559,11 +1578,13 @@ export function ChatListPanel() {
     );
   };
 
-  // Calculate total unread - for admins count disputes + investigation unreads, for others count requests
+  // Calculate total unread message count - sum up unreadCount for each chat
   const investigationsUnreadCount = investigations.reduce((acc, inv) => acc + (inv.unreadCount || 0), 0);
+  const myEngagementsUnreadCount = myEngagements.reduce((acc, e) => acc + (e.unreadCount || 0), 0);
+  const serviceRequestsUnreadCount = serviceRequests.reduce((acc, r) => acc + (r.unreadCount || 0), 0);
   const totalUnread = isAdmin 
     ? disputes.filter(d => !d.read).length + investigationsUnreadCount
-    : myEngagements.filter(e => !e.read).length + serviceRequests.filter(r => !r.read).length;
+    : myEngagementsUnreadCount + serviceRequestsUnreadCount;
 
   // Filter and sort items based on search query and last message time
   const filterAndSortItems = (items: ChatItem[]) => {
