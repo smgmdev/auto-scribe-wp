@@ -848,9 +848,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   }, [globalChatRequest?.order?.id]);
 
   // Clear unread when chat opens - use actualSenderType for correct field
+  // Also clear minimized chat unread to sync between widget and minimized chats
+  const clearMinimizedChatUnread = useAppStore((state) => state.clearMinimizedChatUnread);
+  
   useEffect(() => {
     if (globalChatRequest && senderId) {
       clearUnreadMessageCount(globalChatRequest.id);
+      
+      // Also clear minimized chat unread count to keep them in sync
+      clearMinimizedChatUnread(globalChatRequest.id);
       
       // Use actualSenderType to determine which read field to update
       // Client updates client_read, agency updates agency_read
@@ -871,7 +877,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           });
       }
     }
-  }, [globalChatRequest?.id, actualSenderType, senderId, clearUnreadMessageCount]);
+  }, [globalChatRequest?.id, actualSenderType, senderId, clearUnreadMessageCount, clearMinimizedChatUnread]);
 
   // Fetch sender ID and verify correct sender type based on actual data
   useEffect(() => {
@@ -1014,7 +1020,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           table: 'service_messages',
           filter: `request_id=eq.${globalChatRequest.id}`
         },
-        (payload) => {
+        async (payload) => {
           const newMsg = payload.new as ServiceMessage;
           if (newMsg.sender_type === senderType) return;
           
@@ -1022,6 +1028,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             if (prev.some(m => m.id === newMsg.id)) return prev;
             return [...prev, newMsg];
           });
+          
+          // Update last_read_at when receiving a message in an open chat
+          // This keeps the unread counts synced between widget and ChatListPanel
+          const now = new Date().toISOString();
+          const updateField = actualSenderType === 'agency' 
+            ? { agency_read: true, agency_last_read_at: now } 
+            : actualSenderType === 'client'
+              ? { client_read: true, client_last_read_at: now }
+              : null;
+          
+          if (updateField) {
+            await supabase
+              .from('service_requests')
+              .update(updateField)
+              .eq('id', globalChatRequest.id);
+          }
         }
       )
       .on(
@@ -1042,7 +1064,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [globalChatRequest?.id, senderType]);
+  }, [globalChatRequest?.id, senderType, actualSenderType]);
 
   // Presence tracking - use actualSenderType to determine agencyPayoutId
   useEffect(() => {
