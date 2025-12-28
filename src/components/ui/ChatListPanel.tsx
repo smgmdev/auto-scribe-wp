@@ -1643,7 +1643,23 @@ export function ChatListPanel() {
       if (cleanMessage.startsWith('[STATUS_')) {
         return { text: 'Status Update', type: 'status' };
       }
-      if (cleanMessage.startsWith('[ATTACHMENT]')) {
+      
+      // Check for attachments anywhere in the message (format: [ATTACHMENT]{...}[/ATTACHMENT])
+      const hasAttachment = cleanMessage.includes('[ATTACHMENT]');
+      if (hasAttachment) {
+        // Remove the attachment tag and its JSON content
+        const textWithoutAttachment = cleanMessage
+          .replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '')
+          .trim();
+        
+        // If there's text besides the attachment, show that text with attachment indicator
+        if (textWithoutAttachment) {
+          const text = textWithoutAttachment.length > 40 
+            ? textWithoutAttachment.slice(0, 40) + '... 📎' 
+            : textWithoutAttachment + ' 📎';
+          return { text, type: 'attachment' };
+        }
+        // Pure attachment message
         return { text: 'Attachment', type: 'attachment' };
       }
       
