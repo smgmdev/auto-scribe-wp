@@ -94,27 +94,32 @@ export function useMinimizedChats() {
           const reqInfo = requestInfoMap[chat.request_id];
           const isMyEngagement = chat.chat_type === 'my-request';
           
-          // For user's engagements: only show unread if client_read is false AND has agency messages
-          // For agency requests: only show unread if agency_read is false
-          let isUnread = false;
+          // Calculate unread count based on unread messages from counterparty
+          let unreadCount = 0;
           
           if (isMyEngagement) {
+            // For user's engagements: count is based on client_read being false AND having agency messages
             const agencyCount = agencyMessageCounts[chat.request_id] || 0;
-            isUnread = !reqInfo?.client_read && agencyCount > 0;
+            if (!reqInfo?.client_read && agencyCount > 0) {
+              unreadCount = agencyCount;
+            }
             console.log('[useMinimizedChats] My engagement unread check:', {
               chatId: chat.request_id,
               client_read: reqInfo?.client_read,
               agencyCount,
-              isUnread
+              unreadCount
             });
           } else {
+            // For agency requests: count is based on agency_read being false AND having client messages
             const clientCount = clientMessageCounts[chat.request_id] || 0;
-            isUnread = !reqInfo?.agency_read && clientCount > 0;
+            if (!reqInfo?.agency_read && clientCount > 0) {
+              unreadCount = clientCount;
+            }
             console.log('[useMinimizedChats] Agency request unread check:', {
               chatId: chat.request_id,
               agency_read: reqInfo?.agency_read,
               clientCount,
-              isUnread
+              unreadCount
             });
           }
           
@@ -123,7 +128,7 @@ export function useMinimizedChats() {
             title: chat.title,
             favicon: chat.media_site_favicon,
             type: chat.chat_type as 'agency-request' | 'my-request',
-            unreadCount: isUnread ? 1 : 0,
+            unreadCount,
           });
           
           // DON'T set unreadMessageCounts here - that's for tracking NEW messages
