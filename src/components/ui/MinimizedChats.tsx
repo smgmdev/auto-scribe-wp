@@ -69,6 +69,18 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
     // Clear unread counts from both sources when opening the chat
     clearMinimizedChatUnread(chat.id);
     clearUnreadMessageCount(chat.id);
+    
+    // Dispatch event immediately to update ChatListPanel
+    if (chat.type === 'my-request') {
+      window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+        detail: { id: chat.id, read: true }
+      }));
+    } else {
+      window.dispatchEvent(new CustomEvent('service-request-updated', {
+        detail: { id: chat.id, read: true }
+      }));
+    }
+    
     onOpenChat(chat);
   };
 
