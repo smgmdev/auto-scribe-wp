@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, Minus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar } from 'lucide-react';
+import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useMinimizedChats } from '@/hooks/useMinimizedChats';
-import { useAppStore, MinimizedChat } from '@/stores/appStore';
+import { useAppStore } from '@/stores/appStore';
 
 interface ServiceRequest {
   id: string;
@@ -99,7 +98,6 @@ export function AdminFloatingChat({
   zIndex = 1000
 }: AdminFloatingChatProps) {
   const { user } = useAuth();
-  const { addMinimizedChat } = useMinimizedChats();
   const { incrementUnreadMessageCount } = useAppStore();
   
   const [messages, setMessages] = useState<ServiceMessage[]>(initialMessages);
@@ -652,18 +650,6 @@ export function AdminFloatingChat({
     }
   };
 
-  const handleMinimize = () => {
-    const minimizedChat: MinimizedChat = {
-      id: request.id,
-      title: request.title,
-      favicon: request.media_sites?.favicon || undefined,
-      type: 'agency-request',
-      unreadCount: 0
-    };
-    addMinimizedChat(minimizedChat);
-    onClose();
-  };
-
   const fetchAgencyDetails = async (agencyName: string) => {
     setLoadingAgency(true);
     setLogoLoading(true);
@@ -1152,15 +1138,6 @@ export function AdminFloatingChat({
                   <Info className="h-4 w-4" />
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                onClick={handleMinimize}
-                title="Minimize"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"

@@ -2,96 +2,18 @@ import { ReactNode, useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
-import { MinimizedChats } from '@/components/ui/MinimizedChats';
 import { ChatListPanel } from '@/components/ui/ChatListPanel';
 import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
-import { useAppStore, MinimizedChat, GlobalChatRequest } from '@/stores/appStore';
-import { useMinimizedChats } from '@/hooks/useMinimizedChats';
-import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 
 interface MainLayoutProps {
   children: ReactNode;
-  onOpenMinimizedChat?: (chat: MinimizedChat) => void;
 }
 
 export function MainLayout({
-  children,
-  onOpenMinimizedChat
+  children
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { openGlobalChat, clearUnreadMessageCount } = useAppStore();
-  const { removeMinimizedChat } = useMinimizedChats();
-
-  const handleOpenChat = async (chat: MinimizedChat) => {
-    console.log('[MainLayout] handleOpenChat called with chat:', chat);
-    
-    // Remove and clear unread immediately for responsive UI
-    removeMinimizedChat(chat.id);
-    clearUnreadMessageCount(chat.id);
-    
-    // Mark as read in database and dispatch event immediately
-    if (chat.type === 'my-request') {
-      supabase
-        .from('service_requests')
-        .update({ client_read: true, client_last_read_at: new Date().toISOString() })
-        .eq('id', chat.id)
-        .then(({ error }) => {
-          if (error) console.error('[MainLayout] Error updating client_read:', error);
-        });
-      
-      // Dispatch event to sync with ChatListPanel and MyRequestsView
-      window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-        detail: { id: chat.id, read: true }
-      }));
-    } else {
-      supabase
-        .from('service_requests')
-        .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
-        .eq('id', chat.id)
-        .then(({ error }) => {
-          if (error) console.error('[MainLayout] Error updating agency_read:', error);
-        });
-      
-      // Dispatch event to sync with ChatListPanel and AgencyRequestsView
-      window.dispatchEvent(new CustomEvent('service-request-updated', {
-        detail: { id: chat.id, read: true }
-      }));
-    }
-    
-    try {
-      // Fetch the full request data
-      const { data, error } = await supabase
-        .from('service_requests')
-        .select(`
-          id,
-          title,
-          description,
-          status,
-          read,
-          created_at,
-          updated_at,
-          media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-          order:orders(id, status, delivery_status, delivery_deadline)
-        `)
-        .eq('id', chat.id)
-        .single();
-
-      console.log('[MainLayout] Fetched request data:', data, 'error:', error);
-
-      if (error) {
-        console.error('Error fetching request for minimized chat:', error);
-        return;
-      }
-
-      if (data) {
-        console.log('[MainLayout] Opening global chat with type:', chat.type);
-        openGlobalChat(data as unknown as GlobalChatRequest, chat.type);
-      }
-    } catch (err) {
-      console.error('Error opening minimized chat:', err);
-    }
-  };
 
   return <div className="min-h-screen bg-background">
       {/* Mobile Header with Burger Menu */}
@@ -118,9 +40,6 @@ export function MainLayout({
 
       {/* Global Chat List Panel */}
       <ChatListPanel />
-
-      {/* Global Minimized Chats */}
-      <MinimizedChats onOpenChat={handleOpenChat} />
       
       {/* Global Chat Dialog */}
       <GlobalChatDialog />
