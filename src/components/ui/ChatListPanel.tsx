@@ -201,27 +201,24 @@ export function ChatListPanel() {
 
       const engagements = data.map(item => {
         const lastMsg = lastMessages[item.id];
-        const isUnread = !(item as any).client_read;
         const lastReadAt = (item as any).client_last_read_at;
         
         // Count messages from counterparty sent after last_read_at
         const itemMessages = allMessages.filter(m => m.request_id === item.id);
         let unreadCount = 0;
         
-        if (isUnread) {
-          for (const msg of itemMessages) {
-            // Only count messages from agency/admin that are after last_read_at
-            if (msg.sender_type === 'agency' || msg.sender_type === 'admin') {
-              if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
-                unreadCount++;
-              }
+        for (const msg of itemMessages) {
+          // Only count messages from agency/admin that are after last_read_at
+          if (msg.sender_type === 'agency' || msg.sender_type === 'admin') {
+            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+              unreadCount++;
             }
           }
         }
         
         return {
           ...item,
-          read: !isUnread,
+          read: unreadCount === 0,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount,
@@ -293,26 +290,23 @@ export function ChatListPanel() {
 
       const requests = data.map(item => {
         const lastMsg = lastMessages[item.id];
-        const isUnread = !(item as any).agency_read;
         const lastReadAt = (item as any).agency_last_read_at;
         
         // Count messages from client sent after last_read_at
         const itemMessages = allMessages.filter(m => m.request_id === item.id);
         let unreadCount = 0;
         
-        if (isUnread) {
-          for (const msg of itemMessages) {
-            if (msg.sender_type === 'client') {
-              if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
-                unreadCount++;
-              }
+        for (const msg of itemMessages) {
+          if (msg.sender_type === 'client') {
+            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+              unreadCount++;
             }
           }
         }
         
         return {
           ...item,
-          read: (item as any).agency_read,
+          read: unreadCount === 0,
           lastMessage: lastMsg?.message,
           lastMessageTime: lastMsg?.created_at,
           unreadCount,
