@@ -1007,9 +1007,10 @@ export function ChatListPanel() {
           // Check if this is a disputed chat (admin only)
           const isDisputedChat = isAdmin && disputesRef.current.some(d => d.service_request_id === requestId);
           
-          // Check if chat is minimized - need to do this BEFORE the early return
-          // to handle cases where the chat is minimized but not in the current lists
-          const minimizedChat = minimizedChatsRef.current.find(c => c.id === requestId);
+          // Check if chat is minimized - get fresh state from store for reliability
+          const currentMinimizedChats = useAppStore.getState().minimizedChats;
+          const currentOpenChats = useAppStore.getState().openChats;
+          const minimizedChat = currentMinimizedChats.find(c => c.id === requestId);
           const isMinimized = !!minimizedChat;
           const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
           const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
@@ -1136,8 +1137,8 @@ export function ChatListPanel() {
             });
           }
           
-          // Check if chat dialog is open
-          const isDialogOpen = openChatsRef.current.some(c => c.request.id === requestId);
+          // Check if chat dialog is open - use fresh state from store
+          const isDialogOpen = currentOpenChats.some(c => c.request.id === requestId);
           
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, isServiceRequest, isMinimizedAgencyRequest, isMinimizedMyRequest, senderType });
           
