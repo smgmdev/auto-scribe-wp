@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle, Paperclip } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle, Paperclip, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -130,6 +130,7 @@ export function ChatListPanel() {
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [openingChatId, setOpeningChatId] = useState<string | null>(null);
 
   // Refs to avoid stale closures in subscriptions
   const myEngagementsRef = useRef<ChatItem[]>([]);
@@ -1339,45 +1340,51 @@ export function ChatListPanel() {
   }, [user?.id, isAdmin]);
 
   const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
+    // Show loading indicator immediately
+    setOpeningChatId(item.id);
     clearUnreadMessageCount(item.id);
     
-    // Open chat immediately for better UX
-    openGlobalChat(item as unknown as GlobalChatRequest, type);
-    
-    // Mark as read in database asynchronously (don't await)
-    // Use client_read for my-request (user's engagements) and agency_read for agency-request
-    if (!item.read) {
-      if (type === 'my-request') {
-        supabase
-          .from('service_requests')
-          .update({ client_read: true })
-          .eq('id', item.id);
-        setMyEngagements(prev => prev.map(e => 
-          e.id === item.id ? { ...e, read: true } : e
-        ));
-        
-        // Dispatch event to sync with MyRequestsView
-        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-          detail: { id: item.id, read: true }
-        }));
-      } else {
-        supabase
-          .from('service_requests')
-          .update({ agency_read: true })
-          .eq('id', item.id);
-        setServiceRequests(prev => prev.map(r => 
-          r.id === item.id ? { ...r, read: true } : r
-        ));
-        
-        // Dispatch event to sync with AgencyRequestsView
-        window.dispatchEvent(new CustomEvent('service-request-updated', {
-          detail: {
-            id: item.id,
-            read: true
-          }
-        }));
+    // Small delay for visual feedback before opening
+    setTimeout(() => {
+      // Open chat
+      openGlobalChat(item as unknown as GlobalChatRequest, type);
+      setOpeningChatId(null);
+      
+      // Mark as read in database asynchronously (don't await)
+      // Use client_read for my-request (user's engagements) and agency_read for agency-request
+      if (!item.read) {
+        if (type === 'my-request') {
+          supabase
+            .from('service_requests')
+            .update({ client_read: true })
+            .eq('id', item.id);
+          setMyEngagements(prev => prev.map(e => 
+            e.id === item.id ? { ...e, read: true } : e
+          ));
+          
+          // Dispatch event to sync with MyRequestsView
+          window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+            detail: { id: item.id, read: true }
+          }));
+        } else {
+          supabase
+            .from('service_requests')
+            .update({ agency_read: true })
+            .eq('id', item.id);
+          setServiceRequests(prev => prev.map(r => 
+            r.id === item.id ? { ...r, read: true } : r
+          ));
+          
+          // Dispatch event to sync with AgencyRequestsView
+          window.dispatchEvent(new CustomEvent('service-request-updated', {
+            detail: {
+              id: item.id,
+              read: true
+            }
+          }));
+        }
       }
-    }
+    }, 100);
   };
 
   const formatTime = (dateStr: string) => {
@@ -1586,17 +1593,23 @@ export function ChatListPanel() {
       // Use item.read from database (synced via postgres_changes)
       const hasUnread = !item.read;
       
+      const isOpening = openingChatId === item.id;
+      
       return (
         <div
           key={item.id}
-          className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
+          className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-all border-b border-border/50 last:border-b-0 ${
             hasUnread ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-l-blue-500' : ''
-          }`}
-          onClick={() => handleOpenChat(item, type)}
+          } ${isOpening ? 'opacity-70 scale-[0.99]' : ''}`}
+          onClick={() => !isOpening && handleOpenChat(item, type)}
         >
-          {/* Avatar/Favicon with notification indicator */}
+          {/* Avatar/Favicon with notification indicator or loading spinner */}
           <div className="shrink-0 relative">
-            {item.media_site?.favicon ? (
+            {isOpening ? (
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 text-primary animate-spin" />
+              </div>
+            ) : item.media_site?.favicon ? (
               <img 
                 src={item.media_site.favicon} 
                 alt="" 
@@ -1608,7 +1621,7 @@ export function ChatListPanel() {
               </div>
             )}
             {/* Unread indicator dot */}
-            {hasUnread && (
+            {hasUnread && !isOpening && (
               <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
             )}
           </div>
@@ -1620,7 +1633,7 @@ export function ChatListPanel() {
                 {item.media_site?.name || item.title}
               </span>
               <span className="text-xs text-muted-foreground shrink-0">
-                {item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at)}
+                {isOpening ? 'Opening...' : (item.lastMessageTime ? formatTime(item.lastMessageTime) : formatTime(item.created_at))}
               </span>
             </div>
             <MessagePreview 
