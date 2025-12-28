@@ -786,6 +786,30 @@ export function ChatListPanel() {
       // The postgres_changes subscription will sync the read state to local state
       
       if (isMyEngagement && isFromAgency) {
+        // Update local state immediately
+        setMyEngagements(prev => {
+          const updated = prev.map(e => 
+            e.id === request_id 
+              ? { ...e, unreadCount: e.unreadCount + 1, read: false }
+              : e
+          );
+          myEngagementsRef.current = updated;
+          return updated;
+        });
+        
+        // Sync minimized chat if exists
+        const updatedEngagement = myEngagementsRef.current.find(e => e.id === request_id);
+        if (updatedEngagement) {
+          const minChat = useAppStore.getState().minimizedChats.find(c => c.id === request_id);
+          if (minChat) {
+            useAppStore.setState(state => ({
+              minimizedChats: state.minimizedChats.map(c => 
+                c.id === request_id ? { ...c, unreadCount: updatedEngagement.unreadCount } : c
+              )
+            }));
+          }
+        }
+        
         supabase
           .from('service_requests')
           .update({ client_read: false })
@@ -799,6 +823,30 @@ export function ChatListPanel() {
       }
       
       if (isServiceRequest && isFromClient) {
+        // Update local state immediately
+        setServiceRequests(prev => {
+          const updated = prev.map(r => 
+            r.id === request_id 
+              ? { ...r, unreadCount: r.unreadCount + 1, read: false }
+              : r
+          );
+          serviceRequestsRef.current = updated;
+          return updated;
+        });
+        
+        // Sync minimized chat if exists
+        const updatedRequest = serviceRequestsRef.current.find(r => r.id === request_id);
+        if (updatedRequest) {
+          const minChat = useAppStore.getState().minimizedChats.find(c => c.id === request_id);
+          if (minChat) {
+            useAppStore.setState(state => ({
+              minimizedChats: state.minimizedChats.map(c => 
+                c.id === request_id ? { ...c, unreadCount: updatedRequest.unreadCount } : c
+              )
+            }));
+          }
+        }
+        
         supabase
           .from('service_requests')
           .update({ agency_read: false })
@@ -1135,6 +1183,19 @@ export function ChatListPanel() {
               return updated;
             });
             
+            // Sync minimized chat unread count in real-time
+            const updatedEngagement = myEngagementsRef.current.find(e => e.id === requestId);
+            if (updatedEngagement) {
+              const minimizedChat = useAppStore.getState().minimizedChats.find(c => c.id === requestId);
+              if (minimizedChat && minimizedChat.unreadCount !== updatedEngagement.unreadCount) {
+                useAppStore.setState(state => ({
+                  minimizedChats: state.minimizedChats.map(c => 
+                    c.id === requestId ? { ...c, unreadCount: updatedEngagement.unreadCount } : c
+                  )
+                }));
+              }
+            }
+            
             // Dispatch event to sync with MyRequestsView
             window.dispatchEvent(new CustomEvent('my-engagement-updated', {
               detail: {
@@ -1174,6 +1235,19 @@ export function ChatListPanel() {
               serviceRequestsRef.current = updated;
               return updated;
             });
+            
+            // Sync minimized chat unread count in real-time
+            const updatedRequest = serviceRequestsRef.current.find(r => r.id === requestId);
+            if (updatedRequest) {
+              const minimizedChat = useAppStore.getState().minimizedChats.find(c => c.id === requestId);
+              if (minimizedChat && minimizedChat.unreadCount !== updatedRequest.unreadCount) {
+                useAppStore.setState(state => ({
+                  minimizedChats: state.minimizedChats.map(c => 
+                    c.id === requestId ? { ...c, unreadCount: updatedRequest.unreadCount } : c
+                  )
+                }));
+              }
+            }
             
             // Dispatch event to sync with AgencyRequestsView
             window.dispatchEvent(new CustomEvent('service-request-updated', {
