@@ -1652,15 +1652,15 @@ export function ChatListPanel() {
           .replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '')
           .trim();
         
-        // If there's text besides the attachment, show that text with "Attachment" indicator
+        // If there's text besides the attachment, show icon + Attachment + message
         if (textWithoutAttachment) {
-          const text = textWithoutAttachment.length > 40 
-            ? textWithoutAttachment.slice(0, 40) + '...' 
+          const text = textWithoutAttachment.length > 30 
+            ? textWithoutAttachment.slice(0, 30) + '...' 
             : textWithoutAttachment;
-          return { text: text + ' + Attachment', type: 'attachment' };
+          return { text: '📎 Attachment: ' + text, type: 'attachment' };
         }
         // Pure attachment message
-        return { text: 'Attachment', type: 'attachment' };
+        return { text: '📎 Attachment', type: 'attachment' };
       }
       
       // Remove reply quotes - formats like "> quoted text\nactual message" or ":quoted actual"
