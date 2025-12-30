@@ -1776,13 +1776,13 @@ export function ChatListPanel() {
     );
   };
 
-  // Calculate total unread message count - sum up unreadCount for each chat
-  const investigationsUnreadCount = investigations.reduce((acc, inv) => acc + (inv.unreadCount || 0), 0);
-  const myEngagementsUnreadCount = myEngagements.reduce((acc, e) => acc + (e.unreadCount || 0), 0);
-  const serviceRequestsUnreadCount = serviceRequests.reduce((acc, r) => acc + (r.unreadCount || 0), 0);
+  // Calculate total unread chats count - count number of chats with unread messages, not total messages
+  const investigationsUnreadChatsCount = investigations.filter(inv => (inv.unreadCount || 0) > 0).length;
+  const myEngagementsUnreadChatsCount = myEngagements.filter(e => !e.read || (e.unreadCount || 0) > 0).length;
+  const serviceRequestsUnreadChatsCount = serviceRequests.filter(r => !r.read || (r.unreadCount || 0) > 0).length;
   const totalUnread = isAdmin 
-    ? disputes.filter(d => !d.read).length + investigationsUnreadCount
-    : myEngagementsUnreadCount + serviceRequestsUnreadCount;
+    ? disputes.filter(d => !d.read).length + investigationsUnreadChatsCount
+    : myEngagementsUnreadChatsCount + serviceRequestsUnreadChatsCount;
 
   // Filter and sort items based on search query and last message time
   const filterAndSortItems = (items: ChatItem[]) => {
@@ -1973,9 +1973,9 @@ export function ChatListPanel() {
                 >
                   <Search className="h-3.5 w-3.5 mr-1" />
                   Investigations
-                  {investigationsUnreadCount > 0 && (
+                  {investigationsUnreadChatsCount > 0 && (
                     <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-blue-500 text-white px-1">
-                      {investigationsUnreadCount}
+                      {investigationsUnreadChatsCount}
                     </Badge>
                   )}
                 </TabsTrigger>
