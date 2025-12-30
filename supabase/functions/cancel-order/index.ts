@@ -246,6 +246,27 @@ serve(async (req) => {
         .eq("id", serviceRequest.id);
 
       logStep("Cancellation message sent to chat");
+
+      // Send email notification to agency about the cancellation
+      try {
+        const notifyResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-engagement-cancelled`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
+          },
+          body: JSON.stringify({
+            service_request_id: serviceRequest.id,
+            cancelled_by: 'client',
+            cancellation_reason: 'Order was cancelled by user',
+            media_site_name: mediaSiteName
+          })
+        });
+        logStep("Cancellation notification sent", { status: notifyResponse.status });
+      } catch (notifyError: any) {
+        logStep("Error sending cancellation notification", { error: notifyError.message });
+        // Don't fail the cancellation if notification fails
+      }
     }
 
     logStep("Order cancelled successfully", { order_id, creditRefund });

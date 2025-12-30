@@ -629,6 +629,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         cancellation_reason: cancellationReason.trim()
       }, globalChatRequest.id);
       
+      // Send cancellation notification to counterparty
+      const cancelledBy = isAdmin ? 'admin' : actualSenderType;
+      try {
+        await supabase.functions.invoke('notify-engagement-cancelled', {
+          body: {
+            service_request_id: globalChatRequest.id,
+            cancelled_by: cancelledBy,
+            cancellation_reason: cancellationReason.trim(),
+            media_site_name: globalChatRequest.media_site?.name || globalChatRequest.title
+          }
+        });
+      } catch (notifyError) {
+        console.error('Error sending cancellation notification:', notifyError);
+        // Don't fail the cancellation if notification fails
+      }
+      
       toast({
         title: "Engagement Cancelled",
         description: "This engagement has been cancelled.",
