@@ -1021,6 +1021,9 @@ export function ChatListPanel() {
                 const newEngagements = prev.filter(e => e.id !== updated.id);
                 myEngagementsRef.current = newEngagements;
                 
+                // Close any open chat window for this request
+                useAppStore.getState().closeGlobalChat(updated.id);
+                
                 // Also remove from minimized chats (store + DB)
                 useAppStore.getState().removeMinimizedChat(updated.id);
                 supabase
@@ -1065,6 +1068,9 @@ export function ChatListPanel() {
               if (updated.status === 'cancelled') {
                 const newRequests = prev.filter(r => r.id !== updated.id);
                 serviceRequestsRef.current = newRequests;
+                
+                // Close any open chat window for this request
+                useAppStore.getState().closeGlobalChat(updated.id);
                 
                 // Also remove from minimized chats (store + DB)
                 useAppStore.getState().removeMinimizedChat(updated.id);
