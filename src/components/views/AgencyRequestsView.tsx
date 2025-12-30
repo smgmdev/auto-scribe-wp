@@ -505,43 +505,14 @@ export function AgencyRequestsView() {
         </p>
       </div>
 
-      <div className="flex items-center justify-between gap-4 mb-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search requests..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 w-full"
-          />
-        </div>
-        {requests.length > 0 && activeTab !== 'orders' && (
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            {activeTab === 'active' ? (
-              <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
-                  <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
-                </SelectContent>
-              </Select>
-            ) : (
-              <Select value={cancelledSortBy} onValueChange={(value) => setCancelledSortBy(value as 'cancelled_at' | 'last_message' | 'submitted')}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cancelled_at" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Cancelled Date</SelectItem>
-                  <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
-                  <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        )}
+      <div className="relative mb-2">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search requests..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 w-full"
+        />
       </div>
 
       <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'cancelled' | 'orders')} className="w-full">
