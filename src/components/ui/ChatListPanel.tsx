@@ -1484,7 +1484,9 @@ export function ChatListPanel() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[ChatListPanel] chat-panel-sync subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(syncChannel);
