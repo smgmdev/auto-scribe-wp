@@ -106,3 +106,9 @@ verify_jwt = true
 
 [functions.notify-agency-order]
 verify_jwt = false
+
+[functions.notify-engagement-cancelled]
+verify_jwt = true
+
+[functions.cancel-order]
+verify_jwt = true
