@@ -116,6 +116,7 @@ export function ChatListPanel() {
     globalChatRequest,
     openChats,
     minimizedChats,
+    removeMinimizedChat,
     setUnreadDisputesCount,
     decrementUnreadDisputesCount
   } = useAppStore();
@@ -1019,6 +1020,15 @@ export function ChatListPanel() {
               if (updated.status === 'cancelled') {
                 const newEngagements = prev.filter(e => e.id !== updated.id);
                 myEngagementsRef.current = newEngagements;
+                
+                // Also remove from minimized chats (store + DB)
+                useAppStore.getState().removeMinimizedChat(updated.id);
+                supabase
+                  .from('minimized_chats')
+                  .delete()
+                  .eq('request_id', updated.id)
+                  .then(() => console.log('[ChatListPanel] Removed cancelled chat from minimized_chats'));
+                
                 return newEngagements;
               }
               
@@ -1051,6 +1061,15 @@ export function ChatListPanel() {
               if (updated.status === 'cancelled') {
                 const newRequests = prev.filter(r => r.id !== updated.id);
                 serviceRequestsRef.current = newRequests;
+                
+                // Also remove from minimized chats (store + DB)
+                useAppStore.getState().removeMinimizedChat(updated.id);
+                supabase
+                  .from('minimized_chats')
+                  .delete()
+                  .eq('request_id', updated.id)
+                  .then(() => console.log('[ChatListPanel] Removed cancelled chat from minimized_chats'));
+                
                 return newRequests;
               }
               
