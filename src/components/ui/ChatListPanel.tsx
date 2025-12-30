@@ -903,7 +903,9 @@ export function ChatListPanel() {
       }
       
       // Extra safety check before playing sound - never play if dialog is open or if own message
+      console.log('[ChatListPanel] BROADCAST SOUND CHECK (minimized):', { isDialogOpen, sender_id, userId: user.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
       if (!isDialogOpen && sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
+        console.log('[ChatListPanel] >>> PLAYING SOUND (broadcast minimized path) <<<');
         playMessageSound();
       }
     } else if (!isDialogOpen && shouldNotify) {
@@ -932,7 +934,9 @@ export function ChatListPanel() {
           description: `Message for "${title}" (${media_site_name})`,
         });
         // Extra safety check before playing sound
+        console.log('[ChatListPanel] BROADCAST SOUND CHECK (myEngagement):', { sender_id, userId: user.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
         if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
+          console.log('[ChatListPanel] >>> PLAYING SOUND (broadcast myEngagement path) <<<');
           playMessageSound();
         }
       }
@@ -959,7 +963,9 @@ export function ChatListPanel() {
           description: `Message for "${title}" (${media_site_name})`,
         });
         // Extra safety check before playing sound
+        console.log('[ChatListPanel] BROADCAST SOUND CHECK (serviceRequest):', { sender_id, userId: user.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
         if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
+          console.log('[ChatListPanel] >>> PLAYING SOUND (broadcast serviceRequest path) <<<');
           playMessageSound();
         }
       }
@@ -1400,7 +1406,9 @@ export function ChatListPanel() {
             console.log('[ChatListPanel] Chat is minimized, playing sound (unread already synced from engagement/request)');
             // Extra safety check: verify sender_id doesn't match current user or agency
             const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current && !isAgencySendingAsAgency;
+            console.log('[ChatListPanel] SOUND CHECK (minimized):', { shouldPlaySound, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
             if (shouldPlaySound) {
+              console.log('[ChatListPanel] >>> PLAYING SOUND (minimized path) <<<');
               playMessageSound();
             }
           } else if (!isDialogOpen && isFromCounterparty) {
@@ -1422,7 +1430,10 @@ export function ChatListPanel() {
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
               // Extra safety check before playing sound
-              if (senderId !== user?.id && senderId !== agencyPayoutIdRef.current) {
+              const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current;
+              console.log('[ChatListPanel] SOUND CHECK (myEngagement):', { shouldPlaySound, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
+              if (shouldPlaySound) {
+                console.log('[ChatListPanel] >>> PLAYING SOUND (myEngagement path) <<<');
                 playMessageSound();
               }
             }
@@ -1440,12 +1451,15 @@ export function ChatListPanel() {
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
               // Extra safety check before playing sound
-              if (senderId !== user?.id && senderId !== agencyPayoutIdRef.current) {
+              const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current;
+              console.log('[ChatListPanel] SOUND CHECK (serviceRequest client):', { shouldPlaySound, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
+              if (shouldPlaySound) {
+                console.log('[ChatListPanel] >>> PLAYING SOUND (serviceRequest client path) <<<');
                 playMessageSound();
               }
             }
           } else {
-            console.log('[ChatListPanel] Chat is already open, not showing notification');
+            console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
           }
         }
       )
@@ -1582,6 +1596,7 @@ export function ChatListPanel() {
                 ? { ...inv, unreadCount: (inv.unreadCount || 0) + 1, lastMessageTime: newMsg.created_at, lastMessage: newMsg.message } 
                 : inv
             ));
+            console.log('[ChatListPanel] >>> PLAYING SOUND (investigation path) <<<', { requestId, senderId, senderType });
             playMessageSound();
           } else {
             // Just update last message if chat is open
