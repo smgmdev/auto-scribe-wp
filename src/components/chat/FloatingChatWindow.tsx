@@ -2366,17 +2366,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   );
                 }
                 
+                // For admin view: agency messages on right, client messages on left
+                // For others: own messages on right, others on left
+                const isRightAligned = isAdmin 
+                  ? (msg.sender_type === 'agency' || msg.sender_type === 'admin')
+                  : isOwnMessage;
+                
                 return (
                   <div
                     key={msg.id}
                     id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`relative group max-w-[80%] rounded-lg p-3 transition-all duration-300 ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
-                          : isOwnMessage
+                          : isRightAligned
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
                       } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
@@ -2386,7 +2392,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <button
                             type="button"
                             className={`absolute top-0.5 right-0.5 h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent ${
-                              isOwnMessage 
+                              isRightAligned 
                                 ? 'text-primary-foreground/70' 
                                 : 'text-muted-foreground'
                             }`}
@@ -2395,7 +2401,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          align={isOwnMessage ? "end" : "start"}
+                          align={isRightAligned ? "end" : "start"}
                           side="bottom"
                           sideOffset={5}
                           collisionPadding={16}
@@ -2427,7 +2433,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                               ? (msg.sender_type === 'agency' ? 'Agency' : 'Client')
                               : counterpartyLabel}
                       </p>
-                      {renderMessageContent(msg, isOwnMessage, quote)}
+                      {renderMessageContent(msg, isRightAligned, quote)}
                     </div>
                   </div>
                 );
