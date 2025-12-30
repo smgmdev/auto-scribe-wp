@@ -613,13 +613,33 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     setCancelling(true);
     try {
+      // Determine who cancelled and set unread flags for counterparty
+      const cancelledBy = isAdmin ? 'admin' : actualSenderType;
+      const updateData: Record<string, any> = { 
+        status: 'cancelled',
+        cancellation_reason: cancellationReason.trim(),
+        cancelled_at: new Date().toISOString()
+      };
+      
+      // Set unread flags for counterparty notification
+      if (cancelledBy === 'admin') {
+        // Admin cancels - notify both client and agency
+        updateData.client_read = false;
+        updateData.agency_read = false;
+        updateData.read = true; // Admin already knows
+      } else if (cancelledBy === 'client') {
+        // Client cancels - notify agency
+        updateData.agency_read = false;
+        updateData.read = false; // Also notify admin
+      } else if (cancelledBy === 'agency') {
+        // Agency cancels - notify client
+        updateData.client_read = false;
+        updateData.read = false; // Also notify admin
+      }
+      
       const { error } = await supabase
         .from('service_requests')
-        .update({ 
-          status: 'cancelled',
-          cancellation_reason: cancellationReason.trim(),
-          cancelled_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', globalChatRequest.id);
       
       if (error) throw error;
@@ -628,22 +648,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         status: 'cancelled',
         cancellation_reason: cancellationReason.trim()
       }, globalChatRequest.id);
-      
-      // Send cancellation notification to counterparty
-      const cancelledBy = isAdmin ? 'admin' : actualSenderType;
-      try {
-        await supabase.functions.invoke('notify-engagement-cancelled', {
-          body: {
-            service_request_id: globalChatRequest.id,
-            cancelled_by: cancelledBy,
-            cancellation_reason: cancellationReason.trim(),
-            media_site_name: globalChatRequest.media_site?.name || globalChatRequest.title
-          }
-        });
-      } catch (notifyError) {
-        console.error('Error sending cancellation notification:', notifyError);
-        // Don't fail the cancellation if notification fails
-      }
       
       toast({
         title: "Engagement Cancelled",
