@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
-import { playMessageSound } from '@/lib/chat-presence';
+
 
 interface ChatItem {
   id: string;
@@ -928,12 +928,7 @@ export function ChatListPanel() {
         });
       }
       
-      // Extra safety check before playing sound - never play if dialog is open or if own message
-      console.log('[ChatListPanel] BROADCAST SOUND CHECK (minimized):', { isDialogOpen, sender_id, userId: user.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
-      if (!isDialogOpen && sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
-        console.log('[ChatListPanel] >>> PLAYING SOUND (broadcast minimized path) <<<');
-        playMessageSound();
-      }
+      
     } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
@@ -959,12 +954,6 @@ export function ChatListPanel() {
           title: 'New Message',
           description: `Message for "${title}" (${media_site_name})`,
         });
-        // Extra safety check before playing sound
-        console.log('[ChatListPanel] BROADCAST SOUND CHECK (myEngagement):', { sender_id, userId: user.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
-        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
-          console.log('[ChatListPanel] >>> PLAYING SOUND (broadcast myEngagement path) <<<');
-          playMessageSound();
-        }
       }
       
       if (isServiceRequest && isFromClient) {
@@ -988,12 +977,6 @@ export function ChatListPanel() {
           title: 'New Client Message',
           description: `Message for "${title}" (${media_site_name})`,
         });
-        // Extra safety check before playing sound
-        console.log('[ChatListPanel] BROADCAST SOUND CHECK (serviceRequest):', { sender_id, userId: user.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
-        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
-          console.log('[ChatListPanel] >>> PLAYING SOUND (broadcast serviceRequest path) <<<');
-          playMessageSound();
-        }
       }
     }
     
@@ -1429,14 +1412,7 @@ export function ChatListPanel() {
           // Just play the sound notification - no separate increment needed
           // Note: isOwnMessage was already checked and returned early above, so we know this is from counterparty
           if (isMinimized && isFromCounterparty) {
-            console.log('[ChatListPanel] Chat is minimized, playing sound (unread already synced from engagement/request)');
-            // Extra safety check: verify sender_id doesn't match current user or agency
-            const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current && !isAgencySendingAsAgency;
-            console.log('[ChatListPanel] SOUND CHECK (minimized):', { shouldPlaySound, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current, isAgencySendingAsAgency });
-            if (shouldPlaySound) {
-              console.log('[ChatListPanel] >>> PLAYING SOUND (minimized path) <<<');
-              playMessageSound();
-            }
+            console.log('[ChatListPanel] Chat is minimized, updating unread count');
           } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
@@ -1455,13 +1431,6 @@ export function ChatListPanel() {
                 title: 'New Message from Agency',
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
-              // Extra safety check before playing sound
-              const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current;
-              console.log('[ChatListPanel] SOUND CHECK (myEngagement):', { shouldPlaySound, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
-              if (shouldPlaySound) {
-                console.log('[ChatListPanel] >>> PLAYING SOUND (myEngagement path) <<<');
-                playMessageSound();
-              }
             }
             
             if (isServiceRequest && senderType === 'client') {
@@ -1476,13 +1445,6 @@ export function ChatListPanel() {
                 title: 'New Client Message',
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
-              // Extra safety check before playing sound
-              const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current;
-              console.log('[ChatListPanel] SOUND CHECK (serviceRequest client):', { shouldPlaySound, senderId, userId: user?.id, agencyPayoutId: agencyPayoutIdRef.current });
-              if (shouldPlaySound) {
-                console.log('[ChatListPanel] >>> PLAYING SOUND (serviceRequest client path) <<<');
-                playMessageSound();
-              }
             }
           } else {
             console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
@@ -1510,7 +1472,6 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-joined' }, (payload) => {
         console.log('[ChatListPanel] Admin joined chat:', payload);
-        playMessageSound();
         toast({
           title: "Staff Joined",
           description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
@@ -1546,7 +1507,6 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-joined' }, (payload) => {
         console.log('[ChatListPanel] Admin joined chat (agency):', payload);
-        playMessageSound();
         toast({
           title: "Staff Joined",
           description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
@@ -1622,8 +1582,6 @@ export function ChatListPanel() {
                 ? { ...inv, unreadCount: (inv.unreadCount || 0) + 1, lastMessageTime: newMsg.created_at, lastMessage: newMsg.message } 
                 : inv
             ));
-            console.log('[ChatListPanel] >>> PLAYING SOUND (investigation path) <<<', { requestId, senderId, senderType });
-            playMessageSound();
           } else {
             // Just update last message if chat is open
             setInvestigations(prev => prev.map(inv => 
