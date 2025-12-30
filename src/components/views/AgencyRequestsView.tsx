@@ -708,11 +708,16 @@ export function AgencyRequestsView() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="py-3 px-4 space-y-2">
+                    <CardContent className="py-3 px-4 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                          Cancelled: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                        </span>
+                        <div className="space-y-0.5">
+                          <p className="text-xs text-muted-foreground">
+                            Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
                         {requestMessages.length > 0 && (
                           <span className="text-xs text-muted-foreground">
                             {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
