@@ -84,6 +84,7 @@ export function MyRequestsView() {
           status,
           client_read,
           cancellation_reason,
+          cancelled_at,
           created_at,
           updated_at,
           media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
