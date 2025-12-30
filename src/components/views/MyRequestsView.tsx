@@ -428,6 +428,11 @@ export function MyRequestsView() {
     [requests]
   );
 
+  const unreadCancelledCount = useMemo(() => 
+    cancelledRequests.filter(r => !r.read).length, 
+    [cancelledRequests]
+  );
+
   // Filter and sort requests based on search and sort option - must be before any conditional returns
   const getSortedRequests = (requestList: ServiceRequest[]) => {
     const filtered = requestList.filter((request) => {
@@ -514,9 +519,14 @@ export function MyRequestsView() {
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
           </TabsTrigger>
-          <TabsTrigger value="cancelled" className="gap-2">
+          <TabsTrigger value="cancelled" className="gap-2 relative">
             <History className="h-4 w-4" />
             Cancelled ({cancelledRequests.length})
+            {unreadCancelledCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {unreadCancelledCount}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -613,14 +623,17 @@ export function MyRequestsView() {
               <div className="space-y-2">
                 {sortedCancelledRequests.map((request) => {
                   const requestMessages = messages[request.id] || [];
+                  const hasUnread = !request.read;
                   
                   return (
                     <Card 
                       key={request.id} 
-                      className="relative border-border/50 hover:border-border transition-colors cursor-pointer opacity-75"
+                      className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                        hasUnread ? 'border-l-4 border-l-red-500' : 'opacity-75'
+                      }`}
                       onClick={() => handleCardClick(request)}
                     >
-                      <CardHeader className="py-3 px-4">
+                      <CardHeader className={`py-3 px-4 ${hasUnread ? 'bg-red-500/20' : ''}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
@@ -628,22 +641,29 @@ export function MyRequestsView() {
                                 <img 
                                   src={request.media_site.favicon} 
                                   alt="" 
-                                  className="h-8 w-8 rounded object-cover grayscale"
+                                  className={`h-8 w-8 rounded object-cover ${hasUnread ? '' : 'grayscale'}`}
                                 />
                               ) : (
                                 <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
                                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
                                 </div>
                               )}
+                              {hasUnread && (
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-card" />
+                              )}
                             </div>
-                            <div className="flex flex-col">
-                              <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                              {request.media_site?.agency && (
-                                <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="flex flex-col">
+                                <CardTitle className={`text-base ${hasUnread ? 'text-foreground' : ''}`}>{request.media_site?.name || request.title}</CardTitle>
+                                {request.media_site?.agency && (
+                                  <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                                )}
+                              </div>
+                              {hasUnread && (
+                                <Badge className="bg-red-500 text-white border-red-500">Cancelled</Badge>
                               )}
                             </div>
                           </div>
-                          {/* No status badge in cancelled tab - redundant */}
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
