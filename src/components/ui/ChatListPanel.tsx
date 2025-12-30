@@ -873,7 +873,10 @@ export function ChatListPanel() {
         });
       }
       
-      playMessageSound();
+      // Extra safety check before playing sound
+      if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+        playMessageSound();
+      }
     } else if (!isDialogOpen) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
@@ -899,7 +902,10 @@ export function ChatListPanel() {
           title: 'New Message',
           description: `Message for "${title}" (${media_site_name})`,
         });
-        playMessageSound();
+        // Extra safety check before playing sound
+        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+          playMessageSound();
+        }
       }
       
       if (isServiceRequest && isFromClient) {
@@ -923,7 +929,10 @@ export function ChatListPanel() {
           title: 'New Client Message',
           description: `Message for "${title}" (${media_site_name})`,
         });
-        playMessageSound();
+        // Extra safety check before playing sound
+        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+          playMessageSound();
+        }
       }
     }
     
@@ -1339,9 +1348,14 @@ export function ChatListPanel() {
           
           // For minimized chats: the unread count was already synced from engagements/requests above
           // Just play the sound notification - no separate increment needed
+          // Note: isOwnMessage was already checked and returned early above, so we know this is from counterparty
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, playing sound (unread already synced from engagement/request)');
-            playMessageSound();
+            // Extra safety check: verify sender_id doesn't match current user or agency
+            const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current;
+            if (shouldPlaySound) {
+              playMessageSound();
+            }
           } else if (!isDialogOpen) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
@@ -1360,7 +1374,10 @@ export function ChatListPanel() {
                 title: 'New Message from Agency',
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
-              playMessageSound();
+              // Extra safety check before playing sound
+              if (senderId !== user?.id && senderId !== agencyPayoutIdRef.current) {
+                playMessageSound();
+              }
             }
             
             if (isServiceRequest && senderType === 'client') {
@@ -1375,7 +1392,10 @@ export function ChatListPanel() {
                 title: 'New Client Message',
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
-              playMessageSound();
+              // Extra safety check before playing sound
+              if (senderId !== user?.id && senderId !== agencyPayoutIdRef.current) {
+                playMessageSound();
+              }
             }
           } else {
             console.log('[ChatListPanel] Chat is already open, not showing notification');
