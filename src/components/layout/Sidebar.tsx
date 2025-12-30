@@ -477,45 +477,130 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
-  // Fetch initial unread engagement count for regular users
+  // Fetch initial unread engagement count for regular users (active + cancelled)
   useEffect(() => {
     if (!user || isAdmin) return;
 
     const fetchUnreadEngagements = async () => {
-      // Get all user's active service requests (exclude cancelled)
-      const { data: requests } = await supabase
+      // Get all user's service requests
+      const { data: allRequests } = await supabase
         .from('service_requests')
-        .select('id, client_read')
-        .eq('user_id', user.id)
-        .neq('status', 'cancelled');
+        .select('id, client_read, status')
+        .eq('user_id', user.id);
 
-      if (!requests || requests.length === 0) {
+      if (!allRequests || allRequests.length === 0) {
         setUserUnreadEngagementsCount(0);
+        setUserUnreadCancelledCount(0);
         return;
       }
 
-      // Get all messages for these requests
-      const requestIds = requests.map(r => r.id);
-      const { data: messages } = await supabase
-        .from('service_messages')
-        .select('request_id, sender_type')
-        .in('request_id', requestIds);
+      // Separate active and cancelled requests
+      const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
+      const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
 
-      // Count requests that have unread agency messages
-      let unreadCount = 0;
-      requests.forEach(request => {
-        const hasAgencyMessages = messages?.some(
-          m => m.request_id === request.id && m.sender_type !== 'client'
-        );
-        if (hasAgencyMessages && !(request as any).client_read) {
-          unreadCount++;
-        }
-      });
+      // Get all messages for active requests
+      const activeRequestIds = activeRequests.map(r => r.id);
+      let activeUnreadCount = 0;
+      
+      if (activeRequestIds.length > 0) {
+        const { data: messages } = await supabase
+          .from('service_messages')
+          .select('request_id, sender_type')
+          .in('request_id', activeRequestIds);
 
-      setUserUnreadEngagementsCount(unreadCount);
+        // Count requests that have unread agency messages
+        activeRequests.forEach(request => {
+          const hasAgencyMessages = messages?.some(
+            m => m.request_id === request.id && m.sender_type !== 'client'
+          );
+          if (hasAgencyMessages && !(request as any).client_read) {
+            activeUnreadCount++;
+          }
+        });
+      }
+
+      // Count unread cancelled requests
+      const cancelledUnreadCount = cancelledRequests.filter(r => !(r as any).client_read).length;
+
+      setUserUnreadEngagementsCount(activeUnreadCount);
+      setUserUnreadCancelledCount(cancelledUnreadCount);
     };
 
     fetchUnreadEngagements();
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for user engagement status changes (including cancellations)
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const channel = supabase
+      .channel('user-engagements-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          
+          // If status changed to cancelled, show toast and update count
+          if (old?.status !== 'cancelled' && updated.status === 'cancelled') {
+            toast({
+              variant: 'destructive',
+              title: 'Engagement Cancelled',
+              description: 'One of your engagements has been cancelled.',
+            });
+          }
+          
+          // Refetch counts when any engagement is updated
+          const refetchCounts = async () => {
+            const { data: allRequests } = await supabase
+              .from('service_requests')
+              .select('id, client_read, status')
+              .eq('user_id', user.id);
+
+            if (!allRequests) return;
+
+            const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
+            const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
+
+            // Get messages for active requests
+            const activeRequestIds = activeRequests.map(r => r.id);
+            let activeUnreadCount = 0;
+            
+            if (activeRequestIds.length > 0) {
+              const { data: messages } = await supabase
+                .from('service_messages')
+                .select('request_id, sender_type')
+                .in('request_id', activeRequestIds);
+
+              activeRequests.forEach(request => {
+                const hasAgencyMessages = messages?.some(
+                  m => m.request_id === request.id && m.sender_type !== 'client'
+                );
+                if (hasAgencyMessages && !(request as any).client_read) {
+                  activeUnreadCount++;
+                }
+              });
+            }
+
+            const cancelledUnreadCount = cancelledRequests.filter(r => !(r as any).client_read).length;
+            setUserUnreadEngagementsCount(activeUnreadCount);
+            setUserUnreadCancelledCount(cancelledUnreadCount);
+          };
+
+          refetchCounts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id, isAdmin]);
 
   const handleNavClick = (viewId: string) => {
