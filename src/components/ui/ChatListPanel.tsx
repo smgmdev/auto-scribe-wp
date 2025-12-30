@@ -741,16 +741,16 @@ export function ChatListPanel() {
 
   // Sync unread counts - count requests where read = false
   useEffect(() => {
-    // Calculate total unread for my engagements (count of unread requests)
-    const unreadEngagements = myEngagements.filter(e => !e.read);
+    // Calculate total unread for my engagements (count of unread requests, excluding cancelled)
+    const unreadEngagements = myEngagements.filter(e => e.status !== 'cancelled' && !e.read);
     const engagementUnread = unreadEngagements.length;
     if (engagementUnread > 0) {
       console.log('[ChatListPanel] Unread engagements:', unreadEngagements.map(e => ({ id: e.id, read: e.read, title: e.title })));
     }
     setUserUnreadEngagementsCount(engagementUnread);
 
-    // Calculate total unread for service requests (count of unread requests)
-    const requestsUnread = serviceRequests.filter(r => !r.read).length;
+    // Calculate total unread for service requests (count of unread requests, excluding cancelled)
+    const requestsUnread = serviceRequests.filter(r => r.status !== 'cancelled' && !r.read).length;
     setAgencyUnreadServiceRequestsCount(requestsUnread);
   }, [myEngagements, serviceRequests]);
 
@@ -1847,19 +1847,22 @@ export function ChatListPanel() {
   };
 
   // Calculate total unread chats count - count number of chats with unread messages, not total messages
+  // Exclude cancelled items from unread counts
   const investigationsUnreadChatsCount = investigations.filter(inv => (inv.unreadCount || 0) > 0).length;
-  const myEngagementsUnreadChatsCount = myEngagements.filter(e => !e.read || (e.unreadCount || 0) > 0).length;
-  const serviceRequestsUnreadChatsCount = serviceRequests.filter(r => !r.read || (r.unreadCount || 0) > 0).length;
+  const myEngagementsUnreadChatsCount = myEngagements.filter(e => e.status !== 'cancelled' && (!e.read || (e.unreadCount || 0) > 0)).length;
+  const serviceRequestsUnreadChatsCount = serviceRequests.filter(r => r.status !== 'cancelled' && (!r.read || (r.unreadCount || 0) > 0)).length;
   const totalUnread = isAdmin 
     ? disputes.filter(d => !d.read).length + investigationsUnreadChatsCount
     : myEngagementsUnreadChatsCount + serviceRequestsUnreadChatsCount;
 
   // Filter and sort items based on search query and last message time
   const filterAndSortItems = (items: ChatItem[]) => {
-    let filtered = items;
+    // First, filter out cancelled items
+    let filtered = items.filter(item => item.status !== 'cancelled');
+    
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = items.filter(item => 
+      filtered = filtered.filter(item => 
         item.media_site?.name?.toLowerCase().includes(query) ||
         item.title?.toLowerCase().includes(query) ||
         item.lastMessage?.toLowerCase().includes(query)
