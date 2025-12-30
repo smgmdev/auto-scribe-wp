@@ -758,7 +758,6 @@ export function ChatListPanel() {
   const minimizedChatsRef = useRef(minimizedChats);
   const openChatsRef = useRef(openChats);
   const agencyPayoutIdRef = useRef(agencyPayoutId);
-  const isAgencyRef = useRef(isAgency);
 
   useEffect(() => {
     minimizedChatsRef.current = minimizedChats;
@@ -771,9 +770,8 @@ export function ChatListPanel() {
 
   useEffect(() => {
     agencyPayoutIdRef.current = agencyPayoutId;
-    isAgencyRef.current = isAgency;
-    console.log('[ChatListPanel] Agency refs updated:', { agencyPayoutId, isAgency });
-  }, [agencyPayoutId, isAgency]);
+    console.log('[ChatListPanel] Agency ref updated:', { agencyPayoutId });
+  }, [agencyPayoutId]);
 
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
@@ -790,22 +788,34 @@ export function ChatListPanel() {
     const isMyEngagement = myEngagementsRef.current.some(e => e.id === request_id);
     const isServiceRequest = serviceRequestsRef.current.some(r => r.id === request_id);
     
-    // Skip if this is our own message (sender_id matches our user id or agency payout id)
-    // Also skip if sender_type matches what we are (agency sending as agency = own message)
-    // Use BOTH ref and state-based check for agency status in case ref hasn't updated yet
-    const isAgencyUser = !!agencyPayoutIdRef.current || isAgencyRef.current;
+    // CRITICAL: Check if sender_id matches our agency payout ID by querying the database
+    // This is needed because the refs might not be set yet when this callback fires
+    let isOwnAgencyMessage = false;
+    if (sender_type === 'agency') {
+      const { data: agencyData } = await supabase
+        .from('agency_payouts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('id', sender_id)
+        .maybeSingle();
+      
+      if (agencyData) {
+        isOwnAgencyMessage = true;
+        console.log('[ChatListPanel] Detected own agency message via DB lookup');
+      }
+    }
+    
+    // Skip if this is our own message
     const isOwnBroadcast = sender_id === user.id || 
                            sender_id === agencyPayoutIdRef.current ||
                            (isAdmin && sender_type === 'admin') ||
-                           // If we are an agency and this is an agency-type message, it's likely our own
-                           (isAgencyUser && sender_type === 'agency');
+                           isOwnAgencyMessage;
     
     console.log('[ChatListPanel] Own message check:', { 
       sender_id, 
       userId: user.id, 
       agencyPayoutIdRef: agencyPayoutIdRef.current, 
-      isAgencyRef: isAgencyRef.current,
-      isAgencyUser, 
+      isOwnAgencyMessage,
       sender_type,
       isOwnBroadcast 
     });
@@ -880,13 +890,14 @@ export function ChatListPanel() {
     const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
     
     // CRITICAL: Agency sending as agency should NOT trigger notification for agency
-    const isAgencySendingAsAgency = isAgencyUser && sender_type === 'agency';
+    // Use isOwnAgencyMessage which was determined by DB lookup earlier
+    const isAgencySendingAsAgency = isOwnAgencyMessage || (!!agencyPayoutIdRef.current && sender_type === 'agency');
     const shouldNotify = !isAgencySendingAsAgency && (
       (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient) ||
       (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient)
     );
     
-    console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, sender_type, isAgencyUser });
+    console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type });
     
     // For minimized chats: update the engagement/request state which will sync to minimized chat
     // Also play sound for immediate feedback
