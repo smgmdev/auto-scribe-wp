@@ -451,6 +451,8 @@ export function MyRequestsView() {
 
   // Filter and sort active requests
   const sortedActiveRequests = useMemo(() => {
+    console.log('[MyRequestsView] Sorting active requests, sortBy:', sortBy, 'messages keys:', Object.keys(messages));
+    
     const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
@@ -459,7 +461,8 @@ export function MyRequestsView() {
       return titleMatch || siteMatch;
     });
     
-    return filtered.sort((a, b) => {
+    // Create a copy before sorting to avoid mutation issues
+    const sorted = [...filtered].sort((a, b) => {
       if (sortBy === 'last_message') {
         const aMessages = messages[a.id] || [];
         const bMessages = messages[b.id] || [];
@@ -477,6 +480,9 @@ export function MyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
+    
+    console.log('[MyRequestsView] Sorted result:', sorted.map(r => ({ id: r.id, name: r.media_site?.name, created_at: r.created_at })));
+    return sorted;
   }, [activeRequests, messages, sortBy, searchQuery]);
 
   // Filter and sort cancelled requests
@@ -489,7 +495,8 @@ export function MyRequestsView() {
       return titleMatch || siteMatch;
     });
     
-    return filtered.sort((a, b) => {
+    // Create a copy before sorting to avoid mutation issues
+    return [...filtered].sort((a, b) => {
       if (sortBy === 'last_message') {
         const aMessages = messages[a.id] || [];
         const bMessages = messages[b.id] || [];
