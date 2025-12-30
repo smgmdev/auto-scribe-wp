@@ -1055,7 +1055,11 @@ export function ChatListPanel() {
           }
           
           // For service requests: sync agency_read and status
-          if (agencyPayoutIdRef.current && updated.agency_payout_id === agencyPayoutIdRef.current) {
+          // Check if agency payout matches OR if the request exists in our current list
+          const existsInServiceRequests = serviceRequestsRef.current.some(r => r.id === updated.id);
+          const isAgencyMatch = agencyPayoutIdRef.current && updated.agency_payout_id === agencyPayoutIdRef.current;
+          
+          if (isAgencyMatch || existsInServiceRequests) {
             setServiceRequests(prev => {
               // If status is cancelled, remove from list immediately
               if (updated.status === 'cancelled') {
