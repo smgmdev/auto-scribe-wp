@@ -874,6 +874,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             console.log('[FloatingChatWindow] Marked as read:', updateField);
           });
       }
+      
+      // Dispatch event immediately to sync with ChatListPanel for instant UI update
+      // This ensures the notification badge updates without waiting for realtime
+      if (actualSenderType === 'client') {
+        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+        }));
+      } else if (actualSenderType === 'agency') {
+        window.dispatchEvent(new CustomEvent('service-request-updated', {
+          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+        }));
+      }
     }
   }, [globalChatRequest?.id, actualSenderType, senderId, clearUnreadMessageCount, clearMinimizedChatUnread]);
 

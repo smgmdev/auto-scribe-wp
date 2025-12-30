@@ -650,9 +650,9 @@ export function ChatListPanel() {
       }
     };
 
-    // Listen for service request updates from AgencyRequestsView
+    // Listen for service request updates from AgencyRequestsView and FloatingChatWindow
     const handleServiceRequestUpdated = (event: CustomEvent) => {
-      const { id, read, lastMessage, lastMessageTime } = event.detail || {};
+      const { id, read, lastMessage, lastMessageTime, unreadCount } = event.detail || {};
       if (id) {
         setServiceRequests(prev => {
           const updated = prev.map(r => {
@@ -660,6 +660,7 @@ export function ChatListPanel() {
               return { 
                 ...r, 
                 read: read !== undefined ? read : r.read,
+                unreadCount: unreadCount !== undefined ? unreadCount : r.unreadCount,
                 lastMessage: lastMessage || r.lastMessage,
                 lastMessageTime: lastMessageTime || r.lastMessageTime
               };
@@ -667,6 +668,13 @@ export function ChatListPanel() {
             return r;
           });
           serviceRequestsRef.current = updated;
+          
+          // Recalculate agency unread count immediately
+          if (read === true || unreadCount === 0) {
+            const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+            setAgencyUnreadServiceRequestsCount(newUnreadCount);
+          }
+          
           return updated;
         });
         
@@ -677,9 +685,9 @@ export function ChatListPanel() {
       }
     };
 
-    // Listen for my engagement updates from MyRequestsView
+    // Listen for my engagement updates from MyRequestsView and FloatingChatWindow
     const handleMyEngagementUpdated = (event: CustomEvent) => {
-      const { id, read, lastMessage, lastMessageTime } = event.detail || {};
+      const { id, read, lastMessage, lastMessageTime, unreadCount } = event.detail || {};
       if (id) {
         setMyEngagements(prev => {
           const updated = prev.map(e => {
@@ -687,6 +695,7 @@ export function ChatListPanel() {
               return { 
                 ...e, 
                 read: read !== undefined ? read : e.read,
+                unreadCount: unreadCount !== undefined ? unreadCount : e.unreadCount,
                 lastMessage: lastMessage || e.lastMessage,
                 lastMessageTime: lastMessageTime || e.lastMessageTime
               };
@@ -694,6 +703,13 @@ export function ChatListPanel() {
             return e;
           });
           myEngagementsRef.current = updated;
+          
+          // Recalculate user unread count immediately
+          if (read === true || unreadCount === 0) {
+            const newUnreadCount = updated.filter(e => !e.read && e.status !== 'cancelled').length;
+            setUserUnreadEngagementsCount(newUnreadCount);
+          }
+          
           return updated;
         });
         
@@ -979,7 +995,9 @@ export function ChatListPanel() {
                 if (e.id === updated.id) {
                   // Sync client_read to local read state
                   const newRead = clientReadChanged ? updated.client_read : e.read;
-                  return { ...e, read: newRead, status: updated.status };
+                  // If marked as read, also reset unread count to 0
+                  const newUnreadCount = newRead ? 0 : e.unreadCount;
+                  return { ...e, read: newRead, unreadCount: newUnreadCount, status: updated.status };
                 }
                 return e;
               });
@@ -1009,7 +1027,9 @@ export function ChatListPanel() {
                 if (r.id === updated.id) {
                   // Sync agency_read to local read state
                   const newRead = agencyReadChanged ? updated.agency_read : r.read;
-                  return { ...r, read: newRead, status: updated.status };
+                  // If marked as read, also reset unread count to 0
+                  const newUnreadCount = newRead ? 0 : r.unreadCount;
+                  return { ...r, read: newRead, unreadCount: newUnreadCount, status: updated.status };
                 }
                 return r;
               });
