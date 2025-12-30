@@ -421,25 +421,22 @@ export function AgencyRequestsView() {
       return titleMatch || siteMatch;
     });
     
+    // Always sort by latest message
     return filtered.sort((a, b) => {
-      if (sortBy === 'last_message') {
-        const aMessages = messages[a.id] || [];
-        const bMessages = messages[b.id] || [];
-        const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
-        const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
-        if (aLastMessage && bLastMessage) {
-          return bLastMessage - aLastMessage;
-        } else if (aLastMessage) {
-          return -1;
-        } else if (bLastMessage) {
-          return 1;
-        }
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      const aMessages = messages[a.id] || [];
+      const bMessages = messages[b.id] || [];
+      const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
+      const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
+      if (aLastMessage && bLastMessage) {
+        return bLastMessage - aLastMessage;
+      } else if (aLastMessage) {
+        return -1;
+      } else if (bLastMessage) {
+        return 1;
       }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-  }, [activeRequests, messages, sortBy, searchQuery]);
+  }, [activeRequests, messages, searchQuery]);
 
   const sortedCancelledRequests = useMemo(() => {
     const filtered = cancelledRequests.filter((request) => {
