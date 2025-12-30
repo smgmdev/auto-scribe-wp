@@ -19,6 +19,7 @@ interface ServiceRequest {
   status: string;
   read: boolean;
   cancellation_reason?: string | null;
+  cancelled_at?: string | null;
   created_at: string;
   updated_at: string;
   media_site: {
@@ -63,6 +64,8 @@ export function MyRequestsView() {
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
+  const [cancelledSortBy, setCancelledSortBy] = useState<'cancelled_at' | 'last_message' | 'submitted'>('cancelled_at');
+  const [activeTab, setActiveTab] = useState<'active' | 'cancelled'>('active');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Refs to avoid stale closures in subscriptions
@@ -490,7 +493,11 @@ export function MyRequestsView() {
     });
     
     return [...filtered].sort((a, b) => {
-      if (sortBy === 'last_message') {
+      if (cancelledSortBy === 'cancelled_at') {
+        const aCancelled = a.cancelled_at ? new Date(a.cancelled_at).getTime() : 0;
+        const bCancelled = b.cancelled_at ? new Date(b.cancelled_at).getTime() : 0;
+        return bCancelled - aCancelled;
+      } else if (cancelledSortBy === 'last_message') {
         const aMessages = messages[a.id] || [];
         const bMessages = messages[b.id] || [];
         const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
@@ -507,7 +514,7 @@ export function MyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [cancelledRequests, messages, sortBy, searchQuery]);
+  }, [cancelledRequests, messages, cancelledSortBy, searchQuery]);
 
   if (loading) {
     return (
@@ -532,15 +539,28 @@ export function MyRequestsView() {
         {requests.length > 0 && (
           <div className="flex items-center gap-2">
             <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
-                <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
-              </SelectContent>
-            </Select>
+            {activeTab === 'active' ? (
+              <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
+                  <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select value={cancelledSortBy} onValueChange={(value) => setCancelledSortBy(value as 'cancelled_at' | 'last_message' | 'submitted')}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cancelled_at" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Cancelled Date</SelectItem>
+                  <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
+                  <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         )}
       </div>
@@ -555,7 +575,7 @@ export function MyRequestsView() {
         />
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'cancelled')} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="active" className="gap-2">
             <ClipboardList className="h-4 w-4" />
