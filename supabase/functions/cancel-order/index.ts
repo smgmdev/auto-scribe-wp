@@ -239,34 +239,16 @@ serve(async (req) => {
           message: `[ORDER_CANCELLED]${cancellationMessage}[/ORDER_CANCELLED]`
         });
 
-      // Mark request as unread for agency
+      // Mark request as unread for agency and admin (UI notification)
       await supabaseAdmin
         .from("service_requests")
-        .update({ agency_read: false })
+        .update({ 
+          agency_read: false,
+          read: false // Also notify admin
+        })
         .eq("id", serviceRequest.id);
 
-      logStep("Cancellation message sent to chat");
-
-      // Send email notification to agency about the cancellation
-      try {
-        const notifyResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-engagement-cancelled`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
-          },
-          body: JSON.stringify({
-            service_request_id: serviceRequest.id,
-            cancelled_by: 'client',
-            cancellation_reason: 'Order was cancelled by user',
-            media_site_name: mediaSiteName
-          })
-        });
-        logStep("Cancellation notification sent", { status: notifyResponse.status });
-      } catch (notifyError: any) {
-        logStep("Error sending cancellation notification", { error: notifyError.message });
-        // Don't fail the cancellation if notification fails
-      }
+      logStep("Cancellation message sent to chat and unread flags updated");
     }
 
     logStep("Order cancelled successfully", { order_id, creditRefund });
