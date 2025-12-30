@@ -301,6 +301,12 @@ export function MyRequestsView() {
                   title: 'Changes Requested',
                   description: 'The agency has requested changes to your brief.',
                 });
+              } else if (updated.status === 'cancelled') {
+                toast({
+                  variant: 'destructive',
+                  title: 'Engagement Cancelled',
+                  description: `Your engagement for ${currentRequest.media_site?.name || 'this media site'} has been cancelled.`,
+                });
               }
             }
             
@@ -314,7 +320,13 @@ export function MyRequestsView() {
                 if (r.id === updated.id) {
                   // Sync client_read to local read state when it changes
                   const newRead = clientReadChanged ? updated.client_read : r.read;
-                  return { ...r, read: newRead, status: updated.status };
+                  return { 
+                    ...r, 
+                    read: newRead, 
+                    status: updated.status,
+                    cancelled_at: updated.cancelled_at || r.cancelled_at,
+                    cancellation_reason: updated.cancellation_reason || r.cancellation_reason
+                  };
                 }
                 return r;
               });
