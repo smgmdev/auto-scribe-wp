@@ -1510,6 +1510,10 @@ export function ChatListPanel() {
           const newMsg = payload.new as any;
           const requestId = newMsg.request_id;
           const senderType = newMsg.sender_type;
+          const senderId = newMsg.sender_id;
+          
+          // Skip own messages - never play sound for messages we sent
+          if (senderId === user?.id || senderId === agencyPayoutIdRef.current) return;
           
           // Only track messages from client or agency (not admin's own messages)
           if (senderType === 'admin') return;
