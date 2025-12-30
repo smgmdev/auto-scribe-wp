@@ -47,10 +47,10 @@ export function useMinimizedChats() {
 
       const requestIds = data.map(chat => chat.request_id);
       
-      // Get service requests with read status and timestamps
+      // Get service requests with read status, timestamps, and status to filter out cancelled
       const { data: requestsData } = await supabase
         .from('service_requests')
-        .select('id, client_read, agency_read, client_last_read_at, agency_last_read_at, user_id')
+        .select('id, status, client_read, agency_read, client_last_read_at, agency_last_read_at, user_id')
         .in('id', requestIds);
 
       // Get all messages for these requests to count unread
@@ -60,23 +60,41 @@ export function useMinimizedChats() {
         .in('request_id', requestIds)
         .order('created_at', { ascending: false });
 
-      // Create map for read status
+      // Create map for read status and filter out cancelled requests
       const requestInfoMap: Record<string, { 
+        status: string;
         client_read: boolean; 
         agency_read: boolean; 
         client_last_read_at: string | null;
         agency_last_read_at: string | null;
         user_id: string 
       }> = {};
+      const cancelledRequestIds: string[] = [];
+      
       requestsData?.forEach(req => {
-        requestInfoMap[req.id] = { 
-          client_read: req.client_read, 
-          agency_read: req.agency_read,
-          client_last_read_at: req.client_last_read_at,
-          agency_last_read_at: req.agency_last_read_at,
-          user_id: req.user_id
-        };
+        if (req.status === 'cancelled') {
+          cancelledRequestIds.push(req.id);
+        } else {
+          requestInfoMap[req.id] = { 
+            status: req.status,
+            client_read: req.client_read, 
+            agency_read: req.agency_read,
+            client_last_read_at: req.client_last_read_at,
+            agency_last_read_at: req.agency_last_read_at,
+            user_id: req.user_id
+          };
+        }
       });
+
+      // Delete cancelled minimized chats from DB
+      if (cancelledRequestIds.length > 0) {
+        await supabase
+          .from('minimized_chats')
+          .delete()
+          .eq('user_id', user.id)
+          .in('request_id', cancelledRequestIds);
+        console.log('[useMinimizedChats] Removed cancelled chats from DB:', cancelledRequestIds);
+      }
 
       // Group messages by request_id (already sorted by created_at desc)
       const messagesByRequest: Record<string, { sender_type: string; created_at: string }[]> = {};
@@ -93,8 +111,13 @@ export function useMinimizedChats() {
       // Get current state directly from store to check existing chats
       const currentChats = useAppStore.getState().minimizedChats;
       
-      // Only add chats that aren't already in the store
+      // Only add chats that aren't already in the store AND aren't cancelled
       data?.forEach(chat => {
+        // Skip cancelled requests
+        if (cancelledRequestIds.includes(chat.request_id)) {
+          return;
+        }
+        
         const existingChat = currentChats.find(c => c.id === chat.request_id);
         if (!existingChat) {
           const isMyEngagement = chat.chat_type === 'my-request';
