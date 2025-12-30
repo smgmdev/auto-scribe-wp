@@ -768,7 +768,11 @@ export function ChatListPanel() {
     const { request_id, sender_type, sender_id, message, title, media_site_name, media_site_favicon } = payload;
     
     // Skip if this is our own message (sender_id matches our user id or agency payout id)
-    if (sender_id === user.id || sender_id === agencyPayoutIdRef.current) {
+    // Also skip if sender_type matches what we are (agency sending as agency = own message)
+    const isOwnBroadcast = sender_id === user.id || 
+                           sender_id === agencyPayoutIdRef.current ||
+                           (isAdmin && sender_type === 'admin');
+    if (isOwnBroadcast) {
       console.log('[ChatListPanel] Skipping own message broadcast');
       return;
     }
@@ -873,8 +877,8 @@ export function ChatListPanel() {
         });
       }
       
-      // Extra safety check before playing sound
-      if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+      // Extra safety check before playing sound - never play if dialog is open or if own message
+      if (!isDialogOpen && sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
         playMessageSound();
       }
     } else if (!isDialogOpen) {
@@ -1117,8 +1121,11 @@ export function ChatListPanel() {
           // Skip if this is our own message
           // Check sender_id against both user.id and agencyPayoutId
           // This covers all cases: user sending as client, user sending as agency, admin sending
+          // Also check: if we are an agency (have agencyPayoutId) and message is from 'agency' type,
+          // verify it's not from our agency by checking the service request's agency_payout_id
           const isOwnMessage = senderId === user?.id || 
-                               (agencyPayoutIdRef.current && senderId === agencyPayoutIdRef.current);
+                               (agencyPayoutIdRef.current && senderId === agencyPayoutIdRef.current) ||
+                               (isAdmin && senderType === 'admin');
           
           console.log('[ChatListPanel] isOwnMessage check:', { 
             isOwnMessage, 
