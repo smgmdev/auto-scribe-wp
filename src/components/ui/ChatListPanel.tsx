@@ -1634,7 +1634,7 @@ export function ChatListPanel() {
           
           // Dispatch event to sync with MyRequestsView
           window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-            detail: { id: item.id, read: true }
+            detail: { id: item.id, read: true, unreadCount: 0 }
           }));
         } else {
           supabase

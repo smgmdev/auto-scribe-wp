@@ -447,7 +447,7 @@ export function MyRequestsView() {
       
       // Dispatch event to sync with ChatListPanel (messaging widget)
       window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-        detail: { id: request.id, read: true }
+        detail: { id: request.id, read: true, unreadCount: 0 }
       }));
     }
   };
