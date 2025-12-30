@@ -758,6 +758,7 @@ export function ChatListPanel() {
   const minimizedChatsRef = useRef(minimizedChats);
   const openChatsRef = useRef(openChats);
   const agencyPayoutIdRef = useRef(agencyPayoutId);
+  const isAgencyRef = useRef(isAgency);
 
   useEffect(() => {
     minimizedChatsRef.current = minimizedChats;
@@ -770,7 +771,9 @@ export function ChatListPanel() {
 
   useEffect(() => {
     agencyPayoutIdRef.current = agencyPayoutId;
-  }, [agencyPayoutId]);
+    isAgencyRef.current = isAgency;
+    console.log('[ChatListPanel] Agency refs updated:', { agencyPayoutId, isAgency });
+  }, [agencyPayoutId, isAgency]);
 
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
@@ -789,12 +792,24 @@ export function ChatListPanel() {
     
     // Skip if this is our own message (sender_id matches our user id or agency payout id)
     // Also skip if sender_type matches what we are (agency sending as agency = own message)
-    const isAgencyUser = !!agencyPayoutIdRef.current;
+    // Use BOTH ref and state-based check for agency status in case ref hasn't updated yet
+    const isAgencyUser = !!agencyPayoutIdRef.current || isAgencyRef.current;
     const isOwnBroadcast = sender_id === user.id || 
                            sender_id === agencyPayoutIdRef.current ||
                            (isAdmin && sender_type === 'admin') ||
-                           // Additional check: if we are an agency and this is an agency message in our service request
-                           (isAgencyUser && sender_type === 'agency' && isServiceRequest);
+                           // If we are an agency and this is an agency-type message, it's likely our own
+                           (isAgencyUser && sender_type === 'agency');
+    
+    console.log('[ChatListPanel] Own message check:', { 
+      sender_id, 
+      userId: user.id, 
+      agencyPayoutIdRef: agencyPayoutIdRef.current, 
+      isAgencyRef: isAgencyRef.current,
+      isAgencyUser, 
+      sender_type,
+      isOwnBroadcast 
+    });
+    
     if (isOwnBroadcast) {
       console.log('[ChatListPanel] Skipping own message broadcast');
       return;
