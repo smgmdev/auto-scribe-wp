@@ -321,6 +321,17 @@ export function AgencyRequestsView() {
             ...prev,
             [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg as ServiceMessage]
           }));
+          
+          // Mark the request as unread since we received a new client message
+          setRequests(prev => {
+            const updated = prev.map(r => 
+              r.id === newMsg.request_id ? { ...r, read: false } : r
+            );
+            // Recalculate unread count
+            const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+            setAgencyUnreadServiceRequestsCount(newUnreadCount);
+            return updated;
+          });
         }
       )
       .subscribe();
