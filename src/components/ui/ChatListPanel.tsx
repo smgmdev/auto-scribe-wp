@@ -864,8 +864,14 @@ export function ChatListPanel() {
     const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
     const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
     
-    const shouldNotify = (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient) ||
-                         (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient);
+    // CRITICAL: Agency sending as agency should NOT trigger notification for agency
+    const isAgencySendingAsAgency = isAgencyUser && sender_type === 'agency';
+    const shouldNotify = !isAgencySendingAsAgency && (
+      (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient) ||
+      (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient)
+    );
+    
+    console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, sender_type, isAgencyUser });
     
     // For minimized chats: update the engagement/request state which will sync to minimized chat
     // Also play sound for immediate feedback
@@ -897,10 +903,10 @@ export function ChatListPanel() {
       }
       
       // Extra safety check before playing sound - never play if dialog is open or if own message
-      if (!isDialogOpen && sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+      if (!isDialogOpen && sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
         playMessageSound();
       }
-    } else if (!isDialogOpen) {
+    } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
       
@@ -926,7 +932,7 @@ export function ChatListPanel() {
           description: `Message for "${title}" (${media_site_name})`,
         });
         // Extra safety check before playing sound
-        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
           playMessageSound();
         }
       }
@@ -953,7 +959,7 @@ export function ChatListPanel() {
           description: `Message for "${title}" (${media_site_name})`,
         });
         // Extra safety check before playing sound
-        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current) {
+        if (sender_id !== user.id && sender_id !== agencyPayoutIdRef.current && !isAgencySendingAsAgency) {
           playMessageSound();
         }
       }
@@ -1375,10 +1381,17 @@ export function ChatListPanel() {
           
           // Only increment unread for minimized chats when message is from counterparty
           // Check both local lists AND minimized chat type
-          const isFromCounterparty = (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) || 
-                                     (isServiceRequest && senderType === 'client') ||
-                                     (isMinimizedMyRequest && (senderType === 'agency' || senderType === 'admin')) ||
-                                     (isMinimizedAgencyRequest && senderType === 'client');
+          // CRITICAL: An agency sending a message with senderType='agency' is NOT a counterparty message for agency
+          // A client sending a message with senderType='client' is NOT a counterparty message for client
+          const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency';
+          const isFromCounterparty = !isAgencySendingAsAgency && (
+            (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) || 
+            (isServiceRequest && senderType === 'client') ||
+            (isMinimizedMyRequest && (senderType === 'agency' || senderType === 'admin')) ||
+            (isMinimizedAgencyRequest && senderType === 'client')
+          );
+          
+          console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isAgencySendingAsAgency, senderType, isAgencyUser });
           
           // For minimized chats: the unread count was already synced from engagements/requests above
           // Just play the sound notification - no separate increment needed
@@ -1386,11 +1399,11 @@ export function ChatListPanel() {
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, playing sound (unread already synced from engagement/request)');
             // Extra safety check: verify sender_id doesn't match current user or agency
-            const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current;
+            const shouldPlaySound = senderId !== user?.id && senderId !== agencyPayoutIdRef.current && !isAgencySendingAsAgency;
             if (shouldPlaySound) {
               playMessageSound();
             }
-          } else if (!isDialogOpen) {
+          } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
             // Mark request as unread for the appropriate party in database
