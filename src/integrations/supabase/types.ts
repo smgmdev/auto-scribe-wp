@@ -839,6 +839,7 @@ export type Database = {
           agency_payout_id: string | null
           agency_read: boolean
           cancellation_reason: string | null
+          cancelled_at: string | null
           client_last_read_at: string | null
           client_read: boolean
           created_at: string
@@ -857,6 +858,7 @@ export type Database = {
           agency_payout_id?: string | null
           agency_read?: boolean
           cancellation_reason?: string | null
+          cancelled_at?: string | null
           client_last_read_at?: string | null
           client_read?: boolean
           created_at?: string
@@ -875,6 +877,7 @@ export type Database = {
           agency_payout_id?: string | null
           agency_read?: boolean
           cancellation_reason?: string | null
+          cancelled_at?: string | null
           client_last_read_at?: string | null
           client_read?: boolean
           created_at?: string

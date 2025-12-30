@@ -641,7 +641,7 @@ export function AgencyRequestsView() {
                     <CardContent className="py-3 px-4 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">
-                          Cancelled: {format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
+                          Cancelled: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                         </span>
                         {requestMessages.length > 0 && (
                           <span className="text-xs text-muted-foreground">

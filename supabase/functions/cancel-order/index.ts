@@ -191,6 +191,7 @@ serve(async (req) => {
       .update({
         status: "cancelled",
         cancellation_reason: "Order was cancelled by user",
+        cancelled_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq("order_id", order_id);
