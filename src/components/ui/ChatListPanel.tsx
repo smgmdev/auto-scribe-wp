@@ -1556,6 +1556,9 @@ export function ChatListPanel() {
               e.id === item.id ? { ...e, read: true, unreadCount: 0 } : e
             );
             myEngagementsRef.current = updated;
+            // Recalculate and update the user unread engagements count
+            const newUnreadCount = updated.filter(e => !e.read && e.status !== 'cancelled').length;
+            setUserUnreadEngagementsCount(newUnreadCount);
             return updated;
           });
           
@@ -1576,6 +1579,9 @@ export function ChatListPanel() {
               r.id === item.id ? { ...r, read: true, unreadCount: 0 } : r
             );
             serviceRequestsRef.current = updated;
+            // Recalculate and update the agency unread service requests count
+            const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+            setAgencyUnreadServiceRequestsCount(newUnreadCount);
             return updated;
           });
           
