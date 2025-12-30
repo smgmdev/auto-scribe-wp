@@ -498,28 +498,31 @@ export function Sidebar({
       const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
       const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
 
-      // Get all messages for active requests
-      const activeRequestIds = activeRequests.map(r => r.id);
-      let activeUnreadCount = 0;
+      // Get all request IDs to fetch messages
+      const allRequestIds = allRequests.map(r => r.id);
+      let messagesData: { request_id: string; sender_type: string }[] = [];
       
-      if (activeRequestIds.length > 0) {
-        const { data: messages } = await supabase
+      if (allRequestIds.length > 0) {
+        const { data } = await supabase
           .from('service_messages')
           .select('request_id, sender_type')
-          .in('request_id', activeRequestIds);
-
-        // Count requests that have unread agency messages
-        activeRequests.forEach(request => {
-          const hasAgencyMessages = messages?.some(
-            m => m.request_id === request.id && m.sender_type !== 'client'
-          );
-          if (hasAgencyMessages && !(request as any).client_read) {
-            activeUnreadCount++;
-          }
-        });
+          .in('request_id', allRequestIds);
+        messagesData = data || [];
       }
 
-      // Count unread cancelled requests
+      // Count active requests that have unread agency messages
+      let activeUnreadCount = 0;
+      activeRequests.forEach(request => {
+        const hasAgencyMessages = messagesData.some(
+          m => m.request_id === request.id && m.sender_type !== 'client'
+        );
+        // Only count as unread if client_read is false AND there's an agency message
+        if (hasAgencyMessages && !(request as any).client_read) {
+          activeUnreadCount++;
+        }
+      });
+
+      // Count unread cancelled requests (cancelled requests are always shown as unread if client_read is false)
       const cancelledUnreadCount = cancelledRequests.filter(r => !(r as any).client_read).length;
 
       setUserUnreadEngagementsCount(activeUnreadCount);
