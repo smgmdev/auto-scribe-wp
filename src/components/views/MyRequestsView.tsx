@@ -110,13 +110,17 @@ export function MyRequestsView() {
         messagesForUnread = msgData || [];
       }
 
-      // Map client_read to read for the interface - only show as unread if has agency message
+      // Map client_read to read for the interface
       const mappedRequests = (requestsData || []).map(r => {
+        const isCancelled = r.status === 'cancelled';
         const hasAgencyMessage = messagesForUnread.some(
           m => m.request_id === r.id && m.sender_type !== 'client'
         );
-        // Only mark as unread if client_read is false AND there's an agency message
-        const isRead = (r as any).client_read || !hasAgencyMessage;
+        // For cancelled requests: show as unread based only on client_read
+        // For active requests: only show as unread if client_read is false AND there's an agency message
+        const isRead = isCancelled 
+          ? (r as any).client_read 
+          : ((r as any).client_read || !hasAgencyMessage);
         return {
           ...r,
           read: isRead
