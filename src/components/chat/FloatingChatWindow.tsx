@@ -617,7 +617,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .from('service_requests')
         .update({ 
           status: 'cancelled',
-          cancellation_reason: cancellationReason.trim()
+          cancellation_reason: cancellationReason.trim(),
+          cancelled_at: new Date().toISOString()
         })
         .eq('id', globalChatRequest.id);
       

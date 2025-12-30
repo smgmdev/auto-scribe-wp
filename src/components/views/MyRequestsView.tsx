@@ -658,7 +658,7 @@ export function MyRequestsView() {
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            Cancelled: {format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
+                            Cancelled: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         </div>
                       </CardContent>
