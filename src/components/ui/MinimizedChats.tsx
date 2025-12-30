@@ -71,11 +71,11 @@ export function MinimizedChats({ onOpenChat }: MinimizedChatsProps) {
     // Dispatch event immediately to update ChatListPanel
     if (chat.type === 'my-request') {
       window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-        detail: { id: chat.id, read: true }
+        detail: { id: chat.id, read: true, unreadCount: 0 }
       }));
     } else {
       window.dispatchEvent(new CustomEvent('service-request-updated', {
-        detail: { id: chat.id, read: true }
+        detail: { id: chat.id, read: true, unreadCount: 0 }
       }));
     }
     
