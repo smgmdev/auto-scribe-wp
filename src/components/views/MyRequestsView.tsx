@@ -481,6 +481,8 @@ export function MyRequestsView() {
 
   // Filter and sort cancelled requests
   const sortedCancelledRequests = useMemo(() => {
+    console.log('[CancelledSort] Starting sort, sortBy:', sortBy, 'cancelledRequests:', cancelledRequests.length, 'messages keys:', Object.keys(messages));
+    
     const filtered = cancelledRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
@@ -489,12 +491,15 @@ export function MyRequestsView() {
       return titleMatch || siteMatch;
     });
     
-    return [...filtered].sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
       if (sortBy === 'last_message') {
         const aMessages = messages[a.id] || [];
         const bMessages = messages[b.id] || [];
         const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
         const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
+        
+        console.log('[CancelledSort] Comparing:', a.media_site?.name, 'msgs:', aMessages.length, 'last:', aLastMessage, 'vs', b.media_site?.name, 'msgs:', bMessages.length, 'last:', bLastMessage);
+        
         if (aLastMessage && bLastMessage) {
           return bLastMessage - aLastMessage;
         } else if (aLastMessage) {
@@ -507,6 +512,9 @@ export function MyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
+    
+    console.log('[CancelledSort] Result order:', sorted.map(r => r.media_site?.name));
+    return sorted;
   }, [cancelledRequests, messages, sortBy, searchQuery]);
 
   if (loading) {
