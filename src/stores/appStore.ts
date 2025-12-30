@@ -122,10 +122,18 @@ interface AppState {
   setAgencyUnreadServiceRequestsCount: (count: number) => void;
   incrementAgencyUnreadServiceRequestsCount: () => void;
   
+  // Agency cancelled engagement notifications (separate from active)
+  agencyUnreadCancelledCount: number;
+  setAgencyUnreadCancelledCount: (count: number) => void;
+  
   // User engagement notifications (for My Engagements)
   userUnreadEngagementsCount: number;
   setUserUnreadEngagementsCount: (count: number) => void;
   incrementUserUnreadEngagementsCount: () => void;
+  
+  // User cancelled engagement notifications (separate from active)
+  userUnreadCancelledCount: number;
+  setUserUnreadCancelledCount: (count: number) => void;
   
   // User agency application status
   userApplicationStatus: string | null;
@@ -258,12 +266,20 @@ export const useAppStore = create<AppState>()((set) => ({
     agencyUnreadServiceRequestsCount: state.agencyUnreadServiceRequestsCount + 1 
   })),
   
+  // Agency cancelled engagement notifications
+  agencyUnreadCancelledCount: 0,
+  setAgencyUnreadCancelledCount: (count) => set({ agencyUnreadCancelledCount: count }),
+  
   // User engagement notifications
   userUnreadEngagementsCount: 0,
   setUserUnreadEngagementsCount: (count) => set({ userUnreadEngagementsCount: count }),
   incrementUserUnreadEngagementsCount: () => set((state) => ({ 
     userUnreadEngagementsCount: state.userUnreadEngagementsCount + 1 
   })),
+  
+  // User cancelled engagement notifications
+  userUnreadCancelledCount: 0,
+  setUserUnreadCancelledCount: (count) => set({ userUnreadCancelledCount: count }),
   userApplicationStatus: null,
   setUserApplicationStatus: (status) => set({ userApplicationStatus: status }),
   

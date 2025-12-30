@@ -52,7 +52,8 @@ interface ServiceMessage {
 export function AgencyRequestsView() {
   const { user } = useAuth();
   const { 
-    setAgencyUnreadServiceRequestsCount, 
+    setAgencyUnreadServiceRequestsCount,
+    setAgencyUnreadCancelledCount,
     unreadMessageCounts,
     setUnreadMessageCount,
     clearUnreadMessageCount,
@@ -146,6 +147,10 @@ export function AgencyRequestsView() {
       // Count unread: count requests where agency_read = false AND not cancelled
       const unreadCount = data.filter(r => !(r as any).agency_read && r.status !== 'cancelled').length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
+      
+      // Count unread cancelled requests
+      const unreadCancelledCount = data.filter(r => !(r as any).agency_read && r.status === 'cancelled').length;
+      setAgencyUnreadCancelledCount(unreadCancelledCount);
 
       // Fetch orders for this agency's service requests
       const requestIds = data.map(r => r.id);
@@ -280,14 +285,14 @@ export function AgencyRequestsView() {
               return r;
             });
             
-            // Remove cancelled requests from the list
-            if (statusChanged && updated.status === 'cancelled') {
-              newRequests = newRequests.filter(r => r.id !== updated.id);
-            }
-            
-            // Recalculate unread count (exclude cancelled)
+            // Don't remove cancelled requests - they go to Cancelled tab
+            // Just recalculate unread counts
             const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
             setAgencyUnreadServiceRequestsCount(newUnreadCount);
+            
+            // Also update cancelled unread count
+            const newCancelledUnreadCount = newRequests.filter(r => !r.read && r.status === 'cancelled').length;
+            setAgencyUnreadCancelledCount(newCancelledUnreadCount);
             return newRequests;
           });
         }
@@ -353,6 +358,9 @@ export function AgencyRequestsView() {
   };
 
   const markAsRead = async (requestId: string) => {
+    const request = requests.find(r => r.id === requestId);
+    const isCancelled = request?.status === 'cancelled';
+    
     await supabase
       .from('service_requests')
       .update({ agency_read: true })
@@ -362,8 +370,14 @@ export function AgencyRequestsView() {
       r.id === requestId ? { ...r, read: true } : r
     ));
     
-    const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId && r.status !== 'cancelled').length;
-    setAgencyUnreadServiceRequestsCount(newUnreadCount);
+    // Update the appropriate count based on whether the request is cancelled
+    if (isCancelled) {
+      const newCancelledCount = requests.filter(r => !r.read && r.id !== requestId && r.status === 'cancelled').length;
+      setAgencyUnreadCancelledCount(newCancelledCount);
+    } else {
+      const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId && r.status !== 'cancelled').length;
+      setAgencyUnreadServiceRequestsCount(newUnreadCount);
+    }
     
     // Dispatch event to sync with ChatListPanel messaging widget
     window.dispatchEvent(new CustomEvent('service-request-updated', {
