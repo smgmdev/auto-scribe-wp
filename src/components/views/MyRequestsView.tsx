@@ -56,7 +56,8 @@ export function MyRequestsView() {
     clearUnreadMessageCount,
     openGlobalChat,
     userUnreadEngagementsCount,
-    setUserUnreadEngagementsCount
+    setUserUnreadEngagementsCount,
+    setUserUnreadCancelledCount
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
@@ -123,6 +124,10 @@ export function MyRequestsView() {
       // Count unread: only count requests where client_read = false AND has agency message AND not cancelled
       const unreadCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
       setUserUnreadEngagementsCount(unreadCount);
+      
+      // Count unread cancelled requests
+      const unreadCancelledCount = mappedRequests.filter(r => !r.read && r.status === 'cancelled').length;
+      setUserUnreadCancelledCount(unreadCancelledCount);
 
       // Fetch messages for all requests
       if (requestsData && requestsData.length > 0) {
@@ -315,6 +320,10 @@ export function MyRequestsView() {
               // But still recalculate unread count excluding cancelled
               const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
               setUserUnreadEngagementsCount(newUnreadCount);
+              
+              // Also update cancelled unread count
+              const newCancelledUnreadCount = newRequests.filter(r => !r.read && r.status === 'cancelled').length;
+              setUserUnreadCancelledCount(newCancelledUnreadCount);
               return newRequests;
             });
           }
@@ -396,13 +405,20 @@ export function MyRequestsView() {
     // Mark the request as read in the database asynchronously (don't await)
     // Use client_read for user's engagements
     if (!request.read) {
+      const isCancelled = request.status === 'cancelled';
+      
       supabase
         .from('service_requests')
         .update({ client_read: true, client_last_read_at: new Date().toISOString() })
         .eq('id', request.id)
         .then(() => {
-          // Decrement the sidebar notification count
-          setUserUnreadEngagementsCount(Math.max(0, userUnreadEngagementsCount - 1));
+          // Decrement the appropriate sidebar notification count
+          if (isCancelled) {
+            const currentCancelledCount = requests.filter(r => !r.read && r.id !== request.id && r.status === 'cancelled').length;
+            setUserUnreadCancelledCount(currentCancelledCount);
+          } else {
+            setUserUnreadEngagementsCount(Math.max(0, userUnreadEngagementsCount - 1));
+          }
         });
       
       // Update local state immediately

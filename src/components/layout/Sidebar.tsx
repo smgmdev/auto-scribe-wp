@@ -126,8 +126,12 @@ export function Sidebar({
     setAgencyUnreadMediaSubmissionsCount,
     agencyUnreadServiceRequestsCount,
     setAgencyUnreadServiceRequestsCount,
+    agencyUnreadCancelledCount,
+    setAgencyUnreadCancelledCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
+    userUnreadCancelledCount,
+    setUserUnreadCancelledCount,
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
     incrementAdminUnreadEngagementsCount,
@@ -358,6 +362,7 @@ export function Sidebar({
               .maybeSingle();
             
             let serviceRequestsCount = 0;
+            let cancelledRequestsCount = 0;
             if (agencyPayoutData) {
               const { count: requestsCount } = await supabase
                 .from('service_requests')
@@ -366,12 +371,22 @@ export function Sidebar({
                 .eq('agency_read', false)
                 .neq('status', 'cancelled');
               serviceRequestsCount = requestsCount || 0;
+              
+              // Count unread cancelled requests for agency
+              const { count: cancelledCount } = await supabase
+                .from('service_requests')
+                .select('*', { count: 'exact', head: true })
+                .eq('agency_payout_id', agencyPayoutData.id)
+                .eq('agency_read', false)
+                .eq('status', 'cancelled');
+              cancelledRequestsCount = cancelledCount || 0;
             }
             
             if (isMounted) {
               setAgencyUnreadWpSubmissionsCount((wpRejectedCount || 0) + (wpConnectedCount || 0));
               setAgencyUnreadMediaSubmissionsCount((mediaApprovedCount || 0) + (mediaRejectedCount || 0));
               setAgencyUnreadServiceRequestsCount(serviceRequestsCount);
+              setAgencyUnreadCancelledCount(cancelledRequestsCount);
             }
           }
       }
@@ -557,13 +572,13 @@ export function Sidebar({
                 const agencyDropdownCount = item.id === 'admin-agencies' 
                   ? (unreadAgencyApplicationsCount + unreadCustomVerificationsCount + unreadMediaSubmissionsCount) 
                   : 0;
-                // Calculate notification count for Agency Management dropdown (agency user)
+                // Calculate notification count for Agency Management dropdown (agency user) - include cancelled
                 const agencyManagementCount = item.id === 'agency-management'
-                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount)
+                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount)
                   : 0;
-                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders + disputes + engagements)
+                // Calculate notification count for B2B Media Buying dropdown (user engagements or admin orders + disputes + engagements) - include cancelled
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
-                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount) : userUnreadEngagementsCount)
+                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount) : (userUnreadEngagementsCount + userUnreadCancelledCount))
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
@@ -601,10 +616,10 @@ export function Sidebar({
                           // Agency user My Media shows pending submission notifications
                           const showAgencyMediaBadge = subItem.id === 'agency-media' && (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount) > 0;
                           const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
-                          // Agency user Service Requests shows unread request notifications
-                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && agencyUnreadServiceRequestsCount > 0;
-                          // User My Engagements shows unread message notifications
-                          const showEngagementsBadge = subItem.id === 'my-requests' && userUnreadEngagementsCount > 0;
+                          // Agency user Service Requests shows unread request notifications (active + cancelled)
+                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount) > 0;
+                          // User My Engagements shows unread message notifications (active + cancelled)
+                          const showEngagementsBadge = subItem.id === 'my-requests' && (userUnreadEngagementsCount + userUnreadCancelledCount) > 0;
                           // Admin Order Management shows unread orders + disputes notifications
                           const showOrdersBadge = subItem.id === 'admin-orders' && (unreadOrdersCount + unreadDisputesCount) > 0;
                           const ordersBadgeCount = unreadOrdersCount + unreadDisputesCount;
@@ -616,8 +631,8 @@ export function Sidebar({
                           if (showAgencyBadge) notificationCount = agencyBadgeCount;
                           else if (showMediaBadge) notificationCount = unreadMediaSubmissionsCount;
                           else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
-                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount;
-                          else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount;
+                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount;
+                          else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount + userUnreadCancelledCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
                           else if (showAdminEngagementsBadge) notificationCount = adminUnreadEngagementsCount;
                           
