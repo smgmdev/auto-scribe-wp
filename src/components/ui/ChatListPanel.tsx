@@ -1015,6 +1015,14 @@ export function ChatListPanel() {
             const statusChanged = old?.status !== updated.status;
             
             setMyEngagements(prev => {
+              // If status is cancelled, remove from list immediately
+              if (updated.status === 'cancelled') {
+                const newEngagements = prev.filter(e => e.id !== updated.id);
+                myEngagementsRef.current = newEngagements;
+                return newEngagements;
+              }
+              
+              const clientReadChanged = old?.client_read !== updated.client_read;
               let newEngagements = prev.map(e => {
                 if (e.id === updated.id) {
                   // Sync client_read to local read state
@@ -1025,11 +1033,6 @@ export function ChatListPanel() {
                 }
                 return e;
               });
-              
-              // Remove cancelled requests from the list
-              if (statusChanged && updated.status === 'cancelled') {
-                newEngagements = newEngagements.filter(e => e.id !== updated.id);
-              }
               
               myEngagementsRef.current = newEngagements;
               return newEngagements;
@@ -1043,10 +1046,15 @@ export function ChatListPanel() {
           
           // For service requests: sync agency_read and status
           if (agencyPayoutIdRef.current && updated.agency_payout_id === agencyPayoutIdRef.current) {
-            const agencyReadChanged = old?.agency_read !== updated.agency_read;
-            const statusChanged = old?.status !== updated.status;
-            
             setServiceRequests(prev => {
+              // If status is cancelled, remove from list immediately
+              if (updated.status === 'cancelled') {
+                const newRequests = prev.filter(r => r.id !== updated.id);
+                serviceRequestsRef.current = newRequests;
+                return newRequests;
+              }
+              
+              const agencyReadChanged = old?.agency_read !== updated.agency_read;
               let newRequests = prev.map(r => {
                 if (r.id === updated.id) {
                   // Sync agency_read to local read state
@@ -1057,11 +1065,6 @@ export function ChatListPanel() {
                 }
                 return r;
               });
-              
-              // Remove cancelled requests from the list
-              if (statusChanged && updated.status === 'cancelled') {
-                newRequests = newRequests.filter(r => r.id !== updated.id);
-              }
               
               serviceRequestsRef.current = newRequests;
               return newRequests;
