@@ -2419,7 +2419,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <p className="text-xs font-medium mb-1 opacity-70 pr-5">
-                        {msg.sender_type === 'admin' ? 'Arcana Mace Staff' : isOwnMessage ? 'You' : counterpartyLabel}
+                        {msg.sender_type === 'admin' 
+                          ? 'Arcana Mace Staff' 
+                          : isOwnMessage 
+                            ? 'You' 
+                            : isAdmin 
+                              ? (msg.sender_type === 'agency' ? 'Agency' : 'Client')
+                              : counterpartyLabel}
                       </p>
                       {renderMessageContent(msg, isOwnMessage, quote)}
                     </div>
