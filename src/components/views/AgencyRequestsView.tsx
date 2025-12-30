@@ -450,29 +450,13 @@ export function AgencyRequestsView() {
       return titleMatch || siteMatch;
     });
     
+    // Always sort by cancelled date/time (latest first)
     return filtered.sort((a, b) => {
-      if (cancelledSortBy === 'cancelled_at') {
-        const aCancelled = a.cancelled_at ? new Date(a.cancelled_at).getTime() : 0;
-        const bCancelled = b.cancelled_at ? new Date(b.cancelled_at).getTime() : 0;
-        return bCancelled - aCancelled;
-      } else if (cancelledSortBy === 'last_message') {
-        const aMessages = messages[a.id] || [];
-        const bMessages = messages[b.id] || [];
-        const aLastMessage = aMessages.length > 0 ? aMessages[aMessages.length - 1] : null;
-        const bLastMessage = bMessages.length > 0 ? bMessages[bMessages.length - 1] : null;
-        if (aLastMessage && bLastMessage) {
-          return new Date(bLastMessage.created_at).getTime() - new Date(aLastMessage.created_at).getTime();
-        } else if (aLastMessage) {
-          return -1;
-        } else if (bLastMessage) {
-          return 1;
-        }
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
+      const aCancelled = a.cancelled_at ? new Date(a.cancelled_at).getTime() : 0;
+      const bCancelled = b.cancelled_at ? new Date(b.cancelled_at).getTime() : 0;
+      return bCancelled - aCancelled;
     });
-  }, [cancelledRequests, messages, cancelledSortBy, searchQuery]);
+  }, [cancelledRequests, searchQuery]);
 
   // Calculate order counts
   const activeOrders = useMemo(() => 
