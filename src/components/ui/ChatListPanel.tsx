@@ -115,6 +115,7 @@ export function ChatListPanel() {
     globalChatOpen,
     globalChatRequest,
     openChats,
+    closeGlobalChat,
     minimizedChats,
     removeMinimizedChat,
     setUnreadDisputesCount,
@@ -774,6 +775,47 @@ export function ChatListPanel() {
     console.log('[ChatListPanel] Agency ref updated:', { agencyPayoutId });
   }, [agencyPayoutId]);
 
+  // Listen for engagement-cancelled event to remove cancelled chats from lists
+  useEffect(() => {
+    const handleEngagementCancelled = (event: CustomEvent<{ requestId: string }>) => {
+      const { requestId } = event.detail;
+      console.log('[ChatListPanel] Received engagement-cancelled event:', requestId);
+      
+      // Remove from myEngagements
+      setMyEngagements(prev => {
+        const newEngagements = prev.filter(e => e.id !== requestId);
+        myEngagementsRef.current = newEngagements;
+        const unreadCount = newEngagements.filter(e => !e.read && e.status !== 'cancelled').length;
+        setUserUnreadEngagementsCount(unreadCount);
+        return newEngagements;
+      });
+      
+      // Remove from serviceRequests
+      setServiceRequests(prev => {
+        const newRequests = prev.filter(r => r.id !== requestId);
+        serviceRequestsRef.current = newRequests;
+        const unreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+        setAgencyUnreadServiceRequestsCount(unreadCount);
+        return newRequests;
+      });
+      
+      // Close any open chat window and remove from minimized
+      closeGlobalChat(requestId);
+      removeMinimizedChat(requestId);
+      
+      // Delete from minimized_chats table
+      supabase
+        .from('minimized_chats')
+        .delete()
+        .eq('request_id', requestId)
+        .then(() => console.log('[ChatListPanel] Removed cancelled chat from minimized_chats table'));
+    };
+    
+    window.addEventListener('engagement-cancelled', handleEngagementCancelled as EventListener);
+    return () => {
+      window.removeEventListener('engagement-cancelled', handleEngagementCancelled as EventListener);
+    };
+  }, [closeGlobalChat, removeMinimizedChat]);
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
     

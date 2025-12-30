@@ -649,6 +649,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         cancellation_reason: cancellationReason.trim()
       }, globalChatRequest.id);
       
+      // Dispatch event to notify all components about the cancellation
+      window.dispatchEvent(new CustomEvent('engagement-cancelled', {
+        detail: { requestId: globalChatRequest.id }
+      }));
+      
       toast({
         title: "Engagement Cancelled",
         description: "This engagement has been cancelled.",
