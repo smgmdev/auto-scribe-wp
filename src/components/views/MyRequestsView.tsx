@@ -449,9 +449,9 @@ export function MyRequestsView() {
     [cancelledRequests]
   );
 
-  // Filter and sort requests based on search and sort option - must be before any conditional returns
-  const getSortedRequests = (requestList: ServiceRequest[]) => {
-    const filtered = requestList.filter((request) => {
+  // Filter and sort active requests
+  const sortedActiveRequests = useMemo(() => {
+    const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       const titleMatch = request.title.toLowerCase().includes(query);
@@ -465,7 +465,6 @@ export function MyRequestsView() {
         const bMessages = messages[b.id] || [];
         const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
         const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
-        // If both have messages, sort by last message. Otherwise, fall back to created_at
         if (aLastMessage && bLastMessage) {
           return bLastMessage - aLastMessage;
         } else if (aLastMessage) {
@@ -478,10 +477,37 @@ export function MyRequestsView() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  };
+  }, [activeRequests, messages, sortBy, searchQuery]);
 
-  const sortedActiveRequests = useMemo(() => getSortedRequests(activeRequests), [activeRequests, messages, sortBy, searchQuery]);
-  const sortedCancelledRequests = useMemo(() => getSortedRequests(cancelledRequests), [cancelledRequests, messages, sortBy, searchQuery]);
+  // Filter and sort cancelled requests
+  const sortedCancelledRequests = useMemo(() => {
+    const filtered = cancelledRequests.filter((request) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const titleMatch = request.title.toLowerCase().includes(query);
+      const siteMatch = request.media_site?.name.toLowerCase().includes(query);
+      return titleMatch || siteMatch;
+    });
+    
+    return filtered.sort((a, b) => {
+      if (sortBy === 'last_message') {
+        const aMessages = messages[a.id] || [];
+        const bMessages = messages[b.id] || [];
+        const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
+        const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
+        if (aLastMessage && bLastMessage) {
+          return bLastMessage - aLastMessage;
+        } else if (aLastMessage) {
+          return -1;
+        } else if (bLastMessage) {
+          return 1;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+  }, [cancelledRequests, messages, sortBy, searchQuery]);
 
   if (loading) {
     return (
