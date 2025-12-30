@@ -391,6 +391,10 @@ export function AgencyRequestsView() {
     return requests.filter(r => r.status === 'cancelled');
   }, [requests]);
 
+  const unreadCancelledCount = useMemo(() => {
+    return cancelledRequests.filter(r => !r.read).length;
+  }, [cancelledRequests]);
+
   const sortedRequests = useMemo(() => {
     const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
@@ -497,9 +501,14 @@ export function AgencyRequestsView() {
             <MessageSquare className="h-4 w-4" />
             Active ({activeRequests.length})
           </TabsTrigger>
-          <TabsTrigger value="cancelled" className="gap-2">
+          <TabsTrigger value="cancelled" className="gap-2 relative">
             <XCircle className="h-4 w-4" />
             Cancelled ({cancelledRequests.length})
+            {unreadCancelledCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {unreadCancelledCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="orders" className="gap-2">
             <ShoppingBag className="h-4 w-4" />
@@ -604,17 +613,20 @@ export function AgencyRequestsView() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {sortedCancelledRequests.map((request) => {
+            {sortedCancelledRequests.map((request) => {
                 const requestMessages = messages[request.id] || [];
                 const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
+                const hasUnread = !request.read;
                 
                 return (
                   <Card 
                     key={request.id} 
-                    className="relative border-border/50 hover:border-border transition-colors cursor-pointer"
+                    className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                      hasUnread ? 'border-l-4 border-l-red-500' : ''
+                    }`}
                     onClick={() => handleCardClick(request)}
                   >
-                    <CardHeader className="py-3 px-4 bg-red-500/10">
+                    <CardHeader className={`py-3 px-4 ${hasUnread ? 'bg-red-500/20' : 'bg-red-500/10'}`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -622,15 +634,23 @@ export function AgencyRequestsView() {
                               <img 
                                 src={request.media_site.favicon} 
                                 alt="" 
-                                className="h-8 w-8 rounded object-cover opacity-60"
+                                className={`h-8 w-8 rounded object-cover ${hasUnread ? '' : 'opacity-60'}`}
                               />
                             ) : (
                               <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
                                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
                               </div>
                             )}
+                            {hasUnread && (
+                              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-card" />
+                            )}
                           </div>
-                          <CardTitle className="text-base text-muted-foreground">{request.media_site?.name || request.title}</CardTitle>
+                          <div className="flex items-center gap-2">
+                            <CardTitle className={`text-base ${hasUnread ? 'text-foreground' : 'text-muted-foreground'}`}>{request.media_site?.name || request.title}</CardTitle>
+                            {hasUnread && (
+                              <Badge className="bg-red-500 text-white border-red-500">Cancelled</Badge>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-3 text-sm text-muted-foreground">
                           {request.media_site?.price !== undefined && (
