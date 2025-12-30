@@ -783,11 +783,18 @@ export function ChatListPanel() {
     
     const { request_id, sender_type, sender_id, message, title, media_site_name, media_site_favicon } = payload;
     
+    // Determine if this is for user engagement or agency service request (need this first)
+    const isMyEngagement = myEngagementsRef.current.some(e => e.id === request_id);
+    const isServiceRequest = serviceRequestsRef.current.some(r => r.id === request_id);
+    
     // Skip if this is our own message (sender_id matches our user id or agency payout id)
     // Also skip if sender_type matches what we are (agency sending as agency = own message)
+    const isAgencyUser = !!agencyPayoutIdRef.current;
     const isOwnBroadcast = sender_id === user.id || 
                            sender_id === agencyPayoutIdRef.current ||
-                           (isAdmin && sender_type === 'admin');
+                           (isAdmin && sender_type === 'admin') ||
+                           // Additional check: if we are an agency and this is an agency message in our service request
+                           (isAgencyUser && sender_type === 'agency' && isServiceRequest);
     if (isOwnBroadcast) {
       console.log('[ChatListPanel] Skipping own message broadcast');
       return;
@@ -803,10 +810,6 @@ export function ChatListPanel() {
     // Determine if this is for user engagement or agency service request
     const isFromAgency = sender_type === 'agency' || sender_type === 'admin';
     const isFromClient = sender_type === 'client';
-    
-    // Check if we have this in our local lists
-    const isMyEngagement = myEngagementsRef.current.some(e => e.id === request_id);
-    const isServiceRequest = serviceRequestsRef.current.some(r => r.id === request_id);
     
     console.log('[ChatListPanel] Processing broadcast notification', { 
       request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isMyEngagement, isServiceRequest 
@@ -1141,18 +1144,22 @@ export function ChatListPanel() {
           // Skip if this is our own message
           // Check sender_id against both user.id and agencyPayoutId
           // This covers all cases: user sending as client, user sending as agency, admin sending
-          // Also check: if we are an agency (have agencyPayoutId) and message is from 'agency' type,
-          // verify it's not from our agency by checking the service request's agency_payout_id
+          // Also check: if sender_type matches our role, it's likely our own message
+          // For agency users: if senderType is 'agency' and we're viewing as agency, check agency match
+          const isAgencyUser = !!agencyPayoutIdRef.current;
           const isOwnMessage = senderId === user?.id || 
                                (agencyPayoutIdRef.current && senderId === agencyPayoutIdRef.current) ||
-                               (isAdmin && senderType === 'admin');
+                               (isAdmin && senderType === 'admin') ||
+                               // Additional check: if we are an agency and this is an agency message in our service request
+                               (isAgencyUser && senderType === 'agency' && serviceRequestsRef.current.some(r => r.id === requestId));
           
           console.log('[ChatListPanel] isOwnMessage check:', { 
             isOwnMessage, 
             senderId, 
             senderType,
             userId: user?.id, 
-            agencyPayoutId: agencyPayoutIdRef.current 
+            agencyPayoutId: agencyPayoutIdRef.current,
+            isAgencyUser
           });
           
           // Early return if we can't identify the user - prevents false notifications
