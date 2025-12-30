@@ -1007,6 +1007,7 @@ export function ChatListPanel() {
           table: 'service_requests'
         },
         (payload) => {
+          console.log('[ChatListPanel] service_requests UPDATE received:', payload);
           const updated = payload.new as any;
           const old = payload.old as any;
           
