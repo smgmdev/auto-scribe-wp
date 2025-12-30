@@ -2736,6 +2736,118 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Send Order Dialog (Agency) */}
+      <Dialog open={sendOrderDialogOpen} onOpenChange={setSendOrderDialogOpen}>
+        <DialogContent className="sm:max-w-md z-[250]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
+              {globalChatRequest?.media_site?.favicon && (
+                <img 
+                  src={globalChatRequest.media_site.favicon} 
+                  alt="" 
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold truncate">{globalChatRequest?.media_site?.name}</h3>
+                <p className="text-2xl font-bold text-primary">
+                  ${(globalChatRequest?.media_site?.price || 0).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Special Terms (optional)</label>
+              <Input
+                placeholder="Any special terms or notes for this order..."
+                value={specialTerms}
+                onChange={(e) => setSpecialTerms(e.target.value)}
+              />
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              This will send an order request to the client. They will need to confirm and pay to proceed.
+            </p>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setSendOrderDialogOpen(false);
+                  setSpecialTerms('');
+                  setIsResendMode(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={async () => {
+                  if (!senderId || !globalChatRequest) return;
+                  
+                  setSending(true);
+                  try {
+                    const orderRequestData = {
+                      type: 'order_request',
+                      media_site_id: globalChatRequest.media_site?.id,
+                      media_site_name: globalChatRequest.media_site?.name,
+                      price: globalChatRequest.media_site?.price,
+                      special_terms: specialTerms.trim() || null
+                    };
+                    
+                    const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/ORDER_REQUEST]`;
+                    
+                    const { error } = await supabase.from('service_messages').insert({
+                      request_id: globalChatRequest.id,
+                      sender_type: 'agency',
+                      sender_id: senderId,
+                      message: orderMessage
+                    });
+
+                    if (error) throw error;
+                    
+                    toast({
+                      title: isResendMode ? "Order Request Resent" : "Order Request Sent",
+                      description: "The client will be notified to complete the payment.",
+                    });
+                    
+                    setSendOrderDialogOpen(false);
+                    setSpecialTerms('');
+                    setIsResendMode(false);
+                  } catch (error: any) {
+                    toast({
+                      variant: 'destructive',
+                      title: 'Failed to send order request',
+                      description: error.message,
+                    });
+                  } finally {
+                    setSending(false);
+                  }
+                }}
+                disabled={sending}
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Sending...
+                  </>
+                ) : (
+                  isResendMode ? 'Resend Request' : 'Send Request'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Open Dispute Dialog */}
       <AlertDialog open={disputeDialogOpen} onOpenChange={setDisputeDialogOpen}>
         <AlertDialogContent className="z-[250]">
