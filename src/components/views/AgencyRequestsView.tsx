@@ -131,6 +131,8 @@ export function AgencyRequestsView() {
       }
 
       // Map agency_read to read and normalize order data (Supabase returns arrays for joins)
+      console.log('[AgencyRequestsView] Raw data from Supabase:', data.slice(0, 2).map(r => ({ id: r.id, order: r.order })));
+      
       const mappedRequests = data.map(r => {
         const isUnread = !(r as any).agency_read;
         const requestMessages = messagesByRequest[r.id] || [];
@@ -140,6 +142,8 @@ export function AgencyRequestsView() {
         // Normalize order - Supabase returns array for foreign key joins
         const rawOrder = (r as any).order;
         const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
+        
+        console.log('[AgencyRequestsView] Request', r.id.slice(0, 8), '- rawOrder:', rawOrder, '- normalized:', normalizedOrder);
         
         // Don't set unreadMessageCounts here - that's for tracking NEW messages
         // while a chat is open/minimized. The initial unread state is tracked via item.read
