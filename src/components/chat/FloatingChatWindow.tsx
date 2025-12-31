@@ -1870,6 +1870,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const orderCancelled = parseOrderCancelled(msg.message);
     const cancelRequest = parseCancelOrderRequest(msg.message);
     const cancelAccepted = parseCancelOrderAccepted(msg.message);
+    const orderRequest = parseOrderRequest(msg.message);
 
     // Handle admin joined message
     const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
@@ -1878,6 +1879,81 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         <p className="text-xs text-muted-foreground text-center py-2">
           {adminJoinedMatch[1]}
         </p>
+      );
+    }
+
+    // Handle order request special message (sent by agency to client)
+    if (orderRequest) {
+      const hasOrder = globalChatRequest?.order;
+      const isClient = actualSenderType === 'client';
+      
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-4 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
+          }`}>
+            <div className="flex items-start gap-3">
+              {orderRequest.media_site_favicon && (
+                <img 
+                  src={orderRequest.media_site_favicon} 
+                  alt="" 
+                  className="w-10 h-10 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
+                    Order Request
+                  </span>
+                </div>
+                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  {orderRequest.media_site_name}
+                </p>
+                <p className={`text-xl font-bold mt-1 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`}>
+                  ${orderRequest.price.toLocaleString()}
+                </p>
+                <p className={`text-xs mt-0.5 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                  {orderRequest.price.toLocaleString()} credits
+                </p>
+                {orderRequest.special_terms && (
+                  <p className={`text-xs mt-2 italic ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                    "{orderRequest.special_terms}"
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Action button for client */}
+            {isClient && !hasOrder && !isOwnMessage && (
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                <Button
+                  size="sm"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => setOrderWithCreditsOpen(true)}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Order Now
+                </Button>
+              </div>
+            )}
+            
+            {/* Status indicator if order already placed */}
+            {hasOrder && (
+              <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Order Placed</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
       );
     }
 
