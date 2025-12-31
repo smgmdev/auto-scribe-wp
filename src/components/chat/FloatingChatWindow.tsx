@@ -2919,9 +2919,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
                     if (error) throw error;
                     
-                    // Add new message to local state
+                    // Add new message to local state (with duplicate check)
                     if (insertedMsg) {
-                      setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+                      setMessages(prev => {
+                        if (prev.some(m => m.id === insertedMsg.id)) return prev;
+                        return [...prev, insertedMsg as ServiceMessage];
+                      });
                     }
                     
                     toast({
