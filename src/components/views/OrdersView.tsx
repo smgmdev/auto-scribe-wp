@@ -34,6 +34,7 @@ interface Order {
   delivered_at: string | null;
   accepted_at: string | null;
   released_at: string | null;
+  read: boolean;
   media_sites: {
     name: string;
     agency: string | null;
@@ -346,8 +347,35 @@ export function OrdersView() {
   const filteredCompletedOrders = useMemo(() => filterOrders(completedOrders), [completedOrders, searchQuery]);
   const filteredHistoryOrders = useMemo(() => filterOrders(historyOrders), [historyOrders, searchQuery]);
 
+  // Handle order click - mark as read and open dialog
+  const handleOrderClick = async (order: Order) => {
+    setSelectedOrder(order);
+    
+    // Mark order as read if not already read and not admin
+    if (!isAdmin && user && !order.read) {
+      const { error } = await supabase
+        .from('orders')
+        .update({ read: true })
+        .eq('id', order.id);
+      
+      if (!error) {
+        // Check if this order is in disputes or active orders
+        if (disputeOrderIds.has(order.id)) {
+          // Decrement disputes count
+          setUserUnreadDisputesCount(Math.max(0, userUnreadDisputesCount - 1));
+        } else {
+          // Decrement active orders count
+          decrementUserUnreadOrdersCount();
+        }
+        
+        // Update local order state to reflect read status
+        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, read: true } as Order : o));
+      }
+    }
+  };
+
   const renderOrderCard = (order: Order) => (
-    <Card key={order.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
+    <Card key={order.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => handleOrderClick(order)}>
       <CardContent className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
           {order.media_sites?.favicon ? (
