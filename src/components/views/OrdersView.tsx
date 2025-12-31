@@ -70,7 +70,7 @@ const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boole
 
 export function OrdersView() {
   const { user, isAdmin } = useAuth();
-  const { userUnreadOrdersCount, setUserUnreadOrdersCount } = useAppStore();
+  const { userUnreadOrdersCount, setUserUnreadOrdersCount, userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadOrdersCount } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -100,8 +100,9 @@ export function OrdersView() {
           .filter(o => o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id))
           .map(o => o.id);
       } else if (activeTab === 'disputes') {
-        // Disputes: orders in dispute
+        // Disputes: orders in dispute - also clear disputes notification count
         tabOrderIds = orders.filter(o => disputeOrderIds.has(o.id)).map(o => o.id);
+        setUserUnreadDisputesCount(0);
       } else if (activeTab === 'completed') {
         // Completed: delivered or accepted orders (excluding disputes)
         tabOrderIds = orders
@@ -123,19 +124,23 @@ export function OrdersView() {
         .in('id', tabOrderIds);
       
       if (!error) {
-        // Recalculate unread count from remaining unread orders
-        const { count } = await supabase
+        // Recalculate unread count from remaining unread orders (excluding disputes)
+        const { data: unreadOrders } = await supabase
           .from('orders')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('user_id', user.id)
           .eq('read', false);
         
-        setUserUnreadOrdersCount(count || 0);
+        if (unreadOrders) {
+          // Filter out orders that have disputes from the active orders count
+          const activeUnread = unreadOrders.filter(o => !disputeOrderIds.has(o.id)).length;
+          setUserUnreadOrdersCount(activeUnread);
+        }
       }
     };
     
     markTabOrdersAsRead();
-  }, [activeTab, orders, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount]);
+  }, [activeTab, orders, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
@@ -444,9 +449,14 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="disputes" className="gap-2">
+              <TabsTrigger value="disputes" className="gap-2 relative">
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputeOrders.length})
+                {userUnreadDisputesCount > 0 && !isAdmin && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {userUnreadDisputesCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="completed" className="gap-2">
                 <CheckCircle2 className="h-4 w-4" />
@@ -755,6 +765,10 @@ export function OrdersView() {
                   
                   // Add to local dispute set
                   setDisputeOrderIds(prev => new Set([...prev, selectedOrder.id]));
+                  
+                  // Update notification counts: add to disputes, remove from active orders
+                  incrementUserUnreadDisputesCount();
+                  decrementUserUnreadOrdersCount();
                   
                   toast({
                     title: "Dispute Request Sent",
