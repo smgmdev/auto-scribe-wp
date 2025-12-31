@@ -55,6 +55,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const globalChatRequest = chat.request;
   const globalChatType = chat.type;
   
+  // Local order state - syncs with prop but can be updated immediately
+  const [localOrder, setLocalOrder] = useState(globalChatRequest.order);
+  
+  // Sync local order with prop changes
+  useEffect(() => {
+    setLocalOrder(globalChatRequest.order);
+  }, [globalChatRequest.order]);
+  
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -254,9 +262,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const counterpartyLabel = actualSenderType === 'client' ? 'Agency' : 'Client';
   
   const isCancelled = globalChatRequest?.status === 'cancelled';
-  const hasOrder = !!globalChatRequest?.order;
-  const isDeliveryOverdue = hasOrder && globalChatRequest?.order?.delivery_deadline 
-    ? new Date(globalChatRequest.order.delivery_deadline) < new Date() 
+  const hasOrder = !!localOrder;
+  const isDeliveryOverdue = hasOrder && localOrder?.delivery_deadline 
+    ? new Date(localOrder.delivery_deadline) < new Date() 
     : false;
   const isAdminInvestigating = isAdmin && globalChatType === 'agency-request' && !adminJoined;
 
@@ -469,7 +477,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           .upsert({
             admin_id: senderId,
             service_request_id: globalChatRequest.id,
-            order_id: requestData.order_id || globalChatRequest.order?.id || null,
+            order_id: requestData.order_id || localOrder?.id || null,
             status: 'active'
           }, {
             onConflict: 'service_request_id'
@@ -733,19 +741,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
 
   const handleCancelOrder = async () => {
-    if (!globalChatRequest?.order) return;
+    if (!localOrder) return;
     
     setCancellingOrder(true);
     try {
       // Call the cancel-order edge function which handles credit refunds and notifications
       const { data, error } = await supabase.functions.invoke('cancel-order', {
-        body: { order_id: globalChatRequest.order.id }
+        body: { order_id: localOrder.id }
       });
       
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       
       // Update local state
+      setLocalOrder(null);
       updateGlobalChatRequest({ order: null }, globalChatRequest.id);
       
       toast({
@@ -769,13 +778,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   // Send cancellation request to counterparty
   const handleSendCancelRequest = async () => {
-    if (!globalChatRequest?.order || !senderId) return;
+    if (!localOrder || !senderId) return;
     
     setSendingCancelRequest(true);
     try {
       const cancelRequestData = {
         type: 'cancel_order_request',
-        order_id: globalChatRequest.order.id,
+        order_id: localOrder.id,
         media_site_id: globalChatRequest.media_site?.id,
         media_site_name: globalChatRequest.media_site?.name || 'Unknown',
         reason: cancelOrderRequestReason.trim() || undefined,
@@ -825,13 +834,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   // Accept cancellation request from counterparty
   const handleAcceptCancellation = async (messageId: string) => {
-    if (!globalChatRequest?.order || !senderId) return;
+    if (!localOrder || !senderId) return;
     
     setAcceptingCancellation(true);
     try {
       // Call the cancel-order edge function
       const { data, error } = await supabase.functions.invoke('cancel-order', {
-        body: { order_id: globalChatRequest.order.id }
+        body: { order_id: localOrder.id }
       });
       
       if (error) throw error;
@@ -840,7 +849,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Send acceptance message
       const acceptData = {
         type: 'cancel_order_accepted',
-        order_id: globalChatRequest.order.id,
+        order_id: localOrder.id,
         media_site_name: globalChatRequest.media_site?.name || 'Unknown',
         credits_refunded: data.credits_refunded,
         accepted_by: senderType
@@ -854,6 +863,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       });
       
       // Update local state
+      setLocalOrder(null);
       updateGlobalChatRequest({ order: null }, globalChatRequest.id);
       
       toast({
@@ -875,7 +885,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Check if there's an open dispute for this order
   useEffect(() => {
     const checkDispute = async () => {
-      if (!globalChatRequest?.order?.id) {
+      if (!localOrder?.id) {
         setHasOpenDispute(false);
         return;
       }
@@ -883,14 +893,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const { data } = await supabase
         .from('disputes')
         .select('id')
-        .eq('order_id', globalChatRequest.order.id)
+        .eq('order_id', localOrder.id)
         .eq('status', 'open')
         .maybeSingle();
       
       setHasOpenDispute(!!data);
     };
     checkDispute();
-  }, [globalChatRequest?.order?.id]);
+  }, [localOrder?.id]);
 
   // Clear unread when chat opens - use actualSenderType for correct field
   // Also clear minimized chat unread to sync between widget and minimized chats
@@ -1043,25 +1053,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Fetch latest order data to ensure delivery_deadline is loaded
   useEffect(() => {
     const fetchOrderData = async () => {
-      if (!globalChatRequest?.order?.id) return;
+      if (!localOrder?.id) return;
       
       const { data } = await supabase
         .from('orders')
         .select('id, status, delivery_status, delivery_deadline')
-        .eq('id', globalChatRequest.order.id)
+        .eq('id', localOrder.id)
         .maybeSingle();
       
-      if (data && data.delivery_deadline !== globalChatRequest.order.delivery_deadline) {
-        updateGlobalChatRequest({ 
-          order: { 
-            ...globalChatRequest.order,
-            delivery_deadline: data.delivery_deadline 
-          } 
-        }, globalChatRequest.id);
+      if (data && data.delivery_deadline !== localOrder.delivery_deadline) {
+        const updatedOrder = { ...localOrder, delivery_deadline: data.delivery_deadline };
+        setLocalOrder(updatedOrder);
+        updateGlobalChatRequest({ order: updatedOrder }, globalChatRequest.id);
       }
     };
     fetchOrderData();
-  }, [globalChatRequest?.order?.id]);
+  }, [localOrder?.id]);
 
   // Real-time message subscription
   useEffect(() => {
@@ -2351,7 +2358,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </DropdownMenuItem>
                     )
                   )}
-                  {hasOrder && globalChatRequest.order?.delivery_status === 'pending' ? (
+                  {hasOrder && localOrder?.delivery_status === 'pending' ? (
                     hasSentPendingCancelRequest ? (
                       <DropdownMenuItem 
                         className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
@@ -2429,7 +2436,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </div>
 
         {/* Order Status Banner */}
-        {globalChatRequest.order && (
+        {localOrder && (
           <div className="p-3 bg-black text-white border-b border-black">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -2438,10 +2445,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Order Placed</p>
-                  {globalChatRequest.order.delivery_status === 'pending' && (
+                  {localOrder.delivery_status === 'pending' && (
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      {globalChatRequest.order.delivery_deadline ? (() => {
-                        const timeInfo = formatTimeRemaining(globalChatRequest.order.delivery_deadline);
+                      {localOrder.delivery_deadline ? (() => {
+                        const timeInfo = formatTimeRemaining(localOrder.delivery_deadline);
                         return (
                           <>
                             <span className="text-xs text-white/70">Awaiting delivery</span>
@@ -2457,10 +2464,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       )}
                     </div>
                   )}
-                  {globalChatRequest.order.delivery_status === 'delivered' && (
+                  {localOrder.delivery_status === 'delivered' && (
                     <p className="text-xs text-white/70">Delivered - Awaiting acceptance</p>
                   )}
-                  {globalChatRequest.order.delivery_status === 'accepted' && (
+                  {localOrder.delivery_status === 'accepted' && (
                     <p className="text-xs text-white/70">Completed</p>
                   )}
                 </div>
@@ -2468,28 +2475,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <Badge 
                 variant="secondary" 
                 className={`cursor-pointer ${
-                  globalChatRequest.order.delivery_status === 'accepted' 
+                  localOrder.delivery_status === 'accepted' 
                     ? 'bg-green-500 text-white hover:bg-green-600' 
-                    : globalChatRequest.order.delivery_status === 'delivered'
+                    : localOrder.delivery_status === 'delivered'
                     ? 'bg-purple-500 text-white hover:bg-purple-600'
                     : 'bg-white text-black hover:bg-white/80'
                 }`}
                 onClick={async () => {
-                  if (!globalChatRequest.order) return;
+                  if (!localOrder) return;
                   setLoadingOrderDetails(true);
                   setOrderDetailsOpen(true);
                   const { data } = await supabase
                     .from('orders')
                     .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
-                    .eq('id', globalChatRequest.order.id)
+                    .eq('id', localOrder.id)
                     .maybeSingle();
                   setOrderDetails(data);
                   setLoadingOrderDetails(false);
                 }}
               >
-                {globalChatRequest.order.delivery_status === 'accepted' && 'Completed'}
-                {globalChatRequest.order.delivery_status === 'delivered' && 'Delivered'}
-                {globalChatRequest.order.delivery_status === 'pending' && 'View Details'}
+                {localOrder.delivery_status === 'accepted' && 'Completed'}
+                {localOrder.delivery_status === 'delivered' && 'Delivered'}
+                {localOrder.delivery_status === 'pending' && 'View Details'}
               </Badge>
             </div>
           </div>
@@ -3711,15 +3718,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       if (data?.success) {
                         await refreshCredits();
                         
+                        const newOrder = { 
+                          id: data.order_id, 
+                          status: 'paid',
+                          delivery_status: 'pending',
+                          delivery_deadline: data.delivery_deadline || null
+                        };
+                        
+                        // Update local order state immediately for banner display
+                        setLocalOrder(newOrder);
+                        
                         // Update the global chat request to reflect that an order exists
-                        updateGlobalChatRequest({ 
-                          order: { 
-                            id: data.order_id, 
-                            status: 'paid',
-                            delivery_status: 'pending',
-                            delivery_deadline: data.delivery_deadline || null
-                          } 
-                        }, globalChatRequest.id);
+                        updateGlobalChatRequest({ order: newOrder }, globalChatRequest.id);
                         
                         // Also add the ORDER_PLACED message locally for immediate display
                         const orderPlacedMessage: ServiceMessage = {
