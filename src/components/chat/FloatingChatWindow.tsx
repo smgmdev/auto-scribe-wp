@@ -2485,12 +2485,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div>
                   <p className="text-sm font-medium text-white">Order Placed</p>
                   {(!localOrder.delivery_status || localOrder.delivery_status === 'pending') && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                       {localOrder.delivery_deadline ? (() => {
                         const timeInfo = formatTimeRemaining(localOrder.delivery_deadline);
+                        const dueTime = new Date(localOrder.delivery_deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         return (
                           <>
                             <span className="text-xs text-white/70">Awaiting delivery</span>
+                            <span className="text-white/40">•</span>
+                            <span className="text-xs text-white/70">Due {dueTime}</span>
                             <span className="text-white/40">•</span>
                             <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
                             <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
