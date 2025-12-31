@@ -43,7 +43,7 @@ interface FloatingChatWindowProps {
 }
 
 export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
-  const { user, isAdmin, credits } = useAuth();
+  const { user, isAdmin, credits, refreshCredits } = useAuth();
   const { 
     closeGlobalChat,
     updateGlobalChatRequest,
@@ -94,6 +94,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [acceptingCancellation, setAcceptingCancellation] = useState(false);
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
   const [acceptOrderDialogOpen, setAcceptOrderDialogOpen] = useState(false);
+  const [acceptingOrder, setAcceptingOrder] = useState(false);
   const [pendingOrderRequest, setPendingOrderRequest] = useState<{
     media_site_id: string;
     media_site_name: string;
@@ -3684,20 +3685,74 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setAcceptOrderDialogOpen(false);
                     setPendingOrderRequest(null);
                   }}
+                  disabled={acceptingOrder}
                 >
                   Cancel
                 </Button>
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  disabled={(credits || 0) < pendingOrderRequest.price}
-                  onClick={() => {
-                    setAcceptOrderDialogOpen(false);
-                    setPendingOrderRequest(null);
-                    setOrderWithCreditsOpen(true);
+                  disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder}
+                  onClick={async () => {
+                    if (!pendingOrderRequest || !globalChatRequest) return;
+                    
+                    setAcceptingOrder(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('create-credit-order', {
+                        body: {
+                          media_site_id: pendingOrderRequest.media_site_id,
+                          service_request_id: globalChatRequest.id,
+                          delivery_duration: pendingOrderRequest.delivery_duration || { days: 0, hours: 0, minutes: 0 }
+                        },
+                      });
+
+                      if (error) throw error;
+
+                      if (data?.success) {
+                        await refreshCredits();
+                        
+                        // Update the global chat request to reflect that an order exists
+                        updateGlobalChatRequest({ 
+                          order: { 
+                            id: data.order_id, 
+                            status: 'paid',
+                            delivery_status: 'pending',
+                            delivery_deadline: data.delivery_deadline || null
+                          } 
+                        });
+                        
+                        toast({
+                          title: "Order Accepted",
+                          description: `Successfully ordered from ${pendingOrderRequest.media_site_name}. ${data.credits_deducted} credits used.`,
+                        });
+                        
+                        setAcceptOrderDialogOpen(false);
+                        setPendingOrderRequest(null);
+                      } else if (data?.error) {
+                        throw new Error(data.error);
+                      }
+                    } catch (error: any) {
+                      console.error('Order error:', error);
+                      toast({
+                        variant: 'destructive',
+                        title: 'Order Failed',
+                        description: error.message || 'Failed to place order.',
+                      });
+                    } finally {
+                      setAcceptingOrder(false);
+                    }
                   }}
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Confirm & Pay
+                  {acceptingOrder ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Confirm & Pay
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
