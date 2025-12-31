@@ -70,10 +70,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest.order]);
   
-  // Fetch order data on mount if not provided (handles case where chat opens before order data is passed)
+  // Fetch order data on mount or if not provided (handles case where chat opens before order data is passed)
   useEffect(() => {
     const fetchOrderFromRequest = async () => {
       if (!globalChatRequest?.id) return;
+      
+      // Skip if we already have order data
+      if (globalChatRequest.order) {
+        setLocalOrder(globalChatRequest.order);
+        return;
+      }
       
       // First get the service request to check if it has an order_id
       const { data: requestData } = await supabase
@@ -84,7 +90,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (!requestData?.order_id) return; // No order associated
       
-      // Fetch the order data (always fetch to ensure we have latest delivery_deadline)
+      // Fetch the order data
       const { data: orderData } = await supabase
         .from('orders')
         .select('id, status, delivery_status, delivery_deadline')
@@ -99,7 +105,45 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
     
     fetchOrderFromRequest();
-  }, [globalChatRequest?.id]); // Only run on mount
+  }, [globalChatRequest?.id, globalChatRequest?.order]);
+  
+  // Also subscribe to order updates for this request
+  useEffect(() => {
+    if (!globalChatRequest?.id) return;
+    
+    const channel = supabase
+      .channel(`order-updates-${globalChatRequest.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `id=eq.${globalChatRequest.id}`
+        },
+        async (payload) => {
+          const updated = payload.new as any;
+          // If order_id was just added, fetch the order
+          if (updated.order_id && !localOrder) {
+            const { data: orderData } = await supabase
+              .from('orders')
+              .select('id, status, delivery_status, delivery_deadline')
+              .eq('id', updated.order_id)
+              .maybeSingle();
+            
+            if (orderData) {
+              setLocalOrder(orderData);
+              updateGlobalChatRequest({ order: orderData }, globalChatRequest.id);
+            }
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [globalChatRequest?.id, localOrder]);
   
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
