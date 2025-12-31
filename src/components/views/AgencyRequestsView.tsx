@@ -38,9 +38,9 @@ interface ServiceRequest {
     id: string;
     status: string;
     delivery_status: string;
+    delivery_deadline: string | null;
   } | null;
 }
-
 interface ServiceMessage {
   id: string;
   request_id: string;
