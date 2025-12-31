@@ -1255,7 +1255,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   };
 
-  const parseOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; request_id: string; special_terms?: string } | null => {
+  const parseOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; request_id: string; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
     const match = message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
     if (match) {
       try {
@@ -1265,6 +1265,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
     }
     return null;
+  };
+
+  const formatDeliveryDuration = (duration: { days: number; hours: number; minutes: number }): string => {
+    const parts = [];
+    if (duration.days > 0) parts.push(`${duration.days}d`);
+    if (duration.hours > 0) parts.push(`${duration.hours}h`);
+    if (duration.minutes > 0) parts.push(`${duration.minutes}m`);
+    return parts.length > 0 ? parts.join(' ') : 'Not specified';
   };
 
   const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string; delivery_deadline?: string } | null => {
@@ -1923,6 +1931,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className={`text-xs mt-0.5 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                   {orderRequest.price.toLocaleString()} credits
                 </p>
+                {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
+                  <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    <Clock className="h-3.5 w-3.5" />
+                    <span className="text-xs">
+                      Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
+                    </span>
+                  </div>
+                )}
                 {orderRequest.special_terms && (
                   <p className={`text-xs mt-2 italic ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     "{orderRequest.special_terms}"
