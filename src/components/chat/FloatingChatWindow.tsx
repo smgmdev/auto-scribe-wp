@@ -1058,7 +1058,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         },
         async (payload) => {
           const newMsg = payload.new as ServiceMessage;
-          if (newMsg.sender_type === senderType) return;
+          
+          // Check if this is a special system message (inserted by backend, not user)
+          const isSystemMessage = newMsg.message.includes('[ORDER_PLACED]') || 
+                                  newMsg.message.includes('[ORDER_CANCELLED]') ||
+                                  newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]');
+          
+          // Skip messages from same sender type UNLESS it's a system message
+          // System messages are inserted by edge functions, not the user directly
+          if (newMsg.sender_type === senderType && !isSystemMessage) return;
           
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
