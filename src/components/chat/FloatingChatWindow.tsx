@@ -4,6 +4,7 @@ import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -99,6 +100,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [orderDetailsActionDropdownOpen, setOrderDetailsActionDropdownOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
+  const [orderDeliveryDays, setOrderDeliveryDays] = useState<number>(0);
+  const [orderDeliveryHours, setOrderDeliveryHours] = useState<number>(0);
+  const [orderDeliveryMinutes, setOrderDeliveryMinutes] = useState<number>(0);
   const [adminJoined, setAdminJoined] = useState(false);
   const [joiningChat, setJoiningChat] = useState(false);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
@@ -2850,8 +2854,62 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
 
+            {/* Delivery Duration */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">Delivery Duration</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Set the delivery time for this order.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="order-days" className="text-xs text-muted-foreground">Days</Label>
+                  <Input
+                    id="order-days"
+                    type="number"
+                    min="0"
+                    value={orderDeliveryDays}
+                    onChange={(e) => setOrderDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="text-center"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="order-hours" className="text-xs text-muted-foreground">Hours</Label>
+                  <Input
+                    id="order-hours"
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={orderDeliveryHours}
+                    onChange={(e) => setOrderDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
+                    className="text-center"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="order-minutes" className="text-xs text-muted-foreground">Minutes</Label>
+                  <Input
+                    id="order-minutes"
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={orderDeliveryMinutes}
+                    onChange={(e) => setOrderDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                    className="text-center"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Special Terms (optional)</label>
+              <Label className="text-sm font-medium">Special Terms (optional)</Label>
               <Input
                 placeholder="Any special terms or notes for this order..."
                 value={specialTerms}
@@ -2871,6 +2929,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setSendOrderDialogOpen(false);
                   setSpecialTerms('');
                   setIsResendMode(false);
+                  setOrderDeliveryDays(0);
+                  setOrderDeliveryHours(0);
+                  setOrderDeliveryMinutes(0);
                 }}
               >
                 Cancel
@@ -2905,7 +2966,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       media_site_name: globalChatRequest.media_site?.name,
                       media_site_favicon: globalChatRequest.media_site?.favicon,
                       price: globalChatRequest.media_site?.price,
-                      special_terms: specialTerms.trim() || null
+                      special_terms: specialTerms.trim() || null,
+                      delivery_duration: {
+                        days: orderDeliveryDays,
+                        hours: orderDeliveryHours,
+                        minutes: orderDeliveryMinutes
+                      }
                     };
                     
                     const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/ORDER_REQUEST]`;
@@ -2935,6 +3001,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setSendOrderDialogOpen(false);
                     setSpecialTerms('');
                     setIsResendMode(false);
+                    setOrderDeliveryDays(0);
+                    setOrderDeliveryHours(0);
+                    setOrderDeliveryMinutes(0);
                   } catch (error: any) {
                     toast({
                       variant: 'destructive',
