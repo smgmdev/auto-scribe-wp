@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { formatDistanceToNow } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
+import { cn } from '@/lib/utils';
 
 interface Order {
   id: string;
@@ -387,7 +388,18 @@ export function OrdersView() {
   };
 
   const renderOrderCard = (order: Order) => (
-    <Card key={order.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => handleOrderClick(order)}>
+    <Card 
+      key={order.id} 
+      className={cn(
+        "hover:bg-muted/30 transition-colors cursor-pointer relative",
+        !order.read && !isAdmin && "border-l-4 border-l-primary bg-primary/5"
+      )} 
+      onClick={() => handleOrderClick(order)}
+    >
+      {/* Unread indicator dot */}
+      {!order.read && !isAdmin && (
+        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+      )}
       <CardContent className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
           {order.media_sites?.favicon ? (
@@ -402,7 +414,12 @@ export function OrdersView() {
             </div>
           )}
           <div>
-            <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
+              {!order.read && !isAdmin && (
+                <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">NEW</Badge>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
               {order.media_sites?.agency && ` • via ${order.media_sites.agency}`}
