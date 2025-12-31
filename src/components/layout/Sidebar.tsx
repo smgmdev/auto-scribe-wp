@@ -556,7 +556,8 @@ export function Sidebar({
       let historyUnread = 0;
       
       allUnreadOrders?.forEach(order => {
-        if (order.status === 'cancelled') {
+        if (order.status === 'cancelled' || order.status === 'pending_payment') {
+          // Cancelled and pending_payment orders go to history
           historyUnread++;
         } else if (disputeOrderIds.has(order.id)) {
           disputeUnread++;
