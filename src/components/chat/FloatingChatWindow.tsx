@@ -43,7 +43,7 @@ interface FloatingChatWindowProps {
 }
 
 export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, credits } = useAuth();
   const { 
     closeGlobalChat,
     updateGlobalChatRequest,
@@ -93,6 +93,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [sendingCancelRequest, setSendingCancelRequest] = useState(false);
   const [acceptingCancellation, setAcceptingCancellation] = useState(false);
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
+  const [acceptOrderDialogOpen, setAcceptOrderDialogOpen] = useState(false);
+  const [pendingOrderRequest, setPendingOrderRequest] = useState<{
+    media_site_id: string;
+    media_site_name: string;
+    media_site_favicon?: string;
+    price: number;
+    special_terms?: string;
+    delivery_duration?: { days: number; hours: number; minutes: number };
+  } | null>(null);
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [hasOpenDispute, setHasOpenDispute] = useState(false);
@@ -1965,11 +1974,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
                 <Button
                   size="sm"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => setOrderWithCreditsOpen(true)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    setPendingOrderRequest({
+                      media_site_id: orderRequest.media_site_id,
+                      media_site_name: orderRequest.media_site_name,
+                      media_site_favicon: orderRequest.media_site_favicon,
+                      price: orderRequest.price,
+                      special_terms: orderRequest.special_terms,
+                      delivery_duration: orderRequest.delivery_duration
+                    });
+                    setAcceptOrderDialogOpen(true);
+                  }}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Order Now
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Accept Order
                 </Button>
               </div>
             )}
@@ -3561,6 +3580,128 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               Close
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Accept Order Confirmation Dialog */}
+      <Dialog open={acceptOrderDialogOpen} onOpenChange={(open) => {
+        setAcceptOrderDialogOpen(open);
+        if (!open) setPendingOrderRequest(null);
+      }}>
+        <DialogContent className="sm:max-w-md z-[9999]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Confirm Order
+            </DialogTitle>
+          </DialogHeader>
+
+          {pendingOrderRequest && (
+            <div className="space-y-4 py-4">
+              {/* Order Summary */}
+              <div className="rounded-lg border border-border bg-muted/50 p-4">
+                <div className="flex items-start gap-3">
+                  {pendingOrderRequest.media_site_favicon && (
+                    <img 
+                      src={pendingOrderRequest.media_site_favicon} 
+                      alt="" 
+                      className="w-12 h-12 rounded-lg object-cover shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold">{pendingOrderRequest.media_site_name}</h3>
+                    <p className="text-2xl font-bold text-primary mt-1">
+                      ${pendingOrderRequest.price.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {pendingOrderRequest.price.toLocaleString()} credits will be deducted
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Time */}
+              {pendingOrderRequest.delivery_duration && (pendingOrderRequest.delivery_duration.days > 0 || pendingOrderRequest.delivery_duration.hours > 0 || pendingOrderRequest.delivery_duration.minutes > 0) && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                  <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Delivery Time</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                      {formatDeliveryDuration(pendingOrderRequest.delivery_duration)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Special Terms */}
+              {pendingOrderRequest.special_terms && (
+                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Special Terms</p>
+                  <p className="text-sm text-amber-600 dark:text-amber-400 italic">
+                    "{pendingOrderRequest.special_terms}"
+                  </p>
+                </div>
+              )}
+
+              {/* Credit Balance */}
+              <div className="rounded-lg border border-border bg-background p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Your Credit Balance</span>
+                  <span className="font-semibold">{(credits || 0).toLocaleString()} credits</span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-muted-foreground">Order Cost</span>
+                  <span className="font-semibold text-destructive">-{pendingOrderRequest.price.toLocaleString()} credits</span>
+                </div>
+                <div className="border-t border-border my-3" />
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">After Order</span>
+                  <span className={`font-bold ${(credits || 0) < pendingOrderRequest.price ? 'text-destructive' : 'text-primary'}`}>
+                    {Math.max(0, (credits || 0) - pendingOrderRequest.price).toLocaleString()} credits
+                  </span>
+                </div>
+              </div>
+
+              {/* Insufficient Credits Warning */}
+              {(credits || 0) < pendingOrderRequest.price && (
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                  <X className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-destructive">Insufficient Credits</p>
+                    <p className="text-sm text-muted-foreground">
+                      You need {(pendingOrderRequest.price - (credits || 0)).toLocaleString()} more credits to accept this order.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setAcceptOrderDialogOpen(false);
+                    setPendingOrderRequest(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  disabled={(credits || 0) < pendingOrderRequest.price}
+                  onClick={() => {
+                    setAcceptOrderDialogOpen(false);
+                    setPendingOrderRequest(null);
+                    setOrderWithCreditsOpen(true);
+                  }}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Confirm & Pay
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
