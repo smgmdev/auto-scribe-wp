@@ -2361,10 +2361,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           {loadingMessages ? (
             <div className="flex flex-col items-center justify-center h-full py-12">
               <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
-              <p className="text-muted-foreground text-sm flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading messages...
-              </p>
+              <p className="text-sm text-muted-foreground">Loading Messages...</p>
             </div>
           ) : (
             <div className="space-y-2 p-3">
