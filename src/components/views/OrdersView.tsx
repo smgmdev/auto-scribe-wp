@@ -71,7 +71,12 @@ const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boole
 
 export function OrdersView() {
   const { user, isAdmin } = useAuth();
-  const { userUnreadOrdersCount, setUserUnreadOrdersCount, userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadOrdersCount } = useAppStore();
+  const { 
+    userUnreadOrdersCount, setUserUnreadOrdersCount, decrementUserUnreadOrdersCount,
+    userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadDisputesCount,
+    userUnreadCompletedCount, setUserUnreadCompletedCount, decrementUserUnreadCompletedCount,
+    userUnreadHistoryCount, setUserUnreadHistoryCount, decrementUserUnreadHistoryCount
+  } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -87,61 +92,51 @@ export function OrdersView() {
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const { toast } = useToast();
 
-  // Mark orders as read when viewing each tab - only mark the orders that belong to that tab
+  // Mark all orders in the current tab as read when switching tabs
   useEffect(() => {
     const markTabOrdersAsRead = async () => {
       if (isAdmin || !user || orders.length === 0) return;
       
-      // Get the order IDs that belong to the current tab and are unread
-      let tabOrderIds: string[] = [];
+      // Get the unread order IDs that belong to the current tab
+      let unreadTabOrderIds: string[] = [];
       
       if (activeTab === 'active') {
-        // Active: paid orders waiting for delivery (excluding disputes)
-        tabOrderIds = orders
-          .filter(o => o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id))
+        unreadTabOrderIds = orders
+          .filter(o => !o.read && o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id))
           .map(o => o.id);
+        if (unreadTabOrderIds.length > 0) setUserUnreadOrdersCount(0);
       } else if (activeTab === 'disputes') {
-        // Disputes: orders in dispute - also clear disputes notification count
-        tabOrderIds = orders.filter(o => disputeOrderIds.has(o.id)).map(o => o.id);
-        setUserUnreadDisputesCount(0);
+        unreadTabOrderIds = orders.filter(o => !o.read && disputeOrderIds.has(o.id)).map(o => o.id);
+        if (unreadTabOrderIds.length > 0) setUserUnreadDisputesCount(0);
       } else if (activeTab === 'completed') {
-        // Completed: delivered or accepted orders (excluding disputes)
-        tabOrderIds = orders
-          .filter(o => (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id))
+        unreadTabOrderIds = orders
+          .filter(o => !o.read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id) && o.status !== 'cancelled')
           .map(o => o.id);
+        if (unreadTabOrderIds.length > 0) setUserUnreadCompletedCount(0);
       } else if (activeTab === 'history') {
-        // History: cancelled orders
-        tabOrderIds = orders.filter(o => o.status === 'cancelled').map(o => o.id);
+        unreadTabOrderIds = orders.filter(o => !o.read && o.status === 'cancelled').map(o => o.id);
+        if (unreadTabOrderIds.length > 0) setUserUnreadHistoryCount(0);
       }
       
-      if (tabOrderIds.length === 0) return;
+      if (unreadTabOrderIds.length === 0) return;
       
-      // Mark these specific orders as read
+      // Mark these specific orders as read in DB
       const { error } = await supabase
         .from('orders')
         .update({ read: true })
         .eq('user_id', user.id)
-        .eq('read', false)
-        .in('id', tabOrderIds);
+        .in('id', unreadTabOrderIds);
       
       if (!error) {
-        // Recalculate unread count from remaining unread orders (excluding disputes)
-        const { data: unreadOrders } = await supabase
-          .from('orders')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('read', false);
-        
-        if (unreadOrders) {
-          // Filter out orders that have disputes from the active orders count
-          const activeUnread = unreadOrders.filter(o => !disputeOrderIds.has(o.id)).length;
-          setUserUnreadOrdersCount(activeUnread);
-        }
+        // Update local state to reflect read status
+        setOrders(prev => prev.map(o => 
+          unreadTabOrderIds.includes(o.id) ? { ...o, read: true } : o
+        ));
       }
     };
     
     markTabOrdersAsRead();
-  }, [activeTab, orders, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount]);
+  }, [activeTab, orders.length, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
@@ -347,6 +342,15 @@ export function OrdersView() {
   const filteredCompletedOrders = useMemo(() => filterOrders(completedOrders), [completedOrders, searchQuery]);
   const filteredHistoryOrders = useMemo(() => filterOrders(historyOrders), [historyOrders, searchQuery]);
 
+  // Determine which tab an order belongs to
+  const getOrderTab = (order: Order): 'active' | 'disputes' | 'completed' | 'history' => {
+    if (order.status === 'cancelled') return 'history';
+    if (disputeOrderIds.has(order.id)) return 'disputes';
+    if (order.delivery_status === 'delivered' || order.delivery_status === 'accepted') return 'completed';
+    if (order.status === 'paid') return 'active';
+    return 'history'; // pending_payment goes to history
+  };
+
   // Handle order click - mark as read and open dialog
   const handleOrderClick = async (order: Order) => {
     setSelectedOrder(order);
@@ -359,13 +363,21 @@ export function OrdersView() {
         .eq('id', order.id);
       
       if (!error) {
-        // Check if this order is in disputes or active orders
-        if (disputeOrderIds.has(order.id)) {
-          // Decrement disputes count
-          setUserUnreadDisputesCount(Math.max(0, userUnreadDisputesCount - 1));
-        } else {
-          // Decrement active orders count
-          decrementUserUnreadOrdersCount();
+        // Decrement the appropriate tab's count based on order category
+        const tab = getOrderTab(order);
+        switch (tab) {
+          case 'active':
+            decrementUserUnreadOrdersCount();
+            break;
+          case 'disputes':
+            decrementUserUnreadDisputesCount();
+            break;
+          case 'completed':
+            decrementUserUnreadCompletedCount();
+            break;
+          case 'history':
+            decrementUserUnreadHistoryCount();
+            break;
         }
         
         // Update local order state to reflect read status
@@ -486,13 +498,23 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2">
+              <TabsTrigger value="completed" className="gap-2 relative">
                 <CheckCircle2 className="h-4 w-4" />
                 Completed ({completedOrders.length})
+                {userUnreadCompletedCount > 0 && !isAdmin && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {userUnreadCompletedCount}
+                  </span>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2">
+              <TabsTrigger value="history" className="gap-2 relative">
                 <History className="h-4 w-4" />
                 Order History ({historyOrders.length})
+                {userUnreadHistoryCount > 0 && !isAdmin && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {userUnreadHistoryCount}
+                  </span>
+                )}
               </TabsTrigger>
             </TabsList>
 
