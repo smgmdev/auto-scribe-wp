@@ -55,18 +55,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const globalChatRequest = chat.request;
   const globalChatType = chat.type;
   
+  // Helper to normalize order data (handle both array and object formats from Supabase joins)
+  const normalizeOrder = (order: any): { id: string; status: string; delivery_status: string; delivery_deadline: string | null } | null => {
+    if (!order) return null;
+    // If it's an array (from Supabase foreign key join), get the first element
+    if (Array.isArray(order)) {
+      return order.length > 0 ? order[0] : null;
+    }
+    return order;
+  };
+  
   // Local order state - syncs with prop but can be updated immediately
   const [localOrder, setLocalOrder] = useState<{
     id: string;
     status: string;
     delivery_status: string;
     delivery_deadline: string | null;
-  } | null>(globalChatRequest.order);
+  } | null>(normalizeOrder(globalChatRequest.order));
   
   // Sync local order with prop changes
   useEffect(() => {
-    if (globalChatRequest.order) {
-      setLocalOrder(globalChatRequest.order);
+    const normalized = normalizeOrder(globalChatRequest.order);
+    if (normalized) {
+      setLocalOrder(normalized);
     }
   }, [globalChatRequest.order]);
   
@@ -75,9 +86,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const fetchOrderFromRequest = async () => {
       if (!globalChatRequest?.id) return;
       
-      // Skip if we already have order data
-      if (globalChatRequest.order) {
-        setLocalOrder(globalChatRequest.order);
+      // Skip if we already have order data (check normalized)
+      const existingOrder = normalizeOrder(globalChatRequest.order);
+      if (existingOrder) {
+        setLocalOrder(existingOrder);
         return;
       }
       
