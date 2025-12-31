@@ -304,7 +304,8 @@ serve(async (req) => {
         success: true, 
         order_id: order.id,
         credits_deducted: creditCost, 
-        new_balance: newCredits 
+        new_balance: newCredits,
+        delivery_deadline: deliveryDeadline
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
