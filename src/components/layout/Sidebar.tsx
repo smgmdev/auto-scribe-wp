@@ -556,8 +556,13 @@ export function Sidebar({
       let historyUnread = 0;
       
       allUnreadOrders?.forEach(order => {
-        if (order.status === 'cancelled' || order.status === 'pending_payment') {
-          // Cancelled and pending_payment orders go to history
+        // Skip pending_payment orders - they're user-created and not "new events"
+        if (order.status === 'pending_payment') {
+          return;
+        }
+        
+        if (order.status === 'cancelled') {
+          // Only cancelled orders count as history notifications
           historyUnread++;
         } else if (disputeOrderIds.has(order.id)) {
           disputeUnread++;
