@@ -56,11 +56,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const globalChatType = chat.type;
   
   // Local order state - syncs with prop but can be updated immediately
-  const [localOrder, setLocalOrder] = useState(globalChatRequest.order);
+  const [localOrder, setLocalOrder] = useState<{
+    id: string;
+    status: string;
+    delivery_status: string;
+    delivery_deadline: string | null;
+  } | null>(globalChatRequest.order);
   
   // Sync local order with prop changes
   useEffect(() => {
-    setLocalOrder(globalChatRequest.order);
+    if (globalChatRequest.order) {
+      setLocalOrder(globalChatRequest.order);
+    }
   }, [globalChatRequest.order]);
   
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
