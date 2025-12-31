@@ -130,19 +130,24 @@ export function AgencyRequestsView() {
         setMessages(messagesByRequest);
       }
 
-      // Map agency_read to read and calculate unread message counts
+      // Map agency_read to read and normalize order data (Supabase returns arrays for joins)
       const mappedRequests = data.map(r => {
         const isUnread = !(r as any).agency_read;
         const requestMessages = messagesByRequest[r.id] || [];
         // Count client messages (counterparty messages for agency)
         const clientMessageCount = requestMessages.filter(m => m.sender_type === 'client').length;
         
+        // Normalize order - Supabase returns array for foreign key joins
+        const rawOrder = (r as any).order;
+        const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
+        
         // Don't set unreadMessageCounts here - that's for tracking NEW messages
         // while a chat is open/minimized. The initial unread state is tracked via item.read
         
         return {
           ...r,
-          read: (r as any).agency_read
+          read: (r as any).agency_read,
+          order: normalizedOrder
         };
       }) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
@@ -169,7 +174,13 @@ export function AgencyRequestsView() {
             delivered_at,
             media_site:media_sites(id, name, favicon)
           `)
-          .in('id', data.filter(r => r.order).map(r => r.order!.id));
+          .in('id', data.filter(r => {
+            const order = Array.isArray(r.order) && r.order.length > 0 ? r.order[0] : r.order;
+            return order?.id;
+          }).map(r => {
+            const order = Array.isArray(r.order) && r.order.length > 0 ? r.order[0] : r.order;
+            return order!.id;
+          }));
 
         if (ordersData) {
           setOrders(ordersData);

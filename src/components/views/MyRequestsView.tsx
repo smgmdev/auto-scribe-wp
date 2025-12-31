@@ -110,7 +110,7 @@ export function MyRequestsView() {
         messagesForUnread = msgData || [];
       }
 
-      // Map client_read to read for the interface
+      // Map client_read to read for the interface and normalize order data
       const mappedRequests = (requestsData || []).map(r => {
         const isCancelled = r.status === 'cancelled';
         const hasAgencyMessage = messagesForUnread.some(
@@ -121,9 +121,15 @@ export function MyRequestsView() {
         const isRead = isCancelled 
           ? (r as any).client_read 
           : ((r as any).client_read || !hasAgencyMessage);
+        
+        // Normalize order - Supabase returns array for foreign key joins
+        const rawOrder = (r as any).order;
+        const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
+        
         return {
           ...r,
-          read: isRead
+          read: isRead,
+          order: normalizedOrder
         };
       }) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
