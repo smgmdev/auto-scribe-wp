@@ -276,6 +276,13 @@ export function AgencyRequestsView() {
           // Sync agency_read status changes (both directions - read and unread)
           const agencyReadChanged = old?.agency_read !== updated.agency_read;
           const statusChanged = old?.status !== updated.status;
+          const orderLinked = !old?.order_id && updated.order_id;
+          
+          // If an order was just linked, refetch to get the full order data
+          if (orderLinked) {
+            fetchRequests();
+            return;
+          }
           
           // Update local state with the new read status
           setRequests(prev => {
@@ -315,6 +322,13 @@ export function AgencyRequestsView() {
           
           // Only process client messages (not our own)
           if (newMsg.sender_type === 'agency' || newMsg.sender_type === 'admin') return;
+          
+          // Check if this is an ORDER_PLACED message
+          const isOrderPlaced = newMsg.message?.includes('[ORDER_PLACED]');
+          if (isOrderPlaced) {
+            // Refetch to update orders
+            fetchRequests();
+          }
           
           // Add message to local state
           setMessages(prev => ({
@@ -708,26 +722,131 @@ export function AgencyRequestsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-4">
-              <Card className="border-border/50">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                  <p className="text-muted-foreground text-center">
-                    Active orders from your client requests will appear here.
-                  </p>
-                </CardContent>
-              </Card>
+            <TabsContent value="active" className="mt-4 space-y-4">
+              {activeOrders.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      Active orders from your client requests will appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                activeOrders.map((order) => {
+                  const relatedRequest = requests.find(r => r.order?.id === order.id);
+                  return (
+                    <Card 
+                      key={order.id}
+                      className="border-border/50 hover:border-border transition-colors cursor-pointer"
+                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {order.media_site?.favicon ? (
+                              <img 
+                                src={order.media_site.favicon} 
+                                alt="" 
+                                className="h-10 w-10 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ${(order.amount_cents / 100).toFixed(0)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge className={
+                              order.delivery_status === 'pending' 
+                                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' 
+                                : order.delivery_status === 'in_progress'
+                                ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                                : 'bg-green-500/20 text-green-400 border-green-500/30'
+                            }>
+                              {order.delivery_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                              {order.delivery_status.charAt(0).toUpperCase() + order.delivery_status.slice(1).replace('_', ' ')}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(order.created_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
             </TabsContent>
 
-            <TabsContent value="history" className="mt-4">
-              <Card className="border-border/50">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <History className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                  <p className="text-muted-foreground text-center">
-                    Cancelled and delivered orders will appear here.
-                  </p>
-                </CardContent>
-              </Card>
+            <TabsContent value="history" className="mt-4 space-y-4">
+              {historyOrders.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <History className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      Cancelled and delivered orders will appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                historyOrders.map((order) => {
+                  const relatedRequest = requests.find(r => r.order?.id === order.id);
+                  const isDelivered = order.delivery_status === 'delivered';
+                  return (
+                    <Card 
+                      key={order.id}
+                      className="border-border/50 hover:border-border transition-colors cursor-pointer"
+                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {order.media_site?.favicon ? (
+                              <img 
+                                src={order.media_site.favicon} 
+                                alt="" 
+                                className="h-10 w-10 rounded object-cover opacity-60"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium text-muted-foreground">{order.media_site?.name || 'Unknown Site'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ${(order.amount_cents / 100).toFixed(0)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge className={isDelivered 
+                              ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                              : 'bg-red-500/20 text-red-400 border-red-500/30'
+                            }>
+                              {isDelivered ? (
+                                <><CheckCircle className="h-3 w-3 mr-1" /> Delivered</>
+                              ) : (
+                                <><XCircle className="h-3 w-3 mr-1" /> Cancelled</>
+                              )}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(order.delivered_at || order.created_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
             </TabsContent>
           </Tabs>
         </TabsContent>
