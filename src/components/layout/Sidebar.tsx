@@ -135,6 +135,8 @@ export function Sidebar({
     userUnreadOrdersCount,
     setUserUnreadOrdersCount,
     setUserUnreadDisputesCount,
+    setUserUnreadCompletedCount,
+    setUserUnreadHistoryCount,
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
     incrementAdminUnreadEngagementsCount,
@@ -531,17 +533,14 @@ export function Sidebar({
       setUserUnreadEngagementsCount(activeUnreadCount);
       setUserUnreadCancelledCount(cancelledUnreadCount);
       
-      // Fetch unread orders for this user (only active orders: paid, not delivered, not accepted)
-      // First get all unread paid orders
-      const { data: unreadOrders } = await supabase
+      // Fetch all unread orders for this user
+      const { data: allUnreadOrders } = await supabase
         .from('orders')
         .select('id, status, delivery_status')
         .eq('user_id', user.id)
-        .eq('read', false)
-        .eq('status', 'paid')
-        .not('delivery_status', 'in', '("delivered","accepted")');
+        .eq('read', false);
       
-      // Get orders that have open disputes to exclude them from active orders count
+      // Get orders that have open disputes
       const { data: userDisputes } = await supabase
         .from('disputes')
         .select('order_id')
@@ -550,17 +549,32 @@ export function Sidebar({
       
       const disputeOrderIds = new Set(userDisputes?.map(d => d.order_id) || []);
       
-      // Count unread active orders (excluding disputes)
-      const activeUnreadOrders = unreadOrders?.filter(o => !disputeOrderIds.has(o.id)).length || 0;
-      // Count unread dispute orders
-      const disputeUnreadOrders = unreadOrders?.filter(o => disputeOrderIds.has(o.id)).length || 0;
+      // Categorize unread orders by tab
+      let activeUnread = 0;
+      let disputeUnread = 0;
+      let completedUnread = 0;
+      let historyUnread = 0;
       
-      setUserUnreadOrdersCount(activeUnreadOrders);
-      setUserUnreadDisputesCount(disputeUnreadOrders);
+      allUnreadOrders?.forEach(order => {
+        if (order.status === 'cancelled') {
+          historyUnread++;
+        } else if (disputeOrderIds.has(order.id)) {
+          disputeUnread++;
+        } else if (order.delivery_status === 'delivered' || order.delivery_status === 'accepted') {
+          completedUnread++;
+        } else if (order.status === 'paid') {
+          activeUnread++;
+        }
+      });
+      
+      setUserUnreadOrdersCount(activeUnread);
+      setUserUnreadDisputesCount(disputeUnread);
+      setUserUnreadCompletedCount(completedUnread);
+      setUserUnreadHistoryCount(historyUnread);
     };
 
     fetchUnreadEngagements();
-  }, [user?.id, isAdmin, setUserUnreadEngagementsCount, setUserUnreadCancelledCount, setUserUnreadOrdersCount, setUserUnreadDisputesCount]);
+  }, [user?.id, isAdmin, setUserUnreadEngagementsCount, setUserUnreadCancelledCount, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
 
   // Real-time subscription for user engagement status changes (including cancellations)
   useEffect(() => {
