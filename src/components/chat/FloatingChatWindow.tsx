@@ -601,12 +601,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
   
   // Check if there's an existing order request in messages (sent by agency)
-  const existingOrderMessage = messages.find(msg => {
+  const existingOrderMessages = messages.filter(msg => {
     if (msg.sender_type !== 'agency') return false;
     const match = msg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
     return !!match;
   });
-  const hasExistingOrderRequest = !!existingOrderMessage;
+  const hasExistingOrderRequest = existingOrderMessages.length > 0;
 
   const handleCancelEngagement = async () => {
     if (!globalChatRequest || !cancellationReason.trim()) return;
@@ -2881,18 +2881,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   setSending(true);
                   try {
-                    // If resending, delete the previous order request message first
-                    if (isResendMode && existingOrderMessage) {
+                    // Delete ALL previous order request messages first (prevents duplicates)
+                    if (existingOrderMessages.length > 0) {
+                      const idsToDelete = existingOrderMessages.map(m => m.id);
+                      
                       const { error: deleteError } = await supabase
                         .from('service_messages')
                         .delete()
-                        .eq('id', existingOrderMessage.id);
+                        .in('id', idsToDelete);
                       
                       if (deleteError) {
-                        console.error('Failed to delete previous order request:', deleteError);
+                        console.error('Failed to delete previous order requests:', deleteError);
                       } else {
                         // Remove from local state
-                        setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
+                        setMessages(prev => prev.filter(m => !idsToDelete.includes(m.id)));
                       }
                     }
                     
