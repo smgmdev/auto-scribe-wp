@@ -2881,10 +2881,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   setSending(true);
                   try {
+                    // If resending, delete the previous order request message first
+                    if (isResendMode && existingOrderMessage) {
+                      const { error: deleteError } = await supabase
+                        .from('service_messages')
+                        .delete()
+                        .eq('id', existingOrderMessage.id);
+                      
+                      if (deleteError) {
+                        console.error('Failed to delete previous order request:', deleteError);
+                      } else {
+                        // Remove from local state
+                        setMessages(prev => prev.filter(m => m.id !== existingOrderMessage.id));
+                      }
+                    }
+                    
                     const orderRequestData = {
                       type: 'order_request',
                       media_site_id: globalChatRequest.media_site?.id,
                       media_site_name: globalChatRequest.media_site?.name,
+                      media_site_favicon: globalChatRequest.media_site?.favicon,
                       price: globalChatRequest.media_site?.price,
                       special_terms: specialTerms.trim() || null
                     };
