@@ -70,6 +70,38 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest.order]);
   
+  // Fetch order data on mount if not provided (handles case where chat opens before order data is passed)
+  useEffect(() => {
+    const fetchOrderFromRequest = async () => {
+      if (localOrder) return; // Already have order data
+      if (!globalChatRequest?.id) return;
+      
+      // First get the service request to check if it has an order_id
+      const { data: requestData } = await supabase
+        .from('service_requests')
+        .select('order_id')
+        .eq('id', globalChatRequest.id)
+        .maybeSingle();
+      
+      if (!requestData?.order_id) return; // No order associated
+      
+      // Fetch the order data
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('id, status, delivery_status, delivery_deadline')
+        .eq('id', requestData.order_id)
+        .maybeSingle();
+      
+      if (orderData) {
+        console.log('[FloatingChatWindow] Fetched order data on mount:', orderData);
+        setLocalOrder(orderData);
+        updateGlobalChatRequest({ order: orderData }, globalChatRequest.id);
+      }
+    };
+    
+    fetchOrderFromRequest();
+  }, [globalChatRequest?.id]); // Only run on mount
+  
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
