@@ -48,7 +48,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     closeGlobalChat,
     updateGlobalChatRequest,
     clearUnreadMessageCount,
-    updateChatPosition
+    updateChatPosition,
+    incrementUserUnreadOrdersCount
   } = useAppStore();
   
   const globalChatRequest = chat.request;
@@ -3719,6 +3720,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             delivery_deadline: data.delivery_deadline || null
                           } 
                         });
+                        
+                        // Increment the unread orders count for notification
+                        incrementUserUnreadOrdersCount();
                         
                         toast({
                           title: "Order Accepted",
