@@ -437,7 +437,7 @@ export function OrdersView() {
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
                 {userUnreadOrdersCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-green-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadOrdersCount}
                   </span>
                 )}
