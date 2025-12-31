@@ -830,8 +830,17 @@ export function OrdersView() {
                   
                   if (error) throw error;
                   
-                  // Add to local dispute set
+                  // Mark the order as unread so it shows highlight in disputes tab
+                  await supabase
+                    .from('orders')
+                    .update({ read: false })
+                    .eq('id', selectedOrder.id);
+                  
+                  // Add to local dispute set and update local order state
                   setDisputeOrderIds(prev => new Set([...prev, selectedOrder.id]));
+                  setOrders(prev => prev.map(o => 
+                    o.id === selectedOrder.id ? { ...o, read: false } : o
+                  ));
                   
                   // Update notification counts: add to disputes, remove from active orders
                   incrementUserUnreadDisputesCount();
