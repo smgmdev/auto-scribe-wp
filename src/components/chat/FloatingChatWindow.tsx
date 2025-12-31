@@ -65,6 +65,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return order;
   };
   
+  // Debug log incoming order data
+  console.log('[FloatingChatWindow] globalChatRequest.order:', globalChatRequest.order, 'normalized:', normalizeOrder(globalChatRequest.order));
+  
   // Local order state - syncs with prop but can be updated immediately
   const [localOrder, setLocalOrder] = useState<{
     id: string;
@@ -76,6 +79,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Sync local order with prop changes
   useEffect(() => {
     const normalized = normalizeOrder(globalChatRequest.order);
+    console.log('[FloatingChatWindow] useEffect sync - normalized order:', normalized);
     if (normalized) {
       setLocalOrder(normalized);
     }
