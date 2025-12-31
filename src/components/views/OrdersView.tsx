@@ -82,6 +82,8 @@ export function OrdersView() {
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [, setTimerTick] = useState(0); // Force re-render for countdown timer
   const [activeTab, setActiveTab] = useState<string>('active');
+  const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
+  const [submittingDispute, setSubmittingDispute] = useState(false);
   const { toast } = useToast();
 
   // Mark orders as read when viewing each tab - only mark the orders that belong to that tab
@@ -537,15 +539,10 @@ export function OrdersView() {
                       <>
                         <DropdownMenuItem 
                           className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          disabled={!isDeliveryOverdue}
-                          onClick={() => {
-                            toast({
-                              title: "Coming Soon",
-                              description: "Dispute functionality will be available soon.",
-                            });
-                          }}
+                          disabled={!isDeliveryOverdue || disputeOrderIds.has(selectedOrder?.id || '')}
+                          onClick={() => setDisputeDialogOpen(true)}
                         >
-                          Open Dispute
+                          {disputeOrderIds.has(selectedOrder?.id || '') ? 'Dispute Opened' : 'Open Dispute'}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
@@ -706,6 +703,80 @@ export function OrdersView() {
             >
               {cancellingOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Open Dispute Dialog */}
+      <AlertDialog open={disputeDialogOpen} onOpenChange={setDisputeDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Open Dispute</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                This will send a request to the dispute team of Arcana Mace. A staff member will join the chat to help resolve your issue.
+              </p>
+              <p className="text-foreground font-medium">
+                Please note: The staff member may take up to 6-24 hours to respond.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submittingDispute}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              disabled={submittingDispute}
+              onClick={async () => {
+                if (!selectedOrder?.id || !user) return;
+                
+                setSubmittingDispute(true);
+                try {
+                  // First get the service_request_id for this order
+                  const { data: serviceRequest, error: srError } = await supabase
+                    .from('service_requests')
+                    .select('id')
+                    .eq('order_id', selectedOrder.id)
+                    .maybeSingle();
+                  
+                  if (srError) throw srError;
+                  if (!serviceRequest) throw new Error('Service request not found for this order');
+                  
+                  const { error } = await supabase
+                    .from('disputes')
+                    .insert({
+                      order_id: selectedOrder.id,
+                      service_request_id: serviceRequest.id,
+                      user_id: user.id,
+                      status: 'open',
+                      reason: 'Delivery overdue - dispute opened by client'
+                    });
+                  
+                  if (error) throw error;
+                  
+                  // Add to local dispute set
+                  setDisputeOrderIds(prev => new Set([...prev, selectedOrder.id]));
+                  
+                  toast({
+                    title: "Dispute Request Sent",
+                    description: "A staff member will join your chat within 6-24 hours to help resolve your issue.",
+                  });
+                  
+                  setDisputeDialogOpen(false);
+                  setSelectedOrder(null);
+                } catch (error: any) {
+                  console.error('Error opening dispute:', error);
+                  toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: error.message || 'Failed to open dispute.',
+                  });
+                } finally {
+                  setSubmittingDispute(false);
+                }
+              }}
+            >
+              {submittingDispute ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Send Dispute Request
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
