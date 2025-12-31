@@ -84,12 +84,22 @@ export function OrdersView() {
   const [activeTab, setActiveTab] = useState<string>('active');
   const { toast } = useToast();
 
-  // Clear unread orders count when viewing the Active Orders tab
+  // Clear unread orders count and mark orders as read when viewing the Active Orders tab
   useEffect(() => {
-    if (activeTab === 'active' && userUnreadOrdersCount > 0 && !isAdmin) {
-      setUserUnreadOrdersCount(0);
-    }
-  }, [activeTab, userUnreadOrdersCount, isAdmin, setUserUnreadOrdersCount]);
+    const markOrdersAsRead = async () => {
+      if (activeTab === 'active' && userUnreadOrdersCount > 0 && !isAdmin && user) {
+        // Mark all unread orders as read in the database
+        await supabase
+          .from('orders')
+          .update({ read: true })
+          .eq('user_id', user.id)
+          .eq('read', false);
+        
+        setUserUnreadOrdersCount(0);
+      }
+    };
+    markOrdersAsRead();
+  }, [activeTab, userUnreadOrdersCount, isAdmin, setUserUnreadOrdersCount, user]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
