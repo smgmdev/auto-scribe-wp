@@ -73,7 +73,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Fetch order data on mount if not provided (handles case where chat opens before order data is passed)
   useEffect(() => {
     const fetchOrderFromRequest = async () => {
-      if (localOrder) return; // Already have order data
       if (!globalChatRequest?.id) return;
       
       // First get the service request to check if it has an order_id
@@ -85,7 +84,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (!requestData?.order_id) return; // No order associated
       
-      // Fetch the order data
+      // Fetch the order data (always fetch to ensure we have latest delivery_deadline)
       const { data: orderData } = await supabase
         .from('orders')
         .select('id, status, delivery_status, delivery_deadline')
