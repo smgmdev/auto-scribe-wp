@@ -133,6 +133,7 @@ export function Sidebar({
     userUnreadCancelledCount,
     setUserUnreadCancelledCount,
     userUnreadOrdersCount,
+    setUserUnreadOrdersCount,
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
     incrementAdminUnreadEngagementsCount,
@@ -528,10 +529,19 @@ export function Sidebar({
 
       setUserUnreadEngagementsCount(activeUnreadCount);
       setUserUnreadCancelledCount(cancelledUnreadCount);
+      
+      // Fetch unread orders for this user (orders with read=false)
+      const { count: userUnreadOrdersResult } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+      
+      setUserUnreadOrdersCount(userUnreadOrdersResult || 0);
     };
 
     fetchUnreadEngagements();
-  }, [user?.id, isAdmin]);
+  }, [user?.id, isAdmin, setUserUnreadEngagementsCount, setUserUnreadCancelledCount, setUserUnreadOrdersCount]);
 
   // Real-time subscription for user engagement status changes (including cancellations)
   useEffect(() => {

@@ -2484,7 +2484,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Order Placed</p>
-                  {localOrder.delivery_status === 'pending' && (
+                  {(!localOrder.delivery_status || localOrder.delivery_status === 'pending') && (
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {localOrder.delivery_deadline ? (() => {
                         const timeInfo = formatTimeRemaining(localOrder.delivery_deadline);
@@ -2513,7 +2513,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
               <Badge 
                 variant="secondary" 
-                className={`cursor-pointer ${
+                className={`cursor-pointer shrink-0 ${
                   localOrder.delivery_status === 'accepted' 
                     ? 'bg-green-500 text-white hover:bg-green-600' 
                     : localOrder.delivery_status === 'delivered'
@@ -2533,9 +2533,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setLoadingOrderDetails(false);
                 }}
               >
-                {localOrder.delivery_status === 'accepted' && 'Completed'}
-                {localOrder.delivery_status === 'delivered' && 'Delivered'}
-                {localOrder.delivery_status === 'pending' && 'View Details'}
+                {localOrder.delivery_status === 'accepted' ? 'Completed' : 
+                 localOrder.delivery_status === 'delivered' ? 'Delivered' : 
+                 'View Details'}
               </Badge>
             </div>
           </div>
