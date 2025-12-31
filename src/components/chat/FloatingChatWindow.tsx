@@ -1059,10 +1059,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         async (payload) => {
           const newMsg = payload.new as ServiceMessage;
           
-          // Check if this is a special system message (inserted by backend, not user)
+          // Check if this is a special system message (inserted by backend or via dialog, not regular chat)
           const isSystemMessage = newMsg.message.includes('[ORDER_PLACED]') || 
                                   newMsg.message.includes('[ORDER_CANCELLED]') ||
-                                  newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]');
+                                  newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]') ||
+                                  newMsg.message.includes('[ORDER_REQUEST]');
           
           // Skip messages from same sender type UNLESS it's a system message
           // System messages are inserted by edge functions, not the user directly
@@ -2909,14 +2910,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     
                     const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/ORDER_REQUEST]`;
                     
-                    const { error } = await supabase.from('service_messages').insert({
+                    const { data: insertedMsg, error } = await supabase.from('service_messages').insert({
                       request_id: globalChatRequest.id,
                       sender_type: 'agency',
                       sender_id: senderId,
                       message: orderMessage
-                    });
+                    }).select().single();
 
                     if (error) throw error;
+                    
+                    // Add new message to local state
+                    if (insertedMsg) {
+                      setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+                    }
                     
                     toast({
                       title: isResendMode ? "Order Request Resent" : "Order Request Sent",
