@@ -134,8 +134,10 @@ export function Sidebar({
     setUserUnreadCancelledCount,
     userUnreadOrdersCount,
     setUserUnreadOrdersCount,
+    userUnreadDisputesCount,
     setUserUnreadDisputesCount,
     setUserUnreadCompletedCount,
+    userUnreadHistoryCount,
     setUserUnreadHistoryCount,
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
@@ -716,7 +718,7 @@ export function Sidebar({
                   : 0;
                 // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include cancelled
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
-                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount) : (userUnreadEngagementsCount + userUnreadCancelledCount + userUnreadOrdersCount))
+                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount) : (userUnreadEngagementsCount + userUnreadCancelledCount + userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount))
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
@@ -758,8 +760,9 @@ export function Sidebar({
                           const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount) > 0;
                           // User My Engagements shows unread message notifications (active + cancelled)
                           const showEngagementsBadge = subItem.id === 'my-requests' && (userUnreadEngagementsCount + userUnreadCancelledCount) > 0;
-                          // User My Orders shows unread new order notifications
-                          const showUserOrdersBadge = subItem.id === 'orders' && userUnreadOrdersCount > 0;
+                          // User My Orders shows combined notifications (active + disputes + cancelled)
+                          const showUserOrdersBadge = subItem.id === 'orders' && (userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount) > 0;
+                          const userOrdersBadgeCount = userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount;
                           // Admin Order Management shows unread orders + disputes notifications
                           const showOrdersBadge = subItem.id === 'admin-orders' && (unreadOrdersCount + unreadDisputesCount) > 0;
                           const ordersBadgeCount = unreadOrdersCount + unreadDisputesCount;
@@ -773,7 +776,7 @@ export function Sidebar({
                           else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
                           else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount;
                           else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount + userUnreadCancelledCount;
-                          else if (showUserOrdersBadge) notificationCount = userUnreadOrdersCount;
+                          else if (showUserOrdersBadge) notificationCount = userOrdersBadgeCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
                           else if (showAdminEngagementsBadge) notificationCount = adminUnreadEngagementsCount;
                           
