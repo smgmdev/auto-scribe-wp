@@ -141,6 +141,11 @@ interface AppState {
   incrementUserUnreadOrdersCount: () => void;
   decrementUserUnreadOrdersCount: () => void;
   
+  // User unread disputes count (for Open Disputes tab in My Orders)
+  userUnreadDisputesCount: number;
+  setUserUnreadDisputesCount: (count: number) => void;
+  incrementUserUnreadDisputesCount: () => void;
+  
   // User agency application status
   userApplicationStatus: string | null;
   setUserApplicationStatus: (status: string | null) => void;
@@ -295,6 +300,13 @@ export const useAppStore = create<AppState>()((set) => ({
   })),
   decrementUserUnreadOrdersCount: () => set((state) => ({ 
     userUnreadOrdersCount: Math.max(0, state.userUnreadOrdersCount - 1) 
+  })),
+  
+  // User unread disputes count
+  userUnreadDisputesCount: 0,
+  setUserUnreadDisputesCount: (count) => set({ userUnreadDisputesCount: count }),
+  incrementUserUnreadDisputesCount: () => set((state) => ({ 
+    userUnreadDisputesCount: state.userUnreadDisputesCount + 1 
   })),
   
   userApplicationStatus: null,
