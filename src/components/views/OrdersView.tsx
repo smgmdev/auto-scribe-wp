@@ -84,22 +84,56 @@ export function OrdersView() {
   const [activeTab, setActiveTab] = useState<string>('active');
   const { toast } = useToast();
 
-  // Clear unread orders count and mark orders as read when viewing the Active Orders tab
+  // Mark orders as read when viewing each tab - only mark the orders that belong to that tab
   useEffect(() => {
-    const markOrdersAsRead = async () => {
-      if (activeTab === 'active' && userUnreadOrdersCount > 0 && !isAdmin && user) {
-        // Mark all unread orders as read in the database
-        await supabase
+    const markTabOrdersAsRead = async () => {
+      if (isAdmin || !user || orders.length === 0) return;
+      
+      // Get the order IDs that belong to the current tab and are unread
+      let tabOrderIds: string[] = [];
+      
+      if (activeTab === 'active') {
+        // Active: paid orders waiting for delivery (excluding disputes)
+        tabOrderIds = orders
+          .filter(o => o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id))
+          .map(o => o.id);
+      } else if (activeTab === 'disputes') {
+        // Disputes: orders in dispute
+        tabOrderIds = orders.filter(o => disputeOrderIds.has(o.id)).map(o => o.id);
+      } else if (activeTab === 'completed') {
+        // Completed: delivered or accepted orders (excluding disputes)
+        tabOrderIds = orders
+          .filter(o => (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id))
+          .map(o => o.id);
+      } else if (activeTab === 'history') {
+        // History: cancelled orders
+        tabOrderIds = orders.filter(o => o.status === 'cancelled').map(o => o.id);
+      }
+      
+      if (tabOrderIds.length === 0) return;
+      
+      // Mark these specific orders as read
+      const { error } = await supabase
+        .from('orders')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+        .in('id', tabOrderIds);
+      
+      if (!error) {
+        // Recalculate unread count from remaining unread orders
+        const { count } = await supabase
           .from('orders')
-          .update({ read: true })
+          .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
           .eq('read', false);
         
-        setUserUnreadOrdersCount(0);
+        setUserUnreadOrdersCount(count || 0);
       }
     };
-    markOrdersAsRead();
-  }, [activeTab, userUnreadOrdersCount, isAdmin, setUserUnreadOrdersCount, user]);
+    
+    markTabOrdersAsRead();
+  }, [activeTab, orders, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
