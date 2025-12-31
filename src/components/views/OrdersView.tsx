@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { formatDistanceToNow } from 'date-fns';
+import { useAppStore } from '@/stores/appStore';
 
 interface Order {
   id: string;
@@ -69,6 +70,7 @@ const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boole
 
 export function OrdersView() {
   const { user, isAdmin } = useAuth();
+  const { userUnreadOrdersCount, setUserUnreadOrdersCount } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,15 @@ export function OrdersView() {
   const [cancelOrderDialogOpen, setCancelOrderDialogOpen] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [, setTimerTick] = useState(0); // Force re-render for countdown timer
+  const [activeTab, setActiveTab] = useState<string>('active');
   const { toast } = useToast();
+
+  // Clear unread orders count when viewing the Active Orders tab
+  useEffect(() => {
+    if (activeTab === 'active' && userUnreadOrdersCount > 0 && !isAdmin) {
+      setUserUnreadOrdersCount(0);
+    }
+  }, [activeTab, userUnreadOrdersCount, isAdmin, setUserUnreadOrdersCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
@@ -377,11 +387,16 @@ export function OrdersView() {
             />
           </div>
 
-          <Tabs defaultValue="active" className="w-full">
+          <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full max-w-2xl grid-cols-4">
-              <TabsTrigger value="active" className="gap-2">
+              <TabsTrigger value="active" className="gap-2 relative">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
+                {userUnreadOrdersCount > 0 && !isAdmin && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-green-500 text-white rounded-full flex items-center justify-center">
+                    {userUnreadOrdersCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="disputes" className="gap-2">
                 <AlertTriangle className="h-4 w-4" />
