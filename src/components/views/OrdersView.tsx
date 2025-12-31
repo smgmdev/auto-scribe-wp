@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, History, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, Eye, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -75,7 +75,6 @@ export function OrdersView() {
   const { 
     userUnreadOrdersCount, setUserUnreadOrdersCount, decrementUserUnreadOrdersCount,
     userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadDisputesCount,
-    userUnreadCompletedCount, setUserUnreadCompletedCount, decrementUserUnreadCompletedCount,
     userUnreadHistoryCount, setUserUnreadHistoryCount, decrementUserUnreadHistoryCount
   } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -94,6 +93,7 @@ export function OrdersView() {
   const { toast } = useToast();
 
   // Mark all orders in the current tab as read when switching tabs
+  // Only applies to tabs with notifications: active, disputes, history (cancelled)
   useEffect(() => {
     const markTabOrdersAsRead = async () => {
       if (isAdmin || !user || orders.length === 0) return;
@@ -109,15 +109,11 @@ export function OrdersView() {
       } else if (activeTab === 'disputes') {
         unreadTabOrderIds = orders.filter(o => !o.read && disputeOrderIds.has(o.id)).map(o => o.id);
         if (unreadTabOrderIds.length > 0) setUserUnreadDisputesCount(0);
-      } else if (activeTab === 'completed') {
-        unreadTabOrderIds = orders
-          .filter(o => !o.read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id) && o.status !== 'cancelled')
-          .map(o => o.id);
-        if (unreadTabOrderIds.length > 0) setUserUnreadCompletedCount(0);
       } else if (activeTab === 'history') {
         unreadTabOrderIds = orders.filter(o => !o.read && o.status === 'cancelled').map(o => o.id);
         if (unreadTabOrderIds.length > 0) setUserUnreadHistoryCount(0);
       }
+      // Completed tab doesn't have notifications, so no need to mark as read
       
       if (unreadTabOrderIds.length === 0) return;
       
@@ -137,7 +133,7 @@ export function OrdersView() {
     };
     
     markTabOrdersAsRead();
-  }, [activeTab, orders.length, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
+  }, [activeTab, orders.length, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadHistoryCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
@@ -365,6 +361,7 @@ export function OrdersView() {
       
       if (!error) {
         // Decrement the appropriate tab's count based on order category
+        // Only decrement for tabs with notifications: active, disputes, history
         const tab = getOrderTab(order);
         switch (tab) {
           case 'active':
@@ -373,12 +370,10 @@ export function OrdersView() {
           case 'disputes':
             decrementUserUnreadDisputesCount();
             break;
-          case 'completed':
-            decrementUserUnreadCompletedCount();
-            break;
           case 'history':
             decrementUserUnreadHistoryCount();
             break;
+          // Completed tab has no notifications, so no decrement needed
         }
         
         // Update local order state to reflect read status
@@ -515,18 +510,13 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2 relative">
+              <TabsTrigger value="completed" className="gap-2">
                 <CheckCircle2 className="h-4 w-4" />
                 Completed ({completedOrders.length})
-                {userUnreadCompletedCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
-                    {userUnreadCompletedCount}
-                  </span>
-                )}
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-2 relative">
-                <History className="h-4 w-4" />
-                Order History ({historyOrders.length})
+                <X className="h-4 w-4" />
+                Cancelled Orders ({historyOrders.length})
                 {userUnreadHistoryCount > 0 && !isAdmin && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadHistoryCount}
