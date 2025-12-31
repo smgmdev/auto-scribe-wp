@@ -63,8 +63,17 @@ export class ChatPresenceTracker {
       .on('presence', { event: 'sync' }, () => {
         const state = this.channel?.presenceState() || {};
         this.onlineUsers.clear();
-        Object.keys(state).forEach(key => {
-          this.onlineUsers.add(key);
+        const now = Date.now();
+        Object.entries(state).forEach(([key, presences]: [string, any[]]) => {
+          // Only consider users with a recent online_at timestamp (within 2 minutes)
+          const isRecent = presences.some((p: any) => {
+            if (!p.online_at) return false;
+            const onlineAt = new Date(p.online_at).getTime();
+            return now - onlineAt < 2 * 60 * 1000; // 2 minutes
+          });
+          if (isRecent) {
+            this.onlineUsers.add(key);
+          }
         });
         this.onPresenceChange?.(Array.from(this.onlineUsers));
       })

@@ -135,6 +135,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
+  const senderIdRef = useRef<string | null>(null);
+  
+  // Keep senderIdRef in sync
+  useEffect(() => {
+    senderIdRef.current = senderId;
+  }, [senderId]);
   
   // Auto-focus input when chat opens
   useEffect(() => {
@@ -1126,7 +1132,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         senderId,
         senderType,
         (onlineUsers) => {
-          const hasOtherUser = onlineUsers.some(id => id !== senderId);
+          // Use ref to get current senderId to avoid stale closure
+          const currentSenderId = senderIdRef.current;
+          if (!currentSenderId) {
+            setIsCounterpartyOnline(false);
+            return;
+          }
+          // Check if there's any user online that isn't the current user
+          const hasOtherUser = onlineUsers.some(id => id !== currentSenderId);
           setIsCounterpartyOnline(hasOtherUser);
         },
         agencyPayoutId
