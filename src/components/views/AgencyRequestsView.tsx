@@ -839,9 +839,9 @@ export function AgencyRequestsView() {
               <TabsTrigger value="disputes" className="gap-2 relative">
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputedOrders.length})
-                {disputedOrders.length > 0 && (
+                {disputedOrders.filter(o => !readDisputeIds.has(o.id)).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {disputedOrders.length}
+                    {disputedOrders.filter(o => !readDisputeIds.has(o.id)).length}
                   </span>
                 )}
               </TabsTrigger>
