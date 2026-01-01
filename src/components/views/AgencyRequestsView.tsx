@@ -850,7 +850,7 @@ export function AgencyRequestsView() {
 
         <TabsContent value="orders" className="mt-6">
           <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full max-w-lg grid-cols-3">
+            <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
