@@ -69,8 +69,7 @@ export function AgencyRequestsView() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
-  const [disputes, setDisputes] = useState<{ order_id: string; status: string }[]>([]);
-  const [readDisputeIds, setReadDisputeIds] = useState<Set<string>>(new Set());
+  const [disputes, setDisputes] = useState<{ order_id: string; status: string; read: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
@@ -210,13 +209,15 @@ export function AgencyRequestsView() {
           if (orderIds.length > 0) {
             const { data: disputesData } = await supabase
               .from('disputes')
-              .select('order_id, status')
+              .select('id, order_id, status, read')
               .in('order_id', orderIds)
               .eq('status', 'open');
             
             if (disputesData) {
               setDisputes(disputesData);
-              setAgencyUnreadDisputesCount(disputesData.length);
+              // Only count unread disputes
+              const unreadDisputesCount = disputesData.filter(d => !d.read).length;
+              setAgencyUnreadDisputesCount(unreadDisputesCount);
             }
           }
         }
@@ -506,11 +507,22 @@ export function AgencyRequestsView() {
     }
   };
 
-  const handleDisputedOrderCardClick = (order: any, request: ServiceRequest | undefined) => {
+  const handleDisputedOrderCardClick = async (order: any, request: ServiceRequest | undefined) => {
+    // Find the dispute for this order
+    const dispute = disputes.find(d => d.order_id === order.id);
+    
     // Only decrement if this dispute hasn't been read yet
-    if (!readDisputeIds.has(order.id)) {
-      // Mark as read locally
-      setReadDisputeIds(prev => new Set([...prev, order.id]));
+    if (dispute && !dispute.read) {
+      // Mark as read in database
+      await supabase
+        .from('disputes')
+        .update({ read: true })
+        .eq('order_id', order.id);
+      
+      // Update local state
+      setDisputes(prev => prev.map(d => 
+        d.order_id === order.id ? { ...d, read: true } : d
+      ));
       
       // Decrement disputes count in store (atomic update)
       decrementAgencyUnreadDisputesCount();
@@ -838,9 +850,9 @@ export function AgencyRequestsView() {
               <TabsTrigger value="disputes" className="gap-2 relative">
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputedOrders.length})
-                {disputedOrders.filter(o => !readDisputeIds.has(o.id)).length > 0 && (
+                {disputes.filter(d => !d.read).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {disputedOrders.filter(o => !readDisputeIds.has(o.id)).length}
+                    {disputes.filter(d => !d.read).length}
                   </span>
                 )}
               </TabsTrigger>
@@ -939,7 +951,8 @@ export function AgencyRequestsView() {
               ) : (
                 disputedOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
-                  const isUnread = !readDisputeIds.has(order.id);
+                  const dispute = disputes.find(d => d.order_id === order.id);
+                  const isUnread = dispute ? !dispute.read : false;
                   return (
                     <Card 
                       key={order.id}
