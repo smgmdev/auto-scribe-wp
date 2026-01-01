@@ -88,40 +88,54 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Fetch order data on mount or if not provided (handles case where chat opens before order data is passed)
   useEffect(() => {
     const fetchOrderFromRequest = async () => {
-      if (!globalChatRequest?.id) return;
+      console.log('[FloatingChatWindow] fetchOrderFromRequest called, requestId:', globalChatRequest?.id);
+      if (!globalChatRequest?.id) {
+        console.log('[FloatingChatWindow] No request ID, skipping fetch');
+        return;
+      }
       
       // Skip if we already have order data (check normalized)
       const existingOrder = normalizeOrder(globalChatRequest.order);
       if (existingOrder) {
+        console.log('[FloatingChatWindow] Already have order data, setting localOrder:', existingOrder);
         setLocalOrder(existingOrder);
         return;
       }
       
+      console.log('[FloatingChatWindow] No existing order, fetching from DB...');
+      
       // First get the service request to check if it has an order_id
-      const { data: requestData } = await supabase
+      const { data: requestData, error: requestError } = await supabase
         .from('service_requests')
         .select('order_id')
         .eq('id', globalChatRequest.id)
         .maybeSingle();
       
-      if (!requestData?.order_id) return; // No order associated
+      console.log('[FloatingChatWindow] service_request data:', requestData, 'error:', requestError);
+      
+      if (!requestData?.order_id) {
+        console.log('[FloatingChatWindow] No order_id on request, skipping order fetch');
+        return;
+      }
       
       // Fetch the order data
-      const { data: orderData } = await supabase
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select('id, status, delivery_status, delivery_deadline')
         .eq('id', requestData.order_id)
         .maybeSingle();
       
+      console.log('[FloatingChatWindow] Fetched order:', orderData, 'error:', orderError);
+      
       if (orderData) {
-        console.log('[FloatingChatWindow] Fetched order data on mount:', orderData);
+        console.log('[FloatingChatWindow] Setting localOrder from fetched data:', orderData);
         setLocalOrder(orderData);
         updateGlobalChatRequest({ order: orderData }, globalChatRequest.id);
       }
     };
     
     fetchOrderFromRequest();
-  }, [globalChatRequest?.id, globalChatRequest?.order]);
+  }, [globalChatRequest?.id]);
   
   // Also subscribe to order updates for this request
   useEffect(() => {
