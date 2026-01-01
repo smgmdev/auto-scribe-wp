@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, History, AlertTriangle } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -609,9 +609,17 @@ export function AgencyRequestsView() {
     [orders, disputedOrderIds]
   );
   
-  const historyOrders = useMemo(() => 
+  const completedOrders = useMemo(() => 
     orders.filter(o => 
-      (o.delivery_status === 'delivered' || o.status === 'cancelled') && 
+      o.delivery_status === 'delivered' && 
+      !disputedOrderIds.has(o.id)
+    ), 
+    [orders, disputedOrderIds]
+  );
+  
+  const cancelledOrders = useMemo(() => 
+    orders.filter(o => 
+      o.status === 'cancelled' && 
       !disputedOrderIds.has(o.id)
     ), 
     [orders, disputedOrderIds]
@@ -856,9 +864,13 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2">
-                <History className="h-4 w-4" />
-                Order History ({historyOrders.length})
+              <TabsTrigger value="completed" className="gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Completed ({completedOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="cancelled" className="gap-2">
+                <XCircle className="h-4 w-4" />
+                Cancelled Orders ({cancelledOrders.length})
               </TabsTrigger>
             </TabsList>
 
@@ -1007,20 +1019,75 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="history" className="mt-4 space-y-4">
-              {historyOrders.length === 0 ? (
+            <TabsContent value="completed" className="mt-4 space-y-4">
+              {completedOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
-                    <History className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <CheckCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
                     <p className="text-muted-foreground text-center">
-                      Cancelled and delivered orders will appear here.
+                      Completed orders will appear here.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
-                historyOrders.map((order) => {
+                completedOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
-                  const isDelivered = order.delivery_status === 'delivered';
+                  return (
+                    <Card 
+                      key={order.id}
+                      className="border-border/50 hover:border-border transition-colors cursor-pointer"
+                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {order.media_site?.favicon ? (
+                              <img 
+                                src={order.media_site.favicon} 
+                                alt="" 
+                                className="h-10 w-10 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ${(order.amount_cents / 100).toFixed(0)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                              <CheckCircle className="h-3 w-3 mr-1" /> Delivered
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(order.delivered_at || order.created_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </TabsContent>
+
+            <TabsContent value="cancelled" className="mt-4 space-y-4">
+              {cancelledOrders.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      Cancelled orders will appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                cancelledOrders.map((order) => {
+                  const relatedRequest = requests.find(r => r.order?.id === order.id);
                   return (
                     <Card 
                       key={order.id}
@@ -1049,18 +1116,11 @@ export function AgencyRequestsView() {
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            <Badge className={isDelivered 
-                              ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                              : 'bg-red-500/20 text-red-400 border-red-500/30'
-                            }>
-                              {isDelivered ? (
-                                <><CheckCircle className="h-3 w-3 mr-1" /> Delivered</>
-                              ) : (
-                                <><XCircle className="h-3 w-3 mr-1" /> Cancelled</>
-                              )}
+                            <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                              <XCircle className="h-3 w-3 mr-1" /> Cancelled
                             </Badge>
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(order.delivered_at || order.created_at), 'MMM d, yyyy')}
+                              {format(new Date(order.created_at), 'MMM d, yyyy')}
                             </span>
                           </div>
                         </div>
