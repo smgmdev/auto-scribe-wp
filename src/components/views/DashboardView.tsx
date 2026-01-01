@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, HelpCircle, ArrowRight, CheckCircle, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, HelpCircle, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -72,12 +72,6 @@ export function DashboardView() {
   const [isAgency, setIsAgency] = useState<boolean | null>(null);
   const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
   const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
-  const [agencyEarnings, setAgencyEarnings] = useState({
-    totalEarnings: 0,
-    pendingPayouts: 0,
-    completedPayouts: 0,
-    loading: true
-  });
 
   const agencyStatusLoading = isAgency === null && !isAdmin;
   const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
@@ -95,31 +89,6 @@ export function DashboardView() {
       
       const isOnboarded = data?.onboarding_complete === true;
       setIsAgency(isOnboarded);
-
-      // If agency, fetch earnings data
-      if (isOnboarded && data?.id) {
-        const { data: payoutData } = await supabase
-          .from('payout_transactions')
-          .select('amount_cents, status')
-          .eq('agency_payout_id', data.id);
-
-        if (payoutData) {
-          const totalEarnings = payoutData.reduce((sum, t) => sum + t.amount_cents, 0);
-          const pendingPayouts = payoutData.filter(t => t.status === 'pending').reduce((sum, t) => sum + t.amount_cents, 0);
-          const completedPayouts = payoutData.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount_cents, 0);
-          
-          setAgencyEarnings({
-            totalEarnings,
-            pendingPayouts,
-            completedPayouts,
-            loading: false
-          });
-        } else {
-          setAgencyEarnings(prev => ({ ...prev, loading: false }));
-        }
-      } else {
-        setAgencyEarnings(prev => ({ ...prev, loading: false }));
-      }
     };
 
     fetchAgencyStatus();
@@ -262,69 +231,6 @@ export function DashboardView() {
       })}
       </div>
 
-      {/* Agency Earnings Widget - Only show for active agencies */}
-      {isAgency && (
-        <Card 
-          className="border-green-500/30 bg-green-500/5 transition-colors hover:border-[#4771d9] cursor-pointer"
-          onClick={() => setCurrentView('agency-payouts')}
-        >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-500" />
-              Agency Earnings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
-                  <TrendingUp className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Earnings</p>
-                  <p className="text-xl font-semibold text-foreground">
-                    {agencyEarnings.loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      `$${(agencyEarnings.totalEarnings / 100).toFixed(2)}`
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20">
-                  <Clock className="h-5 w-5 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Pending Payouts</p>
-                  <p className="text-xl font-semibold text-foreground">
-                    {agencyEarnings.loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      `$${(agencyEarnings.pendingPayouts / 100).toFixed(2)}`
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
-                  <CheckCircle className="h-5 w-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Completed Payouts</p>
-                  <p className="text-xl font-semibold text-foreground">
-                    {agencyEarnings.loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      `$${(agencyEarnings.completedPayouts / 100).toFixed(2)}`
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Instant Publishing & B2B Media Buying */}
       <div className="grid gap-6 md:grid-cols-2">
