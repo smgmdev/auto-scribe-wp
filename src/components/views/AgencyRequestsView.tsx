@@ -66,6 +66,7 @@ export function AgencyRequestsView() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
+  const [disputes, setDisputes] = useState<{ order_id: string; status: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
@@ -199,6 +200,20 @@ export function AgencyRequestsView() {
           );
           setAgencyUnreadOrdersCount(unreadActiveOrders.length);
           setNewOrderIds(new Set(unreadActiveOrders.map(o => o.id)));
+
+          // Fetch open disputes for these orders
+          const orderIds = ordersData.map(o => o.id);
+          if (orderIds.length > 0) {
+            const { data: disputesData } = await supabase
+              .from('disputes')
+              .select('order_id, status')
+              .in('order_id', orderIds)
+              .eq('status', 'open');
+            
+            if (disputesData) {
+              setDisputes(disputesData);
+            }
+          }
         }
       }
     }
@@ -542,19 +557,10 @@ export function AgencyRequestsView() {
     });
   }, [cancelledRequests, searchQuery]);
 
-  // Calculate order counts - first get all disputed order IDs
+  // Calculate order counts - first get all disputed order IDs from the disputes table
   const disputedOrderIds = useMemo(() => {
-    return new Set(
-      requests
-        .filter(r => r.order?.id)
-        .filter(r => {
-          // Check if there's an open dispute for this request
-          const requestMessages = messages[r.id] || [];
-          return requestMessages.some(m => m.message.includes('[DISPUTE_OPENED]'));
-        })
-        .map(r => r.order!.id)
-    );
-  }, [requests, messages]);
+    return new Set(disputes.map(d => d.order_id));
+  }, [disputes]);
 
   const disputedOrders = useMemo(() => 
     orders.filter(o => disputedOrderIds.has(o.id)), 
