@@ -129,6 +129,7 @@ export function Sidebar({
     agencyUnreadCancelledCount,
     setAgencyUnreadCancelledCount,
     agencyUnreadDisputesCount,
+    setAgencyUnreadDisputesCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
     userUnreadCancelledCount,
@@ -371,6 +372,7 @@ export function Sidebar({
             
             let serviceRequestsCount = 0;
             let cancelledRequestsCount = 0;
+            let disputesCount = 0;
             if (agencyPayoutData) {
               const { count: requestsCount } = await supabase
                 .from('service_requests')
@@ -388,6 +390,18 @@ export function Sidebar({
                 .eq('agency_read', false)
                 .eq('status', 'cancelled');
               cancelledRequestsCount = cancelledCount || 0;
+              
+              // Count unread disputes for agency
+              const { count: unreadDisputesCount } = await supabase
+                .from('disputes')
+                .select(`
+                  id,
+                  read,
+                  service_requests!inner(agency_payout_id)
+                `, { count: 'exact', head: true })
+                .eq('read', false)
+                .eq('service_requests.agency_payout_id', agencyPayoutData.id);
+              disputesCount = unreadDisputesCount || 0;
             }
             
             if (isMounted) {
@@ -395,6 +409,7 @@ export function Sidebar({
               setAgencyUnreadMediaSubmissionsCount((mediaApprovedCount || 0) + (mediaRejectedCount || 0));
               setAgencyUnreadServiceRequestsCount(serviceRequestsCount);
               setAgencyUnreadCancelledCount(cancelledRequestsCount);
+              setAgencyUnreadDisputesCount(disputesCount);
             }
           }
       }
