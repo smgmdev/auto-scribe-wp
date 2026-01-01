@@ -59,6 +59,7 @@ export function AgencyRequestsView() {
     agencyUnreadOrdersCount,
     incrementAgencyUnreadOrdersCount,
     setAgencyUnreadDisputesCount,
+    decrementAgencyUnreadDisputesCount,
     agencyUnreadDisputesCount,
     unreadMessageCounts,
     setUnreadMessageCount,
@@ -511,10 +512,8 @@ export function AgencyRequestsView() {
       // Mark as read locally
       setReadDisputeIds(prev => new Set([...prev, order.id]));
       
-      // Decrement disputes count
-      if (agencyUnreadDisputesCount > 0) {
-        setAgencyUnreadDisputesCount(Math.max(0, agencyUnreadDisputesCount - 1));
-      }
+      // Decrement disputes count in store (atomic update)
+      decrementAgencyUnreadDisputesCount();
     }
     
     // Open the chat for the related request
