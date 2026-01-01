@@ -619,7 +619,7 @@ export function AgencyRequestsView() {
   
   const cancelledOrders = useMemo(() => 
     orders.filter(o => 
-      o.status === 'cancelled' && 
+      (o.status === 'cancelled' || o.delivery_status === 'cancelled') && 
       !disputedOrderIds.has(o.id)
     ), 
     [orders, disputedOrderIds]
