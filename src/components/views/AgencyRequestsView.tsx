@@ -504,6 +504,21 @@ export function AgencyRequestsView() {
     }
   };
 
+  const handleDisputedOrderCardClick = (order: any, request: ServiceRequest | undefined) => {
+    // Decrement disputes count when opening a disputed order
+    if (agencyUnreadDisputesCount > 0) {
+      setAgencyUnreadDisputesCount(Math.max(0, agencyUnreadDisputesCount - 1));
+    }
+    
+    // Remove from local disputes state to prevent counting again
+    setDisputes(prev => prev.filter(d => d.order_id !== order.id));
+    
+    // Open the chat for the related request
+    if (request) {
+      handleCardClick(request);
+    }
+  };
+
   // Filter and sort requests - separate active from cancelled
   const activeRequests = useMemo(() => {
     return requests.filter(r => r.status !== 'cancelled');
@@ -925,7 +940,7 @@ export function AgencyRequestsView() {
                     <Card 
                       key={order.id}
                       className="border-border/50 hover:border-border transition-colors cursor-pointer bg-orange-500/10 border-l-4 border-l-orange-500"
-                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                      onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
