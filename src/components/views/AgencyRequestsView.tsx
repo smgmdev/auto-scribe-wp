@@ -69,6 +69,7 @@ export function AgencyRequestsView() {
   const [orders, setOrders] = useState<any[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [disputes, setDisputes] = useState<{ order_id: string; status: string }[]>([]);
+  const [readDisputeIds, setReadDisputeIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
@@ -505,13 +506,16 @@ export function AgencyRequestsView() {
   };
 
   const handleDisputedOrderCardClick = (order: any, request: ServiceRequest | undefined) => {
-    // Decrement disputes count when opening a disputed order
-    if (agencyUnreadDisputesCount > 0) {
-      setAgencyUnreadDisputesCount(Math.max(0, agencyUnreadDisputesCount - 1));
+    // Only decrement if this dispute hasn't been read yet
+    if (!readDisputeIds.has(order.id)) {
+      // Mark as read locally
+      setReadDisputeIds(prev => new Set([...prev, order.id]));
+      
+      // Decrement disputes count
+      if (agencyUnreadDisputesCount > 0) {
+        setAgencyUnreadDisputesCount(Math.max(0, agencyUnreadDisputesCount - 1));
+      }
     }
-    
-    // Remove from local disputes state to prevent counting again
-    setDisputes(prev => prev.filter(d => d.order_id !== order.id));
     
     // Open the chat for the related request
     if (request) {
@@ -936,10 +940,13 @@ export function AgencyRequestsView() {
               ) : (
                 disputedOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
+                  const isUnread = !readDisputeIds.has(order.id);
                   return (
                     <Card 
                       key={order.id}
-                      className="border-border/50 hover:border-border transition-colors cursor-pointer bg-orange-500/10 border-l-4 border-l-orange-500"
+                      className={`border-border/50 hover:border-border transition-colors cursor-pointer border-l-4 border-l-orange-500 ${
+                        isUnread ? 'bg-orange-500/10' : ''
+                      }`}
                       onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
                     >
                       <CardContent className="p-4">
@@ -957,7 +964,9 @@ export function AgencyRequestsView() {
                                   <ShoppingBag className="h-5 w-5 text-muted-foreground" />
                                 </div>
                               )}
-                              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-orange-500 rounded-full border-2 border-card" />
+                              {isUnread && (
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-orange-500 rounded-full border-2 border-card" />
+                              )}
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
