@@ -601,12 +601,18 @@ export function AgencyRequestsView() {
   );
 
   const activeOrders = useMemo(() => 
-    orders.filter(o => 
-      o.delivery_status !== 'delivered' && 
-      o.status !== 'cancelled' && 
-      !disputedOrderIds.has(o.id)
-    ), 
-    [orders, disputedOrderIds]
+    orders.filter(o => {
+      // Check if related request is cancelled
+      const relatedRequest = requests.find(r => r.order?.id === o.id);
+      const isRequestCancelled = relatedRequest?.status === 'cancelled';
+      
+      return o.delivery_status !== 'delivered' && 
+        o.status !== 'cancelled' && 
+        o.delivery_status !== 'cancelled' &&
+        !isRequestCancelled &&
+        !disputedOrderIds.has(o.id);
+    }), 
+    [orders, disputedOrderIds, requests]
   );
   
   const completedOrders = useMemo(() => 
@@ -618,11 +624,15 @@ export function AgencyRequestsView() {
   );
   
   const cancelledOrders = useMemo(() => 
-    orders.filter(o => 
-      (o.status === 'cancelled' || o.delivery_status === 'cancelled') && 
-      !disputedOrderIds.has(o.id)
-    ), 
-    [orders, disputedOrderIds]
+    orders.filter(o => {
+      // Check if related request is cancelled
+      const relatedRequest = requests.find(r => r.order?.id === o.id);
+      const isRequestCancelled = relatedRequest?.status === 'cancelled';
+      
+      return (o.status === 'cancelled' || o.delivery_status === 'cancelled' || isRequestCancelled) && 
+        !disputedOrderIds.has(o.id);
+    }), 
+    [orders, disputedOrderIds, requests]
   );
 
   if (loading) {
