@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, History } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, History, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -542,15 +542,40 @@ export function AgencyRequestsView() {
     });
   }, [cancelledRequests, searchQuery]);
 
-  // Calculate order counts
+  // Calculate order counts - first get all disputed order IDs
+  const disputedOrderIds = useMemo(() => {
+    return new Set(
+      requests
+        .filter(r => r.order?.id)
+        .filter(r => {
+          // Check if there's an open dispute for this request
+          const requestMessages = messages[r.id] || [];
+          return requestMessages.some(m => m.message.includes('[DISPUTE_OPENED]'));
+        })
+        .map(r => r.order!.id)
+    );
+  }, [requests, messages]);
+
+  const disputedOrders = useMemo(() => 
+    orders.filter(o => disputedOrderIds.has(o.id)), 
+    [orders, disputedOrderIds]
+  );
+
   const activeOrders = useMemo(() => 
-    orders.filter(o => o.delivery_status !== 'delivered' && o.status !== 'cancelled'), 
-    [orders]
+    orders.filter(o => 
+      o.delivery_status !== 'delivered' && 
+      o.status !== 'cancelled' && 
+      !disputedOrderIds.has(o.id)
+    ), 
+    [orders, disputedOrderIds]
   );
   
   const historyOrders = useMemo(() => 
-    orders.filter(o => o.delivery_status === 'delivered' || o.status === 'cancelled'), 
-    [orders]
+    orders.filter(o => 
+      (o.delivery_status === 'delivered' || o.status === 'cancelled') && 
+      !disputedOrderIds.has(o.id)
+    ), 
+    [orders, disputedOrderIds]
   );
 
   if (loading) {
@@ -778,10 +803,19 @@ export function AgencyRequestsView() {
 
         <TabsContent value="orders" className="mt-6">
           <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="disputes" className="gap-2 relative">
+                <AlertTriangle className="h-4 w-4" />
+                Open Disputes ({disputedOrders.length})
+                {disputedOrders.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {disputedOrders.length}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-2">
                 <History className="h-4 w-4" />
@@ -852,6 +886,69 @@ export function AgencyRequestsView() {
                             }>
                               {order.delivery_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
                               {order.delivery_status.charAt(0).toUpperCase() + order.delivery_status.slice(1).replace('_', ' ')}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(order.created_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </TabsContent>
+
+            <TabsContent value="disputes" className="mt-4 space-y-4">
+              {disputedOrders.length === 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <AlertTriangle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      Orders with open disputes will appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                disputedOrders.map((order) => {
+                  const relatedRequest = requests.find(r => r.order?.id === order.id);
+                  return (
+                    <Card 
+                      key={order.id}
+                      className="border-border/50 hover:border-border transition-colors cursor-pointer bg-orange-500/10 border-l-4 border-l-orange-500"
+                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              {order.media_site?.favicon ? (
+                                <img 
+                                  src={order.media_site.favicon} 
+                                  alt="" 
+                                  className="h-10 w-10 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                  <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                              )}
+                              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-orange-500 rounded-full border-2 border-card" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                                <Badge className="bg-orange-500 text-white border-orange-500">Disputed</Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                ${(order.amount_cents / 100).toFixed(0)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Open Dispute
                             </Badge>
                             <span className="text-xs text-muted-foreground">
                               {format(new Date(order.created_at), 'MMM d, yyyy')}
