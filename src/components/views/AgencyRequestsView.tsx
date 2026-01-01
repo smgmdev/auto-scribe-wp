@@ -58,6 +58,8 @@ export function AgencyRequestsView() {
     setAgencyUnreadOrdersCount,
     agencyUnreadOrdersCount,
     incrementAgencyUnreadOrdersCount,
+    setAgencyUnreadDisputesCount,
+    agencyUnreadDisputesCount,
     unreadMessageCounts,
     setUnreadMessageCount,
     clearUnreadMessageCount,
@@ -212,6 +214,7 @@ export function AgencyRequestsView() {
             
             if (disputesData) {
               setDisputes(disputesData);
+              setAgencyUnreadDisputesCount(disputesData.length);
             }
           }
         }
@@ -632,9 +635,9 @@ export function AgencyRequestsView() {
           <TabsTrigger value="orders" className="gap-2 relative">
             <ShoppingBag className="h-4 w-4" />
             Orders ({orders.length})
-            {agencyUnreadOrdersCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-green-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {agencyUnreadOrdersCount}
+            {(agencyUnreadOrdersCount + agencyUnreadDisputesCount) > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {agencyUnreadOrdersCount + agencyUnreadDisputesCount}
               </span>
             )}
           </TabsTrigger>
@@ -818,7 +821,7 @@ export function AgencyRequestsView() {
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputedOrders.length})
                 {disputedOrders.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {disputedOrders.length}
                   </span>
                 )}

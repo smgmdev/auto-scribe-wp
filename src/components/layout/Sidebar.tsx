@@ -128,6 +128,7 @@ export function Sidebar({
     setAgencyUnreadServiceRequestsCount,
     agencyUnreadCancelledCount,
     setAgencyUnreadCancelledCount,
+    agencyUnreadDisputesCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
     userUnreadCancelledCount,
@@ -712,9 +713,9 @@ export function Sidebar({
                 const agencyDropdownCount = item.id === 'admin-agencies' 
                   ? (unreadAgencyApplicationsCount + unreadCustomVerificationsCount + unreadMediaSubmissionsCount) 
                   : 0;
-                // Calculate notification count for Agency Management dropdown (agency user) - include cancelled
+                // Calculate notification count for Agency Management dropdown (agency user) - include cancelled and disputes
                 const agencyManagementCount = item.id === 'agency-management'
-                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount)
+                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount)
                   : 0;
                 // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include cancelled
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
@@ -756,8 +757,8 @@ export function Sidebar({
                           // Agency user My Media shows pending submission notifications
                           const showAgencyMediaBadge = subItem.id === 'agency-media' && (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount) > 0;
                           const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
-                          // Agency user Service Requests shows unread request notifications (active + cancelled)
-                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount) > 0;
+                          // Agency user Service Requests shows unread request notifications (active + cancelled + disputes)
+                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount) > 0;
                           // User My Engagements shows unread message notifications (active + cancelled)
                           const showEngagementsBadge = subItem.id === 'my-requests' && (userUnreadEngagementsCount + userUnreadCancelledCount) > 0;
                           // User My Orders shows combined notifications (active + disputes + cancelled)
@@ -774,7 +775,7 @@ export function Sidebar({
                           if (showAgencyBadge) notificationCount = agencyBadgeCount;
                           else if (showMediaBadge) notificationCount = unreadMediaSubmissionsCount;
                           else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
-                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount;
+                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount;
                           else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount + userUnreadCancelledCount;
                           else if (showUserOrdersBadge) notificationCount = userOrdersBadgeCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
