@@ -55,6 +55,9 @@ export function AgencyRequestsView() {
   const { 
     setAgencyUnreadServiceRequestsCount,
     setAgencyUnreadCancelledCount,
+    setAgencyUnreadOrdersCount,
+    agencyUnreadOrdersCount,
+    incrementAgencyUnreadOrdersCount,
     unreadMessageCounts,
     setUnreadMessageCount,
     clearUnreadMessageCount,
@@ -69,6 +72,7 @@ export function AgencyRequestsView() {
   const [cancelledSortBy, setCancelledSortBy] = useState<'cancelled_at' | 'last_message' | 'submitted'>('cancelled_at');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'active' | 'cancelled' | 'orders'>('active');
+  const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -176,6 +180,7 @@ export function AgencyRequestsView() {
             amount_cents,
             created_at,
             delivered_at,
+            read,
             media_site:media_sites(id, name, favicon)
           `)
           .in('id', data.filter(r => {
@@ -188,6 +193,12 @@ export function AgencyRequestsView() {
 
         if (ordersData) {
           setOrders(ordersData);
+          // Track new (unread) orders - active orders that haven't been read
+          const unreadActiveOrders = ordersData.filter(o => 
+            !o.read && o.delivery_status !== 'delivered' && o.status !== 'cancelled'
+          );
+          setAgencyUnreadOrdersCount(unreadActiveOrders.length);
+          setNewOrderIds(new Set(unreadActiveOrders.map(o => o.id)));
         }
       }
     }
@@ -341,6 +352,15 @@ export function AgencyRequestsView() {
           // Check if this is an ORDER_PLACED message
           const isOrderPlaced = newMsg.message?.includes('[ORDER_PLACED]');
           if (isOrderPlaced) {
+            // Show notification for new order
+            toast({
+              title: 'New Order Received!',
+              description: 'A client has placed an order.',
+            });
+            // Play sound
+            playMessageSound();
+            // Increment unread orders count
+            incrementAgencyUnreadOrdersCount();
             // Refetch to update orders
             fetchRequests();
           }
@@ -437,6 +457,33 @@ export function AgencyRequestsView() {
     }
     clearUnreadMessageCount(request.id);
     openGlobalChat(request as unknown as GlobalChatRequest, 'agency-request');
+  };
+
+  const handleOrderCardClick = async (order: any, request: ServiceRequest | undefined) => {
+    // Mark order as read if it's new
+    if (newOrderIds.has(order.id)) {
+      // Update database
+      await supabase
+        .from('orders')
+        .update({ read: true })
+        .eq('id', order.id);
+      
+      // Update local state
+      setNewOrderIds(prev => {
+        const updated = new Set(prev);
+        updated.delete(order.id);
+        return updated;
+      });
+      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, read: true } : o));
+      // Recalculate unread count
+      const newUnreadCount = Math.max(0, agencyUnreadOrdersCount - 1);
+      setAgencyUnreadOrdersCount(newUnreadCount);
+    }
+    
+    // Open the chat for the related request
+    if (request) {
+      handleCardClick(request);
+    }
   };
 
   // Filter and sort requests - separate active from cancelled
@@ -551,9 +598,14 @@ export function AgencyRequestsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="orders" className="gap-2">
+          <TabsTrigger value="orders" className="gap-2 relative">
             <ShoppingBag className="h-4 w-4" />
             Orders ({orders.length})
+            {agencyUnreadOrdersCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-green-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {agencyUnreadOrdersCount}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -750,28 +802,41 @@ export function AgencyRequestsView() {
               ) : (
                 activeOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
+                  const isNew = newOrderIds.has(order.id);
                   return (
                     <Card 
                       key={order.id}
-                      className="border-border/50 hover:border-border transition-colors cursor-pointer"
-                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                      className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
+                        isNew ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
+                      }`}
+                      onClick={() => handleOrderCardClick(order, relatedRequest)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            {order.media_site?.favicon ? (
-                              <img 
-                                src={order.media_site.favicon} 
-                                alt="" 
-                                className="h-10 w-10 rounded object-cover"
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
-                              </div>
-                            )}
+                            <div className="relative">
+                              {order.media_site?.favicon ? (
+                                <img 
+                                  src={order.media_site.favicon} 
+                                  alt="" 
+                                  className="h-10 w-10 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                  <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                              )}
+                              {isNew && (
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-card" />
+                              )}
+                            </div>
                             <div>
-                              <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                                {isNew && (
+                                  <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
+                                )}
+                              </div>
                               <p className="text-sm text-muted-foreground">
                                 ${(order.amount_cents / 100).toFixed(0)}
                               </p>
