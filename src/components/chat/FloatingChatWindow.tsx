@@ -3228,7 +3228,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <AlertDialogAction 
               onClick={handleRejectCancellation}
               disabled={rejectingCancellation}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-foreground text-background hover:bg-background hover:text-foreground border border-foreground transition-colors duration-200"
             >
               {rejectingCancellation ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Reject Cancellation
