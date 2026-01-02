@@ -2215,20 +2215,20 @@ export function ChatListPanel() {
                               <AlertTriangle className="h-5 w-5 text-destructive" />
                             </div>
                           )}
-                          {!dispute.read && (
+                          {!(dispute as any).admin_read && (
                             <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-destructive rounded-full border-2 border-card animate-pulse" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className={`font-medium text-sm truncate ${!dispute.read ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
+                            <span className={`font-medium text-sm truncate ${!(dispute as any).admin_read ? 'text-foreground font-semibold' : 'text-foreground/80'}`}>
                               {dispute.service_request?.media_site?.name || dispute.service_request?.title || 'Unknown'}
                             </span>
                             <span className="text-xs text-muted-foreground shrink-0">
                               {formatTime(dispute.created_at)}
                             </span>
                           </div>
-                          {!dispute.read && (
+                          {!(dispute as any).admin_read && (
                             <p className="text-xs text-destructive font-medium mt-0.5">New Dispute</p>
                           )}
                           <p className="text-xs truncate mt-0.5 text-muted-foreground">
