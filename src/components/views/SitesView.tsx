@@ -1005,11 +1005,10 @@ export function SitesView() {
 
         <CardContent className="!p-0">
           <div className="flex items-stretch min-h-[48px]">
-            <div className="flex items-center min-w-0 flex-1">
-              <div 
-                className="relative group/logo flex w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg self-stretch"
-                onClick={(e) => e.stopPropagation()}
-              >
+            <div 
+              className="relative group/logo flex w-12 flex-shrink-0 items-center justify-center overflow-hidden self-stretch"
+              onClick={(e) => e.stopPropagation()}
+            >
                 <img 
                   src={site.favicon || getFaviconUrl(site.url)} 
                   alt={`${site.name} favicon`} 
@@ -1032,9 +1031,8 @@ export function SitesView() {
                   </button>
                 )}
               </div>
-              <div className="min-w-0 flex-1 ml-3">
-                <h3 className="text-sm truncate">{site.name}</h3>
-              </div>
+            <div className="min-w-0 flex-1 ml-3">
+              <h3 className="text-sm truncate">{site.name}</h3>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
               <Badge variant="secondary">
