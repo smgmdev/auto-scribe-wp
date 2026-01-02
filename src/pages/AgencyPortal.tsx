@@ -74,72 +74,79 @@ export default function AgencyPortal() {
     }
   }, []);
 
+  // Polling interval for admin action notifications
+  useEffect(() => {
+    if (!agency) return;
+    
+    // Store last known message timestamps for each request to detect new admin messages
+    const lastCheckedRef: { current: Record<string, string> } = { current: {} };
+    
+    const checkForAdminActions = async () => {
+      try {
+        // Get all service requests for this agency
+        const { data: requests } = await supabase
+          .from('service_requests')
+          .select('id')
+          .eq('agency_payout_id', agency.id);
+        
+        if (!requests || requests.length === 0) return;
+        
+        // Check each request for new admin messages
+        for (const request of requests) {
+          const lastChecked = lastCheckedRef.current[request.id] || new Date(0).toISOString();
+          
+          const { data: newMessages } = await supabase
+            .from('service_messages')
+            .select('*')
+            .eq('request_id', request.id)
+            .eq('sender_type', 'admin')
+            .gt('created_at', lastChecked)
+            .order('created_at', { ascending: true });
+          
+          if (newMessages && newMessages.length > 0) {
+            // Update last checked time
+            lastCheckedRef.current[request.id] = newMessages[newMessages.length - 1].created_at;
+            
+            // Process each new admin message
+            for (const msg of newMessages) {
+              if (msg.message.includes('[ADMIN_JOINED]')) {
+                console.log('[AgencyPortal] Admin joined detected via polling');
+                toast({
+                  title: "Staff Joined Chat",
+                  description: "Arcana Mace Staff has entered the chat.",
+                });
+              } else if (msg.message.includes('[ADMIN_LEFT]')) {
+                console.log('[AgencyPortal] Admin left detected via polling');
+                toast({
+                  title: "Staff Left Chat",
+                  description: "Arcana Mace Staff has left the chat.",
+                });
+              }
+            }
+            
+            // Refresh requests after detecting admin actions
+            fetchRequests();
+          }
+        }
+      } catch (error) {
+        console.error('[AgencyPortal] Error checking for admin actions:', error);
+      }
+    };
+    
+    // Initial check
+    checkForAdminActions();
+    
+    // Poll every 3 seconds for new admin messages
+    const pollInterval = setInterval(checkForAdminActions, 3000);
+    
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [agency?.id]);
+
   useEffect(() => {
     if (agency) {
       fetchRequests();
-      
-      // Subscribe to real-time updates on service_messages for admin join/leave notifications
-      // This is more reliable than broadcast channels since it uses postgres_changes
-      console.log('[AgencyPortal] Setting up service_messages listener for agency:', agency.id);
-      
-      const messagesChannel = supabase.channel(`agency-messages-${agency.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'service_messages'
-          },
-          async (payload) => {
-            console.log('[AgencyPortal] New message received:', payload);
-            const newMessage = payload.new as ServiceMessage;
-            
-            // Check if this message is for one of our requests
-            const { data: request } = await supabase
-              .from('service_requests')
-              .select('id, agency_payout_id')
-              .eq('id', newMessage.request_id)
-              .eq('agency_payout_id', agency.id)
-              .single();
-            
-            if (!request) {
-              console.log('[AgencyPortal] Message not for this agency');
-              return;
-            }
-            
-            // Check for admin join/leave messages
-            if (newMessage.message.includes('[ADMIN_JOINED]')) {
-              console.log('[AgencyPortal] Admin joined detected');
-              toast({
-                title: "Staff Joined Chat",
-                description: "Arcana Mace Staff has entered the chat.",
-              });
-              fetchRequests();
-            } else if (newMessage.message.includes('[ADMIN_LEFT]')) {
-              console.log('[AgencyPortal] Admin left detected');
-              toast({
-                title: "Staff Left Chat",
-                description: "Arcana Mace Staff has left the chat.",
-              });
-              fetchRequests();
-            } else if (newMessage.sender_type === 'admin') {
-              // Regular admin message
-              toast({
-                title: "New Staff Message",
-                description: "Staff sent a new message.",
-              });
-              fetchRequests();
-            }
-          }
-        )
-        .subscribe((status) => {
-          console.log('[AgencyPortal] Messages channel subscription status:', status);
-        });
-      
-      return () => {
-        console.log('[AgencyPortal] Cleaning up messages channel for agency:', agency.id);
-        supabase.removeChannel(messagesChannel);
-      };
     }
   }, [agency?.id]);
 
