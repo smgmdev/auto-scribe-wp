@@ -3945,7 +3945,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
+              {isResendMode ? 'Resend Offer' : 'Send Offer'}
             </DialogTitle>
           </DialogHeader>
           
@@ -4119,7 +4119,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   } catch (error: any) {
                     toast({
                       variant: 'destructive',
-                      title: 'Failed to send order request',
+                      title: 'Failed to send offer',
                       description: error.message,
                     });
                   } finally {
@@ -4134,7 +4134,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     Sending...
                   </>
                 ) : (
-                  isResendMode ? 'Resend Request' : 'Send Request'
+                  isResendMode ? 'Resend Offer' : 'Send Offer'
                 )}
               </Button>
             </div>
