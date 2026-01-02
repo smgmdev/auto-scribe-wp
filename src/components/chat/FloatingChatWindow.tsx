@@ -2311,7 +2311,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1 h-7 text-xs bg-green-600 text-white border-green-600 hover:bg-green-700 hover:text-white"
+                  className="flex-1 h-7 text-xs bg-foreground text-background border-foreground hover:bg-background hover:text-foreground transition-colors duration-200"
                   onClick={() => handleAcceptCancellation(msg.id)}
                   disabled={acceptingCancellation || rejectingCancellation}
                 >
@@ -2321,7 +2321,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1 h-7 text-xs bg-red-600 text-white border-red-600 hover:bg-red-700 hover:text-white"
+                  className="flex-1 h-7 text-xs bg-foreground text-background border-foreground hover:bg-background hover:text-foreground transition-colors duration-200"
                   onClick={() => {
                     setPendingRejectMessageId(msg.id);
                     setShowRejectReasonDialog(true);
