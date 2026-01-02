@@ -1004,16 +1004,16 @@ export function SitesView() {
       >
 
         <CardContent className="!p-0">
-          <div className="flex items-stretch min-h-[48px]">
+          <div className="flex items-stretch">
             <div className="flex items-center min-w-0 flex-1">
               <div 
-                className="relative group/logo flex w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg self-stretch"
+                className="relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
                   src={site.favicon || getFaviconUrl(site.url)} 
                   alt={`${site.name} favicon`} 
-                  className="h-10 w-10 object-contain" 
+                  className="h-8 w-8 object-contain"
                   onError={e => {
                     e.currentTarget.style.display = 'none';
                     (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
