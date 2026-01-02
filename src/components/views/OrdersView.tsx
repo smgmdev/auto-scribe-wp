@@ -78,7 +78,8 @@ export function OrdersView() {
   const { 
     userUnreadOrdersCount, setUserUnreadOrdersCount, decrementUserUnreadOrdersCount,
     userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadDisputesCount,
-    userUnreadHistoryCount, setUserUnreadHistoryCount, decrementUserUnreadHistoryCount
+    userUnreadHistoryCount, setUserUnreadHistoryCount, decrementUserUnreadHistoryCount,
+    userUnreadCompletedCount, setUserUnreadCompletedCount, incrementUserUnreadCompletedCount, decrementUserUnreadCompletedCount
   } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
@@ -97,7 +98,7 @@ export function OrdersView() {
   const { toast } = useToast();
 
   // Mark all orders in the current tab as read when switching tabs
-  // Only applies to tabs with notifications: active, disputes, history (cancelled)
+  // Only applies to tabs with notifications: active, disputes, completed, history (cancelled)
   // Skip on initial load to preserve notification badges until user actually views content
   useEffect(() => {
     const markTabOrdersAsRead = async () => {
@@ -114,11 +115,13 @@ export function OrdersView() {
       } else if (activeTab === 'disputes') {
         unreadTabOrderIds = orders.filter(o => !o.read && disputeOrderIds.has(o.id)).map(o => o.id);
         if (unreadTabOrderIds.length > 0) setUserUnreadDisputesCount(0);
+      } else if (activeTab === 'completed') {
+        unreadTabOrderIds = orders.filter(o => !o.read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id)).map(o => o.id);
+        if (unreadTabOrderIds.length > 0) setUserUnreadCompletedCount(0);
       } else if (activeTab === 'history') {
         unreadTabOrderIds = orders.filter(o => !o.read && o.status === 'cancelled').map(o => o.id);
         if (unreadTabOrderIds.length > 0) setUserUnreadHistoryCount(0);
       }
-      // Completed tab doesn't have notifications, so no need to mark as read
       
       if (unreadTabOrderIds.length === 0) return;
       
@@ -138,7 +141,7 @@ export function OrdersView() {
     };
     
     markTabOrdersAsRead();
-  }, [activeTab, initialLoadComplete, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadHistoryCount]);
+  }, [activeTab, initialLoadComplete, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
@@ -159,12 +162,44 @@ export function OrdersView() {
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
-            table: 'orders'
+            table: 'orders',
+            filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            console.log('[OrdersView] Order change:', payload);
+            console.log('[OrdersView] Order update:', payload);
+            const updatedOrder = payload.new as { id: string; delivery_status: string; read: boolean };
+            const oldOrder = payload.old as { id: string; delivery_status: string };
+            
+            // Check if order was just marked as delivered
+            if (oldOrder.delivery_status !== 'delivered' && updatedOrder.delivery_status === 'delivered') {
+              // Find the order to get the media site name
+              const existingOrder = orders.find(o => o.id === updatedOrder.id);
+              const siteName = existingOrder?.media_sites?.name || 'Your order';
+              
+              toast({
+                title: "Order Delivered!",
+                description: `${siteName} has been marked as delivered. Please review and accept the delivery.`,
+              });
+              
+              // Increment the completed count for the notification badge
+              incrementUserUnreadCompletedCount();
+            }
+            
+            fetchOrders();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'orders',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('[OrdersView] Order insert:', payload);
             fetchOrders();
           }
         )
@@ -620,9 +655,14 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2">
+              <TabsTrigger value="completed" className="gap-2 relative">
                 <CheckCircle2 className="h-4 w-4" />
                 Completed ({completedOrders.length})
+                {userUnreadCompletedCount > 0 && !isAdmin && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {userUnreadCompletedCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-2 relative">
                 <X className="h-4 w-4" />

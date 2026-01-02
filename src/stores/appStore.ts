@@ -162,8 +162,9 @@ interface AppState {
   // User unread completed orders count (for Completed tab in My Orders)
   userUnreadCompletedCount: number;
   setUserUnreadCompletedCount: (count: number) => void;
+  incrementUserUnreadCompletedCount: () => void;
   decrementUserUnreadCompletedCount: () => void;
-  
+
   // User unread history orders count (for Order History tab in My Orders)
   userUnreadHistoryCount: number;
   setUserUnreadHistoryCount: (count: number) => void;
@@ -358,10 +359,13 @@ export const useAppStore = create<AppState>()((set) => ({
   // User unread completed orders count
   userUnreadCompletedCount: 0,
   setUserUnreadCompletedCount: (count) => set({ userUnreadCompletedCount: count }),
+  incrementUserUnreadCompletedCount: () => set((state) => ({ 
+    userUnreadCompletedCount: state.userUnreadCompletedCount + 1 
+  })),
   decrementUserUnreadCompletedCount: () => set((state) => ({ 
     userUnreadCompletedCount: Math.max(0, state.userUnreadCompletedCount - 1) 
   })),
-  
+
   // User unread history orders count
   userUnreadHistoryCount: 0,
   setUserUnreadHistoryCount: (count) => set({ userUnreadHistoryCount: count }),
