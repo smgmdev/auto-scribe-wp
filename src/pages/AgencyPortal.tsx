@@ -407,30 +407,59 @@ export default function AgencyPortal() {
               {/* Messages */}
               <ScrollArea className="h-[250px] border rounded-lg p-4">
                 <div className="space-y-4">
-                  {(selectedRequest.messages || []).map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
-                    >
+                  {(selectedRequest.messages || []).map((msg) => {
+                    // Parse admin system messages
+                    const isAdminJoined = msg.message.includes('[ADMIN_JOINED]');
+                    const isAdminLeft = msg.message.includes('[ADMIN_LEFT]');
+                    const isSystemMessage = isAdminJoined || isAdminLeft;
+                    
+                    // Clean message content
+                    let displayMessage = msg.message;
+                    if (isAdminJoined) {
+                      displayMessage = msg.message.replace(/\[ADMIN_JOINED\]/g, '').replace(/\[\/ADMIN_JOINED\]/g, '');
+                    } else if (isAdminLeft) {
+                      displayMessage = msg.message.replace(/\[ADMIN_LEFT\]/g, '').replace(/\[\/ADMIN_LEFT\]/g, '');
+                    }
+                    
+                    if (isSystemMessage) {
+                      return (
+                        <div key={msg.id} className="flex justify-center my-2">
+                          <div className={`px-4 py-2 rounded-full text-xs font-medium ${
+                            isAdminJoined 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                              : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                          }`}>
+                            {isAdminJoined ? '👤 ' : '🚪 '}{displayMessage.trim()}
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    return (
                       <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          msg.sender_type === 'agency'
-                            ? 'bg-primary text-primary-foreground'
-                            : msg.sender_type === 'admin'
-                            ? 'bg-amber-100 text-amber-900'
-                            : 'bg-muted'
-                        }`}
+                        key={msg.id}
+                        className={`flex ${msg.sender_type === 'agency' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <p className="text-xs font-medium mb-1 opacity-70">
-                          {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Admin' : 'Client'}
-                        </p>
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        <p className="text-xs opacity-50 mt-1">
-                          {format(new Date(msg.created_at), 'MMM d, h:mm a')}
-                        </p>
+                        <div
+                          className={`max-w-[80%] rounded-lg p-3 ${
+                            msg.sender_type === 'agency'
+                              ? 'bg-primary text-primary-foreground'
+                              : msg.sender_type === 'admin'
+                              ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200'
+                              : 'bg-muted'
+                          }`}
+                        >
+                          <p className="text-xs font-medium mb-1 opacity-70">
+                            {msg.sender_type === 'agency' ? 'You' : msg.sender_type === 'admin' ? 'Staff' : 'Client'}
+                          </p>
+                          <p className="text-sm whitespace-pre-wrap">{displayMessage}</p>
+                          <p className="text-xs opacity-50 mt-1">
+                            {format(new Date(msg.created_at), 'MMM d, h:mm a')}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </ScrollArea>
 
@@ -495,8 +524,23 @@ function RequestCard({ request, onSelect, getStatusBadge }: {
   onSelect: () => void;
   getStatusBadge: (status: string, messages?: ServiceMessage[]) => React.ReactNode;
 }) {
+  // Check for unread admin messages
+  const hasAdminActivity = request.messages?.some(msg => 
+    msg.sender_type === 'admin' && 
+    new Date(msg.created_at) > new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
+  );
+  
+  const lastAdminMessage = request.messages?.filter(m => m.sender_type === 'admin').pop();
+  const isStaffInChat = lastAdminMessage?.message.includes('[ADMIN_JOINED]') && 
+    !request.messages?.some(m => m.sender_type === 'admin' && m.message.includes('[ADMIN_LEFT]') && new Date(m.created_at) > new Date(lastAdminMessage.created_at));
+  
   return (
-    <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={onSelect}>
+    <Card 
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${
+        hasAdminActivity ? 'ring-2 ring-amber-500/50 bg-amber-50/50 dark:bg-amber-900/10' : ''
+      } ${isStaffInChat ? 'border-l-4 border-l-green-500' : ''}`} 
+      onClick={onSelect}
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -504,7 +548,19 @@ function RequestCard({ request, onSelect, getStatusBadge }: {
               <img src={request.media_sites.favicon} alt="" className="w-10 h-10 rounded" />
             )}
             <div>
-              <h3 className="font-medium">{request.title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">{request.title}</h3>
+                {isStaffInChat && (
+                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                    Staff Active
+                  </Badge>
+                )}
+                {hasAdminActivity && !isStaffInChat && (
+                  <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs">
+                    Staff Message
+                  </Badge>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">{request.media_sites?.name}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Client: {request.profiles?.email}
