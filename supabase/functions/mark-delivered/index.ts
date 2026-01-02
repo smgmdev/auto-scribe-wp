@@ -136,21 +136,9 @@ serve(async (req) => {
       logStep("Closed open disputes for order", { disputeIds: closedDisputes.map((d: any) => d.id) });
     }
 
-    // Also update the order status to completed when admin force-delivers
-    const { error: completeError } = await supabaseClient
-      .from("orders")
-      .update({
-        status: "completed",
-        accepted_at: new Date().toISOString(),
-        released_at: new Date().toISOString(),
-      })
-      .eq("id", order_id);
-
-    if (completeError) {
-      logStep("Error completing order", { error: completeError.message });
-    } else {
-      logStep("Order marked as completed");
-    }
+    // NOTE: Order status stays as "paid" until client accepts delivery
+    // The status will be updated to "completed" when client accepts via handleAcceptDeliveryFromChat
+    logStep("Order delivery marked - awaiting client acceptance before completion");
 
     // Send notifications to user and agency
     const mediaSiteName = orderDetails.media_sites?.name || 'Unknown';
