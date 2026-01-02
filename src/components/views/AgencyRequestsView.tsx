@@ -193,6 +193,7 @@ export function AgencyRequestsView() {
             created_at,
             delivered_at,
             read,
+            agency_read,
             media_site:media_sites(id, name, favicon)
           `)
           .in('id', data.filter(r => {
@@ -211,6 +212,12 @@ export function AgencyRequestsView() {
           );
           setAgencyUnreadOrdersCount(unreadActiveOrders.length);
           setNewOrderIds(new Set(unreadActiveOrders.map(o => o.id)));
+
+          // Count unread completed orders (delivered but agency hasn't seen)
+          const unreadCompletedOrders = ordersData.filter(o => 
+            !(o as any).agency_read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted')
+          );
+          setAgencyUnreadCompletedCount(unreadCompletedOrders.length);
 
           // Fetch open disputes for these orders
           const orderIds = ordersData.map(o => o.id);
@@ -724,9 +731,9 @@ export function AgencyRequestsView() {
           <TabsTrigger value="orders" className="gap-2 relative">
             <ShoppingBag className="h-4 w-4" />
             Orders ({orders.length})
-            {(agencyUnreadOrdersCount + agencyUnreadDisputesCount) > 0 && (
+            {(agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {agencyUnreadOrdersCount + agencyUnreadDisputesCount}
+                {agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount}
               </span>
             )}
           </TabsTrigger>
@@ -968,8 +975,25 @@ export function AgencyRequestsView() {
         </TabsContent>
 
         <TabsContent value="orders" className="mt-6">
-          <Tabs defaultValue="active" className="w-full" onValueChange={(value) => {
+          <Tabs defaultValue="active" className="w-full" onValueChange={async (value) => {
             if (value === 'completed' && agencyUnreadCompletedCount > 0) {
+              // Mark all unread completed orders as read in database
+              const unreadCompletedOrderIds = orders
+                .filter(o => !(o as any).agency_read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted'))
+                .map(o => o.id);
+              
+              if (unreadCompletedOrderIds.length > 0) {
+                await supabase
+                  .from('orders')
+                  .update({ agency_read: true })
+                  .in('id', unreadCompletedOrderIds);
+                
+                // Update local orders state
+                setOrders(prev => prev.map(o => 
+                  unreadCompletedOrderIds.includes(o.id) ? { ...o, agency_read: true } : o
+                ));
+              }
+              
               setAgencyUnreadCompletedCount(0);
             }
           }}>
