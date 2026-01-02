@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow, isPast } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
 interface ServiceRequest {
@@ -49,10 +49,17 @@ interface ServiceMessage {
   created_at: string;
 }
 
+interface Dispute {
+  id: string;
+  service_request_id: string;
+  status: string;
+}
+
 export function AdminEngagementsView() {
   const { openGlobalChat, decrementAdminUnreadEngagementsCount } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
 
@@ -84,6 +91,14 @@ export function AdminEngagementsView() {
       }));
       
       setRequests(enrichedData as any);
+
+      // Fetch disputes
+      const { data: disputeData } = await supabase
+        .from('disputes')
+        .select('id, service_request_id, status')
+        .eq('status', 'open');
+      
+      setDisputes(disputeData || []);
 
       if (data?.length) {
         const { data: msgs } = await supabase
@@ -157,16 +172,55 @@ export function AdminEngagementsView() {
     openGlobalChat(chatRequest, 'agency-request');
   };
 
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, React.ReactNode> = {
-      pending_review: <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Open</Badge>,
-      changes_requested: <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes</Badge>,
-      accepted: <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>,
-      rejected: <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>,
-      paid: <Badge className="bg-blue-600">Paid</Badge>,
-      cancelled: <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>,
-    };
-    return badges[status] || <Badge>{status}</Badge>;
+  const getEngagementBadge = (request: ServiceRequest) => {
+    const hasOrder = !!request.orders && request.order_id;
+    const isInDispute = disputes.some(d => d.service_request_id === request.id);
+    const deliveryDeadline = request.orders?.delivery_deadline;
+    const isOverdue = deliveryDeadline && isPast(new Date(deliveryDeadline)) && 
+                      request.orders?.delivery_status !== 'delivered';
+
+    // Priority: In Dispute > Delivery Overdue > Active Order > Open
+    if (isInDispute) {
+      return (
+        <Badge variant="destructive" className="bg-red-600">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          In Dispute
+        </Badge>
+      );
+    }
+
+    if (hasOrder && isOverdue) {
+      return (
+        <Badge variant="destructive" className="bg-orange-600">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          Delivery Overdue
+        </Badge>
+      );
+    }
+
+    if (hasOrder) {
+      const deliveryText = deliveryDeadline 
+        ? `Est. ${formatDistanceToNow(new Date(deliveryDeadline), { addSuffix: true })}`
+        : '';
+      return (
+        <div className="flex flex-col items-end gap-1">
+          <Badge className="bg-blue-600">
+            <ShoppingCart className="h-3 w-3 mr-1" />
+            Active Order
+          </Badge>
+          {deliveryText && (
+            <span className="text-xs text-muted-foreground">{deliveryText}</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <Badge variant="secondary">
+        <Clock className="h-3 w-3 mr-1" />
+        Open
+      </Badge>
+    );
   };
 
   const activeRequests = requests.filter(r => r.status !== 'cancelled');
@@ -217,7 +271,7 @@ export function AdminEngagementsView() {
                       </div>
                     </div>
                     <div className="text-right">
-                      {getStatusBadge(r.status)}
+                      {getEngagementBadge(r)}
                       <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
                       <div className="flex items-center justify-end gap-1 mt-1 text-xs text-muted-foreground">
                         <MessageSquare className="h-3 w-3" />
@@ -253,7 +307,7 @@ export function AdminEngagementsView() {
                       </div>
                     </div>
                     <div className="text-right">
-                      {getStatusBadge(r.status)}
+                      <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>
                       <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
                     </div>
                   </CardContent>
