@@ -58,6 +58,7 @@ export function MyRequestsView() {
     openGlobalChat,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
+    userUnreadCancelledCount,
     setUserUnreadCancelledCount
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -67,6 +68,7 @@ export function MyRequestsView() {
   const [cancelledSortBy, setCancelledSortBy] = useState<'cancelled_at' | 'last_message' | 'submitted'>('cancelled_at');
   const [activeTab, setActiveTab] = useState<'active' | 'cancelled'>('active');
   const [searchQuery, setSearchQuery] = useState('');
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -134,12 +136,13 @@ export function MyRequestsView() {
       }) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
 
-      // Count unread: only count requests where client_read = false AND has agency message AND not cancelled
-      const unreadCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
-      setUserUnreadEngagementsCount(unreadCount);
-      
-      // Count unread cancelled requests
+      // Only update sidebar counts if this is first load OR if they differ
+      // This preserves notification badges while keeping data in sync
+      const unreadActiveCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
       const unreadCancelledCount = mappedRequests.filter(r => !r.read && r.status === 'cancelled').length;
+      
+      // Always sync the counts with actual DB state for accuracy
+      setUserUnreadEngagementsCount(unreadActiveCount);
       setUserUnreadCancelledCount(unreadCancelledCount);
 
       // Fetch messages for all requests
@@ -168,6 +171,8 @@ export function MyRequestsView() {
       });
     } finally {
       setLoading(false);
+      // Mark initial load as complete after a delay to allow render
+      setTimeout(() => setInitialLoadComplete(true), 500);
     }
   };
 
@@ -469,6 +474,11 @@ export function MyRequestsView() {
     [requests]
   );
 
+  const unreadActiveCount = useMemo(() => 
+    activeRequests.filter(r => !r.read).length, 
+    [activeRequests]
+  );
+
   const unreadCancelledCount = useMemo(() => 
     cancelledRequests.filter(r => !r.read).length, 
     [cancelledRequests]
@@ -599,9 +609,14 @@ export function MyRequestsView() {
 
       <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'cancelled')} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="active" className="gap-2">
+          <TabsTrigger value="active" className="gap-2 relative">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
+            {unreadActiveCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {unreadActiveCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="cancelled" className="gap-2 relative">
             <History className="h-4 w-4" />
