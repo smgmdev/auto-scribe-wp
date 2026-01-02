@@ -123,10 +123,50 @@ serve(async (req) => {
       logStep("Order marked as completed");
     }
 
-    // Send notifications to user and agency if there was a dispute
+    // Send notifications to user and agency
     const mediaSiteName = orderDetails.media_sites?.name || 'Unknown';
     const orderOwnerId = orderDetails.user_id;
 
+    // Always send order delivered notification to user
+    const orderDeliveredPayload = {
+      action: 'order-delivered',
+      message: `Your order for ${mediaSiteName} has been marked as delivered. Please review and accept the delivery.`,
+      orderId: order_id,
+      mediaSiteName,
+      requestId: serviceRequest?.id
+    };
+
+    // Notify user about delivery
+    await supabaseClient
+      .channel(`notify-${orderOwnerId}-admin-action`)
+      .send({
+        type: 'broadcast',
+        event: 'admin-action',
+        payload: orderDeliveredPayload
+      });
+    logStep("Order delivered notification sent to user", { userId: orderOwnerId });
+
+    // Notify agency about delivery completion
+    if (serviceRequest?.agency_payout_id) {
+      const agencyDeliveredPayload = {
+        action: 'order-delivered',
+        message: `Order for ${mediaSiteName} has been marked as delivered by admin.`,
+        orderId: order_id,
+        mediaSiteName,
+        requestId: serviceRequest.id
+      };
+
+      await supabaseClient
+        .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
+        .send({
+          type: 'broadcast',
+          event: 'admin-action',
+          payload: agencyDeliveredPayload
+        });
+      logStep("Order delivered notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
+    }
+
+    // Additional notification if disputes were closed
     if (closedDisputes && closedDisputes.length > 0 && serviceRequest) {
       const disputeResolvedPayload = {
         action: 'dispute-resolved',
@@ -135,7 +175,7 @@ serve(async (req) => {
         requestId: serviceRequest.id
       };
 
-      // Notify user
+      // Notify user about dispute resolution
       await supabaseClient
         .channel(`notify-${orderOwnerId}-admin-action`)
         .send({
@@ -145,7 +185,7 @@ serve(async (req) => {
         });
       logStep("Dispute resolved notification sent to user", { userId: orderOwnerId });
 
-      // Notify agency
+      // Notify agency about dispute resolution
       if (serviceRequest.agency_payout_id) {
         await supabaseClient
           .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
