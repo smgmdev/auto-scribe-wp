@@ -773,8 +773,8 @@ export function Sidebar({
                         isExpanded && "rotate-180"
                       )} />
                     </Button>
-                    {totalDropdownCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {totalDropdownCount > 0 && !isExpanded && (
+                      <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                         {totalDropdownCount}
                       </span>
                     )}
