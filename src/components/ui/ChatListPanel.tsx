@@ -308,12 +308,14 @@ export function ChatListPanel() {
         const lastMsg = lastMessages[item.id];
         const lastReadAt = (item as any).agency_last_read_at;
         
-        // Count messages from client sent after last_read_at
+        // Count messages from client OR admin sent after last_read_at
+        // (agency should see notifications for both client and admin messages)
         const itemMessages = allMessages.filter(m => m.request_id === item.id);
         let unreadCount = 0;
         
         for (const msg of itemMessages) {
-          if (msg.sender_type === 'client') {
+          // Count messages from client OR admin as unread for agency
+          if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
             if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
               unreadCount++;
             }
