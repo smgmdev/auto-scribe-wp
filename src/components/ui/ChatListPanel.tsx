@@ -1557,6 +1557,21 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-joined' }, (payload) => {
         console.log('[ChatListPanel] Admin joined chat:', payload);
+        const { requestId, message } = payload.payload || {};
+        
+        // Update last message in myEngagements
+        if (requestId) {
+          setMyEngagements(prev => {
+            const updated = prev.map(e => 
+              e.id === requestId 
+                ? { ...e, lastMessage: message || 'Arcana Mace Staff has entered the chat.', lastMessageTime: new Date().toISOString() }
+                : e
+            );
+            myEngagementsRef.current = updated;
+            return updated;
+          });
+        }
+        
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
           toast({
@@ -1567,6 +1582,21 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-left' }, (payload) => {
         console.log('[ChatListPanel] Admin left chat:', payload);
+        const { requestId, message } = payload.payload || {};
+        
+        // Update last message in myEngagements
+        if (requestId) {
+          setMyEngagements(prev => {
+            const updated = prev.map(e => 
+              e.id === requestId 
+                ? { ...e, lastMessage: message || 'Arcana Mace Staff has left the chat.', lastMessageTime: new Date().toISOString() }
+                : e
+            );
+            myEngagementsRef.current = updated;
+            return updated;
+          });
+        }
+        
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
           toast({
@@ -1634,6 +1664,21 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-joined' }, (payload) => {
         console.log('[ChatListPanel] Admin joined chat (agency):', payload);
+        const { requestId, message } = payload.payload || {};
+        
+        // Update last message in serviceRequests for agency
+        if (requestId) {
+          setServiceRequests(prev => {
+            const updated = prev.map(r => 
+              r.id === requestId 
+                ? { ...r, lastMessage: message || 'Arcana Mace Staff has entered the chat.', lastMessageTime: new Date().toISOString() }
+                : r
+            );
+            serviceRequestsRef.current = updated;
+            return updated;
+          });
+        }
+        
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
           toast({
@@ -1644,6 +1689,21 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-left' }, (payload) => {
         console.log('[ChatListPanel] Admin left chat (agency):', payload);
+        const { requestId, message } = payload.payload || {};
+        
+        // Update last message in serviceRequests for agency
+        if (requestId) {
+          setServiceRequests(prev => {
+            const updated = prev.map(r => 
+              r.id === requestId 
+                ? { ...r, lastMessage: message || 'Arcana Mace Staff has left the chat.', lastMessageTime: new Date().toISOString() }
+                : r
+            );
+            serviceRequestsRef.current = updated;
+            return updated;
+          });
+        }
+        
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
           toast({
