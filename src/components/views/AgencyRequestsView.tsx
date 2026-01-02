@@ -1022,21 +1022,23 @@ export function AgencyRequestsView() {
                                 <AlertTriangle className="h-3 w-3 mr-1" />
                                 Overdue
                               </Badge>
-                            ) : order.delivery_status === 'pending' && getTimeRemaining() ? (
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                            ) : getTimeRemaining() ? (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                                 <Clock className="h-3 w-3 mr-1" />
                                 Delivery in {getTimeRemaining()}
                               </Badge>
+                            ) : order.delivery_status === 'in_progress' ? (
+                              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                In Progress
+                              </Badge>
+                            ) : order.delivery_status === 'delivered' ? (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                Delivered
+                              </Badge>
                             ) : (
-                              <Badge className={
-                                order.delivery_status === 'pending' 
-                                  ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' 
-                                  : order.delivery_status === 'in_progress'
-                                  ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                                  : 'bg-green-500/20 text-green-400 border-green-500/30'
-                              }>
-                                {order.delivery_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                                {order.delivery_status.charAt(0).toUpperCase() + order.delivery_status.slice(1).replace('_', ' ')}
+                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Awaiting Delivery
                               </Badge>
                             )}
                             <span className="text-xs text-muted-foreground">
