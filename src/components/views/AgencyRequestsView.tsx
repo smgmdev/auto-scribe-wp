@@ -957,12 +957,32 @@ export function AgencyRequestsView() {
                 activeOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
                   const isNew = newOrderIds.has(order.id);
+                  
+                  // Calculate delivery time remaining or overdue
+                  const deliveryDeadline = order.delivery_deadline;
+                  const isOverdue = deliveryDeadline && new Date(deliveryDeadline) < new Date() && order.delivery_status !== 'delivered';
+                  
+                  const getTimeRemaining = () => {
+                    if (!deliveryDeadline) return null;
+                    const now = new Date();
+                    const deadline = new Date(deliveryDeadline);
+                    const diffMs = deadline.getTime() - now.getTime();
+                    if (diffMs <= 0) return null;
+                    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    if (hours > 24) {
+                      const days = Math.floor(hours / 24);
+                      return `${days}d ${hours % 24}h`;
+                    }
+                    return `${hours}h ${minutes}m`;
+                  };
+                  
                   return (
                     <Card 
                       key={order.id}
                       className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
                         isNew ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
-                      }`}
+                      } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
                       onClick={() => handleOrderCardClick(order, relatedRequest)}
                     >
                       <CardContent className="p-4">
@@ -997,16 +1017,28 @@ export function AgencyRequestsView() {
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            <Badge className={
-                              order.delivery_status === 'pending' 
-                                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' 
-                                : order.delivery_status === 'in_progress'
-                                ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                                : 'bg-green-500/20 text-green-400 border-green-500/30'
-                            }>
-                              {order.delivery_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                              {order.delivery_status.charAt(0).toUpperCase() + order.delivery_status.slice(1).replace('_', ' ')}
-                            </Badge>
+                            {isOverdue ? (
+                              <Badge variant="destructive" className="bg-red-600 text-white">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Overdue
+                              </Badge>
+                            ) : order.delivery_status === 'pending' && getTimeRemaining() ? (
+                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Delivery in {getTimeRemaining()}
+                              </Badge>
+                            ) : (
+                              <Badge className={
+                                order.delivery_status === 'pending' 
+                                  ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' 
+                                  : order.delivery_status === 'in_progress'
+                                  ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                                  : 'bg-green-500/20 text-green-400 border-green-500/30'
+                              }>
+                                {order.delivery_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                {order.delivery_status.charAt(0).toUpperCase() + order.delivery_status.slice(1).replace('_', ' ')}
+                              </Badge>
+                            )}
                             <span className="text-xs text-muted-foreground">
                               {format(new Date(order.created_at), 'MMM d, yyyy')}
                             </span>
