@@ -270,12 +270,12 @@ export function Sidebar({
           .eq('status', 'paid')
           .eq('read', false);
         
-        // Fetch unread disputes count
+        // Fetch unread disputes count for admin (using admin_read field)
         const { count: unreadDisputesCountResult } = await supabase
           .from('disputes')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'open')
-          .eq('read', false);
+          .eq('admin_read', false);
         
         // Fetch unread engagements count (service requests that are unread by admin)
         const { count: unreadEngagementsCountResult } = await supabase
