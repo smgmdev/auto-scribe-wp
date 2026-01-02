@@ -48,6 +48,24 @@ serve(async (req) => {
     const { order_id, delivery_url, delivery_notes } = await req.json();
     logStep("Marking order as delivered", { order_id });
 
+    // Get order details first to get user_id and media site name
+    const { data: orderDetails, error: orderDetailsError } = await supabaseClient
+      .from("orders")
+      .select(`*, media_sites (id, name)`)
+      .eq("id", order_id)
+      .single();
+    
+    if (orderDetailsError || !orderDetails) {
+      throw new Error(`Order not found: ${orderDetailsError?.message}`);
+    }
+
+    // Get the linked service request to get agency_payout_id
+    const { data: serviceRequest } = await supabaseClient
+      .from("service_requests")
+      .select("id, agency_payout_id")
+      .eq("order_id", order_id)
+      .maybeSingle();
+
     // Update order
     const { data: order, error: updateError } = await supabaseClient
       .from("orders")
@@ -69,7 +87,7 @@ serve(async (req) => {
     logStep("Order marked as delivered", { orderId: order.id });
 
     // Close any open disputes for this order and mark as resolved/delivered
-    const { error: disputeError } = await supabaseClient
+    const { data: closedDisputes, error: disputeError } = await supabaseClient
       .from("disputes")
       .update({
         status: "resolved",
@@ -78,13 +96,14 @@ serve(async (req) => {
         admin_notes: "Order was marked as delivered by admin"
       })
       .eq("order_id", order_id)
-      .eq("status", "open");
+      .eq("status", "open")
+      .select('id');
 
     if (disputeError) {
       logStep("Error closing dispute", { error: disputeError.message });
       // Don't fail - order is already updated
-    } else {
-      logStep("Closed open disputes for order");
+    } else if (closedDisputes && closedDisputes.length > 0) {
+      logStep("Closed open disputes for order", { disputeIds: closedDisputes.map((d: any) => d.id) });
     }
 
     // Also update the order status to completed when admin force-delivers
@@ -101,6 +120,41 @@ serve(async (req) => {
       logStep("Error completing order", { error: completeError.message });
     } else {
       logStep("Order marked as completed");
+    }
+
+    // Send notifications to user and agency if there was a dispute
+    const mediaSiteName = orderDetails.media_sites?.name || 'Unknown';
+    const orderOwnerId = orderDetails.user_id;
+
+    if (closedDisputes && closedDisputes.length > 0 && serviceRequest) {
+      const disputeResolvedPayload = {
+        action: 'dispute-resolved',
+        message: `Dispute resolved - Order for ${mediaSiteName} has been marked as complete by Arcana Mace Staff.`,
+        orderId: order_id,
+        requestId: serviceRequest.id
+      };
+
+      // Notify user
+      await supabaseClient
+        .channel(`notify-${orderOwnerId}-admin-action`)
+        .send({
+          type: 'broadcast',
+          event: 'admin-action',
+          payload: disputeResolvedPayload
+        });
+      logStep("Dispute resolved notification sent to user", { userId: orderOwnerId });
+
+      // Notify agency
+      if (serviceRequest.agency_payout_id) {
+        await supabaseClient
+          .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
+          .send({
+            type: 'broadcast',
+            event: 'admin-action',
+            payload: disputeResolvedPayload
+          });
+        logStep("Dispute resolved notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
+      }
     }
 
     return new Response(JSON.stringify({ 

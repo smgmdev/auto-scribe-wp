@@ -181,7 +181,7 @@ serve(async (req) => {
     // Get the linked service request to send a cancellation message
     const { data: serviceRequest } = await supabaseAdmin
       .from("service_requests")
-      .select("id")
+      .select("id, agency_payout_id")
       .eq("order_id", order_id)
       .maybeSingle();
 
@@ -260,6 +260,70 @@ serve(async (req) => {
         .eq("id", serviceRequest.id);
 
       logStep("Cancellation message sent to chat and unread flags updated");
+      
+      // If admin cancelled, broadcast notifications to user and agency
+      if (isAdmin) {
+        const notificationPayload = {
+          action: 'order-cancelled',
+          message: `Order for ${mediaSiteName} has been cancelled by Arcana Mace Staff.`,
+          reason: reason || null,
+          orderId: order_id,
+          requestId: serviceRequest.id,
+          creditsRefunded: creditRefund
+        };
+        
+        // Notify user
+        await supabaseAdmin
+          .channel(`notify-${orderOwnerId}-admin-action`)
+          .send({
+            type: 'broadcast',
+            event: 'admin-action',
+            payload: notificationPayload
+          });
+        logStep("Broadcast notification sent to user", { userId: orderOwnerId });
+        
+        // Notify agency if there's an agency_payout_id
+        if (serviceRequest.agency_payout_id) {
+          await supabaseAdmin
+            .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
+            .send({
+              type: 'broadcast',
+              event: 'admin-action',
+              payload: notificationPayload
+            });
+          logStep("Broadcast notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
+        }
+        
+        // If there was a dispute, also send dispute-resolved notification
+        if (closedDisputes && closedDisputes.length > 0) {
+          const disputePayload = {
+            action: 'dispute-resolved',
+            message: `Dispute resolved - Order cancelled by Arcana Mace Staff.${reason ? ` Reason: ${reason}` : ''}`,
+            reason: reason || null,
+            orderId: order_id,
+            requestId: serviceRequest.id
+          };
+          
+          await supabaseAdmin
+            .channel(`notify-${orderOwnerId}-admin-action`)
+            .send({
+              type: 'broadcast',
+              event: 'admin-action',
+              payload: disputePayload
+            });
+          
+          if (serviceRequest.agency_payout_id) {
+            await supabaseAdmin
+              .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
+              .send({
+                type: 'broadcast',
+                event: 'admin-action',
+                payload: disputePayload
+              });
+          }
+          logStep("Dispute resolved notifications sent");
+        }
+      }
     }
 
     logStep("Order cancelled successfully", { order_id, creditRefund });
