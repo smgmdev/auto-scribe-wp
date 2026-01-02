@@ -77,6 +77,54 @@ export default function AgencyPortal() {
   useEffect(() => {
     if (agency) {
       fetchRequests();
+      
+      // Subscribe to real-time admin notifications
+      const notifyChannel = supabase.channel(`notify-${agency.id}`);
+      
+      notifyChannel
+        .on('broadcast', { event: 'admin-joined' }, (payload) => {
+          console.log('[AgencyPortal] Admin joined notification:', payload);
+          toast({
+            title: "Staff Joined Chat",
+            description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
+          });
+          // Refresh requests to get latest state
+          fetchRequests();
+        })
+        .on('broadcast', { event: 'admin-left' }, (payload) => {
+          console.log('[AgencyPortal] Admin left notification:', payload);
+          toast({
+            title: "Staff Left Chat",
+            description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
+          });
+          // Refresh requests to get latest state
+          fetchRequests();
+        })
+        .on('broadcast', { event: 'admin-action' }, (payload) => {
+          console.log('[AgencyPortal] Admin action notification:', payload);
+          const action = payload.payload?.action;
+          if (action === 'engagement-cancelled') {
+            toast({
+              title: "Engagement Cancelled",
+              description: payload.payload?.message || "Staff has cancelled the engagement.",
+              variant: "destructive"
+            });
+          } else if (action === 'new-admin-message') {
+            toast({
+              title: "New Staff Message",
+              description: payload.payload?.message || "Staff sent a new message.",
+            });
+          }
+          // Refresh requests to get latest state
+          fetchRequests();
+        })
+        .subscribe((status) => {
+          console.log('[AgencyPortal] Notify channel status:', status);
+        });
+      
+      return () => {
+        supabase.removeChannel(notifyChannel);
+      };
     }
   }, [agency]);
 
