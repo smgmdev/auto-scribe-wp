@@ -568,6 +568,40 @@ export function AdminFloatingChat({
         message: joinMessage
       });
 
+      // Notify client (user_id)
+      const clientNotifyChannel = supabase.channel(`notify-${request.user_id}`);
+      clientNotifyChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await clientNotifyChannel.send({
+            type: 'broadcast',
+            event: 'admin-joined',
+            payload: {
+              requestId: request.id,
+              message: 'Arcana Mace Staff has entered the chat.'
+            }
+          });
+          setTimeout(() => supabase.removeChannel(clientNotifyChannel), 500);
+        }
+      });
+      
+      // Notify agency (agency_payout_id)
+      if (request.agency_payout_id) {
+        const agencyNotifyChannel = supabase.channel(`notify-${request.agency_payout_id}`);
+        agencyNotifyChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await agencyNotifyChannel.send({
+              type: 'broadcast',
+              event: 'admin-joined',
+              payload: {
+                requestId: request.id,
+                message: 'Arcana Mace Staff has entered the chat.'
+              }
+            });
+            setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 500);
+          }
+        });
+      }
+
       setHasJoined(true);
       toast({ title: 'Joined chat', description: 'You can now participate in this engagement.' });
     } catch (error: any) {
@@ -596,6 +630,40 @@ export function AdminFloatingChat({
         .delete()
         .eq('service_request_id', request.id)
         .eq('admin_id', user.id);
+
+      // Notify client (user_id)
+      const clientNotifyChannel = supabase.channel(`notify-${request.user_id}`);
+      clientNotifyChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await clientNotifyChannel.send({
+            type: 'broadcast',
+            event: 'admin-left',
+            payload: {
+              requestId: request.id,
+              message: 'Arcana Mace Staff has left the chat.'
+            }
+          });
+          setTimeout(() => supabase.removeChannel(clientNotifyChannel), 500);
+        }
+      });
+      
+      // Notify agency (agency_payout_id)
+      if (request.agency_payout_id) {
+        const agencyNotifyChannel = supabase.channel(`notify-${request.agency_payout_id}`);
+        agencyNotifyChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await agencyNotifyChannel.send({
+              type: 'broadcast',
+              event: 'admin-left',
+              payload: {
+                requestId: request.id,
+                message: 'Arcana Mace Staff has left the chat.'
+              }
+            });
+            setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 500);
+          }
+        });
+      }
 
       setHasJoined(false);
       toast({ title: 'Left chat', description: 'You have left the conversation.' });
