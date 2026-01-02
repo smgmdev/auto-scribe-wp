@@ -372,8 +372,27 @@ export function MyRequestsView() {
           const requestExists = requestsRef.current.some(r => r.id === newMsg.request_id);
           if (!requestExists) return;
           
-          // Only process agency messages (not our own)
+          // Only process agency/admin messages (not our own)
           if (newMsg.sender_type === 'client') return;
+          
+          // Mark the request as unread when receiving a new agency/admin message
+          // This ensures the Active tab badge updates immediately
+          setRequests(prev => {
+            const targetRequest = prev.find(r => r.id === newMsg.request_id);
+            if (!targetRequest || targetRequest.status === 'cancelled') return prev;
+            
+            // Only mark as unread if not already unread
+            if (targetRequest.read) {
+              const updated = prev.map(r => 
+                r.id === newMsg.request_id ? { ...r, read: false } : r
+              );
+              // Update the store count
+              const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+              setUserUnreadEngagementsCount(newUnreadCount);
+              return updated;
+            }
+            return prev;
+          });
           
           // Add message to local state (avoid duplicates from event sync)
           setMessages(prev => {
