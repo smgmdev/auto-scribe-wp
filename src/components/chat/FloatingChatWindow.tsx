@@ -3354,7 +3354,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <span>• {formatDeliveryDuration(pendingOrder.delivery_duration)}</span>
                     )}
                     {pendingOrder.special_terms && (
-                      <span>• {pendingOrder.special_terms}</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1 cursor-help">
+                              • Special Terms
+                              <Info className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs">
+                            <p>{pendingOrder.special_terms}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </div>
                 </div>
