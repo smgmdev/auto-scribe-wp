@@ -59,6 +59,7 @@ export function AdminOrdersView() {
   const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -285,7 +286,10 @@ export function AdminOrdersView() {
     setCancelling(true);
     try {
       const { data, error } = await supabase.functions.invoke('cancel-order', {
-        body: { order_id: selectedOrder.id }
+        body: { 
+          order_id: selectedOrder.id,
+          reason: cancelReason.trim() || undefined
+        }
       });
 
       if (error) throw error;
@@ -299,6 +303,7 @@ export function AdminOrdersView() {
       setCancelDialogOpen(false);
       setDetailsDialogOpen(false);
       setSelectedOrder(null);
+      setCancelReason('');
       fetchOrders();
       fetchDisputedOrders();
     } catch (error: any) {
@@ -1081,7 +1086,10 @@ export function AdminOrdersView() {
       </Dialog>
 
       {/* Cancel Order Confirmation Dialog */}
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <AlertDialog open={cancelDialogOpen} onOpenChange={(open) => {
+        setCancelDialogOpen(open);
+        if (!open) setCancelReason('');
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Order</AlertDialogTitle>
@@ -1089,6 +1097,19 @@ export function AdminOrdersView() {
               Are you sure you want to cancel this order? This will refund {selectedOrder ? Math.round(selectedOrder.amount_cents / 100) : 0} credits to the user's account.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="py-4">
+            <Label htmlFor="cancel-reason" className="text-sm font-medium">
+              Reason for cancellation (optional)
+            </Label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="Enter the reason for cancelling this order..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="mt-2"
+              rows={3}
+            />
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Order</AlertDialogCancel>
             <AlertDialogAction 

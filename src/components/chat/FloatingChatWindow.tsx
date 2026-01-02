@@ -1517,7 +1517,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return { text: parts.join(' '), isOverdue: false };
   };
 
-  const parseOrderCancelled = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_refunded: number; order_id: string } | null => {
+  const parseOrderCancelled = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_refunded: number; order_id: string; cancelled_by?: string; reason?: string | null } | null => {
     const match = message.match(/\[ORDER_CANCELLED\](.*?)\[\/ORDER_CANCELLED\]/);
     if (match) {
       try {
@@ -2319,6 +2319,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // Handle order cancelled special message
     if (orderCancelled) {
+      const cancelledByAdmin = orderCancelled.cancelled_by === 'admin';
+      
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
@@ -2336,6 +2338,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               {orderCancelled.credits_refunded} credits refunded
             </p>
+            {cancelledByAdmin && (
+              <div className={`mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-red-200 dark:border-red-800'}`}>
+                <p className={`text-xs font-medium ${isOwnMessage ? 'text-primary-foreground/80' : 'text-red-600 dark:text-red-400'}`}>
+                  Cancelled by Arcana Mace Staff
+                </p>
+                {orderCancelled.reason && (
+                  <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                    Reason: {orderCancelled.reason}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
