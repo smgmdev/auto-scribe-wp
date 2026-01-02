@@ -815,6 +815,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   };
   
+  // Handle cancel order request from banner (agency side)
+  const handleBannerCancelOrderRequest = async () => {
+    const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
+    if (!lastOrderMsg) return;
+    
+    setCancellingOrderRequestId(lastOrderMsg.id);
+    try {
+      const { error } = await supabase
+        .from('service_messages')
+        .delete()
+        .eq('id', lastOrderMsg.id);
+      
+      if (error) throw error;
+      
+      // Remove from local state
+      setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
+      
+      toast({
+        title: "Order request cancelled",
+        description: "The order request has been removed.",
+      });
+    } catch (error: any) {
+      console.error('Error cancelling order request:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to cancel order request.",
+      });
+    } finally {
+      setCancellingOrderRequestId(null);
+    }
+  }
+  
   // Handler to open send order dialog with previous data if resending
   const handleOpenSendOrderDialog = useCallback(() => {
     if (hasExistingOrderRequest) {
@@ -3361,9 +3394,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Button>
                     </>
                   ) : (
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                      Waiting for client approval
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                        Waiting for client approval
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300 hover:border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500"
+                        onClick={handleBannerCancelOrderRequest}
+                        disabled={cancellingOrderRequestId === pendingOrder.messageId}
+                      >
+                        {cancellingOrderRequestId === pendingOrder.messageId && (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        )}
+                        Cancel Request
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
