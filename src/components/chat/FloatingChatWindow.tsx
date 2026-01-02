@@ -229,6 +229,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [hasOpenDispute, setHasOpenDispute] = useState(false);
   const [cancellingOrderRequestId, setCancellingOrderRequestId] = useState<string | null>(null);
+  const [rejectingOrderRequestId, setRejectingOrderRequestId] = useState<string | null>(null);
   const [acceptingDelivery, setAcceptingDelivery] = useState(false);
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
@@ -2549,6 +2550,36 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }
       };
       
+      // Handle reject order request (client side)
+      const handleRejectOrderRequest = async () => {
+        setRejectingOrderRequestId(msg.id);
+        try {
+          const { error } = await supabase
+            .from('service_messages')
+            .delete()
+            .eq('id', msg.id);
+          
+          if (error) throw error;
+          
+          // Remove from local state
+          setMessages(prev => prev.filter(m => m.id !== msg.id));
+          
+          toast({
+            title: "Order request rejected",
+            description: "The order request has been declined.",
+          });
+        } catch (error: any) {
+          console.error('Error rejecting order request:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to reject order request.",
+          });
+        } finally {
+          setRejectingOrderRequestId(null);
+        }
+      };
+      
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
@@ -2596,12 +2627,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
             
-            {/* Action button for client */}
+            {/* Action buttons for client */}
             {isClient && !hasOrder && !isOwnMessage && (
-              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  variant="outline"
+                  className="flex-1 bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200"
+                  onClick={handleRejectOrderRequest}
+                  disabled={rejectingOrderRequestId === msg.id}
+                >
+                  {rejectingOrderRequestId === msg.id && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  Reject
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   onClick={() => {
                     setPendingOrderRequest({
                       media_site_id: orderRequest.media_site_id,
@@ -2615,7 +2658,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   }}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Accept Order
+                  Accept
                 </Button>
               </div>
             )}
