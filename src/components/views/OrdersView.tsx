@@ -248,6 +248,7 @@ export function OrdersView() {
   }, [user, isAdmin]);
 
   const fetchOrders = async () => {
+    if (!user) return;
     setLoading(true);
 
     let query = supabase
@@ -257,9 +258,9 @@ export function OrdersView() {
         media_sites (name, agency, favicon, link),
         service_requests (cancellation_reason)
       `)
+      .eq('user_id', user.id) // Only show orders where user is the buyer (not agency orders)
       .order('created_at', { ascending: false });
 
-    // Non-admin users can only see their own orders (RLS handles this)
     const { data, error } = await query;
 
     if (error) {
