@@ -1022,11 +1022,6 @@ export function AgencyRequestsView() {
                                 <AlertTriangle className="h-3 w-3 mr-1" />
                                 Overdue
                               </Badge>
-                            ) : getTimeRemaining() ? (
-                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                                <Clock className="h-3 w-3 mr-1" />
-                                Delivery in {getTimeRemaining()}
-                              </Badge>
                             ) : order.delivery_status === 'in_progress' ? (
                               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                                 In Progress
@@ -1038,7 +1033,7 @@ export function AgencyRequestsView() {
                             ) : (
                               <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
                                 <Clock className="h-3 w-3 mr-1" />
-                                Awaiting Delivery
+                                Awaiting Delivery {getTimeRemaining() && `• ${getTimeRemaining()}`}
                               </Badge>
                             )}
                             <span className="text-xs text-muted-foreground">
