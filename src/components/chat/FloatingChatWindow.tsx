@@ -785,6 +785,55 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
+      // Broadcast notification to client and agency if admin cancelled
+      if (cancelledBy === 'admin') {
+        const { data: requestData } = await supabase
+          .from('service_requests')
+          .select('user_id, agency_payout_id')
+          .eq('id', globalChatRequest.id)
+          .maybeSingle();
+        
+        if (requestData) {
+          // Notify client
+          const clientChannel = supabase.channel(`notify-${requestData.user_id}-admin-action`);
+          clientChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await clientChannel.send({
+                type: 'broadcast',
+                event: 'admin-action',
+                payload: {
+                  action: 'engagement-cancelled',
+                  requestId: globalChatRequest.id,
+                  message: 'Staff has cancelled the engagement.',
+                  reason: cancellationReason.trim()
+                }
+              });
+              setTimeout(() => supabase.removeChannel(clientChannel), 500);
+            }
+          });
+          
+          // Notify agency
+          if (requestData.agency_payout_id) {
+            const agencyChannel = supabase.channel(`notify-${requestData.agency_payout_id}-admin-action`);
+            agencyChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await agencyChannel.send({
+                  type: 'broadcast',
+                  event: 'admin-action',
+                  payload: {
+                    action: 'engagement-cancelled',
+                    requestId: globalChatRequest.id,
+                    message: 'Staff has cancelled the engagement.',
+                    reason: cancellationReason.trim()
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(agencyChannel), 500);
+              }
+            });
+          }
+        }
+      }
+      
       updateGlobalChatRequest({ 
         status: 'cancelled',
         cancellation_reason: cancellationReason.trim()

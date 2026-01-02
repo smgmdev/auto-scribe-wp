@@ -875,17 +875,18 @@ export function ChatListPanel() {
     // Check if any open chat matches this request_id
     const isDialogOpen = currentOpenChats.some(c => c.request.id === request_id);
     
-    // Determine if this is for user engagement or agency service request
-    const isFromAgency = sender_type === 'agency' || sender_type === 'admin';
+    // Determine message source type
+    const isFromAgency = sender_type === 'agency';
     const isFromClient = sender_type === 'client';
+    const isFromAdmin = sender_type === 'admin';
     
     console.log('[ChatListPanel] Processing broadcast notification', { 
-      request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isMyEngagement, isServiceRequest 
+      request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isFromAdmin, isMyEngagement, isServiceRequest 
     });
     
     // Update last message in local state immediately for UI responsiveness
     // Don't set read: false here - let the postgres_changes subscription handle it after DB update
-    if (isMyEngagement && isFromAgency) {
+    if (isMyEngagement && (isFromAgency || isFromAdmin)) {
       setMyEngagements(prev => {
         const updated = prev.map(e => 
           e.id === request_id 
@@ -896,7 +897,8 @@ export function ChatListPanel() {
         return updated;
       });
     }
-    if (isServiceRequest && isFromClient) {
+    // For service requests - update on client OR admin messages
+    if (isServiceRequest && (isFromClient || isFromAdmin)) {
       const messageTime = new Date().toISOString();
       setServiceRequests(prev => {
         const updated = prev.map(r => 
@@ -935,12 +937,18 @@ export function ChatListPanel() {
     // CRITICAL: Agency sending as agency should NOT trigger notification for agency
     // Use isOwnAgencyMessage which was determined by DB lookup earlier
     const isAgencySendingAsAgency = isOwnAgencyMessage || (!!agencyPayoutIdRef.current && sender_type === 'agency');
+    
+    // Notification conditions:
+    // - Client engagement receives agency OR admin message
+    // - Agency service request receives client OR admin message
     const shouldNotify = !isAgencySendingAsAgency && (
-      (isMyEngagement && isFromAgency) || (isServiceRequest && isFromClient) ||
-      (isMinimizedMyRequest && isFromAgency) || (isMinimizedAgencyRequest && isFromClient)
+      (isMyEngagement && (isFromAgency || isFromAdmin)) || 
+      (isServiceRequest && (isFromClient || isFromAdmin)) ||
+      (isMinimizedMyRequest && (isFromAgency || isFromAdmin)) || 
+      (isMinimizedAgencyRequest && (isFromClient || isFromAdmin))
     );
     
-    console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type });
+    console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
     
     // For minimized chats: update the engagement/request state which will sync to minimized chat
     // Also play sound for immediate feedback
@@ -976,7 +984,7 @@ export function ChatListPanel() {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
       
-      if (isMyEngagement && isFromAgency) {
+      if (isMyEngagement && (isFromAgency || isFromAdmin)) {
         // Update local state immediately
         setMyEngagements(prev => {
           const updated = prev.map(e => 
@@ -994,12 +1002,12 @@ export function ChatListPanel() {
           .eq('id', request_id);
         
         toast({
-          title: 'New Message',
+          title: isFromAdmin ? 'New Staff Message' : 'New Message',
           description: `Message for "${title}" (${media_site_name})`,
         });
       }
       
-      if (isServiceRequest && isFromClient) {
+      if (isServiceRequest && (isFromClient || isFromAdmin)) {
         // Update local state immediately - sync effect will update minimized chat
         setServiceRequests(prev => {
           const updated = prev.map(r => 
@@ -1017,7 +1025,7 @@ export function ChatListPanel() {
           .eq('id', request_id);
         
         toast({
-          title: 'New Client Message',
+          title: isFromAdmin ? 'New Staff Message' : 'New Client Message',
           description: `Message for "${title}" (${media_site_name})`,
         });
       }
@@ -1564,9 +1572,45 @@ export function ChatListPanel() {
       .subscribe((status) => {
         console.log('[ChatListPanel] User broadcast channel status:', status);
       });
+    
+    // Separate channel for admin action notifications for user
+    const userAdminActionChannel = supabase
+      .channel(`notify-${user.id}-admin-action`)
+      .on('broadcast', { event: 'admin-action' }, (payload) => {
+        console.log('[ChatListPanel] Admin action (user):', payload);
+        const { action, message, reason } = payload.payload || {};
+        
+        if (action === 'engagement-cancelled') {
+          toast({
+            variant: 'destructive',
+            title: "Engagement Cancelled by Staff",
+            description: reason ? `Reason: ${reason}` : message,
+          });
+        } else if (action === 'order-cancelled') {
+          toast({
+            variant: 'destructive',
+            title: "Order Cancelled by Staff",
+            description: reason ? `Reason: ${reason}` : message,
+          });
+        } else if (action === 'dispute-resolved') {
+          toast({
+            title: "Dispute Resolved by Staff",
+            description: message || "A dispute has been resolved.",
+          });
+        } else {
+          toast({
+            title: "Staff Action",
+            description: message || "Staff has taken an action on this engagement.",
+          });
+        }
+      })
+      .subscribe((status) => {
+        console.log('[ChatListPanel] User admin-action channel status:', status);
+      });
 
     return () => {
       supabase.removeChannel(userChannel);
+      supabase.removeChannel(userAdminActionChannel);
     };
   }, [user?.id, handleBroadcastNotification]);
 
@@ -1599,9 +1643,45 @@ export function ChatListPanel() {
       .subscribe((status) => {
         console.log('[ChatListPanel] Agency broadcast channel status:', status);
       });
+    
+    // Separate channel for admin action notifications
+    const agencyAdminActionChannel = supabase
+      .channel(`notify-${agencyPayoutId}-admin-action`)
+      .on('broadcast', { event: 'admin-action' }, (payload) => {
+        console.log('[ChatListPanel] Admin action (agency):', payload);
+        const { action, message, reason } = payload.payload || {};
+        
+        if (action === 'engagement-cancelled') {
+          toast({
+            variant: 'destructive',
+            title: "Engagement Cancelled by Staff",
+            description: reason ? `Reason: ${reason}` : message,
+          });
+        } else if (action === 'order-cancelled') {
+          toast({
+            variant: 'destructive',
+            title: "Order Cancelled by Staff",
+            description: reason ? `Reason: ${reason}` : message,
+          });
+        } else if (action === 'dispute-resolved') {
+          toast({
+            title: "Dispute Resolved by Staff",
+            description: message || "A dispute has been resolved.",
+          });
+        } else {
+          toast({
+            title: "Staff Action",
+            description: message || "Staff has taken an action on this engagement.",
+          });
+        }
+      })
+      .subscribe((status) => {
+        console.log('[ChatListPanel] Agency admin-action channel status:', status);
+      });
 
     return () => {
       supabase.removeChannel(agencyChannel);
+      supabase.removeChannel(agencyAdminActionChannel);
     };
   }, [agencyPayoutId, handleBroadcastNotification]);
 
