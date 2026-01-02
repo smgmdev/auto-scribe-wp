@@ -78,14 +78,17 @@ export default function AgencyPortal() {
   useEffect(() => {
     if (!agency) return;
     
-    console.log('[AgencyPortal] Started polling for admin notifications');
+    console.log('[AgencyPortal] Started polling for admin notifications, agency:', agency.id);
     
     const checkForAdminNotifications = async () => {
+      console.log('[AgencyPortal] Checking for admin notifications...');
       try {
         const response = await supabase.functions.invoke('agency-requests', {
           body: { action: 'check_admin_notifications' },
           headers: { 'x-agency-id': agency.id }
         });
+
+        console.log('[AgencyPortal] Notification check response:', response);
 
         if (response.error) {
           console.error('[AgencyPortal] Error checking notifications:', response.error);
@@ -93,6 +96,7 @@ export default function AgencyPortal() {
         }
 
         const notifications = response.data?.notifications || [];
+        console.log('[AgencyPortal] Notifications count:', notifications.length);
         
         if (notifications.length > 0) {
           console.log('[AgencyPortal] Found notifications:', notifications);
@@ -118,6 +122,9 @@ export default function AgencyPortal() {
         console.error('[AgencyPortal] Error in notification polling:', error);
       }
     };
+    
+    // Run initial check immediately
+    checkForAdminNotifications();
     
     // Poll every 2 seconds
     const pollInterval = setInterval(checkForAdminNotifications, 2000);
