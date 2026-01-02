@@ -228,6 +228,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [hasOpenDispute, setHasOpenDispute] = useState(false);
+  const [cancellingOrderRequestId, setCancellingOrderRequestId] = useState<string | null>(null);
   const [acceptingDelivery, setAcceptingDelivery] = useState(false);
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
@@ -2485,6 +2486,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (orderRequest) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
+      const isAgency = actualSenderType === 'agency';
+      
+      // Handle cancel order request
+      const handleCancelOrderRequest = async () => {
+        setCancellingOrderRequestId(msg.id);
+        try {
+          const { error } = await supabase
+            .from('service_messages')
+            .delete()
+            .eq('id', msg.id);
+          
+          if (error) throw error;
+          
+          // Remove from local state
+          setMessages(prev => prev.filter(m => m.id !== msg.id));
+          
+          toast({
+            title: "Order request cancelled",
+            description: "The order request has been removed.",
+          });
+        } catch (error: any) {
+          console.error('Error cancelling order request:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to cancel order request.",
+          });
+        } finally {
+          setCancellingOrderRequestId(null);
+        }
+      };
       
       return (
         <div className="space-y-1">
@@ -2550,6 +2582,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Accept Order
+                </Button>
+              </div>
+            )}
+            
+            {/* Cancel button for agency (when it's their own message and no order placed yet) */}
+            {isAgency && isOwnMessage && !hasOrder && (
+              <div className="mt-3 pt-3 border-t border-primary-foreground/20">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black transition-all duration-200"
+                  onClick={handleCancelOrderRequest}
+                  disabled={cancellingOrderRequestId === msg.id}
+                >
+                  {cancellingOrderRequestId === msg.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4 mr-2" />
+                  )}
+                  Cancel Request
                 </Button>
               </div>
             )}
