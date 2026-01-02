@@ -1801,9 +1801,13 @@ export function SitesView() {
                                         {!agency.link && <div />}
                                         <Button
                                           size="sm"
-                                          className="h-7 px-3 text-xs bg-black text-white hover:bg-gray-800"
+                                          className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
+                                          onClick={() => setSelectedAgency(agency)}
                                         >
                                           View Details
+                                          <span className="inline-flex w-0 overflow-hidden group-hover/btn:w-4 group-hover/btn:ml-1 transition-all duration-200">
+                                            <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                                          </span>
                                         </Button>
                                       </div>
                                     </div>
