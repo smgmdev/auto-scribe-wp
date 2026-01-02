@@ -1077,13 +1077,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Also clear minimized chat unread to sync between widget and minimized chats
   const clearMinimizedChatUnread = useAppStore((state) => state.clearMinimizedChatUnread);
   
+  // Immediately clear unread counts when chat opens (before sender is verified)
+  // This uses globalChatType from props for instant UI feedback
   useEffect(() => {
-    if (globalChatRequest && senderId) {
+    if (globalChatRequest) {
       clearUnreadMessageCount(globalChatRequest.id);
-      
-      // Also clear minimized chat unread count to keep them in sync
       clearMinimizedChatUnread(globalChatRequest.id);
       
+      // Dispatch event immediately based on chat type for instant UI update
+      // This happens before sender verification completes
+      if (globalChatType === 'my-request') {
+        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+        }));
+      } else if (globalChatType === 'agency-request') {
+        window.dispatchEvent(new CustomEvent('service-request-updated', {
+          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+        }));
+      }
+    }
+  }, [globalChatRequest?.id, globalChatType, clearUnreadMessageCount, clearMinimizedChatUnread]);
+  
+  // Update database read status when sender is verified
+  useEffect(() => {
+    if (globalChatRequest && senderId && actualSenderType) {
       // Use actualSenderType to determine which read field to update
       // Client updates client_read, agency updates agency_read
       const now = new Date().toISOString();
@@ -1102,20 +1119,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             console.log('[FloatingChatWindow] Marked as read:', updateField);
           });
       }
-      
-      // Dispatch event immediately to sync with ChatListPanel for instant UI update
-      // This ensures the notification badge updates without waiting for realtime
-      if (actualSenderType === 'client') {
-        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
-        }));
-      } else if (actualSenderType === 'agency') {
-        window.dispatchEvent(new CustomEvent('service-request-updated', {
-          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
-        }));
-      }
     }
-  }, [globalChatRequest?.id, actualSenderType, senderId, clearUnreadMessageCount, clearMinimizedChatUnread]);
+  }, [globalChatRequest?.id, actualSenderType, senderId]);
 
   // Fetch sender ID and verify correct sender type based on actual data
   useEffect(() => {
