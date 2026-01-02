@@ -772,6 +772,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return !!match;
   });
   const hasExistingOrderRequest = existingOrderMessages.length > 0;
+  
+  // Get the last order request data for resending
+  const getLastOrderRequestData = useCallback(() => {
+    if (existingOrderMessages.length === 0) return null;
+    const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
+    const parsed = parseOrderRequest(lastOrderMsg.message);
+    return parsed;
+  }, [existingOrderMessages]);
+  
+  // Handler to open send order dialog with previous data if resending
+  const handleOpenSendOrderDialog = useCallback(() => {
+    if (hasExistingOrderRequest) {
+      const lastOrder = getLastOrderRequestData();
+      if (lastOrder) {
+        setSpecialTerms(lastOrder.special_terms || '');
+        if (lastOrder.delivery_duration) {
+          setOrderDeliveryDays(lastOrder.delivery_duration.days || 0);
+          setOrderDeliveryHours(lastOrder.delivery_duration.hours || 0);
+          setOrderDeliveryMinutes(lastOrder.delivery_duration.minutes || 0);
+        }
+        setIsResendMode(true);
+      }
+    } else {
+      setSpecialTerms('');
+      setOrderDeliveryDays(0);
+      setOrderDeliveryHours(0);
+      setOrderDeliveryMinutes(0);
+      setIsResendMode(false);
+    }
+    setSendOrderDialogOpen(true);
+  }, [hasExistingOrderRequest, getLastOrderRequestData]);
 
   const handleCancelEngagement = async () => {
     if (!globalChatRequest || !cancellationReason.trim()) return;
@@ -2995,7 +3026,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       disabled={isCancelled || isAdmin}
                       onSelect={() => {
                         setActionDropdownOpen(false);
-                        setSendOrderDialogOpen(true);
+                        handleOpenSendOrderDialog();
                       }}
                     >
                       {hasExistingOrderRequest ? 'Resend Order' : 'Send Order'}
