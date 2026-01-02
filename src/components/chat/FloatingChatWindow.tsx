@@ -3501,9 +3501,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </>
                   ) : (
                     <div className="flex flex-col items-end gap-1.5">
-                      <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                        Waiting for client approval
-                      </span>
                       <Button
                         size="sm"
                         className="bg-black text-white border border-black hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
