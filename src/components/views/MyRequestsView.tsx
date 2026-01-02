@@ -113,24 +113,15 @@ export function MyRequestsView() {
       }
 
       // Map client_read to read for the interface and normalize order data
+      // Use client_read directly - it's set to false when agency/admin sends a message
       const mappedRequests = (requestsData || []).map(r => {
-        const isCancelled = r.status === 'cancelled';
-        const hasAgencyMessage = messagesForUnread.some(
-          m => m.request_id === r.id && m.sender_type !== 'client'
-        );
-        // For cancelled requests: show as unread based only on client_read
-        // For active requests: only show as unread if client_read is false AND there's an agency message
-        const isRead = isCancelled 
-          ? (r as any).client_read 
-          : ((r as any).client_read || !hasAgencyMessage);
-        
         // Normalize order - Supabase returns array for foreign key joins
         const rawOrder = (r as any).order;
         const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
         
         return {
           ...r,
-          read: isRead,
+          read: (r as any).client_read,
           order: normalizedOrder
         };
       }) as unknown as ServiceRequest[];
