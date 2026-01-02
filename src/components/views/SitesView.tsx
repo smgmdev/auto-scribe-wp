@@ -2363,19 +2363,30 @@ export function SitesView() {
             <>
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border">
+                  <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border">
                     {selectedAgency.favicon ? (
-                      <img 
-                        src={selectedAgency.favicon} 
-                        alt={`${selectedAgency.name} logo`} 
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <Globe className={`h-6 w-6 text-muted-foreground ${selectedAgency.favicon ? 'hidden' : ''}`} />
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground absolute" />
+                        <img 
+                          src={selectedAgency.favicon} 
+                          alt={`${selectedAgency.name} logo`} 
+                          className="h-full w-full object-cover relative z-10"
+                          onLoad={(e) => {
+                            const loader = e.currentTarget.previousElementSibling as HTMLElement;
+                            if (loader) loader.style.display = 'none';
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const loader = e.currentTarget.previousElementSibling as HTMLElement;
+                            if (loader) loader.style.display = 'none';
+                            (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                          }}
+                        />
+                        <Globe className="h-6 w-6 text-muted-foreground hidden" />
+                      </>
+                    ) : (
+                      <Globe className="h-6 w-6 text-muted-foreground" />
+                    )}
                   </div>
                   <div>
                     <DialogTitle>{selectedAgency.name}</DialogTitle>
