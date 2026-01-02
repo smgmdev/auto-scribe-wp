@@ -56,7 +56,7 @@ serve(async (req) => {
     const isAdmin = roleData?.role === "admin";
     logStep("Admin check", { isAdmin });
 
-    const { order_id } = await req.json();
+    const { order_id, reason } = await req.json();
 
     if (!order_id) {
       return new Response(
@@ -65,7 +65,7 @@ serve(async (req) => {
       );
     }
 
-    logStep("Processing cancel request", { order_id });
+    logStep("Processing cancel request", { order_id, reason, isAdmin });
 
     // Get the order details
     const { data: order, error: orderError } = await supabaseAdmin
@@ -186,11 +186,15 @@ serve(async (req) => {
       .maybeSingle();
 
     // Cancel the linked service request (engagement)
+    const cancellationReasonText = isAdmin 
+      ? (reason ? `Cancelled by Arcana Mace Staff: ${reason}` : 'Cancelled by Arcana Mace Staff')
+      : 'Order was cancelled by user';
+    
     const { error: requestError } = await supabaseAdmin
       .from("service_requests")
       .update({
         status: "cancelled",
-        cancellation_reason: "Order was cancelled by user",
+        cancellation_reason: cancellationReasonText,
         cancelled_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -202,13 +206,17 @@ serve(async (req) => {
     }
 
     // Close any open disputes for this order
+    const disputeAdminNotes = isAdmin 
+      ? (reason ? `Cancelled by Arcana Mace Staff: ${reason}` : 'Cancelled by Arcana Mace Staff')
+      : 'Order was cancelled';
+    
     const { data: closedDisputes, error: disputeError } = await supabaseAdmin
       .from("disputes")
       .update({
         status: "cancelled",
         resolved_at: new Date().toISOString(),
         resolved_by: user.id,
-        admin_notes: "Order was cancelled"
+        admin_notes: disputeAdminNotes
       })
       .eq("order_id", order_id)
       .eq("status", "open")
@@ -228,14 +236,16 @@ serve(async (req) => {
         media_site_id: order.media_sites?.id,
         media_site_name: mediaSiteName,
         credits_refunded: creditRefund,
-        order_id: order_id
+        order_id: order_id,
+        cancelled_by: isAdmin ? 'admin' : 'user',
+        reason: isAdmin ? (reason || null) : null
       });
 
       await supabaseAdmin
         .from("service_messages")
         .insert({
           request_id: serviceRequest.id,
-          sender_type: 'client',
+          sender_type: isAdmin ? 'admin' : 'client',
           sender_id: user.id,
           message: `[ORDER_CANCELLED]${cancellationMessage}[/ORDER_CANCELLED]`
         });
