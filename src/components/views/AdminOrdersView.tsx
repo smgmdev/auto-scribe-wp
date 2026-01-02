@@ -817,7 +817,7 @@ export function AdminOrdersView() {
                         {/* Hide delivery badge in Order History tab to avoid duplication */}
                         {activeTab !== 'history' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                         
-                        {order.status === 'paid' && (
+                        {order.status === 'paid' && activeTab !== 'disputes' && (
                           <DropdownMenu>
                             <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
                               <Badge variant="outline" className="cursor-pointer hover:bg-muted gap-1">
