@@ -1426,7 +1426,7 @@ export function SitesView() {
         </TabsList>
 
         {/* Instant Publishing Tab - WordPress Sites */}
-        <TabsContent value="instant" className="mt-6">
+        <TabsContent value="instant" className="mt-2">
           {sitesLoading ? (
             <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-16">
@@ -1498,7 +1498,7 @@ export function SitesView() {
         </TabsContent>
 
         {/* Custom Tab - Media Sites */}
-        <TabsContent value="custom" className="mt-6">
+        <TabsContent value="custom" className="mt-2">
           {mediaSitesLoading ? (
             <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-16">
