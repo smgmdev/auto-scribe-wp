@@ -669,9 +669,10 @@ export function Sidebar({
       const disputeOrderIds = new Set(userDisputes?.map(d => d.order_id) || []);
       
       // Categorize unread orders by tab
-      // Only track notifications for: Active Orders, Open Disputes, Cancelled Orders
+      // Only track notifications for: Active Orders, Open Disputes, Completed Orders, Cancelled Orders
       let activeUnread = 0;
       let disputeUnread = 0;
+      let completedUnread = 0;
       let historyUnread = 0;
       
       allUnreadOrders?.forEach(order => {
@@ -688,13 +689,15 @@ export function Sidebar({
         } else if (order.status === 'paid' && order.delivery_status !== 'delivered' && order.delivery_status !== 'accepted') {
           // Active orders: paid, not delivered/accepted, not in dispute
           activeUnread++;
+        } else if (order.delivery_status === 'delivered' || order.delivery_status === 'accepted') {
+          // Completed orders (delivered/accepted) that are unread
+          completedUnread++;
         }
-        // Completed orders (delivered/accepted) don't trigger notifications
       });
       
       setUserUnreadOrdersCount(activeUnread);
       setUserUnreadDisputesCount(disputeUnread);
-      setUserUnreadCompletedCount(0); // No notifications for completed tab
+      setUserUnreadCompletedCount(completedUnread);
       setUserUnreadHistoryCount(historyUnread);
     };
 
