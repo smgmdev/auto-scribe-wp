@@ -112,16 +112,31 @@ export function MyRequestsView() {
         messagesForUnread = msgData || [];
       }
 
+      console.log('[MyRequestsView] fetchRequests - messagesForUnread:', messagesForUnread);
+
       // Map client_read to read for the interface and normalize order data
-      // Use client_read directly - it's set to false when agency/admin sends a message
+      // Use same logic as Sidebar: only show unread if client_read is false AND there's an agency/admin message
       const mappedRequests = (requestsData || []).map(r => {
+        const isCancelled = r.status === 'cancelled';
+        const hasAgencyMessage = messagesForUnread.some(
+          m => m.request_id === r.id && m.sender_type !== 'client'
+        );
+        
+        // For cancelled requests: show as unread based only on client_read
+        // For active requests: only show as unread if client_read is false AND there's an agency message
+        const isRead = isCancelled 
+          ? (r as any).client_read 
+          : ((r as any).client_read || !hasAgencyMessage);
+        
+        console.log('[MyRequestsView] Request:', r.id, 'client_read:', (r as any).client_read, 'hasAgencyMessage:', hasAgencyMessage, 'isRead:', isRead, 'status:', r.status);
+        
         // Normalize order - Supabase returns array for foreign key joins
         const rawOrder = (r as any).order;
         const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
         
         return {
           ...r,
-          read: (r as any).client_read,
+          read: isRead,
           order: normalizedOrder
         };
       }) as unknown as ServiceRequest[];
@@ -131,6 +146,8 @@ export function MyRequestsView() {
       // This preserves notification badges while keeping data in sync
       const unreadActiveCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
       const unreadCancelledCount = mappedRequests.filter(r => !r.read && r.status === 'cancelled').length;
+      
+      console.log('[MyRequestsView] Unread counts - active:', unreadActiveCount, 'cancelled:', unreadCancelledCount);
       
       // Always sync the counts with actual DB state for accuracy
       setUserUnreadEngagementsCount(unreadActiveCount);
