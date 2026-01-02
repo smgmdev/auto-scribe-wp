@@ -211,9 +211,38 @@ export function OrdersView() {
         )
         .subscribe();
       
+      // Subscribe to admin action notifications (order cancellations, dispute resolutions)
+      const adminActionChannel = supabase
+        .channel(`notify-${user.id}-admin-action`)
+        .on('broadcast', { event: 'admin-action' }, (payload) => {
+          console.log('[OrdersView] Admin action received:', payload);
+          const data = payload.payload as { action: string; message: string; reason?: string };
+          
+          if (data.action === 'order-cancelled') {
+            toast({
+              title: "Order Cancelled by Arcana Mace Staff",
+              description: data.reason 
+                ? `${data.message} Reason: ${data.reason}`
+                : data.message,
+              variant: "destructive",
+            });
+            fetchOrders();
+            fetchUserDisputes();
+          } else if (data.action === 'dispute-resolved') {
+            toast({
+              title: "Dispute Resolved",
+              description: data.message,
+            });
+            fetchOrders();
+            fetchUserDisputes();
+          }
+        })
+        .subscribe();
+      
       return () => {
         supabase.removeChannel(ordersChannel);
         supabase.removeChannel(disputesChannel);
+        supabase.removeChannel(adminActionChannel);
       };
     }
   }, [user, isAdmin]);
