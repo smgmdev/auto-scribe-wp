@@ -779,8 +779,41 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (existingOrderMessages.length === 0) return null;
     const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
     const parsed = parseOrderRequest(lastOrderMsg.message);
-    return parsed;
+    return parsed ? { ...parsed, messageId: lastOrderMsg.id } : null;
   }, [existingOrderMessages]);
+  
+  // Handle reject order request from banner (client side)
+  const handleBannerRejectOrderRequest = async () => {
+    const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
+    if (!lastOrderMsg) return;
+    
+    setRejectingOrderRequestId(lastOrderMsg.id);
+    try {
+      const { error } = await supabase
+        .from('service_messages')
+        .delete()
+        .eq('id', lastOrderMsg.id);
+      
+      if (error) throw error;
+      
+      // Remove from local state
+      setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
+      
+      toast({
+        title: "Order request rejected",
+        description: "The order request has been declined.",
+      });
+    } catch (error: any) {
+      console.error('Error rejecting order request:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to reject order request.",
+      });
+    } finally {
+      setRejectingOrderRequestId(null);
+    }
+  };
   
   // Handler to open send order dialog with previous data if resending
   const handleOpenSendOrderDialog = useCallback(() => {
@@ -3261,18 +3294,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {hasExistingOrderRequest && !globalChatRequest?.order && !loadingMessages && (() => {
           const pendingOrder = getLastOrderRequestData();
           if (!pendingOrder) return null;
+          const isClient = actualSenderType === 'client';
           return (
-            <div className="sticky top-0 z-10 mx-3 mt-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <div className="flex items-start gap-3">
+            <div className="sticky top-0 left-0 z-10 p-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="flex items-center gap-3">
                 {pendingOrder.media_site_favicon && (
                   <img 
                     src={pendingOrder.media_site_favicon} 
                     alt="" 
-                    className="w-8 h-8 rounded-lg object-cover shrink-0"
+                    className="w-10 h-10 rounded-lg object-cover shrink-0"
                   />
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-0.5">
                     <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                     <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
                       Pending Order Request
@@ -3281,20 +3315,56 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <p className="font-medium text-sm text-foreground">
                     {pendingOrder.media_site_name}
                   </p>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                     <span>{pendingOrder.price.toLocaleString()} credits</span>
                     {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
                       <span>• {formatDeliveryDuration(pendingOrder.delivery_duration)}</span>
                     )}
+                    {pendingOrder.special_terms && (
+                      <span>• {pendingOrder.special_terms}</span>
+                    )}
                   </div>
-                  {pendingOrder.special_terms && (
-                    <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                      <span className="font-medium">Terms:</span> {pendingOrder.special_terms}
-                    </p>
+                </div>
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {isClient ? (
+                    <>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => {
+                          setPendingOrderRequest({
+                            media_site_id: pendingOrder.media_site_id,
+                            media_site_name: pendingOrder.media_site_name,
+                            media_site_favicon: pendingOrder.media_site_favicon,
+                            price: pendingOrder.price,
+                            special_terms: pendingOrder.special_terms,
+                            delivery_duration: pendingOrder.delivery_duration
+                          });
+                          setAcceptOrderDialogOpen(true);
+                        }}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300 hover:border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500"
+                        onClick={handleBannerRejectOrderRequest}
+                        disabled={rejectingOrderRequestId === pendingOrder.messageId}
+                      >
+                        {rejectingOrderRequestId === pendingOrder.messageId && (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        )}
+                        Reject
+                      </Button>
+                    </>
+                  ) : (
+                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                      Waiting for client approval
+                    </span>
                   )}
-                  <p className="text-xs mt-2 text-amber-600 dark:text-amber-400 font-medium">
-                    {actualSenderType === 'agency' ? 'Waiting for client approval' : 'Awaiting your response'}
-                  </p>
                 </div>
               </div>
             </div>
