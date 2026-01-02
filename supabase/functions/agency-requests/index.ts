@@ -87,6 +87,7 @@ serve(async (req) => {
 
     } else if (action === "check_admin_notifications") {
       // Check for new admin messages since agency_last_read_at
+      // This does NOT update agency_last_read_at - that's done when opening a chat
       const { data: requests, error: reqError } = await supabaseAdmin
         .from("service_requests")
         .select("id, agency_last_read_at")
@@ -94,13 +95,14 @@ serve(async (req) => {
 
       if (reqError) throw new Error(reqError.message);
       if (!requests || requests.length === 0) {
-        return new Response(JSON.stringify({ notifications: [] }), {
+        return new Response(JSON.stringify({ notifications: [], unreadRequests: [] }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         });
       }
 
       const notifications: any[] = [];
+      const unreadRequests: string[] = [];
 
       for (const request of requests) {
         const lastReadAt = request.agency_last_read_at || '1970-01-01T00:00:00Z';
@@ -114,6 +116,9 @@ serve(async (req) => {
           .order("created_at", { ascending: true });
 
         if (newMessages && newMessages.length > 0) {
+          // Track this request as having unread admin messages
+          unreadRequests.push(request.id);
+          
           for (const msg of newMessages) {
             if (msg.message.includes('[ADMIN_JOINED]')) {
               notifications.push({ type: 'admin_joined', requestId: request.id, messageId: msg.id });
@@ -121,19 +126,34 @@ serve(async (req) => {
               notifications.push({ type: 'admin_left', requestId: request.id, messageId: msg.id });
             }
           }
-
-          // Update agency_last_read_at to the latest message timestamp
-          const latestTimestamp = newMessages[newMessages.length - 1].created_at;
-          await supabaseAdmin
-            .from("service_requests")
-            .update({ agency_last_read_at: latestTimestamp })
-            .eq("id", request.id);
         }
       }
 
-      logStep("Admin notifications checked", { count: notifications.length });
+      logStep("Admin notifications checked", { count: notifications.length, unreadRequests: unreadRequests.length });
 
-      return new Response(JSON.stringify({ notifications }), {
+      return new Response(JSON.stringify({ notifications, unreadRequests }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
+    } else if (action === "mark_read") {
+      // Mark a specific request's admin messages as read
+      if (!request_id) {
+        throw new Error("Request ID required");
+      }
+
+      // Update agency_last_read_at to now
+      const { error: updateError } = await supabaseAdmin
+        .from("service_requests")
+        .update({ agency_last_read_at: new Date().toISOString() })
+        .eq("id", request_id)
+        .eq("agency_payout_id", agencyId);
+
+      if (updateError) throw new Error(updateError.message);
+
+      logStep("Request marked as read", { requestId: request_id });
+
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -167,10 +187,14 @@ serve(async (req) => {
         message
       });
 
-      // Update request status
+      // Update request status and mark as read
       await supabaseAdmin
         .from("service_requests")
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ 
+          status, 
+          updated_at: new Date().toISOString(),
+          agency_last_read_at: new Date().toISOString()
+        })
         .eq("id", request_id);
 
       logStep("Response sent", { requestId: request_id, status });

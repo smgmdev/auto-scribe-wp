@@ -60,6 +60,7 @@ export default function AgencyPortal() {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [responseStatus, setResponseStatus] = useState<'accepted' | 'changes_requested' | 'rejected'>('accepted');
+  const [unreadAdminRequests, setUnreadAdminRequests] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Check for stored agency session
@@ -96,23 +97,47 @@ export default function AgencyPortal() {
         }
 
         const notifications = response.data?.notifications || [];
-        console.log('[AgencyPortal] Notifications count:', notifications.length);
+        const unreadRequests = response.data?.unreadRequests || [];
         
+        console.log('[AgencyPortal] Notifications count:', notifications.length, 'Unread requests:', unreadRequests);
+        
+        // Update unread requests set
+        if (unreadRequests.length > 0) {
+          setUnreadAdminRequests(prev => {
+            const newSet = new Set(prev);
+            unreadRequests.forEach((id: string) => newSet.add(id));
+            return newSet;
+          });
+        }
+        
+        // Show toasts for new notifications (only once per notification type per request)
         if (notifications.length > 0) {
           console.log('[AgencyPortal] Found notifications:', notifications);
           
+          // Group notifications by request to show one toast per request
+          const requestNotifications = new Map<string, { hasJoin: boolean; hasLeave: boolean }>();
           for (const notif of notifications) {
-            if (notif.type === 'admin_joined') {
-              toast({
-                title: "Staff Joined Chat",
-                description: "Arcana Mace Staff has entered the chat.",
-              });
-            } else if (notif.type === 'admin_left') {
-              toast({
-                title: "Staff Left Chat",
-                description: "Arcana Mace Staff has left the chat.",
-              });
-            }
+            const existing = requestNotifications.get(notif.requestId) || { hasJoin: false, hasLeave: false };
+            if (notif.type === 'admin_joined') existing.hasJoin = true;
+            if (notif.type === 'admin_left') existing.hasLeave = true;
+            requestNotifications.set(notif.requestId, existing);
+          }
+          
+          // Show one toast per type (not per request to avoid spam)
+          const hasAnyJoin = Array.from(requestNotifications.values()).some(n => n.hasJoin);
+          const hasAnyLeave = Array.from(requestNotifications.values()).some(n => n.hasLeave);
+          
+          if (hasAnyJoin) {
+            toast({
+              title: "Staff Joined Chat",
+              description: "Arcana Mace Staff has entered the chat.",
+            });
+          }
+          if (hasAnyLeave) {
+            toast({
+              title: "Staff Left Chat",
+              description: "Arcana Mace Staff has left the chat.",
+            });
           }
           
           // Refresh requests after notifications
@@ -270,6 +295,29 @@ export default function AgencyPortal() {
     }
   };
 
+  const handleSelectRequest = async (request: ServiceRequest) => {
+    setSelectedRequest(request);
+    
+    // Mark as read if it has unread admin messages
+    if (unreadAdminRequests.has(request.id) && agency) {
+      try {
+        await supabase.functions.invoke('agency-requests', {
+          body: { action: 'mark_read', request_id: request.id },
+          headers: { 'x-agency-id': agency.id }
+        });
+        
+        // Remove from unread set
+        setUnreadAdminRequests(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(request.id);
+          return newSet;
+        });
+      } catch (error) {
+        console.error('[AgencyPortal] Error marking as read:', error);
+      }
+    }
+  };
+
   // Login Screen
   if (!agency) {
     return (
@@ -352,7 +400,13 @@ export default function AgencyPortal() {
             <>
               <TabsContent value="pending" className="space-y-4">
                 {requests.filter(r => r.status === 'pending_review').map((request) => (
-                  <RequestCard key={request.id} request={request} onSelect={() => setSelectedRequest(request)} getStatusBadge={getStatusBadge} />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    hasUnreadAdmin={unreadAdminRequests.has(request.id)}
+                    onSelect={() => handleSelectRequest(request)} 
+                    getStatusBadge={getStatusBadge} 
+                  />
                 ))}
                 {requests.filter(r => r.status === 'pending_review').length === 0 && (
                   <EmptyState message="No pending requests" />
@@ -361,7 +415,13 @@ export default function AgencyPortal() {
 
               <TabsContent value="in_progress" className="space-y-4">
                 {requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).map((request) => (
-                  <RequestCard key={request.id} request={request} onSelect={() => setSelectedRequest(request)} getStatusBadge={getStatusBadge} />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    hasUnreadAdmin={unreadAdminRequests.has(request.id)}
+                    onSelect={() => handleSelectRequest(request)} 
+                    getStatusBadge={getStatusBadge} 
+                  />
                 ))}
                 {requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).length === 0 && (
                   <EmptyState message="No requests in progress" />
@@ -370,7 +430,13 @@ export default function AgencyPortal() {
 
               <TabsContent value="completed" className="space-y-4">
                 {requests.filter(r => ['paid', 'rejected'].includes(r.status)).map((request) => (
-                  <RequestCard key={request.id} request={request} onSelect={() => setSelectedRequest(request)} getStatusBadge={getStatusBadge} />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    hasUnreadAdmin={unreadAdminRequests.has(request.id)}
+                    onSelect={() => handleSelectRequest(request)} 
+                    getStatusBadge={getStatusBadge} 
+                  />
                 ))}
                 {requests.filter(r => ['paid', 'rejected'].includes(r.status)).length === 0 && (
                   <EmptyState message="No completed requests" />
@@ -519,17 +585,13 @@ export default function AgencyPortal() {
   );
 }
 
-function RequestCard({ request, onSelect, getStatusBadge }: { 
+function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: { 
   request: ServiceRequest; 
+  hasUnreadAdmin: boolean;
   onSelect: () => void;
   getStatusBadge: (status: string, messages?: ServiceMessage[]) => React.ReactNode;
 }) {
-  // Check for unread admin messages
-  const hasAdminActivity = request.messages?.some(msg => 
-    msg.sender_type === 'admin' && 
-    new Date(msg.created_at) > new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
-  );
-  
+  // Check if staff is currently in chat
   const lastAdminMessage = request.messages?.filter(m => m.sender_type === 'admin').pop();
   const isStaffInChat = lastAdminMessage?.message.includes('[ADMIN_JOINED]') && 
     !request.messages?.some(m => m.sender_type === 'admin' && m.message.includes('[ADMIN_LEFT]') && new Date(m.created_at) > new Date(lastAdminMessage.created_at));
@@ -537,7 +599,7 @@ function RequestCard({ request, onSelect, getStatusBadge }: {
   return (
     <Card 
       className={`cursor-pointer hover:bg-muted/50 transition-colors ${
-        hasAdminActivity ? 'ring-2 ring-amber-500/50 bg-amber-50/50 dark:bg-amber-900/10' : ''
+        hasUnreadAdmin ? 'ring-2 ring-amber-500/50 bg-amber-50/50 dark:bg-amber-900/10' : ''
       } ${isStaffInChat ? 'border-l-4 border-l-green-500' : ''}`} 
       onClick={onSelect}
     >
@@ -555,8 +617,8 @@ function RequestCard({ request, onSelect, getStatusBadge }: {
                     Staff Active
                   </Badge>
                 )}
-                {hasAdminActivity && !isStaffInChat && (
-                  <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs">
+                {hasUnreadAdmin && !isStaffInChat && (
+                  <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs animate-pulse">
                     Staff Message
                   </Badge>
                 )}
