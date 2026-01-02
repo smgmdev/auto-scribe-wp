@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar } from 'lucide-react';
+import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -229,6 +229,42 @@ export function AdminFloatingChat({
 
   const parseCancelOrderAccepted = (message: string): { type: string; order_id: string; media_site_name: string; credits_refunded: number; accepted_by: string } | null => {
     const match = message.match(/\[CANCEL_ORDER_ACCEPTED\](.*?)\[\/CANCEL_ORDER_ACCEPTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseOrderDelivered = (message: string): { type: string; order_id: string; media_site_id?: string; media_site_name: string; delivery_url?: string | null; delivery_notes?: string | null; delivered_by: string } | null => {
+    const match = message.match(/\[ORDER_DELIVERED\](.*?)\[\/ORDER_DELIVERED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseDeliveryAccepted = (message: string): { type: string; order_id: string; media_site_name: string } | null => {
+    const match = message.match(/\[DELIVERY_ACCEPTED\](.*?)\[\/DELIVERY_ACCEPTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseRevisionRequested = (message: string): { type: string; order_id: string; media_site_name: string; reason: string } | null => {
+    const match = message.match(/\[REVISION_REQUESTED\](.*?)\[\/REVISION_REQUESTED\]/);
     if (match) {
       try {
         return JSON.parse(match[1]);
@@ -914,7 +950,103 @@ export function AdminFloatingChat({
     const orderCancelled = parseOrderCancelled(msg.message);
     const cancelRequest = parseCancelOrderRequest(msg.message);
     const cancelAccepted = parseCancelOrderAccepted(msg.message);
+    const orderDelivered = parseOrderDelivered(msg.message);
+    const deliveryAccepted = parseDeliveryAccepted(msg.message);
+    const revisionRequested = parseRevisionRequested(msg.message);
     const quote = parseQuote(msg.message);
+
+    // Handle order delivered message
+    if (orderDelivered) {
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2 mb-2">
+              <Truck className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="font-semibold text-sm text-green-700 dark:text-green-300">
+                Order Delivered
+              </span>
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              {orderDelivered.media_site_name}
+            </p>
+            <p className="text-sm mt-2 text-muted-foreground">
+              Delivery has been submitted for client review.
+            </p>
+            {orderDelivered.delivery_url && (
+              <div className="mt-2">
+                <a 
+                  href={orderDelivered.delivery_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View Delivery
+                </a>
+              </div>
+            )}
+            {orderDelivered.delivery_notes && (
+              <p className="text-xs mt-2 italic text-muted-foreground">
+                Notes: {orderDelivered.delivery_notes}
+              </p>
+            )}
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle delivery accepted message
+    if (deliveryAccepted) {
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="font-semibold text-sm text-green-700 dark:text-green-300">
+                Delivery Accepted
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Client accepted the delivery for {deliveryAccepted.media_site_name}
+            </p>
+            <p className="text-xs mt-1 text-muted-foreground">
+              Order has been marked as completed
+            </p>
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle revision requested message
+    if (revisionRequested) {
+      return (
+        <div className="space-y-1">
+          <div className="rounded-lg border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+            <div className="flex items-center gap-2 mb-2">
+              <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              <span className="font-semibold text-sm text-orange-700 dark:text-orange-300">
+                Revision Requested
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Client requested a revision for {revisionRequested.media_site_name}
+            </p>
+            <p className="text-xs mt-1 italic text-muted-foreground">
+              Reason: {revisionRequested.reason}
+            </p>
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
     
     // Handle cancel order request message
     if (cancelRequest) {
