@@ -3400,8 +3400,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </span>
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300 hover:border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500"
+                        className="bg-black text-white border-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                         onClick={handleBannerCancelOrderRequest}
                         disabled={cancellingOrderRequestId === pendingOrder.messageId}
                       >
