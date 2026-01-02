@@ -1007,19 +1007,19 @@ export function SitesView() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <div 
-                className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden"
+                className="relative group/logo flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
                   src={site.favicon || getFaviconUrl(site.url)} 
                   alt={`${site.name} favicon`} 
-                  className="h-5 w-5 object-contain" 
+                  className="h-10 w-10 object-contain" 
                   onError={e => {
                     e.currentTarget.style.display = 'none';
                     (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
                   }} 
                 />
-                <Globe className="h-4 w-4 text-accent hidden" />
+                <Globe className="h-8 w-8 text-accent hidden" />
                 {isAdmin && (
                   <button
                     onClick={(e) => {
