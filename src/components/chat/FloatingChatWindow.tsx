@@ -1322,6 +1322,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const isSystemMessage = newMsg.message.includes('[ORDER_PLACED]') || 
                                   newMsg.message.includes('[ORDER_CANCELLED]') ||
                                   newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]') ||
+                                  newMsg.message.includes('[CANCEL_ORDER_REJECTED]') ||
                                   newMsg.message.includes('[ORDER_REQUEST]');
           
           // Skip messages from same sender type UNLESS it's a system message
