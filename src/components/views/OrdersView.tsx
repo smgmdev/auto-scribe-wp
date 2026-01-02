@@ -45,6 +45,9 @@ interface Order {
   profiles?: {
     email: string | null;
   } | null;
+  service_requests?: {
+    cancellation_reason: string | null;
+  }[] | null;
 }
 
 // Format time remaining for delivery countdown
@@ -149,6 +152,69 @@ export function OrdersView() {
     if (user) {
       fetchOrders();
       fetchUserDisputes();
+      
+      // Subscribe to orders changes for real-time updates
+      const ordersChannel = supabase
+        .channel('user-orders-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders'
+          },
+          (payload) => {
+            console.log('[OrdersView] Order change:', payload);
+            fetchOrders();
+          }
+        )
+        .subscribe();
+      
+      // Subscribe to disputes changes for real-time updates
+      const disputesChannel = supabase
+        .channel('user-disputes-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'disputes'
+          },
+          (payload) => {
+            console.log('[OrdersView] Dispute change:', payload);
+            const updated = payload.new as { order_id: string; status: string } | undefined;
+            const deleted = payload.old as { order_id: string } | undefined;
+            
+            if (payload.eventType === 'DELETE' && deleted) {
+              // Remove from disputeOrderIds
+              setDisputeOrderIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(deleted.order_id);
+                return newSet;
+              });
+            } else if (payload.eventType === 'UPDATE' && updated) {
+              // If dispute is no longer open, remove from disputeOrderIds
+              if (updated.status !== 'open') {
+                setDisputeOrderIds(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(updated.order_id);
+                  return newSet;
+                });
+                // Decrement unread disputes count
+                decrementUserUnreadDisputesCount();
+              }
+            } else if (payload.eventType === 'INSERT' && updated) {
+              // New dispute - refetch to get full data
+              fetchUserDisputes();
+            }
+          }
+        )
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(ordersChannel);
+        supabase.removeChannel(disputesChannel);
+      };
     }
   }, [user, isAdmin]);
 
@@ -159,7 +225,8 @@ export function OrdersView() {
       .from('orders')
       .select(`
         *,
-        media_sites (name, agency, favicon, link)
+        media_sites (name, agency, favicon, link),
+        service_requests (cancellation_reason)
       `)
       .order('created_at', { ascending: false });
 
@@ -436,14 +503,23 @@ export function OrdersView() {
             )}
           </div>
           
-          <div className="flex gap-2">
-            {order.status === 'cancelled' ? (
-              <Badge variant="destructive">Cancelled</Badge>
-            ) : (
-              <>
-                {getStatusBadge(order.status)}
-                {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
-              </>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex gap-2">
+              {order.status === 'cancelled' ? (
+                <Badge variant="destructive">Cancelled</Badge>
+              ) : (
+                <>
+                  {getStatusBadge(order.status)}
+                  {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
+                </>
+              )}
+            </div>
+            {order.status === 'cancelled' && order.service_requests?.[0]?.cancellation_reason && (
+              <p className="text-xs text-muted-foreground max-w-[200px] text-right truncate">
+                {order.service_requests[0].cancellation_reason.includes('Arcana Mace Staff') 
+                  ? 'Cancelled by Staff' 
+                  : 'Cancelled by user'}
+              </p>
             )}
           </div>
 
@@ -705,6 +781,21 @@ export function OrdersView() {
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Delivery Notes</p>
                   <p className="text-sm">{selectedOrder.delivery_notes}</p>
+                </div>
+              )}
+
+              {/* Cancellation reason for cancelled orders */}
+              {selectedOrder.status === 'cancelled' && selectedOrder.service_requests?.[0]?.cancellation_reason && (
+                <div className="border-t pt-4">
+                  <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <span className="font-medium text-sm text-red-700 dark:text-red-300">Order Cancelled</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedOrder.service_requests[0].cancellation_reason}
+                    </p>
+                  </div>
                 </div>
               )}
 
