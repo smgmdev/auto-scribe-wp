@@ -614,11 +614,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         // Notify agency (agency_payout_id)
         if (requestData.agency_payout_id) {
           console.log('[FloatingChatWindow] Sending admin-joined to agency:', requestData.agency_payout_id);
-          const agencyNotifyChannel = supabase.channel(`notify-${requestData.agency_payout_id}`);
+          const agencyNotifyChannel = supabase.channel(`notify-${requestData.agency_payout_id}`, {
+            config: { broadcast: { ack: true } }
+          });
           agencyNotifyChannel.subscribe(async (status) => {
             console.log('[FloatingChatWindow] Agency notify channel status:', status);
             if (status === 'SUBSCRIBED') {
-              await agencyNotifyChannel.send({
+              const result = await agencyNotifyChannel.send({
                 type: 'broadcast',
                 event: 'admin-joined',
                 payload: {
@@ -626,8 +628,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   message: 'Arcana Mace Staff has entered the chat.'
                 }
               });
-              console.log('[FloatingChatWindow] Admin-joined broadcast sent to agency');
-              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 500);
+              console.log('[FloatingChatWindow] Admin-joined broadcast sent to agency, result:', result);
+              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 1000);
             }
           });
         } else {
@@ -714,11 +716,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         // Notify agency (agency_payout_id)
         if (requestData.agency_payout_id) {
           console.log('[FloatingChatWindow] Sending admin-left to agency:', requestData.agency_payout_id);
-          const agencyNotifyChannel = supabase.channel(`notify-${requestData.agency_payout_id}`);
+          const agencyNotifyChannel = supabase.channel(`notify-${requestData.agency_payout_id}`, {
+            config: { broadcast: { ack: true } }
+          });
           agencyNotifyChannel.subscribe(async (status) => {
             console.log('[FloatingChatWindow] Agency notify channel status for leave:', status);
             if (status === 'SUBSCRIBED') {
-              await agencyNotifyChannel.send({
+              const result = await agencyNotifyChannel.send({
                 type: 'broadcast',
                 event: 'admin-left',
                 payload: {
@@ -726,8 +730,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   message: 'Arcana Mace Staff has left the chat.'
                 }
               });
-              console.log('[FloatingChatWindow] Admin-left broadcast sent to agency');
-              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 500);
+              console.log('[FloatingChatWindow] Admin-left broadcast sent to agency, result:', result);
+              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 1000);
             }
           });
         } else {
