@@ -1007,7 +1007,7 @@ export function SitesView() {
           <div className="flex items-stretch">
             <div className="flex items-center min-w-0 flex-1">
               <div 
-                className="relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg"
+                className={`relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden ${isExpanded ? 'rounded-tl-lg' : 'rounded-l-lg'}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
