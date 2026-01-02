@@ -377,22 +377,64 @@ export function Sidebar({
             let disputesCount = 0;
             let unreadOrdersCount = 0;
             if (agencyPayoutData) {
-              const { count: requestsCount } = await supabase
+              // Fetch all service requests with their agency_last_read_at timestamp
+              const { data: requestsData } = await supabase
                 .from('service_requests')
-                .select('*', { count: 'exact', head: true })
-                .eq('agency_payout_id', agencyPayoutData.id)
-                .eq('agency_read', false)
-                .neq('status', 'cancelled');
-              serviceRequestsCount = requestsCount || 0;
+                .select('id, status, agency_last_read_at')
+                .eq('agency_payout_id', agencyPayoutData.id);
               
-              // Count unread cancelled requests for agency
-              const { count: cancelledCount } = await supabase
-                .from('service_requests')
-                .select('*', { count: 'exact', head: true })
-                .eq('agency_payout_id', agencyPayoutData.id)
-                .eq('agency_read', false)
-                .eq('status', 'cancelled');
-              cancelledRequestsCount = cancelledCount || 0;
+              if (requestsData && requestsData.length > 0) {
+                const requestIds = requestsData.map(r => r.id);
+                
+                // Fetch all messages for these requests
+                const { data: messagesData } = await supabase
+                  .from('service_messages')
+                  .select('request_id, sender_type, created_at')
+                  .in('request_id', requestIds);
+                
+                // Count requests with unread messages (messages from client/admin after agency_last_read_at)
+                for (const request of requestsData) {
+                  const requestMessages = messagesData?.filter(m => m.request_id === request.id) || [];
+                  const lastReadAt = request.agency_last_read_at;
+                  
+                  // Check if there are any client or admin messages after last_read_at
+                  const hasUnreadMessages = requestMessages.some(msg => {
+                    if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
+                      if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                        return true;
+                      }
+                    }
+                    return false;
+                  });
+                  
+                  if (hasUnreadMessages) {
+                    if (request.status === 'cancelled') {
+                      cancelledRequestsCount++;
+                    } else {
+                      serviceRequestsCount++;
+                    }
+                  }
+                }
+                
+                // Count unread orders for agency - orders that haven't been read
+                const requestsWithOrderIds = requestsData.filter(r => r.status !== 'cancelled');
+                if (requestsWithOrderIds.length > 0) {
+                  const { data: ordersForAgency } = await supabase
+                    .from('orders')
+                    .select('id, read, delivery_status, status')
+                    .in('id', (await supabase
+                      .from('service_requests')
+                      .select('order_id')
+                      .eq('agency_payout_id', agencyPayoutData.id)
+                      .not('order_id', 'is', null)).data?.map(r => r.order_id) || []);
+                  
+                  if (ordersForAgency) {
+                    unreadOrdersCount = ordersForAgency.filter(o => 
+                      !o.read && o.delivery_status !== 'delivered' && o.status !== 'cancelled'
+                    ).length;
+                  }
+                }
+              }
               
               // Count unread disputes for agency
               const { count: unreadDisputesCnt } = await supabase
@@ -405,26 +447,6 @@ export function Sidebar({
                 .eq('read', false)
                 .eq('service_requests.agency_payout_id', agencyPayoutData.id);
               disputesCount = unreadDisputesCnt || 0;
-              
-              // Count unread orders for agency - orders that haven't been read
-              // First get all service requests for this agency that have orders
-              const { data: requestsWithOrders } = await supabase
-                .from('service_requests')
-                .select('order_id')
-                .eq('agency_payout_id', agencyPayoutData.id)
-                .not('order_id', 'is', null);
-              
-              if (requestsWithOrders && requestsWithOrders.length > 0) {
-                const orderIds = requestsWithOrders.map(r => r.order_id).filter(Boolean);
-                const { count: unreadOrdersCnt } = await supabase
-                  .from('orders')
-                  .select('*', { count: 'exact', head: true })
-                  .in('id', orderIds)
-                  .eq('read', false)
-                  .neq('delivery_status', 'delivered')
-                  .neq('status', 'cancelled');
-                unreadOrdersCount = unreadOrdersCnt || 0;
-              }
             }
             
             if (isMounted) {
