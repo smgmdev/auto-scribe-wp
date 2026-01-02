@@ -1082,12 +1082,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         rejected_by: senderType
       };
 
-      await supabase.from('service_messages').insert({
+      const { data: insertedMsg, error: insertError } = await supabase.from('service_messages').insert({
         request_id: globalChatRequest.id,
         sender_type: senderType,
         sender_id: senderId,
         message: `[CANCEL_ORDER_REJECTED]${JSON.stringify(rejectData)}[/CANCEL_ORDER_REJECTED]`
-      });
+      }).select().single();
+      
+      if (insertError) throw insertError;
+      
+      // Add to local messages so sender sees their own rejection
+      if (insertedMsg) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === insertedMsg.id)) return prev;
+          return [...prev, insertedMsg as ServiceMessage];
+        });
+      }
       
       toast({
         title: "Cancellation Rejected",
@@ -1322,7 +1332,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const isSystemMessage = newMsg.message.includes('[ORDER_PLACED]') || 
                                   newMsg.message.includes('[ORDER_CANCELLED]') ||
                                   newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]') ||
-                                  newMsg.message.includes('[CANCEL_ORDER_REJECTED]') ||
                                   newMsg.message.includes('[ORDER_REQUEST]');
           
           // Skip messages from same sender type UNLESS it's a system message
