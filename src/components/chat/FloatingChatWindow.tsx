@@ -2632,18 +2632,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="flex-1 bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200"
-                  onClick={handleRejectOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id}
-                >
-                  {rejectingOrderRequestId === msg.id && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  Reject
-                </Button>
-                <Button
-                  size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   onClick={() => {
                     setPendingOrderRequest({
@@ -2659,6 +2647,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200"
+                  onClick={handleRejectOrderRequest}
+                  disabled={rejectingOrderRequestId === msg.id}
+                >
+                  {rejectingOrderRequestId === msg.id && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  Reject
                 </Button>
               </div>
             )}
