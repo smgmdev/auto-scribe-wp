@@ -2514,9 +2514,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className={`text-xl font-bold mt-1 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`}>
                   ${orderRequest.price.toLocaleString()}
                 </p>
-                <p className={`text-xs mt-0.5 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-                  {orderRequest.price.toLocaleString()} credits
-                </p>
                 {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
                   <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     <Clock className="h-3.5 w-3.5" />
@@ -2526,8 +2523,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {orderRequest.special_terms && (
-                  <p className={`text-xs mt-2 italic ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                    "{orderRequest.special_terms}"
+                  <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                    <span className="font-medium">Special Terms:</span> {orderRequest.special_terms}
                   </p>
                 )}
               </div>
