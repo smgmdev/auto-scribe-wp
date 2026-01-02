@@ -78,8 +78,9 @@ export default function AgencyPortal() {
   useEffect(() => {
     if (!agency) return;
     
-    // Store last known message timestamps for each request to detect new admin messages
-    const lastCheckedRef: { current: Record<string, string> } = { current: {} };
+    // Track messages from session start time - only notify for messages after this
+    const sessionStartTime = new Date().toISOString();
+    console.log('[AgencyPortal] Started polling for admin actions, session start:', sessionStartTime);
     
     const checkForAdminActions = async () => {
       try {
@@ -91,41 +92,39 @@ export default function AgencyPortal() {
         
         if (!requests || requests.length === 0) return;
         
-        // Check each request for new admin messages
-        for (const request of requests) {
-          const lastChecked = lastCheckedRef.current[request.id] || new Date(0).toISOString();
+        // Check for new admin messages since session started
+        const { data: newMessages } = await supabase
+          .from('service_messages')
+          .select('*')
+          .in('request_id', requests.map(r => r.id))
+          .eq('sender_type', 'admin')
+          .gt('created_at', sessionStartTime)
+          .order('created_at', { ascending: true });
+        
+        if (newMessages && newMessages.length > 0) {
+          console.log('[AgencyPortal] Found new admin messages:', newMessages.length);
           
-          const { data: newMessages } = await supabase
-            .from('service_messages')
-            .select('*')
-            .eq('request_id', request.id)
-            .eq('sender_type', 'admin')
-            .gt('created_at', lastChecked)
-            .order('created_at', { ascending: true });
-          
-          if (newMessages && newMessages.length > 0) {
-            // Update last checked time
-            lastCheckedRef.current[request.id] = newMessages[newMessages.length - 1].created_at;
+          // Process each new admin message (only once)
+          for (const msg of newMessages) {
+            const notifiedKey = `notified_${msg.id}`;
+            if (sessionStorage.getItem(notifiedKey)) continue;
+            sessionStorage.setItem(notifiedKey, 'true');
             
-            // Process each new admin message
-            for (const msg of newMessages) {
-              if (msg.message.includes('[ADMIN_JOINED]')) {
-                console.log('[AgencyPortal] Admin joined detected via polling');
-                toast({
-                  title: "Staff Joined Chat",
-                  description: "Arcana Mace Staff has entered the chat.",
-                });
-              } else if (msg.message.includes('[ADMIN_LEFT]')) {
-                console.log('[AgencyPortal] Admin left detected via polling');
-                toast({
-                  title: "Staff Left Chat",
-                  description: "Arcana Mace Staff has left the chat.",
-                });
-              }
+            if (msg.message.includes('[ADMIN_JOINED]')) {
+              console.log('[AgencyPortal] Admin joined detected via polling');
+              toast({
+                title: "Staff Joined Chat",
+                description: "Arcana Mace Staff has entered the chat.",
+              });
+              fetchRequests();
+            } else if (msg.message.includes('[ADMIN_LEFT]')) {
+              console.log('[AgencyPortal] Admin left detected via polling');
+              toast({
+                title: "Staff Left Chat",
+                description: "Arcana Mace Staff has left the chat.",
+              });
+              fetchRequests();
             }
-            
-            // Refresh requests after detecting admin actions
-            fetchRequests();
           }
         }
       } catch (error) {
@@ -133,11 +132,8 @@ export default function AgencyPortal() {
       }
     };
     
-    // Initial check
-    checkForAdminActions();
-    
-    // Poll every 3 seconds for new admin messages
-    const pollInterval = setInterval(checkForAdminActions, 3000);
+    // Poll every 2 seconds for faster notifications
+    const pollInterval = setInterval(checkForAdminActions, 2000);
     
     return () => {
       clearInterval(pollInterval);
