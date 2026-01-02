@@ -1557,17 +1557,23 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-joined' }, (payload) => {
         console.log('[ChatListPanel] Admin joined chat:', payload);
-        toast({
-          title: "Staff Joined",
-          description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
-        });
+        // Don't show notification to admins about admin actions
+        if (!isAdmin) {
+          toast({
+            title: "Staff Joined",
+            description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
+          });
+        }
       })
       .on('broadcast', { event: 'admin-left' }, (payload) => {
         console.log('[ChatListPanel] Admin left chat:', payload);
-        toast({
-          title: "Staff Left",
-          description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
-        });
+        // Don't show notification to admins about admin actions
+        if (!isAdmin) {
+          toast({
+            title: "Staff Left",
+            description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
+          });
+        }
       })
       .subscribe((status) => {
         console.log('[ChatListPanel] User broadcast channel status:', status);
@@ -1628,17 +1634,23 @@ export function ChatListPanel() {
       })
       .on('broadcast', { event: 'admin-joined' }, (payload) => {
         console.log('[ChatListPanel] Admin joined chat (agency):', payload);
-        toast({
-          title: "Staff Joined",
-          description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
-        });
+        // Don't show notification to admins about admin actions
+        if (!isAdmin) {
+          toast({
+            title: "Staff Joined",
+            description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
+          });
+        }
       })
       .on('broadcast', { event: 'admin-left' }, (payload) => {
         console.log('[ChatListPanel] Admin left chat (agency):', payload);
-        toast({
-          title: "Staff Left",
-          description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
-        });
+        // Don't show notification to admins about admin actions
+        if (!isAdmin) {
+          toast({
+            title: "Staff Left",
+            description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
+          });
+        }
       })
       .subscribe((status) => {
         console.log('[ChatListPanel] Agency broadcast channel status:', status);
