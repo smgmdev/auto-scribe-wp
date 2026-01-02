@@ -1003,11 +1003,11 @@ export function SitesView() {
         onClick={() => toggleExpand(site.id)}
       >
 
-        <CardContent className="!p-0 px-3">
-          <div className="flex items-center justify-between gap-4">
+        <CardContent className="!p-0">
+          <div className="flex items-center justify-between gap-4 pr-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <div 
-                className="relative group/logo flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden"
+                className="relative group/logo flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
