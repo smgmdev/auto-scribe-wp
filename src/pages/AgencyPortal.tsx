@@ -74,72 +74,53 @@ export default function AgencyPortal() {
     }
   }, []);
 
-  // Polling interval for admin action notifications using DB timestamps
+  // Polling for admin notifications via edge function
   useEffect(() => {
     if (!agency) return;
     
-    console.log('[AgencyPortal] Started polling for admin actions');
+    console.log('[AgencyPortal] Started polling for admin notifications');
     
-    const checkForAdminActions = async () => {
+    const checkForAdminNotifications = async () => {
       try {
-        // Get all service requests for this agency with their last read timestamps
-        const { data: requests } = await supabase
-          .from('service_requests')
-          .select('id, agency_last_read_at')
-          .eq('agency_payout_id', agency.id);
+        const response = await supabase.functions.invoke('agency-requests', {
+          body: { action: 'check_admin_notifications' },
+          headers: { 'x-agency-id': agency.id }
+        });
+
+        if (response.error) {
+          console.error('[AgencyPortal] Error checking notifications:', response.error);
+          return;
+        }
+
+        const notifications = response.data?.notifications || [];
         
-        if (!requests || requests.length === 0) return;
-        
-        for (const request of requests) {
-          // Get admin messages newer than agency_last_read_at
-          const lastReadAt = request.agency_last_read_at || '1970-01-01T00:00:00Z';
+        if (notifications.length > 0) {
+          console.log('[AgencyPortal] Found notifications:', notifications);
           
-          const { data: newMessages } = await supabase
-            .from('service_messages')
-            .select('*')
-            .eq('request_id', request.id)
-            .eq('sender_type', 'admin')
-            .gt('created_at', lastReadAt)
-            .order('created_at', { ascending: true });
-          
-          if (newMessages && newMessages.length > 0) {
-            console.log('[AgencyPortal] Found new admin messages for request:', request.id, newMessages.length);
-            
-            // Show notification for each new admin message
-            for (const msg of newMessages) {
-              if (msg.message.includes('[ADMIN_JOINED]')) {
-                console.log('[AgencyPortal] Admin joined detected');
-                toast({
-                  title: "Staff Joined Chat",
-                  description: "Arcana Mace Staff has entered the chat.",
-                });
-              } else if (msg.message.includes('[ADMIN_LEFT]')) {
-                console.log('[AgencyPortal] Admin left detected');
-                toast({
-                  title: "Staff Left Chat",
-                  description: "Arcana Mace Staff has left the chat.",
-                });
-              }
+          for (const notif of notifications) {
+            if (notif.type === 'admin_joined') {
+              toast({
+                title: "Staff Joined Chat",
+                description: "Arcana Mace Staff has entered the chat.",
+              });
+            } else if (notif.type === 'admin_left') {
+              toast({
+                title: "Staff Left Chat",
+                description: "Arcana Mace Staff has left the chat.",
+              });
             }
-            
-            // Update agency_last_read_at to the latest message timestamp
-            const latestTimestamp = newMessages[newMessages.length - 1].created_at;
-            await supabase
-              .from('service_requests')
-              .update({ agency_last_read_at: latestTimestamp })
-              .eq('id', request.id);
-            
-            // Refresh requests
-            fetchRequests();
           }
+          
+          // Refresh requests after notifications
+          fetchRequests();
         }
       } catch (error) {
-        console.error('[AgencyPortal] Error checking for admin actions:', error);
+        console.error('[AgencyPortal] Error in notification polling:', error);
       }
     };
     
     // Poll every 2 seconds
-    const pollInterval = setInterval(checkForAdminActions, 2000);
+    const pollInterval = setInterval(checkForAdminNotifications, 2000);
     
     return () => {
       clearInterval(pollInterval);

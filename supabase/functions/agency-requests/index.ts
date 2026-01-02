@@ -85,6 +85,59 @@ serve(async (req) => {
         status: 200,
       });
 
+    } else if (action === "check_admin_notifications") {
+      // Check for new admin messages since agency_last_read_at
+      const { data: requests, error: reqError } = await supabaseAdmin
+        .from("service_requests")
+        .select("id, agency_last_read_at")
+        .eq("agency_payout_id", agencyId);
+
+      if (reqError) throw new Error(reqError.message);
+      if (!requests || requests.length === 0) {
+        return new Response(JSON.stringify({ notifications: [] }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      const notifications: any[] = [];
+
+      for (const request of requests) {
+        const lastReadAt = request.agency_last_read_at || '1970-01-01T00:00:00Z';
+        
+        const { data: newMessages } = await supabaseAdmin
+          .from("service_messages")
+          .select("*")
+          .eq("request_id", request.id)
+          .eq("sender_type", "admin")
+          .gt("created_at", lastReadAt)
+          .order("created_at", { ascending: true });
+
+        if (newMessages && newMessages.length > 0) {
+          for (const msg of newMessages) {
+            if (msg.message.includes('[ADMIN_JOINED]')) {
+              notifications.push({ type: 'admin_joined', requestId: request.id, messageId: msg.id });
+            } else if (msg.message.includes('[ADMIN_LEFT]')) {
+              notifications.push({ type: 'admin_left', requestId: request.id, messageId: msg.id });
+            }
+          }
+
+          // Update agency_last_read_at to the latest message timestamp
+          const latestTimestamp = newMessages[newMessages.length - 1].created_at;
+          await supabaseAdmin
+            .from("service_requests")
+            .update({ agency_last_read_at: latestTimestamp })
+            .eq("id", request.id);
+        }
+      }
+
+      logStep("Admin notifications checked", { count: notifications.length });
+
+      return new Response(JSON.stringify({ notifications }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
     } else if (action === "respond") {
       // Agency responds to a request
       if (!request_id || !message || !status) {
