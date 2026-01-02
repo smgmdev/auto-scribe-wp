@@ -3444,9 +3444,33 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {pendingOrder.media_site_name}
                   </p>
                   <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <span>{pendingOrder.price.toLocaleString()} credits</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 cursor-help">
+                            {pendingOrder.price.toLocaleString()} credits
+                            <Info className="h-3 w-3" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <p>Payment in credits. You should charge your account with appropriate amount of credits to place an order. 1 credit = 1 USD.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
-                      <span>• {formatDeliveryDuration(pendingOrder.delivery_duration)}</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1 cursor-help">
+                              • {formatDeliveryDuration(pendingOrder.delivery_duration)}
+                              <Info className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs">
+                            <p>Estimated delivery time for the order.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                     {pendingOrder.special_terms && (
                       <TooltipProvider>
