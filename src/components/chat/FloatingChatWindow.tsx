@@ -3257,6 +3257,50 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         )}
 
+        {/* Pending Order Banner - Sticky */}
+        {hasExistingOrderRequest && !globalChatRequest?.order && !loadingMessages && (() => {
+          const pendingOrder = getLastOrderRequestData();
+          if (!pendingOrder) return null;
+          return (
+            <div className="sticky top-0 z-10 mx-3 mt-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="flex items-start gap-3">
+                {pendingOrder.media_site_favicon && (
+                  <img 
+                    src={pendingOrder.media_site_favicon} 
+                    alt="" 
+                    className="w-8 h-8 rounded-lg object-cover shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                    <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
+                      Pending Order Request
+                    </span>
+                  </div>
+                  <p className="font-medium text-sm text-foreground">
+                    {pendingOrder.media_site_name}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <span>{pendingOrder.price.toLocaleString()} credits</span>
+                    {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
+                      <span>• {formatDeliveryDuration(pendingOrder.delivery_duration)}</span>
+                    )}
+                  </div>
+                  {pendingOrder.special_terms && (
+                    <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                      <span className="font-medium">Terms:</span> {pendingOrder.special_terms}
+                    </p>
+                  )}
+                  <p className="text-xs mt-2 text-amber-600 dark:text-amber-400 font-medium">
+                    {actualSenderType === 'agency' ? 'Waiting for client approval' : 'Awaiting your response'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Messages */}
         <ScrollArea className="flex-1">
           {loadingMessages ? (
@@ -3266,49 +3310,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
           ) : (
             <div className="space-y-2 p-3">
-              {/* Pending Order Banner */}
-              {hasExistingOrderRequest && !globalChatRequest?.order && (() => {
-                const pendingOrder = getLastOrderRequestData();
-                if (!pendingOrder) return null;
-                return (
-                  <div className="mb-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-start gap-3">
-                      {pendingOrder.media_site_favicon && (
-                        <img 
-                          src={pendingOrder.media_site_favicon} 
-                          alt="" 
-                          className="w-8 h-8 rounded-lg object-cover shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                          <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
-                            Pending Order Request
-                          </span>
-                        </div>
-                        <p className="font-medium text-sm text-foreground">
-                          {pendingOrder.media_site_name}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          <span>{pendingOrder.price.toLocaleString()} credits</span>
-                          {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
-                            <span>• {formatDeliveryDuration(pendingOrder.delivery_duration)}</span>
-                          )}
-                        </div>
-                        {pendingOrder.special_terms && (
-                          <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                            <span className="font-medium">Terms:</span> {pendingOrder.special_terms}
-                          </p>
-                        )}
-                        <p className="text-xs mt-2 text-amber-600 dark:text-amber-400 font-medium">
-                          {actualSenderType === 'agency' ? 'Waiting for client approval' : 'Awaiting your response'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
               {messages.map((msg) => {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
