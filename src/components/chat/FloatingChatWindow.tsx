@@ -833,15 +833,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
       
       toast({
-        title: "Order request cancelled",
-        description: "The order request has been removed.",
+        title: "Offer cancelled",
+        description: "The offer has been removed.",
       });
     } catch (error: any) {
       console.error('Error cancelling order request:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to cancel order request.",
+        description: "Failed to cancel offer.",
       });
     } finally {
       setCancellingOrderRequestId(null);
@@ -2601,15 +2601,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           setMessages(prev => prev.filter(m => m.id !== msg.id));
           
           toast({
-            title: "Order request cancelled",
-            description: "The order request has been removed.",
+            title: "Offer cancelled",
+            description: "The offer has been removed.",
           });
         } catch (error: any) {
           console.error('Error cancelling order request:', error);
           toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to cancel order request.",
+            description: "Failed to cancel offer.",
           });
         } finally {
           setCancellingOrderRequestId(null);
@@ -2665,7 +2665,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div className="flex items-center gap-2 mb-1">
                   <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
-                    Order Request
+                    {isOwnMessage ? 'Offer' : 'Order Request'}
                   </span>
                 </div>
                 <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
@@ -3138,7 +3138,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         handleOpenSendOrderDialog();
                       }}
                     >
-                      {hasExistingOrderRequest ? 'Resend Order' : 'Send Order'}
+                      {hasExistingOrderRequest ? 'Resend Offer' : 'Send Offer'}
                     </DropdownMenuItem>
                   )}
                   {hasOpenDispute && (
@@ -3342,7 +3342,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div className="flex items-center gap-2 mb-0.5">
                     <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                     <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
-                      Pending Order Request
+                      {isClient ? 'Pending Order Request' : 'Pending Offer'}
                     </span>
                   </div>
                   <p className="font-medium text-sm text-foreground">
@@ -3407,7 +3407,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         {cancellingOrderRequestId === pendingOrder.messageId && (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         )}
-                        Cancel Request
+                        Cancel Offer
                       </Button>
                     </div>
                   )}
