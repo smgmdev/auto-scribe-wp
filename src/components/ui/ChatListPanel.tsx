@@ -1754,7 +1754,7 @@ export function ChatListPanel() {
 
   // Format preview message - make it user-friendly by cleaning up technical content
   // Returns { text, type } where type can be used for icon display
-  const formatPreviewMessage = (message: string | undefined, description: string, title: string): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal' } => {
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string, isAgencyView: boolean = false): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal' } => {
     if (message) {
       let cleanMessage = message;
       
@@ -1766,7 +1766,7 @@ export function ChatListPanel() {
         return { text: 'Arcana Mace Staff has left the chat', type: 'status' };
       }
       if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
-        return { text: 'Order Request', type: 'order' };
+        return { text: isAgencyView ? 'Offer Sent' : 'Order Request', type: 'order' };
       }
       if (cleanMessage.startsWith('[ORDER_PLACED]')) {
         return { text: 'Order Placed', type: 'order_placed' };
@@ -1826,7 +1826,7 @@ export function ChatListPanel() {
         .replace(/^>\s*\[[\w-]+\].*?\n?/g, '') // Remove "> [uuid...]" patterns
         .replace(/^:\s*\S+\s+/g, '') // Remove ":quote " prefix patterns
         .replace(/\[[\w-]{36,}\]/g, '') // Remove standalone UUIDs in brackets
-        .replace(/\[ORDER_REQUEST\]\{.*\}/g, 'Order Request') // Handle inline order request
+        .replace(/\[ORDER_REQUEST\]\{.*\}/g, isAgencyView ? 'Offer Sent' : 'Order Request') // Handle inline order request
         .replace(/\[PAYMENT_\w+\]\{.*\}/g, 'Payment Update') // Handle inline payment
         .replace(/\[DELIVERY_\w+\]\{.*\}/g, 'Delivery Update') // Handle inline delivery
         .replace(/\[STATUS_\w+\]\{.*\}/g, 'Status Update') // Handle inline status
@@ -1897,14 +1897,16 @@ export function ChatListPanel() {
     message, 
     description, 
     title, 
-    hasUnread 
+    hasUnread,
+    isAgencyView = false
   }: { 
     message: string | undefined; 
     description: string; 
     title: string; 
     hasUnread: boolean;
+    isAgencyView?: boolean;
   }) => {
-    const preview = formatPreviewMessage(message, description, title);
+    const preview = formatPreviewMessage(message, description, title, isAgencyView);
     const typeIcon = getMessageTypeIcon(preview.type);
     const isReply = isReplyMessage(message);
     
@@ -2016,6 +2018,7 @@ export function ChatListPanel() {
               description={item.description} 
               title={item.title}
               hasUnread={hasUnread}
+              isAgencyView={type === 'agency-request'}
             />
           </div>
         </div>
