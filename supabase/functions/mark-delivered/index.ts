@@ -66,7 +66,7 @@ serve(async (req) => {
       .eq("order_id", order_id)
       .maybeSingle();
 
-    // Update order - set read to false so user sees notification
+    // Update order - set read to false so user and agency see notification
     const { data: order, error: updateError } = await supabaseClient
       .from("orders")
       .update({
@@ -75,6 +75,7 @@ serve(async (req) => {
         delivery_notes,
         delivered_at: new Date().toISOString(),
         read: false, // Mark as unread so user gets notification
+        agency_read: false, // Mark as unread so agency gets notification
       })
       .eq("id", order_id)
       .eq("status", "paid")

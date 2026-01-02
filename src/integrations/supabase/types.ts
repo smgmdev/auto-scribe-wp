@@ -632,6 +632,7 @@ export type Database = {
         Row: {
           accepted_at: string | null
           agency_payout_cents: number
+          agency_read: boolean
           amount_cents: number
           created_at: string
           delivered_at: string | null
@@ -654,6 +655,7 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           agency_payout_cents?: number
+          agency_read?: boolean
           amount_cents: number
           created_at?: string
           delivered_at?: string | null
@@ -676,6 +678,7 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           agency_payout_cents?: number
+          agency_read?: boolean
           amount_cents?: number
           created_at?: string
           delivered_at?: string | null
