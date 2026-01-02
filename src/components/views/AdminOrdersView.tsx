@@ -118,8 +118,8 @@ export function AdminOrdersView() {
             table: 'disputes'
           },
           (payload) => {
-            const updated = payload.new as { id: string; order_id: string; service_request_id: string; read: boolean; status: string };
-            // Update local state for read status changes
+            const updated = payload.new as { id: string; order_id: string; service_request_id: string; admin_read: boolean; status: string };
+            // Update local state for admin_read status changes
             setDisputes(prev => {
               // If dispute is now resolved (not open), remove it
               if (updated.status !== 'open') {
@@ -129,9 +129,9 @@ export function AdminOrdersView() {
                 setUnreadDisputesCount(unreadCount);
                 return newDisputes;
               }
-              // Otherwise update the dispute - unread count is already synced by the component that marked it read
+              // Otherwise update the dispute - map admin_read to local read field
               return prev.map(d => 
-                d.id === updated.id ? { ...d, ...updated } : d
+                d.id === updated.id ? { ...d, read: updated.admin_read } : d
               );
             });
           }
@@ -159,13 +159,15 @@ export function AdminOrdersView() {
   const fetchDisputedOrders = async () => {
     const { data } = await supabase
       .from('disputes')
-      .select('id, order_id, service_request_id, read')
+      .select('id, order_id, service_request_id, admin_read')
       .eq('status', 'open');
     
     if (data) {
-      setDisputes(data);
-      // Sync unread count to store
-      const unreadCount = data.filter(d => !d.read).length;
+      // Map admin_read to read for local state compatibility
+      const mappedData = data.map(d => ({ ...d, read: (d as any).admin_read }));
+      setDisputes(mappedData);
+      // Sync unread count to store (using admin_read)
+      const unreadCount = data.filter(d => !(d as any).admin_read).length;
       setUnreadDisputesCount(unreadCount);
     }
   };
@@ -347,12 +349,12 @@ export function AdminOrdersView() {
         return;
       }
 
-      // Mark the dispute as read when investigating (if there's a dispute for this order)
+      // Mark the dispute as read by admin when investigating (if there's a dispute for this order)
       const dispute = disputes.find(d => d.order_id === targetOrder.id);
       if (dispute && !dispute.read) {
         await supabase
           .from('disputes')
-          .update({ read: true })
+          .update({ admin_read: true })
           .eq('id', dispute.id);
         
         // Update local state
@@ -495,12 +497,12 @@ export function AdminOrdersView() {
     // Mark order as read when opening details
     markOrderAsRead(order.id);
     
-    // Also mark dispute as read if this is a disputed order
+    // Also mark dispute as read by admin if this is a disputed order
     const dispute = disputes.find(d => d.order_id === order.id);
     if (dispute && !dispute.read) {
       await supabase
         .from('disputes')
-        .update({ read: true })
+        .update({ admin_read: true })
         .eq('id', dispute.id);
       
       // Update local state

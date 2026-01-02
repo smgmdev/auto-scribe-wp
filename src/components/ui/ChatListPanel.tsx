@@ -366,7 +366,7 @@ export function ChatListPanel() {
         status,
         reason,
         created_at,
-        read,
+        admin_read,
         service_request:service_requests(
           id,
           title,
@@ -406,8 +406,8 @@ export function ChatListPanel() {
 
       setDisputes(disputesWithMessages as unknown as DisputeItem[]);
       
-      // Sync unread count to store
-      const unreadCount = data.filter(d => !d.read).length;
+      // Sync unread count to store (using admin_read for admin)
+      const unreadCount = data.filter(d => !(d as any).admin_read).length;
       setUnreadDisputesCount(unreadCount);
     }
   };
@@ -1181,21 +1181,21 @@ export function ChatListPanel() {
         (payload) => {
           if (!isAdmin) return;
           
-          const updated = payload.new as { id: string; service_request_id: string; read: boolean; status: string };
+          const updated = payload.new as { id: string; service_request_id: string; admin_read: boolean; status: string };
           
           setDisputes(prev => {
             // If dispute is resolved, remove it
             if (updated.status !== 'open') {
               const newDisputes = prev.filter(d => d.id !== updated.id);
-              const unreadCount = newDisputes.filter(d => !d.read).length;
+              const unreadCount = newDisputes.filter(d => !(d as any).admin_read).length;
               setUnreadDisputesCount(unreadCount);
               return newDisputes;
             }
-            // Update the dispute read status
+            // Update the dispute admin_read status
             const newDisputes = prev.map(d => 
-              d.id === updated.id ? { ...d, read: updated.read } : d
+              d.id === updated.id ? { ...d, admin_read: updated.admin_read } : d
             );
-            const unreadCount = newDisputes.filter(d => !d.read).length;
+            const unreadCount = newDisputes.filter(d => !(d as any).admin_read).length;
             setUnreadDisputesCount(unreadCount);
             return newDisputes;
           });
@@ -2099,7 +2099,7 @@ export function ChatListPanel() {
   const myEngagementsUnreadChatsCount = myEngagements.filter(e => e.status !== 'cancelled' && (!e.read || (e.unreadCount || 0) > 0)).length;
   const serviceRequestsUnreadChatsCount = serviceRequests.filter(r => r.status !== 'cancelled' && (!r.read || (r.unreadCount || 0) > 0)).length;
   const totalUnread = isAdmin 
-    ? disputes.filter(d => !d.read).length + investigationsUnreadChatsCount
+    ? disputes.filter(d => !(d as any).admin_read).length + investigationsUnreadChatsCount
     : myEngagementsUnreadChatsCount + serviceRequestsUnreadChatsCount;
 
   // Filter and sort items based on search query and last message time
@@ -2279,9 +2279,9 @@ export function ChatListPanel() {
                 >
                   <AlertTriangle className="h-3.5 w-3.5 mr-1" />
                   Disputes
-                  {disputes.filter(d => !d.read).length > 0 && (
+                  {disputes.filter(d => !(d as any).admin_read).length > 0 && (
                     <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-destructive text-destructive-foreground px-1">
-                      {disputes.filter(d => !d.read).length}
+                      {disputes.filter(d => !(d as any).admin_read).length}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -2342,15 +2342,15 @@ export function ChatListPanel() {
                       <div
                         key={dispute.id}
                         className={`flex items-start gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
-                          !dispute.read ? 'bg-red-50 dark:bg-red-950/30 border-l-2 border-l-red-500' : ''
+                          !(dispute as any).admin_read ? 'bg-red-50 dark:bg-red-950/30 border-l-2 border-l-red-500' : ''
                         }`}
                         onClick={async () => {
                           // Only mark as read and decrement if currently unread
-                          if (!dispute.read) {
-                            // Mark as read in database
+                          if (!(dispute as any).admin_read) {
+                            // Mark as read by admin in database
                             await supabase
                               .from('disputes')
-                              .update({ read: true })
+                              .update({ admin_read: true })
                               .eq('id', dispute.id);
                             
                             // Decrement global count (synced with AdminOrdersView)
@@ -2358,7 +2358,7 @@ export function ChatListPanel() {
                             
                             // Update local state
                             setDisputes(prev => prev.map(d => 
-                              d.id === dispute.id ? { ...d, read: true } : d
+                              d.id === dispute.id ? { ...d, admin_read: true } : d
                             ));
                           }
                           

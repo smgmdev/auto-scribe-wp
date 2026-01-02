@@ -430,6 +430,7 @@ export type Database = {
       disputes: {
         Row: {
           admin_notes: string | null
+          admin_read: boolean
           created_at: string
           id: string
           order_id: string
@@ -443,6 +444,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          admin_read?: boolean
           created_at?: string
           id?: string
           order_id: string
@@ -456,6 +458,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          admin_read?: boolean
           created_at?: string
           id?: string
           order_id?: string
