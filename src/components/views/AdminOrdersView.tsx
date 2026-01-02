@@ -59,6 +59,7 @@ export function AdminOrdersView() {
   const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [deliveryConfirmDialogOpen, setDeliveryConfirmDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -1046,10 +1047,7 @@ export function AdminOrdersView() {
                       <Button 
                         variant="outline"
                         className="w-full hover:bg-foreground hover:text-background" 
-                        onClick={() => {
-                          setDetailsDialogOpen(false);
-                          openDeliveryDialog(selectedOrder);
-                        }}
+                        onClick={() => setDeliveryConfirmDialogOpen(true)}
                       >
                         <Send className="h-4 w-4 mr-2" />
                         Mark Delivered
@@ -1121,6 +1119,32 @@ export function AdminOrdersView() {
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Mark Delivered Confirmation Dialog */}
+      <AlertDialog open={deliveryConfirmDialogOpen} onOpenChange={setDeliveryConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delivery</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this order as delivered? This will prompt you to enter the delivery URL.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                setDeliveryConfirmDialogOpen(false);
+                setDetailsDialogOpen(false);
+                if (selectedOrder) {
+                  openDeliveryDialog(selectedOrder);
+                }
+              }}
+            >
+              Continue
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
