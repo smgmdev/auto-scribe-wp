@@ -1280,21 +1280,21 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md transition-all duration-300 cursor-pointer" 
+        className="group hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden" 
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
-        <CardContent className="p-3">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+        <CardContent className="!p-0">
+          <div className="flex items-stretch">
+            <div className="flex items-center min-w-0 flex-1">
               <div 
-                className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden"
+                className="relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img 
                   src={site.favicon || getFaviconUrl(site.link)} 
                   alt={`${site.name} logo`} 
-                  className="h-5 w-5 object-contain" 
+                  className="h-full w-full object-cover" 
                   onError={e => {
                     e.currentTarget.style.display = 'none';
                     (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
@@ -1307,17 +1307,17 @@ export function SitesView() {
                       e.stopPropagation();
                       handleOpenLogoDialog(site.id, site.favicon, 'media');
                     }}
-                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
+                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity"
                   >
                     <Edit2 className="h-3 w-3 text-foreground" />
                   </button>
                 )}
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 ml-3">
                 <h3 className="text-sm break-words">{site.name}</h3>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-1 justify-end">
+            <div className="flex items-center gap-2 flex-shrink-0 pr-3">
               {site.country && (
                 <Badge variant="outline" className="text-xs">
                   {site.country}
@@ -1358,7 +1358,7 @@ export function SitesView() {
           {/* Expanded Section */}
           {isExpanded && (
             <div 
-              className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+              className="pt-1.5 pb-2 px-3 border-t border-border space-y-2 animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
               {site.about && (
