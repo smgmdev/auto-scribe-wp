@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle, Paperclip, Loader2 } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Search, Reply, ShoppingCart, CreditCard, Truck, Bell, XCircle, AlertTriangle, Paperclip, Loader2, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -1855,10 +1855,10 @@ export function ChatListPanel() {
   };
 
   // Get icon for message type
-  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal') => {
+  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
     switch (type) {
       case 'order':
-        return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return isAgencyView ? <Tag className="h-3 w-3 shrink-0 text-muted-foreground" /> : <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_placed':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_cancelled':
@@ -1907,7 +1907,7 @@ export function ChatListPanel() {
     isAgencyView?: boolean;
   }) => {
     const preview = formatPreviewMessage(message, description, title, isAgencyView);
-    const typeIcon = getMessageTypeIcon(preview.type);
+    const typeIcon = getMessageTypeIcon(preview.type, isAgencyView);
     const isReply = isReplyMessage(message);
     
     // Attachment type should always show in grey/muted color
