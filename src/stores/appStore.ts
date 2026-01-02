@@ -102,6 +102,7 @@ interface AppState {
   // Admin dispute notifications (synced between Order Management and Messaging Widget)
   unreadDisputesCount: number;
   setUnreadDisputesCount: (count: number) => void;
+  incrementUnreadDisputesCount: () => void;
   decrementUnreadDisputesCount: () => void;
   
   // Admin engagement notifications (for Global Engagements)
@@ -269,6 +270,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // Admin dispute notifications (synced between Order Management and Messaging Widget)
   unreadDisputesCount: 0,
   setUnreadDisputesCount: (count) => set({ unreadDisputesCount: count }),
+  incrementUnreadDisputesCount: () => set((state) => ({ 
+    unreadDisputesCount: state.unreadDisputesCount + 1 
+  })),
   decrementUnreadDisputesCount: () => set((state) => ({ 
     unreadDisputesCount: Math.max(0, state.unreadDisputesCount - 1) 
   })),

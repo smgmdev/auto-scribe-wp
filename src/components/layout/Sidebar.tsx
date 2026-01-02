@@ -120,6 +120,8 @@ export function Sidebar({
     setUnreadOrdersCount,
     unreadDisputesCount,
     setUnreadDisputesCount,
+    incrementUnreadDisputesCount,
+    decrementUnreadDisputesCount,
     agencyUnreadWpSubmissionsCount,
     setAgencyUnreadWpSubmissionsCount,
     agencyUnreadMediaSubmissionsCount,
@@ -536,6 +538,50 @@ export function Sidebar({
           // Increment the admin engagement count when a new request is created
           if (payload.new && (payload.new as any).status !== 'cancelled') {
             incrementAdminUnreadEngagementsCount();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for admin disputes notifications (new disputes)
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-disputes-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'disputes'
+        },
+        (payload) => {
+          console.log('[Sidebar] New dispute created:', payload.new);
+          // Increment the admin disputes count when a new dispute is created
+          if (payload.new && (payload.new as any).status === 'open') {
+            incrementUnreadDisputesCount();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'disputes'
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          // If dispute was marked as read, decrement count
+          if (old?.read === false && updated.read === true) {
+            decrementUnreadDisputesCount();
           }
         }
       )
