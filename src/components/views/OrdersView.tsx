@@ -90,13 +90,15 @@ export function OrdersView() {
   const [activeTab, setActiveTab] = useState<string>('active');
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const { toast } = useToast();
 
   // Mark all orders in the current tab as read when switching tabs
   // Only applies to tabs with notifications: active, disputes, history (cancelled)
+  // Skip on initial load to preserve notification badges until user actually views content
   useEffect(() => {
     const markTabOrdersAsRead = async () => {
-      if (isAdmin || !user || orders.length === 0) return;
+      if (isAdmin || !user || orders.length === 0 || !initialLoadComplete) return;
       
       // Get the unread order IDs that belong to the current tab
       let unreadTabOrderIds: string[] = [];
@@ -133,7 +135,7 @@ export function OrdersView() {
     };
     
     markTabOrdersAsRead();
-  }, [activeTab, orders.length, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadHistoryCount]);
+  }, [activeTab, initialLoadComplete, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadHistoryCount]);
 
   // Timer tick for live countdown updates
   useEffect(() => {
@@ -174,6 +176,8 @@ export function OrdersView() {
       setOrders(data || []);
     }
     setLoading(false);
+    // Mark initial load as complete after a short delay to allow render
+    setTimeout(() => setInitialLoadComplete(true), 500);
   };
 
   // Fetch user's open disputes to identify which orders are in dispute
