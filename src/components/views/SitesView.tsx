@@ -1786,17 +1786,26 @@ export function SitesView() {
                                       {agency.about && (
                                         <p className="text-xs text-muted-foreground">{agency.about}</p>
                                       )}
-                                      {agency.link && (
-                                        <a 
-                                          href={ensureHttps(agency.link)}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                      <div className="flex items-center justify-between">
+                                        {agency.link && (
+                                          <a 
+                                            href={ensureHttps(agency.link)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                                          >
+                                            <span className="truncate">{agency.link.replace(/^https?:\/\//, '')}</span>
+                                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                          </a>
+                                        )}
+                                        {!agency.link && <div />}
+                                        <Button
+                                          size="sm"
+                                          className="h-7 px-3 text-xs bg-black text-white hover:bg-gray-800"
                                         >
-                                          <span className="truncate">{agency.link.replace(/^https?:\/\//, '')}</span>
-                                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                        </a>
-                                      )}
+                                          View Details
+                                        </Button>
+                                      </div>
                                     </div>
                                   )}
                                 </CardContent>
