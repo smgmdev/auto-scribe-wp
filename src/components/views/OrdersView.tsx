@@ -246,12 +246,12 @@ export function OrdersView() {
         )
         .subscribe();
       
-      // Subscribe to admin action notifications (order cancellations, dispute resolutions)
+      // Subscribe to admin action notifications (order cancellations, dispute resolutions, deliveries)
       const adminActionChannel = supabase
         .channel(`notify-${user.id}-admin-action`)
         .on('broadcast', { event: 'admin-action' }, (payload) => {
           console.log('[OrdersView] Admin action received:', payload);
-          const data = payload.payload as { action: string; message: string; reason?: string };
+          const data = payload.payload as { action: string; message: string; reason?: string; mediaSiteName?: string };
           
           if (data.action === 'order-cancelled') {
             toast({
@@ -270,6 +270,14 @@ export function OrdersView() {
             });
             fetchOrders();
             fetchUserDisputes();
+          } else if (data.action === 'order-delivered') {
+            toast({
+              title: "Order Delivered!",
+              description: data.message || `Your order for ${data.mediaSiteName || 'a media site'} has been delivered.`,
+            });
+            // Increment the completed count for the notification badge
+            incrementUserUnreadCompletedCount();
+            fetchOrders();
           }
         })
         .subscribe();

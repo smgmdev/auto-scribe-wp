@@ -411,8 +411,39 @@ export function AgencyRequestsView() {
       )
       .subscribe();
 
+    // Subscribe to admin action notifications (order deliveries, dispute resolutions)
+    const adminActionChannel = supabase
+      .channel(`notify-${agencyPayoutId}-admin-action`)
+      .on('broadcast', { event: 'admin-action' }, (payload) => {
+        console.log('[AgencyRequestsView] Admin action received:', payload);
+        const data = payload.payload as { action: string; message: string; mediaSiteName?: string };
+        
+        if (data.action === 'order-delivered') {
+          toast({
+            title: "Order Delivered",
+            description: data.message || `Order for ${data.mediaSiteName || 'a media site'} has been marked as delivered.`,
+          });
+          fetchRequests();
+        } else if (data.action === 'dispute-resolved') {
+          toast({
+            title: "Dispute Resolved",
+            description: data.message,
+          });
+          fetchRequests();
+        } else if (data.action === 'order-cancelled') {
+          toast({
+            title: "Order Cancelled",
+            description: data.message,
+            variant: "destructive",
+          });
+          fetchRequests();
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(requestsChannel);
+      supabase.removeChannel(adminActionChannel);
     };
   }, [agencyPayoutId]);
 
