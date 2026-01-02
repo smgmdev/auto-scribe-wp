@@ -3394,8 +3394,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Button>
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300 hover:border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500"
+                        className="bg-black text-white border border-black hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
                         onClick={handleBannerRejectOrderRequest}
                         disabled={rejectingOrderRequestId === pendingOrder.messageId}
                       >
