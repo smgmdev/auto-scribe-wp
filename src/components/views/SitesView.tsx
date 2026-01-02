@@ -2408,26 +2408,15 @@ export function SitesView() {
                 {selectedAgency.link && (
                   <div>
                     <p className="text-sm text-muted-foreground">Website</p>
-                    <div className="flex items-center gap-2">
-                      <a 
-                        href={ensureHttps(selectedAgency.link)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-accent hover:underline flex items-center gap-1"
-                      >
-                        {extractDomain(selectedAgency.link)}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                      <button
-                        onClick={() => { 
-                          navigator.clipboard.writeText(selectedAgency.link); 
-                          toast({ title: 'Copied to clipboard' }); 
-                        }}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <Copy className="h-3 w-3" />
-                      </button>
-                    </div>
+                    <a 
+                      href={ensureHttps(selectedAgency.link)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent hover:underline flex items-center gap-1 w-fit"
+                    >
+                      {extractDomain(selectedAgency.link)}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
                 )}
               </div>
