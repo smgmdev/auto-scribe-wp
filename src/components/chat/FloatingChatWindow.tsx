@@ -2104,6 +2104,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
+  // Parse all attachments from a message (for briefs with multiple files)
+  const parseAllAttachments = (message: string): { url: string; name: string; type: string }[] => {
+    const attachments: { url: string; name: string; type: string }[] = [];
+    const regex = /\[ATTACHMENT\](.*?)\[\/ATTACHMENT\]/g;
+    let match;
+    while ((match = regex.exec(message)) !== null) {
+      try {
+        attachments.push(JSON.parse(match[1]));
+      } catch {
+        // Skip invalid JSON
+      }
+    }
+    return attachments;
+  };
+
   const getMessageWithoutAttachment = (message: string): string => {
     // Remove attachment tags
     let cleanMessage = message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
@@ -2298,7 +2313,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Render message content (simplified version)
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: ReturnType<typeof parseQuote>) => {
     let displayMessage = msg.message;
-    const attachment = parseAttachment(msg.message);
+    const attachments = parseAllAttachments(msg.message);
+    const attachment = attachments.length > 0 ? attachments[0] : null;
     const orderPlaced = parseOrderPlaced(msg.message);
     const orderCancelled = parseOrderCancelled(msg.message);
     const cancelRequest = parseCancelOrderRequest(msg.message);
@@ -2825,35 +2841,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {displayMessage && (
           <p className="text-sm whitespace-pre-wrap break-words">{displayMessage}</p>
         )}
-        {attachment && (
-          <div className="mt-2">
-            {attachment.type.startsWith('image/') ? (
-              <div 
-                className="cursor-pointer"
-                onClick={() => setImagePreview({ url: attachment.url, name: attachment.name })}
-              >
-                <img 
-                  src={attachment.url} 
-                  alt={attachment.name}
-                  className="max-h-40 rounded-lg object-cover"
-                />
-                <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
-                  <ImageIcon className="h-3 w-3" />
-                  {attachment.name}
-                </p>
+        {attachments.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {attachments.map((att, index) => (
+              <div key={index}>
+                {att.type.startsWith('image/') ? (
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => setImagePreview({ url: att.url, name: att.name })}
+                  >
+                    <img 
+                      src={att.url} 
+                      alt={att.name}
+                      className="max-h-40 rounded-lg object-cover"
+                    />
+                    <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
+                      <ImageIcon className="h-3 w-3" />
+                      {att.name}
+                    </p>
+                  </div>
+                ) : (
+                  <div 
+                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+                      isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
+                    }`}
+                    onClick={() => setFileWebView({ url: att.url, name: att.name })}
+                  >
+                    <FileText className={`h-5 w-5 ${att.type === 'application/pdf' ? 'text-red-500' : 'text-blue-500'}`} />
+                    <span className="text-sm truncate flex-1">{att.name}</span>
+                    <Download className="h-4 w-4 opacity-70" />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div 
-                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
-                  isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
-                }`}
-                onClick={() => setFileWebView({ url: attachment.url, name: attachment.name })}
-              >
-                <FileText className={`h-5 w-5 ${attachment.type === 'application/pdf' ? 'text-red-500' : 'text-blue-500'}`} />
-                <span className="text-sm truncate flex-1">{attachment.name}</span>
-                <Download className="h-4 w-4 opacity-70" />
-              </div>
-            )}
+            ))}
           </div>
         )}
         <p className="text-xs opacity-50 mt-1">
