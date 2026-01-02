@@ -181,6 +181,7 @@ export function AgencyRequestsView() {
             id,
             status,
             delivery_status,
+            delivery_deadline,
             amount_cents,
             created_at,
             delivered_at,
