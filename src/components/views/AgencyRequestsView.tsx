@@ -108,6 +108,7 @@ export function AgencyRequestsView() {
         description,
         status,
         agency_read,
+        agency_last_read_at,
         cancellation_reason,
         cancelled_at,
         created_at,
@@ -142,34 +143,37 @@ export function AgencyRequestsView() {
       console.log('[AgencyRequestsView] Raw data from Supabase:', data.slice(0, 2).map(r => ({ id: r.id, order: r.order })));
       
       const mappedRequests = data.map(r => {
-        const isUnread = !(r as any).agency_read;
         const requestMessages = messagesByRequest[r.id] || [];
-        // Count client messages (counterparty messages for agency)
-        const clientMessageCount = requestMessages.filter(m => m.sender_type === 'client').length;
+        const lastReadAt = (r as any).agency_last_read_at;
+        
+        // Check if there are any client or admin messages after agency_last_read_at
+        const hasUnreadMessages = requestMessages.some(msg => {
+          if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
+            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+              return true;
+            }
+          }
+          return false;
+        });
         
         // Normalize order - Supabase returns array for foreign key joins
         const rawOrder = (r as any).order;
         const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
         
-        console.log('[AgencyRequestsView] Request', r.id.slice(0, 8), '- rawOrder:', rawOrder, '- normalized:', normalizedOrder);
-        
-        // Don't set unreadMessageCounts here - that's for tracking NEW messages
-        // while a chat is open/minimized. The initial unread state is tracked via item.read
-        
         return {
           ...r,
-          read: (r as any).agency_read,
+          read: !hasUnreadMessages, // Use message-based unread tracking
           order: normalizedOrder
         };
       }) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
 
-      // Count unread: count requests where agency_read = false AND not cancelled
-      const unreadCount = data.filter(r => !(r as any).agency_read && r.status !== 'cancelled').length;
+      // Count unread using the same message-based logic
+      const unreadCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
       
       // Count unread cancelled requests
-      const unreadCancelledCount = data.filter(r => !(r as any).agency_read && r.status === 'cancelled').length;
+      const unreadCancelledCount = mappedRequests.filter(r => !r.read && r.status === 'cancelled').length;
       setAgencyUnreadCancelledCount(unreadCancelledCount);
 
       // Fetch orders for this agency's service requests
