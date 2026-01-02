@@ -79,11 +79,14 @@ export default function AgencyPortal() {
       fetchRequests();
       
       // Subscribe to real-time admin notifications
-      const notifyChannel = supabase.channel(`notify-${agency.id}`);
+      console.log('[AgencyPortal] Setting up notification channel for agency:', agency.id);
+      const notifyChannel = supabase.channel(`notify-${agency.id}`, {
+        config: { broadcast: { self: false } }
+      });
       
       notifyChannel
         .on('broadcast', { event: 'admin-joined' }, (payload) => {
-          console.log('[AgencyPortal] Admin joined notification:', payload);
+          console.log('[AgencyPortal] Admin joined notification received:', payload);
           toast({
             title: "Staff Joined Chat",
             description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
@@ -92,7 +95,7 @@ export default function AgencyPortal() {
           fetchRequests();
         })
         .on('broadcast', { event: 'admin-left' }, (payload) => {
-          console.log('[AgencyPortal] Admin left notification:', payload);
+          console.log('[AgencyPortal] Admin left notification received:', payload);
           toast({
             title: "Staff Left Chat",
             description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
@@ -101,7 +104,7 @@ export default function AgencyPortal() {
           fetchRequests();
         })
         .on('broadcast', { event: 'admin-action' }, (payload) => {
-          console.log('[AgencyPortal] Admin action notification:', payload);
+          console.log('[AgencyPortal] Admin action notification received:', payload);
           const action = payload.payload?.action;
           if (action === 'engagement-cancelled') {
             toast({
@@ -119,14 +122,15 @@ export default function AgencyPortal() {
           fetchRequests();
         })
         .subscribe((status) => {
-          console.log('[AgencyPortal] Notify channel status:', status);
+          console.log('[AgencyPortal] Notify channel subscription status:', status, 'for agency:', agency.id);
         });
       
       return () => {
+        console.log('[AgencyPortal] Cleaning up notification channel for agency:', agency.id);
         supabase.removeChannel(notifyChannel);
       };
     }
-  }, [agency]);
+  }, [agency?.id]);
 
   const handleLogin = async () => {
     if (!email || !password) {

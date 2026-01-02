@@ -620,6 +620,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           agencyNotifyChannel.subscribe(async (status) => {
             console.log('[FloatingChatWindow] Agency notify channel status:', status);
             if (status === 'SUBSCRIBED') {
+              // Small delay to ensure channel is fully established
+              await new Promise(resolve => setTimeout(resolve, 100));
               const result = await agencyNotifyChannel.send({
                 type: 'broadcast',
                 event: 'admin-joined',
@@ -629,7 +631,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 }
               });
               console.log('[FloatingChatWindow] Admin-joined broadcast sent to agency, result:', result);
-              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 1000);
+              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 2000);
             }
           });
         } else {
@@ -722,6 +724,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           agencyNotifyChannel.subscribe(async (status) => {
             console.log('[FloatingChatWindow] Agency notify channel status for leave:', status);
             if (status === 'SUBSCRIBED') {
+              // Small delay to ensure channel is fully established
+              await new Promise(resolve => setTimeout(resolve, 100));
               const result = await agencyNotifyChannel.send({
                 type: 'broadcast',
                 event: 'admin-left',
@@ -731,7 +735,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 }
               });
               console.log('[FloatingChatWindow] Admin-left broadcast sent to agency, result:', result);
-              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 1000);
+              setTimeout(() => supabase.removeChannel(agencyNotifyChannel), 2000);
             }
           });
         } else {
