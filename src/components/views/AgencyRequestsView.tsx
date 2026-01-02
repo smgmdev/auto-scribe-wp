@@ -548,6 +548,10 @@ export function AgencyRequestsView() {
     return cancelledRequests.filter(r => !r.read).length;
   }, [cancelledRequests]);
 
+  const unreadActiveCount = useMemo(() => {
+    return activeRequests.filter(r => !r.read).length;
+  }, [activeRequests]);
+
   const sortedRequests = useMemo(() => {
     const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
@@ -691,9 +695,14 @@ export function AgencyRequestsView() {
         <TabsContent value="requests" className="mt-6">
           <Tabs defaultValue="active" className="w-full">
             <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="active" className="gap-2">
+              <TabsTrigger value="active" className="gap-2 relative">
                 <MessageSquare className="h-4 w-4" />
                 Active ({activeRequests.length})
+                {unreadActiveCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {unreadActiveCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="cancelled" className="gap-2 relative">
                 <XCircle className="h-4 w-4" />
