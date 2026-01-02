@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -785,30 +785,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Handle reject order request from banner (client side)
   const handleBannerRejectOrderRequest = async () => {
     const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
-    if (!lastOrderMsg) return;
+    if (!lastOrderMsg || !globalChatRequest) return;
+    
+    const orderData = parseOrderRequest(lastOrderMsg.message);
+    if (!orderData) return;
     
     setRejectingOrderRequestId(lastOrderMsg.id);
     try {
+      // Send rejection message
+      const rejectionData = {
+        type: 'OFFER_REJECTED',
+        media_site_id: orderData.media_site_id,
+        media_site_name: orderData.media_site_name,
+        media_site_favicon: orderData.media_site_favicon,
+        price: orderData.price
+      };
+      
       const { error } = await supabase
+        .from('service_messages')
+        .insert({
+          request_id: globalChatRequest.id,
+          sender_type: senderType,
+          sender_id: senderId,
+          message: `[OFFER_REJECTED]${JSON.stringify(rejectionData)}[/OFFER_REJECTED]`
+        });
+      
+      if (error) throw error;
+      
+      // Delete the original order request message
+      await supabase
         .from('service_messages')
         .delete()
         .eq('id', lastOrderMsg.id);
-      
-      if (error) throw error;
       
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
       
       toast({
-        title: "Order request rejected",
-        description: "The order request has been declined.",
+        title: "Offer rejected",
+        description: "The offer has been declined.",
       });
     } catch (error: any) {
-      console.error('Error rejecting order request:', error);
+      console.error('Error rejecting offer:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to reject order request.",
+        description: "Failed to reject offer.",
       });
     } finally {
       setRejectingOrderRequestId(null);
@@ -1642,6 +1664,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
+  const parseOfferRejected = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number } | null => {
+    const match = message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const formatDeliveryDuration = (duration: { days: number; hours: number; minutes: number }): string => {
     const parts = [];
     if (duration.days > 0) parts.push(`${duration.days}d`);
@@ -2422,6 +2456,47 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const orderDelivered = parseOrderDelivered(msg.message);
     const deliveryAccepted = parseDeliveryAccepted(msg.message);
     const revisionRequested = parseRevisionRequested(msg.message);
+    const offerRejected = parseOfferRejected(msg.message);
+
+    // Handle offer rejected message
+    if (offerRejected) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-4 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 border-red-200 dark:border-red-800'
+          }`}>
+            <div className="flex items-start gap-3">
+              {offerRejected.media_site_favicon && (
+                <img 
+                  src={offerRejected.media_site_favicon} 
+                  alt="" 
+                  className="w-10 h-10 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <XCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>
+                    Offer Rejected
+                  </span>
+                </div>
+                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  {offerRejected.media_site_name}
+                </p>
+                <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  {offerRejected.price.toLocaleString()} credits
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
 
     // Handle admin joined message
     const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
@@ -2618,28 +2693,49 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       // Handle reject order request (client side)
       const handleRejectOrderRequest = async () => {
+        if (!globalChatRequest) return;
+        
         setRejectingOrderRequestId(msg.id);
         try {
+          // Send rejection message
+          const rejectionData = {
+            type: 'OFFER_REJECTED',
+            media_site_id: orderRequest.media_site_id,
+            media_site_name: orderRequest.media_site_name,
+            media_site_favicon: orderRequest.media_site_favicon,
+            price: orderRequest.price
+          };
+          
           const { error } = await supabase
+            .from('service_messages')
+            .insert({
+              request_id: globalChatRequest.id,
+              sender_type: senderType,
+              sender_id: senderId,
+              message: `[OFFER_REJECTED]${JSON.stringify(rejectionData)}[/OFFER_REJECTED]`
+            });
+          
+          if (error) throw error;
+          
+          // Delete the original order request message
+          await supabase
             .from('service_messages')
             .delete()
             .eq('id', msg.id);
-          
-          if (error) throw error;
           
           // Remove from local state
           setMessages(prev => prev.filter(m => m.id !== msg.id));
           
           toast({
-            title: "Order request rejected",
-            description: "The order request has been declined.",
+            title: "Offer rejected",
+            description: "The offer has been declined.",
           });
         } catch (error: any) {
-          console.error('Error rejecting order request:', error);
+          console.error('Error rejecting offer:', error);
           toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to reject order request.",
+            description: "Failed to reject offer.",
           });
         } finally {
           setRejectingOrderRequestId(null);
