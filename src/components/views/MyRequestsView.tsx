@@ -101,34 +101,42 @@ export function MyRequestsView() {
 
       if (reqError) throw reqError;
 
-      // Fetch messages to determine which requests have agency replies
+      // Fetch messages to determine unread status using timestamp-based logic (same as ChatListPanel)
       const requestIds = (requestsData || []).map(r => r.id);
-      let messagesForUnread: { request_id: string; sender_type: string }[] = [];
+      let messagesForUnread: { request_id: string; sender_type: string; created_at: string }[] = [];
       if (requestIds.length > 0) {
         const { data: msgData } = await supabase
           .from('service_messages')
-          .select('request_id, sender_type')
+          .select('request_id, sender_type, created_at')
           .in('request_id', requestIds);
         messagesForUnread = msgData || [];
       }
 
-      console.log('[MyRequestsView] fetchRequests - messagesForUnread:', messagesForUnread);
-
-      // Map client_read to read for the interface and normalize order data
-      // Use same logic as Sidebar: only show unread if client_read is false AND there's an agency/admin message
+      // Map requests with timestamp-based unread logic (matches ChatListPanel widget)
       const mappedRequests = (requestsData || []).map(r => {
         const isCancelled = r.status === 'cancelled';
-        const hasAgencyMessage = messagesForUnread.some(
+        const lastReadAt = (r as any).client_last_read_at;
+        
+        // Get messages for this request from agency/admin
+        const requestMessages = messagesForUnread.filter(
           m => m.request_id === r.id && m.sender_type !== 'client'
         );
         
-        // For cancelled requests: show as unread based only on client_read
-        // For active requests: only show as unread if client_read is false AND there's an agency message
+        // Count unread messages (sent after client_last_read_at)
+        let unreadCount = 0;
+        for (const msg of requestMessages) {
+          if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+            unreadCount++;
+          }
+        }
+        
+        // For cancelled: use client_read boolean
+        // For active: use timestamp-based unread count
         const isRead = isCancelled 
           ? (r as any).client_read 
-          : ((r as any).client_read || !hasAgencyMessage);
+          : unreadCount === 0;
         
-        console.log('[MyRequestsView] Request:', r.id, 'client_read:', (r as any).client_read, 'hasAgencyMessage:', hasAgencyMessage, 'isRead:', isRead, 'status:', r.status);
+        console.log('[MyRequestsView] Request:', r.id, 'lastReadAt:', lastReadAt, 'agencyMsgCount:', requestMessages.length, 'unreadCount:', unreadCount, 'isRead:', isRead, 'status:', r.status);
         
         // Normalize order - Supabase returns array for foreign key joins
         const rawOrder = (r as any).order;

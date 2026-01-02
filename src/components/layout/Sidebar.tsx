@@ -505,10 +505,10 @@ export function Sidebar({
     if (!user || isAdmin) return;
 
     const fetchUnreadEngagements = async () => {
-      // Get all user's service requests
+      // Get all user's service requests with client_last_read_at for timestamp-based logic
       const { data: allRequests } = await supabase
         .from('service_requests')
-        .select('id, client_read, status')
+        .select('id, client_read, client_last_read_at, status')
         .eq('user_id', user.id);
 
       if (!allRequests || allRequests.length === 0) {
@@ -521,26 +521,35 @@ export function Sidebar({
       const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
       const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
 
-      // Get all request IDs to fetch messages
+      // Get all request IDs to fetch messages with timestamps
       const allRequestIds = allRequests.map(r => r.id);
-      let messagesData: { request_id: string; sender_type: string }[] = [];
+      let messagesData: { request_id: string; sender_type: string; created_at: string }[] = [];
       
       if (allRequestIds.length > 0) {
         const { data } = await supabase
           .from('service_messages')
-          .select('request_id, sender_type')
+          .select('request_id, sender_type, created_at')
           .in('request_id', allRequestIds);
         messagesData = data || [];
       }
 
-      // Count active requests that have unread agency messages
+      // Count active requests using timestamp-based unread logic (matches ChatListPanel widget)
       let activeUnreadCount = 0;
       activeRequests.forEach(request => {
-        const hasAgencyMessages = messagesData.some(
+        const lastReadAt = (request as any).client_last_read_at;
+        const requestMessages = messagesData.filter(
           m => m.request_id === request.id && m.sender_type !== 'client'
         );
-        // Only count as unread if client_read is false AND there's an agency message
-        if (hasAgencyMessages && !(request as any).client_read) {
+        
+        // Count messages sent after client_last_read_at
+        let unreadMsgCount = 0;
+        for (const msg of requestMessages) {
+          if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+            unreadMsgCount++;
+          }
+        }
+        
+        if (unreadMsgCount > 0) {
           activeUnreadCount++;
         }
       });
@@ -627,11 +636,11 @@ export function Sidebar({
             });
           }
           
-          // Refetch counts when any engagement is updated
+          // Refetch counts when any engagement is updated using timestamp-based logic
           const refetchCounts = async () => {
             const { data: allRequests } = await supabase
               .from('service_requests')
-              .select('id, client_read, status')
+              .select('id, client_read, client_last_read_at, status')
               .eq('user_id', user.id);
 
             if (!allRequests) return;
@@ -639,21 +648,31 @@ export function Sidebar({
             const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
             const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
 
-            // Get messages for active requests
+            // Get messages for active requests with timestamps
             const activeRequestIds = activeRequests.map(r => r.id);
             let activeUnreadCount = 0;
             
             if (activeRequestIds.length > 0) {
               const { data: messages } = await supabase
                 .from('service_messages')
-                .select('request_id, sender_type')
+                .select('request_id, sender_type, created_at')
                 .in('request_id', activeRequestIds);
 
               activeRequests.forEach(request => {
-                const hasAgencyMessages = messages?.some(
+                const lastReadAt = (request as any).client_last_read_at;
+                const requestMessages = messages?.filter(
                   m => m.request_id === request.id && m.sender_type !== 'client'
-                );
-                if (hasAgencyMessages && !(request as any).client_read) {
+                ) || [];
+                
+                // Count messages sent after client_last_read_at
+                let unreadMsgCount = 0;
+                for (const msg of requestMessages) {
+                  if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                    unreadMsgCount++;
+                  }
+                }
+                
+                if (unreadMsgCount > 0) {
                   activeUnreadCount++;
                 }
               });
