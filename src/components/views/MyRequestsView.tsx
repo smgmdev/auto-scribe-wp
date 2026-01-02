@@ -89,6 +89,7 @@ export function MyRequestsView() {
           description,
           status,
           client_read,
+          client_last_read_at,
           cancellation_reason,
           cancelled_at,
           created_at,
