@@ -78,56 +78,67 @@ export default function AgencyPortal() {
     if (agency) {
       fetchRequests();
       
-      // Subscribe to real-time admin notifications
-      console.log('[AgencyPortal] Setting up notification channel for agency:', agency.id);
-      const notifyChannel = supabase.channel(`notify-${agency.id}`, {
-        config: { broadcast: { self: false } }
-      });
+      // Subscribe to real-time updates on service_messages for admin join/leave notifications
+      // This is more reliable than broadcast channels since it uses postgres_changes
+      console.log('[AgencyPortal] Setting up service_messages listener for agency:', agency.id);
       
-      notifyChannel
-        .on('broadcast', { event: 'admin-joined' }, (payload) => {
-          console.log('[AgencyPortal] Admin joined notification received:', payload);
-          toast({
-            title: "Staff Joined Chat",
-            description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
-          });
-          // Refresh requests to get latest state
-          fetchRequests();
-        })
-        .on('broadcast', { event: 'admin-left' }, (payload) => {
-          console.log('[AgencyPortal] Admin left notification received:', payload);
-          toast({
-            title: "Staff Left Chat",
-            description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
-          });
-          // Refresh requests to get latest state
-          fetchRequests();
-        })
-        .on('broadcast', { event: 'admin-action' }, (payload) => {
-          console.log('[AgencyPortal] Admin action notification received:', payload);
-          const action = payload.payload?.action;
-          if (action === 'engagement-cancelled') {
-            toast({
-              title: "Engagement Cancelled",
-              description: payload.payload?.message || "Staff has cancelled the engagement.",
-              variant: "destructive"
-            });
-          } else if (action === 'new-admin-message') {
-            toast({
-              title: "New Staff Message",
-              description: payload.payload?.message || "Staff sent a new message.",
-            });
+      const messagesChannel = supabase.channel(`agency-messages-${agency.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'service_messages'
+          },
+          async (payload) => {
+            console.log('[AgencyPortal] New message received:', payload);
+            const newMessage = payload.new as ServiceMessage;
+            
+            // Check if this message is for one of our requests
+            const { data: request } = await supabase
+              .from('service_requests')
+              .select('id, agency_payout_id')
+              .eq('id', newMessage.request_id)
+              .eq('agency_payout_id', agency.id)
+              .single();
+            
+            if (!request) {
+              console.log('[AgencyPortal] Message not for this agency');
+              return;
+            }
+            
+            // Check for admin join/leave messages
+            if (newMessage.message.includes('[ADMIN_JOINED]')) {
+              console.log('[AgencyPortal] Admin joined detected');
+              toast({
+                title: "Staff Joined Chat",
+                description: "Arcana Mace Staff has entered the chat.",
+              });
+              fetchRequests();
+            } else if (newMessage.message.includes('[ADMIN_LEFT]')) {
+              console.log('[AgencyPortal] Admin left detected');
+              toast({
+                title: "Staff Left Chat",
+                description: "Arcana Mace Staff has left the chat.",
+              });
+              fetchRequests();
+            } else if (newMessage.sender_type === 'admin') {
+              // Regular admin message
+              toast({
+                title: "New Staff Message",
+                description: "Staff sent a new message.",
+              });
+              fetchRequests();
+            }
           }
-          // Refresh requests to get latest state
-          fetchRequests();
-        })
+        )
         .subscribe((status) => {
-          console.log('[AgencyPortal] Notify channel subscription status:', status, 'for agency:', agency.id);
+          console.log('[AgencyPortal] Messages channel subscription status:', status);
         });
       
       return () => {
-        console.log('[AgencyPortal] Cleaning up notification channel for agency:', agency.id);
-        supabase.removeChannel(notifyChannel);
+        console.log('[AgencyPortal] Cleaning up messages channel for agency:', agency.id);
+        supabase.removeChannel(messagesChannel);
       };
     }
   }, [agency?.id]);
