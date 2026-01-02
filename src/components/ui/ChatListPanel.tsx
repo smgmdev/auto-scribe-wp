@@ -1076,8 +1076,8 @@ export function ChatListPanel() {
             const statusChanged = old?.status !== updated.status;
             
             setMyEngagements(prev => {
-              // If status is cancelled, remove from list immediately
-              if (updated.status === 'cancelled') {
+              // Only close chat if status JUST CHANGED to cancelled (not already cancelled)
+              if (statusChanged && updated.status === 'cancelled') {
                 const newEngagements = prev.filter(e => e.id !== updated.id);
                 myEngagementsRef.current = newEngagements;
                 
@@ -1123,9 +1123,11 @@ export function ChatListPanel() {
           const isAgencyMatch = agencyPayoutIdRef.current && updated.agency_payout_id === agencyPayoutIdRef.current;
           
           if (isAgencyMatch || existsInServiceRequests) {
+            const statusJustChanged = old?.status !== updated.status;
+            
             setServiceRequests(prev => {
-              // If status is cancelled, remove from list immediately
-              if (updated.status === 'cancelled') {
+              // Only close chat if status JUST CHANGED to cancelled (not already cancelled)
+              if (statusJustChanged && updated.status === 'cancelled') {
                 const newRequests = prev.filter(r => r.id !== updated.id);
                 serviceRequestsRef.current = newRequests;
                 
