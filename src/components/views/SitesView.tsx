@@ -998,7 +998,7 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md transition-all duration-300 relative cursor-pointer" 
+        className="group hover:shadow-md transition-all duration-300 relative cursor-pointer overflow-hidden" 
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
