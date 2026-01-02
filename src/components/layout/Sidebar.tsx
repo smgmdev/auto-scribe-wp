@@ -130,6 +130,8 @@ export function Sidebar({
     setAgencyUnreadCancelledCount,
     agencyUnreadDisputesCount,
     setAgencyUnreadDisputesCount,
+    agencyUnreadOrdersCount,
+    setAgencyUnreadOrdersCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
     userUnreadCancelledCount,
@@ -373,6 +375,7 @@ export function Sidebar({
             let serviceRequestsCount = 0;
             let cancelledRequestsCount = 0;
             let disputesCount = 0;
+            let unreadOrdersCount = 0;
             if (agencyPayoutData) {
               const { count: requestsCount } = await supabase
                 .from('service_requests')
@@ -392,7 +395,7 @@ export function Sidebar({
               cancelledRequestsCount = cancelledCount || 0;
               
               // Count unread disputes for agency
-              const { count: unreadDisputesCount } = await supabase
+              const { count: unreadDisputesCnt } = await supabase
                 .from('disputes')
                 .select(`
                   id,
@@ -401,7 +404,27 @@ export function Sidebar({
                 `, { count: 'exact', head: true })
                 .eq('read', false)
                 .eq('service_requests.agency_payout_id', agencyPayoutData.id);
-              disputesCount = unreadDisputesCount || 0;
+              disputesCount = unreadDisputesCnt || 0;
+              
+              // Count unread orders for agency - orders that haven't been read
+              // First get all service requests for this agency that have orders
+              const { data: requestsWithOrders } = await supabase
+                .from('service_requests')
+                .select('order_id')
+                .eq('agency_payout_id', agencyPayoutData.id)
+                .not('order_id', 'is', null);
+              
+              if (requestsWithOrders && requestsWithOrders.length > 0) {
+                const orderIds = requestsWithOrders.map(r => r.order_id).filter(Boolean);
+                const { count: unreadOrdersCnt } = await supabase
+                  .from('orders')
+                  .select('*', { count: 'exact', head: true })
+                  .in('id', orderIds)
+                  .eq('read', false)
+                  .neq('delivery_status', 'delivered')
+                  .neq('status', 'cancelled');
+                unreadOrdersCount = unreadOrdersCnt || 0;
+              }
             }
             
             if (isMounted) {
@@ -410,6 +433,7 @@ export function Sidebar({
               setAgencyUnreadServiceRequestsCount(serviceRequestsCount);
               setAgencyUnreadCancelledCount(cancelledRequestsCount);
               setAgencyUnreadDisputesCount(disputesCount);
+              setAgencyUnreadOrdersCount(unreadOrdersCount);
             }
           }
       }
@@ -747,9 +771,9 @@ export function Sidebar({
                 const agencyDropdownCount = item.id === 'admin-agencies' 
                   ? (unreadAgencyApplicationsCount + unreadCustomVerificationsCount + unreadMediaSubmissionsCount) 
                   : 0;
-                // Calculate notification count for Agency Management dropdown (agency user) - include cancelled and disputes
+                // Calculate notification count for Agency Management dropdown (agency user) - include cancelled, disputes, and orders
                 const agencyManagementCount = item.id === 'agency-management'
-                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount)
+                  ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount)
                   : 0;
                 // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include cancelled
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
@@ -791,8 +815,8 @@ export function Sidebar({
                           // Agency user My Media shows pending submission notifications
                           const showAgencyMediaBadge = subItem.id === 'agency-media' && (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount) > 0;
                           const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
-                          // Agency user Service Requests shows unread request notifications (active + cancelled + disputes)
-                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount) > 0;
+                          // Agency user Service Requests shows unread request notifications (active + cancelled + disputes + orders)
+                          const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount) > 0;
                           // User My Engagements shows unread message notifications (active + cancelled)
                           const showEngagementsBadge = subItem.id === 'my-requests' && (userUnreadEngagementsCount + userUnreadCancelledCount) > 0;
                           // User My Orders shows combined notifications (active + disputes + cancelled)
@@ -809,7 +833,7 @@ export function Sidebar({
                           if (showAgencyBadge) notificationCount = agencyBadgeCount;
                           else if (showMediaBadge) notificationCount = unreadMediaSubmissionsCount;
                           else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
-                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount;
+                          else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount;
                           else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount + userUnreadCancelledCount;
                           else if (showUserOrdersBadge) notificationCount = userOrdersBadgeCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
