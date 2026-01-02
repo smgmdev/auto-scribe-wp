@@ -2637,10 +2637,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
-                  {globalChatType === 'agency-request' && (
+                  {globalChatType === 'agency-request' && !hasOrder && (
                     <DropdownMenuItem 
                       className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={hasOrder || isCancelled || isAdmin}
+                      disabled={isCancelled || isAdmin}
                       onSelect={() => {
                         setActionDropdownOpen(false);
                         setSendOrderDialogOpen(true);
