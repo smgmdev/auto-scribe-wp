@@ -2546,7 +2546,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <DollarSign className="h-3.5 w-3.5" />
                   <span className="text-xs">
-                    Price: ${orderRequest.price.toLocaleString()}
+                    Price: {orderRequest.price.toLocaleString()} credits
                   </span>
                 </div>
                 {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
@@ -2595,14 +2595,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black transition-all duration-200"
+                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200"
                   onClick={handleCancelOrderRequest}
                   disabled={cancellingOrderRequestId === msg.id}
                 >
-                  {cancellingOrderRequestId === msg.id ? (
+                  {cancellingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <X className="h-4 w-4 mr-2" />
                   )}
                   Cancel Request
                 </Button>
