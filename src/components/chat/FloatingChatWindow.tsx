@@ -4,6 +4,7 @@ import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -1061,7 +1062,53 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   };
 
-  // Check if there's an open dispute for this order
+  // Reject cancellation request from counterparty
+  const [rejectingCancellation, setRejectingCancellation] = useState(false);
+  const [showRejectReasonDialog, setShowRejectReasonDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [pendingRejectMessageId, setPendingRejectMessageId] = useState<string | null>(null);
+
+  const handleRejectCancellation = async () => {
+    if (!localOrder || !senderId || !pendingRejectMessageId) return;
+    
+    setRejectingCancellation(true);
+    try {
+      // Send rejection message
+      const rejectData = {
+        type: 'cancel_order_rejected',
+        order_id: localOrder.id,
+        media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+        reason: rejectReason.trim() || undefined,
+        rejected_by: senderType
+      };
+
+      await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: `[CANCEL_ORDER_REJECTED]${JSON.stringify(rejectData)}[/CANCEL_ORDER_REJECTED]`
+      });
+      
+      toast({
+        title: "Cancellation Rejected",
+        description: "You have rejected the cancellation request. The order remains active.",
+      });
+      
+      setShowRejectReasonDialog(false);
+      setRejectReason('');
+      setPendingRejectMessageId(null);
+    } catch (error: any) {
+      console.error('Error rejecting cancellation:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reject cancellation.",
+        variant: "destructive"
+      });
+    } finally {
+      setRejectingCancellation(false);
+    }
+  };
+
   useEffect(() => {
     const checkDispute = async () => {
       if (!localOrder?.id) {
@@ -1561,15 +1608,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
+  const parseCancelOrderRejected = (message: string): { type: string; order_id: string; media_site_name: string; reason?: string; rejected_by: string } | null => {
+    const match = message.match(/\[CANCEL_ORDER_REJECTED\](.*?)\[\/CANCEL_ORDER_REJECTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   // Check if there's a pending cancellation request in messages (from counterparty)
   const hasPendingCancelRequest = messages.some(msg => {
     if (msg.sender_type === senderType) return false; // Not from me
     const cancelRequest = parseCancelOrderRequest(msg.message);
     if (!cancelRequest) return false;
-    // Check if there's an acceptance message after this
+    // Check if there's an acceptance or rejection message after this
     const msgIndex = messages.findIndex(m => m.id === msg.id);
-    const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
-    return !hasAcceptance;
+    const hasResponse = messages.slice(msgIndex + 1).some(m => 
+      parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+    );
+    return !hasResponse;
   });
 
   // Check if I already sent a cancellation request that's pending
@@ -1577,10 +1638,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (msg.sender_type !== senderType) return false; // Not from me
     const cancelRequest = parseCancelOrderRequest(msg.message);
     if (!cancelRequest) return false;
-    // Check if there's an acceptance message after this
+    // Check if there's an acceptance or rejection message after this
     const msgIndex = messages.findIndex(m => m.id === msg.id);
-    const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
-    return !hasAcceptance;
+    const hasResponse = messages.slice(msgIndex + 1).some(m => 
+      parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+    );
+    return !hasResponse;
   });
 
   const sendMessage = async () => {
@@ -2205,11 +2268,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // Handle cancel order request message
     if (cancelRequest) {
-      // Check if this request has been accepted
+      // Check if this request has been accepted or rejected
       const msgIndex = messages.findIndex(m => m.id === msg.id);
       const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
-      const isPending = !hasAcceptance;
-      const canAccept = !isOwnMessage && isPending && globalChatRequest?.order;
+      const hasRejection = messages.slice(msgIndex + 1).some(m => parseCancelOrderRejected(m.message));
+      const isPending = !hasAcceptance && !hasRejection;
+      const canRespond = !isOwnMessage && isPending && globalChatRequest?.order;
 
       return (
         <div className="space-y-1">
@@ -2223,9 +2287,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-700 dark:text-orange-300'}`}>
                 Cancellation Request
               </span>
-              {!isPending && (
+              {hasAcceptance && (
                 <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                   Accepted
+                </Badge>
+              )}
+              {hasRejection && (
+                <Badge variant="secondary" className="text-xs bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+                  Rejected
                 </Badge>
               )}
             </div>
@@ -2237,20 +2306,67 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 Reason: {cancelRequest.reason}
               </p>
             )}
-            {canAccept && (
+            {canRespond && (
               <div className="flex gap-2 mt-3 pt-2 border-t border-orange-200 dark:border-orange-800">
                 <Button
                   size="sm"
                   variant="outline"
                   className="flex-1 h-7 text-xs bg-green-600 text-white border-green-600 hover:bg-green-700 hover:text-white"
                   onClick={() => handleAcceptCancellation(msg.id)}
-                  disabled={acceptingCancellation}
+                  disabled={acceptingCancellation || rejectingCancellation}
                 >
                   {acceptingCancellation ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                  Accept & Cancel Order
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 h-7 text-xs bg-red-600 text-white border-red-600 hover:bg-red-700 hover:text-white"
+                  onClick={() => {
+                    setPendingRejectMessageId(msg.id);
+                    setShowRejectReasonDialog(true);
+                  }}
+                  disabled={acceptingCancellation || rejectingCancellation}
+                >
+                  Reject
                 </Button>
               </div>
             )}
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle cancel order rejected message
+    const cancelRejected = parseCancelOrderRejected(msg.message);
+    if (cancelRejected) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              <X className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>
+                Cancellation Rejected
+              </span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {isOwnMessage ? 'You rejected' : `${counterpartyLabel} rejected`} the cancellation request for {cancelRejected.media_site_name}
+            </p>
+            {cancelRejected.reason && (
+              <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                Reason: {cancelRejected.reason}
+              </p>
+            )}
+            <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              The order remains active
+            </p>
           </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
@@ -2575,7 +2691,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             const cr = parseCancelOrderRequest(msg.message);
                             if (!cr) return false;
                             const msgIndex = messages.findIndex(m => m.id === msg.id);
-                            return !messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+                            return !messages.slice(msgIndex + 1).some(m => 
+                              parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+                            );
                           });
                           if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
                         }}
@@ -3085,6 +3203,40 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Reject Cancellation Dialog */}
+      <AlertDialog open={showRejectReasonDialog} onOpenChange={setShowRejectReasonDialog}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject Cancellation Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can provide a reason for rejecting this cancellation request. The order will remain active.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Reason for rejection (optional)"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="min-h-[80px]"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setRejectReason('');
+              setPendingRejectMessageId(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRejectCancellation}
+              disabled={rejectingCancellation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {rejectingCancellation ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Reject Cancellation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Send Order Dialog (Agency) */}
       <Dialog open={sendOrderDialogOpen} onOpenChange={setSendOrderDialogOpen}>
         <DialogContent className="sm:max-w-md z-[250]">
@@ -3401,7 +3553,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           const cr = parseCancelOrderRequest(msg.message);
                           if (!cr) return false;
                           const msgIndex = messages.findIndex(m => m.id === msg.id);
-                          return !messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
+                          return !messages.slice(msgIndex + 1).some(m => 
+                            parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+                          );
                         });
                         if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
                       }}
