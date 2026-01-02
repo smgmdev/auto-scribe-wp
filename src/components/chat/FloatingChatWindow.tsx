@@ -3924,23 +3924,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         // Update the global chat request to reflect that an order exists
                         updateGlobalChatRequest({ order: newOrder }, globalChatRequest.id);
                         
-                        // Also add the ORDER_PLACED message locally for immediate display
-                        const orderPlacedMessage: ServiceMessage = {
-                          id: crypto.randomUUID(),
-                          request_id: globalChatRequest.id,
-                          sender_type: 'client',
-                          sender_id: user.id,
-                          message: `[ORDER_PLACED]${JSON.stringify({
-                            type: 'order_placed',
-                            media_site_id: pendingOrderRequest.media_site_id,
-                            media_site_name: pendingOrderRequest.media_site_name,
-                            credits_used: data.credits_deducted,
-                            order_id: data.order_id,
-                            delivery_deadline: data.delivery_deadline
-                          })}[/ORDER_PLACED]`,
-                          created_at: new Date().toISOString()
-                        };
-                        setMessages(prev => [...prev, orderPlacedMessage]);
+                        // Note: ORDER_PLACED message is inserted by the edge function and will arrive via real-time subscription
+                        // Do NOT add it locally to avoid duplicate messages
                         
                         // Increment the unread orders count for notification
                         incrementUserUnreadOrdersCount();
