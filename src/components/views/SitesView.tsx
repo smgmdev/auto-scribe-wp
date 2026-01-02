@@ -1740,19 +1740,19 @@ export function SitesView() {
                             {activeAgencies.map((agency, index) => (
                               <Card 
                                 key={agency.id} 
-                                className="group hover:shadow-md transition-all duration-300 cursor-pointer" 
+                                className="group hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden" 
                                 style={{ animationDelay: `${index * 50}ms` }}
                                 onClick={() => toggleExpand(agency.id)}
                               >
-                                <CardContent className="p-3">
-                                  <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
-                                      <div className="relative group/logo flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
+                                <CardContent className="!p-0">
+                                  <div className="flex items-stretch">
+                                    <div className="flex items-center min-w-0 flex-1">
+                                      <div className="relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden">
                                         {agency.favicon ? (
                                           <img 
                                             src={agency.favicon} 
                                             alt={`${agency.name} logo`} 
-                                            className="h-5 w-5 object-contain" 
+                                            className="h-full w-full object-cover" 
                                             onError={e => {
                                               e.currentTarget.style.display = 'none';
                                               (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
@@ -1761,11 +1761,11 @@ export function SitesView() {
                                         ) : null}
                                         <Globe className={`h-4 w-4 text-accent ${agency.favicon ? 'hidden' : ''}`} />
                                       </div>
-                                      <div className="min-w-0 flex-1">
+                                      <div className="min-w-0 flex-1 ml-3">
                                         <h3 className="text-sm break-words">{agency.name}</h3>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-3 flex-1 justify-end">
+                                    <div className="flex items-center gap-2 flex-shrink-0 pr-3">
                                       {agency.country && (
                                         <Badge variant="outline" className="text-xs">
                                           {agency.country}
@@ -1780,7 +1780,7 @@ export function SitesView() {
                                   {/* Expanded Section */}
                                   {expandedSites.has(agency.id) && (
                                     <div 
-                                      className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                                      className="pt-1.5 pb-2 px-3 border-t border-border space-y-2 animate-fade-in"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       {agency.about && (
