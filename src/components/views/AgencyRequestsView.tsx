@@ -61,6 +61,9 @@ export function AgencyRequestsView() {
     setAgencyUnreadDisputesCount,
     decrementAgencyUnreadDisputesCount,
     agencyUnreadDisputesCount,
+    agencyUnreadCompletedCount,
+    setAgencyUnreadCompletedCount,
+    incrementAgencyUnreadCompletedCount,
     unreadMessageCounts,
     setUnreadMessageCount,
     clearUnreadMessageCount,
@@ -423,6 +426,8 @@ export function AgencyRequestsView() {
             title: "Order Delivered",
             description: data.message || `Order for ${data.mediaSiteName || 'a media site'} has been marked as delivered.`,
           });
+          // Increment the completed count for the notification badge
+          incrementAgencyUnreadCompletedCount();
           fetchRequests();
         } else if (data.action === 'dispute-resolved') {
           toast({
@@ -963,7 +968,11 @@ export function AgencyRequestsView() {
         </TabsContent>
 
         <TabsContent value="orders" className="mt-6">
-          <Tabs defaultValue="active" className="w-full">
+          <Tabs defaultValue="active" className="w-full" onValueChange={(value) => {
+            if (value === 'completed' && agencyUnreadCompletedCount > 0) {
+              setAgencyUnreadCompletedCount(0);
+            }
+          }}>
             <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
@@ -978,9 +987,14 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2">
+              <TabsTrigger value="completed" className="gap-2 relative">
                 <CheckCircle className="h-4 w-4" />
                 Completed ({completedOrders.length})
+                {agencyUnreadCompletedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {agencyUnreadCompletedCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="cancelled" className="gap-2">
                 <XCircle className="h-4 w-4" />

@@ -138,6 +138,12 @@ interface AppState {
   setAgencyUnreadDisputesCount: (count: number) => void;
   decrementAgencyUnreadDisputesCount: () => void;
   
+  // Agency unread completed orders count (for Completed tab)
+  agencyUnreadCompletedCount: number;
+  setAgencyUnreadCompletedCount: (count: number) => void;
+  incrementAgencyUnreadCompletedCount: () => void;
+  decrementAgencyUnreadCompletedCount: () => void;
+  
   // User engagement notifications (for My Engagements)
   userUnreadEngagementsCount: number;
   setUserUnreadEngagementsCount: (count: number) => void;
@@ -323,6 +329,16 @@ export const useAppStore = create<AppState>()((set) => ({
   setAgencyUnreadDisputesCount: (count) => set({ agencyUnreadDisputesCount: count }),
   decrementAgencyUnreadDisputesCount: () => set((state) => ({
     agencyUnreadDisputesCount: Math.max(0, state.agencyUnreadDisputesCount - 1)
+  })),
+  
+  // Agency unread completed orders count
+  agencyUnreadCompletedCount: 0,
+  setAgencyUnreadCompletedCount: (count) => set({ agencyUnreadCompletedCount: count }),
+  incrementAgencyUnreadCompletedCount: () => set((state) => ({
+    agencyUnreadCompletedCount: state.agencyUnreadCompletedCount + 1
+  })),
+  decrementAgencyUnreadCompletedCount: () => set((state) => ({
+    agencyUnreadCompletedCount: Math.max(0, state.agencyUnreadCompletedCount - 1)
   })),
 
   // User engagement notifications
