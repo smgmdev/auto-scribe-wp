@@ -88,6 +88,34 @@ serve(async (req) => {
 
     logStep("Order marked as delivered", { orderId: order.id });
 
+    // Send delivery message to chat if there's a linked service request
+    if (serviceRequest?.id) {
+      const deliveryMessagePayload = {
+        type: 'order_delivered',
+        order_id: order.id,
+        media_site_id: orderDetails.media_sites?.id,
+        media_site_name: orderDetails.media_sites?.name || 'Unknown',
+        delivery_url: delivery_url || null,
+        delivery_notes: delivery_notes || null,
+        delivered_by: 'admin'
+      };
+
+      const { error: msgError } = await supabaseClient
+        .from("service_messages")
+        .insert({
+          request_id: serviceRequest.id,
+          sender_type: 'admin',
+          sender_id: userData.user.id,
+          message: `[ORDER_DELIVERED]${JSON.stringify(deliveryMessagePayload)}[/ORDER_DELIVERED]`
+        });
+
+      if (msgError) {
+        logStep("Error inserting delivery message", { error: msgError.message });
+      } else {
+        logStep("Delivery message inserted into chat");
+      }
+    }
+
     // Close any open disputes for this order and mark as resolved/delivered
     const { data: closedDisputes, error: disputeError } = await supabaseClient
       .from("disputes")

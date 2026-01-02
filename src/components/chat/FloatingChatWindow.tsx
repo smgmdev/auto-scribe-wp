@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -228,6 +228,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [hasOpenDispute, setHasOpenDispute] = useState(false);
+  const [acceptingDelivery, setAcceptingDelivery] = useState(false);
+  const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
+  const [revisionReason, setRevisionReason] = useState('');
+  const [submittingRevision, setSubmittingRevision] = useState(false);
   const [actionDropdownOpen, setActionDropdownOpen] = useState(false);
   const [orderDetailsActionDropdownOpen, setOrderDetailsActionDropdownOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
@@ -1559,6 +1563,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
+  const parseOrderDelivered = (message: string): { type: string; order_id: string; media_site_id?: string; media_site_name: string; delivery_url?: string | null; delivery_notes?: string | null; delivered_by: string } | null => {
+    const match = message.match(/\[ORDER_DELIVERED\](.*?)\[\/ORDER_DELIVERED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boolean } => {
     const now = new Date();
     const deadlineDate = new Date(deadline);
@@ -2114,6 +2130,120 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     closeGlobalChat(globalChatRequest.id);
   };
 
+  // Handle accepting the delivery from chat
+  const handleAcceptDeliveryFromChat = async () => {
+    if (!localOrder) return;
+    
+    setAcceptingDelivery(true);
+    try {
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          delivery_status: 'accepted',
+          released_at: new Date().toISOString()
+        })
+        .eq('id', localOrder.id);
+
+      if (updateError) throw updateError;
+
+      // Send acceptance message to chat
+      const acceptMessagePayload = {
+        type: 'delivery_accepted',
+        order_id: localOrder.id,
+        media_site_name: globalChatRequest.media_site?.name || 'Unknown'
+      };
+
+      await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: `[DELIVERY_ACCEPTED]${JSON.stringify(acceptMessagePayload)}[/DELIVERY_ACCEPTED]`
+      });
+
+      // Update local order state
+      setLocalOrder(prev => prev ? { ...prev, delivery_status: 'accepted' } : null);
+      updateGlobalChatRequest({ order: { ...localOrder, delivery_status: 'accepted' } }, globalChatRequest.id);
+
+      toast({
+        title: 'Delivery accepted',
+        description: 'The order has been marked as completed.'
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error accepting delivery',
+        description: error.message
+      });
+    } finally {
+      setAcceptingDelivery(false);
+    }
+  };
+
+  // Handle requesting a revision
+  const handleRequestRevision = async () => {
+    if (!localOrder || !revisionReason.trim()) return;
+    
+    setSubmittingRevision(true);
+    try {
+      // Send revision request message to chat
+      const revisionMessagePayload = {
+        type: 'revision_requested',
+        order_id: localOrder.id,
+        media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+        reason: revisionReason.trim()
+      };
+
+      await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: `[REVISION_REQUESTED]${JSON.stringify(revisionMessagePayload)}[/REVISION_REQUESTED]`
+      });
+
+      toast({
+        title: 'Revision requested',
+        description: 'Your revision request has been sent.'
+      });
+
+      setRevisionDialogOpen(false);
+      setRevisionReason('');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error requesting revision',
+        description: error.message
+      });
+    } finally {
+      setSubmittingRevision(false);
+    }
+  };
+
+  // Parse delivery accepted message
+  const parseDeliveryAccepted = (message: string): { type: string; order_id: string; media_site_name: string } | null => {
+    const match = message.match(/\[DELIVERY_ACCEPTED\](.*?)\[\/DELIVERY_ACCEPTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Parse revision requested message
+  const parseRevisionRequested = (message: string): { type: string; order_id: string; media_site_name: string; reason: string } | null => {
+    const match = message.match(/\[REVISION_REQUESTED\](.*?)\[\/REVISION_REQUESTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const handleWindowClick = () => {
     onFocus();
   };
@@ -2172,6 +2302,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const cancelRequest = parseCancelOrderRequest(msg.message);
     const cancelAccepted = parseCancelOrderAccepted(msg.message);
     const orderRequest = parseOrderRequest(msg.message);
+    const orderDelivered = parseOrderDelivered(msg.message);
+    const deliveryAccepted = parseDeliveryAccepted(msg.message);
+    const revisionRequested = parseRevisionRequested(msg.message);
 
     // Handle admin joined message
     const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
@@ -2180,6 +2313,153 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         <p className="text-xs text-muted-foreground text-center py-2">
           {adminJoinedMatch[1]}
         </p>
+      );
+    }
+
+    // Handle order delivered message
+    if (orderDelivered) {
+      const isClient = actualSenderType === 'client';
+      const isDeliveryAccepted = localOrder?.delivery_status === 'accepted';
+      // Check if there's already an acceptance or revision message for this delivery
+      const msgIndex = messages.findIndex(m => m.id === msg.id);
+      const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseDeliveryAccepted(m.message));
+      const hasRevision = messages.slice(msgIndex + 1).some(m => parseRevisionRequested(m.message));
+      const canRespond = isClient && !hasAcceptance && !hasRevision && !isDeliveryAccepted && !isOwnMessage;
+
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-4 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              <Truck className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
+                Order Delivered
+              </span>
+              {(hasAcceptance || isDeliveryAccepted) && (
+                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                  Accepted
+                </Badge>
+              )}
+              {hasRevision && (
+                <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">
+                  Revision Requested
+                </Badge>
+              )}
+            </div>
+            <p className={`text-sm font-medium ${isOwnMessage ? 'text-primary-foreground/80' : 'text-foreground'}`}>
+              {orderDelivered.media_site_name}
+            </p>
+            <p className={`text-sm mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              Here is your delivery. Please review and accept or request a revision.
+            </p>
+            {orderDelivered.delivery_url && (
+              <div className="mt-2">
+                <a 
+                  href={orderDelivered.delivery_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-1.5 text-sm ${isOwnMessage ? 'text-primary-foreground underline' : 'text-blue-600 dark:text-blue-400 hover:underline'}`}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View Delivery
+                </a>
+              </div>
+            )}
+            {orderDelivered.delivery_notes && (
+              <p className={`text-xs mt-2 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                Notes: {orderDelivered.delivery_notes}
+              </p>
+            )}
+            
+            {/* Action buttons for client */}
+            {canRespond && (
+              <div className="flex gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  onClick={handleAcceptDeliveryFromChat}
+                  disabled={acceptingDelivery}
+                >
+                  {acceptingDelivery ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setRevisionDialogOpen(true)}
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Request Revision
+                </Button>
+              </div>
+            )}
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle delivery accepted message
+    if (deliveryAccepted) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
+                Delivery Accepted
+              </span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {isOwnMessage ? 'You accepted' : 'Client accepted'} the delivery for {deliveryAccepted.media_site_name}
+            </p>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              Order has been marked as completed
+            </p>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle revision requested message
+    if (revisionRequested) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              <RefreshCw className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-600 dark:text-orange-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-700 dark:text-orange-300'}`}>
+                Revision Requested
+              </span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {isOwnMessage ? 'You requested' : 'Client requested'} a revision for {revisionRequested.media_site_name}
+            </p>
+            <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              Reason: {revisionRequested.reason}
+            </p>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
       );
     }
 
@@ -3505,6 +3785,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             >
               {submittingDispute ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Submit Dispute Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Request Revision Dialog */}
+      <AlertDialog open={revisionDialogOpen} onOpenChange={setRevisionDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Request Revision</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please describe what changes you need for this delivery.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Textarea
+              placeholder="Describe the revisions needed..."
+              value={revisionReason}
+              onChange={(e) => setRevisionReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submittingRevision}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!revisionReason.trim() || submittingRevision}
+              onClick={(e) => {
+                e.preventDefault();
+                handleRequestRevision();
+              }}
+            >
+              {submittingRevision ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Submit Request
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
