@@ -799,6 +799,15 @@ export function ChatListPanel() {
         return newRequests;
       });
       
+      // Remove any disputes associated with this service request
+      setDisputes(prev => {
+        const newDisputes = prev.filter(d => d.service_request_id !== requestId);
+        disputesRef.current = newDisputes;
+        const unreadCount = newDisputes.filter(d => !d.read).length;
+        setUnreadDisputesCount(unreadCount);
+        return newDisputes;
+      });
+      
       // Close any open chat window and remove from minimized
       closeGlobalChat(requestId);
       removeMinimizedChat(requestId);
@@ -815,7 +824,7 @@ export function ChatListPanel() {
     return () => {
       window.removeEventListener('engagement-cancelled', handleEngagementCancelled as EventListener);
     };
-  }, [closeGlobalChat, removeMinimizedChat]);
+  }, [closeGlobalChat, removeMinimizedChat, setUnreadDisputesCount]);
   const handleBroadcastNotification = useCallback(async (payload: any) => {
     if (!payload) return;
     

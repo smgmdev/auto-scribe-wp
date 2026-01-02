@@ -202,7 +202,7 @@ serve(async (req) => {
     }
 
     // Close any open disputes for this order
-    const { error: disputeError } = await supabaseAdmin
+    const { data: closedDisputes, error: disputeError } = await supabaseAdmin
       .from("disputes")
       .update({
         status: "cancelled",
@@ -211,13 +211,14 @@ serve(async (req) => {
         admin_notes: "Order was cancelled"
       })
       .eq("order_id", order_id)
-      .eq("status", "open");
+      .eq("status", "open")
+      .select('id, service_request_id');
 
     if (disputeError) {
       logStep("Error closing dispute", { error: disputeError.message });
       // Don't fail - order is already cancelled
-    } else {
-      logStep("Closed open disputes for order");
+    } else if (closedDisputes && closedDisputes.length > 0) {
+      logStep("Closed open disputes for order", { disputeIds: closedDisputes.map(d => d.id) });
     }
 
     // Send cancellation message to chat
