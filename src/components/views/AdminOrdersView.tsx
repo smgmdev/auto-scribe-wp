@@ -852,7 +852,7 @@ export function AdminOrdersView() {
                         )}
                       </div>
 
-                      {order.delivery_url && (
+                      {activeTab !== 'completed' && order.delivery_url && (
                         <Button 
                           variant="ghost" 
                           size="icon"
@@ -865,7 +865,9 @@ export function AdminOrdersView() {
                         </Button>
                       )}
 
-                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      {activeTab !== 'completed' && (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </div>
                   </CardContent>
                 </Card>
