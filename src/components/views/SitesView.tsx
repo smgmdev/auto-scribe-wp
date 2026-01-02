@@ -2368,7 +2368,7 @@ export function SitesView() {
                       <img 
                         src={selectedAgency.favicon} 
                         alt={`${selectedAgency.name} logo`} 
-                        className="h-8 w-8 object-contain"
+                        className="h-full w-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                           (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
