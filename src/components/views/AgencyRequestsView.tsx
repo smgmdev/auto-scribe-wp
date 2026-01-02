@@ -722,6 +722,28 @@ export function AgencyRequestsView() {
                     const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
                     const hasUnread = !request.read;
                     
+                    // Check order status for badges
+                    const hasOrder = request.order?.id;
+                    const isInDispute = hasOrder && disputedOrderIds.has(request.order.id);
+                    const deliveryDeadline = request.order?.delivery_deadline;
+                    const isOverdue = deliveryDeadline && new Date(deliveryDeadline) < new Date() && request.order?.delivery_status !== 'delivered';
+                    
+                    // Calculate time remaining for delivery
+                    const getTimeRemaining = () => {
+                      if (!deliveryDeadline) return null;
+                      const now = new Date();
+                      const deadline = new Date(deliveryDeadline);
+                      const diffMs = deadline.getTime() - now.getTime();
+                      if (diffMs <= 0) return null;
+                      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                      if (hours > 24) {
+                        const days = Math.floor(hours / 24);
+                        return `${days}d ${hours % 24}h`;
+                      }
+                      return `${hours}h ${minutes}m`;
+                    };
+                    
                     return (
                       <Card 
                         key={request.id} 
@@ -751,6 +773,28 @@ export function AgencyRequestsView() {
                               </div>
                               <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                               {getStatusBadge(request.status, request.read, request.id)}
+                              
+                              {/* Status badges */}
+                              {isOverdue ? (
+                                <Badge variant="destructive" className="bg-red-600 text-white">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Overdue
+                                </Badge>
+                              ) : isInDispute ? (
+                                <Badge variant="destructive" className="bg-orange-500 text-white border-orange-500">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  In Dispute
+                                </Badge>
+                              ) : hasOrder ? (
+                                <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Order Placed {getTimeRemaining() && `• ${getTimeRemaining()}`}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground">
+                                  Open
+                                </Badge>
+                              )}
                             </div>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               {request.media_site?.publication_format && (
