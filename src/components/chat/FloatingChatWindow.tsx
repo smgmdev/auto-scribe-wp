@@ -2730,7 +2730,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle offer rejected message
+    // Hide if order request was rejected
     if (offerRejected) {
+      if (hasOrderRequestRejected) {
+        return null;
+      }
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
