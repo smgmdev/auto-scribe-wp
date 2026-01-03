@@ -798,7 +798,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         media_site_id: orderData.media_site_id,
         media_site_name: orderData.media_site_name,
         media_site_favicon: orderData.media_site_favicon,
-        price: orderData.price
+        price: orderData.price,
+        delivery_duration: orderData.delivery_duration,
+        special_terms: orderData.special_terms
       };
       
       const { data: insertedMsg, error } = await supabase
@@ -1672,7 +1674,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
-  const parseOfferRejected = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number } | null => {
+  const parseOfferRejected = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; delivery_duration?: { days: number; hours: number; minutes: number }; special_terms?: string } | null => {
     const match = message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
     if (match) {
       try {
@@ -2493,6 +2495,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {offerRejected.media_site_name}
                 </p>
+                <div className={`flex items-center gap-2 flex-wrap mt-2 text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <span>{offerRejected.price.toLocaleString()} credits</span>
+                  {offerRejected.delivery_duration && (offerRejected.delivery_duration.days > 0 || offerRejected.delivery_duration.hours > 0 || offerRejected.delivery_duration.minutes > 0) && (
+                    <span>• {formatDeliveryDuration(offerRejected.delivery_duration)}</span>
+                  )}
+                  {offerRejected.special_terms && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 cursor-help">
+                            • Special Terms
+                            <Info className="h-3 w-3" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <p>{offerRejected.special_terms}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -2708,7 +2731,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             media_site_id: orderRequest.media_site_id,
             media_site_name: orderRequest.media_site_name,
             media_site_favicon: orderRequest.media_site_favicon,
-            price: orderRequest.price
+            price: orderRequest.price,
+            delivery_duration: orderRequest.delivery_duration,
+            special_terms: orderRequest.special_terms
           };
           
           const { data: insertedMsg, error } = await supabase
