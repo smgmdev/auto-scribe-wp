@@ -3256,6 +3256,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       >
                         Open Dispute
                       </DropdownMenuItem>
+                    ) : hasExistingOrderRequest ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-muted-foreground"
+                        disabled
+                      >
+                        Offer Pending...
+                      </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem 
                         className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
