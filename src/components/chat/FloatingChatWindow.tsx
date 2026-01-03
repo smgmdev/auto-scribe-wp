@@ -2930,8 +2930,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
             
-            {/* Action buttons for agency */}
-            {isAgency && !hasOrder && !isOwnMessage && (
+            {/* Action buttons for agency - hide if order request was rejected */}
+            {isAgency && !hasOrder && !isOwnMessage && !hasOrderRequestRejected && (
               <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
                 <Button
                   size="sm"
@@ -3017,7 +3017,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
-            {isOwnMessage && !hasOrder && (
+            {/* Cancel button for client - hide if order request was rejected */}
+            {isOwnMessage && !hasOrder && !hasOrderRequestRejected && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
