@@ -3309,7 +3309,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           setOrderWithCreditsOpen(true);
                         }}
                       >
-                        Order Now
+                        Send Order Request
                       </DropdownMenuItem>
                     )
                   )}
