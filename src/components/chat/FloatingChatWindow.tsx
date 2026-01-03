@@ -2654,7 +2654,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
             isOwnMessage 
-              ? 'bg-muted/50 border-muted-foreground/30' 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
           }`}>
             <div className="flex items-start gap-3">
@@ -2667,22 +2667,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-muted-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-foreground' : 'text-amber-700 dark:text-amber-300'}`}>
+                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-700 dark:text-amber-300'}`}>
                     {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-foreground' : 'text-foreground'}`}>
+                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {clientOrderRequest.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 text-muted-foreground`}>
+                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <DollarSign className="h-3.5 w-3.5" />
                   <span className="text-xs">
                     Price: {clientOrderRequest.price.toLocaleString()} credits
                   </span>
                 </div>
                 {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 text-muted-foreground`}>
+                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     <Clock className="h-3.5 w-3.5" />
                     <span className="text-xs">
                       Delivery: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}
@@ -2690,16 +2690,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {clientOrderRequest.special_terms && (
-                  <p className={`text-xs mt-2 text-muted-foreground`}>
+                  <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {clientOrderRequest.special_terms}
                   </p>
-                )}
-                {/* Waiting for approval indicator for client */}
-                {isOwnMessage && !hasOrder && (
-                  <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-muted-foreground/20">
-                    <Clock className="h-3.5 w-3.5 text-muted-foreground animate-pulse" />
-                    <span className="text-xs text-muted-foreground">Waiting for agency to approve...</span>
-                  </div>
                 )}
               </div>
             </div>
@@ -2792,7 +2785,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
             {isOwnMessage && !hasOrder && (
-              <div className="mt-3">
+              <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
                   variant="outline"
