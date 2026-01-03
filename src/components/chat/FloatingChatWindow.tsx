@@ -801,16 +801,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         price: orderData.price
       };
       
-      const { error } = await supabase
+      const { data: insertedMsg, error } = await supabase
         .from('service_messages')
         .insert({
           request_id: globalChatRequest.id,
           sender_type: senderType,
           sender_id: senderId,
           message: `[OFFER_REJECTED]${JSON.stringify(rejectionData)}[/OFFER_REJECTED]`
-        });
+        })
+        .select()
+        .single();
       
       if (error) throw error;
+      
+      // Add rejection message to local state
+      if (insertedMsg) {
+        setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+      }
       
       // Delete the original order request message
       await supabase
@@ -1457,7 +1464,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const isSystemMessage = newMsg.message.includes('[ORDER_PLACED]') || 
                                   newMsg.message.includes('[ORDER_CANCELLED]') ||
                                   newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]') ||
-                                  newMsg.message.includes('[ORDER_REQUEST]');
+                                  newMsg.message.includes('[ORDER_REQUEST]') ||
+                                  newMsg.message.includes('[OFFER_REJECTED]');
           
           // Skip messages from same sender type UNLESS it's a system message
           // System messages are inserted by edge functions, not the user directly
@@ -2706,16 +2714,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             price: orderRequest.price
           };
           
-          const { error } = await supabase
+          const { data: insertedMsg, error } = await supabase
             .from('service_messages')
             .insert({
               request_id: globalChatRequest.id,
               sender_type: senderType,
               sender_id: senderId,
               message: `[OFFER_REJECTED]${JSON.stringify(rejectionData)}[/OFFER_REJECTED]`
-            });
+            })
+            .select()
+            .single();
           
           if (error) throw error;
+          
+          // Add rejection message to local state
+          if (insertedMsg) {
+            setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+          }
           
           // Delete the original order request message
           await supabase
