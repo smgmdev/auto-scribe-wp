@@ -2542,12 +2542,45 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // Handle client order request message (from client to agency)
     if (clientOrderRequest) {
+      const hasOrder = globalChatRequest?.order;
+      const isClient = actualSenderType === 'client';
+      
+      // Handle cancel client order request
+      const handleCancelClientOrderRequest = async () => {
+        setCancellingOrderRequestId(msg.id);
+        try {
+          const { error } = await supabase
+            .from('service_messages')
+            .delete()
+            .eq('id', msg.id);
+          
+          if (error) throw error;
+          
+          // Remove from local state
+          setMessages(prev => prev.filter(m => m.id !== msg.id));
+          
+          toast({
+            title: "Order request cancelled",
+            description: "The order request has been removed.",
+          });
+        } catch (error: any) {
+          console.error('Error cancelling order request:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to cancel order request.",
+          });
+        } finally {
+          setCancellingOrderRequestId(null);
+        }
+      };
+      
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
             isOwnMessage 
-              ? 'bg-primary text-primary-foreground border-primary' 
-              : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
+              ? 'bg-muted/80 border-border' 
+              : 'bg-muted/50 border-border'
           }`}>
             <div className="flex items-start gap-3">
               {clientOrderRequest.media_site_favicon && (
@@ -2559,34 +2592,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-700 dark:text-amber-300'}`}>
+                  <Tag className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-semibold text-sm text-muted-foreground">
                     {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                <p className="font-medium text-foreground">
                   {clientOrderRequest.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                <div className="flex items-center gap-1.5 mt-2 text-muted-foreground">
                   <DollarSign className="h-3.5 w-3.5" />
                   <span className="font-semibold">{clientOrderRequest.price.toLocaleString()} credits</span>
                 </div>
                 {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     <span>Proposed: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}</span>
                   </div>
                 )}
                 {clientOrderRequest.special_terms && (
-                  <div className={`mt-2 p-2 rounded text-sm ${isOwnMessage ? 'bg-primary-foreground/10' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
-                    <p className={`text-xs font-medium mb-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-amber-700 dark:text-amber-300'}`}>Special Terms:</p>
-                    <p className={isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}>{clientOrderRequest.special_terms}</p>
+                  <div className="mt-2 p-2 rounded text-sm bg-muted">
+                    <p className="text-xs font-medium mb-1 text-muted-foreground">Special Terms:</p>
+                    <p className="text-foreground">{clientOrderRequest.special_terms}</p>
                   </div>
                 )}
               </div>
             </div>
+            
+            {/* Cancel button for client (when it's their own message and no order placed yet) */}
+            {isClient && isOwnMessage && !hasOrder && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
+                  onClick={handleCancelClientOrderRequest}
+                  disabled={cancellingOrderRequestId === msg.id}
+                >
+                  {cancellingOrderRequestId === msg.id && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  Cancel Request
+                </Button>
+              </div>
+            )}
           </div>
-          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+          <p className="text-xs opacity-50">
             {format(new Date(msg.created_at), 'HH:mm')}
           </p>
         </div>
@@ -2849,9 +2900,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
-            isOwnMessage 
-              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
+            hasOrder 
+              ? (isOwnMessage 
+                  ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' 
+                  : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800')
+              : (isOwnMessage 
+                  ? 'bg-muted/80 border-border' 
+                  : 'bg-muted/50 border-border')
           }`}>
             <div className="flex items-start gap-3">
               {orderRequest.media_site_favicon && (
@@ -2863,22 +2918,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
+                  <Tag className={`h-4 w-4 ${hasOrder ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`} />
+                  <span className={`font-semibold text-sm ${hasOrder ? 'text-green-700 dark:text-green-300' : 'text-muted-foreground'}`}>
                     {isOwnMessage ? 'Offer Sent' : 'Offer Received'}
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                <p className="font-medium text-foreground">
                   {orderRequest.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                <div className="flex items-center gap-1.5 mt-2 text-muted-foreground">
                   <DollarSign className="h-3.5 w-3.5" />
                   <span className="text-xs">
                     Price: {orderRequest.price.toLocaleString()} credits
                   </span>
                 </div>
                 {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     <span className="text-xs">
                       Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
@@ -2886,7 +2941,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {orderRequest.special_terms && (
-                  <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className="text-xs mt-2 text-muted-foreground">
                     <span className="font-medium">Special Terms:</span> {orderRequest.special_terms}
                   </p>
                 )}
@@ -2895,7 +2950,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Action buttons for client */}
             {isClient && !hasOrder && !isOwnMessage && (
-              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
+              <div className="mt-3 pt-3 border-t border-border flex gap-2">
                 <Button
                   size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
@@ -2930,18 +2985,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Cancel button for agency (when it's their own message and no order placed yet) */}
             {isAgency && isOwnMessage && !hasOrder && (
-              <div className="mt-3 pt-3 border-t border-primary-foreground/20">
+              <div className="mt-3 pt-3 border-t border-border">
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200"
+                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
                   onClick={handleCancelOrderRequest}
                   disabled={cancellingOrderRequestId === msg.id}
                 >
                   {cancellingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   )}
-                  Cancel Request
+                  Cancel Offer
                 </Button>
               </div>
             )}
@@ -2956,7 +3011,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             )}
           </div>
-          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+          <p className="text-xs opacity-50">
             {format(new Date(msg.created_at), 'HH:mm')}
           </p>
         </div>
