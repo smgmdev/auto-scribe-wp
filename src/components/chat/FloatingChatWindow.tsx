@@ -2623,7 +2623,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
-            {isClient && isOwnMessage && !hasOrder && (
+            {isOwnMessage && !hasOrder && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
