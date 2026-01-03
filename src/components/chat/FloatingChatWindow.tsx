@@ -783,12 +783,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   }, [existingOrderMessages]);
   
   // Check if there's an existing client order request in messages (sent by client to agency)
+  // Also check if it has been rejected - if so, don't show the banner
   const existingClientOrderMessages = messages.filter(msg => {
     if (msg.sender_type !== 'client') return false;
     const match = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
     return !!match;
   });
-  const hasExistingClientOrderRequest = existingClientOrderMessages.length > 0;
+  
+  // Check if the client order request has been rejected
+  const hasOrderRequestRejected = messages.some(msg => {
+    if (msg.sender_type !== 'agency') return false;
+    return msg.message.includes('[ORDER_REQUEST_REJECTED]');
+  });
+  
+  const hasExistingClientOrderRequest = existingClientOrderMessages.length > 0 && !hasOrderRequestRejected;
   
   // Get the last client order request data
   const getLastClientOrderRequestData = useCallback(() => {
