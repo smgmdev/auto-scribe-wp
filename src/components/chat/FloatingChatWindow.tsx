@@ -2789,7 +2789,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // Handle client order request message (from client to agency)
     // Hide entirely if the order request was rejected
-    if (clientOrderRequest && !hasOrderRequestRejected) {
+    if (clientOrderRequest) {
+      // If rejected, hide the message completely (return null)
+      if (hasOrderRequestRejected) {
+        return null;
+      }
+      
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       const isAgency = actualSenderType === 'agency';
