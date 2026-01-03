@@ -2579,7 +2579,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
             isOwnMessage 
-              ? 'bg-primary text-primary-foreground border-primary' 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
           }`}>
             <div className="flex items-start gap-3">
@@ -2602,19 +2602,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </p>
                 <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <DollarSign className="h-3.5 w-3.5" />
-                  <span className="font-semibold">{clientOrderRequest.price.toLocaleString()} credits</span>
+                  <span className="text-xs">
+                    Price: {clientOrderRequest.price.toLocaleString()} credits
+                  </span>
                 </div>
                 {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
                   <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     <Clock className="h-3.5 w-3.5" />
-                    <span>Proposed: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}</span>
+                    <span className="text-xs">
+                      Delivery: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}
+                    </span>
                   </div>
                 )}
                 {clientOrderRequest.special_terms && (
-                  <div className={`mt-2 p-2 rounded text-sm ${isOwnMessage ? 'bg-primary-foreground/10' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
-                    <p className={`text-xs font-medium mb-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-amber-700 dark:text-amber-300'}`}>Special Terms:</p>
-                    <p className={isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}>{clientOrderRequest.special_terms}</p>
-                  </div>
+                  <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                    <span className="font-medium">Special Terms:</span> {clientOrderRequest.special_terms}
+                  </p>
                 )}
               </div>
             </div>
