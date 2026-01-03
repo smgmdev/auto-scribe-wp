@@ -807,9 +807,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   
   // Filter out client order requests that have been rejected (by matching media_site_id)
   const nonRejectedClientOrderMessages = existingClientOrderMessages.filter(msg => {
-    const parsed = parseClientOrderRequest(msg.message);
-    if (!parsed) return false;
-    return !rejectedMediaSiteIds.includes(parsed.media_site_id);
+    const match = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+    if (!match) return false;
+    try {
+      const data = JSON.parse(match[1]);
+      return !rejectedMediaSiteIds.includes(data.media_site_id);
+    } catch { return false; }
   });
   
   const hasExistingClientOrderRequest = nonRejectedClientOrderMessages.length > 0;
