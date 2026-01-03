@@ -2730,11 +2730,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle offer rejected message
-    // Hide if order request was rejected
     if (offerRejected) {
-      if (hasOrderRequestRejected) {
-        return null;
-      }
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
@@ -2792,13 +2788,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle client order request message (from client to agency)
-    // Hide entirely if the order request was rejected
     if (clientOrderRequest) {
-      // If rejected, hide the message completely (return null)
-      if (hasOrderRequestRejected) {
-        return null;
-      }
-      
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       const isAgency = actualSenderType === 'agency';
@@ -2940,8 +2930,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
             
-            {/* Action buttons for agency - hide if order request was rejected */}
-            {isAgency && !hasOrder && !isOwnMessage && !hasOrderRequestRejected && (
+            {/* Action buttons for agency */}
+            {isAgency && !hasOrder && !isOwnMessage && (
               <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
                 <Button
                   size="sm"
@@ -3027,8 +3017,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
-            {/* Cancel button for client - hide if order request was rejected */}
-            {isOwnMessage && !hasOrder && !hasOrderRequestRejected && (
+            {isOwnMessage && !hasOrder && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
