@@ -115,7 +115,7 @@ export function OrderWithCreditsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 pt-2">
           {/* Media Site Info */}
           <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
             {mediaSite.favicon && (
