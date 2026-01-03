@@ -1881,6 +1881,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
+  const parseOrderRequestRejected = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
+    const match = message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const formatDeliveryDuration = (duration: { days: number; hours: number; minutes: number }): string => {
     const parts = [];
     if (duration.days > 0) parts.push(`${duration.days}d`);
@@ -2664,6 +2676,50 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const revisionRequested = parseRevisionRequested(msg.message);
     const offerRejected = parseOfferRejected(msg.message);
     const orderRequestAccepted = parseOrderRequestAccepted(msg.message);
+    const orderRequestRejected = parseOrderRequestRejected(msg.message);
+
+    // Handle order request rejected message (agency rejected client's order request)
+    if (orderRequestRejected) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-4 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 border-red-200 dark:border-red-800'
+          }`}>
+            <div className="flex items-start gap-3">
+              {orderRequestRejected.media_site_favicon && (
+                <img 
+                  src={orderRequestRejected.media_site_favicon} 
+                  alt="" 
+                  className="w-10 h-10 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <XCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>
+                    Order Request Rejected
+                  </span>
+                </div>
+                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  {orderRequestRejected.media_site_name}
+                </p>
+                <div className={`flex items-center gap-2 flex-wrap mt-2 text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <span>{orderRequestRejected.price.toLocaleString()} credits</span>
+                  {orderRequestRejected.delivery_duration && (orderRequestRejected.delivery_duration.days > 0 || orderRequestRejected.delivery_duration.hours > 0 || orderRequestRejected.delivery_duration.minutes > 0) && (
+                    <span>• {formatDeliveryDuration(orderRequestRejected.delivery_duration)}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
 
     // Handle offer rejected message
     if (offerRejected) {
