@@ -790,21 +790,31 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return !!match;
   });
   
-  // Check if the client order request has been rejected
-  const hasOrderRequestRejected = messages.some(msg => {
-    if (msg.sender_type !== 'agency') return false;
-    return msg.message.includes('[ORDER_REQUEST_REJECTED]');
+  // Get all rejection messages and extract their media_site_ids
+  const rejectedMediaSiteIds = messages
+    .filter(msg => msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST_REJECTED]'))
+    .map(msg => {
+      const parsed = parseOrderRequestRejected(msg.message);
+      return parsed?.media_site_id;
+    })
+    .filter(Boolean);
+  
+  // Filter out client order requests that have been rejected (by matching media_site_id)
+  const nonRejectedClientOrderMessages = existingClientOrderMessages.filter(msg => {
+    const parsed = parseClientOrderRequest(msg.message);
+    if (!parsed) return false;
+    return !rejectedMediaSiteIds.includes(parsed.media_site_id);
   });
   
-  const hasExistingClientOrderRequest = existingClientOrderMessages.length > 0 && !hasOrderRequestRejected;
+  const hasExistingClientOrderRequest = nonRejectedClientOrderMessages.length > 0;
   
-  // Get the last client order request data
+  // Get the last client order request data (only non-rejected ones)
   const getLastClientOrderRequestData = useCallback(() => {
-    if (existingClientOrderMessages.length === 0) return null;
-    const lastOrderMsg = existingClientOrderMessages[existingClientOrderMessages.length - 1];
+    if (nonRejectedClientOrderMessages.length === 0) return null;
+    const lastOrderMsg = nonRejectedClientOrderMessages[nonRejectedClientOrderMessages.length - 1];
     const parsed = parseClientOrderRequest(lastOrderMsg.message);
     return parsed ? { ...parsed, messageId: lastOrderMsg.id } : null;
-  }, [existingClientOrderMessages]);
+  }, [nonRejectedClientOrderMessages]);
   
   // Handle reject order request from banner (client side)
   const handleBannerRejectOrderRequest = async () => {
