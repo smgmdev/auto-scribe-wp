@@ -2759,9 +2759,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  {isOwnMessage ? <Tag className="h-4 w-4 text-primary-foreground" /> : <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
-                    {isOwnMessage ? 'Offer Sent' : 'Order Request'}
+                    {isOwnMessage ? 'Offer Sent' : 'Offer Received'}
                   </span>
                 </div>
                 <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>

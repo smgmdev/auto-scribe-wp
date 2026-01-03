@@ -1766,7 +1766,7 @@ export function ChatListPanel() {
         return { text: 'Arcana Mace Staff has left the chat', type: 'status' };
       }
       if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
-        return { text: isAgencyView ? 'Offer Sent' : 'Order Request', type: 'order' };
+        return { text: isAgencyView ? 'Offer Sent' : 'Offer Received', type: 'order' };
       }
       if (cleanMessage.startsWith('[ORDER_PLACED]')) {
         return { text: 'Order Placed', type: 'order_placed' };
@@ -1826,7 +1826,7 @@ export function ChatListPanel() {
         .replace(/^>\s*\[[\w-]+\].*?\n?/g, '') // Remove "> [uuid...]" patterns
         .replace(/^:\s*\S+\s+/g, '') // Remove ":quote " prefix patterns
         .replace(/\[[\w-]{36,}\]/g, '') // Remove standalone UUIDs in brackets
-        .replace(/\[ORDER_REQUEST\]\{.*\}/g, isAgencyView ? 'Offer Sent' : 'Order Request') // Handle inline order request
+        .replace(/\[ORDER_REQUEST\]\{.*\}/g, isAgencyView ? 'Offer Sent' : 'Offer Received') // Handle inline order request
         .replace(/\[PAYMENT_\w+\]\{.*\}/g, 'Payment Update') // Handle inline payment
         .replace(/\[DELIVERY_\w+\]\{.*\}/g, 'Delivery Update') // Handle inline delivery
         .replace(/\[STATUS_\w+\]\{.*\}/g, 'Status Update') // Handle inline status
@@ -1858,7 +1858,7 @@ export function ChatListPanel() {
   const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
     switch (type) {
       case 'order':
-        return isAgencyView ? <Tag className="h-3 w-3 shrink-0 text-muted-foreground" /> : <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_placed':
         return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_cancelled':
