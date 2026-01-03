@@ -1468,7 +1468,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                   newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]') ||
                                   newMsg.message.includes('[ORDER_REQUEST]') ||
                                   newMsg.message.includes('[OFFER_REJECTED]') ||
-                                  newMsg.message.includes('[CLIENT_ORDER_REQUEST]');
+                                  newMsg.message.includes('[CLIENT_ORDER_REQUEST]') ||
+                                  newMsg.message.includes('[ORDER_REQUEST_ACCEPTED]');
           
           // Skip messages from same sender type UNLESS it's a system message
           // System messages are inserted by edge functions, not the user directly
@@ -1689,6 +1690,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   const parseClientOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
     const match = message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseOrderRequestAccepted = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
+    const match = message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
     if (match) {
       try {
         return JSON.parse(match[1]);
@@ -2481,6 +2494,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const deliveryAccepted = parseDeliveryAccepted(msg.message);
     const revisionRequested = parseRevisionRequested(msg.message);
     const offerRejected = parseOfferRejected(msg.message);
+    const orderRequestAccepted = parseOrderRequestAccepted(msg.message);
 
     // Handle offer rejected message
     if (offerRejected) {
@@ -2689,18 +2703,69 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => {
-                    setPendingOrderRequest({
-                      media_site_id: clientOrderRequest.media_site_id,
-                      media_site_name: clientOrderRequest.media_site_name,
-                      media_site_favicon: clientOrderRequest.media_site_favicon,
-                      price: clientOrderRequest.price,
-                      special_terms: clientOrderRequest.special_terms,
-                      delivery_duration: clientOrderRequest.delivery_duration
-                    });
-                    setAcceptOrderDialogOpen(true);
+                  onClick={async () => {
+                    if (!globalChatRequest) return;
+                    
+                    setAcceptingOrder(true);
+                    try {
+                      // Send acceptance message
+                      const acceptanceData = {
+                        type: 'ORDER_REQUEST_ACCEPTED',
+                        media_site_id: clientOrderRequest.media_site_id,
+                        media_site_name: clientOrderRequest.media_site_name,
+                        media_site_favicon: clientOrderRequest.media_site_favicon,
+                        price: clientOrderRequest.price,
+                        delivery_duration: clientOrderRequest.delivery_duration,
+                        special_terms: clientOrderRequest.special_terms
+                      };
+                      
+                      const { data: insertedMsg, error } = await supabase
+                        .from('service_messages')
+                        .insert({
+                          request_id: globalChatRequest.id,
+                          sender_type: senderType,
+                          sender_id: senderId,
+                          message: `[ORDER_REQUEST_ACCEPTED]${JSON.stringify(acceptanceData)}[/ORDER_REQUEST_ACCEPTED]`
+                        })
+                        .select()
+                        .single();
+                      
+                      if (error) throw error;
+                      
+                      // Add acceptance message to local state
+                      if (insertedMsg) {
+                        setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+                      }
+                      
+                      // Delete the original order request message
+                      await supabase
+                        .from('service_messages')
+                        .delete()
+                        .eq('id', msg.id);
+                      
+                      // Remove from local state
+                      setMessages(prev => prev.filter(m => m.id !== msg.id));
+                      
+                      toast({
+                        title: "Order request accepted",
+                        description: "The client can now confirm the order.",
+                      });
+                    } catch (error: any) {
+                      console.error('Error accepting order request:', error);
+                      toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "Failed to accept order request.",
+                      });
+                    } finally {
+                      setAcceptingOrder(false);
+                    }
                   }}
+                  disabled={acceptingOrder}
                 >
+                  {acceptingOrder && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Accept
                 </Button>
@@ -2733,6 +2798,99 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   Cancel Request
                 </Button>
+              </div>
+            )}
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle order request accepted message (agency accepted client's order request)
+    if (orderRequestAccepted) {
+      const hasOrder = globalChatRequest?.order;
+      const isClient = actualSenderType === 'client';
+      
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-4 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
+          }`}>
+            <div className="flex items-start gap-3">
+              {orderRequestAccepted.media_site_favicon && (
+                <img 
+                  src={orderRequestAccepted.media_site_favicon} 
+                  alt="" 
+                  className="w-10 h-10 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
+                    {isOwnMessage ? 'Order Request Accepted' : 'Your Order Request Was Accepted'}
+                  </span>
+                </div>
+                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  {orderRequestAccepted.media_site_name}
+                </p>
+                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <DollarSign className="h-3.5 w-3.5" />
+                  <span className="text-xs">
+                    Price: {orderRequestAccepted.price.toLocaleString()} credits
+                  </span>
+                </div>
+                {orderRequestAccepted.delivery_duration && (orderRequestAccepted.delivery_duration.days > 0 || orderRequestAccepted.delivery_duration.hours > 0 || orderRequestAccepted.delivery_duration.minutes > 0) && (
+                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    <Clock className="h-3.5 w-3.5" />
+                    <span className="text-xs">
+                      Delivery: {formatDeliveryDuration(orderRequestAccepted.delivery_duration)}
+                    </span>
+                  </div>
+                )}
+                {orderRequestAccepted.special_terms && (
+                  <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                    <span className="font-medium">Special Terms:</span> {orderRequestAccepted.special_terms}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Confirm Order button for client */}
+            {isClient && !hasOrder && !isOwnMessage && (
+              <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+                <Button
+                  size="sm"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    setPendingOrderRequest({
+                      media_site_id: orderRequestAccepted.media_site_id,
+                      media_site_name: orderRequestAccepted.media_site_name,
+                      media_site_favicon: orderRequestAccepted.media_site_favicon,
+                      price: orderRequestAccepted.price,
+                      special_terms: orderRequestAccepted.special_terms,
+                      delivery_duration: orderRequestAccepted.delivery_duration
+                    });
+                    setAcceptOrderDialogOpen(true);
+                  }}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Confirm Order
+                </Button>
+              </div>
+            )}
+            
+            {/* Status indicator if order already placed */}
+            {hasOrder && (
+              <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Order Placed</span>
+                </div>
               </div>
             )}
           </div>
