@@ -2788,7 +2788,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle client order request message (from client to agency)
-    if (clientOrderRequest) {
+    // Hide entirely if the order request was rejected
+    if (clientOrderRequest && !hasOrderRequestRejected) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       const isAgency = actualSenderType === 'agency';
