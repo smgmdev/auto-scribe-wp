@@ -3806,16 +3806,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   {globalChatType === 'agency-request' && !hasOrder && (
-                    <DropdownMenuItem 
-                      className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={isCancelled || isAdmin}
-                      onSelect={() => {
-                        setActionDropdownOpen(false);
-                        handleOpenSendOrderDialog();
-                      }}
-                    >
-                      {hasExistingOrderRequest ? 'Resend Offer' : 'Send Offer'}
-                    </DropdownMenuItem>
+                    hasExistingClientOrderRequest ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-muted-foreground"
+                        disabled
+                      >
+                        Order Request Pending...
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem 
+                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled={isCancelled || isAdmin}
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
+                          handleOpenSendOrderDialog();
+                        }}
+                      >
+                        {hasExistingOrderRequest ? 'Resend Offer' : 'Send Offer'}
+                      </DropdownMenuItem>
+                    )
                   )}
                   {hasOpenDispute && (
                     <DropdownMenuItem 
