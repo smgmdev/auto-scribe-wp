@@ -1467,7 +1467,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                   newMsg.message.includes('[ORDER_CANCELLED]') ||
                                   newMsg.message.includes('[CANCEL_ORDER_ACCEPTED]') ||
                                   newMsg.message.includes('[ORDER_REQUEST]') ||
-                                  newMsg.message.includes('[OFFER_REJECTED]');
+                                  newMsg.message.includes('[OFFER_REJECTED]') ||
+                                  newMsg.message.includes('[CLIENT_ORDER_REQUEST]');
           
           // Skip messages from same sender type UNLESS it's a system message
           // System messages are inserted by edge functions, not the user directly
@@ -1676,6 +1677,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   const parseOfferRejected = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; delivery_duration?: { days: number; hours: number; minutes: number }; special_terms?: string } | null => {
     const match = message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseClientOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
+    const match = message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
     if (match) {
       try {
         return JSON.parse(match[1]);
@@ -2463,6 +2476,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const cancelRequest = parseCancelOrderRequest(msg.message);
     const cancelAccepted = parseCancelOrderAccepted(msg.message);
     const orderRequest = parseOrderRequest(msg.message);
+    const clientOrderRequest = parseClientOrderRequest(msg.message);
     const orderDelivered = parseOrderDelivered(msg.message);
     const deliveryAccepted = parseDeliveryAccepted(msg.message);
     const revisionRequested = parseRevisionRequested(msg.message);
@@ -2516,6 +2530,59 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </TooltipProvider>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
+    // Handle client order request message (from client to agency)
+    if (clientOrderRequest) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-4 ${
+            isOwnMessage 
+              ? 'bg-primary text-primary-foreground border-primary' 
+              : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
+          }`}>
+            <div className="flex items-start gap-3">
+              {clientOrderRequest.media_site_favicon && (
+                <img 
+                  src={clientOrderRequest.media_site_favicon} 
+                  alt="" 
+                  className="w-10 h-10 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-700 dark:text-amber-300'}`}>
+                    {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
+                  </span>
+                </div>
+                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  {clientOrderRequest.media_site_name}
+                </p>
+                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <DollarSign className="h-3.5 w-3.5" />
+                  <span className="font-semibold">{clientOrderRequest.price.toLocaleString()} credits</span>
+                </div>
+                {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
+                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Proposed: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}</span>
+                  </div>
+                )}
+                {clientOrderRequest.special_terms && (
+                  <div className={`mt-2 p-2 rounded text-sm ${isOwnMessage ? 'bg-primary-foreground/10' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
+                    <p className={`text-xs font-medium mb-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-amber-700 dark:text-amber-300'}`}>Special Terms:</p>
+                    <p className={isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}>{clientOrderRequest.special_terms}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

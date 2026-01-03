@@ -1754,7 +1754,7 @@ export function ChatListPanel() {
 
   // Format preview message - make it user-friendly by cleaning up technical content
   // Returns { text, type } where type can be used for icon display
-  const formatPreviewMessage = (message: string | undefined, description: string, title: string, isAgencyView: boolean = false): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal' } => {
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string, isAgencyView: boolean = false): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal' } => {
     if (message) {
       let cleanMessage = message;
       
@@ -1785,6 +1785,9 @@ export function ChatListPanel() {
       }
       if (cleanMessage.startsWith('[OFFER_REJECTED]')) {
         return { text: 'Offer Rejected', type: 'offer_rejected' };
+      }
+      if (cleanMessage.startsWith('[CLIENT_ORDER_REQUEST]')) {
+        return { text: isAgencyView ? 'Order Request Received' : 'Order Request Sent', type: 'client_order_request' };
       }
       if (cleanMessage.startsWith('[PAYMENT_')) {
         return { text: 'Payment Update', type: 'payment' };
@@ -1858,7 +1861,7 @@ export function ChatListPanel() {
   };
 
   // Get icon for message type
-  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
+  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'payment' | 'delivery' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
     switch (type) {
       case 'order':
         return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
@@ -1874,6 +1877,8 @@ export function ChatListPanel() {
         return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'offer_rejected':
         return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
+      case 'client_order_request':
+        return <Tag className="h-3 w-3 shrink-0 text-amber-500" />;
       case 'payment':
         return <CreditCard className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'delivery':

@@ -3,12 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Coins, ShoppingCart, AlertTriangle, Info } from 'lucide-react';
+import { Loader2, Coins, Tag, AlertTriangle, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useAppStore } from '@/stores/appStore';
 
 interface MediaSiteInfo {
   id: string;
@@ -32,83 +32,86 @@ export function OrderWithCreditsDialog({
   serviceRequestId,
   onSuccess 
 }: OrderWithCreditsDialogProps) {
-  const [purchasing, setPurchasing] = useState(false);
+  const [sending, setSending] = useState(false);
   const [deliveryDays, setDeliveryDays] = useState<number>(0);
   const [deliveryHours, setDeliveryHours] = useState<number>(0);
   const [deliveryMinutes, setDeliveryMinutes] = useState<number>(0);
-  const { credits, refreshCredits } = useAuth();
+  const [specialTerms, setSpecialTerms] = useState('');
+  const { credits, user } = useAuth();
   const { toast } = useToast();
-  const { updateGlobalChatRequest } = useAppStore();
 
   const creditCost = mediaSite?.price || 0;
   const hasEnoughCredits = (credits || 0) >= creditCost;
 
-  const handlePurchase = async () => {
-    if (!mediaSite || !hasEnoughCredits) return;
+  const handleSendRequest = async () => {
+    if (!mediaSite || !hasEnoughCredits || !user) return;
 
-    setPurchasing(true);
+    setSending(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-credit-order', {
-        body: {
-          media_site_id: mediaSite.id,
-          service_request_id: serviceRequestId,
-          delivery_duration: {
-            days: deliveryDays,
-            hours: deliveryHours,
-            minutes: deliveryMinutes
-          }
+      // Create the order request message (from client to agency)
+      const orderRequestData = {
+        type: 'CLIENT_ORDER_REQUEST',
+        media_site_id: mediaSite.id,
+        media_site_name: mediaSite.name,
+        media_site_favicon: mediaSite.favicon,
+        price: creditCost,
+        delivery_duration: {
+          days: deliveryDays,
+          hours: deliveryHours,
+          minutes: deliveryMinutes
         },
-      });
+        special_terms: specialTerms || null
+      };
+
+      const { error } = await supabase
+        .from('service_messages')
+        .insert({
+          request_id: serviceRequestId,
+          sender_type: 'client',
+          sender_id: user.id,
+          message: `[CLIENT_ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/CLIENT_ORDER_REQUEST]`
+        });
 
       if (error) throw error;
 
-      if (data?.success) {
-        await refreshCredits();
-        
-        // Update the global chat request to reflect that an order exists
-        updateGlobalChatRequest({ 
-          order: { 
-            id: data.order_id, 
-            status: 'paid',
-            delivery_status: 'pending',
-            delivery_deadline: data.delivery_deadline || null
-          } 
-        });
-        
-        toast({
-          title: "Order Placed",
-          description: `Successfully ordered from ${mediaSite.name}. ${data.credits_deducted} credits used.`,
-        });
-        onOpenChange(false);
-        onSuccess();
-      } else if (data?.error) {
-        throw new Error(data.error);
-      }
+      toast({
+        title: "Order Request Sent",
+        description: `Your order request has been sent to the agency for approval.`,
+      });
+      
+      // Reset form
+      setDeliveryDays(0);
+      setDeliveryHours(0);
+      setDeliveryMinutes(0);
+      setSpecialTerms('');
+      
+      onOpenChange(false);
+      onSuccess();
     } catch (error: any) {
-      console.error('Order error:', error);
+      console.error('Order request error:', error);
       toast({
         variant: 'destructive',
-        title: 'Order Failed',
-        description: error.message || 'Failed to place order.',
+        title: 'Request Failed',
+        description: error.message || 'Failed to send order request.',
       });
     } finally {
-      setPurchasing(false);
+      setSending(false);
     }
   };
 
   if (!mediaSite) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => !purchasing && onOpenChange(newOpen)}>
+    <Dialog open={open} onOpenChange={(newOpen) => !sending && onOpenChange(newOpen)}>
       <DialogContent className="sm:max-w-md z-[9999]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Order Now
+            <Tag className="h-5 w-5" />
+            Send Order Request
           </DialogTitle>
           <DialogDescription>
-            Use your credits to place this order (1 credit = $1)
+            Send an order request to the agency for approval
           </DialogDescription>
         </DialogHeader>
 
@@ -133,17 +136,17 @@ export function OrderWithCreditsDialog({
             </div>
           </div>
 
-          {/* Agreed Delivery Duration */}
+          {/* Proposed Delivery Duration */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">Agreed Delivery Duration</Label>
+              <Label className="text-sm font-medium">Proposed Delivery Duration</Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Confirm with the agency on the delivery time.</p>
+                    <p>Propose a delivery time for the agency to consider.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -187,6 +190,30 @@ export function OrderWithCreditsDialog({
             </div>
           </div>
 
+          {/* Special Terms */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium">Special Terms (Optional)</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Add any special requirements or conditions for this order.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Textarea
+              placeholder="Enter any special terms or requirements..."
+              value={specialTerms}
+              onChange={(e) => setSpecialTerms(e.target.value)}
+              className="resize-none"
+              rows={3}
+            />
+          </div>
+
           {/* Credit Balance */}
           <div className="rounded-lg border border-border bg-background p-4">
             <div className="flex items-center justify-between">
@@ -218,25 +245,25 @@ export function OrderWithCreditsDialog({
               <div>
                 <p className="font-medium text-destructive">Insufficient Credits</p>
                 <p className="text-sm text-muted-foreground">
-                  You need {(creditCost - (credits || 0)).toLocaleString()} more credits (${(creditCost - (credits || 0)).toLocaleString()}) to place this order.
+                  You need {(creditCost - (credits || 0)).toLocaleString()} more credits (${(creditCost - (credits || 0)).toLocaleString()}) to send this order request.
                 </p>
               </div>
             </div>
           )}
 
           <Button
-            onClick={handlePurchase}
-            disabled={purchasing || !hasEnoughCredits}
+            onClick={handleSendRequest}
+            disabled={sending || !hasEnoughCredits}
             className="w-full"
             size="lg"
           >
-            {purchasing ? (
+            {sending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Processing...
+                Sending...
               </>
             ) : hasEnoughCredits ? (
-              `Order for $${creditCost.toLocaleString()}`
+              `Send Order Request`
             ) : (
               'Insufficient Credits'
             )}
