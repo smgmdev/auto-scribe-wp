@@ -794,8 +794,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const rejectedMediaSiteIds = messages
     .filter(msg => msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST_REJECTED]'))
     .map(msg => {
-      const parsed = parseOrderRequestRejected(msg.message);
-      return parsed?.media_site_id;
+      const match = msg.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
+      if (match) {
+        try {
+          const data = JSON.parse(match[1]);
+          return data.media_site_id;
+        } catch { return null; }
+      }
+      return null;
     })
     .filter(Boolean);
   
