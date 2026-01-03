@@ -2544,6 +2544,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (clientOrderRequest) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
+      const isAgency = actualSenderType === 'agency';
       
       // Handle cancel client order request
       const handleCancelClientOrderRequest = async () => {
@@ -2572,6 +2573,66 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           });
         } finally {
           setCancellingOrderRequestId(null);
+        }
+      };
+      
+      // Handle reject client order request (agency side)
+      const handleRejectClientOrderRequest = async () => {
+        if (!globalChatRequest) return;
+        
+        setRejectingOrderRequestId(msg.id);
+        try {
+          // Send rejection message
+          const rejectionData = {
+            type: 'ORDER_REQUEST_REJECTED',
+            media_site_id: clientOrderRequest.media_site_id,
+            media_site_name: clientOrderRequest.media_site_name,
+            media_site_favicon: clientOrderRequest.media_site_favicon,
+            price: clientOrderRequest.price,
+            delivery_duration: clientOrderRequest.delivery_duration,
+            special_terms: clientOrderRequest.special_terms
+          };
+          
+          const { data: insertedMsg, error } = await supabase
+            .from('service_messages')
+            .insert({
+              request_id: globalChatRequest.id,
+              sender_type: senderType,
+              sender_id: senderId,
+              message: `[ORDER_REQUEST_REJECTED]${JSON.stringify(rejectionData)}[/ORDER_REQUEST_REJECTED]`
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+          
+          // Add rejection message to local state
+          if (insertedMsg) {
+            setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+          }
+          
+          // Delete the original order request message
+          await supabase
+            .from('service_messages')
+            .delete()
+            .eq('id', msg.id);
+          
+          // Remove from local state
+          setMessages(prev => prev.filter(m => m.id !== msg.id));
+          
+          toast({
+            title: "Order request rejected",
+            description: "The order request has been declined.",
+          });
+        } catch (error: any) {
+          console.error('Error rejecting order request:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to reject order request.",
+          });
+        } finally {
+          setRejectingOrderRequestId(null);
         }
       };
       
@@ -2621,6 +2682,41 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
               </div>
             </div>
+            
+            {/* Action buttons for agency */}
+            {isAgency && !hasOrder && !isOwnMessage && (
+              <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    setPendingOrderRequest({
+                      media_site_id: clientOrderRequest.media_site_id,
+                      media_site_name: clientOrderRequest.media_site_name,
+                      media_site_favicon: clientOrderRequest.media_site_favicon,
+                      price: clientOrderRequest.price,
+                      special_terms: clientOrderRequest.special_terms,
+                      delivery_duration: clientOrderRequest.delivery_duration
+                    });
+                    setAcceptOrderDialogOpen(true);
+                  }}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
+                  onClick={handleRejectClientOrderRequest}
+                  disabled={rejectingOrderRequestId === msg.id}
+                >
+                  {rejectingOrderRequestId === msg.id && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  Reject
+                </Button>
+              </div>
+            )}
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
             {isOwnMessage && !hasOrder && (
