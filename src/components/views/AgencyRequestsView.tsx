@@ -996,7 +996,7 @@ export function AgencyRequestsView() {
           </Tabs>
         </TabsContent>
 
-        <TabsContent value="orders" className="mt-6">
+        <TabsContent value="orders" className="mt-2">
           <Tabs defaultValue="active" className="w-full" onValueChange={async (value) => {
             if (value === 'completed' && agencyUnreadCompletedCount > 0) {
               // Mark all unread completed orders as read in database
