@@ -409,9 +409,9 @@ export function OrdersView() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending_payment':
-        return null;
+        return <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><Clock className="h-3 w-3 mr-1" />Pending Payment</Badge>;
       case 'paid':
-        return <Badge variant="secondary" className="bg-blue-600/20 text-blue-600"><CheckCircle className="h-3 w-3 mr-1" />Paid</Badge>;
+        return <Badge variant="secondary" className="bg-black text-green-500 dark:bg-white dark:text-green-600"><CheckCircle className="h-3 w-3 mr-1 text-green-500 dark:text-green-600" />Paid</Badge>;
       case 'completed':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       case 'cancelled':
@@ -874,6 +874,7 @@ export function OrdersView() {
                     }}
                   />
                 </p>
+                <p>Order Placed: {new Date(selectedOrder.created_at).toLocaleString()}</p>
               </div>
             </div>
           )}
