@@ -4385,7 +4385,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </DropdownMenuItem>
                     )
                   )}
-                  {hasOrder && localOrder?.delivery_status === 'pending' && (
+                  {hasOrder && localOrder?.delivery_status === 'pending' && globalChatType === 'my-request' && (
                     hasSentPendingCancelRequest ? (
                       <DropdownMenuItem 
                         className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
