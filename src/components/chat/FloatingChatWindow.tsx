@@ -4288,200 +4288,190 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    Action
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
-                  {hasOrder && (
-                    <DropdownMenuItem 
-                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                      onSelect={async () => {
-                        setActionDropdownOpen(false);
-                        if (!localOrder) return;
-                        setLoadingOrderDetails(true);
-                        setOrderDetailsOpen(true);
-                        const { data } = await supabase
-                          .from('orders')
-                          .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
-                          .eq('id', localOrder.id)
-                          .maybeSingle();
-                        setOrderDetails(data);
-                        setLoadingOrderDetails(false);
-                      }}
+              {!isCancelled && localOrder?.status !== 'cancelled' && (
+                <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
+                      onMouseDown={(e) => e.stopPropagation()}
                     >
-                      Order Details
-                    </DropdownMenuItem>
-                  )}
-                  {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && (
-                    hasExistingClientOrderRequest ? (
+                      Action
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                    {hasOrder && (
                       <DropdownMenuItem 
-                        className="cursor-pointer text-muted-foreground"
-                        disabled
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        onSelect={async () => {
+                          setActionDropdownOpen(false);
+                          if (!localOrder) return;
+                          setLoadingOrderDetails(true);
+                          setOrderDetailsOpen(true);
+                          const { data } = await supabase
+                            .from('orders')
+                            .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                            .eq('id', localOrder.id)
+                            .maybeSingle();
+                          setOrderDetails(data);
+                          setLoadingOrderDetails(false);
+                        }}
                       >
-                        Order Request Pending...
+                        Order Details
                       </DropdownMenuItem>
-                    ) : (
+                    )}
+                    {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && (
+                      hasExistingClientOrderRequest ? (
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-muted-foreground"
+                          disabled
+                        >
+                          Order Request Pending...
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem 
+                          className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                          disabled={isCancelled || isAdmin}
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            handleOpenSendOrderDialog();
+                          }}
+                        >
+                          {hasExistingOrderRequest ? 'Resend Offer' : 'Send Offer'}
+                        </DropdownMenuItem>
+                      )
+                    )}
+                    {globalChatType === 'agency-request' && (hasAcceptedOrderRequest || (hasOrder && (!localOrder?.delivery_status || localOrder?.delivery_status === 'pending'))) && (
                       <DropdownMenuItem 
                         className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isCancelled || isAdmin}
+                        disabled={isAdmin}
                         onSelect={() => {
                           setActionDropdownOpen(false);
-                          handleOpenSendOrderDialog();
+                          setDeliverOrderDialogOpen(true);
                         }}
                       >
-                        {hasExistingOrderRequest ? 'Resend Offer' : 'Send Offer'}
+                        Deliver Order
                       </DropdownMenuItem>
-                    )
-                  )}
-                  {globalChatType === 'agency-request' && (hasAcceptedOrderRequest || (hasOrder && (!localOrder?.delivery_status || localOrder?.delivery_status === 'pending'))) && (
-                    <DropdownMenuItem 
-                      className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={isAdmin}
-                      onSelect={() => {
-                        setActionDropdownOpen(false);
-                        setDeliverOrderDialogOpen(true);
-                      }}
-                    >
-                      Deliver Order
-                    </DropdownMenuItem>
-                  )}
-                  {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && (
-                    <DropdownMenuItem 
-                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={isAdmin}
-                      onSelect={() => {
-                        setActionDropdownOpen(false);
-                        setCancelPlacedOrderDialogOpen(true);
-                      }}
-                    >
-                      Cancel Order
-                    </DropdownMenuItem>
-                  )}
-                  {hasOpenDispute && (
-                    <DropdownMenuItem 
-                      className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled
-                    >
-                      Dispute Opened
-                    </DropdownMenuItem>
-                  )}
-                  {globalChatType === 'my-request' && !hasOpenDispute && (
-                    hasOrder ? (
-                      <DropdownMenuItem 
-                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isCancelled || !isDeliveryOverdue || isAdmin}
-                        onSelect={() => {
-                          setActionDropdownOpen(false);
-                          setDisputeDialogOpen(true);
-                        }}
-                      >
-                        Open Dispute
-                      </DropdownMenuItem>
-                    ) : hasAcceptedOrderRequest ? (
-                      <DropdownMenuItem 
-                        className="cursor-pointer text-green-600"
-                        disabled
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Order Placed - Awaiting Delivery
-                      </DropdownMenuItem>
-                    ) : hasExistingOrderRequest ? (
-                      <DropdownMenuItem 
-                        className="cursor-pointer text-muted-foreground"
-                        disabled
-                      >
-                        Offer Pending...
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem 
-                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isCancelled || isAdmin}
-                        onSelect={() => {
-                          setActionDropdownOpen(false);
-                          setOrderWithCreditsOpen(true);
-                        }}
-                      >
-                        Send Order Request
-                      </DropdownMenuItem>
-                    )
-                  )}
-                  {hasOrder && localOrder?.delivery_status === 'pending' && globalChatType === 'my-request' && (
-                    hasSentPendingCancelRequest ? (
-                      <DropdownMenuItem 
-                        className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled
-                      >
-                        Cancellation Pending...
-                      </DropdownMenuItem>
-                    ) : hasPendingCancelRequest ? (
-                      <DropdownMenuItem 
-                        className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        onSelect={() => {
-                          setActionDropdownOpen(false);
-                          // Find the pending request and accept it
-                          const pendingMsg = messages.find(msg => {
-                            if (msg.sender_type === senderType) return false;
-                            const cr = parseCancelOrderRequest(msg.message);
-                            if (!cr) return false;
-                            const msgIndex = messages.findIndex(m => m.id === msg.id);
-                            return !messages.slice(msgIndex + 1).some(m => 
-                              parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
-                            );
-                          });
-                          if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
-                        }}
-                        disabled={acceptingCancellation || isAdmin}
-                      >
-                        {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
-                      </DropdownMenuItem>
-                    ) : (
+                    )}
+                    {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && (
                       <DropdownMenuItem 
                         className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                         disabled={isAdmin}
                         onSelect={() => {
                           setActionDropdownOpen(false);
-                          setCancelOrderRequestDialogOpen(true);
+                          setCancelPlacedOrderDialogOpen(true);
                         }}
                       >
-                        Request Cancellation
+                        Cancel Order
                       </DropdownMenuItem>
-                    )
-                  )}
-                  {hasAcceptedOrderRequest && globalChatType === 'agency-request' && !hasOrder && (
-                    <DropdownMenuItem 
-                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={isCancelled || isAdmin}
-                      onSelect={() => {
-                        setActionDropdownOpen(false);
-                        setCancelPlacedOrderDialogOpen(true);
-                      }}
-                    >
-                      Cancel Order
-                    </DropdownMenuItem>
-                  )}
-                  {!hasOrder && !hasAcceptedOrderRequest && !isCancelled && (
-                    <DropdownMenuItem 
-                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={isAdmin}
-                      onSelect={() => {
-                        setActionDropdownOpen(false);
-                        setCancelDialogOpen(true);
-                      }}
-                    >
-                      Cancel Engagement
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    )}
+                    {hasOpenDispute && (
+                      <DropdownMenuItem 
+                        className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled
+                      >
+                        Dispute Opened
+                      </DropdownMenuItem>
+                    )}
+                    {globalChatType === 'my-request' && !hasOpenDispute && (
+                      hasOrder ? (
+                        <DropdownMenuItem 
+                          className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                          disabled={isCancelled || !isDeliveryOverdue || isAdmin}
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            setDisputeDialogOpen(true);
+                          }}
+                        >
+                          Open Dispute
+                        </DropdownMenuItem>
+                      ) : hasAcceptedOrderRequest ? (
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-green-600"
+                          disabled
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Order Placed - Awaiting Delivery
+                        </DropdownMenuItem>
+                      ) : hasExistingOrderRequest ? (
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-muted-foreground"
+                          disabled
+                        >
+                          Offer Pending...
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem 
+                          className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                          disabled={isCancelled || isAdmin}
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            setOrderWithCreditsOpen(true);
+                          }}
+                        >
+                          Send Order Request
+                        </DropdownMenuItem>
+                      )
+                    )}
+                    {hasOrder && localOrder?.delivery_status === 'pending' && globalChatType === 'my-request' && (
+                      hasSentPendingCancelRequest ? (
+                        <DropdownMenuItem 
+                          className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
+                          disabled
+                        >
+                          Cancellation Pending...
+                        </DropdownMenuItem>
+                      ) : hasPendingCancelRequest ? (
+                        <DropdownMenuItem 
+                          className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            // Find the pending request and accept it
+                            const pendingMsg = messages.find(msg => {
+                              if (msg.sender_type === senderType) return false;
+                              const cr = parseCancelOrderRequest(msg.message);
+                              if (!cr) return false;
+                              const msgIndex = messages.findIndex(m => m.id === msg.id);
+                              return !messages.slice(msgIndex + 1).some(m => 
+                                parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+                              );
+                            });
+                            if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
+                          }}
+                          disabled={acceptingCancellation || isAdmin}
+                        >
+                          {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem 
+                          className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                          disabled={isCancelled || isAdmin}
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            setCancelOrderDialogOpen(true);
+                          }}
+                        >
+                          Request Cancellation
+                        </DropdownMenuItem>
+                      )
+                    )}
+                    {!hasOrder && !hasAcceptedOrderRequest && !isCancelled && (
+                      <DropdownMenuItem 
+                        className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled={isAdmin}
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
+                          setCancelDialogOpen(true);
+                        }}
+                      >
+                        Cancel Engagement
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {globalChatRequest.media_site && (
                 <Button
                   variant="ghost"
