@@ -5841,7 +5841,33 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Delivery Status</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground">Delivery Status</p>
+                    {(() => {
+                      const acceptedData = getLastAcceptedOrderRequestData();
+                      if (acceptedData?.delivery_duration) {
+                        const { days = 0, hours = 0, minutes = 0 } = acceptedData.delivery_duration;
+                        const parts = [];
+                        if (days > 0) parts.push(`${days}d`);
+                        if (hours > 0) parts.push(`${hours}h`);
+                        if (minutes > 0) parts.push(`${minutes}m`);
+                        const durationText = parts.join(' ') || '0m';
+                        return (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">Agreed delivery time: {durationText}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                   {orderDetails.delivery_status === 'accepted' && (
                     <Badge variant="secondary" className="mt-1 bg-green-600 text-white">
                       Accepted
