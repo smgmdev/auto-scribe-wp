@@ -6451,8 +6451,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <Dialog open={deliverOrderDialogOpen} onOpenChange={setDeliverOrderDialogOpen}>
         <DialogContent className="z-[9999] max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
+            <DialogTitle>
               Deliver Order
             </DialogTitle>
           </DialogHeader>
@@ -6493,7 +6492,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              className="flex-1 bg-black hover:bg-black/90 text-white"
               disabled={!deliveryLink.trim() || submittingDelivery}
               onClick={async () => {
                 if (!globalChatRequest || !deliveryLink.trim()) return;
@@ -6561,10 +6560,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Submitting...
                 </>
               ) : (
-                <>
-                  <Truck className="h-4 w-4 mr-2" />
-                  Submit Delivery
-                </>
+                'Submit Delivery'
               )}
             </Button>
           </div>
