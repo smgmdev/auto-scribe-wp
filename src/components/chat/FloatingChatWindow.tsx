@@ -1102,7 +1102,38 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (!globalChatRequest || !orderData.messageId) return;
     
     try {
-      // Send acceptance message
+      // First get the client user_id from the service request
+      const { data: serviceRequest, error: fetchError } = await supabase
+        .from('service_requests')
+        .select('user_id')
+        .eq('id', globalChatRequest.id)
+        .single();
+
+      if (fetchError || !serviceRequest) {
+        throw new Error('Failed to fetch service request details');
+      }
+
+      // Create a pending_payment order via edge function
+      const { data: orderResult, error: orderError } = await supabase.functions.invoke('accept-order-request', {
+        body: {
+          service_request_id: globalChatRequest.id,
+          media_site_id: orderData.media_site_id,
+          price: orderData.price,
+          delivery_duration: orderData.delivery_duration,
+          client_user_id: serviceRequest.user_id
+        }
+      });
+
+      if (orderError) {
+        console.error('Error creating pending order:', orderError);
+        throw orderError;
+      }
+
+      if (orderResult?.error) {
+        throw new Error(orderResult.error);
+      }
+
+      // Send acceptance message with order_id
       const acceptData = {
         type: 'ORDER_REQUEST_ACCEPTED',
         media_site_id: orderData.media_site_id,
@@ -1110,7 +1141,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         media_site_favicon: orderData.media_site_favicon,
         price: orderData.price,
         delivery_duration: orderData.delivery_duration,
-        special_terms: orderData.special_terms
+        special_terms: orderData.special_terms,
+        order_id: orderResult?.order_id
       };
       
       const { data: insertedMsg, error } = await supabase
@@ -1149,7 +1181,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to accept order request.",
+        description: error.message || "Failed to accept order request.",
       });
     }
   };
@@ -3242,7 +3274,38 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     
                     setAcceptingOrder(true);
                     try {
-                      // Send acceptance message
+                      // First get the client user_id from the service request
+                      const { data: serviceRequest, error: fetchError } = await supabase
+                        .from('service_requests')
+                        .select('user_id')
+                        .eq('id', globalChatRequest.id)
+                        .single();
+
+                      if (fetchError || !serviceRequest) {
+                        throw new Error('Failed to fetch service request details');
+                      }
+
+                      // Create a pending_payment order via edge function
+                      const { data: orderResult, error: orderError } = await supabase.functions.invoke('accept-order-request', {
+                        body: {
+                          service_request_id: globalChatRequest.id,
+                          media_site_id: clientOrderRequest.media_site_id,
+                          price: clientOrderRequest.price,
+                          delivery_duration: clientOrderRequest.delivery_duration,
+                          client_user_id: serviceRequest.user_id
+                        }
+                      });
+
+                      if (orderError) {
+                        console.error('Error creating pending order:', orderError);
+                        throw orderError;
+                      }
+
+                      if (orderResult?.error) {
+                        throw new Error(orderResult.error);
+                      }
+
+                      // Send acceptance message with order_id
                       const acceptanceData = {
                         type: 'ORDER_REQUEST_ACCEPTED',
                         media_site_id: clientOrderRequest.media_site_id,
@@ -3250,7 +3313,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         media_site_favicon: clientOrderRequest.media_site_favicon,
                         price: clientOrderRequest.price,
                         delivery_duration: clientOrderRequest.delivery_duration,
-                        special_terms: clientOrderRequest.special_terms
+                        special_terms: clientOrderRequest.special_terms,
+                        order_id: orderResult?.order_id
                       };
                       
                       const { data: insertedMsg, error } = await supabase
@@ -3289,7 +3353,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       toast({
                         variant: "destructive",
                         title: "Error",
-                        description: "Failed to accept order request.",
+                        description: error.message || "Failed to accept order request.",
                       });
                     } finally {
                       setAcceptingOrder(false);

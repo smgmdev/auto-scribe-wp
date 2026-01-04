@@ -170,7 +170,7 @@ serve(async (req) => {
     const platformFeeCents = Math.round(amountCents * (commissionPercentage / 100));
     const agencyPayoutCents = amountCents - platformFeeCents;
 
-    // Start transaction: deduct credits, create order, link to service request
+    // Start transaction: deduct credits, create/update order, link to service request
     // Deduct credits first
     const newCredits = currentCredits - creditCost;
     const { error: updateError } = await supabaseAdmin
@@ -186,10 +186,6 @@ serve(async (req) => {
       );
     }
 
-    // Generate unique order number
-    const orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
-    console.log(`Generated unique order number: ${orderNumber}`);
-
     // Calculate delivery deadline if duration was provided
     let deliveryDeadline = null;
     if (delivery_duration) {
@@ -200,36 +196,89 @@ serve(async (req) => {
       }
     }
 
-    // Create order BEFORE recording transaction
-    const { data: order, error: orderError } = await supabaseAdmin
+    // Check if there's an existing pending_payment order for this service request
+    const { data: existingOrder } = await supabaseAdmin
       .from("orders")
-      .insert({
-        order_number: orderNumber,
-        user_id: user.id,
-        media_site_id: media_site_id,
-        amount_cents: amountCents,
-        platform_fee_cents: platformFeeCents,
-        agency_payout_cents: agencyPayoutCents,
-        status: "paid",
-        paid_at: new Date().toISOString(),
-        delivery_status: "pending",
-        delivery_deadline: deliveryDeadline
-      })
-      .select()
-      .single();
+      .select("id, order_number")
+      .eq("media_site_id", media_site_id)
+      .eq("user_id", user.id)
+      .eq("status", "pending_payment")
+      .maybeSingle();
 
-    if (orderError) {
-      console.error("Error creating order:", orderError);
-      // Refund credits on failure
-      await supabaseAdmin
-        .from("user_credits")
-        .update({ credits: currentCredits, updated_at: new Date().toISOString() })
-        .eq("user_id", user.id);
-      
-      return new Response(
-        JSON.stringify({ error: "Failed to create order" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
+    let order;
+    let orderNumber;
+
+    if (existingOrder) {
+      // Update existing pending_payment order to paid
+      const { data: updatedOrder, error: updateOrderError } = await supabaseAdmin
+        .from("orders")
+        .update({
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          delivery_deadline: deliveryDeadline,
+          amount_cents: amountCents,
+          platform_fee_cents: platformFeeCents,
+          agency_payout_cents: agencyPayoutCents
+        })
+        .eq("id", existingOrder.id)
+        .select()
+        .single();
+
+      if (updateOrderError) {
+        console.error("Error updating order:", updateOrderError);
+        // Refund credits on failure
+        await supabaseAdmin
+          .from("user_credits")
+          .update({ credits: currentCredits, updated_at: new Date().toISOString() })
+          .eq("user_id", user.id);
+        
+        return new Response(
+          JSON.stringify({ error: "Failed to update order" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      order = updatedOrder;
+      orderNumber = existingOrder.order_number;
+      console.log(`Updated existing order ${order.id} from pending_payment to paid`);
+    } else {
+      // Generate unique order number for new order
+      orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
+      console.log(`Generated unique order number: ${orderNumber}`);
+
+      // Create new order
+      const { data: newOrder, error: orderError } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
+          user_id: user.id,
+          media_site_id: media_site_id,
+          amount_cents: amountCents,
+          platform_fee_cents: platformFeeCents,
+          agency_payout_cents: agencyPayoutCents,
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          delivery_status: "pending",
+          delivery_deadline: deliveryDeadline
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error("Error creating order:", orderError);
+        // Refund credits on failure
+        await supabaseAdmin
+          .from("user_credits")
+          .update({ credits: currentCredits, updated_at: new Date().toISOString() })
+          .eq("user_id", user.id);
+        
+        return new Response(
+          JSON.stringify({ error: "Failed to create order" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      order = newOrder;
     }
 
     // Record credit transaction ONLY after order is successfully created
