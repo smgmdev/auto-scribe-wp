@@ -26,6 +26,8 @@ const statusColors: Record<string, string> = {
   scheduled: 'bg-warning/10 text-warning border-warning/30',
 };
 
+const ARTICLES_PER_PAGE = 15;
+
 export function ArticlesView() {
   const { setEditingArticle, setCurrentView } = useAppStore();
   const { sites } = useSites();
@@ -34,6 +36,8 @@ export function ArticlesView() {
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [visiblePublished, setVisiblePublished] = useState(ARTICLES_PER_PAGE);
+  const [visibleDrafts, setVisibleDrafts] = useState(ARTICLES_PER_PAGE);
 
   const getSiteInfo = (article: Article) => {
     // Use stored name/favicon if available, otherwise try to look up from sites
@@ -72,14 +76,24 @@ export function ArticlesView() {
     setArticleToDelete(null);
   };
 
-  const filteredArticles = articles.filter(article => {
-    if (activeTab === 'published') return article.status === 'published';
-    if (activeTab === 'drafts') return article.status === 'draft';
-    return true;
-  });
+  const publishedArticles = articles.filter(a => a.status === 'published');
+  const draftArticles = articles.filter(a => a.status === 'draft');
+  
+  const filteredArticles = activeTab === 'published' ? publishedArticles : draftArticles;
+  const visibleCount = activeTab === 'published' ? visiblePublished : visibleDrafts;
+  const displayedArticles = filteredArticles.slice(0, visibleCount);
+  const hasMore = filteredArticles.length > visibleCount;
 
-  const publishedCount = articles.filter(a => a.status === 'published').length;
-  const draftsCount = articles.filter(a => a.status === 'draft').length;
+  const handleLoadMore = () => {
+    if (activeTab === 'published') {
+      setVisiblePublished(prev => prev + ARTICLES_PER_PAGE);
+    } else {
+      setVisibleDrafts(prev => prev + ARTICLES_PER_PAGE);
+    }
+  };
+
+  const publishedCount = publishedArticles.length;
+  const draftsCount = draftArticles.length;
 
   const renderArticleCard = (article: Article, index: number) => (
     <Card 
@@ -218,21 +232,35 @@ export function ArticlesView() {
         ) : (
           <>
             <TabsContent value="published" className="mt-6">
-              {filteredArticles.length === 0 ? (
+              {displayedArticles.length === 0 ? (
                 renderEmptyState('No published articles yet. Publish your first article to see it here.')
               ) : (
                 <div className="space-y-4">
-                  {filteredArticles.map((article, index) => renderArticleCard(article, index))}
+                  {displayedArticles.map((article, index) => renderArticleCard(article, index))}
+                  {hasMore && (
+                    <div className="flex justify-center pt-4">
+                      <Button variant="outline" onClick={handleLoadMore}>
+                        Load More ({filteredArticles.length - visibleCount} remaining)
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
 
             <TabsContent value="drafts" className="mt-6">
-              {filteredArticles.length === 0 ? (
+              {displayedArticles.length === 0 ? (
                 renderEmptyState('No draft articles. Start writing a new article to save it as a draft.')
               ) : (
                 <div className="space-y-4">
-                  {filteredArticles.map((article, index) => renderArticleCard(article, index))}
+                  {displayedArticles.map((article, index) => renderArticleCard(article, index))}
+                  {hasMore && (
+                    <div className="flex justify-center pt-4">
+                      <Button variant="outline" onClick={handleLoadMore}>
+                        Load More ({filteredArticles.length - visibleCount} remaining)
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
