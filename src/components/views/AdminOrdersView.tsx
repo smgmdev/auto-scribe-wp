@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1028,33 +1028,10 @@ export function AdminOrdersView() {
                   {investigating ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <Search className="h-4 w-4 mr-2" />
+                    <MessageSquare className="h-4 w-4 mr-2" />
                   )}
-                  Investigate
+                  Go to Chat
                 </Button>
-                
-                {selectedOrder.status === 'paid' && (
-                  <>
-                    {selectedOrder.delivery_status === 'pending' && (
-                      <Button 
-                        variant="outline"
-                        className="w-full hover:bg-foreground hover:text-background" 
-                        onClick={() => setDeliveryConfirmDialogOpen(true)}
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Mark Delivered
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outline"
-                      className="w-full hover:bg-destructive hover:text-destructive-foreground hover:border-destructive" 
-                      onClick={() => setCancelDialogOpen(true)}
-                    >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Cancel Order
-                    </Button>
-                  </>
-                )}
               </div>
 
               <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
