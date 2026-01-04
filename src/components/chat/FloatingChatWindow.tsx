@@ -2383,22 +2383,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           : `[ATTACHMENT]${fileData}[/ATTACHMENT]`;
       }
 
-      const { error } = await supabase.from('service_messages').insert({
+      const { data: insertedMsg, error } = await supabase.from('service_messages').insert({
         request_id: globalChatRequest.id,
         sender_type: senderType,
         sender_id: senderId,
         message: fullMessage
-      });
+      }).select().single();
 
       if (error) throw error;
 
       const newMsg: ServiceMessage = {
-        id: crypto.randomUUID(),
+        id: insertedMsg.id,
         request_id: globalChatRequest.id,
         sender_type: senderType,
         sender_id: senderId,
         message: fullMessage,
-        created_at: new Date().toISOString()
+        created_at: insertedMsg.created_at
       };
 
       setMessages(prev => [...prev, newMsg]);
