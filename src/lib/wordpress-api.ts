@@ -384,13 +384,16 @@ export async function fetchPostSEOData(
         desc: data.meta?.rank_math_description
       });
     } else if (site.seoPlugin === 'aioseo') {
-      // AIOSEO stores data in aioseo_meta_data or meta
+      // AIOSEO stores data in various locations depending on version and configuration
+      
+      // Method 1: aioseo_meta_data at top level or in meta
       const aioseoData = data.aioseo_meta_data || data.meta?.aioseo_meta_data;
-      if (aioseoData) {
+      if (aioseoData && typeof aioseoData === 'object' && aioseoData.description) {
         metaDescription = aioseoData.description || '';
         focusKeyword = aioseoData.keyphrases?.focus?.keyphrase || '';
       }
-      // Also check post meta for AIOSEO
+      
+      // Method 2: Check post meta for AIOSEO v4+ format
       if (!focusKeyword && data.meta?._aioseo_keywords) {
         focusKeyword = data.meta._aioseo_keywords;
       }
@@ -398,8 +401,21 @@ export async function fetchPostSEOData(
         metaDescription = data.meta._aioseo_description;
       }
       
+      // Method 3: Check for _aioseo_og_description as fallback
+      if (!metaDescription && data.meta?._aioseo_og_description) {
+        metaDescription = data.meta._aioseo_og_description;
+      }
+      
+      // Method 4: Check yoast_head_json if AIOSEO exposes via similar format
+      if (data.yoast_head_json) {
+        if (!metaDescription && data.yoast_head_json.description) {
+          metaDescription = data.yoast_head_json.description;
+        }
+      }
+      
       // Debug log for AIOSEO
       console.log('[fetchPostSEOData] AIOSEO data:', aioseoData);
+      console.log('[fetchPostSEOData] Full meta object:', data.meta);
     }
     
     return { focusKeyword, metaDescription };
