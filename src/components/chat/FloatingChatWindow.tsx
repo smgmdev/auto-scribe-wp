@@ -5295,8 +5295,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           favicon: globalChatRequest.media_site.favicon
         } : null}
         serviceRequestId={globalChatRequest?.id || ''}
-        onSuccess={() => {
-          updateGlobalChatRequest({ order: { id: 'temp' } as any }, globalChatRequest.id);
+        onSuccess={(insertedMsg) => {
+          // Add the message to local state immediately so it shows without waiting for realtime
+          if (insertedMsg) {
+            setMessages(prev => {
+              if (prev.some(m => m.id === insertedMsg.id)) return prev;
+              return [...prev, insertedMsg as ServiceMessage];
+            });
+          }
+          // Don't set temp order here - CLIENT_ORDER_REQUEST is just a request, not an order
         }}
       />
 
