@@ -1663,9 +1663,29 @@ export function ChatListPanel() {
         console.log('[ChatListPanel] Agency admin-action channel status:', status);
       });
 
+    // Separate channel for client action notifications (engagement cancellations by client)
+    const clientActionChannel = supabase
+      .channel(`notify-${agencyPayoutId}-client-action`)
+      .on('broadcast', { event: 'client-action' }, (payload) => {
+        console.log('[ChatListPanel] Client action (agency):', payload);
+        const { action, message, reason } = payload.payload || {};
+        
+        if (action === 'engagement-cancelled') {
+          toast({
+            variant: 'destructive',
+            title: "Engagement Cancelled by Client",
+            description: reason ? `Reason: ${reason}` : message,
+          });
+        }
+      })
+      .subscribe((status) => {
+        console.log('[ChatListPanel] Client-action channel status:', status);
+      });
+
     return () => {
       supabase.removeChannel(agencyChannel);
       supabase.removeChannel(agencyAdminActionChannel);
+      supabase.removeChannel(clientActionChannel);
     };
   }, [agencyPayoutId, handleBroadcastNotification]);
 
