@@ -828,17 +828,20 @@ export function AgencyRequestsView() {
                     // Calculate time remaining for delivery
                     const getTimeRemaining = () => {
                       if (!deliveryDeadline) return null;
-                      const now = new Date();
                       const deadline = new Date(deliveryDeadline);
-                      const diffMs = deadline.getTime() - now.getTime();
+                      const diffMs = deadline.getTime() - currentTime.getTime();
                       if (diffMs <= 0) return null;
-                      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                      if (hours > 24) {
-                        const days = Math.floor(hours / 24);
-                        return `${days}d ${hours % 24}h`;
+                      
+                      const totalSeconds = Math.floor(diffMs / 1000);
+                      const days = Math.floor(totalSeconds / 86400);
+                      const hours = Math.floor((totalSeconds % 86400) / 3600);
+                      const minutes = Math.floor((totalSeconds % 3600) / 60);
+                      const seconds = totalSeconds % 60;
+                      
+                      if (days > 0) {
+                        return `${days}d ${hours}h ${minutes}m`;
                       }
-                      return `${hours}h ${minutes}m`;
+                      return `${hours}h ${minutes}m ${seconds}s`;
                     };
                     
                     return (
