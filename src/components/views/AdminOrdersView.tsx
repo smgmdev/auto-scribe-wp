@@ -818,38 +818,6 @@ export function AdminOrdersView() {
                         {/* Hide delivery badge in Order History tab to avoid duplication */}
                         {activeTab !== 'history' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                         
-                        {order.status === 'paid' && activeTab !== 'disputes' && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
-                              <Badge variant="outline" className="cursor-pointer hover:bg-muted gap-1">
-                                Action
-                                <ChevronDown className="h-3 w-3" />
-                              </Badge>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                              <DropdownMenuItem 
-                                onClick={() => handleInvestigate(order)}
-                                className="hover:bg-foreground hover:text-background cursor-pointer"
-                              >
-                                Investigate
-                              </DropdownMenuItem>
-                              {order.delivery_status === 'pending' && (
-                                <DropdownMenuItem 
-                                  onClick={() => openDeliveryDialog(order)}
-                                  className="hover:bg-foreground hover:text-background cursor-pointer"
-                                >
-                                  Mark Delivered
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem 
-                                onClick={() => handleCardCancelOrder(order)}
-                                className="hover:bg-destructive hover:text-destructive-foreground cursor-pointer"
-                              >
-                                Cancel Order
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
                       </div>
 
                       {activeTab !== 'completed' && activeTab !== 'history' && order.delivery_url && (
