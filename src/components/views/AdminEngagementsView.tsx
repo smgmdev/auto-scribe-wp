@@ -263,7 +263,7 @@ export function AdminEngagementsView() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">All Engagements</h2>
+          <h2 className="text-2xl font-bold">Global Engagements</h2>
           <p className="text-muted-foreground">Monitor all client-agency communications</p>
         </div>
         <Button
