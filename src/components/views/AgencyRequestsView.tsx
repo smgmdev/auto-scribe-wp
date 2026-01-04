@@ -454,6 +454,7 @@ export function AgencyRequestsView() {
       .subscribe();
 
     // Subscribe to client action notifications (engagement cancellations by client)
+    console.log('[AgencyRequestsView] Setting up client-action channel for agency:', agencyPayoutId);
     const clientActionChannel = supabase
       .channel(`notify-${agencyPayoutId}-client-action`)
       .on('broadcast', { event: 'client-action' }, (payload) => {
@@ -469,7 +470,9 @@ export function AgencyRequestsView() {
           fetchRequests();
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[AgencyRequestsView] Client-action channel status:', status);
+      });
 
     return () => {
       supabase.removeChannel(requestsChannel);
