@@ -4292,7 +4292,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         setLoadingOrderDetails(false);
                       }}
                     >
-                      View Details
+                      Order Details
                     </DropdownMenuItem>
                   )}
                   {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && (
