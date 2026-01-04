@@ -292,13 +292,14 @@ export function AdminEngagementsView() {
                       <div>
                         <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
                         <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
                           Last message: {messages[r.id]?.length > 0 
                             ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
                             : 'No messages'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Opened: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
                     </div>
