@@ -212,9 +212,10 @@ export function AgencyRequestsView() {
 
         if (ordersData) {
           setOrders(ordersData);
-          // Track new (unread) orders - active orders that haven't been read
+          // Track new (unread) orders - active orders that haven't been read (pending_payment or paid)
           const unreadActiveOrders = ordersData.filter(o => 
-            !o.read && o.delivery_status !== 'delivered' && o.status !== 'cancelled'
+            !o.read && (o.status === 'pending_payment' || o.status === 'paid') && 
+            o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted'
           );
           setAgencyUnreadOrdersCount(unreadActiveOrders.length);
           setNewOrderIds(new Set(unreadActiveOrders.map(o => o.id)));
@@ -690,7 +691,10 @@ export function AgencyRequestsView() {
       const relatedRequest = requests.find(r => r.order?.id === o.id);
       const isRequestCancelled = relatedRequest?.status === 'cancelled';
       
-      return o.delivery_status !== 'delivered' && 
+      // Include pending_payment and paid orders that aren't delivered/cancelled
+      return (o.status === 'pending_payment' || o.status === 'paid') &&
+        o.delivery_status !== 'delivered' && 
+        o.delivery_status !== 'accepted' &&
         o.status !== 'cancelled' && 
         o.delivery_status !== 'cancelled' &&
         !isRequestCancelled &&
