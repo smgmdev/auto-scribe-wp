@@ -751,8 +751,7 @@ export function AgencyRequestsView() {
 
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="requests" className="gap-2 relative">
-            <MessageSquare className="h-4 w-4" />
+          <TabsTrigger value="requests" className="relative">
             Requests ({activeRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCancelledCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
@@ -760,8 +759,7 @@ export function AgencyRequestsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="orders" className="gap-2 relative">
-            <ShoppingBag className="h-4 w-4" />
+          <TabsTrigger value="orders" className="relative">
             Orders ({orders.length})
             {(agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
