@@ -749,8 +749,7 @@ export function AdminAgenciesView() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            className="bg-black text-white hover:bg-black/80 border-black gap-2"
+            className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none gap-2"
             onClick={() => fetchData(true)}
             disabled={isRefreshing}
           >
