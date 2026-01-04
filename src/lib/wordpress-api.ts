@@ -355,6 +355,13 @@ export async function fetchPostSEOData(
 
     const data = await response.json();
     
+    // Debug: Log all available meta and SEO-related fields
+    console.log('[fetchPostSEOData] Site SEO Plugin:', site.seoPlugin);
+    console.log('[fetchPostSEOData] Post meta keys:', data.meta ? Object.keys(data.meta) : 'no meta');
+    console.log('[fetchPostSEOData] Top-level keys with seo/rank/aioseo:', 
+      Object.keys(data).filter(k => k.toLowerCase().includes('seo') || k.toLowerCase().includes('rank') || k.toLowerCase().includes('aioseo'))
+    );
+    
     if (site.seoPlugin === 'rankmath') {
       // RankMath exposes data via rank_math_meta object when REST API addon is enabled
       if (data.rank_math_meta) {
@@ -369,6 +376,13 @@ export async function fetchPostSEOData(
       if (!metaDescription) {
         metaDescription = data.meta?.rank_math_description || '';
       }
+      
+      // Debug log for RankMath
+      console.log('[fetchPostSEOData] RankMath meta:', data.rank_math_meta);
+      console.log('[fetchPostSEOData] RankMath from post.meta:', {
+        focus: data.meta?.rank_math_focus_keyword,
+        desc: data.meta?.rank_math_description
+      });
     } else if (site.seoPlugin === 'aioseo') {
       // AIOSEO stores data in aioseo_meta_data or meta
       const aioseoData = data.aioseo_meta_data || data.meta?.aioseo_meta_data;
@@ -383,6 +397,9 @@ export async function fetchPostSEOData(
       if (!metaDescription && data.meta?._aioseo_description) {
         metaDescription = data.meta._aioseo_description;
       }
+      
+      // Debug log for AIOSEO
+      console.log('[fetchPostSEOData] AIOSEO data:', aioseoData);
     }
     
     return { focusKeyword, metaDescription };
