@@ -649,7 +649,7 @@ export function MyRequestsView() {
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
             {unreadActiveCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                 {unreadActiveCount}
               </span>
             )}
