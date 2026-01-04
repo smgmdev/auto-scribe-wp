@@ -592,9 +592,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             .eq('status', 'approved')
             .maybeSingle();
           
+          // Construct full storage URL if logo_url is a path
+          let fullLogoUrl: string | null = null;
+          if (appData?.logo_url) {
+            // Check if it's already a full URL
+            if (appData.logo_url.startsWith('http')) {
+              fullLogoUrl = appData.logo_url;
+            } else {
+              // Construct Supabase storage URL
+              const { data: urlData } = supabase.storage
+                .from('agency-documents')
+                .getPublicUrl(appData.logo_url);
+              fullLogoUrl = urlData?.publicUrl || null;
+            }
+          }
+          
           setCounterpartyAgencyInfo({
             name: agencyData.agency_name,
-            logo_url: appData?.logo_url || null
+            logo_url: fullLogoUrl
           });
         }
       } catch (error) {
