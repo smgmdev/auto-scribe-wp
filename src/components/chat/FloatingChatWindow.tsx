@@ -195,6 +195,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
+  // Counterparty agency info (for displaying agency name and logo in client view)
+  const [counterpartyAgencyInfo, setCounterpartyAgencyInfo] = useState<{
+    name: string;
+    logo_url: string | null;
+  } | null>(null);
   const [mediaListingOpen, setMediaListingOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
@@ -378,7 +383,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Use actualSenderType which is verified against actual request data (set in fetchSenderId effect)
   // This is the initial value, but actualSenderType will be corrected after data fetch
   const senderType = actualSenderType;
-  const counterpartyLabel = actualSenderType === 'client' ? 'Agency' : 'Client';
+  // Dynamic counterparty label - use agency name if available for client view
+  const counterpartyLabel = actualSenderType === 'client' 
+    ? (counterpartyAgencyInfo?.name || 'Agency') 
+    : 'Client';
+  const counterpartyLogo = actualSenderType === 'client' ? counterpartyAgencyInfo?.logo_url : null;
   
   const isCancelled = globalChatRequest?.status === 'cancelled';
   const hasOrder = !!localOrder;
@@ -551,6 +560,50 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
     };
   }, [globalChatRequest?.id, actualSenderType, senderId]);
+
+  // Fetch counterparty agency info (for client view to show agency name and logo)
+  useEffect(() => {
+    const fetchAgencyInfo = async () => {
+      if (!globalChatRequest?.id || actualSenderType !== 'client') return;
+      
+      try {
+        // Get the agency_payout_id from the service request
+        const { data: requestData } = await supabase
+          .from('service_requests')
+          .select('agency_payout_id')
+          .eq('id', globalChatRequest.id)
+          .maybeSingle();
+        
+        if (!requestData?.agency_payout_id) return;
+        
+        // Fetch agency name from agency_payouts
+        const { data: agencyData } = await supabase
+          .from('agency_payouts')
+          .select('agency_name')
+          .eq('id', requestData.agency_payout_id)
+          .maybeSingle();
+        
+        if (agencyData) {
+          // Try to get logo from agency_applications using the agency name
+          const { data: appData } = await supabase
+            .from('agency_applications')
+            .select('logo_url')
+            .eq('agency_name', agencyData.agency_name)
+            .eq('status', 'approved')
+            .maybeSingle();
+          
+          setCounterpartyAgencyInfo({
+            name: agencyData.agency_name,
+            logo_url: appData?.logo_url || null
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching agency info:', error);
+      }
+    };
+    
+    fetchAgencyInfo();
+  }, [globalChatRequest?.id, actualSenderType]);
 
   // Handle admin joining chat
   const handleAdminJoinChat = async () => {
@@ -3897,10 +3950,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               <div className="flex flex-col">
                 <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
-                <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
-                  <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {renderLastSeenStatus()}
-                </span>
+                <div className="flex items-center gap-2">
+                  {/* Agency name and logo for client view */}
+                  {actualSenderType === 'client' && counterpartyAgencyInfo && (
+                    <div className="flex items-center gap-1.5">
+                      {counterpartyAgencyInfo.logo_url && (
+                        <img 
+                          src={counterpartyAgencyInfo.logo_url} 
+                          alt="" 
+                          className="w-4 h-4 rounded-full object-cover"
+                        />
+                      )}
+                      <span className="text-xs text-muted-foreground font-medium">
+                        {counterpartyAgencyInfo.name}
+                      </span>
+                      <span className="text-muted-foreground text-xs">•</span>
+                    </div>
+                  )}
+                  <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
+                    <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
+                    {renderLastSeenStatus()}
+                  </span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -4271,8 +4342,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                    {isClient && counterpartyAgencyInfo?.logo_url && (
+                      <img 
+                        src={counterpartyAgencyInfo.logo_url} 
+                        alt="" 
+                        className="w-4 h-4 rounded-full object-cover"
+                      />
+                    )}
                     <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
-                      {isClient ? 'Waiting for agency approval' : 'Order request from client'}
+                      {isClient ? `Waiting for ${counterpartyLabel} approval` : 'Order request from client'}
                     </span>
                   </div>
                   <p className="font-medium text-sm text-foreground">
@@ -4458,15 +4536,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <p className="text-xs font-medium mb-1 opacity-70 pr-5">
-                        {msg.sender_type === 'admin' 
-                          ? 'Arcana Mace Staff' 
-                          : isOwnMessage 
-                            ? 'You' 
-                            : isAdmin 
-                              ? (msg.sender_type === 'agency' ? 'Agency' : 'Client')
-                              : counterpartyLabel}
-                      </p>
+                      <div className="flex items-center gap-1.5 text-xs font-medium mb-1 opacity-70 pr-5">
+                        {/* Show agency logo next to name for agency messages in client view */}
+                        {!isOwnMessage && msg.sender_type === 'agency' && counterpartyLogo && (
+                          <img 
+                            src={counterpartyLogo} 
+                            alt="" 
+                            className="w-4 h-4 rounded-full object-cover"
+                          />
+                        )}
+                        <span>
+                          {msg.sender_type === 'admin' 
+                            ? 'Arcana Mace Staff' 
+                            : isOwnMessage 
+                              ? 'You' 
+                              : isAdmin 
+                                ? (msg.sender_type === 'agency' ? 'Agency' : 'Client')
+                                : counterpartyLabel}
+                        </span>
+                      </div>
                       {renderMessageContent(msg, isRightAligned, quote)}
                     </div>
                   </div>
@@ -4488,9 +4576,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span>
+            <span className="flex items-center gap-1.5">
+              {/* Show agency logo in typing indicator if agency is typing */}
+              {typingUsers.some(u => u.sender_type === 'agency') && counterpartyLogo && (
+                <img 
+                  src={counterpartyLogo} 
+                  alt="" 
+                  className="w-4 h-4 rounded-full object-cover"
+                />
+              )}
               {typingUsers.map(u => 
-                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? 'Agency' : 'Client'
+                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? counterpartyLabel : 'Client'
               ).filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
             </span>
           </div>
@@ -4557,9 +4653,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div className="flex items-center gap-2 px-3 py-2 bg-muted/50">
                     <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground">
-                        Replying to {replyToMessage.sender_type === senderType ? 'yourself' : counterpartyLabel}
-                      </p>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        {/* Show agency logo when replying to agency message */}
+                        {replyToMessage.sender_type === 'agency' && counterpartyLogo && (
+                          <img 
+                            src={counterpartyLogo} 
+                            alt="" 
+                            className="w-3.5 h-3.5 rounded-full object-cover"
+                          />
+                        )}
+                        <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}</span>
+                      </div>
                       <p className="text-sm truncate">{getMessageWithoutAttachment(replyToMessage.message)}</p>
                     </div>
                     <Button
