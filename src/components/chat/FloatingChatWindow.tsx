@@ -3385,7 +3385,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       : isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'
                   }`}>
                     <Clock className="h-3.5 w-3.5" />
-                    <span className="text-xs font-mono">
+                    <span className="text-xs">
                       {cardCountdown.isOverdue ? 'Overdue' : `Delivery in: ${cardCountdown.text}`}
                     </span>
                   </div>
@@ -4744,7 +4744,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center gap-1 text-white/70 cursor-help">
-                              <DollarSign className="h-3 w-3" />
                               <span className="text-xs">{acceptedOrder.price.toLocaleString()} credits</span>
                               <Info className="h-3 w-3" />
                             </div>
@@ -4762,7 +4761,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                               <TooltipTrigger asChild>
                                 <div className={`flex items-center gap-1 cursor-help ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
                                   <Clock className="h-3 w-3" />
-                                  <span className="text-xs font-mono">
+                                  <span className="text-xs">
                                     {countdown.isOverdue ? 'Overdue' : countdown.text}
                                   </span>
                                   <Info className="h-3 w-3" />
