@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, HelpCircle, ArrowRight, CheckCircle } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -182,40 +182,18 @@ export function DashboardView() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => {
-        const Icon = stat.icon;
-        return <Card 
-          key={stat.key} 
-          className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 ${stat.clickable ? 'cursor-pointer hover:border-[#4771d9]' : 'hover:border-border/50'}`}
-          style={{ animationDelay: `${index * 100}ms` }}
-          onClick={() => stat.clickable && handleStatClick(stat.key)}
-        >
+          const Icon = stat.icon;
+          const cardContent = (
+            <Card 
+              key={stat.key} 
+              className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 ${stat.clickable ? 'cursor-pointer hover:border-[#4771d9]' : 'hover:border-border/50'}`}
+              style={{ animationDelay: `${index * 100}ms` }}
+              onClick={() => stat.clickable && handleStatClick(stat.key)}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                {stat.tooltip ? (
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 cursor-help">
-                        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          {stat.label}
-                        </CardTitle>
-                        <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent 
-                      side="right" 
-                      align="start"
-                      sideOffset={8}
-                      collisionPadding={16}
-                      avoidCollisions={true}
-                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-                    >
-                      <p>{stat.tooltip}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    {stat.label}
-                  </CardTitle>
-                )}
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {stat.label}
+                </CardTitle>
                 <Icon className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
@@ -227,8 +205,28 @@ export function DashboardView() {
                   )}
                 </div>
               </CardContent>
-            </Card>;
-      })}
+            </Card>
+          );
+
+          if (stat.tooltip) {
+            return (
+              <Tooltip key={stat.key} delayDuration={100}>
+                <TooltipTrigger asChild>
+                  {cardContent}
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="bottom" 
+                  sideOffset={8}
+                  className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+                >
+                  <p>{stat.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return cardContent;
+        })}
       </div>
 
 
