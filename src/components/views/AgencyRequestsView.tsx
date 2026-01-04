@@ -340,6 +340,19 @@ export function AgencyRequestsView() {
           const statusChanged = old?.status !== updated.status;
           const orderLinked = !old?.order_id && updated.order_id;
           
+          // Check if engagement was just cancelled (by client or admin)
+          const wasCancelled = statusChanged && updated.status === 'cancelled' && old?.status !== 'cancelled';
+          if (wasCancelled) {
+            toast({
+              title: 'Engagement Cancelled',
+              description: updated.cancellation_reason 
+                ? `Reason: ${updated.cancellation_reason}` 
+                : 'A client has cancelled their engagement.',
+              variant: 'destructive',
+            });
+            playMessageSound();
+          }
+          
           // If an order was just linked, refetch to get the full order data
           if (orderLinked) {
             fetchRequests();
