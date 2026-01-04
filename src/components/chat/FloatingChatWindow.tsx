@@ -5767,7 +5767,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       </AlertDialog>
 
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
-        <DialogContent className="max-w-md z-[250]" hideCloseButton>
+        <DialogContent className="max-w-md z-[9999]" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
             <DialogClose className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
               <X className="h-4 w-4" />
