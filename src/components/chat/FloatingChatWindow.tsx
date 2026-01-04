@@ -4696,12 +4696,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <div className="flex items-center gap-1 text-white/70 cursor-help">
-                                  <span className="text-xs">Special Terms: {acceptedOrder.special_terms}</span>
+                                  <span className="text-xs">Special Terms</span>
                                   <Info className="h-3 w-3" />
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
-                                <p>Additional terms and conditions agreed upon for this order.</p>
+                                <p>{acceptedOrder.special_terms}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
