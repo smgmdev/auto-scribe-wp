@@ -328,14 +328,14 @@ export function AdminEngagementsView() {
           ) : (
             <div className="grid gap-4">
               {cancelledRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors border-destructive/20" onClick={() => handleOpenChat(r)}>
+                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleOpenChat(r)}>
                   <CardContent className="p-4 flex justify-between items-start">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
-                        <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1 opacity-50" alt="" />
+                        <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
                       )}
                       <div>
-                        <h3 className="font-medium text-muted-foreground">{r.title}</h3>
+                        <h3 className="font-medium">{r.title}</h3>
                         <p className="text-sm text-muted-foreground">{r.media_sites?.name} • {r.profiles?.email}</p>
                         <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                         {r.cancellation_reason && (
