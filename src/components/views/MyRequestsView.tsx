@@ -633,7 +633,7 @@ export function MyRequestsView() {
         )}
       </div>
 
-      <div className="relative mb-2">
+      <div className="relative mb-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search engagements..."
@@ -665,7 +665,7 @@ export function MyRequestsView() {
           </TabsTrigger>
         </TabsList>
 
-          <TabsContent value="active" className="mt-6">
+          <TabsContent value="active" className="mt-3">
             {sortedActiveRequests.length === 0 ? (
               <Card className="border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -746,7 +746,7 @@ export function MyRequestsView() {
             )}
           </TabsContent>
 
-          <TabsContent value="cancelled" className="mt-6">
+          <TabsContent value="cancelled" className="mt-3">
             {sortedCancelledRequests.length === 0 ? (
               <Card className="border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
