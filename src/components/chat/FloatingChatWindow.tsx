@@ -4656,23 +4656,55 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       {acceptedOrder.media_site_name}
                     </p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <div className="flex items-center gap-1 text-white/70">
-                        <DollarSign className="h-3 w-3" />
-                        <span className="text-xs">{acceptedOrder.price.toLocaleString()} credits</span>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1 text-white/70 cursor-help">
+                              <DollarSign className="h-3 w-3" />
+                              <span className="text-xs">{acceptedOrder.price.toLocaleString()} credits</span>
+                              <Info className="h-3 w-3" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs">
+                            <p>Payment in credits. 1 credit = 1 USD.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {formatDeliveryTime() && (
                         <>
                           <span className="text-white/40">•</span>
-                          <div className="flex items-center gap-1 text-white/70">
-                            <Clock className="h-3 w-3" />
-                            <span className="text-xs">Delivery: {formatDeliveryTime()}</span>
-                          </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 text-white/70 cursor-help">
+                                  <Clock className="h-3 w-3" />
+                                  <span className="text-xs">Delivery: {formatDeliveryTime()}</span>
+                                  <Info className="h-3 w-3" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-xs">
+                                <p>Estimated delivery time after order confirmation.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </>
                       )}
                       {acceptedOrder.special_terms && (
                         <>
                           <span className="text-white/40">•</span>
-                          <span className="text-xs text-white/70">Terms: {acceptedOrder.special_terms}</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 text-white/70 cursor-help">
+                                  <span className="text-xs">Special Terms: {acceptedOrder.special_terms}</span>
+                                  <Info className="h-3 w-3" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-xs">
+                                <p>Additional terms and conditions agreed upon for this order.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </>
                       )}
                     </div>
