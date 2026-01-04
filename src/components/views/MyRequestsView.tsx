@@ -594,43 +594,14 @@ export function MyRequestsView() {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <ClipboardList className="h-8 w-8" />
-            My Engagements
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Track your engagements and communicate with agencies
-          </p>
-        </div>
-        {requests.length > 0 && (
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            {activeTab === 'active' ? (
-              <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'last_message' | 'submitted')}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
-                  <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
-                </SelectContent>
-              </Select>
-            ) : (
-              <Select value={cancelledSortBy} onValueChange={(value) => setCancelledSortBy(value as 'cancelled_at' | 'last_message' | 'submitted')}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cancelled_at" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Cancelled Date</SelectItem>
-                  <SelectItem value="last_message" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Last Message</SelectItem>
-                  <SelectItem value="submitted" className="focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black">Submitted Date</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        )}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <ClipboardList className="h-8 w-8" />
+          My Engagements
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Track your engagements and communicate with agencies
+        </p>
       </div>
 
       <div className="relative mb-1">
