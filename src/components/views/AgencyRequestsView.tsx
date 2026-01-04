@@ -748,9 +748,9 @@ export function AgencyRequestsView() {
           <TabsTrigger value="requests" className="gap-2 relative">
             <MessageSquare className="h-4 w-4" />
             Requests ({activeRequests.length + cancelledRequests.length})
-            {unreadCancelledCount > 0 && (
+            {(unreadActiveCount + unreadCancelledCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {unreadCancelledCount}
+                {unreadActiveCount + unreadCancelledCount}
               </span>
             )}
           </TabsTrigger>
