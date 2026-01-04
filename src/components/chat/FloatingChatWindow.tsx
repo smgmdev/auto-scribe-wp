@@ -302,10 +302,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return () => clearTimeout(timer);
   }, []);
   
-  // Auto-focus when this chat is clicked/focused
+  // Auto-focus when this chat is clicked/focused and lock body scroll
+  const [isChatFocused, setIsChatFocused] = useState(false);
+  
   useEffect(() => {
     inputRef.current?.focus();
   }, [chat.zIndex]);
+  
+  // Lock body scroll when chat is focused
+  useEffect(() => {
+    if (isChatFocused) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isChatFocused]);
   
   // Sync position from props
   useEffect(() => {
@@ -4237,8 +4250,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           zIndex: chat.zIndex + 100,
           overscrollBehavior: 'contain'
         }}
-        onMouseDown={handleWindowClick}
+        onMouseDown={() => {
+          handleWindowClick();
+          setIsChatFocused(true);
+        }}
+        onFocus={() => setIsChatFocused(true)}
+        onBlur={(e) => {
+          // Only blur if the new focus target is outside the chat
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setIsChatFocused(false);
+          }
+        }}
         onWheel={(e) => e.stopPropagation()}
+        tabIndex={-1}
       >
         {/* Header */}
         <div 
