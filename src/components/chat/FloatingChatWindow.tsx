@@ -244,6 +244,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [orderDetailsActionDropdownOpen, setOrderDetailsActionDropdownOpen] = useState(false);
   const [resendingOrder, setResendingOrder] = useState(false);
   const [isResendMode, setIsResendMode] = useState(false);
+  const [deliverOrderDialogOpen, setDeliverOrderDialogOpen] = useState(false);
+  const [deliveryLink, setDeliveryLink] = useState('');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
+  const [submittingDelivery, setSubmittingDelivery] = useState(false);
   const [orderDeliveryDays, setOrderDeliveryDays] = useState<number>(0);
   const [orderDeliveryHours, setOrderDeliveryHours] = useState<number>(0);
   const [orderDeliveryMinutes, setOrderDeliveryMinutes] = useState<number>(0);
@@ -4196,13 +4200,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )
                   )}
                   {globalChatType === 'agency-request' && hasAcceptedOrderRequest && !hasOrder && (
-                    <DropdownMenuItem 
-                      className="cursor-pointer text-green-600"
-                      disabled
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Order Placed - Awaiting Delivery
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-green-600"
+                        disabled
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Order Placed - Awaiting Delivery
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                        disabled={isAdmin}
+                        onSelect={() => {
+                          setActionDropdownOpen(false);
+                          setDeliverOrderDialogOpen(true);
+                        }}
+                      >
+                        <Truck className="h-4 w-4 mr-2" />
+                        Deliver Order
+                      </DropdownMenuItem>
+                    </>
                   )}
                   {hasOpenDispute && (
                     <DropdownMenuItem 
@@ -6159,6 +6176,130 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Deliver Order Dialog */}
+      <Dialog open={deliverOrderDialogOpen} onOpenChange={setDeliverOrderDialogOpen}>
+        <DialogContent className="z-[9999] max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="h-5 w-5" />
+              Deliver Order
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="delivery-link">Delivery Link <span className="text-destructive">*</span></Label>
+              <Input
+                id="delivery-link"
+                placeholder="https://example.com/article-link"
+                value={deliveryLink}
+                onChange={(e) => setDeliveryLink(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                The published article link or proof of delivery
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="delivery-notes">Delivery Notes (optional)</Label>
+              <Textarea
+                id="delivery-notes"
+                placeholder="Any additional notes about the delivery..."
+                value={deliveryNotes}
+                onChange={(e) => setDeliveryNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setDeliverOrderDialogOpen(false);
+                setDeliveryLink('');
+                setDeliveryNotes('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              disabled={!deliveryLink.trim() || submittingDelivery}
+              onClick={async () => {
+                if (!globalChatRequest || !deliveryLink.trim()) return;
+                
+                setSubmittingDelivery(true);
+                try {
+                  // Get the accepted order data
+                  const acceptedOrderData = getLastAcceptedOrderRequestData();
+                  if (!acceptedOrderData) {
+                    throw new Error('No accepted order found');
+                  }
+                  
+                  // Send ORDER_DELIVERED message
+                  const deliveryData = {
+                    type: 'order_delivered',
+                    media_site_id: acceptedOrderData.media_site_id,
+                    media_site_name: acceptedOrderData.media_site_name,
+                    media_site_favicon: acceptedOrderData.media_site_favicon,
+                    delivery_url: deliveryLink.trim(),
+                    delivery_notes: deliveryNotes.trim() || null,
+                    delivered_by: 'agency'
+                  };
+                  
+                  const { data: insertedMsg, error } = await supabase
+                    .from('service_messages')
+                    .insert({
+                      request_id: globalChatRequest.id,
+                      sender_type: senderType,
+                      sender_id: senderId,
+                      message: `[ORDER_DELIVERED]${JSON.stringify(deliveryData)}[/ORDER_DELIVERED]`
+                    })
+                    .select()
+                    .single();
+                  
+                  if (error) throw error;
+                  
+                  // Add to local messages
+                  if (insertedMsg) {
+                    setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+                  }
+                  
+                  toast({
+                    title: "Order Delivered",
+                    description: "The client has been notified about the delivery.",
+                  });
+                  
+                  setDeliverOrderDialogOpen(false);
+                  setDeliveryLink('');
+                  setDeliveryNotes('');
+                } catch (error: any) {
+                  console.error('Error delivering order:', error);
+                  toast({
+                    variant: 'destructive',
+                    title: 'Delivery Failed',
+                    description: error.message || 'Failed to submit delivery.',
+                  });
+                } finally {
+                  setSubmittingDelivery(false);
+                }
+              }}
+            >
+              {submittingDelivery ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Truck className="h-4 w-4 mr-2" />
+                  Submit Delivery
+                </>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
