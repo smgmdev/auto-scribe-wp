@@ -833,9 +833,6 @@ export function AdminOrdersView() {
                         </Button>
                       )}
 
-                      {activeTab !== 'completed' && activeTab !== 'history' && (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
                     </div>
                   </CardContent>
                 </Card>
