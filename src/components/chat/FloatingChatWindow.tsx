@@ -4410,13 +4410,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                    {isClient && counterpartyAgencyInfo?.logo_url && (
-                      <img 
-                        src={counterpartyAgencyInfo.logo_url} 
-                        alt="" 
-                        className="w-4 h-4 rounded-full object-cover"
-                      />
-                    )}
                     <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
                       {isClient ? `Waiting for ${counterpartyLabel} approval` : 'Order request from client'}
                     </span>
