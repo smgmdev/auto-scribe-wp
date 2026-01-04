@@ -80,6 +80,15 @@ export function AgencyRequestsView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'active' | 'cancelled' | 'orders'>('active');
   const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every second for real-time countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -1072,23 +1081,23 @@ export function AgencyRequestsView() {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
                   const isNew = newOrderIds.has(order.id);
                   
-                  // Calculate delivery time remaining or overdue
+                  // Calculate delivery time remaining or overdue using real-time currentTime
                   const deliveryDeadline = order.delivery_deadline;
-                  const isOverdue = deliveryDeadline && new Date(deliveryDeadline) < new Date() && order.delivery_status !== 'delivered';
+                  const isOverdue = deliveryDeadline && new Date(deliveryDeadline) < currentTime && order.delivery_status !== 'delivered';
                   
                   const getTimeRemaining = () => {
                     if (!deliveryDeadline) return null;
-                    const now = new Date();
                     const deadline = new Date(deliveryDeadline);
-                    const diffMs = deadline.getTime() - now.getTime();
+                    const diffMs = deadline.getTime() - currentTime.getTime();
                     if (diffMs <= 0) return null;
                     const hours = Math.floor(diffMs / (1000 * 60 * 60));
                     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
                     if (hours > 24) {
                       const days = Math.floor(hours / 24);
-                      return `${days}d ${hours % 24}h`;
+                      return `${days}d ${hours % 24}h ${minutes}m`;
                     }
-                    return `${hours}h ${minutes}m`;
+                    return `${hours}h ${minutes}m ${seconds}s`;
                   };
                   
                   return (
