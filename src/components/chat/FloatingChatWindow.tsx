@@ -4511,20 +4511,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        {acceptedOrderData?.media_site_favicon ? (
-                          <img 
-                            src={acceptedOrderData.media_site_favicon} 
-                            alt="" 
-                            className="w-10 h-10 rounded-lg object-cover shrink-0 cursor-help"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center cursor-help">
-                            <CheckCircle className="h-5 w-5 text-white" />
-                          </div>
-                        )}
+                        <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center cursor-help shrink-0">
+                          <CheckCircle className="h-5 w-5 text-white" />
+                        </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                        <p>{acceptedOrderData?.media_site_name || 'Order'}</p>
+                        <p>{acceptedOrderData?.media_site_name || 'Order Accepted'}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
