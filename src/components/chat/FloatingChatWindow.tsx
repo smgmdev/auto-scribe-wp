@@ -4238,6 +4238,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           overscrollBehavior: 'contain'
         }}
         onMouseDown={handleWindowClick}
+        onWheel={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div 
