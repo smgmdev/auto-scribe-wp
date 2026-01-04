@@ -4350,8 +4350,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         )}
 
-        {/* Pending Order Banner - Sticky */}
-        {hasExistingOrderRequest && !globalChatRequest?.order && !loadingMessages && (() => {
+        {/* Pending Order Banner - Sticky (hide when order exists) */}
+        {hasExistingOrderRequest && !globalChatRequest?.order && !localOrder && !loadingMessages && (() => {
           const pendingOrder = getLastOrderRequestData();
           if (!pendingOrder) return null;
           const isClient = actualSenderType === 'client';
