@@ -148,6 +148,7 @@ export function AgencyRequestsView() {
       const mappedRequests = data.map(r => {
         const requestMessages = messagesByRequest[r.id] || [];
         const lastReadAt = (r as any).agency_last_read_at;
+        const agencyRead = (r as any).agency_read;
         
         // Check if there are any client or admin messages after agency_last_read_at
         const hasUnreadMessages = requestMessages.some(msg => {
@@ -159,13 +160,18 @@ export function AgencyRequestsView() {
           return false;
         });
         
+        // For cancelled requests, use agency_read directly since cancellation itself is the "notification"
+        // For active requests, use message-based unread tracking
+        const isCancelled = r.status === 'cancelled';
+        const isUnread = isCancelled ? !agencyRead : hasUnreadMessages;
+        
         // Normalize order - Supabase returns array for foreign key joins
         const rawOrder = (r as any).order;
         const normalizedOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder[0] : rawOrder;
         
         return {
           ...r,
-          read: !hasUnreadMessages, // Use message-based unread tracking
+          read: !isUnread,
           order: normalizedOrder
         };
       }) as unknown as ServiceRequest[];
