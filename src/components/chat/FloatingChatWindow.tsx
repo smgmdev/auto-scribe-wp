@@ -4550,8 +4550,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center gap-1 text-white/70 cursor-help">
-                                <DollarSign className="h-3 w-3" />
                                 <span className="text-xs">{acceptedOrderData.price.toLocaleString()} credits</span>
+                                <Info className="h-3 w-3" />
                               </div>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="max-w-xs">
@@ -4580,16 +4580,35 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </TooltipProvider>
                         </>
                       )}
+                      {!timeInfo && acceptedOrderData?.delivery_duration && (
+                        <>
+                          {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 text-white/70 cursor-help">
+                                  <Clock className="h-3 w-3" />
+                                  <span className="text-xs font-medium">
+                                    Est. Delivery: {acceptedOrderData.delivery_duration.days > 0 ? `${acceptedOrderData.delivery_duration.days}d ` : ''}{acceptedOrderData.delivery_duration.hours}h {acceptedOrderData.delivery_duration.minutes}m
+                                  </span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-xs">
+                                <p>Estimated delivery time for this order</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      )}
                       {acceptedOrderData?.special_terms && (
                         <>
                           <span className="text-white/40">•</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 text-white/70 cursor-help">
-                                  <Tag className="h-3 w-3" />
-                                  <span className="text-xs">Special Terms</span>
-                                </div>
+                                <span className="text-xs text-white/70 cursor-help underline decoration-dotted underline-offset-2">
+                                  Special Terms
+                                </span>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
                                 <p>{acceptedOrderData.special_terms}</p>
