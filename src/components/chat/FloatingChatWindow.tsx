@@ -4580,46 +4580,64 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </Tooltip>
                         </TooltipProvider>
                       )}
-                      {timeInfo && (!localOrder.delivery_status || localOrder.delivery_status === 'pending') && (
-                        <>
-                          {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className={`flex items-center gap-1 cursor-help ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                                  <Clock className="h-3 w-3" />
-                                  <span className="text-xs font-medium">
-                                    {timeInfo.isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo.text}`}
-                                  </span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs">
-                                <p>{timeInfo.isOverdue ? 'Delivery deadline has passed. Please deliver as soon as possible.' : 'Estimated time remaining until delivery deadline'}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      )}
-                      {!timeInfo && acceptedOrderData?.delivery_duration && (
-                        <>
-                          {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 text-white/70 cursor-help">
-                                  <Clock className="h-3 w-3" />
-                                  <span className="text-xs font-medium">
-                                    Est. Delivery: {acceptedOrderData.delivery_duration.days > 0 ? `${acceptedOrderData.delivery_duration.days}d ` : ''}{acceptedOrderData.delivery_duration.hours}h {acceptedOrderData.delivery_duration.minutes}m
-                                  </span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs">
-                                <p>Estimated delivery time for this order</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      )}
+                      {(() => {
+                        // Calculate real-time countdown from accepted order data
+                        const countdown = acceptedOrderData?.accepted_at && acceptedOrderData?.delivery_duration 
+                          ? getDeliveryCountdown(acceptedOrderData.accepted_at, acceptedOrderData.delivery_duration)
+                          : null;
+                        
+                        // Use order's delivery_deadline if available, otherwise use calculated countdown
+                        const showTimeInfo = timeInfo && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
+                        const showCountdown = !showTimeInfo && countdown && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
+                        
+                        if (showTimeInfo) {
+                          return (
+                            <>
+                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className={`flex items-center gap-1 cursor-help ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                                      <Clock className="h-3 w-3" />
+                                      <span className="text-xs font-medium">
+                                        {timeInfo.isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo.text}`}
+                                      </span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <p>{timeInfo.isOverdue ? 'Delivery deadline has passed. Please deliver as soon as possible.' : 'Estimated time remaining until delivery deadline'}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          );
+                        }
+                        
+                        if (showCountdown && countdown) {
+                          return (
+                            <>
+                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className={`flex items-center gap-1 cursor-help ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                                      <Clock className="h-3 w-3" />
+                                      <span className="text-xs font-medium">
+                                        {countdown.isOverdue ? 'Overdue' : `Est. Delivery: ${countdown.text}`}
+                                      </span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <p>{countdown.isOverdue ? 'Delivery deadline has passed. Please deliver as soon as possible.' : 'Estimated time remaining until delivery deadline'}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          );
+                        }
+                        
+                        return null;
+                      })()}
                       {acceptedOrderData?.special_terms && (
                         <>
                           <span className="text-white/40">•</span>
