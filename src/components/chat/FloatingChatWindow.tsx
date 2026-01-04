@@ -4511,8 +4511,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center cursor-help shrink-0">
-                          <CheckCircle className="h-5 w-5 text-white" />
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-help shrink-0">
+                          <CheckCircle className="h-6 w-6 text-green-500" />
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
