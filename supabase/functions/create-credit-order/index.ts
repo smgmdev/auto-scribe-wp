@@ -246,6 +246,9 @@ serve(async (req) => {
       orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
       console.log(`Generated unique order number: ${orderNumber}`);
 
+      // For credit orders, created_at and paid_at should be the same since payment is instant
+      const orderTimestamp = new Date().toISOString();
+
       // Create new order
       const { data: newOrder, error: orderError } = await supabaseAdmin
         .from("orders")
@@ -257,7 +260,8 @@ serve(async (req) => {
           platform_fee_cents: platformFeeCents,
           agency_payout_cents: agencyPayoutCents,
           status: "paid",
-          paid_at: new Date().toISOString(),
+          created_at: orderTimestamp,
+          paid_at: orderTimestamp,
           delivery_status: "pending",
           delivery_deadline: deliveryDeadline
         })
