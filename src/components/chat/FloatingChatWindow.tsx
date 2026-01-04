@@ -5957,6 +5957,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               </div>
 
+              {/* Special Terms */}
+              {(() => {
+                const acceptedData = getLastAcceptedOrderRequestData();
+                if (acceptedData?.special_terms) {
+                  return (
+                    <div className="border-t pt-4">
+                      <p className="text-sm text-muted-foreground mb-1">Special Terms</p>
+                      <p className="text-sm">{acceptedData.special_terms}</p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Good to Know */}
+              {globalChatRequest?.media_site?.about && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-1">Good to Know</p>
+                  <p className="text-sm">{globalChatRequest.media_site.about}</p>
+                </div>
+              )}
+
               {orderDetails.delivery_url && (
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
