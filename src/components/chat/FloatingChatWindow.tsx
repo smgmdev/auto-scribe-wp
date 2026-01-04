@@ -4444,18 +4444,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         >
                           {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
                         </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem 
-                          className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                          disabled={isCancelled || isAdmin}
-                          onSelect={() => {
-                            setActionDropdownOpen(false);
-                            setCancelOrderDialogOpen(true);
-                          }}
-                        >
-                          Request Cancellation
-                        </DropdownMenuItem>
-                      )
+                      ) : null
                     )}
                     {!hasOrder && !hasAcceptedOrderRequest && !isCancelled && (
                       <DropdownMenuItem 
