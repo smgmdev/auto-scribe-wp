@@ -453,9 +453,28 @@ export function AgencyRequestsView() {
       })
       .subscribe();
 
+    // Subscribe to client action notifications (engagement cancellations by client)
+    const clientActionChannel = supabase
+      .channel(`notify-${agencyPayoutId}-client-action`)
+      .on('broadcast', { event: 'client-action' }, (payload) => {
+        console.log('[AgencyRequestsView] Client action received:', payload);
+        const data = payload.payload as { action: string; message: string; requestId?: string; reason?: string };
+        
+        if (data.action === 'engagement-cancelled') {
+          toast({
+            title: "Engagement Cancelled",
+            description: data.message || 'A client has cancelled their engagement.',
+            variant: "destructive",
+          });
+          fetchRequests();
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(requestsChannel);
       supabase.removeChannel(adminActionChannel);
+      supabase.removeChannel(clientActionChannel);
     };
   }, [agencyPayoutId]);
 

@@ -1208,7 +1208,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
-      // Broadcast notification to client and agency if admin cancelled
+      // Broadcast notification to counterparty
       if (cancelledBy === 'admin') {
         const { data: requestData } = await supabase
           .from('service_requests')
@@ -1251,6 +1251,53 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   }
                 });
                 setTimeout(() => supabase.removeChannel(agencyChannel), 500);
+              }
+            });
+          }
+        }
+      } else if (cancelledBy === 'client' || cancelledBy === 'agency') {
+        // Client or agency cancels - notify the counterparty in real-time
+        const { data: requestData } = await supabase
+          .from('service_requests')
+          .select('user_id, agency_payout_id')
+          .eq('id', globalChatRequest.id)
+          .maybeSingle();
+        
+        if (requestData) {
+          if (cancelledBy === 'client' && requestData.agency_payout_id) {
+            // Client cancels - notify agency
+            const agencyChannel = supabase.channel(`notify-${requestData.agency_payout_id}-client-action`);
+            agencyChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await agencyChannel.send({
+                  type: 'broadcast',
+                  event: 'client-action',
+                  payload: {
+                    action: 'engagement-cancelled',
+                    requestId: globalChatRequest.id,
+                    message: 'Client has cancelled the engagement.',
+                    reason: cancellationReason.trim()
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(agencyChannel), 500);
+              }
+            });
+          } else if (cancelledBy === 'agency' && requestData.user_id) {
+            // Agency cancels - notify client
+            const clientChannel = supabase.channel(`notify-${requestData.user_id}-agency-action`);
+            clientChannel.subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await clientChannel.send({
+                  type: 'broadcast',
+                  event: 'agency-action',
+                  payload: {
+                    action: 'engagement-cancelled',
+                    requestId: globalChatRequest.id,
+                    message: 'Agency has cancelled the engagement.',
+                    reason: cancellationReason.trim()
+                  }
+                });
+                setTimeout(() => supabase.removeChannel(clientChannel), 500);
               }
             });
           }
