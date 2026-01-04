@@ -4466,35 +4466,69 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           // Get accepted order data for display (media site name, special terms, etc.)
           const acceptedOrderData = getLastAcceptedOrderRequestData();
           const timeInfo = localOrder.delivery_deadline ? formatTimeRemaining(localOrder.delivery_deadline) : null;
+          const isAgencyView = globalChatType === 'agency-request' && !isAdmin;
+          const canDeliver = isAgencyView && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
+          const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted';
           
           return (
             <div className="p-3 bg-black text-white border-b border-black">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {acceptedOrderData?.media_site_favicon ? (
-                    <img 
-                      src={acceptedOrderData.media_site_favicon} 
-                      alt="" 
-                      className="w-10 h-10 rounded-lg object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </div>
-                  )}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        {acceptedOrderData?.media_site_favicon ? (
+                          <img 
+                            src={acceptedOrderData.media_site_favicon} 
+                            alt="" 
+                            className="w-10 h-10 rounded-lg object-cover shrink-0 cursor-help"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center cursor-help">
+                            <CheckCircle className="h-5 w-5 text-white" />
+                          </div>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p>{acceptedOrderData?.media_site_name || 'Order'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <p className="font-medium text-sm text-white truncate">
-                        {acceptedOrderData?.media_site_name || 'Order Placed'}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                        <span className="font-medium text-xs text-green-400">
-                          {localOrder.delivery_status === 'delivered' ? 'Delivered' : 
-                           localOrder.delivery_status === 'accepted' ? 'Completed' : 
-                           'Awaiting Delivery'}
-                        </span>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="font-medium text-sm text-white truncate cursor-help">
+                              {acceptedOrderData?.media_site_name || 'Order Placed'}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            <p>Media site for this order</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1 cursor-help">
+                              <CheckCircle className="h-3.5 w-3.5 text-green-400" />
+                              <span className="font-medium text-xs text-green-400">
+                                {localOrder.delivery_status === 'delivered' ? 'Delivered' : 
+                                 localOrder.delivery_status === 'accepted' ? 'Completed' : 
+                                 'Awaiting Delivery'}
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            <p>
+                              {localOrder.delivery_status === 'delivered' ? 'Order has been delivered, awaiting client acceptance' : 
+                               localOrder.delivery_status === 'accepted' ? 'Order completed successfully' : 
+                               'Waiting for delivery from agency'}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {acceptedOrderData?.price && (
@@ -4520,13 +4554,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                               <TooltipTrigger asChild>
                                 <div className={`flex items-center gap-1 cursor-help ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
                                   <Clock className="h-3 w-3" />
-                                  <span className="text-xs">
-                                    {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                                  <span className="text-xs font-medium">
+                                    {timeInfo.isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo.text}`}
                                   </span>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
-                                <p>{timeInfo.isOverdue ? 'Delivery deadline has passed' : 'Time remaining until delivery deadline'}</p>
+                                <p>{timeInfo.isOverdue ? 'Delivery deadline has passed. Please deliver as soon as possible.' : 'Estimated time remaining until delivery deadline'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -4553,25 +4587,93 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
-                  onClick={async () => {
-                    if (!localOrder) return;
-                    setLoadingOrderDetails(true);
-                    setOrderDetailsOpen(true);
-                    const { data } = await supabase
-                      .from('orders')
-                      .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
-                      .eq('id', localOrder.id)
-                      .maybeSingle();
-                    setOrderDetails(data);
-                    setLoadingOrderDetails(false);
-                  }}
-                >
-                  View Details
-                </Button>
+                <div className="flex items-center gap-2">
+                  {canDeliver && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
+                            onClick={() => setDeliverOrderDialogOpen(true)}
+                          >
+                            <Truck className="h-4 w-4 mr-1.5" />
+                            Deliver Order
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p>Submit the delivery link and complete this order</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenu open={orderDetailsActionDropdownOpen} onOpenChange={setOrderDetailsActionDropdownOpen}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 z-[9999]">
+                            <DropdownMenuItem 
+                              className="cursor-pointer"
+                              onSelect={async () => {
+                                setOrderDetailsActionDropdownOpen(false);
+                                if (!localOrder) return;
+                                setLoadingOrderDetails(true);
+                                setOrderDetailsOpen(true);
+                                const { data } = await supabase
+                                  .from('orders')
+                                  .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                                  .eq('id', localOrder.id)
+                                  .maybeSingle();
+                                setOrderDetails(data);
+                                setLoadingOrderDetails(false);
+                              }}
+                            >
+                              <Info className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            {canDeliver && (
+                              <DropdownMenuItem 
+                                className="cursor-pointer"
+                                onSelect={() => {
+                                  setOrderDetailsActionDropdownOpen(false);
+                                  setDeliverOrderDialogOpen(true);
+                                }}
+                              >
+                                <Truck className="h-4 w-4 mr-2" />
+                                Deliver Order
+                              </DropdownMenuItem>
+                            )}
+                            {canCancel && (
+                              <DropdownMenuItem 
+                                className="cursor-pointer text-destructive focus:text-destructive"
+                                onSelect={() => {
+                                  setOrderDetailsActionDropdownOpen(false);
+                                  setCancelPlacedOrderDialogOpen(true);
+                                }}
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Cancel Order
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p>More actions</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
             </div>
           );
