@@ -743,44 +743,6 @@ export function OrdersView() {
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
         <DialogContent className="max-w-lg" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
-            {selectedOrder && selectedOrder.delivery_status === 'pending' && selectedOrder.status !== 'cancelled' && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 gap-1 text-xs hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black data-[state=open]:bg-black data-[state=open]:text-white dark:data-[state=open]:bg-white dark:data-[state=open]:text-black"
-                  >
-                    Action
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
-                  {(() => {
-                    const isDeliveryOverdue = selectedOrder.delivery_deadline 
-                      ? new Date(selectedOrder.delivery_deadline) < new Date() 
-                      : false;
-                    return (
-                      <>
-                        <DropdownMenuItem 
-                          className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          disabled={!isDeliveryOverdue || disputeOrderIds.has(selectedOrder?.id || '')}
-                          onClick={() => setDisputeDialogOpen(true)}
-                        >
-                          {disputeOrderIds.has(selectedOrder?.id || '') ? 'Dispute Opened' : 'Open Dispute'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          onClick={() => setCancelOrderDialogOpen(true)}
-                        >
-                          Request Cancellation
-                        </DropdownMenuItem>
-                      </>
-                    );
-                  })()}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
             <DialogClose className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
