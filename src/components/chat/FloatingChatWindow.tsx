@@ -3483,16 +3483,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Button>
               </div>
             )}
-            
-            {/* Status indicator if order already placed */}
-            {hasOrder && (
-              <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">Order Placed</span>
-                </div>
-              </div>
-            )}
           </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
