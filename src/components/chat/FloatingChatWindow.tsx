@@ -2821,7 +2821,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle client order request message (from client to agency)
     if (clientOrderRequest) {
       // Check if this specific order request has been rejected
-      const isRejected = messages.some(m => {
+      // Only hide if there's a rejection that came AFTER this message (meaning this specific request was rejected)
+      const msgIndex = messages.findIndex(m => m.id === msg.id);
+      const isRejected = messages.slice(msgIndex + 1).some(m => {
         if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
         const match = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
         if (!match) return false;
