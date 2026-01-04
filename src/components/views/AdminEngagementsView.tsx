@@ -336,8 +336,7 @@ export function AdminEngagementsView() {
                       )}
                       <div>
                         <h3 className="font-medium">{r.title}</h3>
-                        <p className="text-sm text-muted-foreground">{r.media_sites?.name} • {r.profiles?.email}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                         {r.cancellation_reason && (
                           <p className="text-xs text-destructive mt-1">Reason: {r.cancellation_reason}</p>
                         )}
