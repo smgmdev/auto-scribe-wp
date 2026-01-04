@@ -4756,6 +4756,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
                 
+                // Check if this is a CLIENT_ORDER_REQUEST message that has been accepted
+                const clientOrderRequestMatch = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+                if (clientOrderRequestMatch && !quote) {
+                  const msgIndex = messages.findIndex(m => m.id === msg.id);
+                  try {
+                    const clientOrderData = JSON.parse(clientOrderRequestMatch[1]);
+                    const isAccepted = messages.slice(msgIndex + 1).some(m => {
+                      if (!m.message.includes('[ORDER_REQUEST_ACCEPTED]')) return false;
+                      const match = m.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
+                      if (!match) return false;
+                      try {
+                        const data = JSON.parse(match[1]);
+                        return data.media_site_id === clientOrderData.media_site_id;
+                      } catch { return false; }
+                    });
+                    const isRejected = messages.slice(msgIndex + 1).some(m => {
+                      if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
+                      const match = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
+                      if (!match) return false;
+                      try {
+                        const data = JSON.parse(match[1]);
+                        return data.media_site_id === clientOrderData.media_site_id;
+                      } catch { return false; }
+                    });
+                    // Skip rendering entire message wrapper if accepted or rejected
+                    if (isAccepted || isRejected) {
+                      return null;
+                    }
+                  } catch {}
+                }
+                
                 // Check for admin joined message - render as independent centered text
                 const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
                 if (adminJoinedMatch) {
