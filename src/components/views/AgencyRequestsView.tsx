@@ -363,8 +363,9 @@ export function AgencyRequestsView() {
           setRequests(prev => {
             let newRequests = prev.map(r => {
               if (r.id === updated.id) {
-                // Sync agency_read to local read state when it changes
-                const newRead = agencyReadChanged ? updated.agency_read : r.read;
+                // For cancellations, always mark as unread (agency_read is set to false by client)
+                // For other changes, sync agency_read to local read state when it changes
+                const newRead = wasCancelled ? false : (agencyReadChanged ? updated.agency_read : r.read);
                 return { ...r, read: newRead, status: updated.status };
               }
               return r;
