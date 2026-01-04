@@ -640,7 +640,7 @@ export function OrdersView() {
                 <Badge variant="destructive">Cancelled</Badge>
               ) : (
                 <>
-                  {getStatusBadge(order.status)}
+                  {order.status !== 'paid' && getStatusBadge(order.status)}
                   {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                 </>
               )}
