@@ -2131,7 +2131,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     broadcastTyping(false);
     
     try {
-      const replyContent = replyToMessage ? getReplyContentOnly(replyToMessage.message) : '';
+      const isOwnReplyMessage = replyToMessage?.sender_type === senderType;
+      const replyContent = replyToMessage ? getReplyContentOnly(replyToMessage.message, isOwnReplyMessage) : '';
       const fullMessage = replyToMessage 
         ? `> [${replyToMessage.id}]:${replyContent}\n\n${newMessage.trim()}`
         : newMessage.trim();
@@ -2371,7 +2372,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         setUploadingFile(false);
       }
 
-      const replyContent = replyToMessage ? getReplyContentOnly(replyToMessage.message) : '';
+      const isOwnReplyMessage = replyToMessage?.sender_type === senderType;
+      const replyContent = replyToMessage ? getReplyContentOnly(replyToMessage.message, isOwnReplyMessage) : '';
       let fullMessage = replyToMessage 
         ? `> [${replyToMessage.id}]:${replyContent}\n\n${newMessage.trim()}`
         : newMessage.trim();
@@ -2581,7 +2583,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   // Get the actual reply content from a message, excluding any quoted content
   // For special message types, return a friendly label instead of raw content
-  const getReplyContentOnly = (message: string): string => {
+  // isOwnMessage: whether the message being quoted was sent by the current user
+  const getReplyContentOnly = (message: string, isOwnMessage?: boolean): string => {
     // Remove attachment tags first
     let cleanMessage = message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
     // If message starts with quote format, extract only the reply part (after \n\n)
@@ -2592,9 +2595,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
     }
     
-    // Return friendly labels for special message types
+    // Return friendly labels for special message types - dynamic based on who sent it
     if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
-      return 'Offer Received';
+      return isOwnMessage ? 'Offer Sent' : 'Offer Received';
     }
     if (cleanMessage.startsWith('[ORDER_PLACED]')) {
       return 'Order Placed';
@@ -2612,13 +2615,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return 'Revision Requested';
     }
     if (cleanMessage.startsWith('[CANCEL_ORDER_REQUEST]')) {
-      return 'Cancellation Requested';
+      return isOwnMessage ? 'Cancellation Requested' : 'Cancellation Request Received';
     }
     if (cleanMessage.startsWith('[CANCEL_ORDER_ACCEPTED]')) {
       return 'Cancellation Accepted';
     }
     if (cleanMessage.startsWith('[CLIENT_ORDER_REQUEST]')) {
-      return 'Order Request Sent';
+      return isOwnMessage ? 'Order Request Sent' : 'Order Request Received';
+    }
+    if (cleanMessage.startsWith('[ORDER_REQUEST_REJECTED]')) {
+      return 'Order Request Rejected';
+    }
+    if (cleanMessage.startsWith('[OFFER_REJECTED]')) {
+      return 'Offer Rejected';
+    }
+    if (cleanMessage.startsWith('[ORDER_REQUEST_ACCEPTED]')) {
+      return 'Order Request Accepted';
+    }
+    if (cleanMessage.startsWith('[CANCEL_ORDER_REJECTED]')) {
+      return 'Cancellation Rejected';
     }
     
     return cleanMessage;
@@ -3903,9 +3918,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       text = text.replace(/^\[[^\]]+\]:/, '');
       text = text.trim();
       
-      // Show friendly label for special message types
+      // Get original message sender to determine sent vs received labels
+      const originalMsg = quote.originalId ? messages.find(m => m.id === quote.originalId) : null;
+      const isOwnQuotedMessage = originalMsg?.sender_type === senderType;
+      
+      // Show friendly label for special message types - dynamic based on who sent it
       if (text.startsWith('[ORDER_REQUEST]')) {
-        return 'Offer Received';
+        return isOwnQuotedMessage ? 'Offer Sent' : 'Offer Received';
       }
       if (text.startsWith('[ORDER_PLACED]')) {
         return 'Order Placed';
@@ -3914,22 +3933,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         return 'Order Cancelled';
       }
       if (text.startsWith('[ORDER_DELIVERED]')) {
-        return 'Order Delivered';
+        return isOwnQuotedMessage ? 'Order Delivered' : 'Order Delivered';
       }
       if (text.startsWith('[DELIVERY_ACCEPTED]')) {
         return 'Delivery Accepted';
       }
       if (text.startsWith('[REVISION_REQUESTED]')) {
-        return 'Revision Requested';
+        return isOwnQuotedMessage ? 'Revision Requested' : 'Revision Requested';
       }
       if (text.startsWith('[CANCEL_ORDER_REQUEST]')) {
-        return 'Cancellation Requested';
+        return isOwnQuotedMessage ? 'Cancellation Requested' : 'Cancellation Request Received';
       }
       if (text.startsWith('[CANCEL_ORDER_ACCEPTED]')) {
         return 'Cancellation Accepted';
       }
       if (text.startsWith('[CLIENT_ORDER_REQUEST]')) {
-        return 'Order Request Sent';
+        return isOwnQuotedMessage ? 'Order Request Sent' : 'Order Request Received';
       }
       if (text.startsWith('[ORDER_REQUEST_REJECTED]')) {
         return 'Order Request Rejected';
@@ -4746,33 +4765,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}</span>
                       </div>
                       <p className="text-sm truncate">
-                        {replyToMessage.message.startsWith('[ORDER_REQUEST]') 
-                          ? 'Offer Sent' 
-                          : replyToMessage.message.startsWith('[CLIENT_ORDER_REQUEST]')
-                            ? 'Order Request Sent'
-                            : replyToMessage.message.startsWith('[ORDER_REQUEST_REJECTED]')
-                              ? 'Order Request Rejected'
-                              : replyToMessage.message.startsWith('[OFFER_REJECTED]')
-                                ? 'Offer Rejected'
-                                : replyToMessage.message.startsWith('[ORDER_PLACED]')
-                                  ? 'Order Placed'
-                                  : replyToMessage.message.startsWith('[ORDER_CANCELLED]')
-                                    ? 'Order Cancelled'
-                                    : replyToMessage.message.startsWith('[ORDER_DELIVERED]')
-                                      ? 'Order Delivered'
-                                      : replyToMessage.message.startsWith('[DELIVERY_ACCEPTED]')
-                                        ? 'Delivery Accepted'
-                                        : replyToMessage.message.startsWith('[REVISION_REQUESTED]')
-                                          ? 'Revision Requested'
-                                          : replyToMessage.message.startsWith('[CANCEL_ORDER_REQUEST]')
-                                            ? 'Cancellation Requested'
-                                            : replyToMessage.message.startsWith('[CANCEL_ORDER_ACCEPTED]')
-                                              ? 'Cancellation Accepted'
-                                              : replyToMessage.message.startsWith('[ORDER_REQUEST_ACCEPTED]')
-                                                ? 'Order Request Accepted'
-                                                : replyToMessage.message.startsWith('[CANCEL_ORDER_REJECTED]')
-                                                  ? 'Cancellation Rejected'
-                                                  : getMessageWithoutAttachment(replyToMessage.message)}
+                        {getReplyContentOnly(replyToMessage.message, replyToMessage.sender_type === senderType)}
                       </p>
                     </div>
                     <Button
