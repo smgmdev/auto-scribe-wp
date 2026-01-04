@@ -4174,15 +4174,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
-                  {globalChatType === 'agency-request' && !hasOrder && (
-                    hasAcceptedOrderRequest ? (
-                      <DropdownMenuItem 
-                        className="cursor-pointer text-green-600"
-                        disabled
-                      >
-                        Order Accepted - Awaiting Payment
-                      </DropdownMenuItem>
-                    ) : hasExistingClientOrderRequest ? (
+                  {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && (
+                    hasExistingClientOrderRequest ? (
                       <DropdownMenuItem 
                         className="cursor-pointer text-muted-foreground"
                         disabled
@@ -4201,6 +4194,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         {hasExistingOrderRequest ? 'Resend Offer' : 'Send Offer'}
                       </DropdownMenuItem>
                     )
+                  )}
+                  {globalChatType === 'agency-request' && hasAcceptedOrderRequest && !hasOrder && (
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-green-600"
+                      disabled
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Order Placed - Awaiting Delivery
+                    </DropdownMenuItem>
                   )}
                   {hasOpenDispute && (
                     <DropdownMenuItem 
@@ -4227,7 +4229,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         className="cursor-pointer text-green-600"
                         disabled
                       >
-                        Order Accepted - Confirm to Pay
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Order Placed - Awaiting Delivery
                       </DropdownMenuItem>
                     ) : hasExistingOrderRequest ? (
                       <DropdownMenuItem 
@@ -4674,7 +4677,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <div className="flex items-center gap-2 mb-0.5">
                       <CheckCircle className="h-3.5 w-3.5 text-green-400" />
                       <span className="font-medium text-xs text-green-400">
-                        {isClient ? 'Order Request Accepted' : 'Offer Accepted - Awaiting Payment'}
+                        Order Placed - Awaiting Delivery
                       </span>
                     </div>
                     <p className="font-medium text-sm text-white truncate">
@@ -4703,12 +4706,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                               <TooltipTrigger asChild>
                                 <div className="flex items-center gap-1 text-white/70 cursor-help">
                                   <Clock className="h-3 w-3" />
-                                  <span className="text-xs">Delivery: {formatDeliveryTime()}</span>
+                                  <span className="text-xs">Est. Delivery: {formatDeliveryTime()}</span>
                                   <Info className="h-3 w-3" />
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
-                                <p>Estimated delivery time after order confirmation.</p>
+                                <p>Estimated delivery time from order acceptance.</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -4735,26 +4738,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   </div>
                 </div>
-                {isClient && (
-                  <Button
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white shrink-0"
-                    onClick={() => {
-                      setPendingOrderRequest({
-                        media_site_id: acceptedOrder.media_site_id,
-                        media_site_name: acceptedOrder.media_site_name,
-                        media_site_favicon: acceptedOrder.media_site_favicon,
-                        price: acceptedOrder.price,
-                        special_terms: acceptedOrder.special_terms,
-                        delivery_duration: acceptedOrder.delivery_duration
-                      });
-                      setAcceptOrderDialogOpen(true);
-                    }}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Confirm & Pay
-                  </Button>
-                )}
               </div>
             </div>
           );
