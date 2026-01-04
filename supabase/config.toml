@@ -110,3 +110,6 @@ verify_jwt = false
 
 [functions.cancel-order]
 verify_jwt = true
+
+[functions.accept-order-request]
+verify_jwt = true
