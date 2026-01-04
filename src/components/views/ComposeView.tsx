@@ -1079,7 +1079,7 @@ export function ComposeView() {
           </div>
 
           {/* Generate Button */}
-          <Button variant="accent" className="w-full" onClick={handleGenerate} disabled={isGenerating || !title}>
+          <Button className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none" onClick={handleGenerate} disabled={isGenerating || !title}>
             {isGenerating ? <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Generating...
@@ -1247,8 +1247,7 @@ export function ComposeView() {
                   </> : 'Save Changes'}
               </Button>}
             <Button 
-              variant="accent" 
-              className="w-full" 
+              className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
               disabled={isPublishing || !selectedSite || (!isAdmin && !editingArticle && !canAffordSite(selectedSite))}
             >
