@@ -208,7 +208,10 @@ export function ArticlesView() {
             Manage your published and draft articles
           </p>
         </div>
-        <Button onClick={() => setCurrentView('compose')} className="gap-2">
+        <Button 
+          onClick={() => setCurrentView('compose')} 
+          className="gap-2 transition-all duration-300 hover:bg-white hover:text-black hover:border hover:border-black"
+        >
           <Plus className="h-4 w-4" />
           New Article
         </Button>
