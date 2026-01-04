@@ -2580,6 +2580,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
 
   // Get the actual reply content from a message, excluding any quoted content
+  // For special message types, return a friendly label instead of raw content
   const getReplyContentOnly = (message: string): string => {
     // Remove attachment tags first
     let cleanMessage = message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').trim();
@@ -2590,6 +2591,36 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         return parts.slice(1).join('\n\n').trim();
       }
     }
+    
+    // Return friendly labels for special message types
+    if (cleanMessage.startsWith('[ORDER_REQUEST]')) {
+      return 'Offer Received';
+    }
+    if (cleanMessage.startsWith('[ORDER_PLACED]')) {
+      return 'Order Placed';
+    }
+    if (cleanMessage.startsWith('[ORDER_CANCELLED]')) {
+      return 'Order Cancelled';
+    }
+    if (cleanMessage.startsWith('[ORDER_DELIVERED]')) {
+      return 'Order Delivered';
+    }
+    if (cleanMessage.startsWith('[DELIVERY_ACCEPTED]')) {
+      return 'Delivery Accepted';
+    }
+    if (cleanMessage.startsWith('[REVISION_REQUESTED]')) {
+      return 'Revision Requested';
+    }
+    if (cleanMessage.startsWith('[CANCEL_ORDER_REQUEST]')) {
+      return 'Cancellation Requested';
+    }
+    if (cleanMessage.startsWith('[CANCEL_ORDER_ACCEPTED]')) {
+      return 'Cancellation Accepted';
+    }
+    if (cleanMessage.startsWith('[CLIENT_ORDER_REQUEST]')) {
+      return 'Order Request';
+    }
+    
     return cleanMessage;
   };
 
