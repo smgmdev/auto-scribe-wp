@@ -284,7 +284,7 @@ export function AdminEngagementsView() {
                   {!r.read && (
                     <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
                   )}
-                  <CardContent className="p-4 flex justify-between items-start">
+                  <CardContent className="p-4 flex justify-between items-start relative">
                     <div className="flex items-start gap-3">
                       {r.media_sites?.favicon && (
                         <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
@@ -305,10 +305,10 @@ export function AdminEngagementsView() {
                     </div>
                     <div className="text-right">
                       {getEngagementBadge(r)}
-                      <div className="flex items-center justify-end gap-1 mt-2 text-xs text-muted-foreground">
-                        <MessageSquare className="h-3 w-3" />
-                        {messages[r.id]?.length || 0}
-                      </div>
+                    </div>
+                    <div className="absolute bottom-3 right-4 flex items-center gap-1 text-xs text-muted-foreground">
+                      <MessageSquare className="h-3 w-3" />
+                      {messages[r.id]?.length || 0}
                     </div>
                   </CardContent>
                 </Card>
