@@ -790,28 +790,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return !!match;
   });
   
-  // Get all rejection messages and extract their media_site_ids
-  const rejectedMediaSiteIds = messages
-    .filter(msg => msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST_REJECTED]'))
-    .map(msg => {
-      const match = msg.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
-      if (match) {
-        try {
-          const data = JSON.parse(match[1]);
-          return data.media_site_id;
-        } catch { return null; }
-      }
-      return null;
-    })
-    .filter(Boolean);
-  
-  // Filter out client order requests that have been rejected (by matching media_site_id)
-  const nonRejectedClientOrderMessages = existingClientOrderMessages.filter(msg => {
-    const match = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+  // Filter out client order requests that have been rejected
+  // Only consider a request rejected if there's a rejection message AFTER it with matching media_site_id
+  const nonRejectedClientOrderMessages = existingClientOrderMessages.filter(clientOrderMsg => {
+    const match = clientOrderMsg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
     if (!match) return false;
     try {
-      const data = JSON.parse(match[1]);
-      return !rejectedMediaSiteIds.includes(data.media_site_id);
+      const clientOrderData = JSON.parse(match[1]);
+      const clientOrderIndex = messages.findIndex(m => m.id === clientOrderMsg.id);
+      
+      // Check if there's a rejection AFTER this message for the same media_site_id
+      const hasRejectionAfter = messages.slice(clientOrderIndex + 1).some(m => {
+        if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
+        const rejMatch = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
+        if (!rejMatch) return false;
+        try {
+          const rejData = JSON.parse(rejMatch[1]);
+          return rejData.media_site_id === clientOrderData.media_site_id;
+        } catch { return false; }
+      });
+      
+      return !hasRejectionAfter;
     } catch { return false; }
   });
   
