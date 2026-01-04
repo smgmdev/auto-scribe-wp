@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format, isPast, differenceInSeconds } from 'date-fns';
@@ -85,6 +86,7 @@ export function AdminEngagementsView() {
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
   const [, setTick] = useState(0);
 
@@ -100,7 +102,10 @@ export function AdminEngagementsView() {
     fetchRequests();
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true);
+    }
     try {
       const { data, error } = await supabase
         .from('service_requests')
@@ -151,6 +156,7 @@ export function AdminEngagementsView() {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -255,9 +261,23 @@ export function AdminEngagementsView() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">All Engagements</h2>
-        <p className="text-muted-foreground">Monitor all client-agency communications</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">All Engagements</h2>
+          <p className="text-muted-foreground">Monitor all client-agency communications</p>
+        </div>
+        <Button
+          onClick={() => fetchRequests(true)}
+          disabled={isRefreshing}
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
+        >
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
