@@ -3391,7 +3391,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {orderRequestAccepted.special_terms && (
-                  <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {orderRequestAccepted.special_terms}
                   </p>
                 )}
