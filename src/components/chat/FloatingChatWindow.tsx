@@ -5853,20 +5853,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Status</p>
-                  <Badge 
-                    variant="secondary" 
-                    className={`mt-1 ${
-                      orderDetails.delivery_status === 'accepted' 
-                        ? 'bg-green-600 text-white' 
-                        : orderDetails.delivery_status === 'delivered'
-                        ? 'bg-purple-600/20 text-purple-600'
-                        : 'bg-yellow-600/20 text-yellow-600'
-                    }`}
-                  >
-                    {orderDetails.delivery_status === 'accepted' && 'Accepted'}
-                    {orderDetails.delivery_status === 'delivered' && 'Delivered'}
-                    {orderDetails.delivery_status === 'pending' && 'Pending'}
-                  </Badge>
+                  {orderDetails.delivery_status === 'accepted' && (
+                    <Badge variant="secondary" className="mt-1 bg-green-600 text-white">
+                      Accepted
+                    </Badge>
+                  )}
+                  {orderDetails.delivery_status === 'delivered' && (
+                    <Badge variant="secondary" className="mt-1 bg-purple-600/20 text-purple-600">
+                      Delivered
+                    </Badge>
+                  )}
                   {orderDetails.delivery_status === 'pending' && (() => {
                     // Try to get countdown from delivery_deadline first
                     if (orderDetails.delivery_deadline) {
@@ -5876,7 +5872,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       const isOverdue = diff <= 0;
                       
                       if (isOverdue) {
-                        return <p className="text-xs text-red-500 font-medium mt-1">Overdue</p>;
+                        return (
+                          <Badge variant="secondary" className="mt-1 bg-red-600/20 text-red-600">
+                            Overdue
+                          </Badge>
+                        );
                       }
                       
                       const totalSeconds = Math.floor(diff / 1000);
@@ -5894,7 +5894,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         countdownText = `${minutes}m ${seconds}s`;
                       }
                       
-                      return <p className="text-xs text-green-600 font-medium mt-1">{countdownText}</p>;
+                      return (
+                        <Badge variant="secondary" className="mt-1 bg-yellow-600/20 text-yellow-600">
+                          {countdownText}
+                        </Badge>
+                      );
                     }
                     
                     // Fallback to accepted order data from messages
@@ -5903,13 +5907,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       const countdown = getDeliveryCountdown(acceptedData.accepted_at, acceptedData.delivery_duration);
                       if (countdown) {
                         if (countdown.isOverdue) {
-                          return <p className="text-xs text-red-500 font-medium mt-1">Overdue</p>;
+                          return (
+                            <Badge variant="secondary" className="mt-1 bg-red-600/20 text-red-600">
+                              Overdue
+                            </Badge>
+                          );
                         }
-                        return <p className="text-xs text-green-600 font-medium mt-1">{countdown.text}</p>;
+                        return (
+                          <Badge variant="secondary" className="mt-1 bg-yellow-600/20 text-yellow-600">
+                            {countdown.text}
+                          </Badge>
+                        );
                       }
                     }
                     
-                    return null;
+                    // Fallback to Pending if no countdown available
+                    return (
+                      <Badge variant="secondary" className="mt-1 bg-yellow-600/20 text-yellow-600">
+                        Pending
+                      </Badge>
+                    );
                   })()}
                 </div>
               </div>
