@@ -4290,6 +4290,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                  {hasOrder && (
+                    <DropdownMenuItem 
+                      className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                      onSelect={async () => {
+                        setActionDropdownOpen(false);
+                        if (!localOrder) return;
+                        setLoadingOrderDetails(true);
+                        setOrderDetailsOpen(true);
+                        const { data } = await supabase
+                          .from('orders')
+                          .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                          .eq('id', localOrder.id)
+                          .maybeSingle();
+                        setOrderDetails(data);
+                        setLoadingOrderDetails(false);
+                      }}
+                    >
+                      View Details
+                    </DropdownMenuItem>
+                  )}
                   {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && (
                     hasExistingClientOrderRequest ? (
                       <DropdownMenuItem 
@@ -4640,34 +4660,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Tooltip>
                     </TooltipProvider>
                   )}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-white hover:bg-white/20"
-                          onClick={async () => {
-                            if (!localOrder) return;
-                            setLoadingOrderDetails(true);
-                            setOrderDetailsOpen(true);
-                            const { data } = await supabase
-                              .from('orders')
-                              .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
-                              .eq('id', localOrder.id)
-                              .maybeSingle();
-                            setOrderDetails(data);
-                            setLoadingOrderDetails(false);
-                          }}
-                        >
-                          <Info className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>View order details</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 </div>
               </div>
             </div>
