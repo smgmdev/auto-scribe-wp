@@ -3929,6 +3929,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       if (text.startsWith('[CLIENT_ORDER_REQUEST]')) {
         return 'Order Request Received';
       }
+      if (text.startsWith('[ORDER_REQUEST_REJECTED]')) {
+        return 'Order Request Rejected';
+      }
+      if (text.startsWith('[OFFER_REJECTED]')) {
+        return 'Offer Rejected';
+      }
       
       return text;
     };
