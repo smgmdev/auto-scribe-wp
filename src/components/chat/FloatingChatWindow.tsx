@@ -4534,27 +4534,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1 cursor-help">
-                              <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                              <span className="font-medium text-xs text-green-400">
-                                {localOrder.delivery_status === 'delivered' ? 'Delivered' : 
-                                 localOrder.delivery_status === 'accepted' ? 'Completed' : 
-                                 'Awaiting Delivery'}
-                              </span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            <p>
-                              {localOrder.delivery_status === 'delivered' ? 'Order has been delivered, awaiting client acceptance' : 
-                               localOrder.delivery_status === 'accepted' ? 'Order completed successfully' : 
-                               'Waiting for delivery from agency'}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
                     </div>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {acceptedOrderData?.price && (
