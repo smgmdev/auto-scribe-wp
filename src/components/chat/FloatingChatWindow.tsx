@@ -4311,7 +4311,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </DropdownMenuItem>
                     )
                   )}
-                  {globalChatType === 'agency-request' && hasAcceptedOrderRequest && !hasOrder && (
+                  {globalChatType === 'agency-request' && (hasAcceptedOrderRequest || (hasOrder && (!localOrder?.delivery_status || localOrder?.delivery_status === 'pending'))) && (
                     <DropdownMenuItem 
                       className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       disabled={isAdmin}
@@ -4320,7 +4320,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         setDeliverOrderDialogOpen(true);
                       }}
                     >
+                      <Truck className="h-4 w-4 mr-2" />
                       Deliver Order
+                    </DropdownMenuItem>
+                  )}
+                  {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && (
+                    <DropdownMenuItem 
+                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={isAdmin}
+                      onSelect={() => {
+                        setActionDropdownOpen(false);
+                        setCancelPlacedOrderDialogOpen(true);
+                      }}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Cancel Order
                     </DropdownMenuItem>
                   )}
                   {hasOpenDispute && (
