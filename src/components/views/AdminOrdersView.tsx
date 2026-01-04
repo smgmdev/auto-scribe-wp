@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatDistanceToNow, format, differenceInHours, differenceInDays } from 'date-fns';
+import { formatDistanceToNow, format, differenceInSeconds } from 'date-fns';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
@@ -75,6 +75,15 @@ export function AdminOrdersView() {
     delivery_url: '',
     delivery_notes: ''
   });
+  const [, setTick] = useState(0);
+
+  // Real-time countdown timer - update every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (isAdmin) {
@@ -443,26 +452,42 @@ export function AdminOrdersView() {
     
     const now = new Date();
     const deadline = new Date(deliveryDeadline);
-    const diffMs = deadline.getTime() - now.getTime();
+    const totalSeconds = differenceInSeconds(deadline, now);
     
-    if (diffMs <= 0) {
+    if (totalSeconds <= 0) {
       // Overdue
-      const overdueDays = Math.abs(differenceInDays(now, deadline));
-      const overdueHours = Math.abs(differenceInHours(now, deadline)) % 24;
+      const absSeconds = Math.abs(totalSeconds);
+      const days = Math.floor(absSeconds / 86400);
+      const hours = Math.floor((absSeconds % 86400) / 3600);
+      const minutes = Math.floor((absSeconds % 3600) / 60);
+      const seconds = absSeconds % 60;
       
-      if (overdueDays === 0 && overdueHours === 0) {
-        return { text: 'Overdue', isOverdue: true };
+      if (days > 0) {
+        return { text: `Overdue ${days}d ${hours}h ${minutes}m`, isOverdue: true };
+      } else if (hours > 0) {
+        return { text: `Overdue ${hours}h ${minutes}m ${seconds}s`, isOverdue: true };
+      } else if (minutes > 0) {
+        return { text: `Overdue ${minutes}m ${seconds}s`, isOverdue: true };
+      } else {
+        return { text: `Overdue ${seconds}s`, isOverdue: true };
       }
-      
-      const overdueText = overdueDays > 0 ? `${overdueDays}d ${overdueHours}h` : `${overdueHours}h`;
-      return { text: `Overdue ${overdueText}`, isOverdue: true };
     }
     
     // Remaining time
-    const days = differenceInDays(deadline, now);
-    const hours = differenceInHours(deadline, now) % 24;
-    const remainingText = days > 0 ? `${days}d ${hours}h` : `${hours}h`;
-    return { text: remainingText, isOverdue: false };
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (days > 0) {
+      return { text: `${days}d ${hours}h ${minutes}m`, isOverdue: false };
+    } else if (hours > 0) {
+      return { text: `${hours}h ${minutes}m ${seconds}s`, isOverdue: false };
+    } else if (minutes > 0) {
+      return { text: `${minutes}m ${seconds}s`, isOverdue: false };
+    } else {
+      return { text: `${seconds}s`, isOverdue: false };
+    }
   };
 
   const getDeliveryBadge = (status: string, deliveryDeadline: string | null) => {
