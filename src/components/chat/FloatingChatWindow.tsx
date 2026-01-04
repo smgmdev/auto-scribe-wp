@@ -4992,7 +4992,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         })()}
 
         {/* Messages */}
-        <ScrollArea className="flex-1" style={{ overscrollBehavior: 'contain' }}>
+        <div 
+          className="flex-1 overflow-hidden"
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+        >
+        <ScrollArea className="h-full" style={{ overscrollBehavior: 'contain' }}>
           {loadingMessages ? (
             <div className="flex flex-col items-center justify-center h-full py-12">
               <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
@@ -5150,6 +5156,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
           )}
         </ScrollArea>
+        </div>
 
         {/* Typing Indicator */}
         {typingUsers.length > 0 && (
