@@ -2812,7 +2812,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const orderRequestRejected = parseOrderRequestRejected(msg.message);
 
     // Handle order request rejected message (agency rejected client's order request)
-    if (orderRequestRejected) {
+    // Skip if this is a quoted reply - the quote contains the tag but this is a reply message
+    if (orderRequestRejected && !quote) {
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
@@ -2868,7 +2869,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle offer rejected message
-    if (offerRejected) {
+    // Skip if this is a quoted reply - the quote contains the tag but this is a reply message
+    if (offerRejected && !quote) {
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
