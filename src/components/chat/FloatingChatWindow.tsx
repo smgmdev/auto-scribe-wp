@@ -4320,7 +4320,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         setDeliverOrderDialogOpen(true);
                       }}
                     >
-                      <Truck className="h-4 w-4 mr-2" />
                       Deliver Order
                     </DropdownMenuItem>
                   )}
@@ -4333,7 +4332,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         setCancelPlacedOrderDialogOpen(true);
                       }}
                     >
-                      <XCircle className="h-4 w-4 mr-2" />
                       Cancel Order
                     </DropdownMenuItem>
                   )}
@@ -4614,7 +4612,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
                           >
-                            <Truck className="h-4 w-4 mr-1.5" />
                             Deliver Order
                           </Button>
                         </TooltipTrigger>
@@ -4627,65 +4624,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <DropdownMenu open={orderDetailsActionDropdownOpen} onOpenChange={setOrderDetailsActionDropdownOpen}>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-white hover:bg-white/20"
-                            >
-                              <ChevronDown className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40 z-[9999]">
-                            <DropdownMenuItem 
-                              className="cursor-pointer"
-                              onSelect={async () => {
-                                setOrderDetailsActionDropdownOpen(false);
-                                if (!localOrder) return;
-                                setLoadingOrderDetails(true);
-                                setOrderDetailsOpen(true);
-                                const { data } = await supabase
-                                  .from('orders')
-                                  .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
-                                  .eq('id', localOrder.id)
-                                  .maybeSingle();
-                                setOrderDetails(data);
-                                setLoadingOrderDetails(false);
-                              }}
-                            >
-                              <Info className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            {canDeliver && (
-                              <DropdownMenuItem 
-                                className="cursor-pointer"
-                                onSelect={() => {
-                                  setOrderDetailsActionDropdownOpen(false);
-                                  setDeliverOrderDialogOpen(true);
-                                }}
-                              >
-                                <Truck className="h-4 w-4 mr-2" />
-                                Deliver Order
-                              </DropdownMenuItem>
-                            )}
-                            {canCancel && (
-                              <DropdownMenuItem 
-                                className="cursor-pointer text-destructive focus:text-destructive"
-                                onSelect={() => {
-                                  setOrderDetailsActionDropdownOpen(false);
-                                  setCancelPlacedOrderDialogOpen(true);
-                                }}
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Cancel Order
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                          onClick={async () => {
+                            if (!localOrder) return;
+                            setLoadingOrderDetails(true);
+                            setOrderDetailsOpen(true);
+                            const { data } = await supabase
+                              .from('orders')
+                              .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                              .eq('id', localOrder.id)
+                              .maybeSingle();
+                            setOrderDetails(data);
+                            setLoadingOrderDetails(false);
+                          }}
+                        >
+                          <Info className="h-4 w-4" />
+                        </Button>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                        <p>More actions</p>
+                        <p>View order details</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
