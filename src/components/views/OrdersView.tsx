@@ -79,7 +79,8 @@ export function OrdersView() {
     userUnreadOrdersCount, setUserUnreadOrdersCount, decrementUserUnreadOrdersCount,
     userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadDisputesCount,
     userUnreadHistoryCount, setUserUnreadHistoryCount, decrementUserUnreadHistoryCount,
-    userUnreadCompletedCount, setUserUnreadCompletedCount, incrementUserUnreadCompletedCount, decrementUserUnreadCompletedCount
+    userUnreadCompletedCount, setUserUnreadCompletedCount, incrementUserUnreadCompletedCount, decrementUserUnreadCompletedCount,
+    openGlobalChat, clearUnreadMessageCount
   } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
@@ -492,10 +493,8 @@ export function OrdersView() {
     return 'history';
   };
 
-  // Handle order click - mark as read and open dialog
+  // Handle order click - mark as read and open chat
   const handleOrderClick = async (order: Order) => {
-    setSelectedOrder(order);
-    
     // Mark order as read if not already read and not admin
     if (!isAdmin && user && !order.read) {
       const { error } = await supabase
@@ -505,7 +504,6 @@ export function OrdersView() {
       
       if (!error) {
         // Decrement the appropriate tab's count based on order category
-        // Only decrement for tabs with notifications: active, disputes, history
         const tab = getOrderTab(order);
         switch (tab) {
           case 'active':
@@ -517,12 +515,72 @@ export function OrdersView() {
           case 'history':
             decrementUserUnreadHistoryCount();
             break;
-          // Completed tab has no notifications, so no decrement needed
         }
         
         // Update local order state to reflect read status
         setOrders(prev => prev.map(o => o.id === order.id ? { ...o, read: true } as Order : o));
       }
+    }
+    
+    // Fetch the service request associated with this order
+    const { data: serviceRequest } = await supabase
+      .from('service_requests')
+      .select(`
+        id,
+        title,
+        description,
+        status,
+        created_at,
+        updated_at,
+        order_id,
+        media_site_id,
+        user_id,
+        cancellation_reason,
+        cancelled_at,
+        media_sites:media_site_id (
+          id,
+          name,
+          favicon,
+          price,
+          agency,
+          link,
+          category,
+          subcategory,
+          about,
+          publication_format
+        )
+      `)
+      .eq('order_id', order.id)
+      .maybeSingle();
+    
+    if (serviceRequest) {
+      // Format the request for the global chat
+      const chatRequest = {
+        id: serviceRequest.id,
+        title: serviceRequest.title,
+        description: serviceRequest.description,
+        status: serviceRequest.status,
+        created_at: serviceRequest.created_at,
+        updated_at: serviceRequest.updated_at,
+        order_id: serviceRequest.order_id,
+        media_site_id: serviceRequest.media_site_id,
+        user_id: serviceRequest.user_id,
+        cancellation_reason: serviceRequest.cancellation_reason,
+        cancelled_at: serviceRequest.cancelled_at,
+        media_site: serviceRequest.media_sites,
+        order: {
+          id: order.id,
+          status: order.status,
+          delivery_status: order.delivery_status,
+          delivery_deadline: order.delivery_deadline
+        }
+      };
+      
+      clearUnreadMessageCount(serviceRequest.id);
+      openGlobalChat(chatRequest as any, 'my-request');
+    } else {
+      // Fallback to opening order details dialog if no service request found
+      setSelectedOrder(order);
     }
   };
 
