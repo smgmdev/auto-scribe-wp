@@ -2725,9 +2725,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         message: `[DELIVERY_ACCEPTED]${JSON.stringify(acceptMessagePayload)}[/DELIVERY_ACCEPTED]`
       });
 
-      // Update local order state - set to null to hide the banner since order is now completed
-      setLocalOrder(null);
-      updateGlobalChatRequest({ order: null }, globalChatRequest.id);
+      // Update local order state to reflect completion - keep the banner visible
+      const updatedOrder = { ...localOrder, delivery_status: 'accepted', status: 'completed' };
+      setLocalOrder(updatedOrder);
+      updateGlobalChatRequest({ order: updatedOrder }, globalChatRequest.id);
 
       toast({
         title: 'Delivery accepted',
