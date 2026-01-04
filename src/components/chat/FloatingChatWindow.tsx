@@ -4234,7 +4234,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           left: `calc(50% + ${localPosition.x}px)`,
           top: `calc(50% + ${localPosition.y}px)`,
           transform: 'translate(-50%, -50%)',
-          zIndex: chat.zIndex + 100
+          zIndex: chat.zIndex + 100,
+          overscrollBehavior: 'contain'
         }}
         onMouseDown={handleWindowClick}
       >
@@ -4990,7 +4991,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         })()}
 
         {/* Messages */}
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1" style={{ overscrollBehavior: 'contain' }}>
           {loadingMessages ? (
             <div className="flex flex-col items-center justify-center h-full py-12">
               <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
