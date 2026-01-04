@@ -800,7 +800,7 @@ export function AdminOrdersView() {
                 <Card 
                   key={order.id} 
                   className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${hasUnreadNotification ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
-                  onClick={() => openDetailsDialog(order)}
+                  onClick={() => handleInvestigate(order)}
                 >
                   {/* Unread notification badge */}
                   {hasUnreadNotification && (
