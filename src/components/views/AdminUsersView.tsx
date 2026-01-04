@@ -507,11 +507,10 @@ export function AdminUsersView() {
           </p>
         </div>
         <Button
-          variant="outline"
           size="sm"
           onClick={() => fetchUsers()}
           disabled={loading}
-          className="bg-black text-white hover:bg-black/90 border-black"
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
