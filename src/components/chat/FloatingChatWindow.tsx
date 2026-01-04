@@ -5895,7 +5895,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       }
                       
                       return (
-                        <Badge variant="secondary" className="mt-1 bg-yellow-600/20 text-yellow-600">
+                        <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
                           {countdownText}
                         </Badge>
                       );
@@ -5914,7 +5914,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           );
                         }
                         return (
-                          <Badge variant="secondary" className="mt-1 bg-yellow-600/20 text-yellow-600">
+                          <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
                             {countdown.text}
                           </Badge>
                         );
@@ -5923,7 +5923,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     
                     // Fallback to Pending if no countdown available
                     return (
-                      <Badge variant="secondary" className="mt-1 bg-yellow-600/20 text-yellow-600">
+                      <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
                         Pending
                       </Badge>
                     );
