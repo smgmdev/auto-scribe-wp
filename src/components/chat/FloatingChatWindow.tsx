@@ -5802,8 +5802,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Payment Status</p>
-                  <Badge variant="secondary" className="mt-1 bg-blue-600/20 text-blue-600">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                  <Badge variant="secondary" className="mt-1 bg-black text-green-500 dark:bg-white dark:text-green-600">
+                    <CheckCircle className="h-3 w-3 mr-1 text-green-500 dark:text-green-600" />
                     Paid
                   </Badge>
                 </div>
