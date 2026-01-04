@@ -4175,7 +4175,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
                   {globalChatType === 'agency-request' && !hasOrder && (
-                    hasExistingClientOrderRequest ? (
+                    hasAcceptedOrderRequest ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-green-600"
+                        disabled
+                      >
+                        Order Accepted - Awaiting Payment
+                      </DropdownMenuItem>
+                    ) : hasExistingClientOrderRequest ? (
                       <DropdownMenuItem 
                         className="cursor-pointer text-muted-foreground"
                         disabled
@@ -4214,6 +4221,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         }}
                       >
                         Open Dispute
+                      </DropdownMenuItem>
+                    ) : hasAcceptedOrderRequest ? (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-green-600"
+                        disabled
+                      >
+                        Order Accepted - Confirm to Pay
                       </DropdownMenuItem>
                     ) : hasExistingOrderRequest ? (
                       <DropdownMenuItem 
