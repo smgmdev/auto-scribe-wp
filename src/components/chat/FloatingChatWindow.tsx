@@ -909,20 +909,58 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return !!match;
   });
   
-  // Get the last accepted order request data
+  // Get the last accepted order request data (including timestamp for countdown)
   const getLastAcceptedOrderRequestData = useCallback(() => {
     if (existingAcceptedOrderMessages.length === 0) return null;
     const lastAcceptedMsg = existingAcceptedOrderMessages[existingAcceptedOrderMessages.length - 1];
     const match = lastAcceptedMsg.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
     if (match) {
       try {
-        return JSON.parse(match[1]);
+        const data = JSON.parse(match[1]);
+        return { ...data, accepted_at: lastAcceptedMsg.created_at };
       } catch {
         return null;
       }
     }
     return null;
   }, [existingAcceptedOrderMessages]);
+  
+  // Calculate delivery deadline and countdown for accepted order requests
+  const getDeliveryCountdown = useCallback((acceptedAt: string, deliveryDuration: { days: number; hours: number; minutes: number } | undefined) => {
+    if (!deliveryDuration) return null;
+    
+    const { days, hours, minutes } = deliveryDuration;
+    if (days === 0 && hours === 0 && minutes === 0) return null;
+    
+    const acceptedTime = new Date(acceptedAt).getTime();
+    const totalMs = ((days * 24 * 60) + (hours * 60) + minutes) * 60 * 1000;
+    const deadlineTime = acceptedTime + totalMs;
+    const now = Date.now();
+    const remainingMs = deadlineTime - now;
+    
+    if (remainingMs <= 0) {
+      return { isOverdue: true, text: 'Overdue', totalSeconds: 0 };
+    }
+    
+    const totalSeconds = Math.floor(remainingMs / 1000);
+    const d = Math.floor(totalSeconds / (24 * 60 * 60));
+    const h = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+    const m = Math.floor((totalSeconds % (60 * 60)) / 60);
+    const s = totalSeconds % 60;
+    
+    let text = '';
+    if (d > 0) {
+      text = `${d}d ${h}h ${m}m`;
+    } else if (h > 0) {
+      text = `${h}h ${m}m ${s}s`;
+    } else if (m > 0) {
+      text = `${m}m ${s}s`;
+    } else {
+      text = `${s}s`;
+    }
+    
+    return { isOverdue: false, text, totalSeconds };
+  }, []);
   
   const hasAcceptedOrderRequest = existingAcceptedOrderMessages.length > 0 && !localOrder;
   
@@ -3306,6 +3344,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       
+      // Calculate countdown for this specific message
+      const cardCountdown = getDeliveryCountdown(msg.created_at, orderRequestAccepted.delivery_duration);
+      
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
@@ -3337,11 +3378,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     Price: {orderRequestAccepted.price.toLocaleString()} credits
                   </span>
                 </div>
-                {orderRequestAccepted.delivery_duration && (orderRequestAccepted.delivery_duration.days > 0 || orderRequestAccepted.delivery_duration.hours > 0 || orderRequestAccepted.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                {cardCountdown && (
+                  <div className={`flex items-center gap-1.5 mt-1 ${
+                    cardCountdown.isOverdue 
+                      ? 'text-red-600 dark:text-red-400' 
+                      : isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                  }`}>
                     <Clock className="h-3.5 w-3.5" />
-                    <span className="text-xs">
-                      Delivery: {formatDeliveryDuration(orderRequestAccepted.delivery_duration)}
+                    <span className="text-xs font-mono">
+                      {cardCountdown.isOverdue ? 'Overdue' : `Delivery in: ${cardCountdown.text}`}
                     </span>
                   </div>
                 )}
@@ -4664,16 +4709,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           if (!acceptedOrder) return null;
           const isClient = actualSenderType === 'client';
           
-          // Format delivery duration
-          const formatDeliveryTime = () => {
-            if (!acceptedOrder.delivery_duration) return null;
-            const { days, hours, minutes } = acceptedOrder.delivery_duration;
-            const parts = [];
-            if (days > 0) parts.push(`${days}d`);
-            if (hours > 0) parts.push(`${hours}h`);
-            if (minutes > 0) parts.push(`${minutes}m`);
-            return parts.length > 0 ? parts.join(' ') : null;
-          };
+          // Get countdown data
+          const countdown = acceptedOrder.accepted_at && acceptedOrder.delivery_duration 
+            ? getDeliveryCountdown(acceptedOrder.accepted_at, acceptedOrder.delivery_duration)
+            : null;
           
           return (
             <div className="p-3 bg-black text-white border-b border-black">
@@ -4715,20 +4754,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                      {formatDeliveryTime() && (
+                      {countdown && (
                         <>
                           <span className="text-white/40">•</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 text-white/70 cursor-help">
+                                <div className={`flex items-center gap-1 cursor-help ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
                                   <Clock className="h-3 w-3" />
-                                  <span className="text-xs">Est. Delivery: {formatDeliveryTime()}</span>
+                                  <span className="text-xs font-mono">
+                                    {countdown.isOverdue ? 'Overdue' : countdown.text}
+                                  </span>
                                   <Info className="h-3 w-3" />
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
-                                <p>Estimated delivery time from order acceptance.</p>
+                                <p>{countdown.isOverdue ? 'Delivery deadline has passed' : 'Time remaining until delivery deadline'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
