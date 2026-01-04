@@ -428,7 +428,7 @@ export function AdminOrdersView() {
       case 'pending_payment':
         return <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
       case 'paid':
-        return <Badge variant="secondary" className="bg-blue-600/20 text-blue-600"><CreditCard className="h-3 w-3 mr-1" />Paid</Badge>;
+        return <Badge variant="secondary" className="bg-black text-green-500 dark:bg-white dark:text-green-600"><CheckCircle className="h-3 w-3 mr-1 text-green-500 dark:text-green-600" />Paid</Badge>;
       case 'completed':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       case 'cancelled':
