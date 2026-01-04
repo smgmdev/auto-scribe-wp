@@ -886,15 +886,10 @@ export function AgencyRequestsView() {
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
                                 </Badge>
-                              ) : isPaidOrder ? (
+                              ) : hasOrder ? (
                                 <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Order Placed {getTimeRemaining() && `• ${getTimeRemaining()}`}
-                                </Badge>
-                              ) : hasOrder ? (
-                                <Badge variant="outline" className="text-yellow-600 border-yellow-500/30">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  Awaiting Payment
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground">
