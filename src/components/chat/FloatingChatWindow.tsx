@@ -4461,8 +4461,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         </div>
 
-        {/* Order Status Banner - Shows detailed info when order is placed */}
-        {localOrder && (() => {
+        {/* Order Status Banner - Shows detailed info when order is placed (wait for messages to load) */}
+        {localOrder && !loadingMessages && (() => {
           // Get accepted order data for display (media site name, special terms, etc.)
           const acceptedOrderData = getLastAcceptedOrderRequestData();
           const timeInfo = localOrder.delivery_deadline ? formatTimeRemaining(localOrder.delivery_deadline) : null;
