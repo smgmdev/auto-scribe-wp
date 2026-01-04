@@ -3973,29 +3973,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex flex-col">
                 <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
                 <div className="flex items-center gap-2">
-                  {/* Agency name and logo for client view */}
-                  {actualSenderType === 'client' && loadingCounterpartyAgency && (
-                    <div className="flex items-center gap-1.5">
-                      <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">Loading...</span>
-                      <span className="text-muted-foreground text-xs">•</span>
-                    </div>
-                  )}
-                  {actualSenderType === 'client' && !loadingCounterpartyAgency && counterpartyAgencyInfo && (
-                    <div className="flex items-center gap-1.5">
-                      {counterpartyAgencyInfo.logo_url && (
-                        <img 
-                          src={counterpartyAgencyInfo.logo_url} 
-                          alt="" 
-                          className="w-4 h-4 rounded-full object-cover"
-                        />
-                      )}
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {counterpartyAgencyInfo.name}
-                      </span>
-                      <span className="text-muted-foreground text-xs">•</span>
-                    </div>
-                  )}
                   <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
                     <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
                     {renderLastSeenStatus()}
