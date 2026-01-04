@@ -3029,8 +3029,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         } catch { return false; }
       });
       
-      // Don't render if rejected - the rejection card will be shown instead
-      if (isRejected) {
+      // Check if this specific order request has been accepted
+      const isAccepted = messages.slice(msgIndex + 1).some(m => {
+        if (!m.message.includes('[ORDER_REQUEST_ACCEPTED]')) return false;
+        const match = m.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
+        if (!match) return false;
+        try {
+          const data = JSON.parse(match[1]);
+          return data.media_site_id === clientOrderRequest.media_site_id;
+        } catch { return false; }
+      });
+      
+      // Don't render if rejected or accepted - the respective card will be shown instead
+      if (isRejected || isAccepted) {
         return null;
       }
       
