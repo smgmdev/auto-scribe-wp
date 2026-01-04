@@ -350,7 +350,6 @@ export function AdminEngagementsView() {
                     </div>
                     <div className="text-right">
                       <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>
-                      <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
                     </div>
                   </CardContent>
                 </Card>
