@@ -305,8 +305,7 @@ export function AdminEngagementsView() {
                     </div>
                     <div className="text-right">
                       {getEngagementBadge(r)}
-                      <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.updated_at), 'MMM d, yyyy')}</p>
-                      <div className="flex items-center justify-end gap-1 mt-1 text-xs text-muted-foreground">
+                      <div className="flex items-center justify-end gap-1 mt-2 text-xs text-muted-foreground">
                         <MessageSquare className="h-3 w-3" />
                         {messages[r.id]?.length || 0}
                       </div>
