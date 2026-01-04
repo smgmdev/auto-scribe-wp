@@ -5920,24 +5920,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               </div>
 
-              {orderDetails.delivery_deadline && orderDetails.delivery_status === 'pending' && (
-                <div className="border-t pt-4">
-                  {(() => {
-                    const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
-                    return (
-                      <div className="flex justify-between text-sm items-center">
-                        <span className="text-muted-foreground flex items-center gap-1.5">
-                          <Clock className="h-4 w-4" />
-                          Expected Delivery
-                        </span>
-                        <span className={`font-semibold ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600'}`}>
-                          {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
-                        </span>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
 
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
