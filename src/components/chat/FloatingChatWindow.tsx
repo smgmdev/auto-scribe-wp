@@ -4736,7 +4736,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           ? 'Offer Received' 
                           : replyToMessage.message.startsWith('[CLIENT_ORDER_REQUEST]')
                             ? 'Order Request Received'
-                            : getMessageWithoutAttachment(replyToMessage.message)}
+                            : replyToMessage.message.startsWith('[ORDER_REQUEST_REJECTED]')
+                              ? 'Order Request Rejected'
+                              : replyToMessage.message.startsWith('[OFFER_REJECTED]')
+                                ? 'Offer Rejected'
+                                : getMessageWithoutAttachment(replyToMessage.message)}
                       </p>
                     </div>
                     <Button
