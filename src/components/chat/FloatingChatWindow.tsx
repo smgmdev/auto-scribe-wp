@@ -4461,75 +4461,121 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         </div>
 
-        {/* Order Status Banner */}
-        {localOrder && (
-          <div className="p-3 bg-black text-white border-b border-black">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Order Placed</p>
-                  {(!localOrder.delivery_status || localOrder.delivery_status === 'pending') && (
-                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                      {localOrder.delivery_deadline ? (() => {
-                        const timeInfo = formatTimeRemaining(localOrder.delivery_deadline);
-                        const dueTime = new Date(localOrder.delivery_deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        return (
-                          <>
-                            <span className="text-xs text-white/70">Awaiting delivery</span>
-                            <span className="text-white/40">•</span>
-                            <span className="text-xs text-white/70">Due {dueTime}</span>
-                            <span className="text-white/40">•</span>
-                            <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
-                            <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                              {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
-                            </span>
-                          </>
-                        );
-                      })() : (
-                        <span className="text-xs text-white/70">Awaiting delivery</span>
-                      )}
+        {/* Order Status Banner - Shows detailed info when order is placed */}
+        {localOrder && (() => {
+          // Get accepted order data for display (media site name, special terms, etc.)
+          const acceptedOrderData = getLastAcceptedOrderRequestData();
+          const timeInfo = localOrder.delivery_deadline ? formatTimeRemaining(localOrder.delivery_deadline) : null;
+          
+          return (
+            <div className="p-3 bg-black text-white border-b border-black">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {acceptedOrderData?.media_site_favicon ? (
+                    <img 
+                      src={acceptedOrderData.media_site_favicon} 
+                      alt="" 
+                      className="w-10 h-10 rounded-lg object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                      <CheckCircle className="h-5 w-5 text-white" />
                     </div>
                   )}
-                  {localOrder.delivery_status === 'delivered' && (
-                    <p className="text-xs text-white/70">Delivered - Awaiting acceptance</p>
-                  )}
-                  {localOrder.delivery_status === 'accepted' && (
-                    <p className="text-xs text-white/70">Completed</p>
-                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <p className="font-medium text-sm text-white truncate">
+                        {acceptedOrderData?.media_site_name || 'Order Placed'}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-400" />
+                        <span className="font-medium text-xs text-green-400">
+                          {localOrder.delivery_status === 'delivered' ? 'Delivered' : 
+                           localOrder.delivery_status === 'accepted' ? 'Completed' : 
+                           'Awaiting Delivery'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      {acceptedOrderData?.price && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-1 text-white/70 cursor-help">
+                                <DollarSign className="h-3 w-3" />
+                                <span className="text-xs">{acceptedOrderData.price.toLocaleString()} credits</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-xs">
+                              <p>Payment in credits. 1 credit = 1 USD.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      {timeInfo && (!localOrder.delivery_status || localOrder.delivery_status === 'pending') && (
+                        <>
+                          {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className={`flex items-center gap-1 cursor-help ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                                  <Clock className="h-3 w-3" />
+                                  <span className="text-xs">
+                                    {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                                  </span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-xs">
+                                <p>{timeInfo.isOverdue ? 'Delivery deadline has passed' : 'Time remaining until delivery deadline'}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      )}
+                      {acceptedOrderData?.special_terms && (
+                        <>
+                          <span className="text-white/40">•</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 text-white/70 cursor-help">
+                                  <Tag className="h-3 w-3" />
+                                  <span className="text-xs">Special Terms</span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-xs">
+                                <p>{acceptedOrderData.special_terms}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
+                  onClick={async () => {
+                    if (!localOrder) return;
+                    setLoadingOrderDetails(true);
+                    setOrderDetailsOpen(true);
+                    const { data } = await supabase
+                      .from('orders')
+                      .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                      .eq('id', localOrder.id)
+                      .maybeSingle();
+                    setOrderDetails(data);
+                    setLoadingOrderDetails(false);
+                  }}
+                >
+                  View Details
+                </Button>
               </div>
-              <Badge 
-                variant="secondary" 
-                className={`cursor-pointer shrink-0 ${
-                  localOrder.delivery_status === 'accepted' 
-                    ? 'bg-green-500 text-white hover:bg-green-600' 
-                    : localOrder.delivery_status === 'delivered'
-                    ? 'bg-purple-500 text-white hover:bg-purple-600'
-                    : 'bg-white text-black hover:bg-white/80'
-                }`}
-                onClick={async () => {
-                  if (!localOrder) return;
-                  setLoadingOrderDetails(true);
-                  setOrderDetailsOpen(true);
-                  const { data } = await supabase
-                    .from('orders')
-                    .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
-                    .eq('id', localOrder.id)
-                    .maybeSingle();
-                  setOrderDetails(data);
-                  setLoadingOrderDetails(false);
-                }}
-              >
-                {localOrder.delivery_status === 'accepted' ? 'Completed' : 
-                 localOrder.delivery_status === 'delivered' ? 'Delivered' : 
-                 'View Details'}
-              </Badge>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Pending Order Banner - Sticky (hide when order exists or accepted) */}
         {hasExistingOrderRequest && !globalChatRequest?.order && !localOrder && !hasAcceptedOrderRequest && !loadingMessages && (() => {
