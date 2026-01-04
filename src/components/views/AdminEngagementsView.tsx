@@ -262,8 +262,13 @@ export function AdminEngagementsView() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="active">
+          <TabsTrigger value="active" className="relative">
             Active ({activeRequests.length})
+            {activeRequests.filter(r => !r.read).length > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                {activeRequests.filter(r => !r.read).length}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="cancelled">
             Cancelled ({cancelledRequests.length})
