@@ -137,7 +137,11 @@ export function SettingsView() {
             Configure AI article generation and publishing preferences
           </p>
         </div>
-        <Button className="bg-black text-white hover:bg-black/90" onClick={handleSave} disabled={isSaving}>
+        <Button 
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none" 
+          onClick={handleSave} 
+          disabled={isSaving}
+        >
           {isSaving ? (
             <>
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
