@@ -200,6 +200,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     name: string;
     logo_url: string | null;
   } | null>(null);
+  const [loadingCounterpartyAgency, setLoadingCounterpartyAgency] = useState(false);
   const [mediaListingOpen, setMediaListingOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
@@ -566,6 +567,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const fetchAgencyInfo = async () => {
       if (!globalChatRequest?.id || actualSenderType !== 'client') return;
       
+      setLoadingCounterpartyAgency(true);
       try {
         // Get the agency_payout_id from the service request
         const { data: requestData } = await supabase
@@ -574,7 +576,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           .eq('id', globalChatRequest.id)
           .maybeSingle();
         
-        if (!requestData?.agency_payout_id) return;
+        if (!requestData?.agency_payout_id) {
+          setLoadingCounterpartyAgency(false);
+          return;
+        }
         
         // Fetch agency name from agency_payouts
         const { data: agencyData } = await supabase
@@ -614,6 +619,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }
       } catch (error) {
         console.error('Error fetching agency info:', error);
+      } finally {
+        setLoadingCounterpartyAgency(false);
       }
     };
     
@@ -3967,7 +3974,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
                 <div className="flex items-center gap-2">
                   {/* Agency name and logo for client view */}
-                  {actualSenderType === 'client' && counterpartyAgencyInfo && (
+                  {actualSenderType === 'client' && loadingCounterpartyAgency && (
+                    <div className="flex items-center gap-1.5">
+                      <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Loading...</span>
+                      <span className="text-muted-foreground text-xs">•</span>
+                    </div>
+                  )}
+                  {actualSenderType === 'client' && !loadingCounterpartyAgency && counterpartyAgencyInfo && (
                     <div className="flex items-center gap-1.5">
                       {counterpartyAgencyInfo.logo_url && (
                         <img 
