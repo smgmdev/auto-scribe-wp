@@ -1151,7 +1151,7 @@ export function AgencyRequestsView() {
                               </Badge>
                             )}
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(order.created_at), 'MMM d, yyyy')}
+                              {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                         </div>
