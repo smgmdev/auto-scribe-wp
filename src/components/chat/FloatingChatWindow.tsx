@@ -5867,36 +5867,49 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {orderDetails.delivery_status === 'delivered' && 'Delivered'}
                     {orderDetails.delivery_status === 'pending' && 'Pending'}
                   </Badge>
-                  {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (() => {
-                    const deadline = new Date(orderDetails.delivery_deadline);
-                    const now = new Date();
-                    const diff = deadline.getTime() - now.getTime();
-                    const isOverdue = diff <= 0;
-                    
-                    if (isOverdue) {
-                      return (
-                        <p className="text-xs text-red-500 font-medium mt-1">Overdue</p>
-                      );
+                  {orderDetails.delivery_status === 'pending' && (() => {
+                    // Try to get countdown from delivery_deadline first
+                    if (orderDetails.delivery_deadline) {
+                      const deadline = new Date(orderDetails.delivery_deadline);
+                      const now = new Date();
+                      const diff = deadline.getTime() - now.getTime();
+                      const isOverdue = diff <= 0;
+                      
+                      if (isOverdue) {
+                        return <p className="text-xs text-red-500 font-medium mt-1">Overdue</p>;
+                      }
+                      
+                      const totalSeconds = Math.floor(diff / 1000);
+                      const days = Math.floor(totalSeconds / 86400);
+                      const hours = Math.floor((totalSeconds % 86400) / 3600);
+                      const minutes = Math.floor((totalSeconds % 3600) / 60);
+                      const seconds = totalSeconds % 60;
+                      
+                      let countdownText = '';
+                      if (days > 0) {
+                        countdownText = `${days}d ${hours}h ${minutes}m`;
+                      } else if (hours > 0) {
+                        countdownText = `${hours}h ${minutes}m ${seconds}s`;
+                      } else {
+                        countdownText = `${minutes}m ${seconds}s`;
+                      }
+                      
+                      return <p className="text-xs text-green-600 font-medium mt-1">{countdownText}</p>;
                     }
                     
-                    const totalSeconds = Math.floor(diff / 1000);
-                    const days = Math.floor(totalSeconds / 86400);
-                    const hours = Math.floor((totalSeconds % 86400) / 3600);
-                    const minutes = Math.floor((totalSeconds % 3600) / 60);
-                    const seconds = totalSeconds % 60;
-                    
-                    let countdownText = '';
-                    if (days > 0) {
-                      countdownText = `${days}d ${hours}h ${minutes}m`;
-                    } else if (hours > 0) {
-                      countdownText = `${hours}h ${minutes}m ${seconds}s`;
-                    } else {
-                      countdownText = `${minutes}m ${seconds}s`;
+                    // Fallback to accepted order data from messages
+                    const acceptedData = getLastAcceptedOrderRequestData();
+                    if (acceptedData?.accepted_at && acceptedData?.delivery_duration) {
+                      const countdown = getDeliveryCountdown(acceptedData.accepted_at, acceptedData.delivery_duration);
+                      if (countdown) {
+                        if (countdown.isOverdue) {
+                          return <p className="text-xs text-red-500 font-medium mt-1">Overdue</p>;
+                        }
+                        return <p className="text-xs text-green-600 font-medium mt-1">{countdown.text}</p>;
+                      }
                     }
                     
-                    return (
-                      <p className="text-xs text-green-600 font-medium mt-1">{countdownText}</p>
-                    );
+                    return null;
                   })()}
                 </div>
               </div>
