@@ -624,19 +624,9 @@ export function AdminOrdersView() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
         <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Pending Delivery
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total value of orders awaiting delivery</p>
-              </TooltipContent>
-            </Tooltip>
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Pending Delivery
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
@@ -646,19 +636,9 @@ export function AdminOrdersView() {
         
         <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Open Disputes
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total value of orders with active disputes</p>
-              </TooltipContent>
-            </Tooltip>
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Open Disputes
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
@@ -668,19 +648,9 @@ export function AdminOrdersView() {
         
         <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Delivered Orders
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total value of successfully completed orders</p>
-              </TooltipContent>
-            </Tooltip>
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Delivered Orders
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
@@ -690,19 +660,9 @@ export function AdminOrdersView() {
         
         <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Total Fee Earnings
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Platform fee earnings from completed orders</p>
-              </TooltipContent>
-            </Tooltip>
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Total Fee Earnings
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground/60" />
           </CardHeader>
           <CardContent className="pt-0 pb-0 px-4">
