@@ -2926,7 +2926,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle client order request message (from client to agency)
-    if (clientOrderRequest) {
+    if (clientOrderRequest && !quote) {
       // Check if this specific order request has been rejected
       // Only hide if there's a rejection that came AFTER this message (meaning this specific request was rejected)
       const msgIndex = messages.findIndex(m => m.id === msg.id);
@@ -3198,7 +3198,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle order request accepted message (agency accepted client's order request)
-    if (orderRequestAccepted) {
+    if (orderRequestAccepted && !quote) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       
@@ -3301,7 +3301,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle order delivered message
-    if (orderDelivered) {
+    if (orderDelivered && !quote) {
       const isClient = actualSenderType === 'client';
       const isDeliveryAccepted = localOrder?.delivery_status === 'accepted';
       // Check if there's already an acceptance or revision message for this delivery
@@ -3390,7 +3390,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle delivery accepted message
-    if (deliveryAccepted) {
+    if (deliveryAccepted && !quote) {
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
@@ -3419,7 +3419,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle revision requested message
-    if (revisionRequested) {
+    if (revisionRequested && !quote) {
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
@@ -3448,7 +3448,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle order request special message (sent by agency to client)
-    if (orderRequest) {
+    if (orderRequest && !quote) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       const isAgency = actualSenderType === 'agency';
@@ -3661,7 +3661,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle cancel order request message
-    if (cancelRequest) {
+    if (cancelRequest && !quote) {
       // Check if this request has been accepted or rejected
       const msgIndex = messages.findIndex(m => m.id === msg.id);
       const hasAcceptance = messages.slice(msgIndex + 1).some(m => parseCancelOrderAccepted(m.message));
@@ -3770,7 +3770,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle cancel order accepted message
-    if (cancelAccepted) {
+    if (cancelAccepted && !quote) {
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-3 ${
@@ -3799,7 +3799,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
     
     // Handle order placed special message
-    if (orderPlaced) {
+    if (orderPlaced && !quote) {
       const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
       
       return (
@@ -3836,7 +3836,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Handle order cancelled special message
-    if (orderCancelled) {
+    if (orderCancelled && !quote) {
       const cancelledByAdmin = orderCancelled.cancelled_by === 'admin';
       
       return (
@@ -3929,13 +3929,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         return 'Cancellation Accepted';
       }
       if (text.startsWith('[CLIENT_ORDER_REQUEST]')) {
-        return 'Order Request Received';
+        return 'Order Request Sent';
       }
       if (text.startsWith('[ORDER_REQUEST_REJECTED]')) {
         return 'Order Request Rejected';
       }
       if (text.startsWith('[OFFER_REJECTED]')) {
         return 'Offer Rejected';
+      }
+      if (text.startsWith('[ORDER_REQUEST_ACCEPTED]')) {
+        return 'Order Request Accepted';
+      }
+      if (text.startsWith('[CANCEL_ORDER_REJECTED]')) {
+        return 'Cancellation Rejected';
       }
       
       return text;
@@ -4741,14 +4747,32 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </div>
                       <p className="text-sm truncate">
                         {replyToMessage.message.startsWith('[ORDER_REQUEST]') 
-                          ? 'Offer Received' 
+                          ? 'Offer Sent' 
                           : replyToMessage.message.startsWith('[CLIENT_ORDER_REQUEST]')
-                            ? 'Order Request Received'
+                            ? 'Order Request Sent'
                             : replyToMessage.message.startsWith('[ORDER_REQUEST_REJECTED]')
                               ? 'Order Request Rejected'
                               : replyToMessage.message.startsWith('[OFFER_REJECTED]')
                                 ? 'Offer Rejected'
-                                : getMessageWithoutAttachment(replyToMessage.message)}
+                                : replyToMessage.message.startsWith('[ORDER_PLACED]')
+                                  ? 'Order Placed'
+                                  : replyToMessage.message.startsWith('[ORDER_CANCELLED]')
+                                    ? 'Order Cancelled'
+                                    : replyToMessage.message.startsWith('[ORDER_DELIVERED]')
+                                      ? 'Order Delivered'
+                                      : replyToMessage.message.startsWith('[DELIVERY_ACCEPTED]')
+                                        ? 'Delivery Accepted'
+                                        : replyToMessage.message.startsWith('[REVISION_REQUESTED]')
+                                          ? 'Revision Requested'
+                                          : replyToMessage.message.startsWith('[CANCEL_ORDER_REQUEST]')
+                                            ? 'Cancellation Requested'
+                                            : replyToMessage.message.startsWith('[CANCEL_ORDER_ACCEPTED]')
+                                              ? 'Cancellation Accepted'
+                                              : replyToMessage.message.startsWith('[ORDER_REQUEST_ACCEPTED]')
+                                                ? 'Order Request Accepted'
+                                                : replyToMessage.message.startsWith('[CANCEL_ORDER_REJECTED]')
+                                                  ? 'Cancellation Rejected'
+                                                  : getMessageWithoutAttachment(replyToMessage.message)}
                       </p>
                     </div>
                     <Button
