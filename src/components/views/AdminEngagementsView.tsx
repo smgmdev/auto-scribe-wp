@@ -5,8 +5,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { format, formatDistanceToNow, isPast } from 'date-fns';
+import { format, isPast, differenceInSeconds } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
+
+// Helper to format countdown
+const formatCountdown = (deadline: string): string => {
+  const now = new Date();
+  const end = new Date(deadline);
+  const totalSeconds = differenceInSeconds(end, now);
+  
+  if (totalSeconds <= 0) return 'Overdue';
+  
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${seconds}s`;
+  } else {
+    return `${seconds}s`;
+  }
+};
 
 interface ServiceRequest {
   id: string;
@@ -62,6 +86,15 @@ export function AdminEngagementsView() {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
+  const [, setTick] = useState(0);
+
+  // Real-time countdown timer - update every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchRequests();
@@ -199,9 +232,7 @@ export function AdminEngagementsView() {
     }
 
     if (hasOrder) {
-      const deliveryText = deliveryDeadline 
-        ? formatDistanceToNow(new Date(deliveryDeadline))
-        : '';
+      const deliveryText = deliveryDeadline ? formatCountdown(deliveryDeadline) : '';
       return (
         <Badge className="bg-blue-600">
           Active Order{deliveryText ? ` • ${deliveryText}` : ''}
