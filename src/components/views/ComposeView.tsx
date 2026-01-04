@@ -275,9 +275,18 @@ export function ComposeView() {
 
   // Separate effect to fetch SEO data when editing an article with a WP post ID
   useEffect(() => {
-    if (editingArticle?.wpPostId && currentSite) {
+    // Only fetch if we have a WP post ID, the site is loaded, matches the article's site, and has credentials
+    if (
+      editingArticle?.wpPostId && 
+      currentSite && 
+      currentSite.id === editingArticle.publishedTo &&
+      currentSite.username && 
+      currentSite.applicationPassword
+    ) {
+      console.log('[ComposeView] Fetching SEO data for post:', editingArticle.wpPostId, 'from site:', currentSite.name);
       setIsLoadingSEO(true);
       fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
+        console.log('[ComposeView] SEO data fetched:', seoData);
         setFocusKeyword(seoData.focusKeyword);
         setMetaDescription(seoData.metaDescription);
       }).catch(error => {
@@ -286,7 +295,7 @@ export function ComposeView() {
         setIsLoadingSEO(false);
       });
     }
-  }, [currentSite?.id, editingArticle]);
+  }, [currentSite?.id, editingArticle?.wpPostId, editingArticle?.publishedTo, currentSite?.username, currentSite?.applicationPassword]);
 
   // Don't clear editingArticle on unmount - it causes issues with remounting
   // The article should be cleared when user explicitly creates a new article
