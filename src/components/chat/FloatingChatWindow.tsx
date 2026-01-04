@@ -599,11 +599,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             if (appData.logo_url.startsWith('http')) {
               fullLogoUrl = appData.logo_url;
             } else {
-              // Construct Supabase storage URL
-              const { data: urlData } = supabase.storage
+              // Create a signed URL since the bucket is private
+              const { data: urlData } = await supabase.storage
                 .from('agency-documents')
-                .getPublicUrl(appData.logo_url);
-              fullLogoUrl = urlData?.publicUrl || null;
+                .createSignedUrl(appData.logo_url, 3600); // 1 hour expiry
+              fullLogoUrl = urlData?.signedUrl || null;
             }
           }
           
