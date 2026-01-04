@@ -4256,7 +4256,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         setDeliverOrderDialogOpen(true);
                       }}
                     >
-                      <Truck className="h-4 w-4 mr-2" />
                       Deliver Order
                     </DropdownMenuItem>
                   )}
@@ -4802,6 +4801,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   </div>
                 </div>
+                {globalChatType === 'agency-request' && !isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-white text-black hover:bg-white/90 border-white shrink-0"
+                    onClick={() => setDeliverOrderDialogOpen(true)}
+                  >
+                    Deliver Order
+                  </Button>
+                )}
               </div>
             </div>
           );
