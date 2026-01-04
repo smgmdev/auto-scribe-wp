@@ -4385,7 +4385,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </DropdownMenuItem>
                     )
                   )}
-                  {hasOrder && localOrder?.delivery_status === 'pending' ? (
+                  {hasOrder && localOrder?.delivery_status === 'pending' && (
                     hasSentPendingCancelRequest ? (
                       <DropdownMenuItem 
                         className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
@@ -4426,7 +4426,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Request Cancellation
                       </DropdownMenuItem>
                     )
-                  ) : hasAcceptedOrderRequest && globalChatType === 'agency-request' ? (
+                  )}
+                  {hasAcceptedOrderRequest && globalChatType === 'agency-request' && !hasOrder && (
                     <DropdownMenuItem 
                       className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                       disabled={isCancelled || isAdmin}
@@ -4437,10 +4438,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     >
                       Cancel Order
                     </DropdownMenuItem>
-                  ) : (
+                  )}
+                  {!hasOrder && !hasAcceptedOrderRequest && !isCancelled && (
                     <DropdownMenuItem 
                       className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={hasOrder || isCancelled || isAdmin || hasAcceptedOrderRequest}
+                      disabled={isAdmin}
                       onSelect={() => {
                         setActionDropdownOpen(false);
                         setCancelDialogOpen(true);
