@@ -5971,6 +5971,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     }}
                   />
                 </p>
+                <p>Order Placed: {new Date(orderDetails.created_at).toLocaleString()}</p>
               </div>
             </div>
           ) : (
