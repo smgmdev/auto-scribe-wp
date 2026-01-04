@@ -1390,32 +1390,6 @@ export function SitesView() {
           <p className="mt-2 text-muted-foreground">Available media sites for publishing</p>
         </div>
         
-        {isAdmin && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-black text-white hover:bg-black/90">
-                <Plus className="mr-2 h-4 w-4" />
-                Add
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-popover border border-border">
-              <DropdownMenuItem onClick={() => setIsWPDialogOpen(true)} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
-                WordPress Site
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsMediaDialogOpen(true)} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
-                Media Site
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                setActiveTab('custom');
-                setActiveMediaCategory('Agencies/People');
-                setIsAgencyDialogOpen(true);
-              }} className="hover:bg-black hover:text-white focus:bg-black focus:text-white">
-                Agency/People
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
       </div>
 
       {/* Tabs */}
