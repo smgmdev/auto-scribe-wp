@@ -17,12 +17,21 @@ interface MediaSiteInfo {
   favicon?: string;
 }
 
+interface ServiceMessage {
+  id: string;
+  request_id: string;
+  sender_type: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+}
+
 interface OrderWithCreditsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mediaSite: MediaSiteInfo | null;
   serviceRequestId: string;
-  onSuccess: () => void;
+  onSuccess: (message?: ServiceMessage) => void;
 }
 
 export function OrderWithCreditsDialog({ 
@@ -64,14 +73,16 @@ export function OrderWithCreditsDialog({
         special_terms: specialTerms || null
       };
 
-      const { error } = await supabase
+      const { data: insertedMsg, error } = await supabase
         .from('service_messages')
         .insert({
           request_id: serviceRequestId,
           sender_type: 'client',
           sender_id: user.id,
           message: `[CLIENT_ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/CLIENT_ORDER_REQUEST]`
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -87,7 +98,7 @@ export function OrderWithCreditsDialog({
       setSpecialTerms('');
       
       onOpenChange(false);
-      onSuccess();
+      onSuccess(insertedMsg as ServiceMessage);
     } catch (error: any) {
       console.error('Order request error:', error);
       toast({
