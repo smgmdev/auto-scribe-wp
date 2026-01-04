@@ -4742,7 +4742,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 shrink-0"
+                      className="h-6 w-6 shrink-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                       onClick={() => setReplyToMessage(null)}
                     >
                       <X className="h-3 w-3" />
