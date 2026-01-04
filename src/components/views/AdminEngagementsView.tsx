@@ -337,6 +337,12 @@ export function AdminEngagementsView() {
                       <div>
                         <h3 className="font-medium">{r.title}</h3>
                         <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Cancelled: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                        </p>
                         {r.cancellation_reason && (
                           <p className="text-xs text-destructive mt-1">Reason: {r.cancellation_reason}</p>
                         )}
