@@ -38,6 +38,7 @@ interface ServiceRequest {
     id: string;
     status: string;
     delivery_status: string;
+    delivery_deadline: string | null;
   } | null;
 }
 
@@ -69,6 +70,15 @@ export function MyRequestsView() {
   const [activeTab, setActiveTab] = useState<'active' | 'cancelled'>('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [, setTimerTick] = useState(0);
+  
+  // Timer for real-time countdown updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerTick(t => t + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
   
   // Refs to avoid stale closures in subscriptions
   const requestsRef = useRef<ServiceRequest[]>([]);
@@ -462,6 +472,56 @@ export function MyRequestsView() {
     }
   };
 
+  // Helper function to format countdown
+  const formatDeliveryCountdown = (deadline: string) => {
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diff = deadlineDate.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      return { text: 'Overdue', isOverdue: true };
+    }
+    
+    const totalSeconds = Math.floor(diff / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    let text = '';
+    if (days > 0) {
+      text = `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      text = `${hours}h ${minutes}m ${seconds}s`;
+    } else {
+      text = `${minutes}m ${seconds}s`;
+    }
+    
+    return { text, isOverdue: false };
+  };
+
+  // Get order placed badge with countdown
+  const getOrderPlacedBadge = (request: ServiceRequest) => {
+    if (!request.order || request.order.status !== 'paid') return null;
+    if (request.order.delivery_status === 'accepted') return null;
+    
+    const countdown = request.order.delivery_deadline 
+      ? formatDeliveryCountdown(request.order.delivery_deadline)
+      : null;
+    
+    return (
+      <Badge className="bg-black text-white dark:bg-white dark:text-black">
+        <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+        Order Placed
+        {countdown && (
+          <span className={`ml-2 ${countdown.isOverdue ? 'text-red-400' : ''}`}>
+            {countdown.isOverdue ? '• Overdue' : `• ${countdown.text}`}
+          </span>
+        )}
+      </Badge>
+    );
+  };
+
   const handleCardClick = (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
     
@@ -685,8 +745,9 @@ export function MyRequestsView() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {getStatusBadge(request.status)}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {getOrderPlacedBadge(request)}
+                            {!request.order && getStatusBadge(request.status)}
                           </div>
                         </div>
                       </CardHeader>
