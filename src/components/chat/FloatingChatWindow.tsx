@@ -3868,7 +3868,38 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Remove any leading "> " and "[id]:" patterns
       text = text.replace(/^> /, '');
       text = text.replace(/^\[[^\]]+\]:/, '');
-      return text.trim();
+      text = text.trim();
+      
+      // Show friendly label for special message types
+      if (text.startsWith('[ORDER_REQUEST]')) {
+        return 'Offer Received';
+      }
+      if (text.startsWith('[ORDER_PLACED]')) {
+        return 'Order Placed';
+      }
+      if (text.startsWith('[ORDER_CANCELLED]')) {
+        return 'Order Cancelled';
+      }
+      if (text.startsWith('[ORDER_DELIVERED]')) {
+        return 'Order Delivered';
+      }
+      if (text.startsWith('[DELIVERY_ACCEPTED]')) {
+        return 'Delivery Accepted';
+      }
+      if (text.startsWith('[REVISION_REQUESTED]')) {
+        return 'Revision Requested';
+      }
+      if (text.startsWith('[CANCEL_ORDER_REQUEST]')) {
+        return 'Cancellation Requested';
+      }
+      if (text.startsWith('[CANCEL_ORDER_ACCEPTED]')) {
+        return 'Cancellation Accepted';
+      }
+      if (text.startsWith('[CLIENT_ORDER_REQUEST]')) {
+        return 'Order Request';
+      }
+      
+      return text;
     };
     
     const quoteSenderLabel = getQuoteSenderLabel();
