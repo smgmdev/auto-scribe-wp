@@ -761,7 +761,7 @@ export function AgencyRequestsView() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="requests" className="mt-6">
+        <TabsContent value="requests" className="mt-2">
           <Tabs defaultValue="active" className="w-full">
             <TabsList className="grid w-full max-w-md grid-cols-2">
               <TabsTrigger value="active" className="gap-2 relative">
