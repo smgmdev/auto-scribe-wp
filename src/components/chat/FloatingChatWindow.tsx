@@ -4373,8 +4373,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         )}
 
-        {/* Pending Order Banner - Sticky (hide when order exists) */}
-        {hasExistingOrderRequest && !globalChatRequest?.order && !localOrder && !loadingMessages && (() => {
+        {/* Pending Order Banner - Sticky (hide when order exists or accepted) */}
+        {hasExistingOrderRequest && !globalChatRequest?.order && !localOrder && !hasAcceptedOrderRequest && !loadingMessages && (() => {
           const pendingOrder = getLastOrderRequestData();
           if (!pendingOrder) return null;
           const isClient = actualSenderType === 'client';
@@ -4499,8 +4499,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           );
         })()}
 
-        {/* Client Order Request Banner - Sticky (when client sends order request to agency) */}
-        {hasExistingClientOrderRequest && !globalChatRequest?.order && !loadingMessages && (() => {
+        {/* Client Order Request Banner - Sticky (when client sends order request to agency, hide when accepted) */}
+        {hasExistingClientOrderRequest && !globalChatRequest?.order && !hasAcceptedOrderRequest && !loadingMessages && (() => {
           const pendingClientOrder = getLastClientOrderRequestData();
           if (!pendingClientOrder) return null;
           const isClient = actualSenderType === 'client';
