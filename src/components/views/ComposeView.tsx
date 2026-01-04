@@ -258,19 +258,6 @@ export function ComposeView() {
         setIsLoadingTags(false);
         setAvailableTags([]);
       });
-
-      // Fetch SEO data if editing an existing WP post
-      if (editingArticle?.wpPostId && !siteChanged) {
-        setIsLoadingSEO(true);
-        fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
-          setFocusKeyword(seoData.focusKeyword);
-          setMetaDescription(seoData.metaDescription);
-        }).catch(error => {
-          console.error('Failed to fetch SEO data:', error);
-        }).finally(() => {
-          setIsLoadingSEO(false);
-        });
-      }
     } else if (!editingArticle) {
       // Only reset when not editing (prevents race condition)
       setAvailableCategories([]);
@@ -284,6 +271,21 @@ export function ComposeView() {
     
     // Update the ref after processing
     previousSiteIdRef.current = currentSite?.id || null;
+  }, [currentSite?.id]);
+
+  // Separate effect to fetch SEO data when editing an article with a WP post ID
+  useEffect(() => {
+    if (editingArticle?.wpPostId && currentSite) {
+      setIsLoadingSEO(true);
+      fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
+        setFocusKeyword(seoData.focusKeyword);
+        setMetaDescription(seoData.metaDescription);
+      }).catch(error => {
+        console.error('Failed to fetch SEO data:', error);
+      }).finally(() => {
+        setIsLoadingSEO(false);
+      });
+    }
   }, [currentSite?.id, editingArticle]);
 
   // Don't clear editingArticle on unmount - it causes issues with remounting
