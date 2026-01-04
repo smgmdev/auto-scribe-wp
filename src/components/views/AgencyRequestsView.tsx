@@ -687,20 +687,17 @@ export function AgencyRequestsView() {
 
   const activeOrders = useMemo(() => 
     orders.filter(o => {
-      // Check if related request is cancelled
-      const relatedRequest = requests.find(r => r.order?.id === o.id);
-      const isRequestCancelled = relatedRequest?.status === 'cancelled';
-      
       // Include pending_payment and paid orders that aren't delivered/cancelled
+      // Note: delivery_status 'accepted' means client accepted delivery, so it's completed
+      // Don't filter out based on request status - if order exists, show it
       return (o.status === 'pending_payment' || o.status === 'paid') &&
         o.delivery_status !== 'delivered' && 
         o.delivery_status !== 'accepted' &&
         o.status !== 'cancelled' && 
         o.delivery_status !== 'cancelled' &&
-        !isRequestCancelled &&
         !disputedOrderIds.has(o.id);
     }), 
-    [orders, disputedOrderIds, requests]
+    [orders, disputedOrderIds]
   );
   
   const completedOrders = useMemo(() => 
