@@ -4676,7 +4676,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         )}
                         <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}</span>
                       </div>
-                      <p className="text-sm truncate">{getMessageWithoutAttachment(replyToMessage.message)}</p>
+                      <p className="text-sm truncate">
+                        {replyToMessage.message.startsWith('[ORDER_REQUEST]') 
+                          ? 'Offer Received' 
+                          : getMessageWithoutAttachment(replyToMessage.message)}
+                      </p>
                     </div>
                     <Button
                       variant="ghost"
