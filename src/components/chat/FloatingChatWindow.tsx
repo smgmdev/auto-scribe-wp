@@ -4543,8 +4543,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <div className="flex items-center gap-1.5 text-xs font-medium mb-1 opacity-70 pr-5">
+                        {/* Show loading spinner while fetching agency info */}
+                        {!isOwnMessage && msg.sender_type === 'agency' && loadingCounterpartyAgency && (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        )}
                         {/* Show agency logo next to name for agency messages in client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && counterpartyLogo && (
+                        {!isOwnMessage && msg.sender_type === 'agency' && !loadingCounterpartyAgency && counterpartyLogo && (
                           <img 
                             src={counterpartyLogo} 
                             alt="" 
@@ -4558,7 +4562,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                               ? 'You' 
                               : isAdmin 
                                 ? (msg.sender_type === 'agency' ? 'Agency' : 'Client')
-                                : counterpartyLabel}
+                                : loadingCounterpartyAgency && msg.sender_type === 'agency'
+                                  ? 'Loading...'
+                                  : counterpartyLabel}
                         </span>
                       </div>
                       {renderMessageContent(msg, isRightAligned, quote)}
