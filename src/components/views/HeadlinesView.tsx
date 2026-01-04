@@ -183,7 +183,7 @@ export function HeadlinesView() {
         <Button 
           onClick={handleScan}
           disabled={isScanning || settings.selectedSources.length === 0 || settingsLoading}
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none"
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
           {isScanning ? 'Scanning...' : 'Scan Headlines'}

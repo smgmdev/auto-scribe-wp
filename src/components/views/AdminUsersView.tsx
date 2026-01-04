@@ -510,7 +510,7 @@ export function AdminUsersView() {
           size="sm"
           onClick={() => fetchUsers()}
           disabled={loading}
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none"
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
