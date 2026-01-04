@@ -210,7 +210,7 @@ export function ArticlesView() {
         </div>
         <Button 
           onClick={() => setCurrentView('compose')} 
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none"
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           New Article
         </Button>

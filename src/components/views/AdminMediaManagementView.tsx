@@ -1502,7 +1502,7 @@ export function AdminMediaManagementView() {
           </p>
         </div>
         <Button
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-none gap-2"
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
           onClick={() => fetchData(true)}
           disabled={isRefreshing}
         >
