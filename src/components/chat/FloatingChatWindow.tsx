@@ -3422,13 +3422,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
           }`}>
             <div className="flex items-start gap-3">
-              {orderRequestAccepted.media_site_favicon && (
-                <img 
-                  src={orderRequestAccepted.media_site_favicon} 
-                  alt="" 
-                  className="w-10 h-10 rounded-lg object-cover shrink-0"
-                />
-              )}
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                <CheckCircle className={`h-6 w-6 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-500'}`} />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
