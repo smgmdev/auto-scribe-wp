@@ -313,7 +313,7 @@ export function BriefSubmissionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg z-[200]">
         <DialogHeader>
-          <DialogTitle>Submit Your Brief</DialogTitle>
+          <DialogTitle>Send Your Brief</DialogTitle>
           <DialogDescription>
             Tell the agency what you're looking for. They'll review your request and respond.
           </DialogDescription>
@@ -430,7 +430,7 @@ export function BriefSubmissionDialog({
             ) : (
               <Send className="h-4 w-4 mr-2" />
             )}
-            Submit Brief
+            Send Brief
           </Button>
         </div>
       </DialogContent>
