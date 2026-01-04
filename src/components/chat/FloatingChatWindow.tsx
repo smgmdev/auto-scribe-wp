@@ -4375,6 +4375,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Dispute Opened
                       </DropdownMenuItem>
                     )}
+                    {globalChatType === 'my-request' && hasOrder && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                        onSelect={async () => {
+                          setActionDropdownOpen(false);
+                          if (!localOrder) return;
+                          setLoadingOrderDetails(true);
+                          setOrderDetailsOpen(true);
+                          const { data } = await supabase
+                            .from('orders')
+                            .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                            .eq('id', localOrder.id)
+                            .maybeSingle();
+                          setOrderDetails(data);
+                          setLoadingOrderDetails(false);
+                        }}
+                      >
+                        Order Details
+                      </DropdownMenuItem>
+                    )}
                     {globalChatType === 'my-request' && !hasOpenDispute && (
                       hasOrder ? (
                         <DropdownMenuItem 
