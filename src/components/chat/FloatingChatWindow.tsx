@@ -899,6 +899,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return parsed ? { ...parsed, messageId: lastOrderMsg.id } : null;
   }, [nonRejectedClientOrderMessages]);
   
+  // Check if there's an ORDER_REQUEST_ACCEPTED message (agency accepted client's order request, waiting for payment)
+  const existingAcceptedOrderMessages = messages.filter(msg => {
+    const match = msg.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
+    return !!match;
+  });
+  
+  // Get the last accepted order request data
+  const getLastAcceptedOrderRequestData = useCallback(() => {
+    if (existingAcceptedOrderMessages.length === 0) return null;
+    const lastAcceptedMsg = existingAcceptedOrderMessages[existingAcceptedOrderMessages.length - 1];
+    const match = lastAcceptedMsg.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }, [existingAcceptedOrderMessages]);
+  
+  const hasAcceptedOrderRequest = existingAcceptedOrderMessages.length > 0 && !localOrder;
+  
   // Handle reject order request from banner (client side)
   const handleBannerRejectOrderRequest = async () => {
     const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
@@ -4585,6 +4608,96 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </>
                   )}
                 </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Accepted Order Request Banner - Black (when agency accepted, waiting for client to pay) */}
+        {hasAcceptedOrderRequest && !loadingMessages && (() => {
+          const acceptedOrder = getLastAcceptedOrderRequestData();
+          if (!acceptedOrder) return null;
+          const isClient = actualSenderType === 'client';
+          
+          // Format delivery duration
+          const formatDeliveryTime = () => {
+            if (!acceptedOrder.delivery_duration) return null;
+            const { days, hours, minutes } = acceptedOrder.delivery_duration;
+            const parts = [];
+            if (days > 0) parts.push(`${days}d`);
+            if (hours > 0) parts.push(`${hours}h`);
+            if (minutes > 0) parts.push(`${minutes}m`);
+            return parts.length > 0 ? parts.join(' ') : null;
+          };
+          
+          return (
+            <div className="p-3 bg-black text-white border-b border-black">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {acceptedOrder.media_site_favicon ? (
+                    <img 
+                      src={acceptedOrder.media_site_favicon} 
+                      alt="" 
+                      className="w-10 h-10 rounded-lg object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                      <CheckCircle className="h-5 w-5 text-white" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <CheckCircle className="h-3.5 w-3.5 text-green-400" />
+                      <span className="font-medium text-xs text-green-400">
+                        {isClient ? 'Order Request Accepted' : 'Offer Accepted - Awaiting Payment'}
+                      </span>
+                    </div>
+                    <p className="font-medium text-sm text-white truncate">
+                      {acceptedOrder.media_site_name}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      <div className="flex items-center gap-1 text-white/70">
+                        <DollarSign className="h-3 w-3" />
+                        <span className="text-xs">{acceptedOrder.price.toLocaleString()} credits</span>
+                      </div>
+                      {formatDeliveryTime() && (
+                        <>
+                          <span className="text-white/40">•</span>
+                          <div className="flex items-center gap-1 text-white/70">
+                            <Clock className="h-3 w-3" />
+                            <span className="text-xs">Delivery: {formatDeliveryTime()}</span>
+                          </div>
+                        </>
+                      )}
+                      {acceptedOrder.special_terms && (
+                        <>
+                          <span className="text-white/40">•</span>
+                          <span className="text-xs text-white/70">Terms: {acceptedOrder.special_terms}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {isClient && (
+                  <Button
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white shrink-0"
+                    onClick={() => {
+                      setPendingOrderRequest({
+                        media_site_id: acceptedOrder.media_site_id,
+                        media_site_name: acceptedOrder.media_site_name,
+                        media_site_favicon: acceptedOrder.media_site_favicon,
+                        price: acceptedOrder.price,
+                        special_terms: acceptedOrder.special_terms,
+                        delivery_duration: acceptedOrder.delivery_duration
+                      });
+                      setAcceptOrderDialogOpen(true);
+                    }}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Confirm & Pay
+                  </Button>
+                )}
               </div>
             </div>
           );
