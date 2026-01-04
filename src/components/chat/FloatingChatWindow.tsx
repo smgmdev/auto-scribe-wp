@@ -4245,26 +4245,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )
                   )}
                   {globalChatType === 'agency-request' && hasAcceptedOrderRequest && !hasOrder && (
-                    <>
-                      <DropdownMenuItem 
-                        className="cursor-pointer text-green-600"
-                        disabled
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Order Placed - Awaiting Delivery
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isAdmin}
-                        onSelect={() => {
-                          setActionDropdownOpen(false);
-                          setDeliverOrderDialogOpen(true);
-                        }}
-                      >
-                        <Truck className="h-4 w-4 mr-2" />
-                        Deliver Order
-                      </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem 
+                      className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={isAdmin}
+                      onSelect={() => {
+                        setActionDropdownOpen(false);
+                        setDeliverOrderDialogOpen(true);
+                      }}
+                    >
+                      <Truck className="h-4 w-4 mr-2" />
+                      Deliver Order
+                    </DropdownMenuItem>
                   )}
                   {hasOpenDispute && (
                     <DropdownMenuItem 
