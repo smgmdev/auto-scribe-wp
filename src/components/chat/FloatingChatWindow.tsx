@@ -4730,15 +4730,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                      <span className="font-medium text-xs text-green-400">
-                        Order Placed - Awaiting Delivery
-                      </span>
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <p className="font-medium text-sm text-white truncate">
+                        {acceptedOrder.media_site_name}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-400" />
+                        <span className="font-medium text-xs text-green-400">
+                          Order Placed - Awaiting Delivery
+                        </span>
+                      </div>
                     </div>
-                    <p className="font-medium text-sm text-white truncate">
-                      {acceptedOrder.media_site_name}
-                    </p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       <TooltipProvider>
                         <Tooltip>
