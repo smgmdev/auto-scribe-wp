@@ -1266,10 +1266,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         if (requestData) {
           if (cancelledBy === 'client' && requestData.agency_payout_id) {
             // Client cancels - notify agency
+            console.log('[FloatingChatWindow] Client cancelling - notifying agency:', requestData.agency_payout_id);
             const agencyChannel = supabase.channel(`notify-${requestData.agency_payout_id}-client-action`);
             agencyChannel.subscribe(async (status) => {
+              console.log('[FloatingChatWindow] Agency notification channel status:', status);
               if (status === 'SUBSCRIBED') {
-                await agencyChannel.send({
+                const result = await agencyChannel.send({
                   type: 'broadcast',
                   event: 'client-action',
                   payload: {
@@ -1279,6 +1281,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     reason: cancellationReason.trim()
                   }
                 });
+                console.log('[FloatingChatWindow] Broadcast result:', result);
                 setTimeout(() => supabase.removeChannel(agencyChannel), 500);
               }
             });
