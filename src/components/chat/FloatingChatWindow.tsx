@@ -2618,7 +2618,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return 'Cancellation Accepted';
     }
     if (cleanMessage.startsWith('[CLIENT_ORDER_REQUEST]')) {
-      return 'Order Request';
+      return 'Order Request Received';
     }
     
     return cleanMessage;
@@ -3927,7 +3927,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         return 'Cancellation Accepted';
       }
       if (text.startsWith('[CLIENT_ORDER_REQUEST]')) {
-        return 'Order Request';
+        return 'Order Request Received';
       }
       
       return text;
@@ -4734,7 +4734,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <p className="text-sm truncate">
                         {replyToMessage.message.startsWith('[ORDER_REQUEST]') 
                           ? 'Offer Received' 
-                          : getMessageWithoutAttachment(replyToMessage.message)}
+                          : replyToMessage.message.startsWith('[CLIENT_ORDER_REQUEST]')
+                            ? 'Order Request Received'
+                            : getMessageWithoutAttachment(replyToMessage.message)}
                       </p>
                     </div>
                     <Button
