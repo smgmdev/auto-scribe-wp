@@ -248,6 +248,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [deliveryLink, setDeliveryLink] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [submittingDelivery, setSubmittingDelivery] = useState(false);
+  const [cancelPlacedOrderDialogOpen, setCancelPlacedOrderDialogOpen] = useState(false);
+  const [cancelPlacedOrderReason, setCancelPlacedOrderReason] = useState('');
+  const [cancellingPlacedOrder, setCancellingPlacedOrder] = useState(false);
   const [orderDeliveryDays, setOrderDeliveryDays] = useState<number>(0);
   const [orderDeliveryHours, setOrderDeliveryHours] = useState<number>(0);
   const [orderDeliveryMinutes, setOrderDeliveryMinutes] = useState<number>(0);
@@ -4346,10 +4349,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Request Cancellation
                       </DropdownMenuItem>
                     )
+                  ) : hasAcceptedOrderRequest && globalChatType === 'agency-request' ? (
+                    <DropdownMenuItem 
+                      className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                      disabled={isCancelled || isAdmin}
+                      onSelect={() => {
+                        setActionDropdownOpen(false);
+                        setCancelPlacedOrderDialogOpen(true);
+                      }}
+                    >
+                      Cancel Order
+                    </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem 
                       className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                      disabled={hasOrder || isCancelled || isAdmin}
+                      disabled={hasOrder || isCancelled || isAdmin || hasAcceptedOrderRequest}
                       onSelect={() => {
                         setActionDropdownOpen(false);
                         setCancelDialogOpen(true);
@@ -6335,6 +6349,97 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Placed Order Dialog (Agency side) */}
+      <AlertDialog open={cancelPlacedOrderDialogOpen} onOpenChange={setCancelPlacedOrderDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order? Please provide a reason for cancellation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Reason for cancellation..."
+            value={cancelPlacedOrderReason}
+            onChange={(e) => setCancelPlacedOrderReason(e.target.value)}
+            rows={3}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setCancelPlacedOrderReason('');
+            }}>
+              Keep Order
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={async () => {
+                if (!globalChatRequest || !cancelPlacedOrderReason.trim()) return;
+                
+                setCancellingPlacedOrder(true);
+                try {
+                  // Get the accepted order data
+                  const acceptedOrderData = getLastAcceptedOrderRequestData();
+                  
+                  // Send ORDER_CANCELLED message
+                  const cancelData = {
+                    type: 'order_cancelled',
+                    media_site_id: acceptedOrderData?.media_site_id,
+                    media_site_name: acceptedOrderData?.media_site_name,
+                    media_site_favicon: acceptedOrderData?.media_site_favicon,
+                    reason: cancelPlacedOrderReason.trim(),
+                    cancelled_by: 'agency'
+                  };
+                  
+                  const { error: msgError } = await supabase
+                    .from('service_messages')
+                    .insert({
+                      request_id: globalChatRequest.id,
+                      sender_type: senderType,
+                      sender_id: senderId,
+                      message: `[ORDER_CANCELLED]${JSON.stringify(cancelData)}[/ORDER_CANCELLED]`
+                    });
+                  
+                  if (msgError) throw msgError;
+                  
+                  // Update the service request status to cancelled
+                  const { error: updateError } = await supabase
+                    .from('service_requests')
+                    .update({ 
+                      status: 'cancelled',
+                      cancelled_at: new Date().toISOString(),
+                      cancellation_reason: cancelPlacedOrderReason.trim()
+                    })
+                    .eq('id', globalChatRequest.id);
+                  
+                  if (updateError) throw updateError;
+                  
+                  toast({
+                    title: "Order Cancelled",
+                    description: "The order has been cancelled and the client has been notified.",
+                  });
+                  
+                  setCancelPlacedOrderDialogOpen(false);
+                  setCancelPlacedOrderReason('');
+                } catch (error: any) {
+                  console.error('Error cancelling order:', error);
+                  toast({
+                    variant: 'destructive',
+                    title: 'Cancellation Failed',
+                    description: error.message || 'Failed to cancel order.',
+                  });
+                } finally {
+                  setCancellingPlacedOrder(false);
+                }
+              }}
+              disabled={!cancelPlacedOrderReason.trim() || cancellingPlacedOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancellingPlacedOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
