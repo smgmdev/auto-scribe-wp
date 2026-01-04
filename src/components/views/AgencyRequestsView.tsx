@@ -1158,9 +1158,9 @@ export function AgencyRequestsView() {
                                 Delivered
                               </Badge>
                             ) : (
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                              <Badge className="bg-white text-black border-white/30">
                                 <Clock className="h-3 w-3 mr-1" />
-                                Awaiting Delivery {getTimeRemaining() && `• ${getTimeRemaining()}`}
+                                Pending Delivery {getTimeRemaining() && `• ${getTimeRemaining()}`}
                               </Badge>
                             )}
                             <span className="text-xs text-muted-foreground">
