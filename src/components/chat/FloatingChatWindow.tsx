@@ -2618,7 +2618,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return 'Cancellation Accepted';
     }
     if (cleanMessage.startsWith('[CLIENT_ORDER_REQUEST]')) {
-      return 'Order Request Received';
+      return 'Order Request Sent';
     }
     
     return cleanMessage;
