@@ -291,7 +291,7 @@ export function AdminEngagementsView() {
                       )}
                       <div>
                         <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           Last message: {messages[r.id]?.length > 0 
