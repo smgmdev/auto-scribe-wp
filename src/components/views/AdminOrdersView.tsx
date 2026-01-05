@@ -634,9 +634,13 @@ export function AdminOrdersView() {
         <Button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="bg-white text-black border border-black shadow-none hover:bg-transparent transition-all duration-200"
+          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
           {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
       </div>
