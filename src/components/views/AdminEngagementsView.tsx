@@ -230,7 +230,7 @@ export function AdminEngagementsView() {
 
     if (hasOrder && isOverdue) {
       return (
-        <Badge variant="destructive" className="bg-orange-600">
+        <Badge variant="destructive" className="bg-red-600">
           <AlertCircle className="h-3 w-3 mr-1" />
           Delivery Overdue
         </Badge>
