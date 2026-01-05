@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,6 +69,7 @@ export function AdminOrdersView() {
   const [historySubTab, setHistorySubTab] = useState<'all' | 'cancelled'>('all');
   const [disputes, setDisputes] = useState<{ id: string; order_id: string; service_request_id: string; read: boolean }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -185,8 +186,12 @@ export function AdminOrdersView() {
   // Helper to get disputedOrderIds from disputes state
   const disputedOrderIds = new Set(disputes.map(d => d.order_id));
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
     const { data, error } = await supabase
       .from('orders')
@@ -213,6 +218,12 @@ export function AdminOrdersView() {
       setUnreadOrdersCount(unreadCount);
     }
     setLoading(false);
+    setIsRefreshing(false);
+  };
+
+  const handleRefresh = () => {
+    fetchOrders(true);
+    fetchDisputedOrders();
   };
 
   // Mark order as read when viewing details
@@ -615,9 +626,19 @@ export function AdminOrdersView() {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-6">
-        <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
-        <p className="mt-2 text-muted-foreground">Manage deliveries and payouts</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
+          <p className="mt-2 text-muted-foreground">Manage orders</p>
+        </div>
+        <Button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="bg-white text-black border border-black shadow-none hover:bg-transparent transition-all duration-200"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </div>
 
       {/* Stats Cards */}
