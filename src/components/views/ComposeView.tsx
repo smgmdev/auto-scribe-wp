@@ -1249,7 +1249,7 @@ export function ComposeView() {
             <Button 
               className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
-              disabled={isPublishing || !selectedSite || (!isAdmin && !editingArticle && !canAffordSite(selectedSite))}
+              disabled={isPublishing || !title || !content || !selectedSite || (!isAdmin && !canAffordSite(selectedSite))}
             >
               {isPublishing ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1259,7 +1259,7 @@ export function ComposeView() {
                   {editingArticle ? 'Update & Publish' : 'Publish Article'}
                 </>}
             </Button>
-            {!isAdmin && !editingArticle && selectedSite && !canAffordSite(selectedSite) && (
+            {!isAdmin && selectedSite && !canAffordSite(selectedSite) && (
               <p className="text-xs text-destructive text-center">
                 Insufficient credits. You need {getSiteCreditCost(selectedSite)} credits to publish.
               </p>
