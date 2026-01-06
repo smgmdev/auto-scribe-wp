@@ -4714,7 +4714,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   {/* Accept/Request Revision buttons for client when order is delivered */}
                   {canAcceptDelivery && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-1">
                       <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white shrink-0"
