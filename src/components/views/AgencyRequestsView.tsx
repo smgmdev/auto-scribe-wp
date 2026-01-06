@@ -922,12 +922,12 @@ export function AgencyRequestsView() {
                               <span className="text-xs text-muted-foreground">
                                 Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </span>
-                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <div className="flex flex-col items-end gap-0.5">
                                 {request.media_site?.publication_format && (
-                                  <span className="capitalize">{request.media_site.publication_format}</span>
+                                  <span className="text-xs text-muted-foreground capitalize">{request.media_site.publication_format}</span>
                                 )}
                                 {request.media_site?.price !== undefined && (
-                                  <span className="font-medium text-foreground">${request.media_site.price}</span>
+                                  <span className="font-semibold text-sm text-foreground">${request.media_site.price}</span>
                                 )}
                               </div>
                             </div>
