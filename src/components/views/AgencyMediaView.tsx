@@ -585,14 +585,14 @@ export function AgencyMediaView() {
           <DropdownMenuContent align="end" className="bg-popover border-border">
             <DropdownMenuItem 
               onClick={() => handleAddMedia('wordpress')}
-              className="hover:!bg-foreground hover:!text-background cursor-pointer"
+              className="hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <Globe className="h-4 w-4 mr-2" />
               WordPress Site
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleAddMedia('media')}
-              className="hover:!bg-foreground hover:!text-background cursor-pointer"
+              className="hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <Library className="h-4 w-4 mr-2" />
               Media Site
@@ -749,7 +749,7 @@ export function AgencyMediaView() {
                             )}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-foreground hover:text-background">
+                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-muted/50 transition-colors">
                                   Action
                                   <ChevronDown className="h-3 w-3 ml-1" />
                                 </Button>
@@ -758,7 +758,7 @@ export function AgencyMediaView() {
                                 {site.connected ? (
                                   <DropdownMenuItem 
                                     onClick={() => handleDisconnectSite(site.id)}
-                                    className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                    className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 transition-colors"
                                   >
                                     <Unplug className="h-4 w-4 mr-2" />
                                     Disconnect
@@ -766,7 +766,7 @@ export function AgencyMediaView() {
                                 ) : (
                                   <DropdownMenuItem 
                                     onClick={() => handleConnectSite(site.id)}
-                                    className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                    className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 transition-colors"
                                   >
                                     <Plug className="h-4 w-4 mr-2" />
                                     Connect
@@ -774,14 +774,14 @@ export function AgencyMediaView() {
                                 )}
                                 <DropdownMenuItem 
                                   onClick={() => handleOpenPriceDialog(site)}
-                                  className="cursor-pointer hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                  className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 transition-colors"
                                 >
                                   <DollarSign className="h-4 w-4 mr-2" />
                                   Change Price
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleDeleteSite(site)}
-                                  className="cursor-pointer text-destructive hover:!bg-foreground hover:!text-background focus:!bg-foreground focus:!text-background"
+                                  className="cursor-pointer text-destructive hover:bg-muted/50 focus:bg-muted/50 transition-colors"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Delete
@@ -1517,14 +1517,14 @@ export function AgencyMediaView() {
             <Button 
               variant="outline" 
               onClick={() => setIsPriceDialogOpen(false)}
-              className="hover:bg-foreground hover:text-background"
+              className="hover:bg-muted/50 transition-colors"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSavePrice}
               disabled={isPriceLoading}
-              className="hover:bg-foreground hover:text-background"
+              className="hover:bg-muted/50 transition-colors"
             >
               Save Price
             </Button>
@@ -1559,7 +1559,7 @@ export function AgencyMediaView() {
             <Button 
               variant="outline" 
               onClick={() => setIsDeleteDialogOpen(false)}
-              className="hover:bg-foreground hover:text-background"
+              className="hover:bg-muted/50 transition-colors"
             >
               Cancel
             </Button>
@@ -1567,7 +1567,7 @@ export function AgencyMediaView() {
               variant="destructive"
               onClick={confirmDeleteSite}
               disabled={isDeleting}
-              className="hover:!bg-foreground hover:!text-background"
+              className="hover:bg-destructive/80 transition-colors"
             >
               {isDeleting ? (
                 <>
