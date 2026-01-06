@@ -520,7 +520,7 @@ export function AdminOrdersView() {
           </Badge>
         );
       case 'delivered':
-        return <Badge variant="secondary" className="bg-purple-600/20 text-purple-600"><Truck className="h-3 w-3 mr-1" />Delivered</Badge>;
+        return <Badge className="bg-purple-600">Delivered - Pending Approval</Badge>;
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       default:
