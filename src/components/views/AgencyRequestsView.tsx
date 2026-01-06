@@ -984,14 +984,12 @@ export function AgencyRequestsView() {
                                   <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
                                 )}
                               </div>
-                              <div className="flex items-center gap-2">
-                                <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                                <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                                  <XCircle className="h-3 w-3 mr-1" />
-                                  Cancelled request
-                                </Badge>
-                              </div>
+                            <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                             </div>
+                            <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Cancelled request
+                            </Badge>
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0 pb-3 px-4">
@@ -1007,7 +1005,7 @@ export function AgencyRequestsView() {
                                 )}
                               </p>
                             </div>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <div className="flex flex-col items-end gap-0.5 text-sm text-muted-foreground">
                               {request.media_site?.publication_format && (
                                 <span className="capitalize">{request.media_site.publication_format}</span>
                               )}
