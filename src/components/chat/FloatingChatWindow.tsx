@@ -176,6 +176,38 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, [globalChatRequest?.id, localOrder]);
   
+  // Subscribe to order table updates (for delivery_status changes)
+  useEffect(() => {
+    if (!localOrder?.id) return;
+    
+    const orderChannel = supabase
+      .channel(`order-delivery-${localOrder.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${localOrder.id}`
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          console.log('[FloatingChatWindow] Order updated via realtime:', updated);
+          setLocalOrder(prev => prev ? {
+            ...prev,
+            status: updated.status,
+            delivery_status: updated.delivery_status,
+            delivery_deadline: updated.delivery_deadline
+          } : null);
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(orderChannel);
+    };
+  }, [localOrder?.id]);
+  
   const [messages, setMessages] = useState<ServiceMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
