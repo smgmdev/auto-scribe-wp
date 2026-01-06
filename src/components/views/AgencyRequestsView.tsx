@@ -876,14 +876,6 @@ export function AgencyRequestsView() {
                                   <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                                   {getStatusBadge(request.status, request.read, request.id)}
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                  {request.media_site?.publication_format && (
-                                    <span className="capitalize">{request.media_site.publication_format}</span>
-                                  )}
-                                  {request.media_site?.price !== undefined && (
-                                    <span className="font-medium text-foreground">${request.media_site.price}</span>
-                                  )}
-                                </div>
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-1">
@@ -924,14 +916,24 @@ export function AgencyRequestsView() {
                               </div>
                             )}
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground">
-                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
-                              {requestMessages.length > 0 && (
+                              <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">
-                                  {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                                  Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </span>
-                              )}
+                                {requestMessages.length > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                {request.media_site?.publication_format && (
+                                  <span className="capitalize">{request.media_site.publication_format}</span>
+                                )}
+                                {request.media_site?.price !== undefined && (
+                                  <span className="font-medium text-foreground">${request.media_site.price}</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </CardContent>
