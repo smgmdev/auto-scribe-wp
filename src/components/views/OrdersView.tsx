@@ -659,19 +659,24 @@ export function OrdersView() {
         </div>
       </CardHeader>
       <CardContent className="pt-0 pb-3 px-4">
-        <div className="space-y-0.5">
-          <span className="text-xs text-muted-foreground block">
-            Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
-          </span>
+        <div className="flex justify-between items-end">
+          <div className="space-y-0.5">
+            <span className="text-xs text-muted-foreground block">
+              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+            </span>
+            {order.status === 'cancelled' && (
+              <span className="text-xs text-muted-foreground block">
+                Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+              </span>
+            )}
+            {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+              <span className="text-xs text-muted-foreground block">
+                Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+              </span>
+            )}
+          </div>
           {order.status === 'cancelled' && (
-            <span className="text-xs text-muted-foreground block">
-              Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
-            </span>
-          )}
-          {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
-            <span className="text-xs text-muted-foreground block">
-              Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
-            </span>
+            <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
           )}
         </div>
       </CardContent>
