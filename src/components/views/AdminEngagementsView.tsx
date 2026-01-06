@@ -377,7 +377,7 @@ export function AdminEngagementsView() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {r.media_sites?.favicon && (
-                          <img src={r.media_sites.favicon} className="h-10 w-10 rounded" alt="" />
+                          <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
                         )}
                         <div>
                           <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
