@@ -454,9 +454,9 @@ export function OrdersView() {
   };
 
   // Calculate order counts for tabs
-  // Active: paid orders waiting for delivery OR pending_payment orders (excluding orders in dispute)
+  // Active: paid orders waiting for delivery OR delivered awaiting client approval (excluding orders in dispute)
   const activeOrders = useMemo(() => 
-    orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id)), 
+    orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id)), 
     [orders, disputeOrderIds]
   );
   
@@ -466,9 +466,9 @@ export function OrdersView() {
     [orders, disputeOrderIds]
   );
   
-  // Completed: delivered or accepted orders (excluding orders in dispute)
+  // Completed: only accepted orders (client approved the delivery)
   const completedOrders = useMemo(() => 
-    orders.filter(o => (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id)), 
+    orders.filter(o => o.delivery_status === 'accepted' && !disputeOrderIds.has(o.id)), 
     [orders, disputeOrderIds]
   );
   
