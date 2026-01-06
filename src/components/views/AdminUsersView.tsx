@@ -503,7 +503,7 @@ export function AdminUsersView() {
         <div>
           <h1 className="text-4xl font-bold text-foreground">Users</h1>
           <p className="mt-2 text-muted-foreground">
-            Manage users and credits
+            Manage user accounts and their credits
           </p>
         </div>
         <Button
@@ -642,8 +642,7 @@ export function AdminUsersView() {
                           onClick={(e) => openCreditDialog(user, e)}
                           className="hover:bg-black hover:text-white"
                         >
-                          <Coins className="h-4 w-4 mr-1" />
-                          Credits
+                          Manage Credits
                         </Button>
                       )}
                       {user.id !== currentUser?.id ? (
