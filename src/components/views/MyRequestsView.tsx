@@ -806,7 +806,7 @@ export function MyRequestsView() {
                     <Card 
                       key={request.id} 
                       className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                        hasUnread ? 'border-l-4 border-l-red-500' : 'opacity-75'
+                        hasUnread ? 'border-l-4 border-l-red-500' : ''
                       }`}
                       onClick={() => handleCardClick(request)}
                     >
