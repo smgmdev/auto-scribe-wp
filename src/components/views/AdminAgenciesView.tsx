@@ -1075,8 +1075,6 @@ export function AdminAgenciesView() {
 
         {/* Under Verification Tab */}
         <TabsContent value="verification" className="mt-2">
-          <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
-          
           {/* Sub-tabs for verification stages */}
           <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
@@ -1095,6 +1093,7 @@ export function AdminAgenciesView() {
 
             {/* Pending Verification Sub-Tab */}
             <TabsContent value="pending-verification" className="mt-2">
+              <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
               {agenciesPendingVerification.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1175,6 +1174,7 @@ export function AdminAgenciesView() {
 
             {/* Pending Approval Sub-Tab */}
             <TabsContent value="pending-approval" className="mt-2">
+              <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing approval</p>
               {agenciesPendingApprovalReview.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
