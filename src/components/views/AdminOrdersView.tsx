@@ -858,7 +858,7 @@ export function AdminOrdersView() {
                             ) : (
                               <>
                                 {order.status !== 'paid' && getStatusBadge(order.status)}
-                                {activeTab !== 'history' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
+                                {activeTab !== 'history' && activeTab !== 'completed' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                               </>
                             )}
                           </div>
