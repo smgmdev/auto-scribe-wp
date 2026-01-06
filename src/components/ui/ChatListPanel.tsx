@@ -1821,6 +1821,9 @@ export function ChatListPanel() {
       if (cleanMessage.startsWith('[DELIVERY_')) {
         return { text: 'Delivery Update', type: 'delivery' };
       }
+      if (cleanMessage.startsWith('[ORDER_DELIVERED]')) {
+        return { text: 'Order Delivered', type: 'delivery' };
+      }
       if (cleanMessage.startsWith('[STATUS_')) {
         return { text: 'Status Update', type: 'status' };
       }
