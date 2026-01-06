@@ -681,7 +681,7 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-muted-foreground max-w-xs truncate">
                           {tx.description || '-'}
                         </TableCell>
-                        <TableCell className={`text-right font-semibold ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        <TableCell className={`text-right ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
                           {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-muted-foreground whitespace-nowrap">
