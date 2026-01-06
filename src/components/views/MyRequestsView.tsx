@@ -466,7 +466,7 @@ export function MyRequestsView() {
       case 'completed':
         return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       case 'cancelled':
-        return <Badge className="bg-muted text-muted-foreground border-muted-foreground/30"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
+        return <Badge className="bg-muted text-muted-foreground border-muted-foreground/30"><XCircle className="h-3 w-3 mr-1" />Cancelled engagement</Badge>;
       default:
         return null;
     }
@@ -837,7 +837,7 @@ export function MyRequestsView() {
                                 )}
                               </div>
                               {hasUnread && (
-                                <Badge className="bg-red-500 text-white border-red-500">Cancelled</Badge>
+                                <Badge className="bg-red-500 text-white border-red-500">Cancelled engagement</Badge>
                               )}
                             </div>
                           </div>
@@ -856,7 +856,7 @@ export function MyRequestsView() {
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            Submitted: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                            Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         </div>
                       </CardContent>
