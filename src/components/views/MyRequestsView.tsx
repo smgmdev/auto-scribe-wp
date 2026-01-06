@@ -801,7 +801,7 @@ export function MyRequestsView() {
                               <span className="capitalize">{request.media_site.publication_format}</span>
                             )}
                             {request.media_site?.price !== undefined && (
-                              <span className="font-medium text-foreground">${request.media_site.price}</span>
+                              <span className="font-medium text-foreground text-sm">${request.media_site.price}</span>
                             )}
                           </div>
                         </div>
