@@ -380,7 +380,7 @@ export function AdminEngagementsView() {
                           <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
                         )}
                         <div>
-                          <h3 className={`font-medium text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
+                          <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
                           <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                         </div>
                       </div>
@@ -443,7 +443,7 @@ export function AdminEngagementsView() {
                             </div>
                           )}
                           <div className="flex flex-col">
-                            <h3 className="font-medium text-base">{r.title}</h3>
+                            <h3 className="font-medium">{r.title}</h3>
                             <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                           </div>
                         </div>
