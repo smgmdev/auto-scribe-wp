@@ -1177,7 +1177,7 @@ export function AgencyRequestsView() {
                             </span>
                             {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                               <span className="text-xs text-muted-foreground block">
-                                Delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                               </span>
                             )}
                           </div>
