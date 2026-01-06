@@ -359,7 +359,7 @@ export function AdminEngagementsView() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="mt-4">
+        <TabsContent value="active" className="mt-2">
           {activeRequests.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No active engagements</CardContent></Card>
           ) : (
@@ -412,7 +412,7 @@ export function AdminEngagementsView() {
           )}
         </TabsContent>
 
-        <TabsContent value="cancelled" className="mt-4">
+        <TabsContent value="cancelled" className="mt-2">
           {cancelledRequests.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
           ) : (
