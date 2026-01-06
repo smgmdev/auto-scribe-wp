@@ -154,7 +154,7 @@ export function DashboardView() {
         break;
     }
   };
-  return <div className="space-y-8 animate-fade-in">
+  return <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -231,7 +231,7 @@ export function DashboardView() {
 
 
       {/* Instant Publishing & B2B Media Buying */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Instant Publishing */}
         <Card className="border-border/50 bg-card">
           <CardHeader>
