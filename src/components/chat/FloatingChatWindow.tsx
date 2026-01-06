@@ -4585,7 +4585,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -4599,7 +4599,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Tooltip>
                       </TooltipProvider>
                     </div>
-                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    <div className="flex items-center gap-3 flex-wrap">
                       {acceptedOrderData?.price && (
                         <TooltipProvider>
                           <Tooltip>
