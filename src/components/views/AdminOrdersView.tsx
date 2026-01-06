@@ -43,6 +43,7 @@ interface Order {
     agency: string | null;
     favicon: string | null;
     link: string;
+    publication_format: string | null;
   } | null;
   profiles?: {
     email: string | null;
@@ -197,7 +198,7 @@ export function AdminOrdersView() {
       .from('orders')
       .select(`
         *,
-        media_sites (name, agency, favicon, link)
+        media_sites (name, agency, favicon, link, publication_format)
       `)
       .order('created_at', { ascending: false });
 
@@ -874,8 +875,11 @@ export function AdminOrdersView() {
                           </span>
                         )}
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold">
+                      <div className="flex flex-col items-end gap-0.5">
+                        {order.media_sites?.publication_format && (
+                          <span className="text-xs text-muted-foreground capitalize">{order.media_sites.publication_format}</span>
+                        )}
+                        <p className="font-semibold text-sm">
                           ${(order.amount_cents / 100).toFixed(2)}
                           <span className="text-xs text-green-600 font-normal ml-2">
                             +${(order.platform_fee_cents / 100).toFixed(2)} fee
