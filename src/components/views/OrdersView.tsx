@@ -36,6 +36,7 @@ interface Order {
   delivered_at: string | null;
   accepted_at: string | null;
   released_at: string | null;
+  updated_at: string;
   read: boolean;
   media_sites: {
     name: string;
@@ -662,6 +663,11 @@ export function OrdersView() {
           <span className="text-xs text-muted-foreground block">
             Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
           </span>
+          {order.status === 'cancelled' && (
+            <span className="text-xs text-muted-foreground block">
+              Order Cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+            </span>
+          )}
           {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
             <span className="text-xs text-muted-foreground block">
               Order Delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
