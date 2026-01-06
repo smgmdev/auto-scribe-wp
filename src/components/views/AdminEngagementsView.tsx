@@ -69,6 +69,7 @@ interface ServiceRequest {
 
 interface ServiceMessage {
   id: string;
+  request_id: string;
   sender_type: 'client' | 'agency' | 'admin';
   message: string;
   created_at: string;
@@ -81,7 +82,7 @@ interface Dispute {
 }
 
 export function AdminEngagementsView() {
-  const { openGlobalChat, decrementAdminUnreadEngagementsCount } = useAppStore();
+  const { openGlobalChat, decrementAdminUnreadEngagementsCount, incrementAdminUnreadEngagementsCount } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -100,6 +101,61 @@ export function AdminEngagementsView() {
 
   useEffect(() => {
     fetchRequests();
+
+    // Subscribe to new messages from users/agencies for real-time notifications
+    const messagesChannel = supabase
+      .channel('admin-engagements-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const newMessage = payload.new as ServiceMessage;
+          // Only notify for messages from clients or agencies (not admin)
+          if (newMessage.sender_type === 'client' || newMessage.sender_type === 'agency') {
+            // Add to local messages state
+            setMessages(prev => {
+              const requestMessages = prev[newMessage.request_id] || [];
+              return {
+                ...prev,
+                [newMessage.request_id]: [...requestMessages, newMessage]
+              };
+            });
+            
+            // Mark the request as unread and increment count
+            setRequests(prev => prev.map(r => 
+              r.id === newMessage.request_id ? { ...r, read: false } : r
+            ));
+            incrementAdminUnreadEngagementsCount();
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to service request changes
+    const requestsChannel = supabase
+      .channel('admin-engagements-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        () => {
+          // Refresh requests on any change
+          fetchRequests();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(requestsChannel);
+    };
   }, []);
 
   const fetchRequests = async (isRefresh = false) => {
