@@ -871,9 +871,22 @@ export function AgencyRequestsView() {
                                   <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
                                 )}
                               </div>
-                              <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                              {getStatusBadge(request.status, request.read, request.id)}
-                              
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                                  {getStatusBadge(request.status, request.read, request.id)}
+                                </div>
+                                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                  {request.media_site?.publication_format && (
+                                    <span className="capitalize">{request.media_site.publication_format}</span>
+                                  )}
+                                  {request.media_site?.price !== undefined && (
+                                    <span className="font-medium text-foreground">${request.media_site.price}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
                               {/* Status badges */}
                               {isOverdue ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white">
@@ -898,14 +911,6 @@ export function AgencyRequestsView() {
                                 <Badge variant="outline" className="text-muted-foreground">
                                   Open
                                 </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              {request.media_site?.publication_format && (
-                                <span className="capitalize">{request.media_site.publication_format}</span>
-                              )}
-                              {request.media_site?.price !== undefined && (
-                                <span className="font-medium text-foreground">${request.media_site.price}</span>
                               )}
                             </div>
                           </div>
