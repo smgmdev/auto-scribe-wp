@@ -6632,6 +6632,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         ...prev,
                         delivery_status: 'delivered'
                       } : null);
+                      
+                      // Notify user about the delivery via broadcast
+                      const { data: requestData } = await supabase
+                        .from('service_requests')
+                        .select('user_id')
+                        .eq('id', globalChatRequest.id)
+                        .single();
+                      
+                      if (requestData?.user_id) {
+                        const mediaSiteName = acceptedOrderData.media_site_name || globalChatRequest.media_site?.name || 'Unknown';
+                        await supabase
+                          .channel(`notify-${requestData.user_id}-admin-action`)
+                          .send({
+                            type: 'broadcast',
+                            event: 'admin-action',
+                            payload: {
+                              action: 'order_delivered',
+                              message: `Your order for ${mediaSiteName} has been delivered and is awaiting your approval.`,
+                              mediaSiteName: mediaSiteName
+                            }
+                          });
+                        console.log('[FloatingChatWindow] Broadcast delivery notification sent to user:', requestData.user_id);
+                      }
                     }
                   }
                   
