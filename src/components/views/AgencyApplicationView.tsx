@@ -397,7 +397,7 @@ export function AgencyApplicationView() {
         </div>
         <Button 
           variant="outline" 
-          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black hover:text-white'}`}
+          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/50 transition-colors'}`}
           onClick={() => setDialogOpen(true)}
           disabled={existingApplication?.status === 'pending'}
         >
@@ -474,7 +474,7 @@ export function AgencyApplicationView() {
                 {!showRejectionReason ? (
                   <Button 
                     variant="outline" 
-                    className="w-full hover:bg-black hover:text-white"
+                    className="w-full hover:bg-muted/50 transition-colors"
                     onClick={() => setShowRejectionReason(true)}
                   >
                     <ChevronDown className="h-4 w-4 mr-2" />
@@ -484,7 +484,7 @@ export function AgencyApplicationView() {
                   <div className="space-y-3">
                     <Button 
                       variant="outline" 
-                      className="w-full hover:bg-black hover:text-white"
+                      className="w-full hover:bg-muted/50 transition-colors"
                       onClick={() => setShowRejectionReason(false)}
                     >
                       <ChevronUp className="h-4 w-4 mr-2" />
