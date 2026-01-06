@@ -368,7 +368,7 @@ export const AdminCreditManagementView = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Credit Management</h1>
         <p className="text-muted-foreground mt-1">Manage credits and view transactions</p>
@@ -387,7 +387,7 @@ export const AdminCreditManagementView = () => {
         </TabsList>
 
         {/* Users Tab */}
-        <TabsContent value="users" className="space-y-6">
+        <TabsContent value="users" className="space-y-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="balances">Balances</TabsTrigger>
@@ -395,8 +395,8 @@ export const AdminCreditManagementView = () => {
             </TabsList>
 
         {/* Balances Tab */}
-        <TabsContent value="balances" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <TabsContent value="balances" className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <Card className="transition-colors hover:border-[#4771d9] py-3">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <Tooltip delayDuration={100}>
@@ -530,8 +530,8 @@ export const AdminCreditManagementView = () => {
         </TabsContent>
 
         {/* Transactions Tab */}
-        <TabsContent value="transactions" className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <TabsContent value="transactions" className="space-y-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <Card className="transition-colors hover:border-[#4771d9] py-3">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <Tooltip delayDuration={100}>
@@ -699,7 +699,7 @@ export const AdminCreditManagementView = () => {
         </TabsContent>
 
         {/* Agencies Tab */}
-        <TabsContent value="agencies" className="space-y-6">
+        <TabsContent value="agencies" className="space-y-2">
           <Tabs value={agencyActiveTab} onValueChange={setAgencyActiveTab}>
             <TabsList>
               <TabsTrigger value="balances">Balances</TabsTrigger>
@@ -707,9 +707,9 @@ export const AdminCreditManagementView = () => {
             </TabsList>
 
             {/* Agency Balances Tab */}
-            <TabsContent value="balances" className="space-y-6">
+            <TabsContent value="balances" className="space-y-2">
               <TooltipProvider>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   <Card className="transition-colors hover:border-[#4771d9] py-3">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                       <Tooltip delayDuration={100}>
@@ -869,9 +869,9 @@ export const AdminCreditManagementView = () => {
             </TabsContent>
 
             {/* Agency Transactions Tab */}
-            <TabsContent value="transactions" className="space-y-6">
+            <TabsContent value="transactions" className="space-y-2">
               <TooltipProvider>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   <Card className="transition-colors hover:border-[#4771d9] py-3">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                       <Tooltip delayDuration={100}>
