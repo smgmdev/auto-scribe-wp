@@ -6012,7 +6012,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     
                     if (hasRevision) {
                       return (
-                        <Badge variant="secondary" className="mt-1 bg-orange-600/20 text-orange-600">
+                        <Badge variant="secondary" className="mt-1 bg-black text-orange-500">
                           Revision Requested
                         </Badge>
                       );
