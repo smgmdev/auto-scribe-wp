@@ -4601,11 +4601,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex items-center gap-1 cursor-help text-green-400">
-                                      <span className="text-xs font-medium">Delivered</span>
+                                      <span className="text-xs font-medium">
+                                        {isAgencyView ? 'Awaiting client approval' : 'Delivered'}
+                                      </span>
                                     </div>
                                   </TooltipTrigger>
                                   <TooltipContent side="bottom" className="max-w-xs">
-                                    <p>Order has been delivered. Awaiting client acceptance.</p>
+                                    <p>{isAgencyView ? 'Order has been delivered. Awaiting client approval.' : 'Order has been delivered. Awaiting client acceptance.'}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
