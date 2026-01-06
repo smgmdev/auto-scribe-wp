@@ -4727,7 +4727,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="bg-transparent text-white border-white/50 hover:bg-white/10 shrink-0"
+                        className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
                         onClick={() => setRevisionDialogOpen(true)}
                       >
                         Request Revision
