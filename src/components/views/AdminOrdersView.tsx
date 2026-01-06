@@ -33,6 +33,7 @@ interface Order {
   delivery_url: string | null;
   delivery_deadline: string | null;
   created_at: string;
+  updated_at: string;
   paid_at: string | null;
   delivered_at: string | null;
   accepted_at: string | null;
@@ -869,6 +870,11 @@ export function AdminOrdersView() {
                         <span className="text-xs text-muted-foreground block">
                           Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
+                        {order.status === 'cancelled' && (
+                          <span className="text-xs text-muted-foreground block">
+                            Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        )}
                         {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                           <span className="text-xs text-muted-foreground block">
                             Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
