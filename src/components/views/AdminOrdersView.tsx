@@ -572,7 +572,8 @@ export function AdminOrdersView() {
         if (historySubTab === 'cancelled') {
           matchesTab = order.status === 'cancelled';
         } else {
-          matchesTab = true;
+          // Show only completed or cancelled orders in history - not active/pending orders
+          matchesTab = order.status === 'completed' || order.status === 'cancelled';
         }
         break;
       default:
@@ -599,7 +600,7 @@ export function AdminOrdersView() {
   const disputesCount = orders.filter(o => disputedOrderIds.has(o.id)).length;
   const cancelledCount = orders.filter(o => o.status === 'cancelled').length;
   const completedCount = orders.filter(o => o.status === 'completed').length;
-  const allOrdersCount = orders.length;
+  const allOrdersCount = orders.filter(o => o.status === 'completed' || o.status === 'cancelled').length;
   
   // Calculate unread counts for notifications (exclude disputed orders from active)
   const unreadPendingCount = orders.filter(o => o.status === 'paid' && !o.read && !disputedOrderIds.has(o.id)).length;
