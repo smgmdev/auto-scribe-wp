@@ -3685,7 +3685,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {isOwnMessage ? 'You requested' : 'Client requested'} a revision for {revisionRequested.media_site_name}
             </p>
-            <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               Reason: {revisionRequested.reason}
             </p>
           </div>
