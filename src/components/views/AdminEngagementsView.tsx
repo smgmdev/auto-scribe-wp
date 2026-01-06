@@ -403,12 +403,12 @@ export function AdminEngagementsView() {
                           Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
                       </div>
-                      <div className="flex flex-col items-end gap-0.5 text-sm text-muted-foreground">
+                      <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                         {r.media_sites?.publication_format && (
                           <span className="capitalize">{r.media_sites.publication_format}</span>
                         )}
                         {r.media_sites?.price !== undefined && (
-                          <span className="font-medium text-foreground">${r.media_sites.price}</span>
+                          <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
                         )}
                       </div>
                     </div>
@@ -467,12 +467,12 @@ export function AdminEngagementsView() {
                             <p className="text-xs text-destructive">Reason: {r.cancellation_reason}</p>
                           )}
                         </div>
-                        <div className="flex flex-col items-end gap-0.5 text-sm text-muted-foreground">
+                        <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                           {r.media_sites?.publication_format && (
                             <span className="capitalize">{r.media_sites.publication_format}</span>
                           )}
                           {r.media_sites?.price !== undefined && (
-                            <span className="font-medium text-foreground">${r.media_sites.price}</span>
+                            <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
                           )}
                         </div>
                       </div>
