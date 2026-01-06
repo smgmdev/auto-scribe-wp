@@ -997,12 +997,12 @@ export function AgencyRequestsView() {
                             <div className="space-y-0.5">
                               <p className="text-xs text-muted-foreground">
                                 Cancelled request: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 {requestMessages.length > 0 && (
                                   <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                 )}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </p>
                             </div>
                             <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
