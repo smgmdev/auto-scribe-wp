@@ -988,7 +988,7 @@ export function AgencyRequestsView() {
                             </div>
                             <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
                               <XCircle className="h-3 w-3 mr-1" />
-                              Cancelled request
+                              Cancelled
                             </Badge>
                           </div>
                         </CardHeader>
@@ -996,7 +996,7 @@ export function AgencyRequestsView() {
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
                               <p className="text-xs text-muted-foreground">
-                                Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
+                                Cancelled request: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
