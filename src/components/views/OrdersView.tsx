@@ -420,7 +420,7 @@ export function OrdersView() {
       case 'completed':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">Cancelled</Badge>;
+        return <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -633,7 +633,7 @@ export function OrdersView() {
             <div className="flex flex-col items-end gap-1">
               <div className="flex gap-2">
                 {order.status === 'cancelled' ? (
-                  <Badge variant="destructive">Cancelled</Badge>
+                  <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>
                 ) : (
                   <>
                     {order.status !== 'paid' && getStatusBadge(order.status)}
