@@ -1320,7 +1320,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="cancelled" className="mt-2 space-y-4">
+            <TabsContent value="cancelled" className="mt-2 space-y-2">
               {cancelledOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1339,34 +1339,43 @@ export function AgencyRequestsView() {
                       className="border-border/50 hover:border-border transition-colors cursor-pointer"
                       onClick={() => relatedRequest && handleCardClick(relatedRequest)}
                     >
-                      <CardContent className="p-4">
+                      <CardHeader className="py-3 px-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             {order.media_site?.favicon ? (
                               <img 
                                 src={order.media_site.favicon} 
                                 alt="" 
-                                className="h-10 w-10 rounded object-cover opacity-60"
+                                className="h-8 w-8 rounded object-cover"
                               />
                             ) : (
-                              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                              <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                               </div>
                             )}
-                            <div>
-                              <p className="font-medium text-muted-foreground">{order.media_site?.name || 'Unknown Site'}</p>
-                              <p className="text-sm text-muted-foreground">
-                                ${(order.amount_cents / 100).toFixed(0)}
-                              </p>
-                            </div>
+                            <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-                              <XCircle className="h-3 w-3 mr-1" /> Cancelled
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(order.created_at), 'MMM d, yyyy')}
-                            </span>
+                          <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Cancelled
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-4">
+                        <div className="flex items-end justify-between">
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-muted-foreground">
+                              Cancelled order: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                            {order.media_site?.publication_format && (
+                              <span className="capitalize">{order.media_site.publication_format}</span>
+                            )}
+                            <span className="font-medium text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
                           </div>
                         </div>
                       </CardContent>
