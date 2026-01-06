@@ -1141,9 +1141,12 @@ export function AgencyRequestsView() {
                                   <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-muted-foreground">
-                                ${(order.amount_cents / 100).toFixed(0)}
-                              </p>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                {order.media_site?.publication_format && (
+                                  <span className="capitalize">{order.media_site.publication_format}</span>
+                                )}
+                                <span className="font-medium text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
+                              </div>
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1">
