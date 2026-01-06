@@ -120,8 +120,9 @@ export function CreditHistoryView() {
           </p>
         </div>
         <Button 
+          variant="outline"
           onClick={() => setBuyCreditsOpen(true)}
-          className="bg-black text-white hover:bg-black/80"
+          className="hover:bg-muted/50 transition-colors"
         >
           Buy Credits
         </Button>
