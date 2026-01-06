@@ -696,11 +696,10 @@ export function AgencyRequestsView() {
 
   const activeOrders = useMemo(() => 
     orders.filter(o => {
-      // Include pending_payment and paid orders that aren't delivered/cancelled
-      // Note: delivery_status 'accepted' means client accepted delivery, so it's completed
-      // Don't filter out based on request status - if order exists, show it
+      // Include pending_payment and paid orders that aren't accepted/cancelled
+      // Note: delivery_status 'delivered' means awaiting client approval, so still active
+      // Only 'accepted' means client approved, so it's completed
       return (o.status === 'pending_payment' || o.status === 'paid') &&
-        o.delivery_status !== 'delivered' && 
         o.delivery_status !== 'accepted' &&
         o.status !== 'cancelled' && 
         o.delivery_status !== 'cancelled' &&
@@ -711,7 +710,7 @@ export function AgencyRequestsView() {
   
   const completedOrders = useMemo(() => 
     orders.filter(o => 
-      o.delivery_status === 'delivered' && 
+      o.delivery_status === 'accepted' && 
       !disputedOrderIds.has(o.id)
     ), 
     [orders, disputedOrderIds]
