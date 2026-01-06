@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Filter, Wallet, HelpCircle, ShoppingBag } from 'lucide-react';
+import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, HelpCircle, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,7 +22,7 @@ export function CreditHistoryView() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>('all');
+  
   const [availableCredits, setAvailableCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
@@ -43,9 +43,6 @@ export function CreditHistoryView() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (filter !== 'all') {
-        query = query.eq('type', filter);
-      }
 
       const { data, error } = await query;
 
@@ -58,7 +55,7 @@ export function CreditHistoryView() {
     };
 
     fetchTransactions();
-  }, [user, filter]);
+  }, [user]);
 
   const totalPurchased = transactions
     .filter(t => t.type === 'purchase')
@@ -310,24 +307,6 @@ export function CreditHistoryView() {
         </Card>
       </div>
 
-      {/* Filter */}
-      <div className="flex items-center gap-3">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Transactions</SelectItem>
-            <SelectItem value="purchase">Purchases</SelectItem>
-            <SelectItem value="order">Orders</SelectItem>
-            <SelectItem value="usage">Usage</SelectItem>
-            <SelectItem value="deduction">Deductions</SelectItem>
-            <SelectItem value="refund">Refunds</SelectItem>
-            <SelectItem value="bonus">Bonuses</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Transactions List */}
       <Card>
