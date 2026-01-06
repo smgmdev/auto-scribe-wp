@@ -1537,10 +1537,10 @@ export function AdminMediaManagementView() {
         </TabsList>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-2">
+        <TabsContent value="wordpress" className="mt-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
-            <TabsList className="mb-2">
+            <TabsList>
               <TabsTrigger value="approved">
                 Approved ({approvedSites.length})
               </TabsTrigger>
@@ -1935,10 +1935,10 @@ export function AdminMediaManagementView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-2">
+        <TabsContent value="media" className="mt-0">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="mb-2">
+            <TabsList>
               <TabsTrigger value="added">
                 Added Media Sites ({approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0)})
               </TabsTrigger>
