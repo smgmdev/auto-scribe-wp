@@ -519,7 +519,7 @@ export function MyRequestsView() {
       
       if (hasRevisionAfterDelivery) {
         return (
-          <Badge className="bg-black text-orange-500">
+          <Badge className="bg-black text-orange-400">
             Delivered - Revision Requested
           </Badge>
         );
