@@ -1249,7 +1249,18 @@ export function ComposeView() {
             <Button 
               className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
-              disabled={isPublishing || !title || !content || !selectedSite || (!isAdmin && !canAffordSite(selectedSite))}
+              disabled={
+                isPublishing || 
+                !title || 
+                !content || 
+                !selectedSite || 
+                selectedCategories.length === 0 || 
+                selectedTagIds.length === 0 || 
+                !focusKeyword || 
+                !metaDescription || 
+                !imagePreview || 
+                (!isAdmin && !canAffordSite(selectedSite))
+              }
             >
               {isPublishing ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
