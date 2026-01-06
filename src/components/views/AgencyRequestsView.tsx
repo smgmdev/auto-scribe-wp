@@ -1365,10 +1365,10 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
-                              Cancelled order: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+                              Cancelled order: {order.updated_at ? format(new Date(order.updated_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                              Order started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
