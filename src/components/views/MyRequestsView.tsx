@@ -847,7 +847,7 @@ export function MyRequestsView() {
                         <div className="space-y-0.5">
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">
-                              Cancelled: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
+                              Cancelled engagement: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                             </span>
                             {requestMessages.length > 0 && (
                               <span className="text-xs text-muted-foreground">
