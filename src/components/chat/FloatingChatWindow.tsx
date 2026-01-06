@@ -86,7 +86,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest.order]);
   
-  // Fetch order data on mount or if not provided (handles case where chat opens before order data is passed)
+  // Fetch order data on mount - ALWAYS fetch fresh data to ensure delivery_status is current
   useEffect(() => {
     const fetchOrderFromRequest = async () => {
       console.log('[FloatingChatWindow] fetchOrderFromRequest called, requestId:', globalChatRequest?.id);
@@ -94,16 +94,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         console.log('[FloatingChatWindow] No request ID, skipping fetch');
         return;
       }
-      
-      // Skip if we already have order data (check normalized)
-      const existingOrder = normalizeOrder(globalChatRequest.order);
-      if (existingOrder) {
-        console.log('[FloatingChatWindow] Already have order data, setting localOrder:', existingOrder);
-        setLocalOrder(existingOrder);
-        return;
-      }
-      
-      console.log('[FloatingChatWindow] No existing order, fetching from DB...');
       
       // First get the service request to check if it has an order_id
       const { data: requestData, error: requestError } = await supabase
@@ -116,10 +106,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (!requestData?.order_id) {
         console.log('[FloatingChatWindow] No order_id on request, skipping order fetch');
+        // Set from existing prop if available
+        const existingOrder = normalizeOrder(globalChatRequest.order);
+        if (existingOrder) {
+          setLocalOrder(existingOrder);
+        }
         return;
       }
       
-      // Fetch the order data
+      // ALWAYS fetch fresh order data from DB to ensure delivery_status is current
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select('id, status, delivery_status, delivery_deadline')
