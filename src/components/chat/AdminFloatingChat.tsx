@@ -1412,7 +1412,7 @@ export function AdminFloatingChat({
                 onClick={fetchOrderDetails}
               >
                 {orderDetails.delivery_status === 'accepted' && 'Completed'}
-                {orderDetails.delivery_status === 'delivered' && 'Delivered'}
+                {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
                 {orderDetails.delivery_status === 'pending' && 'View Details'}
               </Badge>
             </div>
@@ -1885,7 +1885,7 @@ export function AdminFloatingChat({
                     }`}
                   >
                     {orderDetails.delivery_status === 'accepted' && 'Accepted'}
-                    {orderDetails.delivery_status === 'delivered' && 'Delivered'}
+                    {orderDetails.delivery_status === 'delivered' && 'Delivered - Pending Approval'}
                     {orderDetails.delivery_status === 'pending' && 'Pending'}
                   </Badge>
                 </div>
