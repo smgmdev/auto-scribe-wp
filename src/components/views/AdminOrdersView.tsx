@@ -573,7 +573,13 @@ export function AdminOrdersView() {
   };
 
   // Helper to calculate dynamic platform fee based on current agency commission
+  // Only applies to active orders - completed orders keep their original stored fee
   const calculatePlatformFee = (order: Order): number => {
+    // Completed and cancelled orders keep their original stored fee
+    if (order.status === 'completed' || order.status === 'cancelled') {
+      return order.platform_fee_cents;
+    }
+    
     const agency = order.media_sites?.agency;
     if (!agency || !agencyCommissions[agency]) {
       return order.platform_fee_cents; // Fall back to stored value
