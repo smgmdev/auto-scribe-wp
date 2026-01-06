@@ -1180,11 +1180,11 @@ export function AgencyRequestsView() {
                       <CardContent className="pt-0 pb-3 px-4">
                         <div className="space-y-0.5">
                           <span className="text-xs text-muted-foreground block">
-                            Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                            Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                           </span>
                           {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                             <span className="text-xs text-muted-foreground block">
-                              Order Delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                              Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           )}
                         </div>
