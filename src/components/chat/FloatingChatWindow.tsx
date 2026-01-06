@@ -3614,10 +3614,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 bg-white text-black border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200"
                   onClick={() => setRevisionDialogOpen(true)}
                 >
-                  <RefreshCw className="h-3 w-3 mr-1" />
                   Request Revision
                 </Button>
               </div>
