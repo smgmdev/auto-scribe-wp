@@ -1940,9 +1940,6 @@ export function AdminFloatingChat({
               )}
 
               <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
-                {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
-                {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
-                {orderDetails.accepted_at && <p>Accepted: {new Date(orderDetails.accepted_at).toLocaleString()}</p>}
                 <p className="flex items-center gap-1">
                   Order ID: {orderDetails.order_number || orderDetails.id.slice(0, 8)}
                   <Copy 
@@ -1953,6 +1950,9 @@ export function AdminFloatingChat({
                     }}
                   />
                 </p>
+                <p>Order Placed: {new Date(orderDetails.created_at).toLocaleString()}</p>
+                {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
+                {orderDetails.delivered_at && <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>}
               </div>
             </div>
           ) : (
