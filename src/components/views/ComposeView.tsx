@@ -1257,7 +1257,7 @@ export function ComposeView() {
                 selectedCategories.length === 0 || 
                 selectedTagIds.length === 0 || 
                 !focusKeyword.trim() || 
-                !metaDescription.trim() || 
+                (currentSite?.seoPlugin === 'aioseo' && !metaDescription.trim()) || 
                 !imagePreview || 
                 (!isAdmin && !canAffordSite(selectedSite))
               }
