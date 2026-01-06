@@ -394,16 +394,13 @@ export function AdminEngagementsView() {
                         Last message: {messages[r.id]?.length > 0 
                           ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
                           : 'No messages'}
+                        {messages[r.id]?.length > 0 && (
+                          <span> • {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                        )}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                        </span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <MessageSquare className="h-3 w-3" />
-                          {messages[r.id]?.length || 0} message{(messages[r.id]?.length || 0) !== 1 ? 's' : ''}
-                        </span>
-                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
