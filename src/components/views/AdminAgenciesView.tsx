@@ -793,7 +793,7 @@ export function AdminAgenciesView() {
         </TabsList>
 
         {/* Pending Applications Tab */}
-        <TabsContent value="pending" className="mt-6">
+        <TabsContent value="pending" className="mt-2">
           <p className="text-sm text-muted-foreground mb-4">New agency applications</p>
           {pendingApplications.length === 0 ? (
             <Card className="border-dashed border-2">
@@ -869,7 +869,7 @@ export function AdminAgenciesView() {
         </TabsContent>
 
         {/* Void Tab - Cancelled and Rejected */}
-        <TabsContent value="void" className="mt-6">
+        <TabsContent value="void" className="mt-2">
           <p className="text-sm text-muted-foreground mb-4">Cancelled and rejected agency applications</p>
           
           {/* Sub-tabs for void stages */}
@@ -889,7 +889,7 @@ export function AdminAgenciesView() {
             </TabsList>
 
             {/* Cancelled Sub-Tab */}
-            <TabsContent value="cancelled" className="mt-4">
+            <TabsContent value="cancelled" className="mt-2">
               {cancelledApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -969,7 +969,7 @@ export function AdminAgenciesView() {
             </TabsContent>
 
             {/* Rejected Sub-Tab */}
-            <TabsContent value="rejected" className="mt-4">
+            <TabsContent value="rejected" className="mt-2">
               {rejectedApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1074,7 +1074,7 @@ export function AdminAgenciesView() {
         </TabsContent>
 
         {/* Under Verification Tab */}
-        <TabsContent value="verification" className="mt-6">
+        <TabsContent value="verification" className="mt-2">
           <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
           
           {/* Sub-tabs for verification stages */}
@@ -1094,7 +1094,7 @@ export function AdminAgenciesView() {
             </TabsList>
 
             {/* Pending Verification Sub-Tab */}
-            <TabsContent value="pending-verification" className="mt-4">
+            <TabsContent value="pending-verification" className="mt-2">
               {agenciesPendingVerification.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1174,7 +1174,7 @@ export function AdminAgenciesView() {
             </TabsContent>
 
             {/* Pending Approval Sub-Tab */}
-            <TabsContent value="pending-approval" className="mt-4">
+            <TabsContent value="pending-approval" className="mt-2">
               {agenciesPendingApprovalReview.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1275,7 +1275,7 @@ export function AdminAgenciesView() {
         </TabsContent>
 
         {/* Onboarded Agencies Tab */}
-        <TabsContent value="onboarded" className="mt-6">
+        <TabsContent value="onboarded" className="mt-2">
           <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
           
           {/* Sub-tabs for Active and Downgraded */}
@@ -1290,7 +1290,7 @@ export function AdminAgenciesView() {
             </TabsList>
 
             {/* Active Sub-Tab */}
-            <TabsContent value="active" className="mt-4">
+            <TabsContent value="active" className="mt-2">
               {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1421,7 +1421,7 @@ export function AdminAgenciesView() {
             </TabsContent>
 
             {/* Downgraded Sub-Tab */}
-            <TabsContent value="downgraded" className="mt-4">
+            <TabsContent value="downgraded" className="mt-2">
               {agencies.filter(a => a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
