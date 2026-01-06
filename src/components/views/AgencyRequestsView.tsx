@@ -1115,7 +1115,7 @@ export function AgencyRequestsView() {
                       } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
                       onClick={() => handleOrderCardClick(order, relatedRequest)}
                     >
-                      <CardContent className="p-4">
+                      <CardHeader className="py-3 px-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
@@ -1123,11 +1123,11 @@ export function AgencyRequestsView() {
                                 <img 
                                   src={order.media_site.favicon} 
                                   alt="" 
-                                  className="h-10 w-10 rounded object-cover"
+                                  className="h-8 w-8 rounded object-cover"
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                  <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                                 </div>
                               )}
                               {isNew && (
@@ -1136,7 +1136,7 @@ export function AgencyRequestsView() {
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                                <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                                 {isNew && (
                                   <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
                                 )}
@@ -1166,10 +1166,19 @@ export function AgencyRequestsView() {
                                 Pending Delivery {getTimeRemaining() && `• ${getTimeRemaining()}`}
                               </Badge>
                             )}
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
                           </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-4">
+                        <div className="space-y-0.5">
+                          <span className="text-xs text-muted-foreground block">
+                            Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                          {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                            <span className="text-xs text-muted-foreground block">
+                              Order Delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
