@@ -788,19 +788,12 @@ export function MyRequestsView() {
                           {requestMessages.length > 0 && (
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              <span>Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, h:mm a')}</span>
+                              <span>Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, h:mm a')} • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                             </div>
                           )}
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
-                              Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            {requestMessages.length > 0 && (
-                              <span className="text-xs text-muted-foreground">
-                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                              </span>
-                            )}
-                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
