@@ -453,19 +453,19 @@ export function MyAgencyView() {
                       {bankDetails.bank_account_number && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Account Number</span>
-                          <span className="font-medium font-mono">{bankDetails.bank_account_number}</span>
+                          <span className="font-medium">{bankDetails.bank_account_number}</span>
                         </div>
                       )}
                       {bankDetails.bank_iban && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">IBAN</span>
-                          <span className="font-medium font-mono text-xs">{bankDetails.bank_iban}</span>
+                          <span className="font-medium">{bankDetails.bank_iban}</span>
                         </div>
                       )}
                       {bankDetails.bank_swift_code && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">SWIFT/BIC</span>
-                          <span className="font-medium font-mono">{bankDetails.bank_swift_code}</span>
+                          <span className="font-medium">{bankDetails.bank_swift_code}</span>
                         </div>
                       )}
                       {bankDetails.bank_country && (
@@ -500,7 +500,7 @@ export function MyAgencyView() {
                       )}
                       <div className="flex justify-between items-start">
                         <span className="text-muted-foreground">Wallet Address</span>
-                        <span className="font-medium font-mono text-xs text-right max-w-[180px] break-all">
+                        <span className="font-medium text-right max-w-[200px] break-all">
                           {bankDetails.usdt_wallet_address}
                         </span>
                       </div>
