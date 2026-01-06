@@ -6585,6 +6585,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (error) throw error;
                   
+                  // Update order delivery_status to 'delivered'
+                  if (localOrder?.id) {
+                    const { error: updateError } = await supabase
+                      .from('orders')
+                      .update({
+                        delivery_status: 'delivered',
+                        delivery_url: deliveryLink.trim(),
+                        delivery_notes: deliveryNotes.trim() || null,
+                        delivered_at: new Date().toISOString()
+                      })
+                      .eq('id', localOrder.id);
+                    
+                    if (updateError) {
+                      console.error('Error updating order delivery status:', updateError);
+                    } else {
+                      // Update local order state
+                      setLocalOrder(prev => prev ? {
+                        ...prev,
+                        delivery_status: 'delivered'
+                      } : null);
+                    }
+                  }
+                  
                   // Add to local messages
                   if (insertedMsg) {
                     setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
