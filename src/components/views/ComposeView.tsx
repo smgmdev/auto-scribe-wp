@@ -1251,13 +1251,13 @@ export function ComposeView() {
               onClick={handlePublish} 
               disabled={
                 isPublishing || 
-                !title || 
-                !content || 
+                !title.trim() || 
+                !content.trim() || 
                 !selectedSite || 
                 selectedCategories.length === 0 || 
                 selectedTagIds.length === 0 || 
-                !focusKeyword || 
-                !metaDescription || 
+                !focusKeyword.trim() || 
+                !metaDescription.trim() || 
                 !imagePreview || 
                 (!isAdmin && !canAffordSite(selectedSite))
               }
