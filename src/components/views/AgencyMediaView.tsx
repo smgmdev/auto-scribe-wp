@@ -585,14 +585,14 @@ export function AgencyMediaView() {
           <DropdownMenuContent align="end" className="bg-popover border-border">
             <DropdownMenuItem 
               onClick={() => handleAddMedia('wordpress')}
-              className="hover:bg-muted/50 cursor-pointer transition-colors"
+              className="hover:!bg-black hover:!text-white cursor-pointer transition-colors"
             >
               <Globe className="h-4 w-4 mr-2" />
               WordPress Site
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleAddMedia('media')}
-              className="hover:bg-muted/50 cursor-pointer transition-colors"
+              className="hover:!bg-black hover:!text-white cursor-pointer transition-colors"
             >
               <Library className="h-4 w-4 mr-2" />
               Media Site
