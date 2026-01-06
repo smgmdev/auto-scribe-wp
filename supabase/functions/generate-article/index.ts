@@ -252,6 +252,8 @@ FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 
 Remember: Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling. PRESERVE ALL NAMES from the original headline.`;
 
+    console.log('Calling AI gateway...');
+    
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -268,6 +270,8 @@ Remember: Write like a seasoned journalist, not an AI. No lists. No excessive fo
         max_tokens: 2000,
       }),
     });
+
+    console.log('AI gateway response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
