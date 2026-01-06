@@ -557,7 +557,8 @@ export function AdminOrdersView() {
     let matchesTab = false;
     switch (activeTab) {
       case 'pending':
-        matchesTab = order.status === 'paid' && order.delivery_status === 'pending' && !disputedOrderIds.has(order.id);
+        // Active orders: paid orders that are not completed/cancelled and not in dispute
+        matchesTab = order.status === 'paid' && !disputedOrderIds.has(order.id);
         break;
       case 'disputes':
         matchesTab = disputedOrderIds.has(order.id);
@@ -591,21 +592,21 @@ export function AdminOrdersView() {
     return true;
   });
 
-  // Calculate counts for all tabs (exclude disputed orders from pending)
-  const pendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !disputedOrderIds.has(o.id)).length;
+  // Calculate counts for all tabs (exclude disputed orders from active)
+  const pendingCount = orders.filter(o => o.status === 'paid' && !disputedOrderIds.has(o.id)).length;
   const disputesCount = orders.filter(o => disputedOrderIds.has(o.id)).length;
   const cancelledCount = orders.filter(o => o.status === 'cancelled').length;
   const completedCount = orders.filter(o => o.status === 'completed').length;
   const allOrdersCount = orders.length;
   
-  // Calculate unread counts for notifications (exclude disputed orders from pending)
-  const unreadPendingCount = orders.filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !o.read && !disputedOrderIds.has(o.id)).length;
+  // Calculate unread counts for notifications (exclude disputed orders from active)
+  const unreadPendingCount = orders.filter(o => o.status === 'paid' && !o.read && !disputedOrderIds.has(o.id)).length;
   // Use dispute.read for unread disputes count (not order.read)
   const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
   // Calculate value stats
   const pendingValue = orders
-    .filter(o => o.status === 'paid' && o.delivery_status === 'pending' && !disputedOrderIds.has(o.id))
+    .filter(o => o.status === 'paid' && !disputedOrderIds.has(o.id))
     .reduce((sum, o) => sum + o.amount_cents, 0);
   
   const disputeValue = orders
@@ -737,7 +738,7 @@ export function AdminOrdersView() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="pending" className="relative">
-            Pending Delivery ({pendingCount})
+            Active Orders ({pendingCount})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
                 {unreadPendingCount}
@@ -792,7 +793,7 @@ export function AdminOrdersView() {
                 <h3 className="mt-4 text-xl font-semibold">No orders</h3>
                 <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
                   {activeTab === 'pending' 
-                    ? 'No orders pending delivery'
+                    ? 'No active orders'
                     : activeTab === 'disputes'
                     ? 'No open disputes'
                     : 'No orders in this category'}
