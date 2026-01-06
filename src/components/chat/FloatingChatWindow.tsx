@@ -4714,14 +4714,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   {/* Accept/Request Revision buttons for client when order is delivered */}
                   {canAcceptDelivery && (
-                    <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
                       <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white shrink-0"
                         onClick={handleAcceptDeliveryFromChat}
                         disabled={acceptingDelivery}
                       >
-                        {acceptingDelivery ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                        {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                         Accept
                       </Button>
                       <Button
@@ -4730,7 +4730,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         className="bg-transparent text-white border-white/50 hover:bg-white/10 shrink-0"
                         onClick={() => setRevisionDialogOpen(true)}
                       >
-                        <RefreshCw className="h-3 w-3 mr-1" />
                         Request Revision
                       </Button>
                     </div>
