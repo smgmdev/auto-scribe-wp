@@ -1157,7 +1157,7 @@ export function AgencyRequestsView() {
                                 In Progress
                               </Badge>
                             ) : order.delivery_status === 'delivered' ? (
-                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                              <Badge className="bg-purple-500/20 text-purple-600 border-purple-500/30">
                                 Delivered - Pending Approval
                               </Badge>
                             ) : (
