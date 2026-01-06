@@ -209,7 +209,7 @@ export function AgencyRequestsView() {
             delivered_at,
             read,
             agency_read,
-            media_site:media_sites(id, name, favicon)
+            media_site:media_sites(id, name, favicon, publication_format)
           `)
           .in('id', data.filter(r => {
             const order = Array.isArray(r.order) && r.order.length > 0 ? r.order[0] : r.order;
