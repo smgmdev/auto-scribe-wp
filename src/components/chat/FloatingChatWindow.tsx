@@ -2899,11 +2899,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         reason: revisionReason.trim()
       };
 
+      // Insert the system revision request message
       await supabase.from('service_messages').insert({
         request_id: globalChatRequest.id,
         sender_type: senderType,
         sender_id: senderId,
         message: `[REVISION_REQUESTED]${JSON.stringify(revisionMessagePayload)}[/REVISION_REQUESTED]`
+      });
+
+      // Send auto message with the revision request text
+      await supabase.from('service_messages').insert({
+        request_id: globalChatRequest.id,
+        sender_type: senderType,
+        sender_id: senderId,
+        message: revisionReason.trim()
       });
 
       toast({
