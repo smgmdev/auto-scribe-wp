@@ -1885,7 +1885,7 @@ export function AdminFloatingChat({
                     }`}
                   >
                     {orderDetails.delivery_status === 'accepted' && 'Accepted'}
-                    {orderDetails.delivery_status === 'delivered' && 'Delivered - Pending Approval'}
+                    {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
                     {orderDetails.delivery_status === 'pending' && 'Pending'}
                   </Badge>
                 </div>
