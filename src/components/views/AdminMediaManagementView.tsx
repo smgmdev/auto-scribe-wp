@@ -1537,7 +1537,7 @@ export function AdminMediaManagementView() {
         </TabsList>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-0">
+        <TabsContent value="wordpress" className="mt-2">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <TabsList>
@@ -1935,7 +1935,7 @@ export function AdminMediaManagementView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-0">
+        <TabsContent value="media" className="mt-2">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList>
