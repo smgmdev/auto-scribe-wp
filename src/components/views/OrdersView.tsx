@@ -618,8 +618,10 @@ export function OrdersView() {
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
-              {order.media_sites?.agency && ` • via ${order.media_sites.agency}`}
+              {order.delivery_status === 'delivered' || order.delivery_status === 'accepted'
+                ? `Order Delivered: ${new Date(order.delivered_at || order.created_at).toLocaleString()}`
+                : `Order Started: ${new Date(order.created_at).toLocaleString()}`
+              }
             </p>
           </div>
         </div>
