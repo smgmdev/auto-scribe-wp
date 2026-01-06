@@ -848,14 +848,7 @@ export function AdminOrdersView() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
-                          <p className="text-xs text-green-600">
-                            +${(order.platform_fee_cents / 100).toFixed(2)} fee
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
+                      <div className="flex flex-col items-end gap-1">
                           <div className="flex gap-2">
                             {order.status === 'cancelled' ? (
                               <Badge variant="destructive">Cancelled</Badge>
@@ -867,19 +860,26 @@ export function AdminOrdersView() {
                             )}
                           </div>
                         </div>
-                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0 pb-3 px-4">
-                    <div className="space-y-0.5">
-                      <span className="text-xs text-muted-foreground block">
-                        Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                      {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                    <div className="flex items-end justify-between">
+                      <div className="space-y-0.5">
                         <span className="text-xs text-muted-foreground block">
-                          Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                          Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
-                      )}
+                        {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                          <span className="text-xs text-muted-foreground block">
+                            Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+                        <p className="text-xs text-green-600">
+                          +${(order.platform_fee_cents / 100).toFixed(2)} fee
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
