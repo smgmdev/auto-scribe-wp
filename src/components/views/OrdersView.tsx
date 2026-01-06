@@ -87,6 +87,7 @@ export function OrdersView() {
   } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
+  const [revisionOrderIds, setRevisionOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [releasing, setReleasing] = useState(false);
@@ -319,6 +320,8 @@ export function OrdersView() {
       });
     } else {
       setOrders(data || []);
+      // Fetch revision status for delivered orders
+      fetchRevisionStatus(data || []);
     }
     setLoading(false);
     // Mark initial load as complete after a short delay to allow render
@@ -339,6 +342,62 @@ export function OrdersView() {
       const orderIds = new Set(data.map(d => d.order_id));
       setDisputeOrderIds(orderIds);
     }
+  };
+
+  // Fetch revision status for delivered orders
+  const fetchRevisionStatus = async (ordersList: Order[]) => {
+    if (!user) return;
+    
+    // Get orders that are delivered
+    const deliveredOrders = ordersList.filter(o => o.delivery_status === 'delivered');
+    if (deliveredOrders.length === 0) {
+      setRevisionOrderIds(new Set());
+      return;
+    }
+    
+    // Get service request IDs for these orders
+    const { data: serviceRequests } = await supabase
+      .from('service_requests')
+      .select('id, order_id')
+      .in('order_id', deliveredOrders.map(o => o.id));
+    
+    if (!serviceRequests || serviceRequests.length === 0) {
+      setRevisionOrderIds(new Set());
+      return;
+    }
+    
+    // Get messages for these service requests
+    const { data: messages } = await supabase
+      .from('service_messages')
+      .select('request_id, message, created_at')
+      .in('request_id', serviceRequests.map(sr => sr.id))
+      .order('created_at', { ascending: true });
+    
+    if (!messages) {
+      setRevisionOrderIds(new Set());
+      return;
+    }
+    
+    // Check each service request for revision after delivery
+    const revisionOrders = new Set<string>();
+    
+    for (const sr of serviceRequests) {
+      const requestMessages = messages.filter(m => m.request_id === sr.id);
+      const lastDeliveryIndex = requestMessages
+        .map((m, i) => ({ m, i }))
+        .filter(({ m }) => m.message.startsWith('[ORDER_DELIVERED]'))
+        .pop()?.i ?? -1;
+      
+      const hasRevisionAfterDelivery = requestMessages
+        .slice(lastDeliveryIndex + 1)
+        .some(m => m.message.startsWith('[REVISION_REQUESTED]'));
+      
+      if (hasRevisionAfterDelivery && sr.order_id) {
+        revisionOrders.add(sr.order_id);
+      }
+    }
+    
+    setRevisionOrderIds(revisionOrders);
   };
 
   const handleAcceptDelivery = async (order: Order) => {
@@ -426,7 +485,7 @@ export function OrdersView() {
     }
   };
 
-  const getDeliveryBadge = (status: string, deliveryDeadline?: string | null) => {
+  const getDeliveryBadge = (status: string, deliveryDeadline?: string | null, orderId?: string) => {
     switch (status) {
       case 'pending':
         if (deliveryDeadline) {
@@ -438,6 +497,10 @@ export function OrdersView() {
         }
         return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery</Badge>;
       case 'delivered':
+        // Check if this order has a pending revision request
+        if (orderId && revisionOrderIds.has(orderId)) {
+          return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
+        }
         return <Badge variant="secondary" className="bg-purple-600/20 text-purple-600">Delivered - Pending Approval</Badge>;
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
@@ -637,7 +700,7 @@ export function OrdersView() {
                 ) : (
                   <>
                     {order.status !== 'paid' && getStatusBadge(order.status)}
-                    {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
+                    {getDeliveryBadge(order.delivery_status, order.delivery_deadline, order.id)}
                   </>
                 )}
               </div>
@@ -876,7 +939,7 @@ export function OrdersView() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Status</p>
-                  <div className="mt-1">{getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.delivery_deadline)}</div>
+                  <div className="mt-1">{getDeliveryBadge(selectedOrder.delivery_status, selectedOrder.delivery_deadline, selectedOrder.id)}</div>
                 </div>
               </div>
 
