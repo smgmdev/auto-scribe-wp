@@ -801,7 +801,7 @@ export function AgencyRequestsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-4 space-y-4">
+            <TabsContent value="active" className="mt-2 space-y-4">
               {activeRequests.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -942,7 +942,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="cancelled" className="mt-4 space-y-4">
+            <TabsContent value="cancelled" className="mt-2 space-y-4">
               {cancelledRequests.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1078,7 +1078,7 @@ export function AgencyRequestsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-4 space-y-4">
+            <TabsContent value="active" className="mt-2 space-y-4">
               {activeOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1195,7 +1195,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="disputes" className="mt-4 space-y-4">
+            <TabsContent value="disputes" className="mt-2 space-y-4">
               {disputedOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1264,7 +1264,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="completed" className="mt-4 space-y-4">
+            <TabsContent value="completed" className="mt-2 space-y-4">
               {completedOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1320,7 +1320,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="cancelled" className="mt-4 space-y-4">
+            <TabsContent value="cancelled" className="mt-2 space-y-4">
               {cancelledOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
