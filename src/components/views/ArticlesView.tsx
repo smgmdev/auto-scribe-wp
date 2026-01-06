@@ -233,7 +233,7 @@ export function ArticlesView() {
           </div>
         ) : (
           <>
-            <TabsContent value="published" className="mt-6">
+            <TabsContent value="published" className="mt-2">
               {displayedArticles.length === 0 ? (
                 renderEmptyState('No published articles yet. Publish your first article to see it here.')
               ) : (
@@ -250,7 +250,7 @@ export function ArticlesView() {
               )}
             </TabsContent>
 
-            <TabsContent value="drafts" className="mt-6">
+            <TabsContent value="drafts" className="mt-2">
               {displayedArticles.length === 0 ? (
                 renderEmptyState('No draft articles. Start writing a new article to save it as a draft.')
               ) : (
