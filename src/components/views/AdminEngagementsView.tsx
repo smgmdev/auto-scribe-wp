@@ -423,34 +423,63 @@ export function AdminEngagementsView() {
           {cancelledRequests.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
           ) : (
-            <div className="grid gap-4">
-              {cancelledRequests.map((r) => (
-                <Card key={r.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleOpenChat(r)}>
-                  <CardContent className="p-4 flex justify-between items-start">
-                    <div className="flex items-start gap-3">
-                      {r.media_sites?.favicon && (
-                        <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
-                      )}
-                      <div>
-                        <h3 className="font-medium">{r.title}</h3>
-                        <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Cancelled: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                        {r.cancellation_reason && (
-                          <p className="text-xs text-destructive mt-1">Reason: {r.cancellation_reason}</p>
-                        )}
+            <div className="grid gap-2">
+              {cancelledRequests.map((r) => {
+                const requestMessages = messages[r.id] || [];
+                return (
+                  <Card 
+                    key={r.id} 
+                    className="cursor-pointer hover:bg-muted/50 transition-colors border-border/50" 
+                    onClick={() => handleOpenChat(r)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          {r.media_sites?.favicon ? (
+                            <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
+                          ) : (
+                            <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <h3 className="font-medium text-base">{r.title}</h3>
+                            <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Cancelled
+                        </Badge>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="flex items-end justify-between">
+                        <div className="space-y-0.5">
+                          <p className="text-xs text-muted-foreground">
+                            Cancelled engagement: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
+                            {requestMessages.length > 0 && (
+                              <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                          {r.cancellation_reason && (
+                            <p className="text-xs text-destructive">Reason: {r.cancellation_reason}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end gap-0.5 text-sm text-muted-foreground">
+                          {r.media_sites?.publication_format && (
+                            <span className="capitalize">{r.media_sites.publication_format}</span>
+                          )}
+                          {r.media_sites?.price !== undefined && (
+                            <span className="font-medium text-foreground">${r.media_sites.price}</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </TabsContent>
