@@ -961,11 +961,11 @@ export function AgencyRequestsView() {
                       <Card 
                         key={request.id} 
                         className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                          hasUnread ? 'border-l-4 border-l-red-500' : ''
+                          hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
                         }`}
                         onClick={() => handleCardClick(request)}
                       >
-                        <CardHeader className={`py-3 px-4 ${hasUnread ? 'bg-red-500/20' : 'bg-red-500/10'}`}>
+                        <CardHeader className="py-3 px-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="relative">
@@ -973,7 +973,7 @@ export function AgencyRequestsView() {
                                   <img 
                                     src={request.media_site.favicon} 
                                     alt="" 
-                                    className={`h-8 w-8 rounded object-cover ${hasUnread ? '' : 'opacity-60'}`}
+                                    className="h-8 w-8 rounded object-cover"
                                   />
                                 ) : (
                                   <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
@@ -981,38 +981,40 @@ export function AgencyRequestsView() {
                                   </div>
                                 )}
                                 {hasUnread && (
-                                  <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-card" />
+                                  <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
                                 )}
                               </div>
                               <div className="flex items-center gap-2">
-                                <CardTitle className={`text-base ${hasUnread ? 'text-foreground' : 'text-muted-foreground'}`}>{request.media_site?.name || request.title}</CardTitle>
-                                {hasUnread && (
-                                  <Badge className="bg-red-500 text-white border-red-500">Cancelled</Badge>
-                                )}
+                                <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                                <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Cancelled request
+                                </Badge>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              {request.media_site?.price !== undefined && (
-                                <span>${request.media_site.price}</span>
-                              )}
                             </div>
                           </div>
                         </CardHeader>
-                        <CardContent className="py-3 px-4 space-y-1">
-                          <div className="flex items-center justify-between">
+                        <CardContent className="pt-0 pb-3 px-4">
+                          <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
                               <p className="text-xs text-muted-foreground">
                                 Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                {requestMessages.length > 0 && (
+                                  <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                )}
                               </p>
                             </div>
-                            {requestMessages.length > 0 && (
-                              <span className="text-xs text-muted-foreground">
-                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              {request.media_site?.publication_format && (
+                                <span className="capitalize">{request.media_site.publication_format}</span>
+                              )}
+                              {request.media_site?.price !== undefined && (
+                                <span className="font-medium text-foreground">${request.media_site.price}</span>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
