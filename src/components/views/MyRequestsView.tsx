@@ -854,7 +854,12 @@ export function MyRequestsView() {
                                 <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
                               )}
                             </div>
-                            <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                            <div className="flex flex-col">
+                              <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                              {request.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                              )}
+                            </div>
                           </div>
                           <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
                             <XCircle className="h-3 w-3 mr-1" />
