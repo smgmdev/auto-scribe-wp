@@ -576,7 +576,7 @@ export function AgencyMediaView() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button className="bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all">
               <Plus className="h-4 w-4 mr-2" />
               Add Media
               <ChevronDown className="h-4 w-4 ml-2" />
