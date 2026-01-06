@@ -549,7 +549,7 @@ export function AdminUsersView() {
         </Tabs>
       </div>
 
-      <div className="-mt-6">
+      <div className="-mt-8">
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -569,7 +569,7 @@ export function AdminUsersView() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {filteredUsers.map((user) => {
             const isExpanded = expandedUsers.has(user.id);
             
