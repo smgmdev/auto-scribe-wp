@@ -377,7 +377,7 @@ export function AdminEngagementsView() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {r.media_sites?.favicon && (
-                          <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
+                          <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
                         )}
                         <div>
                           <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
@@ -436,10 +436,10 @@ export function AdminEngagementsView() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
                           {r.media_sites?.favicon ? (
-                            <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
+                          <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
                           ) : (
-                            <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                              <MessageSquare className="h-5 w-5 text-muted-foreground" />
                             </div>
                           )}
                           <div className="flex flex-col">
