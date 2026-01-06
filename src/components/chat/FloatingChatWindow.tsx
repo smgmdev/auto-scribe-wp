@@ -4560,7 +4560,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const isAgencyView = globalChatType === 'agency-request' && !isAdmin;
           const isClientView = globalChatType === 'my-request' || actualSenderType === 'client';
           const canDeliver = isAgencyView && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
-          const canAcceptDelivery = isClientView && localOrder.delivery_status === 'delivered';
+          
+          // Check if there's a pending revision request (revision requested after the last delivery)
+          const lastDeliveryIndex = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
+          const hasRevisionAfterDelivery = messages.slice(lastDeliveryIndex + 1).some(m => parseRevisionRequested(m.message));
+          
+          const canAcceptDelivery = isClientView && localOrder.delivery_status === 'delivered' && !hasRevisionAfterDelivery;
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted';
           
           return (
