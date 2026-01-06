@@ -6005,11 +6005,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       Accepted
                     </Badge>
                   )}
-                  {orderDetails.delivery_status === 'delivered' && (
-                    <Badge variant="secondary" className="mt-1 bg-purple-600/20 text-purple-600">
-                      Pending Approval
-                    </Badge>
-                  )}
+                  {orderDetails.delivery_status === 'delivered' && (() => {
+                    // Check if there's a pending revision request (revision requested after the last delivery)
+                    const lastDeliveryIdx = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
+                    const hasRevision = messages.slice(lastDeliveryIdx + 1).some(m => parseRevisionRequested(m.message));
+                    
+                    if (hasRevision) {
+                      return (
+                        <Badge variant="secondary" className="mt-1 bg-orange-600/20 text-orange-600">
+                          Revision Requested
+                        </Badge>
+                      );
+                    }
+                    
+                    return (
+                      <Badge variant="secondary" className="mt-1 bg-purple-600/20 text-purple-600">
+                        Pending Approval
+                      </Badge>
+                    );
+                  })()}
                   {orderDetails.delivery_status === 'pending' && (() => {
                     // Try to get countdown from delivery_deadline first
                     if (orderDetails.delivery_deadline) {
