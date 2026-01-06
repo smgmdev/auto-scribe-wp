@@ -107,7 +107,7 @@ export function CreditHistoryView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -130,7 +130,7 @@ export function CreditHistoryView() {
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
         <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <Tooltip delayDuration={100}>
