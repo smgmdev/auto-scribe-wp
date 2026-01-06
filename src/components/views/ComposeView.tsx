@@ -874,7 +874,7 @@ export function ComposeView() {
       description: currentSite ? `Draft saved to ${currentSite.name}` : "Your draft has been saved"
     });
   };
-  return <div className="space-y-8 animate-fade-in relative">
+  return <div className="space-y-4 animate-fade-in relative">
       {/* Publishing Overlay */}
       {isPublishing && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
@@ -925,9 +925,9 @@ export function ComposeView() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* Main Editor */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Selected Headline */}
           {selectedHeadline && <Card className="border-accent/30 bg-accent/5">
               <CardContent className="flex items-center justify-between p-4">
@@ -1237,7 +1237,7 @@ export function ComposeView() {
 
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Actions - At Top */}
           <div className="space-y-3">
             {editingArticle && <Button variant="default" className="w-full" onClick={handleSaveChanges} disabled={!title || isSaving}>
