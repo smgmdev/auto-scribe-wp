@@ -885,6 +885,11 @@ export function AgencyRequestsView() {
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
                                 </Badge>
+                              ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
+                                <Badge variant="secondary" className="bg-purple-500/20 text-purple-600 border-purple-500/30">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Delivered - Pending Approval
+                                </Badge>
                               ) : hasOrder ? (
                                 <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
                                   <CheckCircle className="h-3 w-3 mr-1" />
@@ -1153,8 +1158,8 @@ export function AgencyRequestsView() {
                                 In Progress
                               </Badge>
                             ) : order.delivery_status === 'delivered' ? (
-                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                                Delivered
+                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                                Delivered - Pending Approval
                               </Badge>
                             ) : (
                               <Badge className="bg-white text-black border-white/30">
