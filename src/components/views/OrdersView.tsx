@@ -711,10 +711,14 @@ export function OrdersView() {
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="gap-2 bg-black text-white border border-black hover:bg-transparent hover:text-black transition-all duration-200"
+          className={`gap-2 border border-black transition-all duration-200 ${
+            refreshing 
+              ? 'bg-transparent text-black' 
+              : 'bg-black text-white hover:bg-transparent hover:text-black'
+          }`}
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
+          {refreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
       </div>
 
