@@ -640,13 +640,6 @@ export function OrdersView() {
                   </>
                 )}
               </div>
-              {order.status === 'cancelled' && (
-                <p className="text-xs text-muted-foreground max-w-[200px] text-right truncate">
-                  {order.service_requests?.[0]?.cancellation_reason?.includes('Arcana Mace Staff') 
-                    ? 'Cancelled by Arcana Mace Staff' 
-                    : 'Cancelled by user'}
-                </p>
-              )}
             </div>
           </div>
         </div>
