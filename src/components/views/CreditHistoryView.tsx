@@ -121,7 +121,7 @@ export function CreditHistoryView() {
         </div>
         <Button 
           onClick={() => setBuyCreditsOpen(true)}
-          className="bg-black text-white hover:bg-transparent hover:text-foreground transition-colors"
+          className="bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
         >
           Buy Credits
         </Button>
