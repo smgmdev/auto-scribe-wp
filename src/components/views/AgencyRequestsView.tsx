@@ -887,7 +887,6 @@ export function AgencyRequestsView() {
                                 </Badge>
                               ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
                                 <Badge variant="secondary" className="bg-purple-500/20 text-purple-600 border-purple-500/30">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
                                   Delivered - Pending Approval
                                 </Badge>
                               ) : hasOrder ? (
