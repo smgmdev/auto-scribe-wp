@@ -684,7 +684,7 @@ export function MyRequestsView() {
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="gap-2 bg-black text-white hover:bg-black/80 transition-all duration-200"
+          className="gap-2 bg-black text-white border border-black hover:bg-transparent hover:text-black transition-all duration-200"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
