@@ -1276,8 +1276,6 @@ export function AdminAgenciesView() {
 
         {/* Onboarded Agencies Tab */}
         <TabsContent value="onboarded" className="mt-2">
-          <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
-          
           {/* Sub-tabs for Active and Downgraded */}
           <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
@@ -1291,6 +1289,7 @@ export function AdminAgenciesView() {
 
             {/* Active Sub-Tab */}
             <TabsContent value="active" className="mt-2">
+              <p className="text-sm text-muted-foreground mb-4">Onboarded active agencies</p>
               {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1422,6 +1421,7 @@ export function AdminAgenciesView() {
 
             {/* Downgraded Sub-Tab */}
             <TabsContent value="downgraded" className="mt-2">
+              <p className="text-sm text-muted-foreground mb-4">Onboarded downgraded agencies</p>
               {agencies.filter(a => a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
