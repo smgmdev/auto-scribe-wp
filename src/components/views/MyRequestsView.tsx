@@ -831,11 +831,11 @@ export function MyRequestsView() {
                     <Card 
                       key={request.id} 
                       className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                        hasUnread ? 'border-l-4 border-l-red-500' : ''
+                        hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
                       }`}
                       onClick={() => handleCardClick(request)}
                     >
-                      <CardHeader className={`py-3 px-4 ${hasUnread ? 'bg-red-500/20' : ''}`}>
+                      <CardHeader className="py-3 px-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
@@ -843,7 +843,7 @@ export function MyRequestsView() {
                                 <img 
                                   src={request.media_site.favicon} 
                                   alt="" 
-                                  className={`h-8 w-8 rounded object-cover ${hasUnread ? '' : 'grayscale'}`}
+                                  className="h-8 w-8 rounded object-cover"
                                 />
                               ) : (
                                 <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
@@ -851,38 +851,38 @@ export function MyRequestsView() {
                                 </div>
                               )}
                               {hasUnread && (
-                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-card" />
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex flex-col">
-                                <CardTitle className={`text-base ${hasUnread ? 'text-foreground' : ''}`}>{request.media_site?.name || request.title}</CardTitle>
-                                {request.media_site?.agency && (
-                                  <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
-                                )}
-                              </div>
-                              {hasUnread && (
-                                <Badge className="bg-red-500 text-white border-red-500">Engagement cancelled</Badge>
-                              )}
-                            </div>
+                            <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                           </div>
+                          <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Cancelled
+                          </Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
+                        <div className="flex items-end justify-between">
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-muted-foreground">
                               Cancelled engagement: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            {requestMessages.length > 0 && (
-                              <span className="text-xs text-muted-foreground">
-                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                              </span>
+                              {requestMessages.length > 0 && (
+                                <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                            {request.media_site?.publication_format && (
+                              <span className="capitalize">{request.media_site.publication_format}</span>
+                            )}
+                            {request.media_site?.price !== undefined && (
+                              <span className="font-medium text-foreground text-sm">${request.media_site.price}</span>
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                          </span>
                         </div>
                       </CardContent>
                     </Card>
