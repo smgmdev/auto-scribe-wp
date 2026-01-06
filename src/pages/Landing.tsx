@@ -756,7 +756,7 @@ const Landing = () => {
                             <img
                               src={site.favicon || getFaviconUrl(site.link)}
                               alt={site.name}
-                              className="h-10 w-10 rounded-lg bg-muted object-contain flex-shrink-0"
+                              className="h-10 w-10 rounded-lg bg-muted object-cover flex-shrink-0"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                               }}
