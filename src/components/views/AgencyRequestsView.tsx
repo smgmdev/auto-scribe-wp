@@ -987,7 +987,6 @@ export function AgencyRequestsView() {
                             <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
                             </div>
                             <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                              <XCircle className="h-3 w-3 mr-1" />
                               Cancelled
                             </Badge>
                           </div>
@@ -1356,7 +1355,6 @@ export function AgencyRequestsView() {
                             <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                           </div>
                           <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                            <XCircle className="h-3 w-3 mr-1" />
                             Cancelled
                           </Badge>
                         </div>
