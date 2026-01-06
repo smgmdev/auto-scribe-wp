@@ -870,8 +870,6 @@ export function AdminAgenciesView() {
 
         {/* Void Tab - Cancelled and Rejected */}
         <TabsContent value="void" className="mt-2">
-          <p className="text-sm text-muted-foreground mb-4">Cancelled and rejected agency applications</p>
-          
           {/* Sub-tabs for void stages */}
           <Tabs value={voidSubTab} onValueChange={setVoidSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
@@ -890,6 +888,7 @@ export function AdminAgenciesView() {
 
             {/* Cancelled Sub-Tab */}
             <TabsContent value="cancelled" className="mt-2">
+              <p className="text-sm text-muted-foreground mb-4">Cancelled agency applications by user</p>
               {cancelledApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -970,6 +969,7 @@ export function AdminAgenciesView() {
 
             {/* Rejected Sub-Tab */}
             <TabsContent value="rejected" className="mt-2">
+              <p className="text-sm text-muted-foreground mb-4">Rejected agency applications by Arcana Mace Staff</p>
               {rejectedApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
