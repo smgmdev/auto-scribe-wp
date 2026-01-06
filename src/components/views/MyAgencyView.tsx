@@ -231,7 +231,7 @@ export function MyAgencyView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -249,7 +249,7 @@ export function MyAgencyView() {
         </Badge>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-2 md:grid-cols-2">
         {/* Agency Profile Card */}
         <Card className="md:col-span-2">
           <CardHeader className="pb-4">
