@@ -3567,7 +3567,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             )}
             {orderDelivered.delivery_notes && (
-              <p className={`text-xs mt-2 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                 Notes: {orderDelivered.delivery_notes}
               </p>
             )}
