@@ -3,7 +3,8 @@ import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, 
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -597,74 +598,75 @@ export function OrdersView() {
       {!order.read && !isAdmin && (
         <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
       )}
-      <CardContent className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-start gap-4">
-          <div className="flex flex-col items-start">
-            {order.media_sites?.favicon ? (
-              <img 
-                src={order.media_sites.favicon} 
-                alt="" 
-                className="w-10 h-10 rounded object-cover"
-              />
-            ) : (
-              <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
-                <Package className="h-5 w-5 text-muted-foreground" />
+      <CardHeader className="pb-2 px-4 pt-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              {order.media_sites?.favicon ? (
+                <img 
+                  src={order.media_sites.favicon} 
+                  alt="" 
+                  className="h-8 w-8 rounded object-cover"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{order.media_sites?.name || 'Unknown Site'}</CardTitle>
+                {!order.read && !isAdmin && (
+                  <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">NEW</Badge>
+                )}
               </div>
-            )}
-            <div className="space-y-0.5 mt-1.5">
-              <span className="text-xs text-muted-foreground block">
-                Order Started: {new Date(order.created_at).toLocaleString()}
-              </span>
-              {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
-                <span className="text-xs text-muted-foreground block">
-                  Order Delivered: {new Date(order.delivered_at).toLocaleString()}
-                </span>
+              {order.media_sites?.agency && (
+                <span className="text-xs text-muted-foreground">via {order.media_sites.agency}</span>
               )}
             </div>
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
-              {!order.read && !isAdmin && (
-                <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">NEW</Badge>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+              {isAdmin && (
+                <p className="text-xs text-muted-foreground">
+                  Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
+                </p>
               )}
             </div>
-            {order.media_sites?.agency && (
-              <span className="text-xs text-muted-foreground">via {order.media_sites.agency}</span>
-            )}
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex gap-2">
+                {order.status === 'cancelled' ? (
+                  <Badge variant="destructive">Cancelled</Badge>
+                ) : (
+                  <>
+                    {order.status !== 'paid' && getStatusBadge(order.status)}
+                    {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
+                  </>
+                )}
+              </div>
+              {order.status === 'cancelled' && (
+                <p className="text-xs text-muted-foreground max-w-[200px] text-right truncate">
+                  {order.service_requests?.[0]?.cancellation_reason?.includes('Arcana Mace Staff') 
+                    ? 'Cancelled by Arcana Mace Staff' 
+                    : 'Cancelled by user'}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
-            {isAdmin && (
-              <p className="text-xs text-muted-foreground">
-                Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
-              </p>
-            )}
-          </div>
-          
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex gap-2">
-              {order.status === 'cancelled' ? (
-                <Badge variant="destructive">Cancelled</Badge>
-              ) : (
-                <>
-                  {order.status !== 'paid' && getStatusBadge(order.status)}
-                  {getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
-                </>
-              )}
-            </div>
-            {order.status === 'cancelled' && (
-              <p className="text-xs text-muted-foreground max-w-[200px] text-right truncate">
-                {order.service_requests?.[0]?.cancellation_reason?.includes('Arcana Mace Staff') 
-                  ? 'Cancelled by Arcana Mace Staff' 
-                  : 'Cancelled by user'}
-              </p>
-            )}
-          </div>
-
+      </CardHeader>
+      <CardContent className="pt-0 pb-3 px-4">
+        <div className="space-y-0.5">
+          <span className="text-xs text-muted-foreground block">
+            Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+          </span>
+          {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+            <span className="text-xs text-muted-foreground block">
+              Order Delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>
