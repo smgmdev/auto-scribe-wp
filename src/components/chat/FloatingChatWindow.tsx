@@ -4562,6 +4562,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </TooltipProvider>
                       )}
                       {(() => {
+                        // Check if order has been delivered (awaiting client acceptance)
+                        const isDelivered = localOrder.delivery_status === 'delivered';
+                        
+                        if (isDelivered) {
+                          return (
+                            <>
+                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 cursor-help text-green-400">
+                                      <CheckCircle className="h-3 w-3" />
+                                      <span className="text-xs font-medium">Delivered</span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <p>Order has been delivered. Awaiting client acceptance.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          );
+                        }
+                        
                         // Calculate real-time countdown from accepted order data
                         const countdown = acceptedOrderData?.accepted_at && acceptedOrderData?.delivery_duration 
                           ? getDeliveryCountdown(acceptedOrderData.accepted_at, acceptedOrderData.delivery_duration)
@@ -4658,6 +4682,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+                  )}
+                  {/* Accept/Request Revision buttons for client when order is delivered */}
+                  {actualSenderType === 'client' && localOrder.delivery_status === 'delivered' && (
+                    <>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white shrink-0"
+                        onClick={handleAcceptDeliveryFromChat}
+                        disabled={acceptingDelivery}
+                      >
+                        {acceptingDelivery ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-transparent text-white border-white/50 hover:bg-white/10 shrink-0"
+                        onClick={() => setRevisionDialogOpen(true)}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Request Revision
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
