@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, HelpCircle, ShoppingBag } from 'lucide-react';
+import { CreditCard, Coins, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -131,180 +131,150 @@ export function CreditHistoryView() {
 
       {/* Summary Cards */}
       <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Available Credits
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Available Credits
+                </CardTitle>
+                <Wallet className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    availableCredits.toLocaleString()
+                  )}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="right" 
-                align="start"
-                sideOffset={8}
-                collisionPadding={16}
-                avoidCollisions={true}
-                className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-              >
-                <p>Your current credit balance available for orders</p>
-              </TooltipContent>
-            </Tooltip>
-            <Wallet className="h-4 w-4 text-muted-foreground/60" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                availableCredits.toLocaleString()
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            sideOffset={8}
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+          >
+            <p>Your current credit balance available for orders</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Total Purchased
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Total Purchased
+                </CardTitle>
+                <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    totalPurchased.toLocaleString()
+                  )}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="right" 
-                align="start"
-                sideOffset={8}
-                collisionPadding={16}
-                avoidCollisions={true}
-                className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-              >
-                <p>Total credits you have purchased</p>
-              </TooltipContent>
-            </Tooltip>
-            <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                totalPurchased.toLocaleString()
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            sideOffset={8}
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+          >
+            <p>Total credits you have purchased</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Total Used
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Total Used
+                </CardTitle>
+                <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    totalSpent.toLocaleString()
+                  )}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="right" 
-                align="start"
-                sideOffset={8}
-                collisionPadding={16}
-                avoidCollisions={true}
-                className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-              >
-                <p>Total credits spent on orders and other usage</p>
-              </TooltipContent>
-            </Tooltip>
-            <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                totalSpent.toLocaleString()
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            sideOffset={8}
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+          >
+            <p>Total credits spent on orders and other usage</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Total Orders
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Total Orders
+                </CardTitle>
+                <ShoppingBag className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    totalOrders
+                  )}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="right" 
-                align="start"
-                sideOffset={8}
-                collisionPadding={16}
-                avoidCollisions={true}
-                className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-              >
-                <p>Number of media site orders placed using credits ({totalOrderCredits.toLocaleString()} credits)</p>
-              </TooltipContent>
-            </Tooltip>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground/60" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                totalOrders
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            sideOffset={8}
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+          >
+            <p>Number of media site orders placed using credits ({totalOrderCredits.toLocaleString()} credits)</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9]">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Transactions
-                  </CardTitle>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground/70" />
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Transactions
+                </CardTitle>
+                <Coins className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    transactions.length
+                  )}
                 </div>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="right" 
-                align="start"
-                sideOffset={8}
-                collisionPadding={16}
-                avoidCollisions={true}
-                className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-              >
-                <p>Total number of credit transactions</p>
-              </TooltipContent>
-            </Tooltip>
-            <Coins className="h-4 w-4 text-muted-foreground/60" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                transactions.length
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            sideOffset={8}
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+          >
+            <p>Total number of credit transactions</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
 
