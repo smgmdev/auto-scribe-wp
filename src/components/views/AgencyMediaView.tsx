@@ -623,10 +623,10 @@ export function AgencyMediaView() {
         </TabsList>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-6 space-y-4">
+        <TabsContent value="wordpress" className="mt-2 space-y-4">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <TabsList className="mb-6">
+            <TabsList>
               <TabsTrigger value="connected" className="relative overflow-visible">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
@@ -966,10 +966,10 @@ export function AgencyMediaView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-6 space-y-4">
+        <TabsContent value="media" className="mt-2 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="mb-6 overflow-visible">
+            <TabsList className="overflow-visible">
               <TabsTrigger value="added" className="relative overflow-visible">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
