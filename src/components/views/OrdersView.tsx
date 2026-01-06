@@ -628,14 +628,16 @@ export function OrdersView() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
-              {isAdmin && (
-                <p className="text-xs text-muted-foreground">
-                  Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
-                </p>
-              )}
-            </div>
+            {order.status !== 'cancelled' && (
+              <div className="text-right">
+                <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+                {isAdmin && (
+                  <p className="text-xs text-muted-foreground">
+                    Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
+                  </p>
+                )}
+              </div>
+            )}
             <div className="flex flex-col items-end gap-1">
               <div className="flex gap-2">
                 {order.status === 'cancelled' ? (
