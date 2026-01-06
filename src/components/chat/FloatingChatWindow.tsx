@@ -4543,7 +4543,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const acceptedOrderData = getLastAcceptedOrderRequestData();
           const timeInfo = localOrder.delivery_deadline ? formatTimeRemaining(localOrder.delivery_deadline) : null;
           const isAgencyView = globalChatType === 'agency-request' && !isAdmin;
+          const isClientView = globalChatType === 'my-request' || actualSenderType === 'client';
           const canDeliver = isAgencyView && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
+          const canAcceptDelivery = isClientView && localOrder.delivery_status === 'delivered';
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted';
           
           return (
@@ -4716,7 +4718,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </TooltipProvider>
                   )}
                   {/* Accept/Request Revision buttons for client when order is delivered */}
-                  {actualSenderType === 'client' && localOrder.delivery_status === 'delivered' && (
+                  {canAcceptDelivery && (
                     <>
                       <Button
                         size="sm"
