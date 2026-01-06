@@ -873,7 +873,7 @@ export function AdminAgenciesView() {
           <p className="text-sm text-muted-foreground mb-4">Cancelled and rejected agency applications</p>
           
           {/* Sub-tabs for void stages */}
-          <Tabs value={voidSubTab} onValueChange={setVoidSubTab} className="mb-4">
+          <Tabs value={voidSubTab} onValueChange={setVoidSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="cancelled" className="relative">
                 Cancelled ({cancelledApplications.length})
@@ -1078,7 +1078,7 @@ export function AdminAgenciesView() {
           <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
           
           {/* Sub-tabs for verification stages */}
-          <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab} className="mb-4">
+          <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="pending-verification" className="relative">
                 Pending Verification ({agenciesPendingVerification.length})
@@ -1279,7 +1279,7 @@ export function AdminAgenciesView() {
           <p className="text-sm text-muted-foreground mb-4">Onboarded agencies</p>
           
           {/* Sub-tabs for Active and Downgraded */}
-          <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab} className="mb-4">
+          <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="active" className="relative">
                 Active ({agencies.filter(a => a.onboarding_complete && !a.downgraded).length})
