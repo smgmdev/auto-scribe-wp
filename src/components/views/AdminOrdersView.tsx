@@ -875,9 +875,11 @@ export function AdminOrdersView() {
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
-                        <p className="text-xs text-green-600">
-                          +${(order.platform_fee_cents / 100).toFixed(2)} fee
+                        <p className="font-semibold">
+                          ${(order.amount_cents / 100).toFixed(2)}
+                          <span className="text-xs text-green-600 font-normal ml-2">
+                            +${(order.platform_fee_cents / 100).toFixed(2)} fee
+                          </span>
                         </p>
                       </div>
                     </div>
