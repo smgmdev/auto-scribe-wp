@@ -505,6 +505,15 @@ export function MyRequestsView() {
     if (!request.order || request.order.status !== 'paid') return null;
     if (request.order.delivery_status === 'accepted') return null;
     
+    // Show "Delivered - Pending Approval" badge when order is delivered
+    if (request.order.delivery_status === 'delivered') {
+      return (
+        <Badge className="bg-purple-600/20 text-purple-600">
+          Delivered - Pending Approval
+        </Badge>
+      );
+    }
+    
     const countdown = request.order.delivery_deadline 
       ? formatDeliveryCountdown(request.order.delivery_deadline)
       : null;
