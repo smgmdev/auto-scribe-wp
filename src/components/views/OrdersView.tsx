@@ -610,19 +610,26 @@ export function OrdersView() {
               <Package className="h-5 w-5 text-muted-foreground" />
             </div>
           )}
-          <div>
+          <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
               {!order.read && !isAdmin && (
                 <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">NEW</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {order.delivery_status === 'delivered' || order.delivery_status === 'accepted'
-                ? `Order Delivered: ${new Date(order.delivered_at || order.created_at).toLocaleString()}`
-                : `Order Started: ${new Date(order.created_at).toLocaleString()}`
-              }
-            </p>
+            {order.media_sites?.agency && (
+              <span className="text-xs text-muted-foreground">via {order.media_sites.agency}</span>
+            )}
+            <div className="space-y-0.5 mt-1">
+              <span className="text-xs text-muted-foreground block">
+                Order Started: {new Date(order.created_at).toLocaleString()}
+              </span>
+              {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                <span className="text-xs text-muted-foreground block">
+                  Order Delivered: {new Date(order.delivered_at).toLocaleString()}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
