@@ -448,7 +448,6 @@ export function AdminEngagementsView() {
                           </div>
                         </div>
                         <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                          <XCircle className="h-3 w-3 mr-1" />
                           Cancelled
                         </Badge>
                       </div>
