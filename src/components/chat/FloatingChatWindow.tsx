@@ -4601,7 +4601,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex items-center gap-1 cursor-help text-green-400">
-                                      <CheckCircle className="h-3 w-3" />
                                       <span className="text-xs font-medium">Delivered</span>
                                     </div>
                                   </TooltipTrigger>
