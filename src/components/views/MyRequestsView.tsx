@@ -751,7 +751,7 @@ export function MyRequestsView() {
                       }`}
                       onClick={() => handleCardClick(request)}
                     >
-                      <CardHeader className="py-3 px-4">
+                      <CardHeader className="pb-2 px-4 pt-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
@@ -835,7 +835,7 @@ export function MyRequestsView() {
                       }`}
                       onClick={() => handleCardClick(request)}
                     >
-                      <CardHeader className="py-3 px-4">
+                      <CardHeader className="pb-2 px-4 pt-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
