@@ -43,6 +43,7 @@ interface Order {
     agency: string | null;
     favicon: string | null;
     link: string;
+    publication_format: string;
   } | null;
   profiles?: {
     email: string | null;
@@ -301,7 +302,7 @@ export function OrdersView() {
       .from('orders')
       .select(`
         *,
-        media_sites (name, agency, favicon, link),
+        media_sites (name, agency, favicon, link, publication_format),
         service_requests (cancellation_reason)
       `)
       .eq('user_id', user.id) // Only show orders where user is the buyer (not agency orders)
@@ -668,6 +669,9 @@ export function OrdersView() {
             )}
           </div>
           <div className="text-right">
+            {order.media_sites?.publication_format && (
+              <p className="text-xs text-muted-foreground">{order.media_sites.publication_format}</p>
+            )}
             <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
             {isAdmin && (
               <p className="text-xs text-muted-foreground">
