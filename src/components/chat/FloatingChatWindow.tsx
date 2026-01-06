@@ -4576,11 +4576,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-help shrink-0">
-                          <CheckCircle className="h-6 w-6 text-green-500" />
+                          {hasRevisionAfterDelivery ? (
+                            <RefreshCw className="h-6 w-6 text-orange-400" />
+                          ) : (
+                            <CheckCircle className="h-6 w-6 text-green-500" />
+                          )}
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                        <p>{acceptedOrderData?.media_site_name || 'Order Accepted'}</p>
+                        <p>{hasRevisionAfterDelivery ? 'Revision Requested' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
