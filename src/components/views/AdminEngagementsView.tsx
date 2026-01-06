@@ -317,31 +317,37 @@ export function AdminEngagementsView() {
                   {!r.read && (
                     <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
                   )}
-                  <CardContent className="p-4 flex justify-between items-start relative">
-                    <div className="flex items-start gap-3">
-                      {r.media_sites?.favicon && (
-                        <img src={r.media_sites.favicon} className="h-10 w-10 rounded mt-1" alt="" />
-                      )}
-                      <div>
-                        <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
-                        <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
-                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          Last message: {messages[r.id]?.length > 0 
-                            ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                            : 'No messages'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
+                  <CardContent className="p-4 relative">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {r.media_sites?.favicon && (
+                          <img src={r.media_sites.favicon} className="h-10 w-10 rounded" alt="" />
+                        )}
+                        <div>
+                          <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
+                          <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        {getEngagementBadge(r)}
                       </div>
                     </div>
-                    <div className="text-right">
-                      {getEngagementBadge(r)}
-                    </div>
-                    <div className="absolute bottom-3 right-4 flex items-center gap-1 text-xs text-muted-foreground">
-                      <MessageSquare className="h-3 w-3" />
-                      {messages[r.id]?.length || 0}
+                    <div className="mt-2 space-y-0.5">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Last message: {messages[r.id]?.length > 0 
+                          ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
+                          : 'No messages'}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                        </span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          {messages[r.id]?.length || 0} message{(messages[r.id]?.length || 0) !== 1 ? 's' : ''}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
