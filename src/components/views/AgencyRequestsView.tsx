@@ -913,19 +913,15 @@ export function AgencyRequestsView() {
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3" />
                                 <span>Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}</span>
+                                {requestMessages.length > 0 && (
+                                  <span>• {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                )}
                               </div>
                             )}
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">
-                                  Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                                </span>
-                                {requestMessages.length > 0 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                                  </span>
-                                )}
-                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
                               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                 {request.media_site?.publication_format && (
                                   <span className="capitalize">{request.media_site.publication_format}</span>
