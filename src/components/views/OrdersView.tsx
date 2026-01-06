@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle } from 'lucide-react';
+import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle, RefreshCw } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -99,6 +99,7 @@ export function OrdersView() {
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
 
   // Mark all orders in the current tab as read when switching tabs
@@ -689,15 +690,33 @@ export function OrdersView() {
     </Card>
   );
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchOrders(), fetchUserDisputes()]);
+    setRefreshing(false);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">
-          {isAdmin ? 'All Orders' : 'My Orders'}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {isAdmin ? 'Manage all orders and payouts' : 'Track your media placement orders'}
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            {isAdmin ? 'All Orders' : 'My Orders'}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {isAdmin ? 'Manage all orders and payouts' : 'Track your media placement orders'}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       {loading ? (

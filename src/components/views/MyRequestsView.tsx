@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -70,6 +70,7 @@ export function MyRequestsView() {
   const [activeTab, setActiveTab] = useState<'active' | 'cancelled'>('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [, setTimerTick] = useState(0);
   
   // Timer for real-time countdown updates
@@ -661,16 +662,34 @@ export function MyRequestsView() {
     );
   }
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchRequests();
+    setRefreshing(false);
+  };
+
   return (
     <div className="animate-fade-in">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <ClipboardList className="h-8 w-8" />
-          My Engagements
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Track your engagements and communicate with agencies
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <ClipboardList className="h-8 w-8" />
+            My Engagements
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Track your engagements and communicate with agencies
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       <div className="space-y-2">
