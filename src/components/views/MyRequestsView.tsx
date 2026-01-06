@@ -673,17 +673,18 @@ export function MyRequestsView() {
         </p>
       </div>
 
-      <div className="relative mb-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search engagements..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 w-full"
-        />
-      </div>
+      <div className="space-y-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search engagements..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 w-full"
+          />
+        </div>
 
-      <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'cancelled')} className="w-full">
+        <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'cancelled')} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="active" className="gap-2 relative">
             <ClipboardList className="h-4 w-4" />
@@ -705,7 +706,7 @@ export function MyRequestsView() {
           </TabsTrigger>
         </TabsList>
 
-          <TabsContent value="active" className="mt-3">
+          <TabsContent value="active" className="mt-2">
             {sortedActiveRequests.length === 0 ? (
               <Card className="border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -787,7 +788,7 @@ export function MyRequestsView() {
             )}
           </TabsContent>
 
-          <TabsContent value="cancelled" className="mt-3">
+          <TabsContent value="cancelled" className="mt-2">
             {sortedCancelledRequests.length === 0 ? (
               <Card className="border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -865,7 +866,8 @@ export function MyRequestsView() {
               </div>
             )}
           </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }
