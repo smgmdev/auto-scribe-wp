@@ -1144,12 +1144,6 @@ export function AgencyRequestsView() {
                                   <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
                                 )}
                               </div>
-                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                {order.media_site?.publication_format && (
-                                  <span className="capitalize">{order.media_site.publication_format}</span>
-                                )}
-                                <span className="font-medium text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
-                              </div>
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1">
@@ -1177,14 +1171,20 @@ export function AgencyRequestsView() {
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
                         <div className="space-y-0.5">
-                          <span className="text-xs text-muted-foreground block">
-                            Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
-                          </span>
-                          {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
-                            <span className="text-xs text-muted-foreground block">
-                              Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                          )}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <span>Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}</span>
+                              {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                                <span>• Delivered: {format(new Date(order.delivered_at), 'MMM d, h:mm a')}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              {order.media_site?.publication_format && (
+                                <span className="capitalize">{order.media_site.publication_format}</span>
+                              )}
+                              <span className="font-medium text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
+                            </div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
