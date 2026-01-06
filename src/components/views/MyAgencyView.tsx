@@ -370,6 +370,18 @@ export function MyAgencyView() {
                   </p>
                 </div>
               </div>
+
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  <Percent className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">Commission Rate</p>
+                  <p className="text-sm font-medium">
+                    You keep {100 - agency.commission_percentage}% <span className="text-muted-foreground">({agency.commission_percentage}% fee)</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -500,28 +512,6 @@ export function MyAgencyView() {
           </CardContent>
         </Card>
 
-        {/* Commission Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Percent className="h-5 w-5" />
-              Commission Rate
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-4">
-              <p className="text-4xl font-bold text-primary">
-                {100 - agency.commission_percentage}%
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                You keep {100 - agency.commission_percentage}% of each order
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Platform fee: {agency.commission_percentage}%
-              </p>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Media Sites Tabs */}
         <Card className="md:col-span-2">
