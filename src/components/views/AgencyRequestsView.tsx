@@ -908,28 +908,28 @@ export function AgencyRequestsView() {
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0 pb-3 px-4">
-                          <div className="space-y-0.5">
-                            {lastMessage && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                <span>Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}</span>
-                                {requestMessages.length > 0 && (
-                                  <span>• {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                )}
-                              </div>
-                            )}
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground">
+                          <div className="flex items-end justify-between">
+                            <div className="space-y-0.5">
+                              {lastMessage && (
+                                <span className="text-xs text-muted-foreground block">
+                                  <Clock className="h-3 w-3 inline mr-1" />
+                                  Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}
+                                  {requestMessages.length > 0 && (
+                                    <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                  )}
+                                </span>
+                              )}
+                              <span className="text-xs text-muted-foreground block">
                                 Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </span>
-                              <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
-                                {request.media_site?.publication_format && (
-                                  <span className="capitalize">{request.media_site.publication_format}</span>
-                                )}
-                                {request.media_site?.price !== undefined && (
-                                  <span className="font-medium text-foreground">${request.media_site.price}</span>
-                                )}
-                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5">
+                              {request.media_site?.publication_format && (
+                                <span className="text-xs text-muted-foreground capitalize">{request.media_site.publication_format}</span>
+                              )}
+                              {request.media_site?.price !== undefined && (
+                                <span className="font-semibold text-sm text-foreground">${request.media_site.price}</span>
+                              )}
                             </div>
                           </div>
                         </CardContent>
