@@ -986,7 +986,7 @@ export function AdminFloatingChat({
               </div>
             )}
             {orderDelivered.delivery_notes && (
-              <p className="text-xs mt-2 italic text-muted-foreground">
+              <p className="text-xs mt-2 text-muted-foreground">
                 Notes: {orderDelivered.delivery_notes}
               </p>
             )}
