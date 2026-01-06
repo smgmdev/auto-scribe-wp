@@ -239,7 +239,7 @@ export function AdminEngagementsView() {
 
     if (hasOrder && request.orders?.delivery_status === 'delivered') {
       return (
-        <Badge className="bg-amber-600">
+        <Badge className="bg-purple-600">
           Delivered - Pending Approval
         </Badge>
       );
