@@ -5947,7 +5947,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   {orderDetails.delivery_status === 'delivered' && (
                     <Badge variant="secondary" className="mt-1 bg-purple-600/20 text-purple-600">
-                      Delivered
+                      Delivered - Pending Approval
                     </Badge>
                   )}
                   {orderDetails.delivery_status === 'pending' && (() => {
