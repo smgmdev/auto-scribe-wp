@@ -1393,7 +1393,7 @@ export function AdminFloatingChat({
                     </div>
                   )}
                   {orderDetails.delivery_status === 'delivered' && (
-                    <p className="text-xs text-white/70">Delivered - Awaiting acceptance</p>
+                    <p className="text-xs text-white/70">Awaiting client approval</p>
                   )}
                   {orderDetails.delivery_status === 'accepted' && (
                     <p className="text-xs text-white/70">Completed</p>
