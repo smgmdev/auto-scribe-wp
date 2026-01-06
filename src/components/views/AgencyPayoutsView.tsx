@@ -114,7 +114,7 @@ export function AgencyPayoutsView() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-2 animate-fade-in">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
@@ -127,7 +127,7 @@ export function AgencyPayoutsView() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-2 md:grid-cols-3">
         <Card className="transition-colors hover:border-[#4771d9] py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
             <Tooltip delayDuration={100}>
@@ -215,7 +215,7 @@ export function AgencyPayoutsView() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {transactions.map((transaction) => (
                 <div 
                   key={transaction.id} 
