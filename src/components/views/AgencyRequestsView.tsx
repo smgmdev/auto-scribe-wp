@@ -1181,7 +1181,7 @@ export function AgencyRequestsView() {
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                             {order.media_site?.publication_format && (
                               <span className="capitalize">{order.media_site.publication_format}</span>
                             )}
