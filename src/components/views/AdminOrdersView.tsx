@@ -70,6 +70,7 @@ export function AdminOrdersView() {
   const [activeTab, setActiveTab] = useState('pending');
   const [historySubTab, setHistorySubTab] = useState<'all' | 'cancelled'>('all');
   const [disputes, setDisputes] = useState<{ id: string; order_id: string; service_request_id: string; read: boolean }[]>([]);
+  const [agencyCommissions, setAgencyCommissions] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
@@ -218,6 +219,23 @@ export function AdminOrdersView() {
       // Update unread count in store
       const unreadCount = (data || []).filter((o: Order) => o.status === 'paid' && !o.read).length;
       setUnreadOrdersCount(unreadCount);
+      
+      // Fetch agency commissions for all unique agencies
+      const uniqueAgencies = [...new Set((data || []).map((o: Order) => o.media_sites?.agency).filter(Boolean))];
+      if (uniqueAgencies.length > 0) {
+        const { data: agencyData } = await supabase
+          .from('agency_payouts')
+          .select('agency_name, commission_percentage')
+          .in('agency_name', uniqueAgencies);
+        
+        if (agencyData) {
+          const commissions: Record<string, number> = {};
+          agencyData.forEach((a: any) => {
+            commissions[a.agency_name] = a.commission_percentage;
+          });
+          setAgencyCommissions(commissions);
+        }
+      }
     }
     setLoading(false);
     setIsRefreshing(false);
@@ -554,6 +572,16 @@ export function AdminOrdersView() {
     }
   };
 
+  // Helper to calculate dynamic platform fee based on current agency commission
+  const calculatePlatformFee = (order: Order): number => {
+    const agency = order.media_sites?.agency;
+    if (!agency || !agencyCommissions[agency]) {
+      return order.platform_fee_cents; // Fall back to stored value
+    }
+    const commissionPercentage = agencyCommissions[agency];
+    return Math.round(order.amount_cents * (commissionPercentage / 100));
+  };
+
   const filteredOrders = orders.filter(order => {
     // First apply tab filter
     let matchesTab = false;
@@ -622,7 +650,7 @@ export function AdminOrdersView() {
   
   const totalFeeEarnings = orders
     .filter(o => o.status === 'completed')
-    .reduce((sum, o) => sum + o.platform_fee_cents, 0);
+    .reduce((sum, o) => sum + calculatePlatformFee(o), 0);
 
   if (!isAdmin) {
     return <div className="text-center py-12 text-muted-foreground">Admin access required</div>;
@@ -889,7 +917,7 @@ export function AdminOrdersView() {
                         <p className="font-semibold text-sm">
                           ${(order.amount_cents / 100).toFixed(2)}
                           <span className="text-xs text-green-600 font-normal ml-2">
-                            +${(order.platform_fee_cents / 100).toFixed(2)} fee
+                            +${(calculatePlatformFee(order) / 100).toFixed(2)} fee
                           </span>
                         </p>
                       </div>
@@ -1023,8 +1051,8 @@ export function AdminOrdersView() {
                   <span className="font-semibold">${(selectedOrder.amount_cents / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
-                  <span className="text-muted-foreground">Platform Fee</span>
-                  <span className="text-green-600">${(selectedOrder.platform_fee_cents / 100).toFixed(2)}</span>
+                  <span className="text-muted-foreground">Platform Fee ({agencyCommissions[selectedOrder.media_sites?.agency || ''] || 10}%)</span>
+                  <span className="text-green-600">${(calculatePlatformFee(selectedOrder) / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
                   <span className="text-muted-foreground">Agency Payout</span>
