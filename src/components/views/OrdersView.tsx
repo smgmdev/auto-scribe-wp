@@ -598,18 +598,30 @@ export function OrdersView() {
         <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
       )}
       <CardContent className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-4">
-          {order.media_sites?.favicon ? (
-            <img 
-              src={order.media_sites.favicon} 
-              alt="" 
-              className="w-10 h-10 rounded object-cover"
-            />
-          ) : (
-            <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
-              <Package className="h-5 w-5 text-muted-foreground" />
+        <div className="flex items-start gap-4">
+          <div className="flex flex-col items-start">
+            {order.media_sites?.favicon ? (
+              <img 
+                src={order.media_sites.favicon} 
+                alt="" 
+                className="w-10 h-10 rounded object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
+                <Package className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+            <div className="space-y-0.5 mt-1.5">
+              <span className="text-xs text-muted-foreground block">
+                Order Started: {new Date(order.created_at).toLocaleString()}
+              </span>
+              {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                <span className="text-xs text-muted-foreground block">
+                  Order Delivered: {new Date(order.delivered_at).toLocaleString()}
+                </span>
+              )}
             </div>
-          )}
+          </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold">{order.media_sites?.name || 'Unknown Site'}</h3>
@@ -620,16 +632,6 @@ export function OrdersView() {
             {order.media_sites?.agency && (
               <span className="text-xs text-muted-foreground">via {order.media_sites.agency}</span>
             )}
-            <div className="space-y-0.5 mt-1">
-              <span className="text-xs text-muted-foreground block">
-                Order Started: {new Date(order.created_at).toLocaleString()}
-              </span>
-              {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
-                <span className="text-xs text-muted-foreground block">
-                  Order Delivered: {new Date(order.delivered_at).toLocaleString()}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
