@@ -302,6 +302,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   const [, setTimerTick] = useState(0); // Force re-render for countdown timer
   
+  // Admin dispute resolution states
+  const [completeViaDisputeDialogOpen, setCompleteViaDisputeDialogOpen] = useState(false);
+  const [cancelViaDisputeDialogOpen, setCancelViaDisputeDialogOpen] = useState(false);
+  const [disputeResolutionReason, setDisputeResolutionReason] = useState('');
+  const [resolvingDispute, setResolvingDispute] = useState(false);
+  
   // Drag state - use position from chat object
   const [localPosition, setLocalPosition] = useState(chat.position);
   const [isDragging, setIsDragging] = useState(false);
@@ -4449,13 +4455,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Cancel Order
                       </DropdownMenuItem>
                     )}
-                    {hasOpenDispute && (
+                    {hasOpenDispute && !isAdmin && (
                       <DropdownMenuItem 
-                        className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
+                        className="cursor-pointer text-muted-foreground"
                         disabled
                       >
                         Dispute Opened
                       </DropdownMenuItem>
+                    )}
+                    {hasOpenDispute && isAdmin && adminJoined && (
+                      <>
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-green-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            setCompleteViaDisputeDialogOpen(true);
+                          }}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Complete via Dispute
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          onSelect={() => {
+                            setActionDropdownOpen(false);
+                            setCancelViaDisputeDialogOpen(true);
+                          }}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Cancel via Dispute
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {globalChatType === 'my-request' && hasOrder && (
                       <DropdownMenuItem 
@@ -7052,6 +7082,230 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               className="bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:text-destructive hover:border-destructive transition-all duration-200"
             >
               {cancellingPlacedOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Admin: Complete Order via Dispute Dialog */}
+      <AlertDialog open={completeViaDisputeDialogOpen} onOpenChange={setCompleteViaDisputeDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Order via Dispute</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will mark the order as completed and resolve the dispute in favor of completing the order. Please provide a reason for this decision.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Reason for completing the order..."
+            value={disputeResolutionReason}
+            onChange={(e) => setDisputeResolutionReason(e.target.value)}
+            rows={3}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
+              onClick={() => {
+                setDisputeResolutionReason('');
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={async () => {
+                if (!globalChatRequest || !disputeResolutionReason.trim() || !localOrder) return;
+                
+                setResolvingDispute(true);
+                try {
+                  // Update order to completed
+                  const { error: orderError } = await supabase
+                    .from('orders')
+                    .update({ 
+                      status: 'completed',
+                      delivery_status: 'accepted',
+                      accepted_at: new Date().toISOString()
+                    })
+                    .eq('id', localOrder.id);
+                  
+                  if (orderError) throw orderError;
+                  
+                  // Close the dispute
+                  const { error: disputeError } = await supabase
+                    .from('disputes')
+                    .update({ 
+                      status: 'resolved',
+                      resolved_at: new Date().toISOString(),
+                      resolved_by: user?.id,
+                      admin_notes: `Completed via dispute: ${disputeResolutionReason.trim()}`
+                    })
+                    .eq('order_id', localOrder.id)
+                    .eq('status', 'open');
+                  
+                  if (disputeError) throw disputeError;
+                  
+                  // Update service request status
+                  await supabase
+                    .from('service_requests')
+                    .update({ status: 'completed' })
+                    .eq('id', globalChatRequest.id);
+                  
+                  // Send admin message about resolution
+                  const resolutionData = {
+                    type: 'dispute_resolved_complete',
+                    reason: disputeResolutionReason.trim(),
+                    resolved_by: 'admin'
+                  };
+                  
+                  await supabase
+                    .from('service_messages')
+                    .insert({
+                      request_id: globalChatRequest.id,
+                      sender_type: 'admin',
+                      sender_id: senderId || user?.id,
+                      message: `[DISPUTE_RESOLVED]${JSON.stringify(resolutionData)}[/DISPUTE_RESOLVED]\n\nDispute resolved - Order completed.\n\nReason: ${disputeResolutionReason.trim()}`
+                    });
+                  
+                  // Update local state
+                  setLocalOrder(prev => prev ? { ...prev, status: 'completed', delivery_status: 'accepted' } : null);
+                  setHasOpenDispute(false);
+                  
+                  toast({
+                    title: "Order Completed",
+                    description: "The dispute has been resolved and the order marked as completed.",
+                  });
+                  
+                  setCompleteViaDisputeDialogOpen(false);
+                  setDisputeResolutionReason('');
+                } catch (error: any) {
+                  console.error('Error completing order via dispute:', error);
+                  toast({
+                    variant: 'destructive',
+                    title: 'Resolution Failed',
+                    description: error.message || 'Failed to complete order.',
+                  });
+                } finally {
+                  setResolvingDispute(false);
+                }
+              }}
+              disabled={!disputeResolutionReason.trim() || resolvingDispute}
+              className="bg-green-600 text-white border border-green-600 hover:!bg-transparent hover:text-green-600 hover:border-green-600 transition-all duration-200"
+            >
+              {resolvingDispute ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Complete Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Admin: Cancel Order via Dispute Dialog */}
+      <AlertDialog open={cancelViaDisputeDialogOpen} onOpenChange={setCancelViaDisputeDialogOpen}>
+        <AlertDialogContent className="z-[250]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order via Dispute</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will cancel the order, refund credits to the client, and resolve the dispute. Please provide a reason for this decision.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Reason for cancelling the order..."
+            value={disputeResolutionReason}
+            onChange={(e) => setDisputeResolutionReason(e.target.value)}
+            rows={3}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
+              onClick={() => {
+                setDisputeResolutionReason('');
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={async () => {
+                if (!globalChatRequest || !disputeResolutionReason.trim() || !localOrder) return;
+                
+                setResolvingDispute(true);
+                try {
+                  // Call the cancel-order edge function to handle refund
+                  const { data, error: cancelError } = await supabase.functions.invoke('cancel-order', {
+                    body: { 
+                      order_id: localOrder.id,
+                      reason: `Dispute resolution: ${disputeResolutionReason.trim()}`
+                    }
+                  });
+
+                  if (cancelError) throw cancelError;
+                  if (data?.error) throw new Error(data.error);
+                  
+                  // Close the dispute
+                  const { error: disputeError } = await supabase
+                    .from('disputes')
+                    .update({ 
+                      status: 'resolved',
+                      resolved_at: new Date().toISOString(),
+                      resolved_by: user?.id,
+                      admin_notes: `Cancelled via dispute: ${disputeResolutionReason.trim()}`
+                    })
+                    .eq('order_id', localOrder.id)
+                    .eq('status', 'open');
+                  
+                  if (disputeError) throw disputeError;
+                  
+                  // Update service request status
+                  await supabase
+                    .from('service_requests')
+                    .update({ 
+                      status: 'cancelled',
+                      cancelled_at: new Date().toISOString(),
+                      cancellation_reason: `Dispute resolution: ${disputeResolutionReason.trim()}`
+                    })
+                    .eq('id', globalChatRequest.id);
+                  
+                  // Send admin message about resolution
+                  const resolutionData = {
+                    type: 'dispute_resolved_cancel',
+                    reason: disputeResolutionReason.trim(),
+                    resolved_by: 'admin',
+                    credits_refunded: data?.credits_refunded || 0
+                  };
+                  
+                  await supabase
+                    .from('service_messages')
+                    .insert({
+                      request_id: globalChatRequest.id,
+                      sender_type: 'admin',
+                      sender_id: senderId || user?.id,
+                      message: `[DISPUTE_RESOLVED]${JSON.stringify(resolutionData)}[/DISPUTE_RESOLVED]\n\nDispute resolved - Order cancelled. ${data?.credits_refunded || 0} credits refunded to client.\n\nReason: ${disputeResolutionReason.trim()}`
+                    });
+                  
+                  // Update local state
+                  setLocalOrder(prev => prev ? { ...prev, status: 'cancelled' } : null);
+                  setHasOpenDispute(false);
+                  
+                  toast({
+                    title: "Order Cancelled",
+                    description: `The dispute has been resolved. ${data?.credits_refunded || 0} credits refunded to client.`,
+                  });
+                  
+                  setCancelViaDisputeDialogOpen(false);
+                  setDisputeResolutionReason('');
+                } catch (error: any) {
+                  console.error('Error cancelling order via dispute:', error);
+                  toast({
+                    variant: 'destructive',
+                    title: 'Resolution Failed',
+                    description: error.message || 'Failed to cancel order.',
+                  });
+                } finally {
+                  setResolvingDispute(false);
+                }
+              }}
+              disabled={!disputeResolutionReason.trim() || resolvingDispute}
+              className="bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:text-destructive hover:border-destructive transition-all duration-200"
+            >
+              {resolvingDispute ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cancel Order
             </AlertDialogAction>
           </AlertDialogFooter>
