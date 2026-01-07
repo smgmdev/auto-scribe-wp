@@ -142,6 +142,7 @@ export function Sidebar({
     setUserUnreadOrdersCount,
     userUnreadDisputesCount,
     setUserUnreadDisputesCount,
+    userUnreadCompletedCount,
     setUserUnreadCompletedCount,
     userUnreadHistoryCount,
     setUserUnreadHistoryCount,
@@ -993,9 +994,9 @@ export function Sidebar({
                           const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount) > 0;
                           // User My Engagements shows unread message notifications (active + cancelled)
                           const showEngagementsBadge = subItem.id === 'my-requests' && (userUnreadEngagementsCount + userUnreadCancelledCount) > 0;
-                          // User My Orders shows combined notifications (active + disputes + cancelled)
-                          const showUserOrdersBadge = subItem.id === 'orders' && (userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount) > 0;
-                          const userOrdersBadgeCount = userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount;
+                          // User My Orders shows combined notifications (active + disputes + completed + cancelled)
+                          const showUserOrdersBadge = subItem.id === 'orders' && (userUnreadOrdersCount + userUnreadDisputesCount + userUnreadCompletedCount + userUnreadHistoryCount) > 0;
+                          const userOrdersBadgeCount = userUnreadOrdersCount + userUnreadDisputesCount + userUnreadCompletedCount + userUnreadHistoryCount;
                           // Admin Order Management shows unread orders + disputes notifications
                           const showOrdersBadge = subItem.id === 'admin-orders' && (unreadOrdersCount + unreadDisputesCount) > 0;
                           const ordersBadgeCount = unreadOrdersCount + unreadDisputesCount;
