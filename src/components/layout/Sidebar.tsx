@@ -931,12 +931,12 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
-  // Real-time subscription for user order completion notifications
+  // Real-time subscription for user order updates (triggers engagement count recalculation)
   useEffect(() => {
     if (!user || isAdmin) return;
 
     const channel = supabase
-      .channel('user-orders-completed-realtime')
+      .channel('user-orders-realtime-sidebar')
       .on(
         'postgres_changes',
         {
@@ -945,11 +945,75 @@ export function Sidebar({
           table: 'orders',
           filter: `user_id=eq.${user.id}`
         },
-        (payload) => {
+        async (payload) => {
           const updated = payload.new as any;
           const old = payload.old as any;
           
-          // If delivery_status changed to accepted, increment completed count
+          // If delivery_status changed, recalculate engagement counts
+          if (old?.delivery_status !== updated.delivery_status) {
+            console.log('[Sidebar] Order delivery status changed, recalculating engagement counts');
+            
+            // Refetch engagement counts to move items between Active/Delivered
+            const { data: allRequests } = await supabase
+              .from('service_requests')
+              .select('id, client_read, client_last_read_at, status, orders(delivery_status)')
+              .eq('user_id', user.id);
+
+            if (allRequests) {
+              // Normalize order data
+              const normalizedRequests = allRequests.map(r => ({
+                ...r,
+                order: Array.isArray((r as any).orders) && (r as any).orders.length > 0 
+                  ? (r as any).orders[0] 
+                  : (r as any).orders
+              }));
+
+              const activeRequests = normalizedRequests.filter(r => r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted');
+              const deliveredRequests = normalizedRequests.filter(r => r.status !== 'cancelled' && r.order?.delivery_status === 'accepted');
+              const cancelledRequests = normalizedRequests.filter(r => r.status === 'cancelled');
+
+              // Get messages for timestamp-based unread calculation
+              const allRequestIds = normalizedRequests.map(r => r.id);
+              let messagesData: { request_id: string; sender_type: string; created_at: string }[] = [];
+              
+              if (allRequestIds.length > 0) {
+                const { data } = await supabase
+                  .from('service_messages')
+                  .select('request_id, sender_type, created_at')
+                  .in('request_id', allRequestIds);
+                messagesData = data || [];
+              }
+
+              // Count unread for each category
+              const countUnread = (requests: typeof normalizedRequests) => {
+                let count = 0;
+                requests.forEach(request => {
+                  const lastReadAt = (request as any).client_last_read_at;
+                  const requestMessages = messagesData.filter(
+                    m => m.request_id === request.id && m.sender_type !== 'client'
+                  );
+                  
+                  let unreadMsgCount = 0;
+                  for (const msg of requestMessages) {
+                    if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                      unreadMsgCount++;
+                    }
+                  }
+                  
+                  if (unreadMsgCount > 0) {
+                    count++;
+                  }
+                });
+                return count;
+              };
+
+              setUserUnreadEngagementsCount(countUnread(activeRequests));
+              setUserUnreadDeliveredCount(countUnread(deliveredRequests));
+              setUserUnreadCancelledCount(cancelledRequests.filter(r => !(r as any).client_read).length);
+            }
+          }
+          
+          // If delivery_status changed to accepted, increment completed orders count
           if (old?.delivery_status !== 'accepted' && updated.delivery_status === 'accepted') {
             incrementUserUnreadCompletedCount();
           }
