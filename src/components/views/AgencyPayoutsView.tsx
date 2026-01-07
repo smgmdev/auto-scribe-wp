@@ -309,11 +309,6 @@ export function AgencyPayoutsView() {
                         <p className="text-xs text-muted-foreground">
                           {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
-                        {platformFee !== null && (
-                          <p className="text-xs text-yellow-500/80 mt-0.5">
-                            Platform fee: {platformFee} credits
-                          </p>
-                        )}
                         <p className={`font-semibold mt-1 ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
                           {isIncoming ? '+' : ''}{transaction.amount} credits
                         </p>
