@@ -487,6 +487,11 @@ export function OrdersView() {
   };
 
   const getDeliveryBadge = (status: string, deliveryDeadline?: string | null, orderId?: string) => {
+    // Check if order is in dispute first (highest priority)
+    if (orderId && disputeOrderIds.has(orderId)) {
+      return <Badge className="bg-red-600 text-white"><AlertTriangle className="h-3 w-3 mr-1" />In Dispute</Badge>;
+    }
+    
     // Check pending_revision first (priority over overdue)
     if (status === 'pending_revision') {
       return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
