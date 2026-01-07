@@ -30,6 +30,12 @@ interface ServiceRequest {
     username: string | null;
   };
   messages: ServiceMessage[];
+  orders: {
+    id: string;
+    agency_read: boolean;
+    delivery_status: string;
+    accepted_at: string | null;
+  } | null;
 }
 
 interface ServiceMessage {
@@ -61,6 +67,7 @@ export default function AgencyPortal() {
   const [sending, setSending] = useState(false);
   const [responseStatus, setResponseStatus] = useState<'accepted' | 'changes_requested' | 'rejected'>('accepted');
   const [unreadAdminRequests, setUnreadAdminRequests] = useState<Set<string>>(new Set());
+  const [unreadCompletedCount, setUnreadCompletedCount] = useState(0);
 
   useEffect(() => {
     // Check for stored agency session
@@ -222,7 +229,14 @@ export default function AgencyPortal() {
       if (response.error) throw new Error(response.error.message);
       if (response.data?.error) throw new Error(response.data.error);
 
-      setRequests(response.data.requests || []);
+      const fetchedRequests = response.data.requests || [];
+      setRequests(fetchedRequests);
+      
+      // Count unread completed orders (status=paid and agency_read=false)
+      const unreadCompleted = fetchedRequests.filter(
+        (r: ServiceRequest) => r.status === 'paid' && r.orders?.agency_read === false
+      ).length;
+      setUnreadCompletedCount(unreadCompleted);
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -316,6 +330,26 @@ export default function AgencyPortal() {
         console.error('[AgencyPortal] Error marking as read:', error);
       }
     }
+    
+    // Mark order as read if it's a completed order with unread status
+    if (request.status === 'paid' && request.orders?.agency_read === false && agency) {
+      try {
+        await supabase.functions.invoke('agency-requests', {
+          body: { action: 'mark_order_read', request_id: request.id },
+          headers: { 'x-agency-id': agency.id }
+        });
+        
+        // Update local state
+        setRequests(prev => prev.map(r => 
+          r.id === request.id && r.orders
+            ? { ...r, orders: { ...r.orders, agency_read: true } }
+            : r
+        ));
+        setUnreadCompletedCount(prev => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error('[AgencyPortal] Error marking order as read:', error);
+      }
+    }
   };
 
   // Login Screen
@@ -387,8 +421,13 @@ export default function AgencyPortal() {
             <TabsTrigger value="in_progress">
               In Progress ({requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).length})
             </TabsTrigger>
-            <TabsTrigger value="completed">
+            <TabsTrigger value="completed" className="relative">
               Completed ({requests.filter(r => ['paid', 'rejected'].includes(r.status)).length})
+              {unreadCompletedCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-green-500 text-white text-xs rounded-full">
+                  {unreadCompletedCount}
+                </span>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -596,11 +635,16 @@ function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: {
   const isStaffInChat = lastAdminMessage?.message.includes('[ADMIN_JOINED]') && 
     !request.messages?.some(m => m.sender_type === 'admin' && m.message.includes('[ADMIN_LEFT]') && new Date(m.created_at) > new Date(lastAdminMessage.created_at));
   
+  // Check if this is an unread completed order
+  const isUnreadCompleted = request.status === 'paid' && request.orders?.agency_read === false;
+  
   return (
     <Card 
       className={`cursor-pointer hover:bg-muted/50 transition-colors ${
         hasUnreadAdmin ? 'ring-2 ring-amber-500/50 bg-amber-50/50 dark:bg-amber-900/10' : ''
-      } ${isStaffInChat ? 'border-l-4 border-l-green-500' : ''}`} 
+      } ${isStaffInChat ? 'border-l-4 border-l-green-500' : ''} ${
+        isUnreadCompleted ? 'ring-2 ring-green-500/50 bg-green-50/50 dark:bg-green-900/10' : ''
+      }`} 
       onClick={onSelect}
     >
       <CardContent className="p-4">
@@ -612,6 +656,11 @@ function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-medium">{request.title}</h3>
+                {isUnreadCompleted && (
+                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs animate-pulse">
+                    New Completion
+                  </Badge>
+                )}
                 {isStaffInChat && (
                   <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
                     Staff Active
