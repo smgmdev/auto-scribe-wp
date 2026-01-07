@@ -1335,9 +1335,10 @@ export function AgencyRequestsView() {
                   </CardContent>
                 </Card>
               ) : (
-                completedOrders.map((order) => {
+              completedOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
                   const isUnread = !order.agency_read;
+                  const requestMessages = relatedRequest ? (messages[relatedRequest.id] || []) : [];
                   return (
                     <Card 
                       key={order.id}
@@ -1346,7 +1347,7 @@ export function AgencyRequestsView() {
                       }`}
                       onClick={() => handleCompletedOrderClick(order, relatedRequest)}
                     >
-                      <CardContent className="p-4">
+                      <CardHeader className="pb-2 px-4 pt-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
@@ -1354,31 +1355,48 @@ export function AgencyRequestsView() {
                                 <img 
                                   src={order.media_site.favicon} 
                                   alt="" 
-                                  className="h-10 w-10 rounded object-cover"
+                                  className="h-8 w-8 rounded object-cover"
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                  <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                                 </div>
                               )}
                               {isUnread && (
                                 <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-card" />
                               )}
                             </div>
-                            <div>
-                              <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
-                              <p className="text-sm text-muted-foreground">
-                                ${(order.amount_cents / 100).toFixed(0)}
-                              </p>
+                            <div className="flex flex-col">
+                              <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
+                              {order.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {order.media_site.agency}</span>
+                              )}
                             </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                              <CheckCircle className="h-3 w-3 mr-1" /> Delivered
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(order.delivered_at || order.created_at), 'MMM d, yyyy')}
-                            </span>
+                          <Badge className="bg-green-600 text-white">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Completed
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-4">
+                        <div className="flex items-end justify-between">
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-muted-foreground">
+                              Completed: {order.accepted_at ? format(new Date(order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
+                              {requestMessages.length > 0 && (
+                                <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                            {order.media_site?.publication_format && (
+                              <span className="capitalize">{order.media_site.publication_format}</span>
+                            )}
+                            <span className="font-medium text-foreground text-sm">${(order.amount_cents / 100).toFixed(0)}</span>
                           </div>
                         </div>
                       </CardContent>
