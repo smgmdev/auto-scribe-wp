@@ -300,11 +300,12 @@ export function AgencyPayoutsView() {
                 const platformFee = platformFeeMatch ? parseInt(platformFeeMatch[1]) : null;
                 // Extract main description without platform fee part
                 const mainDescription = transaction.description?.replace(/\s*\(Platform fee:.*\)/, '') || '';
+                // Calculate sale price (earnings + platform fee)
+                const salePrice = platformFee !== null ? transaction.amount + platformFee : transaction.amount;
                 
-                return (
+                const rowContent = (
                   <div 
-                    key={transaction.id} 
-                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-border transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isIncoming ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
@@ -340,6 +341,26 @@ export function AgencyPayoutsView() {
                     </div>
                   </div>
                 );
+
+                // Only show tooltip for order payouts with platform fee
+                if (transaction.type === 'order_payout' && platformFee !== null) {
+                  return (
+                    <Tooltip key={transaction.id} delayDuration={100}>
+                      <TooltipTrigger asChild>
+                        {rowContent}
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
+                        <div className="space-y-1">
+                          <p><span className="text-muted-foreground">Sale:</span> <span className="font-semibold">{salePrice} credits</span></p>
+                          <p><span className="text-muted-foreground">Platform Fee:</span> <span className="font-semibold text-yellow-400">-{platformFee} credits</span></p>
+                          <p><span className="text-muted-foreground">Actual Earnings:</span> <span className="font-semibold text-green-400">{transaction.amount} credits</span></p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+
+                return <div key={transaction.id}>{rowContent}</div>;
               })}
             </div>
           )}
