@@ -7495,10 +7495,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Email</p>
                 <p className="font-medium">{userDetails.email || 'Not available'}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">WhatsApp</p>
-                <p className="font-medium">{userDetails.phone || 'Not available'}</p>
-              </div>
+              {userDetails.type === 'agency' && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">WhatsApp Phone</p>
+                  <p className="font-medium">{userDetails.phone || 'Not available'}</p>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
