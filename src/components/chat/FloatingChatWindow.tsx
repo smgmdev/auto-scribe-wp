@@ -3162,7 +3162,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {isCompleted ? 'Order marked as completed by Arcana Mace Staff' : 'Order cancelled by Arcana Mace Staff'}
             </p>
             {disputeResolved.reason && (
-              <p className="text-xs mt-2 italic text-muted-foreground">
+              <p className="text-xs mt-2 text-muted-foreground">
                 Reason: {disputeResolved.reason}
               </p>
             )}
