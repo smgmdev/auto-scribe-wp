@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle, RefreshCw } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,7 +88,6 @@ export function OrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [revisionOrderIds, setRevisionOrderIds] = useState<Set<string>>(new Set());
-  const [revisionStatusLoading, setRevisionStatusLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [releasing, setReleasing] = useState(false);
@@ -320,11 +318,17 @@ export function OrdersView() {
         title: 'Error loading orders',
         description: error.message
       });
-    } else {
-      setOrders(data || []);
-      // Fetch revision status for delivered orders
-      fetchRevisionStatus(data || []);
+      setLoading(false);
+      return;
     }
+    
+    const ordersList = data || [];
+    
+    // Fetch revision status inline before setting orders (prevents badge flash)
+    const revisionIds = await computeRevisionOrderIds(ordersList);
+    setRevisionOrderIds(revisionIds);
+    setOrders(ordersList);
+    
     setLoading(false);
     // Mark initial load as complete after a short delay to allow render
     setTimeout(() => setInitialLoadComplete(true), 500);
@@ -346,21 +350,12 @@ export function OrdersView() {
     }
   };
 
-  // Fetch revision status for delivered orders
-  const fetchRevisionStatus = async (ordersList: Order[]) => {
-    if (!user) {
-      setRevisionStatusLoading(false);
-      return;
-    }
-    
-    setRevisionStatusLoading(true);
-    
+  // Compute revision status for delivered orders (returns Set, doesn't set state)
+  const computeRevisionOrderIds = async (ordersList: Order[]): Promise<Set<string>> => {
     // Get orders that are delivered
     const deliveredOrders = ordersList.filter(o => o.delivery_status === 'delivered');
     if (deliveredOrders.length === 0) {
-      setRevisionOrderIds(new Set());
-      setRevisionStatusLoading(false);
-      return;
+      return new Set();
     }
     
     // Get service request IDs for these orders
@@ -370,9 +365,7 @@ export function OrdersView() {
       .in('order_id', deliveredOrders.map(o => o.id));
     
     if (!serviceRequests || serviceRequests.length === 0) {
-      setRevisionOrderIds(new Set());
-      setRevisionStatusLoading(false);
-      return;
+      return new Set();
     }
     
     // Get messages for these service requests
@@ -383,9 +376,7 @@ export function OrdersView() {
       .order('created_at', { ascending: true });
     
     if (!messages) {
-      setRevisionOrderIds(new Set());
-      setRevisionStatusLoading(false);
-      return;
+      return new Set();
     }
     
     // Check each service request for revision after delivery
@@ -407,8 +398,7 @@ export function OrdersView() {
       }
     }
     
-    setRevisionOrderIds(revisionOrders);
-    setRevisionStatusLoading(false);
+    return revisionOrders;
   };
 
   const handleAcceptDelivery = async (order: Order) => {
@@ -508,10 +498,6 @@ export function OrdersView() {
         }
         return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery</Badge>;
       case 'delivered':
-        // Wait for revision status to load before showing the badge to prevent flash
-        if (revisionStatusLoading) {
-          return <Skeleton className="h-5 w-32" />;
-        }
         // Check if this order has a pending revision request
         if (orderId && revisionOrderIds.has(orderId)) {
           return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
