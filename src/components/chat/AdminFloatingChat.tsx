@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw, Phone, XCircle, Package } from 'lucide-react';
+import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw, Phone, XCircle, Package, Scale } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -266,6 +266,18 @@ export function AdminFloatingChat({
 
   const parseRevisionRequested = (message: string): { type: string; order_id: string; media_site_name: string; reason: string } | null => {
     const match = message.match(/\[REVISION_REQUESTED\](.*?)\[\/REVISION_REQUESTED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseDisputeResolved = (message: string): { type: string; reason: string; resolved_by: string; credits_refunded?: number } | null => {
+    const match = message.match(/\[DISPUTE_RESOLVED\](.*?)\[\/DISPUTE_RESOLVED\]/);
     if (match) {
       try {
         return JSON.parse(match[1]);
@@ -954,7 +966,41 @@ export function AdminFloatingChat({
     const orderDelivered = parseOrderDelivered(msg.message);
     const deliveryAccepted = parseDeliveryAccepted(msg.message);
     const revisionRequested = parseRevisionRequested(msg.message);
+    const disputeResolved = parseDisputeResolved(msg.message);
     const quote = parseQuote(msg.message);
+
+    // Handle dispute resolved message
+    if (disputeResolved) {
+      const isCompleted = disputeResolved.type === 'dispute_resolved_complete';
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <Scale className={`h-4 w-4 ${isCompleted ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} />
+              <span className={`font-semibold text-sm ${isCompleted ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'}`}>
+                Dispute Resolved
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {isCompleted ? 'Order marked as completed by Arcana Mace Staff' : 'Order cancelled by Arcana Mace Staff'}
+            </p>
+            {disputeResolved.reason && (
+              <p className="text-xs mt-2 italic text-muted-foreground">
+                Reason: {disputeResolved.reason}
+              </p>
+            )}
+            {!isCompleted && disputeResolved.credits_refunded !== undefined && (
+              <p className="text-xs mt-1 text-muted-foreground">
+                {disputeResolved.credits_refunded} credits refunded to client
+              </p>
+            )}
+          </div>
+          <p className="text-xs opacity-50">
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
 
     // Handle order delivered message
     if (orderDelivered) {
