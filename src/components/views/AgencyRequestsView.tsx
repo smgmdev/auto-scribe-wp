@@ -128,7 +128,7 @@ export function AgencyRequestsView() {
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-        order:orders(id, status, delivery_status, delivery_deadline)
+        order:orders(id, status, delivery_status, delivery_deadline, released_at, accepted_at)
       `)
       .eq('agency_payout_id', agencyData.id)
       .order('created_at', { ascending: false });
