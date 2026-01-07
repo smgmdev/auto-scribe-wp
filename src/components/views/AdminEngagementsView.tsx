@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format, isPast, differenceInSeconds } from 'date-fns';
@@ -297,6 +297,15 @@ export function AdminEngagementsView() {
         <Badge variant="destructive" className="bg-red-600">
           <AlertCircle className="h-3 w-3 mr-1" />
           Delivery Overdue
+        </Badge>
+      );
+    }
+
+    if (hasOrder && request.orders?.delivery_status === 'accepted') {
+      return (
+        <Badge className="bg-green-600">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Delivery Completed
         </Badge>
       );
     }
