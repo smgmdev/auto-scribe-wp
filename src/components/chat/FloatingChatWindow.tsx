@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -307,6 +307,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [cancelViaDisputeDialogOpen, setCancelViaDisputeDialogOpen] = useState(false);
   const [disputeResolutionReason, setDisputeResolutionReason] = useState('');
   const [resolvingDispute, setResolvingDispute] = useState(false);
+  
+  // Admin user details states
+  const [userDetailsDialogOpen, setUserDetailsDialogOpen] = useState(false);
+  const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState<{
+    email: string | null;
+    phone: string | null;
+    type: 'client' | 'agency';
+    name?: string | null;
+  } | null>(null);
   
   // Drag state - use position from chat object
   const [localPosition, setLocalPosition] = useState(chat.position);
@@ -5407,6 +5417,62 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <Reply className="h-4 w-4 mr-2" />
                             Reply
                           </DropdownMenuItem>
+                          {isAdmin && msg.sender_type !== 'admin' && (
+                            <DropdownMenuItem 
+                              onSelect={async () => {
+                                setUserDetailsLoading(true);
+                                setUserDetailsDialogOpen(true);
+                                setUserDetails(null);
+                                
+                                try {
+                                  if (msg.sender_type === 'client') {
+                                    // Fetch client profile
+                                    const { data: profile } = await supabase
+                                      .from('profiles')
+                                      .select('email')
+                                      .eq('id', msg.sender_id)
+                                      .maybeSingle();
+                                    
+                                    // Get phone from auth.users via edge function or use profile email
+                                    setUserDetails({
+                                      email: profile?.email || null,
+                                      phone: null,
+                                      type: 'client'
+                                    });
+                                  } else if (msg.sender_type === 'agency') {
+                                    // Fetch agency details
+                                    const { data: agency } = await supabase
+                                      .from('agency_payouts')
+                                      .select('agency_name, email, user_id')
+                                      .eq('id', msg.sender_id)
+                                      .maybeSingle();
+                                    
+                                    // Also check agency_applications for phone
+                                    const { data: application } = await supabase
+                                      .from('agency_applications')
+                                      .select('whatsapp_phone, email')
+                                      .eq('user_id', agency?.user_id || msg.sender_id)
+                                      .maybeSingle();
+                                    
+                                    setUserDetails({
+                                      email: agency?.email || application?.email || null,
+                                      phone: application?.whatsapp_phone || null,
+                                      type: 'agency',
+                                      name: agency?.agency_name || null
+                                    });
+                                  }
+                                } catch (error) {
+                                  console.error('Error fetching user details:', error);
+                                } finally {
+                                  setUserDetailsLoading(false);
+                                }
+                              }}
+                              className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              User Details
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <div className="flex items-center gap-1.5 text-xs font-medium mb-1 opacity-70 pr-5">
@@ -7309,6 +7375,60 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Admin: User Details Dialog */}
+      <Dialog open={userDetailsDialogOpen} onOpenChange={setUserDetailsDialogOpen}>
+        <DialogContent className="z-[250] max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {userDetails?.type === 'agency' ? (
+                <>
+                  <Building2 className="h-5 w-5" />
+                  Agency Details
+                </>
+              ) : (
+                <>
+                  <Info className="h-5 w-5" />
+                  Client Details
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {userDetailsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : userDetails ? (
+            <div className="space-y-4">
+              {userDetails.name && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Name</p>
+                  <p className="font-medium">{userDetails.name}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Email</p>
+                <p className="font-medium">{userDetails.email || 'Not available'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Phone</p>
+                <p className="font-medium">{userDetails.phone || 'Not available'}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Unable to load user details.
+            </p>
+          )}
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button variant="outline" className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                Close
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
