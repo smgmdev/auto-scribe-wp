@@ -509,7 +509,7 @@ export function OrdersView() {
         }
         return <Badge className="bg-purple-600 text-white">Delivered - Pending Approval</Badge>;
       case 'accepted':
-        return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
+        return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
