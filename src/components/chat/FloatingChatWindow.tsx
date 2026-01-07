@@ -2946,18 +2946,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     setAcceptingDelivery(true);
     try {
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ 
-          delivery_status: 'accepted',
-          status: 'completed',
-          accepted_at: new Date().toISOString(),
-          released_at: new Date().toISOString(),
-          read: false
-        })
-        .eq('id', localOrder.id);
+      // Call edge function to complete order and allocate credits to agency
+      const { data, error } = await supabase.functions.invoke('complete-order', {
+        body: {
+          order_id: localOrder.id,
+          service_request_id: globalChatRequest.id
+        }
+      });
 
-      if (updateError) throw updateError;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       // Send acceptance message to chat
       const acceptMessagePayload = {
@@ -7375,38 +7373,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 
                 setResolvingDispute(true);
                 try {
-                  // Update order to completed
-                  const { error: orderError } = await supabase
-                    .from('orders')
-                    .update({ 
-                      status: 'completed',
-                      delivery_status: 'accepted',
-                      accepted_at: new Date().toISOString(),
-                      read: false
-                    })
-                    .eq('id', localOrder.id);
-                  
-                  if (orderError) throw orderError;
-                  
-                  // Close the dispute
-                  const { error: disputeError } = await supabase
-                    .from('disputes')
-                    .update({ 
-                      status: 'resolved',
-                      resolved_at: new Date().toISOString(),
-                      resolved_by: user?.id,
-                      admin_notes: `Completed via dispute: ${disputeResolutionReason.trim()}`
-                    })
-                    .eq('order_id', localOrder.id)
-                    .eq('status', 'open');
-                  
-                  if (disputeError) throw disputeError;
-                  
-                  // Update service request status
-                  await supabase
-                    .from('service_requests')
-                    .update({ status: 'completed' })
-                    .eq('id', globalChatRequest.id);
+                  // Call edge function to complete order and allocate credits to agency
+                  const { data, error } = await supabase.functions.invoke('complete-order', {
+                    body: {
+                      order_id: localOrder.id,
+                      service_request_id: globalChatRequest.id
+                    }
+                  });
+
+                  if (error) throw error;
+                  if (data?.error) throw new Error(data.error);
                   
                   // Send admin message about resolution
                   const resolutionData = {
