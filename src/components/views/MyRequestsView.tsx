@@ -430,7 +430,7 @@ export function MyRequestsView() {
           if (newMsg.sender_type === 'client') return;
           
           // Mark the request as unread when receiving a new agency/admin message
-          // This ensures the Active tab badge updates immediately
+          // This ensures the Active/Delivered tab badges update immediately
           setRequests(prev => {
             const targetRequest = prev.find(r => r.id === newMsg.request_id);
             if (!targetRequest || targetRequest.status === 'cancelled') return prev;
@@ -440,9 +440,11 @@ export function MyRequestsView() {
               const updated = prev.map(r => 
                 r.id === newMsg.request_id ? { ...r, read: false } : r
               );
-              // Update the store count
-              const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
-              setUserUnreadEngagementsCount(newUnreadCount);
+              // Update the store counts - separate active from delivered
+              const newActiveUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted').length;
+              const newDeliveredUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status === 'accepted').length;
+              setUserUnreadEngagementsCount(newActiveUnreadCount);
+              setUserUnreadDeliveredCount(newDeliveredUnreadCount);
               return updated;
             }
             return prev;
@@ -472,10 +474,57 @@ export function MyRequestsView() {
       )
       .subscribe();
 
+    // Also subscribe to order updates to detect delivery_status changes
+    const ordersChannel = supabase
+      .channel('user-orders-engagement-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          
+          // If delivery_status changed, update the request's order status in local state
+          if (old?.delivery_status !== updated.delivery_status) {
+            console.log('[MyRequestsView] Order delivery status changed:', updated.id, updated.delivery_status);
+            
+            setRequests(prev => {
+              const newRequests = prev.map(r => {
+                if (r.order?.id === updated.id) {
+                  return {
+                    ...r,
+                    order: { ...r.order, delivery_status: updated.delivery_status }
+                  };
+                }
+                return r;
+              });
+              
+              // Recalculate counts after updating
+              const newActiveUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted').length;
+              const newDeliveredUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status === 'accepted').length;
+              const newCancelledUnreadCount = newRequests.filter(r => !r.read && r.status === 'cancelled').length;
+              
+              setUserUnreadEngagementsCount(newActiveUnreadCount);
+              setUserUnreadDeliveredCount(newDeliveredUnreadCount);
+              setUserUnreadCancelledCount(newCancelledUnreadCount);
+              
+              return newRequests;
+            });
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(requestsChannel);
+      supabase.removeChannel(ordersChannel);
     };
-  }, [user?.id]);
+  }, [user?.id, setUserUnreadEngagementsCount, setUserUnreadDeliveredCount, setUserUnreadCancelledCount]);
 
 
   const getStatusBadge = (status: string) => {
