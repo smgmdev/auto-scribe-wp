@@ -374,8 +374,13 @@ export function AdminEngagementsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed">
+          <TabsTrigger value="closed" className="relative">
             Closed ({deliveredRequests.length + cancelledRequests.length})
+            {(deliveredRequests.filter(r => !r.read).length + cancelledRequests.filter(r => !r.read).length) > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                {deliveredRequests.filter(r => !r.read).length + cancelledRequests.filter(r => !r.read).length}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -442,11 +447,21 @@ export function AdminEngagementsView() {
         <TabsContent value="closed" className="mt-2">
           <Tabs value={closedSubTab} onValueChange={setClosedSubTab}>
             <TabsList className="grid w-full grid-cols-2 max-w-xs mb-4">
-              <TabsTrigger value="delivered">
+              <TabsTrigger value="delivered" className="relative">
                 Delivered ({deliveredRequests.length})
+                {deliveredRequests.filter(r => !r.read).length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                    {deliveredRequests.filter(r => !r.read).length}
+                  </span>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="cancelled">
+              <TabsTrigger value="cancelled" className="relative">
                 Cancelled ({cancelledRequests.length})
+                {cancelledRequests.filter(r => !r.read).length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                    {cancelledRequests.filter(r => !r.read).length}
+                  </span>
+                )}
               </TabsTrigger>
             </TabsList>
 
@@ -458,9 +473,12 @@ export function AdminEngagementsView() {
                   {deliveredRequests.map((r) => (
                     <Card 
                       key={r.id} 
-                      className="cursor-pointer hover:bg-muted/50 transition-colors" 
+                      className={`cursor-pointer hover:bg-muted/50 transition-colors relative ${!r.read ? 'bg-blue-500/5 border-blue-500/30' : ''}`}
                       onClick={() => handleOpenChat(r)}
                     >
+                      {!r.read && (
+                        <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                      )}
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -468,7 +486,7 @@ export function AdminEngagementsView() {
                               <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
                             )}
                             <div>
-                              <h3 className="font-medium">{r.title}</h3>
+                              <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
                               <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                             </div>
                           </div>
@@ -518,21 +536,24 @@ export function AdminEngagementsView() {
                     return (
                       <Card 
                         key={r.id} 
-                        className="cursor-pointer hover:bg-muted/50 transition-colors border-border/50" 
+                        className={`cursor-pointer hover:bg-muted/50 transition-colors border-border/50 relative ${!r.read ? 'bg-blue-500/5 border-blue-500/30' : ''}`}
                         onClick={() => handleOpenChat(r)}
                       >
+                        {!r.read && (
+                          <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                        )}
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3">
                               {r.media_sites?.favicon ? (
-                              <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
+                                <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
                               ) : (
                                 <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
                                   <MessageSquare className="h-5 w-5 text-muted-foreground" />
                                 </div>
                               )}
                               <div className="flex flex-col">
-                                <h3 className="font-medium">{r.title}</h3>
+                                <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
                                 <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                               </div>
                             </div>
