@@ -284,19 +284,19 @@ export function AdminEngagementsView() {
       );
     }
 
+    if (hasOrder && request.orders?.delivery_status === 'pending_revision') {
+      return (
+        <Badge className="bg-black text-orange-400">
+          Delivered - Revision Requested
+        </Badge>
+      );
+    }
+
     if (hasOrder && isOverdue) {
       return (
         <Badge variant="destructive" className="bg-red-600">
           <AlertCircle className="h-3 w-3 mr-1" />
           Delivery Overdue
-        </Badge>
-      );
-    }
-
-    if (hasOrder && request.orders?.delivery_status === 'pending_revision') {
-      return (
-        <Badge className="bg-orange-500">
-          Revision Requested
         </Badge>
       );
     }

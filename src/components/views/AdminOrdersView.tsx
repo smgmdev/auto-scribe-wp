@@ -522,6 +522,11 @@ export function AdminOrdersView() {
   };
 
   const getDeliveryBadge = (status: string, deliveryDeadline: string | null) => {
+    // Check pending_revision first (priority over overdue)
+    if (status === 'pending_revision') {
+      return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
+    }
+    
     switch (status) {
       case 'pending':
         const { text, isOverdue } = getRemainingTime(deliveryDeadline);
@@ -541,8 +546,6 @@ export function AdminOrdersView() {
         );
       case 'delivered':
         return <Badge className="bg-purple-600">Delivered - Pending Approval</Badge>;
-      case 'pending_revision':
-        return <Badge className="bg-orange-500">Revision Requested</Badge>;
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       default:
