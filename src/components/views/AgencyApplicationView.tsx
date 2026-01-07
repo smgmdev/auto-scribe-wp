@@ -473,7 +473,7 @@ export function AgencyApplicationView() {
                 {!showRejectionReason ? (
                   <Button 
                     variant="outline" 
-                    className="w-full hover:bg-muted/50 transition-colors"
+                    className="w-full hover:bg-black hover:text-white transition-all duration-200"
                     onClick={() => setShowRejectionReason(true)}
                   >
                     <ChevronDown className="h-4 w-4 mr-2" />
@@ -483,7 +483,7 @@ export function AgencyApplicationView() {
                   <div className="space-y-3">
                     <Button 
                       variant="outline" 
-                      className="w-full hover:bg-muted/50 transition-colors"
+                      className="w-full hover:bg-black hover:text-white transition-all duration-200"
                       onClick={() => setShowRejectionReason(false)}
                     >
                       <ChevronUp className="h-4 w-4 mr-2" />
