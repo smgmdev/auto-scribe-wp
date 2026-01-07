@@ -4379,7 +4379,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40 z-[9999] bg-popover border shadow-lg">
+                  <DropdownMenuContent align="end" className="w-auto min-w-40 z-[9999] bg-popover border shadow-lg">
                     {hasOrder && globalChatType === 'agency-request' && (
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
@@ -4466,23 +4466,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {hasOpenDispute && isAdmin && (
                       <>
                         <DropdownMenuItem 
-                          className="cursor-pointer text-green-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          className="cursor-pointer text-green-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black whitespace-nowrap"
                           onSelect={() => {
                             setActionDropdownOpen(false);
                             setCompleteViaDisputeDialogOpen(true);
                           }}
                         >
-                          <CheckCircle className="h-4 w-4 mr-2" />
                           Complete via Dispute
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black whitespace-nowrap"
                           onSelect={() => {
                             setActionDropdownOpen(false);
                             setCancelViaDisputeDialogOpen(true);
                           }}
                         >
-                          <XCircle className="h-4 w-4 mr-2" />
                           Cancel via Dispute
                         </DropdownMenuItem>
                       </>
