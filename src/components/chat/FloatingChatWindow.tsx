@@ -228,6 +228,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     logo_url: string | null;
   } | null>(null);
   const [loadingCounterpartyAgency, setLoadingCounterpartyAgency] = useState(false);
+  // Admin agency info (for displaying agency name and logo in admin view)
+  const [adminAgencyInfo, setAdminAgencyInfo] = useState<{
+    name: string;
+    logo_url: string | null;
+  } | null>(null);
+  const [loadingAdminAgency, setLoadingAdminAgency] = useState(false);
   const [mediaListingOpen, setMediaListingOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
@@ -690,6 +696,71 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     fetchAgencyInfo();
   }, [globalChatRequest?.id, actualSenderType]);
+
+  // Fetch agency info for admin view (to show agency name and logo in messages)
+  useEffect(() => {
+    const fetchAdminAgencyInfo = async () => {
+      if (!globalChatRequest?.id || !isAdmin) return;
+      
+      setLoadingAdminAgency(true);
+      try {
+        // Get the agency_payout_id from the service request
+        const { data: requestData } = await supabase
+          .from('service_requests')
+          .select('agency_payout_id')
+          .eq('id', globalChatRequest.id)
+          .maybeSingle();
+        
+        if (!requestData?.agency_payout_id) {
+          setLoadingAdminAgency(false);
+          return;
+        }
+        
+        // Fetch agency name from agency_payouts
+        const { data: agencyData } = await supabase
+          .from('agency_payouts')
+          .select('agency_name')
+          .eq('id', requestData.agency_payout_id)
+          .maybeSingle();
+        
+        if (agencyData) {
+          // Try to get logo from agency_applications using the agency name
+          const { data: appData } = await supabase
+            .from('agency_applications')
+            .select('logo_url')
+            .eq('agency_name', agencyData.agency_name)
+            .eq('status', 'approved')
+            .maybeSingle();
+          
+          // Construct full storage URL if logo_url is a path
+          let fullLogoUrl: string | null = null;
+          if (appData?.logo_url) {
+            // Check if it's already a full URL
+            if (appData.logo_url.startsWith('http')) {
+              fullLogoUrl = appData.logo_url;
+            } else {
+              // Create a signed URL since the bucket is private
+              const { data: urlData } = await supabase.storage
+                .from('agency-documents')
+                .createSignedUrl(appData.logo_url, 3600); // 1 hour expiry
+              fullLogoUrl = urlData?.signedUrl || null;
+            }
+          }
+          
+          setAdminAgencyInfo({
+            name: agencyData.agency_name,
+            logo_url: fullLogoUrl
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching admin agency info:', error);
+      } finally {
+        setLoadingAdminAgency(false);
+      }
+    };
+    
+    fetchAdminAgencyInfo();
+  }, [globalChatRequest?.id, isAdmin]);
 
   // Handle admin joining chat
   const handleAdminJoinChat = async () => {
@@ -5476,14 +5547,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <div className="flex items-center gap-1.5 text-xs font-medium mb-1 opacity-70 pr-5">
-                        {/* Show loading spinner while fetching agency info */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && loadingCounterpartyAgency && (
+                        {/* Show loading spinner while fetching agency info for client view */}
+                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
                           <Loader2 className="w-3 h-3 animate-spin" />
                         )}
                         {/* Show agency logo next to name for agency messages in client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !loadingCounterpartyAgency && counterpartyLogo && (
+                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && !loadingCounterpartyAgency && counterpartyLogo && (
                           <img 
                             src={counterpartyLogo} 
+                            alt="" 
+                            className="w-4 h-4 rounded-full object-cover"
+                          />
+                        )}
+                        {/* Show loading spinner while fetching agency info for admin view */}
+                        {msg.sender_type === 'agency' && isAdmin && loadingAdminAgency && (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        )}
+                        {/* Show agency logo next to name for agency messages in admin view */}
+                        {msg.sender_type === 'agency' && isAdmin && !loadingAdminAgency && adminAgencyInfo?.logo_url && (
+                          <img 
+                            src={adminAgencyInfo.logo_url} 
                             alt="" 
                             className="w-4 h-4 rounded-full object-cover"
                           />
@@ -5494,7 +5577,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             : isOwnMessage 
                               ? 'You' 
                               : isAdmin 
-                                ? (msg.sender_type === 'agency' ? 'Agency' : 'Client')
+                                ? (msg.sender_type === 'agency' 
+                                    ? (loadingAdminAgency ? 'Loading...' : (adminAgencyInfo?.name || 'Agency'))
+                                    : 'Client')
                                 : loadingCounterpartyAgency && msg.sender_type === 'agency'
                                   ? 'Loading...'
                                   : counterpartyLabel}
