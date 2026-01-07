@@ -207,7 +207,7 @@ export function AgencyPayoutsView() {
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  {summary.totalSales.toLocaleString()} credits
+                  ${summary.totalSales.toLocaleString()}
                 </div>
               </CardContent>
             </Card>
