@@ -396,8 +396,7 @@ export function AgencyApplicationView() {
           </p>
         </div>
         <Button 
-          variant="outline" 
-          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/50 transition-colors'}`}
+          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
           onClick={() => setDialogOpen(true)}
           disabled={existingApplication?.status === 'pending'}
         >
