@@ -322,7 +322,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     phone: string | null;
     type: 'client' | 'agency';
     name?: string | null;
+    logo_url?: string | null;
   } | null>(null);
+  const [userDetailsLogoLoading, setUserDetailsLogoLoading] = useState(true);
   
   // Drag state - use position from chat object
   const [localPosition, setLocalPosition] = useState(chat.position);
@@ -5492,6 +5494,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <DropdownMenuItem 
                               onSelect={async () => {
                                 setUserDetailsLoading(true);
+                                setUserDetailsLogoLoading(true);
                                 setUserDetailsDialogOpen(true);
                                 setUserDetails(null);
                                 
@@ -5520,23 +5523,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                     
                                     let whatsappPhone: string | null = null;
                                     
-                                    // Fetch whatsapp_phone from agency_applications using the user_id
+                                    // Fetch whatsapp_phone and logo_url from agency_applications using the user_id
+                                    let logoUrl: string | null = null;
                                     if (agency?.user_id) {
                                       const { data: application } = await supabase
                                         .from('agency_applications')
-                                        .select('whatsapp_phone')
+                                        .select('whatsapp_phone, logo_url')
                                         .eq('user_id', agency.user_id)
                                         .eq('status', 'approved')
                                         .maybeSingle();
                                       
                                       whatsappPhone = application?.whatsapp_phone || null;
+                                      logoUrl = application?.logo_url || null;
                                     }
                                     
                                     setUserDetails({
                                       email: agency?.email || null,
                                       phone: whatsappPhone,
                                       type: 'agency',
-                                      name: agency?.agency_name || null
+                                      name: agency?.agency_name || null,
+                                      logo_url: logoUrl
                                     });
                                   }
                                 } catch (error) {
@@ -7475,7 +7481,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <DialogTitle className="flex items-center gap-2">
               {userDetails?.type === 'agency' ? (
                 <>
-                  <Building2 className="h-5 w-5" />
+                  {userDetails.logo_url ? (
+                    <div className="relative h-6 w-6">
+                      {userDetailsLogoLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        </div>
+                      )}
+                      <img 
+                        src={userDetails.logo_url} 
+                        alt="" 
+                        className={`h-6 w-6 rounded-full object-cover ${userDetailsLogoLoading ? 'opacity-0' : 'opacity-100'}`}
+                        onLoad={() => setUserDetailsLogoLoading(false)}
+                        onError={() => setUserDetailsLogoLoading(false)}
+                      />
+                    </div>
+                  ) : (
+                    <Building2 className="h-5 w-5" />
+                  )}
                   Agency Details
                 </>
               ) : (
