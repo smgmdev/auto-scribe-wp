@@ -4781,7 +4781,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
                           >
-                            <RefreshCw className="h-3 w-3 mr-1" />
                             Deliver Again
                           </Button>
                         </TooltipTrigger>
