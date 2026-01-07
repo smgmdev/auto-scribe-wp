@@ -145,6 +145,7 @@ export function Sidebar({
     userUnreadCompletedCount,
     setUserUnreadCompletedCount,
     incrementUserUnreadCompletedCount,
+    decrementUserUnreadCompletedCount,
     userUnreadHistoryCount,
     setUserUnreadHistoryCount,
     adminUnreadEngagementsCount,
@@ -914,6 +915,12 @@ export function Sidebar({
           // If delivery_status changed to accepted, increment completed count
           if (old?.delivery_status !== 'accepted' && updated.delivery_status === 'accepted') {
             incrementUserUnreadCompletedCount();
+          }
+          
+          // If order was marked as read and is a completed order, decrement count
+          if (old?.read === false && updated.read === true && 
+              (updated.delivery_status === 'accepted' || updated.delivery_status === 'delivered')) {
+            decrementUserUnreadCompletedCount();
           }
         }
       )
