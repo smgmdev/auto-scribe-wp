@@ -541,6 +541,8 @@ export function AdminOrdersView() {
         );
       case 'delivered':
         return <Badge className="bg-purple-600">Delivered - Pending Approval</Badge>;
+      case 'pending_revision':
+        return <Badge className="bg-orange-500">Revision Requested</Badge>;
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       default:
