@@ -6232,8 +6232,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     }}
                   />
                 </p>
-                <p>Order Placed: {new Date(orderDetails.created_at).toLocaleString()}</p>
-                {orderDetails.paid_at && <p>Paid: {new Date(orderDetails.paid_at).toLocaleString()}</p>}
+                <p>Order Placed and Paid: {new Date(orderDetails.created_at).toLocaleString()}</p>
                 {orderDetails.delivery_status === 'pending_revision' && orderDetails.delivered_at && (
                   <p>Last Order Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
                 )}
