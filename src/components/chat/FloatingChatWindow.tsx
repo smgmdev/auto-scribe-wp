@@ -6667,7 +6667,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-white text-black border border-white hover:bg-black hover:text-white hover:border-white transition-all duration-200"
+              className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200"
               disabled={!deliveryLink.trim() || submittingDelivery}
               onClick={async () => {
                 if (!globalChatRequest || !deliveryLink.trim()) return;
