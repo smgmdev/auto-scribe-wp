@@ -6657,7 +6657,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
               onClick={() => {
                 setDeliverOrderDialogOpen(false);
                 setDeliveryLink('');
@@ -6667,7 +6667,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-black hover:bg-black/90 text-white"
+              className="flex-1 bg-white text-black border border-white hover:bg-black hover:text-white hover:border-white transition-all duration-200"
               disabled={!deliveryLink.trim() || submittingDelivery}
               onClick={async () => {
                 if (!globalChatRequest || !deliveryLink.trim()) return;
