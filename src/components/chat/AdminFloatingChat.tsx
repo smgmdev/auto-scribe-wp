@@ -1939,7 +1939,7 @@ export function AdminFloatingChat({
                         : 'bg-yellow-600/20 text-yellow-600'
                     }`}
                   >
-                    {orderDetails.delivery_status === 'accepted' && 'Accepted'}
+                    {orderDetails.delivery_status === 'accepted' && 'Completed'}
                     {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
                     {orderDetails.delivery_status === 'pending' && 'Pending'}
                   </Badge>

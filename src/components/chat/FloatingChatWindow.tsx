@@ -6403,7 +6403,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                   {!hasOpenDispute && orderDetails.delivery_status === 'accepted' && (
                     <Badge variant="secondary" className="mt-1 bg-green-600 text-white">
-                      Accepted
+                      Completed
                     </Badge>
                   )}
                   {!hasOpenDispute && orderDetails.delivery_status === 'pending_revision' && (
