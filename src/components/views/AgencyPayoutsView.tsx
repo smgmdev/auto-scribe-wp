@@ -31,7 +31,7 @@ interface CreditTransaction {
 }
 
 interface EarningsSummary {
-  totalEarnings: number;
+  totalSales: number;
   pendingPayouts: number;
   completedPayouts: number;
   creditsAvailable: number;
@@ -43,7 +43,7 @@ export function AgencyPayoutsView() {
   const [transactions, setTransactions] = useState<PayoutTransaction[]>([]);
   const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
   const [summary, setSummary] = useState<EarningsSummary>({
-    totalEarnings: 0,
+    totalSales: 0,
     pendingPayouts: 0,
     completedPayouts: 0,
     creditsAvailable: 0,
@@ -110,7 +110,6 @@ export function AgencyPayoutsView() {
 
         // Calculate summary from credit transactions (earnings)
         const orderPayouts = (creditTxData || []).filter(t => t.type === 'order_payout');
-        const totalEarnings = orderPayouts.reduce((sum, t) => sum + (t.amount * 100), 0); // Convert credits to cents
         const pending = typedData.filter(t => t.status === 'pending').reduce((sum, t) => sum + t.amount_cents, 0);
         const completed = typedData.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount_cents, 0);
         
@@ -120,8 +119,12 @@ export function AgencyPayoutsView() {
           return sum + (match ? parseInt(match[1]) : 0);
         }, 0);
 
+        // Calculate total sales (earnings + platform fees = original sale price)
+        const totalEarningsCredits = orderPayouts.reduce((sum, t) => sum + t.amount, 0);
+        const totalSales = totalEarningsCredits + totalPlatformFees;
+
         setSummary({
-          totalEarnings,
+          totalSales,
           pendingPayouts: pending,
           completedPayouts: completed,
           creditsAvailable,
@@ -204,7 +207,7 @@ export function AgencyPayoutsView() {
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  ${(summary.totalEarnings / 100).toFixed(2)}
+                  {summary.totalSales.toLocaleString()} credits
                 </div>
               </CardContent>
             </Card>
