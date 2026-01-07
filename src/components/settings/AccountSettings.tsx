@@ -219,7 +219,7 @@ export function AccountSettings() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Optional but recommended for faster communication with agencies
+            Optional but recommended. Arcana Mace Staff may contact you if your media order is in dispute with an agency.
           </p>
         </div>
 
