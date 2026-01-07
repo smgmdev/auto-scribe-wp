@@ -623,6 +623,78 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
+  // Real-time subscription for admin engagements notifications
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const refetchEngagementCounts = async () => {
+      // Fetch all unread active requests with their order delivery status
+      const { data: activeRequestsData } = await supabase
+        .from('service_requests')
+        .select('id, orders(delivery_status)')
+        .eq('read', false)
+        .neq('status', 'cancelled');
+      
+      // Count active (not delivered) engagements
+      const activeUnreadCount = (activeRequestsData || []).filter(r => 
+        !r.orders || r.orders.delivery_status !== 'accepted'
+      ).length;
+      
+      // Count delivered engagements (delivery_status = 'accepted' and unread)
+      const deliveredUnreadCount = (activeRequestsData || []).filter(r => 
+        r.orders?.delivery_status === 'accepted'
+      ).length;
+      
+      // Fetch unread cancelled engagements count
+      const { count: cancelledEngagementsCountResult } = await supabase
+        .from('service_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('read', false)
+        .eq('status', 'cancelled');
+      
+      setAdminUnreadEngagementsCount(activeUnreadCount);
+      setAdminUnreadDeliveredCount(deliveredUnreadCount);
+      setAdminUnreadCancelledEngagementsCount(cancelledEngagementsCountResult || 0);
+    };
+
+    const channel = supabase
+      .channel('admin-engagements-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        () => {
+          console.log('[Sidebar] Service request changed, refetching engagement counts');
+          refetchEngagementCounts();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          // Refetch when order delivery_status changes
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          if (updated.delivery_status !== old?.delivery_status) {
+            console.log('[Sidebar] Order delivery status changed, refetching engagement counts');
+            refetchEngagementCounts();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
   // Fetch initial unread engagement count for regular users (active + cancelled)
   useEffect(() => {
     if (!user || isAdmin) return;
