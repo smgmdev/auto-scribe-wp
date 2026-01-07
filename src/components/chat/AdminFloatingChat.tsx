@@ -1395,6 +1395,9 @@ export function AdminFloatingChat({
                   {orderDetails.delivery_status === 'delivered' && (
                     <p className="text-xs text-white/70">Awaiting client approval</p>
                   )}
+                  {orderDetails.delivery_status === 'pending_revision' && (
+                    <p className="text-xs text-orange-400">Revision Requested</p>
+                  )}
                   {orderDetails.delivery_status === 'accepted' && (
                     <p className="text-xs text-white/70">Completed</p>
                   )}
@@ -1407,12 +1410,15 @@ export function AdminFloatingChat({
                     ? 'bg-green-500 text-white hover:bg-green-600' 
                     : orderDetails.delivery_status === 'delivered'
                     ? 'bg-purple-500 text-white hover:bg-purple-600'
+                    : orderDetails.delivery_status === 'pending_revision'
+                    ? 'bg-black text-orange-400 border border-orange-400 hover:bg-orange-400/10'
                     : 'bg-white text-black hover:bg-white/80'
                 }`}
                 onClick={fetchOrderDetails}
               >
                 {orderDetails.delivery_status === 'accepted' && 'Completed'}
                 {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
+                {orderDetails.delivery_status === 'pending_revision' && 'Revision Requested'}
                 {orderDetails.delivery_status === 'pending' && 'View Details'}
               </Badge>
             </div>
