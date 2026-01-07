@@ -5500,17 +5500,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 
                                 try {
                                   if (msg.sender_type === 'client') {
-                                    // Fetch client profile
+                                    // Fetch client profile including whatsapp_phone
                                     const { data: profile } = await supabase
                                       .from('profiles')
-                                      .select('email')
+                                      .select('email, whatsapp_phone')
                                       .eq('id', msg.sender_id)
                                       .maybeSingle();
                                     
-                                    // Get phone from auth.users via edge function or use profile email
                                     setUserDetails({
                                       email: profile?.email || null,
-                                      phone: null,
+                                      phone: profile?.whatsapp_phone || null,
                                       type: 'client'
                                     });
                                   } else if (msg.sender_type === 'agency') {
@@ -7531,12 +7530,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Email</p>
                 <p className="font-medium">{userDetails.email || 'Not available'}</p>
               </div>
-              {userDetails.type === 'agency' && (
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">WhatsApp Phone</p>
-                  <p className="font-medium">{userDetails.phone || 'Not available'}</p>
-                </div>
-              )}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">WhatsApp</p>
+                <p className="font-medium">{userDetails.phone || 'N/A'}</p>
+              </div>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
