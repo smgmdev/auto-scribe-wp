@@ -172,6 +172,51 @@ export default function AgencyPortal() {
     }
   }, [agency?.id]);
 
+  // Real-time subscription for order completion updates
+  useEffect(() => {
+    if (!agency) return;
+    
+    console.log('[AgencyPortal] Setting up real-time subscription for orders');
+    
+    const channel = supabase
+      .channel('agency-order-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders'
+        },
+        async (payload) => {
+          console.log('[AgencyPortal] Order update received:', payload);
+          
+          // Check if this order belongs to one of our requests
+          const updatedOrder = payload.new as any;
+          const oldOrder = payload.old as any;
+          
+          // If delivery_status changed to 'delivered', this is a completion
+          if (updatedOrder.delivery_status === 'delivered' && oldOrder.delivery_status !== 'delivered') {
+            // Refresh requests to get the updated data
+            fetchRequests();
+            
+            // Show toast notification
+            toast({
+              title: 'Order Completed! 🎉',
+              description: 'A client order has been marked as delivered.',
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[AgencyPortal] Realtime subscription status:', status);
+      });
+    
+    return () => {
+      console.log('[AgencyPortal] Cleaning up real-time subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [agency?.id]);
+
   const handleLogin = async () => {
     if (!email || !password) {
       toast({
