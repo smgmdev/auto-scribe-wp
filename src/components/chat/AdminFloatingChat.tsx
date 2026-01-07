@@ -277,10 +277,10 @@ export function AdminFloatingChat({
   };
 
   const parseDisputeResolved = (message: string): { type: string; reason: string; resolved_by: string; credits_refunded?: number } | null => {
-    const match = message.match(/\[DISPUTE_RESOLVED\](.*?)\[\/DISPUTE_RESOLVED\]/);
+    const match = message.match(/\[DISPUTE_RESOLVED\]([\s\S]*?)\[\/DISPUTE_RESOLVED\]/);
     if (match) {
       try {
-        return JSON.parse(match[1]);
+        return JSON.parse(match[1].trim());
       } catch {
         return null;
       }
