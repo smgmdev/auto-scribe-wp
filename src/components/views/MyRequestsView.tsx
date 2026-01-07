@@ -506,25 +506,17 @@ export function MyRequestsView() {
     if (!request.order || request.order.status !== 'paid') return null;
     if (request.order.delivery_status === 'accepted') return null;
     
-    // Show "Delivered - Pending Approval" or "Delivered - Revision Requested" badge when order is delivered
+    // Show "Delivered - Revision Requested" badge when order has pending_revision status (priority over overdue)
+    if (request.order.delivery_status === 'pending_revision') {
+      return (
+        <Badge className="bg-black text-orange-400">
+          Delivered - Revision Requested
+        </Badge>
+      );
+    }
+    
+    // Show "Delivered - Pending Approval" badge when order is delivered
     if (request.order.delivery_status === 'delivered') {
-      // Check if there's a revision request after the last delivery
-      const requestMessages = messages[request.id] || [];
-      const lastDeliveryIndex = requestMessages.map((m, i) => ({ m, i }))
-        .filter(({ m }) => m.message.startsWith('[ORDER_DELIVERED]'))
-        .pop()?.i ?? -1;
-      const hasRevisionAfterDelivery = requestMessages
-        .slice(lastDeliveryIndex + 1)
-        .some(m => m.message.startsWith('[REVISION_REQUESTED]'));
-      
-      if (hasRevisionAfterDelivery) {
-        return (
-          <Badge className="bg-black text-orange-400">
-            Delivered - Revision Requested
-          </Badge>
-        );
-      }
-      
       return (
         <Badge className="bg-purple-600/20 text-purple-600">
           Delivered - Pending Approval
