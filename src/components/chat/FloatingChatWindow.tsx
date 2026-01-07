@@ -4463,7 +4463,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Dispute Opened
                       </DropdownMenuItem>
                     )}
-                    {hasOpenDispute && isAdmin && adminJoined && (
+                    {hasOpenDispute && isAdmin && (
                       <>
                         <DropdownMenuItem 
                           className="cursor-pointer text-green-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
