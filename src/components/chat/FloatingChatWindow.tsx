@@ -5921,7 +5921,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </AlertDialogCancel>
             <AlertDialogAction 
               disabled={submittingDispute || !disputeReason.trim()}
-              className="bg-black text-white border border-black hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
+              className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200"
               onClick={async () => {
                 if (!globalChatRequest?.order?.id || !user || !disputeReason.trim()) return;
                 
