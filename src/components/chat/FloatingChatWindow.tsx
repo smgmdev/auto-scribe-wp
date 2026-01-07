@@ -4834,6 +4834,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   </div>
                 </div>
+                {!hasOpenDispute && (
                 <div className="flex items-center gap-2">
                   {canDeliver && (
                     <TooltipProvider>
@@ -4844,7 +4845,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             variant="outline"
                             className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
-                            disabled={hasOpenDispute}
                           >
                             Deliver Order
                           </Button>
@@ -4865,7 +4865,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             variant="outline"
                             className="bg-black text-white border-white shrink-0 transition-all duration-200 hover:bg-white hover:text-black hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
-                            disabled={hasOpenDispute}
                           >
                             Deliver Again
                           </Button>
@@ -4883,7 +4882,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white shrink-0"
                         onClick={handleAcceptDeliveryFromChat}
-                        disabled={acceptingDelivery || hasOpenDispute}
+                        disabled={acceptingDelivery}
                       >
                         {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                         Accept
@@ -4893,13 +4892,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         variant="outline"
                         className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
                         onClick={() => setRevisionDialogOpen(true)}
-                        disabled={hasOpenDispute}
                       >
                         Request Revision
                       </Button>
                     </div>
                   )}
                 </div>
+                )}
               </div>
             </div>
           );
