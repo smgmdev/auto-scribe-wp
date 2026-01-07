@@ -5534,7 +5534,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                         .maybeSingle();
                                       
                                       whatsappPhone = application?.whatsapp_phone || null;
-                                      logoUrl = application?.logo_url || null;
+                                      // Convert storage path to full public URL
+                                      if (application?.logo_url) {
+                                        const { data: urlData } = supabase.storage
+                                          .from('agency-documents')
+                                          .getPublicUrl(application.logo_url);
+                                        logoUrl = urlData?.publicUrl || null;
+                                      }
                                     }
                                     
                                     setUserDetails({
