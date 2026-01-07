@@ -541,8 +541,6 @@ export function AdminOrdersView() {
         );
       case 'delivered':
         return <Badge className="bg-purple-600">Delivered - Pending Approval</Badge>;
-      case 'pending_revision':
-        return <Badge className="bg-orange-500">Revision Requested</Badge>;
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       default:
@@ -912,7 +910,7 @@ export function AdminOrdersView() {
                             Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         )}
-                        {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted' || order.delivery_status === 'pending_revision') && order.delivered_at && (
+                        {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                           <span className="text-xs text-muted-foreground block">
                             Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                           </span>
