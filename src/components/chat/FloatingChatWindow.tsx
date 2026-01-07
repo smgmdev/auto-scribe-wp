@@ -2946,7 +2946,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           delivery_status: 'accepted',
           status: 'completed',
           accepted_at: new Date().toISOString(),
-          released_at: new Date().toISOString()
+          released_at: new Date().toISOString(),
+          read: false
         })
         .eq('id', localOrder.id);
 
@@ -7343,7 +7344,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     .update({ 
                       status: 'completed',
                       delivery_status: 'accepted',
-                      accepted_at: new Date().toISOString()
+                      accepted_at: new Date().toISOString(),
+                      read: false
                     })
                     .eq('id', localOrder.id);
                   
