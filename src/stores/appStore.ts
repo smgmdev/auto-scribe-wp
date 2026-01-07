@@ -161,6 +161,10 @@ interface AppState {
   userUnreadCancelledCount: number;
   setUserUnreadCancelledCount: (count: number) => void;
   
+  // User delivered engagement notifications (for Closed > Delivered tab)
+  userUnreadDeliveredCount: number;
+  setUserUnreadDeliveredCount: (count: number) => void;
+  
   // User unread orders count (for My Orders notification)
   userUnreadOrdersCount: number;
   setUserUnreadOrdersCount: (count: number) => void;
@@ -371,6 +375,10 @@ export const useAppStore = create<AppState>()((set) => ({
   // User cancelled engagement notifications
   userUnreadCancelledCount: 0,
   setUserUnreadCancelledCount: (count) => set({ userUnreadCancelledCount: count }),
+  
+  // User delivered engagement notifications
+  userUnreadDeliveredCount: 0,
+  setUserUnreadDeliveredCount: (count) => set({ userUnreadDeliveredCount: count }),
   
   // User unread orders count
   userUnreadOrdersCount: 0,

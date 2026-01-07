@@ -60,7 +60,9 @@ export function MyRequestsView() {
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
     userUnreadCancelledCount,
-    setUserUnreadCancelledCount
+    setUserUnreadCancelledCount,
+    userUnreadDeliveredCount,
+    setUserUnreadDeliveredCount
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
@@ -166,13 +168,17 @@ export function MyRequestsView() {
 
       // Only update sidebar counts if this is first load OR if they differ
       // This preserves notification badges while keeping data in sync
-      const unreadActiveCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+      // Active = not cancelled AND not delivered (order.delivery_status !== 'accepted')
+      const unreadActiveCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted').length;
+      // Delivered = not cancelled AND delivered (order.delivery_status === 'accepted')
+      const unreadDeliveredCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status === 'accepted').length;
       const unreadCancelledCount = mappedRequests.filter(r => !r.read && r.status === 'cancelled').length;
       
-      console.log('[MyRequestsView] Unread counts - active:', unreadActiveCount, 'cancelled:', unreadCancelledCount);
+      console.log('[MyRequestsView] Unread counts - active:', unreadActiveCount, 'delivered:', unreadDeliveredCount, 'cancelled:', unreadCancelledCount);
       
       // Always sync the counts with actual DB state for accuracy
       setUserUnreadEngagementsCount(unreadActiveCount);
+      setUserUnreadDeliveredCount(unreadDeliveredCount);
       setUserUnreadCancelledCount(unreadCancelledCount);
 
       // Fetch messages for all requests
@@ -394,12 +400,13 @@ export function MyRequestsView() {
               });
               
               // Note: Don't remove cancelled from MyRequestsView - they go to Cancelled tab
-              // But still recalculate unread count excluding cancelled
-              const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
-              setUserUnreadEngagementsCount(newUnreadCount);
-              
-              // Also update cancelled unread count
+              // Recalculate unread counts for active, delivered, and cancelled
+              const newActiveUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted').length;
+              const newDeliveredUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled' && r.order?.delivery_status === 'accepted').length;
               const newCancelledUnreadCount = newRequests.filter(r => !r.read && r.status === 'cancelled').length;
+              
+              setUserUnreadEngagementsCount(newActiveUnreadCount);
+              setUserUnreadDeliveredCount(newDeliveredUnreadCount);
               setUserUnreadCancelledCount(newCancelledUnreadCount);
               return newRequests;
             });
