@@ -5534,12 +5534,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                         .maybeSingle();
                                       
                                       whatsappPhone = application?.whatsapp_phone || null;
-                                      // Convert storage path to full public URL
+                                      // Get signed URL for private bucket
                                       if (application?.logo_url) {
-                                        const { data: urlData } = supabase.storage
+                                        const { data: signedData } = await supabase.storage
                                           .from('agency-documents')
-                                          .getPublicUrl(application.logo_url);
-                                        logoUrl = urlData?.publicUrl || null;
+                                          .createSignedUrl(application.logo_url, 3600);
+                                        logoUrl = signedData?.signedUrl || null;
                                       }
                                     }
                                     
