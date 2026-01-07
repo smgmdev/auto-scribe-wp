@@ -894,6 +894,11 @@ export function AdminOrdersView() {
                           <div className="flex gap-2">
                             {order.status === 'cancelled' ? (
                               <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>
+                            ) : isDisputedOrder ? (
+                              <Badge className="bg-red-600 text-white border-red-600">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                In Dispute
+                              </Badge>
                             ) : (
                               <>
                                 {order.status !== 'paid' && getStatusBadge(order.status)}
