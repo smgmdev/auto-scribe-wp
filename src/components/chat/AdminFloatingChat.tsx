@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw, Phone } from 'lucide-react';
+import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw, Phone, XCircle, Package } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -962,7 +962,7 @@ export function AdminFloatingChat({
         <div className="space-y-1">
           <div className="rounded-lg border p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <Truck className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="font-semibold text-sm text-green-700 dark:text-green-300">
                 Order Delivered
               </span>
@@ -1005,7 +1005,7 @@ export function AdminFloatingChat({
         <div className="space-y-1">
           <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <Package className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="font-semibold text-sm text-green-700 dark:text-green-300">
                 Delivery Accepted
               </span>
@@ -1151,7 +1151,7 @@ export function AdminFloatingChat({
         <div className="space-y-1">
           <div className="rounded-lg border p-3 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
             <div className="flex items-center gap-2 mb-2">
-              <ShoppingCart className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <span className="font-semibold text-sm text-red-700 dark:text-red-300">Order Cancelled</span>
             </div>
             <p className="text-sm text-muted-foreground">
