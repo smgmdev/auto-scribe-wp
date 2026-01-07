@@ -890,30 +890,14 @@ export function AgencyRequestsView() {
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
                                 </Badge>
+                              ) : hasOrder && request.order?.delivery_status === 'pending_revision' ? (
+                                <Badge className="bg-black text-orange-400">
+                                  Delivered - Revision Requested
+                                </Badge>
                               ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
-                                (() => {
-                                  // Check if there's a revision request after the last delivery
-                                  const lastDeliveryIndex = requestMessages
-                                    .map((m, i) => ({ m, i }))
-                                    .filter(({ m }) => m.message.startsWith('[ORDER_DELIVERED]'))
-                                    .pop()?.i ?? -1;
-                                  const hasRevisionAfterDelivery = requestMessages
-                                    .slice(lastDeliveryIndex + 1)
-                                    .some(m => m.message.startsWith('[REVISION_REQUESTED]'));
-                                  
-                                  if (hasRevisionAfterDelivery) {
-                                    return (
-                                      <Badge className="bg-black text-orange-400">
-                                        Delivered - Revision Requested
-                                      </Badge>
-                                    );
-                                  }
-                                  return (
-                                    <Badge variant="secondary" className="bg-purple-500/20 text-purple-600 border-purple-500/30">
-                                      Delivered - Pending Approval
-                                    </Badge>
-                                  );
-                                })()
+                                <Badge variant="secondary" className="bg-purple-500/20 text-purple-600 border-purple-500/30">
+                                  Delivered - Pending Approval
+                                </Badge>
                               ) : hasOrder ? (
                                 <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
                                   <CheckCircle className="h-3 w-3 mr-1" />
@@ -1175,31 +1159,14 @@ export function AgencyRequestsView() {
                               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                                 In Progress
                               </Badge>
+                            ) : order.delivery_status === 'pending_revision' ? (
+                              <Badge className="bg-black text-orange-400">
+                                Delivered - Revision Requested
+                              </Badge>
                             ) : order.delivery_status === 'delivered' ? (
-                              (() => {
-                                // Check if there's a revision request after the last delivery
-                                const orderMessages = relatedRequest ? (messages[relatedRequest.id] || []) : [];
-                                const lastDeliveryIndex = orderMessages
-                                  .map((m, i) => ({ m, i }))
-                                  .filter(({ m }) => m.message.startsWith('[ORDER_DELIVERED]'))
-                                  .pop()?.i ?? -1;
-                                const hasRevisionAfterDelivery = orderMessages
-                                  .slice(lastDeliveryIndex + 1)
-                                  .some(m => m.message.startsWith('[REVISION_REQUESTED]'));
-                                
-                                if (hasRevisionAfterDelivery) {
-                                  return (
-                                    <Badge className="bg-black text-orange-400">
-                                      Delivered - Revision Requested
-                                    </Badge>
-                                  );
-                                }
-                                return (
-                                  <Badge className="bg-purple-500/20 text-purple-600 border-purple-500/30">
-                                    Delivered - Pending Approval
-                                  </Badge>
-                                );
-                              })()
+                              <Badge className="bg-purple-500/20 text-purple-600 border-purple-500/30">
+                                Delivered - Pending Approval
+                              </Badge>
                             ) : (
                               <Badge className="bg-white text-black border-white/30">
                                 <Clock className="h-3 w-3 mr-1" />
