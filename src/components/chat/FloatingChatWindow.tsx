@@ -3331,7 +3331,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Action buttons for agency */}
-            {isAgency && !hasOrder && !isOwnMessage && (
+            {isAgency && !hasOrder && !isOwnMessage && !hasOpenDispute && (
               <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
                 <Button
                   size="sm"
@@ -3449,7 +3449,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
-            {isOwnMessage && !hasOrder && (
+            {isOwnMessage && !hasOrder && !hasOpenDispute && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
@@ -3528,7 +3528,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Confirm Order button for client */}
-            {isClient && !hasOrder && !isOwnMessage && (
+            {isClient && !hasOrder && !isOwnMessage && !hasOpenDispute && (
               <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
@@ -3627,7 +3627,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Action buttons for client */}
-            {canRespond && (
+            {canRespond && !hasOpenDispute && (
               <div className="flex gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
@@ -3874,7 +3874,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Action buttons for client */}
-            {isClient && !hasOrder && !isOwnMessage && (
+            {isClient && !hasOrder && !isOwnMessage && !hasOpenDispute && (
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
@@ -3909,7 +3909,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Cancel button for agency (when it's their own message and no order placed yet) */}
-            {isAgency && isOwnMessage && !hasOrder && (
+            {isAgency && isOwnMessage && !hasOrder && !hasOpenDispute && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
@@ -3983,7 +3983,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 Reason: {cancelRequest.reason}
               </p>
             )}
-            {canRespond && (
+            {canRespond && !hasOpenDispute && (
               <div className="flex gap-2 mt-3 pt-2 border-t border-orange-200 dark:border-orange-800">
                 <Button
                   size="sm"
