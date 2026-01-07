@@ -180,7 +180,7 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help border-green-500/30 bg-green-500/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Credits Available
+                  Total Earnings
                 </CardTitle>
                 <CreditCard className="h-4 w-4 text-green-500/60" />
               </CardHeader>
@@ -192,7 +192,7 @@ export function AgencyPayoutsView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Your current credit balance available for withdrawal</p>
+            <p>Your total earnings after platform fees</p>
           </TooltipContent>
         </Tooltip>
 
