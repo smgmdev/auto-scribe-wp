@@ -272,7 +272,8 @@ export function AdminEngagementsView() {
     const isInDispute = disputes.some(d => d.service_request_id === request.id);
     const deliveryDeadline = request.orders?.delivery_deadline;
     const isOverdue = deliveryDeadline && isPast(new Date(deliveryDeadline)) && 
-                      request.orders?.delivery_status !== 'delivered';
+                      request.orders?.delivery_status !== 'delivered' &&
+                      request.orders?.delivery_status !== 'accepted';
 
     // Priority: In Dispute > Delivery Overdue > Active Order > Open
     if (isInDispute) {
