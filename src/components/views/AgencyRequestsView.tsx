@@ -890,7 +890,7 @@ export function AgencyRequestsView() {
                                   Overdue
                                 </Badge>
                               ) : isInDispute ? (
-                                <Badge variant="destructive" className="bg-orange-500 text-white border-orange-500">
+                                <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
                                 </Badge>
@@ -1252,7 +1252,7 @@ export function AgencyRequestsView() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
-                                <Badge className="bg-orange-500 text-white border-orange-500">Disputed</Badge>
+                                <Badge className="bg-red-600 text-white border-red-600">Disputed</Badge>
                               </div>
                               <p className="text-sm text-muted-foreground">
                                 ${(order.amount_cents / 100).toFixed(0)}
