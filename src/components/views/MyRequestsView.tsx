@@ -518,7 +518,7 @@ export function MyRequestsView() {
     // Show "Delivered - Pending Approval" badge when order is delivered
     if (request.order.delivery_status === 'delivered') {
       return (
-        <Badge className="bg-purple-600/20 text-purple-600">
+        <Badge className="bg-purple-600 text-white">
           Delivered - Pending Approval
         </Badge>
       );
