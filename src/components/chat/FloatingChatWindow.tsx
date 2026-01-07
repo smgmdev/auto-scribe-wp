@@ -6238,7 +6238,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <p>Last Order Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
                 )}
                 {orderDetails.delivery_status !== 'pending_revision' && orderDetails.delivered_at && (
-                  <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                  <>
+                    <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                    {(() => {
+                      // Check if this delivery was after a revision request
+                      const deliveryMessages = messages.filter(m => parseOrderDelivered(m.message));
+                      const revisionMessages = messages.filter(m => parseRevisionRequested(m.message));
+                      
+                      // If there are revision messages and multiple deliveries, show last revised delivery
+                      if (revisionMessages.length > 0 && deliveryMessages.length > 1) {
+                        return (
+                          <p>Last Revised Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </>
                 )}
               </div>
             </div>
