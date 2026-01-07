@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard, ArrowDownLeft, ArrowUpRight, Percent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -35,6 +35,7 @@ interface EarningsSummary {
   pendingPayouts: number;
   completedPayouts: number;
   creditsAvailable: number;
+  totalPlatformFees: number;
 }
 
 export function AgencyPayoutsView() {
@@ -45,7 +46,8 @@ export function AgencyPayoutsView() {
     totalEarnings: 0,
     pendingPayouts: 0,
     completedPayouts: 0,
-    creditsAvailable: 0
+    creditsAvailable: 0,
+    totalPlatformFees: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -111,12 +113,19 @@ export function AgencyPayoutsView() {
         const totalEarnings = orderPayouts.reduce((sum, t) => sum + (t.amount * 100), 0); // Convert credits to cents
         const pending = typedData.filter(t => t.status === 'pending').reduce((sum, t) => sum + t.amount_cents, 0);
         const completed = typedData.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount_cents, 0);
+        
+        // Calculate total platform fees from descriptions
+        const totalPlatformFees = orderPayouts.reduce((sum, t) => {
+          const match = t.description?.match(/Platform fee: (\d+) credits/);
+          return sum + (match ? parseInt(match[1]) : 0);
+        }, 0);
 
         setSummary({
           totalEarnings,
           pendingPayouts: pending,
           completedPayouts: completed,
-          creditsAvailable
+          creditsAvailable,
+          totalPlatformFees
         });
       } else {
         setSummary(prev => ({ ...prev, creditsAvailable }));
@@ -162,7 +171,7 @@ export function AgencyPayoutsView() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-2 md:grid-cols-4">
+      <div className="grid gap-2 md:grid-cols-5">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help border-green-500/30 bg-green-500/5">
@@ -244,6 +253,27 @@ export function AgencyPayoutsView() {
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
             <p>Successfully transferred payouts to your account</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help border-yellow-500/30 bg-yellow-500/5">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Platform Fees
+                </CardTitle>
+                <Percent className="h-4 w-4 text-yellow-500/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-yellow-500">
+                  {summary.totalPlatformFees.toLocaleString()}
+                </div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+            <p>Total platform fees deducted from your earnings</p>
           </TooltipContent>
         </Tooltip>
       </div>
