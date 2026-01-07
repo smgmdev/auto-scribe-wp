@@ -350,10 +350,10 @@ export function OrdersView() {
     }
   };
 
-  // Compute revision status for delivered orders (returns Set, doesn't set state)
+  // Compute revision status for orders (returns Set, doesn't set state)
   const computeRevisionOrderIds = async (ordersList: Order[]): Promise<Set<string>> => {
-    // Get orders that are delivered
-    const deliveredOrders = ordersList.filter(o => o.delivery_status === 'delivered');
+    // Get orders that have been delivered at some point (have delivered_at timestamp)
+    const deliveredOrders = ordersList.filter(o => o.delivered_at);
     if (deliveredOrders.length === 0) {
       return new Set();
     }
@@ -379,21 +379,16 @@ export function OrdersView() {
       return new Set();
     }
     
-    // Check each service request for revision after delivery
+    // Check each service request for any revision request after any delivery
     const revisionOrders = new Set<string>();
     
     for (const sr of serviceRequests) {
       const requestMessages = messages.filter(m => m.request_id === sr.id);
-      const lastDeliveryIndex = requestMessages
-        .map((m, i) => ({ m, i }))
-        .filter(({ m }) => m.message.startsWith('[ORDER_DELIVERED]'))
-        .pop()?.i ?? -1;
       
-      const hasRevisionAfterDelivery = requestMessages
-        .slice(lastDeliveryIndex + 1)
-        .some(m => m.message.startsWith('[REVISION_REQUESTED]'));
+      // Check if there's any revision request in the messages
+      const hasAnyRevision = requestMessages.some(m => m.message.startsWith('[REVISION_REQUESTED]'));
       
-      if (hasRevisionAfterDelivery && sr.order_id) {
+      if (hasAnyRevision && sr.order_id) {
         revisionOrders.add(sr.order_id);
       }
     }
