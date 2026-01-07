@@ -2907,6 +2907,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         message: `[REVISION_REQUESTED]${JSON.stringify(revisionMessagePayload)}[/REVISION_REQUESTED]`
       }).select().single();
 
+      // Update order delivery_status to pending_revision
+      await supabase.from('orders').update({
+        delivery_status: 'pending_revision'
+      }).eq('id', localOrder.id);
+
+      // Update local order state
+      setLocalOrder(prev => prev ? { ...prev, delivery_status: 'pending_revision' } : null);
+
       // Add message to local state to immediately update banner
       if (revisionMsg) {
         setMessages(prev => [...prev, revisionMsg as ServiceMessage]);
