@@ -2907,20 +2907,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         message: `[REVISION_REQUESTED]${JSON.stringify(revisionMessagePayload)}[/REVISION_REQUESTED]`
       }).select().single();
 
-      // Send auto message with the revision request text
-      const { data: textMsg } = await supabase.from('service_messages').insert({
-        request_id: globalChatRequest.id,
-        sender_type: senderType,
-        sender_id: senderId,
-        message: revisionReason.trim()
-      }).select().single();
-
-      // Add messages to local state to immediately update banner
+      // Add message to local state to immediately update banner
       if (revisionMsg) {
         setMessages(prev => [...prev, revisionMsg as ServiceMessage]);
-      }
-      if (textMsg) {
-        setMessages(prev => [...prev, textMsg as ServiceMessage]);
       }
 
       toast({
