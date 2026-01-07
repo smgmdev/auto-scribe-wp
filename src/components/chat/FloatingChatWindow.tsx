@@ -6695,12 +6695,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="delivery-link">Delivery Link <span className="text-destructive">*</span></Label>
-              <Input
-                id="delivery-link"
-                placeholder="https://example.com/article-link"
-                value={deliveryLink}
-                onChange={(e) => setDeliveryLink(e.target.value)}
-              />
+              <div className="flex">
+                <div className="flex items-center px-3 bg-muted border border-r-0 rounded-l-md text-sm text-muted-foreground">
+                  https://
+                </div>
+                <Input
+                  id="delivery-link"
+                  placeholder="example.com/article-link"
+                  value={deliveryLink}
+                  onChange={(e) => setDeliveryLink(e.target.value)}
+                  className="rounded-l-none"
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
                 The published article link or proof of delivery
               </p>
@@ -6748,7 +6754,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     media_site_id: acceptedOrderData.media_site_id,
                     media_site_name: acceptedOrderData.media_site_name,
                     media_site_favicon: acceptedOrderData.media_site_favicon,
-                    delivery_url: deliveryLink.trim(),
+                    delivery_url: `https://${deliveryLink.trim()}`,
                     delivery_notes: deliveryNotes.trim() || null,
                     delivered_by: 'agency'
                   };
