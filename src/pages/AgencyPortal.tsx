@@ -194,15 +194,15 @@ export default function AgencyPortal() {
           const updatedOrder = payload.new as any;
           const oldOrder = payload.old as any;
           
-          // If delivery_status changed to 'delivered', this is a completion
-          if (updatedOrder.delivery_status === 'delivered' && oldOrder.delivery_status !== 'delivered') {
+          // If delivery_status changed to 'accepted', client has accepted - order is complete
+          if (updatedOrder.delivery_status === 'accepted' && oldOrder.delivery_status !== 'accepted') {
             // Refresh requests to get the updated data
             fetchRequests();
             
             // Show toast notification
             toast({
               title: 'Order Completed! 🎉',
-              description: 'A client order has been marked as delivered.',
+              description: 'A client has accepted the delivery.',
             });
           }
         }
@@ -277,9 +277,9 @@ export default function AgencyPortal() {
       const fetchedRequests = response.data.requests || [];
       setRequests(fetchedRequests);
       
-      // Count unread completed orders (status=paid and agency_read=false)
+      // Count unread completed orders (status=paid/completed and agency_read=false)
       const unreadCompleted = fetchedRequests.filter(
-        (r: ServiceRequest) => r.status === 'paid' && r.orders?.agency_read === false
+        (r: ServiceRequest) => ['paid', 'completed'].includes(r.status) && r.orders?.agency_read === false
       ).length;
       setUnreadCompletedCount(unreadCompleted);
     } catch (error: any) {
@@ -377,7 +377,7 @@ export default function AgencyPortal() {
     }
     
     // Mark order as read if it's a completed order with unread status
-    if (request.status === 'paid' && request.orders?.agency_read === false && agency) {
+    if (['paid', 'completed'].includes(request.status) && request.orders?.agency_read === false && agency) {
       try {
         await supabase.functions.invoke('agency-requests', {
           body: { action: 'mark_order_read', request_id: request.id },
@@ -467,7 +467,7 @@ export default function AgencyPortal() {
               In Progress ({requests.filter(r => ['changes_requested', 'accepted'].includes(r.status)).length})
             </TabsTrigger>
             <TabsTrigger value="completed" className="relative">
-              Completed ({requests.filter(r => ['paid', 'rejected'].includes(r.status)).length})
+              Completed ({requests.filter(r => ['paid', 'rejected', 'completed'].includes(r.status)).length})
               {unreadCompletedCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-green-500 text-white text-xs rounded-full">
                   {unreadCompletedCount}
@@ -513,7 +513,7 @@ export default function AgencyPortal() {
               </TabsContent>
 
               <TabsContent value="completed" className="space-y-4">
-                {requests.filter(r => ['paid', 'rejected'].includes(r.status)).map((request) => (
+                {requests.filter(r => ['paid', 'rejected', 'completed'].includes(r.status)).map((request) => (
                   <RequestCard 
                     key={request.id} 
                     request={request} 
@@ -522,7 +522,7 @@ export default function AgencyPortal() {
                     getStatusBadge={getStatusBadge} 
                   />
                 ))}
-                {requests.filter(r => ['paid', 'rejected'].includes(r.status)).length === 0 && (
+                {requests.filter(r => ['paid', 'rejected', 'completed'].includes(r.status)).length === 0 && (
                   <EmptyState message="No completed requests" />
                 )}
               </TabsContent>
@@ -681,7 +681,7 @@ function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: {
     !request.messages?.some(m => m.sender_type === 'admin' && m.message.includes('[ADMIN_LEFT]') && new Date(m.created_at) > new Date(lastAdminMessage.created_at));
   
   // Check if this is an unread completed order
-  const isUnreadCompleted = request.status === 'paid' && request.orders?.agency_read === false;
+  const isUnreadCompleted = ['paid', 'completed'].includes(request.status) && request.orders?.agency_read === false;
   
   return (
     <Card 
