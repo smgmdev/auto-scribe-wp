@@ -6239,19 +6239,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
                 {orderDetails.delivery_status !== 'pending_revision' && orderDetails.delivered_at && (
                   <>
-                    <p>Delivered: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
                     {(() => {
-                      // Check if this delivery was after a revision request
+                      // Get all delivery messages to find the first one
                       const deliveryMessages = messages.filter(m => parseOrderDelivered(m.message));
                       const revisionMessages = messages.filter(m => parseRevisionRequested(m.message));
                       
-                      // If there are revision messages and multiple deliveries, show last revised delivery
+                      // Get the first delivery date
+                      const firstDeliveryMsg = deliveryMessages[0];
+                      const firstDeliveryDate = firstDeliveryMsg ? new Date(firstDeliveryMsg.created_at) : new Date(orderDetails.delivered_at);
+                      
+                      // If there are revision messages and multiple deliveries, show both dates
                       if (revisionMessages.length > 0 && deliveryMessages.length > 1) {
                         return (
-                          <p>Last Revised Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                          <>
+                            <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>
+                            <p>Last Revised Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                          </>
                         );
                       }
-                      return null;
+                      
+                      // Otherwise just show the delivered date
+                      return <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>;
                     })()}
                   </>
                 )}
