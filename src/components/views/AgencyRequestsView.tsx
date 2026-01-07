@@ -39,6 +39,8 @@ interface ServiceRequest {
     status: string;
     delivery_status: string;
     delivery_deadline: string | null;
+    released_at?: string | null;
+    accepted_at?: string | null;
   } | null;
 }
 interface ServiceMessage {
@@ -686,14 +688,29 @@ export function AgencyRequestsView() {
     }
   };
 
-  // Filter and sort requests - separate active from cancelled
+  // Filter and sort requests - separate active, delivered, and cancelled
+  const deliveredRequests = useMemo(() => {
+    return requests.filter(r => 
+      r.status !== 'cancelled' && 
+      r.order && 
+      (r.order.delivery_status === 'delivered' || r.order.delivery_status === 'accepted')
+    );
+  }, [requests]);
+
   const activeRequests = useMemo(() => {
-    return requests.filter(r => r.status !== 'cancelled');
+    return requests.filter(r => 
+      r.status !== 'cancelled' && 
+      !(r.order && (r.order.delivery_status === 'delivered' || r.order.delivery_status === 'accepted'))
+    );
   }, [requests]);
 
   const cancelledRequests = useMemo(() => {
     return requests.filter(r => r.status === 'cancelled');
   }, [requests]);
+
+  const unreadDeliveredCount = useMemo(() => {
+    return deliveredRequests.filter(r => !r.read).length;
+  }, [deliveredRequests]);
 
   const unreadCancelledCount = useMemo(() => {
     return cancelledRequests.filter(r => !r.read).length;
@@ -728,6 +745,23 @@ export function AgencyRequestsView() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [activeRequests, messages, searchQuery]);
+
+  const sortedDeliveredRequests = useMemo(() => {
+    const filtered = deliveredRequests.filter((request) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const titleMatch = request.title.toLowerCase().includes(query);
+      const siteMatch = request.media_site?.name.toLowerCase().includes(query);
+      return titleMatch || siteMatch;
+    });
+    
+    // Sort by completion date (latest first)
+    return filtered.sort((a, b) => {
+      const aCompleted = a.order?.released_at || a.order?.accepted_at || a.updated_at;
+      const bCompleted = b.order?.released_at || b.order?.accepted_at || b.updated_at;
+      return new Date(bCompleted).getTime() - new Date(aCompleted).getTime();
+    });
+  }, [deliveredRequests, searchQuery]);
 
   const sortedCancelledRequests = useMemo(() => {
     const filtered = cancelledRequests.filter((request) => {
@@ -823,10 +857,10 @@ export function AgencyRequestsView() {
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="requests" className="relative">
-            Requests ({activeRequests.length + cancelledRequests.length})
-            {(unreadActiveCount + unreadCancelledCount) > 0 && (
+            Requests ({activeRequests.length + deliveredRequests.length + cancelledRequests.length})
+            {(unreadActiveCount + unreadDeliveredCount + unreadCancelledCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {unreadActiveCount + unreadCancelledCount}
+                {unreadActiveCount + unreadDeliveredCount + unreadCancelledCount}
               </span>
             )}
           </TabsTrigger>
@@ -852,12 +886,12 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="gap-2 relative">
-                <XCircle className="h-4 w-4" />
-                Cancelled requests ({cancelledRequests.length})
-                {unreadCancelledCount > 0 && (
+              <TabsTrigger value="closed" className="gap-2 relative">
+                <CheckCircle className="h-4 w-4" />
+                Closed ({deliveredRequests.length + cancelledRequests.length})
+                {(unreadDeliveredCount + unreadCancelledCount) > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {unreadCancelledCount}
+                    {unreadDeliveredCount + unreadCancelledCount}
                   </span>
                 )}
               </TabsTrigger>
@@ -1006,85 +1040,196 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="cancelled" className="mt-2 space-y-2">
-              {cancelledRequests.length === 0 ? (
-                <Card className="border-border/50">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                    <p className="text-muted-foreground text-center">
-                      No cancelled requests. Cancelled engagements will appear here.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-2">
-                  {sortedCancelledRequests.map((request) => {
-                    const requestMessages = messages[request.id] || [];
-                    const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
-                    const hasUnread = !request.read;
-                    
-                    return (
-                      <Card 
-                        key={request.id} 
-                        className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                          hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
-                        }`}
-                        onClick={() => handleCardClick(request)}
-                      >
-                        <CardHeader className="py-3 px-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="relative">
-                                {request.media_site?.favicon ? (
-                                  <img 
-                                    src={request.media_site.favicon} 
-                                    alt="" 
-                                    className="h-8 w-8 rounded object-cover"
-                                  />
-                                ) : (
-                                  <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <TabsContent value="closed" className="mt-2">
+              <Tabs defaultValue="delivered" className="w-full">
+                <TabsList className="w-full max-w-xs">
+                  <TabsTrigger value="delivered" className="gap-2 relative flex-1">
+                    <CheckCircle className="h-4 w-4" />
+                    Delivered ({deliveredRequests.length})
+                    {unreadDeliveredCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                        {unreadDeliveredCount}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="cancelled" className="gap-2 relative flex-1">
+                    <XCircle className="h-4 w-4" />
+                    Cancelled ({cancelledRequests.length})
+                    {unreadCancelledCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                        {unreadCancelledCount}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="delivered" className="mt-2">
+                  {sortedDeliveredRequests.length === 0 ? (
+                    <Card className="border-border/50">
+                      <CardContent className="flex flex-col items-center justify-center py-12">
+                        <CheckCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                        <p className="text-muted-foreground text-center">No delivered requests</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-2">
+                      {sortedDeliveredRequests.map((request) => {
+                        const requestMessages = messages[request.id] || [];
+                        const hasUnread = !request.read;
+                        
+                        return (
+                          <Card 
+                            key={request.id} 
+                            className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                              hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
+                            }`}
+                            onClick={() => handleCardClick(request)}
+                          >
+                            <CardHeader className="pb-2 px-4 pt-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative">
+                                    {request.media_site?.favicon ? (
+                                      <img 
+                                        src={request.media_site.favicon} 
+                                        alt="" 
+                                        className="h-8 w-8 rounded object-cover"
+                                      />
+                                    ) : (
+                                      <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                      </div>
+                                    )}
+                                    {hasUnread && (
+                                      <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                                    )}
                                   </div>
-                                )}
-                                {hasUnread && (
-                                  <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
-                                )}
+                                  <div className="flex flex-col">
+                                    <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                                    {request.media_site?.agency && (
+                                      <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <Badge className="bg-green-600 text-white">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Completed
+                                </Badge>
                               </div>
-                            <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                            </div>
-                            <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                              Cancelled
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pt-0 pb-3 px-4">
-                          <div className="flex items-end justify-between">
-                            <div className="space-y-0.5">
-                              <p className="text-xs text-muted-foreground">
-                                Cancelled request: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                                {requestMessages.length > 0 && (
-                                  <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                )}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            </div>
-                            <div className="flex flex-col items-end gap-0.5">
-                              {request.media_site?.publication_format && (
-                                <span className="text-xs text-muted-foreground capitalize">{request.media_site.publication_format}</span>
-                              )}
-                              {request.media_site?.price !== undefined && (
-                                <span className="font-semibold text-sm text-foreground">${request.media_site.price}</span>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
+                            </CardHeader>
+                            <CardContent className="pt-0 pb-3 px-4">
+                              <div className="flex items-end justify-between">
+                                <div className="space-y-0.5">
+                                  <p className="text-xs text-muted-foreground">
+                                    Completed: {request.order?.released_at ? format(new Date(request.order.released_at), 'MMM d, yyyy h:mm a') : request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
+                                    {requestMessages.length > 0 && (
+                                      <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                                  {request.media_site?.publication_format && (
+                                    <span className="capitalize">{request.media_site.publication_format}</span>
+                                  )}
+                                  {request.media_site?.price !== undefined && (
+                                    <span className="font-medium text-foreground text-sm">${request.media_site.price}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="cancelled" className="mt-2">
+                  {sortedCancelledRequests.length === 0 ? (
+                    <Card className="border-border/50">
+                      <CardContent className="flex flex-col items-center justify-center py-12">
+                        <XCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                        <p className="text-muted-foreground text-center">No cancelled requests</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-2">
+                      {sortedCancelledRequests.map((request) => {
+                        const requestMessages = messages[request.id] || [];
+                        const hasUnread = !request.read;
+                        
+                        return (
+                          <Card 
+                            key={request.id} 
+                            className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                              hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
+                            }`}
+                            onClick={() => handleCardClick(request)}
+                          >
+                            <CardHeader className="pb-2 px-4 pt-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative">
+                                    {request.media_site?.favicon ? (
+                                      <img 
+                                        src={request.media_site.favicon} 
+                                        alt="" 
+                                        className="h-8 w-8 rounded object-cover"
+                                      />
+                                    ) : (
+                                      <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                      </div>
+                                    )}
+                                    {hasUnread && (
+                                      <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                                    {request.media_site?.agency && (
+                                      <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                                  Cancelled
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="pt-0 pb-3 px-4">
+                              <div className="flex items-end justify-between">
+                                <div className="space-y-0.5">
+                                  <p className="text-xs text-muted-foreground">
+                                    Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
+                                    {requestMessages.length > 0 && (
+                                      <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                                  {request.media_site?.publication_format && (
+                                    <span className="capitalize">{request.media_site.publication_format}</span>
+                                  )}
+                                  {request.media_site?.price !== undefined && (
+                                    <span className="font-medium text-foreground text-sm">${request.media_site.price}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           </Tabs>
         </TabsContent>
