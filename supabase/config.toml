@@ -107,9 +107,11 @@ verify_jwt = true
 [functions.notify-agency-order]
 verify_jwt = false
 
-
 [functions.cancel-order]
 verify_jwt = true
 
 [functions.accept-order-request]
+verify_jwt = true
+
+[functions.complete-order]
 verify_jwt = true
