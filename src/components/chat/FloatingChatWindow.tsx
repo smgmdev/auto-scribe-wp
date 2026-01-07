@@ -6862,9 +6862,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             rows={3}
           />
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setCancelPlacedOrderReason('');
-            }}>
+            <AlertDialogCancel 
+              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
+              onClick={() => {
+                setCancelPlacedOrderReason('');
+              }}
+            >
               Keep Order
             </AlertDialogCancel>
             <AlertDialogAction 
@@ -6928,7 +6931,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 }
               }}
               disabled={!cancelPlacedOrderReason.trim() || cancellingPlacedOrder}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:text-destructive hover:border-destructive transition-all duration-200"
             >
               {cancellingPlacedOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cancel Order
