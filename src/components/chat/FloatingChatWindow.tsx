@@ -6052,6 +6052,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       Accepted
                     </Badge>
                   )}
+                  {orderDetails.delivery_status === 'pending_revision' && (
+                    <Badge variant="secondary" className="mt-1 bg-black text-orange-400">
+                      Revision Requested
+                    </Badge>
+                  )}
                   {orderDetails.delivery_status === 'delivered' && (() => {
                     // Check if there's a pending revision request (revision requested after the last delivery)
                     const lastDeliveryIdx = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
