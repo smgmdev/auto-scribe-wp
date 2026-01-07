@@ -454,7 +454,7 @@ export function AdminEngagementsView() {
 
         <TabsContent value="closed" className="mt-2">
           <Tabs value={closedSubTab} onValueChange={setClosedSubTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-xs mb-4">
+            <TabsList className="grid w-full grid-cols-2 max-w-xs">
               <TabsTrigger value="delivered" className="relative">
                 Delivered ({deliveredRequests.length})
                 {deliveredRequests.filter(r => !r.read).length > 0 && (
