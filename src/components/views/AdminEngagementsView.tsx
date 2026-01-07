@@ -89,6 +89,7 @@ export function AdminEngagementsView() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
+  const [closedSubTab, setClosedSubTab] = useState('delivered');
   const [, setTick] = useState(0);
 
   // Real-time countdown timer - update every second
@@ -336,7 +337,8 @@ export function AdminEngagementsView() {
     );
   };
 
-  const activeRequests = requests.filter(r => r.status !== 'cancelled');
+  const activeRequests = requests.filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted');
+  const deliveredRequests = requests.filter(r => r.orders?.delivery_status === 'accepted');
   const cancelledRequests = requests.filter(r => r.status === 'cancelled');
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
@@ -372,8 +374,8 @@ export function AdminEngagementsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="cancelled">
-            Cancelled ({cancelledRequests.length})
+          <TabsTrigger value="closed">
+            Closed ({deliveredRequests.length + cancelledRequests.length})
           </TabsTrigger>
         </TabsList>
 
@@ -437,68 +439,139 @@ export function AdminEngagementsView() {
           )}
         </TabsContent>
 
-        <TabsContent value="cancelled" className="mt-2">
-          {cancelledRequests.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
-          ) : (
-            <div className="grid gap-2">
-              {cancelledRequests.map((r) => {
-                const requestMessages = messages[r.id] || [];
-                return (
-                  <Card 
-                    key={r.id} 
-                    className="cursor-pointer hover:bg-muted/50 transition-colors border-border/50" 
-                    onClick={() => handleOpenChat(r)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          {r.media_sites?.favicon ? (
-                          <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
-                          ) : (
-                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                              <MessageSquare className="h-5 w-5 text-muted-foreground" />
+        <TabsContent value="closed" className="mt-2">
+          <Tabs value={closedSubTab} onValueChange={setClosedSubTab}>
+            <TabsList className="grid w-full grid-cols-2 max-w-xs mb-4">
+              <TabsTrigger value="delivered">
+                Delivered ({deliveredRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="cancelled">
+                Cancelled ({cancelledRequests.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="delivered" className="mt-2">
+              {deliveredRequests.length === 0 ? (
+                <Card><CardContent className="py-12 text-center text-muted-foreground">No delivered engagements</CardContent></Card>
+              ) : (
+                <div className="grid gap-4">
+                  {deliveredRequests.map((r) => (
+                    <Card 
+                      key={r.id} 
+                      className="cursor-pointer hover:bg-muted/50 transition-colors" 
+                      onClick={() => handleOpenChat(r)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {r.media_sites?.favicon && (
+                              <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
+                            )}
+                            <div>
+                              <h3 className="font-medium">{r.title}</h3>
+                              <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                             </div>
-                          )}
-                          <div className="flex flex-col">
-                            <h3 className="font-medium">{r.title}</h3>
-                            <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                          </div>
+                          <Badge className="bg-green-600">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Delivery Completed
+                          </Badge>
+                        </div>
+                        <div className="mt-2 flex items-end justify-between">
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Last message: {messages[r.id]?.length > 0 
+                                ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
+                                : 'No messages'}
+                              {messages[r.id]?.length > 0 && (
+                                <span> • {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                              )}
+                            </p>
+                            <span className="text-xs text-muted-foreground">
+                              Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                            {r.media_sites?.publication_format && (
+                              <span className="capitalize">{r.media_sites.publication_format}</span>
+                            )}
+                            {r.media_sites?.price !== undefined && (
+                              <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
+                            )}
                           </div>
                         </div>
-                        <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                          Cancelled
-                        </Badge>
-                      </div>
-                      <div className="flex items-end justify-between">
-                        <div className="space-y-0.5">
-                          <p className="text-xs text-muted-foreground">
-                            Cancelled engagement: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
-                            {requestMessages.length > 0 && (
-                              <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                          {r.cancellation_reason && (
-                            <p className="text-xs text-destructive">Reason: {r.cancellation_reason}</p>
-                          )}
-                        </div>
-                        <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
-                          {r.media_sites?.publication_format && (
-                            <span className="capitalize">{r.media_sites.publication_format}</span>
-                          )}
-                          {r.media_sites?.price !== undefined && (
-                            <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="cancelled" className="mt-2">
+              {cancelledRequests.length === 0 ? (
+                <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
+              ) : (
+                <div className="grid gap-2">
+                  {cancelledRequests.map((r) => {
+                    const requestMessages = messages[r.id] || [];
+                    return (
+                      <Card 
+                        key={r.id} 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors border-border/50" 
+                        onClick={() => handleOpenChat(r)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              {r.media_sites?.favicon ? (
+                              <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
+                              ) : (
+                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                              )}
+                              <div className="flex flex-col">
+                                <h3 className="font-medium">{r.title}</h3>
+                                <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                              </div>
+                            </div>
+                            <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                              Cancelled
+                            </Badge>
+                          </div>
+                          <div className="flex items-end justify-between">
+                            <div className="space-y-0.5">
+                              <p className="text-xs text-muted-foreground">
+                                Cancelled engagement: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
+                                {requestMessages.length > 0 && (
+                                  <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                )}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                              {r.cancellation_reason && (
+                                <p className="text-xs text-destructive">Reason: {r.cancellation_reason}</p>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                              {r.media_sites?.publication_format && (
+                                <span className="capitalize">{r.media_sites.publication_format}</span>
+                              )}
+                              {r.media_sites?.price !== undefined && (
+                                <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
