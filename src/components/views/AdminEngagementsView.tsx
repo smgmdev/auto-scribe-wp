@@ -271,10 +271,11 @@ export function AdminEngagementsView() {
     const hasOrder = !!request.orders && request.order_id;
     const isInDispute = disputes.some(d => d.service_request_id === request.id);
     const deliveryDeadline = request.orders?.delivery_deadline;
+    const deliveryStatus = request.orders?.delivery_status;
     const isOverdue = deliveryDeadline && isPast(new Date(deliveryDeadline)) && 
-                      request.orders?.delivery_status !== 'delivered';
+                      deliveryStatus !== 'delivered' && deliveryStatus !== 'pending_revision' && deliveryStatus !== 'accepted';
 
-    // Priority: In Dispute > Delivery Overdue > Active Order > Open
+    // Priority: In Dispute > Revision Requested > Delivered > Delivery Overdue > Active Order > Open
     if (isInDispute) {
       return (
         <Badge variant="destructive" className="bg-red-600">
@@ -284,27 +285,27 @@ export function AdminEngagementsView() {
       );
     }
 
-    if (hasOrder && isOverdue) {
+    if (hasOrder && deliveryStatus === 'pending_revision') {
       return (
-        <Badge variant="destructive" className="bg-red-600">
-          <AlertCircle className="h-3 w-3 mr-1" />
-          Delivery Overdue
-        </Badge>
-      );
-    }
-
-    if (hasOrder && request.orders?.delivery_status === 'pending_revision') {
-      return (
-        <Badge className="bg-orange-500">
+        <Badge className="bg-black text-orange-500">
           Delivered - Revision Requested
         </Badge>
       );
     }
 
-    if (hasOrder && request.orders?.delivery_status === 'delivered') {
+    if (hasOrder && deliveryStatus === 'delivered') {
       return (
         <Badge className="bg-purple-600">
           Delivered - Pending Approval
+        </Badge>
+      );
+    }
+
+    if (hasOrder && isOverdue) {
+      return (
+        <Badge variant="destructive" className="bg-red-600">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          Delivery Overdue
         </Badge>
       );
     }
