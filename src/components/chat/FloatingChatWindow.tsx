@@ -261,6 +261,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [hasOpenDispute, setHasOpenDispute] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
   const [cancellingOrderRequestId, setCancellingOrderRequestId] = useState<string | null>(null);
   const [rejectingOrderRequestId, setRejectingOrderRequestId] = useState<string | null>(null);
   const [acceptingDelivery, setAcceptingDelivery] = useState(false);
@@ -5887,7 +5888,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       </Dialog>
 
       {/* Open Dispute Dialog */}
-      <AlertDialog open={disputeDialogOpen} onOpenChange={setDisputeDialogOpen}>
+      <AlertDialog open={disputeDialogOpen} onOpenChange={(open) => {
+        setDisputeDialogOpen(open);
+        if (!open) setDisputeReason('');
+      }}>
         <AlertDialogContent className="z-[250]">
           <AlertDialogHeader>
             <AlertDialogTitle>Open Dispute</AlertDialogTitle>
@@ -5900,12 +5904,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="py-4">
+            <Textarea
+              placeholder="Please describe your reason for opening this dispute..."
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={submittingDispute}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              disabled={submittingDispute}
+              disabled={submittingDispute || !disputeReason.trim()}
               onClick={async () => {
-                if (!globalChatRequest?.order?.id || !user) return;
+                if (!globalChatRequest?.order?.id || !user || !disputeReason.trim()) return;
                 
                 setSubmittingDispute(true);
                 try {
@@ -5916,7 +5928,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       service_request_id: globalChatRequest.id,
                       user_id: user.id,
                       status: 'open',
-                      reason: 'Delivery overdue - dispute opened by client'
+                      reason: disputeReason.trim()
                     });
                   
                   if (error) throw error;
@@ -5927,6 +5939,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     description: "A staff member will join this chat within 6-24 hours.",
                   });
                   setDisputeDialogOpen(false);
+                  setDisputeReason('');
                 } catch (error: any) {
                   console.error('Error creating dispute:', error);
                   toast({
