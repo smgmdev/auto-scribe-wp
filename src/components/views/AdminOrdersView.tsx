@@ -70,6 +70,7 @@ export function AdminOrdersView() {
   const [activeTab, setActiveTab] = useState('pending');
   const [historySubTab, setHistorySubTab] = useState<'all' | 'cancelled'>('all');
   const [disputes, setDisputes] = useState<{ id: string; order_id: string; service_request_id: string; read: boolean }[]>([]);
+  const [revisionOrderIds, setRevisionOrderIds] = useState<Set<string>>(new Set());
   const [agencyCommissions, setAgencyCommissions] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -189,6 +190,52 @@ export function AdminOrdersView() {
   // Helper to get disputedOrderIds from disputes state
   const disputedOrderIds = new Set(disputes.map(d => d.order_id));
 
+  // Compute revision status for orders (returns Set)
+  const computeRevisionOrderIds = async (ordersList: Order[]): Promise<Set<string>> => {
+    // Get orders that have been delivered at some point (have delivered_at timestamp)
+    const deliveredOrders = ordersList.filter(o => o.delivered_at);
+    if (deliveredOrders.length === 0) {
+      return new Set();
+    }
+    
+    // Get service request IDs for these orders
+    const { data: serviceRequests } = await supabase
+      .from('service_requests')
+      .select('id, order_id')
+      .in('order_id', deliveredOrders.map(o => o.id));
+    
+    if (!serviceRequests || serviceRequests.length === 0) {
+      return new Set();
+    }
+    
+    // Get messages for these service requests
+    const { data: messages } = await supabase
+      .from('service_messages')
+      .select('request_id, message, created_at')
+      .in('request_id', serviceRequests.map(sr => sr.id))
+      .order('created_at', { ascending: true });
+    
+    if (!messages) {
+      return new Set();
+    }
+    
+    // Check each service request for any revision request after any delivery
+    const revisionOrders = new Set<string>();
+    
+    for (const sr of serviceRequests) {
+      const requestMessages = messages.filter(m => m.request_id === sr.id);
+      
+      // Check if there's any revision request in the messages
+      const hasAnyRevision = requestMessages.some(m => m.message.startsWith('[REVISION_REQUESTED]'));
+      
+      if (hasAnyRevision && sr.order_id) {
+        revisionOrders.add(sr.order_id);
+      }
+    }
+    
+    return revisionOrders;
+  };
+
   const fetchOrders = async (isRefresh = false) => {
     if (isRefresh) {
       setIsRefreshing(true);
@@ -219,6 +266,10 @@ export function AdminOrdersView() {
       // Update unread count in store
       const unreadCount = (data || []).filter((o: Order) => o.status === 'paid' && !o.read).length;
       setUnreadOrdersCount(unreadCount);
+      
+      // Fetch revision status for orders
+      const revisionIds = await computeRevisionOrderIds(uniqueOrders);
+      setRevisionOrderIds(revisionIds);
       
       // Fetch agency commissions for all unique agencies
       const uniqueAgencies = [...new Set((data || []).map((o: Order) => o.media_sites?.agency).filter(Boolean))];
@@ -927,7 +978,7 @@ export function AdminOrdersView() {
                         )}
                         {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                           <span className="text-xs text-muted-foreground block">
-                            Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                            {revisionOrderIds.has(order.id) || disputedOrderIds.has(order.id) && revisionOrderIds.has(order.id) ? 'Last order delivery:' : 'Order delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         )}
                       </div>
