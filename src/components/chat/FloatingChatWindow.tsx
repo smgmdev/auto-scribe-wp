@@ -2926,6 +2926,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (cleanMessage.startsWith('[CANCEL_ORDER_REJECTED]')) {
       return 'Cancellation Rejected';
     }
+    if (cleanMessage.startsWith('[DISPUTE_OPENED]')) {
+      return 'Dispute Opened';
+    }
+    if (cleanMessage.startsWith('[DISPUTE_RESOLVED]')) {
+      return 'Dispute Resolved';
+    }
     
     return cleanMessage;
   };
@@ -4368,6 +4374,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
       if (text.startsWith('[CANCEL_ORDER_REJECTED]')) {
         return 'Cancellation Rejected';
+      }
+      if (text.startsWith('[DISPUTE_OPENED]')) {
+        return 'Dispute Opened';
+      }
+      if (text.startsWith('[DISPUTE_RESOLVED]')) {
+        return 'Dispute Resolved';
       }
       
       return text;
