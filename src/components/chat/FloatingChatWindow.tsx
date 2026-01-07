@@ -5913,9 +5913,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             />
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={submittingDispute}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel 
+              disabled={submittingDispute}
+              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction 
               disabled={submittingDispute || !disputeReason.trim()}
+              className="bg-black text-white border border-black hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
               onClick={async () => {
                 if (!globalChatRequest?.order?.id || !user || !disputeReason.trim()) return;
                 
