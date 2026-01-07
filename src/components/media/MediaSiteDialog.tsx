@@ -32,7 +32,6 @@ interface MediaSiteDialogProps {
   mediaSite: MediaSite | null;
   agencyLogos?: Record<string, string>;
   onSuccess?: (engagement?: { id: string; media_site_id: string; [key: string]: any }) => void;
-  onPublishNewArticle?: (siteId: string) => void;
 }
 
 type DialogView = 'detail' | 'brief';
@@ -42,8 +41,7 @@ export function MediaSiteDialog({
   onOpenChange,
   mediaSite,
   agencyLogos = {},
-  onSuccess,
-  onPublishNewArticle
+  onSuccess
 }: MediaSiteDialogProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -536,21 +534,6 @@ export function MediaSiteDialog({
               >
                 Close
               </Button>
-              {onPublishNewArticle && (
-                <Button 
-                  variant="outline"
-                  className="hover:bg-black hover:text-white transition-all duration-200 group"
-                  onClick={() => {
-                    onPublishNewArticle(mediaSite.id);
-                    onOpenChange(false);
-                  }}
-                >
-                  <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
-                  <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                    <ArrowRight className="h-4 w-4 shrink-0" />
-                  </span>
-                </Button>
-              )}
               {!isAgency && !(userAgencyName && mediaSite.agency === userAgencyName) && (
                 user ? (
                   checkingEngagement ? (
