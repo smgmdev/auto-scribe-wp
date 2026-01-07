@@ -943,6 +943,7 @@ const Landing = () => {
         mediaSite={selectedMediaSite}
         agencyLogos={agencyLogos}
         onSuccess={() => setSelectedMediaSite(null)}
+        onPublishNewArticle={handlePublishNewArticle}
       />
 
       {/* Agency Details Dialog */}
