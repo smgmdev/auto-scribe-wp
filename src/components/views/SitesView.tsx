@@ -1252,11 +1252,10 @@ export function SitesView() {
                   ) : (
                     <Button
                       size="sm"
-                      className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
+                      className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 overflow-hidden border border-transparent hover:border-black"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setBriefMediaSite(site);
-                        setBriefDialogOpen(true);
+                        handleOpenMediaSiteDialog(site);
                       }}
                     >
                       I'm Interested
