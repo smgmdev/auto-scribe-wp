@@ -890,6 +890,10 @@ export function AgencyRequestsView() {
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
                                 </Badge>
+                              ) : hasOrder && request.order?.delivery_status === 'pending_revision' ? (
+                                <Badge className="bg-black text-orange-400">
+                                  Delivered - Revision Requested
+                                </Badge>
                               ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
                                 (() => {
                                   // Check if there's a revision request after the last delivery
