@@ -136,6 +136,8 @@ export function Sidebar({
     setAgencyUnreadOrdersCount,
     userUnreadEngagementsCount,
     setUserUnreadEngagementsCount,
+    userUnreadDeliveredCount,
+    setUserUnreadDeliveredCount,
     userUnreadCancelledCount,
     setUserUnreadCancelledCount,
     userUnreadOrdersCount,
@@ -698,29 +700,39 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
-  // Fetch initial unread engagement count for regular users (active + cancelled)
+  // Fetch initial unread engagement count for regular users (active + delivered + cancelled)
   useEffect(() => {
     if (!user || isAdmin) return;
 
     const fetchUnreadEngagements = async () => {
-      // Get all user's service requests with client_last_read_at for timestamp-based logic
+      // Get all user's service requests with client_last_read_at for timestamp-based logic and order status
       const { data: allRequests } = await supabase
         .from('service_requests')
-        .select('id, client_read, client_last_read_at, status')
+        .select('id, client_read, client_last_read_at, status, orders(delivery_status)')
         .eq('user_id', user.id);
 
       if (!allRequests || allRequests.length === 0) {
         setUserUnreadEngagementsCount(0);
+        setUserUnreadDeliveredCount(0);
         setUserUnreadCancelledCount(0);
         return;
       }
 
-      // Separate active and cancelled requests
-      const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
-      const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
+      // Normalize order data (Supabase returns array for foreign key joins)
+      const normalizedRequests = allRequests.map(r => ({
+        ...r,
+        order: Array.isArray((r as any).orders) && (r as any).orders.length > 0 
+          ? (r as any).orders[0] 
+          : (r as any).orders
+      }));
+
+      // Separate active, delivered, and cancelled requests
+      const activeRequests = normalizedRequests.filter(r => r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted');
+      const deliveredRequests = normalizedRequests.filter(r => r.status !== 'cancelled' && r.order?.delivery_status === 'accepted');
+      const cancelledRequests = normalizedRequests.filter(r => r.status === 'cancelled');
 
       // Get all request IDs to fetch messages with timestamps
-      const allRequestIds = allRequests.map(r => r.id);
+      const allRequestIds = normalizedRequests.map(r => r.id);
       let messagesData: { request_id: string; sender_type: string; created_at: string }[] = [];
       
       if (allRequestIds.length > 0) {
@@ -731,31 +743,38 @@ export function Sidebar({
         messagesData = data || [];
       }
 
-      // Count active requests using timestamp-based unread logic (matches ChatListPanel widget)
-      let activeUnreadCount = 0;
-      activeRequests.forEach(request => {
-        const lastReadAt = (request as any).client_last_read_at;
-        const requestMessages = messagesData.filter(
-          m => m.request_id === request.id && m.sender_type !== 'client'
-        );
-        
-        // Count messages sent after client_last_read_at
-        let unreadMsgCount = 0;
-        for (const msg of requestMessages) {
-          if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
-            unreadMsgCount++;
+      // Helper function to count unread for a set of requests
+      const countUnread = (requests: typeof normalizedRequests) => {
+        let count = 0;
+        requests.forEach(request => {
+          const lastReadAt = (request as any).client_last_read_at;
+          const requestMessages = messagesData.filter(
+            m => m.request_id === request.id && m.sender_type !== 'client'
+          );
+          
+          // Count messages sent after client_last_read_at
+          let unreadMsgCount = 0;
+          for (const msg of requestMessages) {
+            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+              unreadMsgCount++;
+            }
           }
-        }
-        
-        if (unreadMsgCount > 0) {
-          activeUnreadCount++;
-        }
-      });
+          
+          if (unreadMsgCount > 0) {
+            count++;
+          }
+        });
+        return count;
+      };
+
+      const activeUnreadCount = countUnread(activeRequests);
+      const deliveredUnreadCount = countUnread(deliveredRequests);
 
       // Count unread cancelled requests (cancelled requests are always shown as unread if client_read is false)
       const cancelledUnreadCount = cancelledRequests.filter(r => !(r as any).client_read).length;
 
       setUserUnreadEngagementsCount(activeUnreadCount);
+      setUserUnreadDeliveredCount(deliveredUnreadCount);
       setUserUnreadCancelledCount(cancelledUnreadCount);
       
       // Fetch all unread orders for this user
@@ -808,7 +827,7 @@ export function Sidebar({
     };
 
     fetchUnreadEngagements();
-  }, [user?.id, isAdmin, setUserUnreadEngagementsCount, setUserUnreadCancelledCount, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
+  }, [user?.id, isAdmin, setUserUnreadEngagementsCount, setUserUnreadDeliveredCount, setUserUnreadCancelledCount, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
 
   // Real-time subscription for user engagement status changes (including cancellations)
   useEffect(() => {
@@ -841,31 +860,44 @@ export function Sidebar({
           const refetchCounts = async () => {
             const { data: allRequests } = await supabase
               .from('service_requests')
-              .select('id, client_read, client_last_read_at, status')
+              .select('id, client_read, client_last_read_at, status, orders(delivery_status)')
               .eq('user_id', user.id);
 
             if (!allRequests) return;
 
-            const activeRequests = allRequests.filter(r => r.status !== 'cancelled');
-            const cancelledRequests = allRequests.filter(r => r.status === 'cancelled');
+            // Normalize order data
+            const normalizedRequests = allRequests.map(r => ({
+              ...r,
+              order: Array.isArray((r as any).orders) && (r as any).orders.length > 0 
+                ? (r as any).orders[0] 
+                : (r as any).orders
+            }));
 
-            // Get messages for active requests with timestamps
-            const activeRequestIds = activeRequests.map(r => r.id);
-            let activeUnreadCount = 0;
+            const activeRequests = normalizedRequests.filter(r => r.status !== 'cancelled' && r.order?.delivery_status !== 'accepted');
+            const deliveredRequests = normalizedRequests.filter(r => r.status !== 'cancelled' && r.order?.delivery_status === 'accepted');
+            const cancelledRequests = normalizedRequests.filter(r => r.status === 'cancelled');
+
+            // Get messages for all requests with timestamps
+            const allRequestIds = normalizedRequests.map(r => r.id);
+            let messagesData: { request_id: string; sender_type: string; created_at: string }[] = [];
             
-            if (activeRequestIds.length > 0) {
-              const { data: messages } = await supabase
+            if (allRequestIds.length > 0) {
+              const { data } = await supabase
                 .from('service_messages')
                 .select('request_id, sender_type, created_at')
-                .in('request_id', activeRequestIds);
+                .in('request_id', allRequestIds);
+              messagesData = data || [];
+            }
 
-              activeRequests.forEach(request => {
+            // Helper function to count unread for a set of requests
+            const countUnread = (requests: typeof normalizedRequests) => {
+              let count = 0;
+              requests.forEach(request => {
                 const lastReadAt = (request as any).client_last_read_at;
-                const requestMessages = messages?.filter(
+                const requestMessages = messagesData.filter(
                   m => m.request_id === request.id && m.sender_type !== 'client'
-                ) || [];
+                );
                 
-                // Count messages sent after client_last_read_at
                 let unreadMsgCount = 0;
                 for (const msg of requestMessages) {
                   if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
@@ -874,13 +906,18 @@ export function Sidebar({
                 }
                 
                 if (unreadMsgCount > 0) {
-                  activeUnreadCount++;
+                  count++;
                 }
               });
-            }
+              return count;
+            };
 
+            const activeUnreadCount = countUnread(activeRequests);
+            const deliveredUnreadCount = countUnread(deliveredRequests);
             const cancelledUnreadCount = cancelledRequests.filter(r => !(r as any).client_read).length;
+            
             setUserUnreadEngagementsCount(activeUnreadCount);
+            setUserUnreadDeliveredCount(deliveredUnreadCount);
             setUserUnreadCancelledCount(cancelledUnreadCount);
           };
 
@@ -989,9 +1026,9 @@ export function Sidebar({
                 const agencyManagementCount = item.id === 'agency-management'
                   ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount)
                   : 0;
-                // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include cancelled and delivered
+                // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include delivered and cancelled
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
-                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount + adminUnreadDeliveredCount + adminUnreadCancelledEngagementsCount) : (userUnreadEngagementsCount + userUnreadCancelledCount + userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount))
+                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount + adminUnreadDeliveredCount + adminUnreadCancelledEngagementsCount) : (userUnreadEngagementsCount + userUnreadDeliveredCount + userUnreadCancelledCount + userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount))
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
@@ -1031,8 +1068,9 @@ export function Sidebar({
                           const agencyMediaBadgeCount = agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount;
                           // Agency user Service Requests shows unread request notifications (active + cancelled + disputes + orders)
                           const showServiceRequestsBadge = subItem.id === 'agency-requests' && (agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount) > 0;
-                          // User My Engagements shows unread message notifications (active + cancelled)
-                          const showEngagementsBadge = subItem.id === 'my-requests' && (userUnreadEngagementsCount + userUnreadCancelledCount) > 0;
+                          // User My Engagements shows unread message notifications (active + delivered + cancelled)
+                          const userEngagementsTotalCount = userUnreadEngagementsCount + userUnreadDeliveredCount + userUnreadCancelledCount;
+                          const showEngagementsBadge = subItem.id === 'my-requests' && userEngagementsTotalCount > 0;
                           // User My Orders shows combined notifications (active + disputes + completed + cancelled)
                           const showUserOrdersBadge = subItem.id === 'orders' && (userUnreadOrdersCount + userUnreadDisputesCount + userUnreadCompletedCount + userUnreadHistoryCount) > 0;
                           const userOrdersBadgeCount = userUnreadOrdersCount + userUnreadDisputesCount + userUnreadCompletedCount + userUnreadHistoryCount;
@@ -1049,7 +1087,7 @@ export function Sidebar({
                           else if (showMediaBadge) notificationCount = unreadMediaSubmissionsCount;
                           else if (showAgencyMediaBadge) notificationCount = agencyMediaBadgeCount;
                           else if (showServiceRequestsBadge) notificationCount = agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount;
-                          else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount + userUnreadCancelledCount;
+                          else if (showEngagementsBadge) notificationCount = userEngagementsTotalCount;
                           else if (showUserOrdersBadge) notificationCount = userOrdersBadgeCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
                           else if (showAdminEngagementsBadge) notificationCount = adminEngagementsTotalCount;
