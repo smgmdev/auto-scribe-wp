@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,6 +22,14 @@ interface PayoutTransaction {
   } | null;
 }
 
+interface CreditTransaction {
+  id: string;
+  amount: number;
+  type: string;
+  description: string | null;
+  created_at: string;
+}
+
 interface EarningsSummary {
   totalEarnings: number;
   pendingPayouts: number;
@@ -32,6 +40,7 @@ interface EarningsSummary {
 export function AgencyPayoutsView() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<PayoutTransaction[]>([]);
+  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
   const [summary, setSummary] = useState<EarningsSummary>({
     totalEarnings: 0,
     pendingPayouts: 0,
@@ -65,6 +74,17 @@ export function AgencyPayoutsView() {
 
       const creditsAvailable = creditsData?.credits || 0;
 
+      // Fetch credit transactions for this user (shows earnings from orders)
+      const { data: creditTxData } = await supabase
+        .from('credit_transactions')
+        .select('id, amount, type, description, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (creditTxData) {
+        setCreditTransactions(creditTxData as CreditTransaction[]);
+      }
+
       // Fetch payout transactions for this agency
       const { data, error } = await supabase
         .from('payout_transactions')
@@ -86,13 +106,14 @@ export function AgencyPayoutsView() {
         const typedData = data as unknown as PayoutTransaction[];
         setTransactions(typedData);
 
-        // Calculate summary
-        const total = typedData.reduce((sum, t) => sum + t.amount_cents, 0);
+        // Calculate summary from credit transactions (earnings)
+        const orderPayouts = (creditTxData || []).filter(t => t.type === 'order_payout');
+        const totalEarnings = orderPayouts.reduce((sum, t) => sum + (t.amount * 100), 0); // Convert credits to cents
         const pending = typedData.filter(t => t.status === 'pending').reduce((sum, t) => sum + t.amount_cents, 0);
         const completed = typedData.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount_cents, 0);
 
         setSummary({
-          totalEarnings: total,
+          totalEarnings,
           pendingPayouts: pending,
           completedPayouts: completed,
           creditsAvailable
@@ -227,51 +248,58 @@ export function AgencyPayoutsView() {
         </Tooltip>
       </div>
 
-      {/* Transactions List */}
+      {/* Credit Transactions (Earnings) */}
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle>Earnings History</CardTitle>
         </CardHeader>
         <CardContent>
-          {transactions.length === 0 ? (
+          {creditTransactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground text-center">
-                No payout transactions yet. Your earnings will appear here once clients confirm deliveries.
+                No earnings yet. Your earnings will appear here once clients confirm deliveries.
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              {transactions.map((transaction) => (
-                <div 
-                  key={transaction.id} 
-                  className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-border transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {transaction.order?.media_site?.favicon && (
-                      <img 
-                        src={transaction.order.media_site.favicon} 
-                        alt="" 
-                        className="h-8 w-8 rounded object-cover"
-                      />
-                    )}
-                    <div>
-                      <p className="font-medium">
-                        {transaction.order?.media_site?.name || 'Order Payout'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                      </p>
+              {creditTransactions.map((transaction) => {
+                const isIncoming = transaction.amount > 0;
+                return (
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-border transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isIncoming ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                        {isIncoming ? (
+                          <ArrowDownLeft className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <ArrowUpRight className="h-5 w-5 text-red-500" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {transaction.type === 'order_payout' ? 'Order Earning' : 
+                           transaction.type === 'withdrawal' ? 'Withdrawal' :
+                           transaction.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {transaction.description || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge className={isIncoming ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}>
+                        {isIncoming ? 'Incoming' : 'Outgoing'}
+                      </Badge>
+                      <span className={`font-semibold ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
+                        {isIncoming ? '+' : ''}{transaction.amount} credits
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    {getStatusBadge(transaction.status)}
-                    <span className="font-semibold text-green-500">
-                      +${(transaction.amount_cents / 100).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
