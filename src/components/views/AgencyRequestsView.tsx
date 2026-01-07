@@ -1225,13 +1225,13 @@ export function AgencyRequestsView() {
                   return (
                     <Card 
                       key={order.id}
-                      className={`border-border/50 hover:border-border transition-colors cursor-pointer border-l-4 border-l-orange-500 ${
-                        isUnread ? 'bg-orange-500/10' : ''
+                      className={`border-border/50 hover:border-border transition-colors cursor-pointer border-l-4 border-l-red-500 ${
+                        isUnread ? 'bg-red-500/10' : ''
                       }`}
                       onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
                     >
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <div className="relative">
                               {order.media_site?.favicon ? (
@@ -1246,27 +1246,34 @@ export function AgencyRequestsView() {
                                 </div>
                               )}
                               {isUnread && (
-                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-orange-500 rounded-full border-2 border-card" />
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-card" />
                               )}
                             </div>
                             <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
-                                <Badge className="bg-red-600 text-white border-red-600">Disputed</Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                ${(order.amount_cents / 100).toFixed(0)}
-                              </p>
+                              <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
-                              <AlertTriangle className="h-3 w-3 mr-1" />
-                              Open Dispute
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(order.created_at), 'MMM d, yyyy')}
+                          <Badge className="bg-red-600 text-white border-red-600">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            Open Dispute
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <div className="space-y-0.5">
+                            <span className="text-xs text-muted-foreground block">
+                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
+                            {order.delivered_at && (
+                              <span className="text-xs text-muted-foreground block">
+                                Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            {order.media_site?.publication_format && (
+                              <p className="text-xs text-muted-foreground">{order.media_site.publication_format}</p>
+                            )}
+                            <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
                           </div>
                         </div>
                       </CardContent>
