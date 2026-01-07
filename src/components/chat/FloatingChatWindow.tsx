@@ -2899,6 +2899,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         reason: revisionReason.trim()
       };
 
+      // Update order delivery_status to pending_revision
+      await supabase
+        .from('orders')
+        .update({ delivery_status: 'pending_revision' })
+        .eq('id', localOrder.id);
+
+      // Update local order state
+      setLocalOrder(prev => prev ? { ...prev, delivery_status: 'pending_revision' } : null);
+
       // Insert the system revision request message
       const { data: revisionMsg } = await supabase.from('service_messages').insert({
         request_id: globalChatRequest.id,
