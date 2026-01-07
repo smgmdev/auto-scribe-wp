@@ -880,7 +880,11 @@ export function AgencyRequestsView() {
                             </div>
                             <div className="flex flex-col items-end gap-1">
                               {/* Status badges */}
-                              {isOverdue ? (
+                              {hasOrder && request.order?.delivery_status === 'pending_revision' ? (
+                                <Badge className="bg-black text-orange-400">
+                                  Delivered - Revision Requested
+                                </Badge>
+                              ) : isOverdue ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   Overdue
@@ -889,10 +893,6 @@ export function AgencyRequestsView() {
                                 <Badge variant="destructive" className="bg-orange-500 text-white border-orange-500">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
-                                </Badge>
-                              ) : hasOrder && request.order?.delivery_status === 'pending_revision' ? (
-                                <Badge className="bg-black text-orange-400">
-                                  Delivered - Revision Requested
                                 </Badge>
                               ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
                                 <Badge variant="secondary" className="bg-purple-500/20 text-purple-600 border-purple-500/30">
