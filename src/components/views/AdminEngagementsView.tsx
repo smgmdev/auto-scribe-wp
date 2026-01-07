@@ -82,7 +82,7 @@ interface Dispute {
 }
 
 export function AdminEngagementsView() {
-  const { openGlobalChat, decrementAdminUnreadEngagementsCount, incrementAdminUnreadEngagementsCount } = useAppStore();
+  const { openGlobalChat, decrementAdminUnreadEngagementsCount, incrementAdminUnreadEngagementsCount, decrementAdminUnreadDeliveredCount, decrementAdminUnreadCancelledEngagementsCount } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -226,11 +226,19 @@ export function AdminEngagementsView() {
         .eq('id', request.id);
       
       if (!error) {
-        // Update local state and notification count
+        // Update local state and notification count based on which category the item belongs to
         setRequests(prev => prev.map(r => 
           r.id === request.id ? { ...r, read: true } : r
         ));
-        decrementAdminUnreadEngagementsCount();
+        
+        // Decrement the appropriate counter based on request status
+        if (request.status === 'cancelled') {
+          decrementAdminUnreadCancelledEngagementsCount();
+        } else if (request.orders?.delivery_status === 'accepted') {
+          decrementAdminUnreadDeliveredCount();
+        } else {
+          decrementAdminUnreadEngagementsCount();
+        }
       }
     }
 
