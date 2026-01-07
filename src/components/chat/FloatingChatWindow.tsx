@@ -5944,7 +5944,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={!revisionReason.trim() || submittingRevision}
-              className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200"
+              className="bg-black text-white border border-black hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
               onClick={(e) => {
                 e.preventDefault();
                 handleRequestRevision();
@@ -6673,7 +6673,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200"
+              className="flex-1 bg-black text-white border border-black hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
               disabled={!deliveryLink.trim() || submittingDelivery}
               onClick={async () => {
                 if (!globalChatRequest || !deliveryLink.trim()) return;
