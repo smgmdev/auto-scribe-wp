@@ -4775,7 +4775,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
+                            className="bg-black text-white border-black shrink-0 transition-all duration-200 hover:bg-white hover:text-black hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
                           >
                             Deliver Again
