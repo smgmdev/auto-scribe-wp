@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History, RefreshCw } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +72,7 @@ export function MyRequestsView() {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [, setTimerTick] = useState(0);
+  const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   
   // Timer for real-time countdown updates
   useEffect(() => {
@@ -204,9 +205,26 @@ export function MyRequestsView() {
     }
   };
 
+  // Fetch user's open disputes to identify which orders are in dispute
+  const fetchUserDisputes = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('disputes')
+      .select('order_id')
+      .eq('user_id', user.id)
+      .eq('status', 'open');
+    
+    if (!error && data) {
+      const orderIds = new Set(data.map(d => d.order_id));
+      setDisputeOrderIds(orderIds);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchRequests();
+      fetchUserDisputes();
     }
   }, [user]);
 
@@ -505,6 +523,16 @@ export function MyRequestsView() {
   const getOrderPlacedBadge = (request: ServiceRequest) => {
     if (!request.order || request.order.status !== 'paid') return null;
     if (request.order.delivery_status === 'accepted') return null;
+    
+    // Check if order is in dispute first (highest priority)
+    if (disputeOrderIds.has(request.order.id)) {
+      return (
+        <Badge className="bg-red-600 text-white">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          In Dispute
+        </Badge>
+      );
+    }
     
     // Show "Delivered - Revision Requested" badge when order has pending_revision status (priority over overdue)
     if (request.order.delivery_status === 'pending_revision') {
