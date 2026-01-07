@@ -6203,12 +6203,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
                   <a 
-                    href={orderDetails.delivery_url}
+                    href={orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline flex items-center gap-1"
                   >
-                    {orderDetails.delivery_url}
+                    {orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
