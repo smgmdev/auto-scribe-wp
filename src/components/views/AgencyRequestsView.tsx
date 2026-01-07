@@ -1090,28 +1090,7 @@ export function AgencyRequestsView() {
         </TabsContent>
 
         <TabsContent value="orders" className="mt-2">
-          <Tabs defaultValue="active" className="w-full" onValueChange={async (value) => {
-            if (value === 'completed' && agencyUnreadCompletedCount > 0) {
-              // Mark all unread completed orders as read in database
-              const unreadCompletedOrderIds = orders
-                .filter(o => !(o as any).agency_read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted'))
-                .map(o => o.id);
-              
-              if (unreadCompletedOrderIds.length > 0) {
-                await supabase
-                  .from('orders')
-                  .update({ agency_read: true })
-                  .in('id', unreadCompletedOrderIds);
-                
-                // Update local orders state
-                setOrders(prev => prev.map(o => 
-                  unreadCompletedOrderIds.includes(o.id) ? { ...o, agency_read: true } : o
-                ));
-              }
-              
-              setAgencyUnreadCompletedCount(0);
-            }
-          }}>
+          <Tabs defaultValue="active" className="w-full">
             <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="active" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
