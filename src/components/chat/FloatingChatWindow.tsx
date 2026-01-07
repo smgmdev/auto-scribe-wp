@@ -5729,10 +5729,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               </div>
             ) : localOrder?.delivery_status === 'accepted' ? (
-              <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
+              <div className="flex flex-col items-center justify-center py-2 px-3 bg-muted/20 gap-1">
                 <span className="text-muted-foreground text-sm">
                   Order delivery was completed
                 </span>
+                {(() => {
+                  // Find the completion reason from messages
+                  const disputeResolvedMsg = messages.find(m => m.message.includes('[DISPUTE_RESOLVED]') && m.message.includes('dispute_resolved_complete'));
+                  if (disputeResolvedMsg) {
+                    const parsed = parseDisputeResolved(disputeResolvedMsg.message);
+                    if (parsed?.reason) {
+                      return (
+                        <span className="text-muted-foreground text-xs text-center">
+                          Reason: {parsed.reason}
+                        </span>
+                      );
+                    }
+                  }
+                  return null;
+                })()}
               </div>
             ) : isAdminInvestigating ? (
               <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
