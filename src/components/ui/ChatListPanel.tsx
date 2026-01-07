@@ -1774,7 +1774,7 @@ export function ChatListPanel() {
 
   // Format preview message - make it user-friendly by cleaning up technical content
   // Returns { text, type } where type can be used for icon display
-  const formatPreviewMessage = (message: string | undefined, description: string, title: string, isAgencyView: boolean = false): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'order_request_accepted' | 'order_request_rejected' | 'payment' | 'delivery' | 'order_delivered' | 'revision_requested' | 'status' | 'attachment' | 'normal' } => {
+  const formatPreviewMessage = (message: string | undefined, description: string, title: string, isAgencyView: boolean = false): { text: string; type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'order_request_accepted' | 'order_request_rejected' | 'payment' | 'delivery' | 'order_delivered' | 'revision_requested' | 'dispute_opened' | 'dispute_resolved' | 'status' | 'attachment' | 'normal' } => {
     if (message) {
       let cleanMessage = message;
       
@@ -1829,6 +1829,12 @@ export function ChatListPanel() {
       }
       if (cleanMessage.startsWith('[STATUS_')) {
         return { text: 'Status Update', type: 'status' };
+      }
+      if (cleanMessage.startsWith('[DISPUTE_OPENED]')) {
+        return { text: 'Dispute Opened', type: 'dispute_opened' };
+      }
+      if (cleanMessage.startsWith('[DISPUTE_RESOLVED]')) {
+        return { text: 'Dispute Resolved', type: 'dispute_resolved' };
       }
       
       // Check for attachments anywhere in the message (format: [ATTACHMENT]{...}[/ATTACHMENT])
@@ -1893,7 +1899,7 @@ export function ChatListPanel() {
   };
 
   // Get icon for message type
-  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'order_request_accepted' | 'order_request_rejected' | 'payment' | 'delivery' | 'order_delivered' | 'revision_requested' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
+  const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'order_request_accepted' | 'order_request_rejected' | 'payment' | 'delivery' | 'order_delivered' | 'revision_requested' | 'dispute_opened' | 'dispute_resolved' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
     switch (type) {
       case 'order':
         return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
@@ -1923,6 +1929,10 @@ export function ChatListPanel() {
         return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'revision_requested':
         return <RefreshCw className="h-3 w-3 shrink-0 text-muted-foreground" />;
+      case 'dispute_opened':
+        return <AlertTriangle className="h-3 w-3 shrink-0 text-muted-foreground" />;
+      case 'dispute_resolved':
+        return <CheckCircle className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'status':
         return <Bell className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'attachment':
