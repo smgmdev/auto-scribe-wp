@@ -4768,7 +4768,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </TooltipProvider>
                   )}
                   {/* Deliver Again button for agency when revision is requested */}
-                  {isAgencyView && hasRevisionAfterDelivery && localOrder.delivery_status === 'delivered' && (
+                  {isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
