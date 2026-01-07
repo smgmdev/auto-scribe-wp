@@ -39,6 +39,7 @@ interface ServiceRequest {
     status: string;
     delivery_status: string;
     delivery_deadline: string | null;
+    accepted_at: string | null;
   } | null;
 }
 
@@ -110,7 +111,7 @@ export function MyRequestsView() {
           created_at,
           updated_at,
           media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-          order:orders(id, status, delivery_status, delivery_deadline)
+          order:orders(id, status, delivery_status, delivery_deadline, accepted_at)
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -1018,7 +1019,7 @@ export function MyRequestsView() {
                             <div className="flex items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
-                                  Completed: {format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
+                                  Completed: {request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
                                   {requestMessages.length > 0 && (
                                     <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                   )}
