@@ -265,6 +265,12 @@ export function AgencyPayoutsView() {
             <div className="space-y-2">
               {creditTransactions.map((transaction) => {
                 const isIncoming = transaction.amount > 0;
+                // Parse platform fee from description if present
+                const platformFeeMatch = transaction.description?.match(/Platform fee: (\d+) credits/);
+                const platformFee = platformFeeMatch ? parseInt(platformFeeMatch[1]) : null;
+                // Extract main description without platform fee part
+                const mainDescription = transaction.description?.replace(/\s*\(Platform fee:.*\)/, '') || '';
+                
                 return (
                   <div 
                     key={transaction.id} 
@@ -285,8 +291,13 @@ export function AgencyPayoutsView() {
                            transaction.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {transaction.description || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                          {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
+                        {platformFee !== null && (
+                          <p className="text-xs text-yellow-500/80 mt-0.5">
+                            Platform fee: {platformFee} credits
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
