@@ -5728,7 +5728,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </button>
                 </div>
               </div>
-            ) : isAdminInvestigating && localOrder?.delivery_status === 'accepted' ? (
+            ) : localOrder?.delivery_status === 'accepted' ? (
               <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
                 <span className="text-muted-foreground text-sm">
                   Order delivery was completed
