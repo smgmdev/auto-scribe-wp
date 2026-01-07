@@ -43,13 +43,14 @@ serve(async (req) => {
     logStep("Request received", { action, agencyId, request_id });
 
     if (action === "list") {
-      // Get all requests for this agency
+      // Get all requests for this agency with order data
       const { data: requests, error: requestsError } = await supabaseAdmin
         .from("service_requests")
         .select(`
           *,
           media_sites (name, favicon, price),
-          profiles:user_id (email, username)
+          profiles:user_id (email, username),
+          orders:order_id (id, agency_read, delivery_status, accepted_at)
         `)
         .eq("agency_payout_id", agencyId)
         .order("created_at", { ascending: false });
@@ -152,6 +153,38 @@ serve(async (req) => {
       if (updateError) throw new Error(updateError.message);
 
       logStep("Request marked as read", { requestId: request_id });
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
+    } else if (action === "mark_order_read") {
+      // Mark an order's agency_read as true
+      if (!request_id) {
+        throw new Error("Request ID required");
+      }
+
+      // Get the request to find its order
+      const { data: request, error: reqError } = await supabaseAdmin
+        .from("service_requests")
+        .select("order_id")
+        .eq("id", request_id)
+        .eq("agency_payout_id", agencyId)
+        .single();
+
+      if (reqError || !request) throw new Error("Request not found");
+
+      if (request.order_id) {
+        const { error: updateError } = await supabaseAdmin
+          .from("orders")
+          .update({ agency_read: true })
+          .eq("id", request.order_id);
+
+        if (updateError) throw new Error(updateError.message);
+      }
+
+      logStep("Order marked as read", { requestId: request_id, orderId: request.order_id });
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
