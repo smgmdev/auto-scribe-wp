@@ -3714,27 +3714,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       );
     }
 
-    // Handle dispute opened message
+    // Handle dispute opened message - render as user message with title and reason
     if (disputeOpened && !quote) {
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
-            isOwnMessage 
-              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
+          <div className={`text-sm whitespace-pre-wrap break-words ${
+            isOwnMessage ? 'text-primary-foreground' : ''
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>
-                Dispute Opened
-              </span>
-            </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-              {isOwnMessage ? 'You opened' : 'Client opened'} a dispute for {disputeOpened.media_site_name}
-            </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-              Reason: {disputeOpened.reason}
-            </p>
+            <p className="font-semibold">Dispute Opened</p>
+            <p className="mt-1">{disputeOpened.reason}</p>
           </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
