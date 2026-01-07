@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -1366,64 +1367,88 @@ export function AdminFloatingChat({
         </div>
 
         {/* Order Status Banner */}
-        {hasOrder && orderDetails && (
-          <div className="p-3 bg-black text-white border-b border-black">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-white" />
+        {hasOrder && orderDetails && (() => {
+          // Get revision reason if pending_revision
+          const lastRevisionMessage = orderDetails.delivery_status === 'pending_revision'
+            ? messages.slice().reverse().find(m => parseRevisionRequested(m.message))
+            : null;
+          const revisionData = lastRevisionMessage ? parseRevisionRequested(lastRevisionMessage.message) : null;
+          
+          return (
+            <div className="p-3 bg-black text-white border-b border-black">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    {orderDetails.delivery_status === 'pending_revision' ? (
+                      <RefreshCw className="h-4 w-4 text-orange-400" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Order Placed</p>
+                    {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-xs text-white/70">Awaiting delivery</span>
+                        <span className="text-white/40">•</span>
+                        {(() => {
+                          const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
+                          return (
+                            <>
+                              <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
+                              <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                                {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                              </span>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
+                    {orderDetails.delivery_status === 'delivered' && (
+                      <p className="text-xs text-white/70">Awaiting client approval</p>
+                    )}
+                    {orderDetails.delivery_status === 'pending_revision' && revisionData && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-xs text-orange-400 cursor-help">Revision Requested</p>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs">
+                            <p><span className="font-medium">Reason:</span> {revisionData.reason}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {orderDetails.delivery_status === 'pending_revision' && !revisionData && (
+                      <p className="text-xs text-orange-400">Revision Requested</p>
+                    )}
+                    {orderDetails.delivery_status === 'accepted' && (
+                      <p className="text-xs text-white/70">Completed</p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Order Placed</p>
-                  {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-xs text-white/70">Awaiting delivery</span>
-                      <span className="text-white/40">•</span>
-                      {(() => {
-                        const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
-                        return (
-                          <>
-                            <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
-                            <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                              {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
-                            </span>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
-                  {orderDetails.delivery_status === 'delivered' && (
-                    <p className="text-xs text-white/70">Awaiting client approval</p>
-                  )}
-                  {orderDetails.delivery_status === 'pending_revision' && (
-                    <p className="text-xs text-orange-400">Revision Requested</p>
-                  )}
-                  {orderDetails.delivery_status === 'accepted' && (
-                    <p className="text-xs text-white/70">Completed</p>
-                  )}
-                </div>
+                <Badge 
+                  variant="secondary" 
+                  className={`cursor-pointer ${
+                    orderDetails.delivery_status === 'accepted' 
+                      ? 'bg-green-500 text-white hover:bg-green-600' 
+                      : orderDetails.delivery_status === 'delivered'
+                      ? 'bg-purple-500 text-white hover:bg-purple-600'
+                      : orderDetails.delivery_status === 'pending_revision'
+                      ? 'bg-black text-orange-400 border border-orange-400 hover:bg-orange-400/10'
+                      : 'bg-white text-black hover:bg-white/80'
+                  }`}
+                  onClick={fetchOrderDetails}
+                >
+                  {orderDetails.delivery_status === 'accepted' && 'Completed'}
+                  {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
+                  {orderDetails.delivery_status === 'pending_revision' && 'Revision Requested'}
+                  {orderDetails.delivery_status === 'pending' && 'View Details'}
+                </Badge>
               </div>
-              <Badge 
-                variant="secondary" 
-                className={`cursor-pointer ${
-                  orderDetails.delivery_status === 'accepted' 
-                    ? 'bg-green-500 text-white hover:bg-green-600' 
-                    : orderDetails.delivery_status === 'delivered'
-                    ? 'bg-purple-500 text-white hover:bg-purple-600'
-                    : orderDetails.delivery_status === 'pending_revision'
-                    ? 'bg-black text-orange-400 border border-orange-400 hover:bg-orange-400/10'
-                    : 'bg-white text-black hover:bg-white/80'
-                }`}
-                onClick={fetchOrderDetails}
-              >
-                {orderDetails.delivery_status === 'accepted' && 'Completed'}
-                {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
-                {orderDetails.delivery_status === 'pending_revision' && 'Revision Requested'}
-                {orderDetails.delivery_status === 'pending' && 'View Details'}
-              </Badge>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Cancellation notice */}
         {isCancelled && (
