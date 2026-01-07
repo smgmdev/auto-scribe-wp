@@ -5511,23 +5511,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                       type: 'client'
                                     });
                                   } else if (msg.sender_type === 'agency') {
-                                    // Fetch agency details
+                                    // Fetch agency details from agency_payouts
                                     const { data: agency } = await supabase
                                       .from('agency_payouts')
                                       .select('agency_name, email, user_id')
                                       .eq('id', msg.sender_id)
                                       .maybeSingle();
                                     
-                                    // Also check agency_applications for phone
-                                    const { data: application } = await supabase
-                                      .from('agency_applications')
-                                      .select('whatsapp_phone, email')
-                                      .eq('user_id', agency?.user_id || msg.sender_id)
-                                      .maybeSingle();
+                                    let whatsappPhone: string | null = null;
+                                    
+                                    // Fetch whatsapp_phone from agency_applications using the user_id
+                                    if (agency?.user_id) {
+                                      const { data: application } = await supabase
+                                        .from('agency_applications')
+                                        .select('whatsapp_phone')
+                                        .eq('user_id', agency.user_id)
+                                        .eq('status', 'approved')
+                                        .maybeSingle();
+                                      
+                                      whatsappPhone = application?.whatsapp_phone || null;
+                                    }
                                     
                                     setUserDetails({
-                                      email: agency?.email || application?.email || null,
-                                      phone: application?.whatsapp_phone || null,
+                                      email: agency?.email || null,
+                                      phone: whatsappPhone,
                                       type: 'agency',
                                       name: agency?.agency_name || null
                                     });
