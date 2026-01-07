@@ -487,6 +487,11 @@ export function OrdersView() {
   };
 
   const getDeliveryBadge = (status: string, deliveryDeadline?: string | null, orderId?: string) => {
+    // Check pending_revision first (priority over overdue)
+    if (status === 'pending_revision') {
+      return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
+    }
+    
     switch (status) {
       case 'pending':
         if (deliveryDeadline) {
