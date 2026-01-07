@@ -186,7 +186,7 @@ export function AgencyPayoutsView() {
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-green-500">
-                  {summary.creditsAvailable.toLocaleString()}
+                  ${summary.creditsAvailable.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
