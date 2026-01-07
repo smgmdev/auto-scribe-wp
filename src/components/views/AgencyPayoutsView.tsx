@@ -287,9 +287,12 @@ export function AgencyPayoutsView() {
                 
                 const rowContent = (
                   <div 
-                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
+                    className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
+                    <Badge className={`absolute top-3 right-3 ${isIncoming ? "bg-foreground text-background border-foreground" : "bg-red-500/20 text-red-400 border-red-500/30"}`}>
+                      {isIncoming ? 'Credited' : 'Outgoing'}
+                    </Badge>
+                    <div className="flex items-center gap-3 pr-20">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isIncoming ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
                         {isIncoming ? (
                           <ArrowDownLeft className="h-5 w-5 text-green-500" />
@@ -297,7 +300,7 @@ export function AgencyPayoutsView() {
                           <ArrowUpRight className="h-5 w-5 text-red-500" />
                         )}
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">
                           {transaction.type === 'order_payout' ? 'Order Earning' : 
                            transaction.type === 'withdrawal' ? 'Withdrawal' :
@@ -311,15 +314,10 @@ export function AgencyPayoutsView() {
                             Platform fee: {platformFee} credits
                           </p>
                         )}
+                        <p className={`font-semibold mt-1 ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
+                          {isIncoming ? '+' : ''}{transaction.amount} credits
+                        </p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Badge className={isIncoming ? "bg-foreground text-background border-foreground" : "bg-red-500/20 text-red-400 border-red-500/30"}>
-                        {isIncoming ? 'Credited' : 'Outgoing'}
-                      </Badge>
-                      <span className={`font-semibold ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
-                        {isIncoming ? '+' : ''}{transaction.amount} credits
-                      </span>
                     </div>
                   </div>
                 );
@@ -333,9 +331,9 @@ export function AgencyPayoutsView() {
                       </TooltipTrigger>
                       <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                         <div className="space-y-1">
-                          <p><span className="text-muted-foreground">Sale:</span> <span className="font-semibold">{salePrice} credits</span></p>
-                          <p><span className="text-muted-foreground">Platform Fee:</span> <span className="font-semibold text-yellow-400">-{platformFee} credits</span></p>
-                          <p><span className="text-muted-foreground">Actual Earnings:</span> <span className="font-semibold text-green-400">{transaction.amount} credits</span></p>
+                          <p><span className="text-muted-foreground">Sale:</span> <span className="font-semibold text-background">${salePrice} credits</span></p>
+                          <p><span className="text-muted-foreground">Platform Fee:</span> <span className="font-semibold text-yellow-400">-${platformFee} credits</span></p>
+                          <p><span className="text-muted-foreground">Actual Earnings:</span> <span className="font-semibold text-green-400">${transaction.amount} credits</span></p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
