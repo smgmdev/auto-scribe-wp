@@ -494,10 +494,47 @@ export function AgencyRequestsView() {
         console.log('[AgencyRequestsView] Client-action channel status:', status);
       });
 
+    // Subscribe to order updates for real-time delivery status changes
+    const ordersChannel = supabase
+      .channel('agency-orders-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          console.log('[AgencyRequestsView] Order update received:', payload);
+          const updatedOrder = payload.new as any;
+          const oldOrder = payload.old as any;
+          
+          // Check if delivery_status changed to 'delivered' or 'accepted'
+          if ((updatedOrder.delivery_status === 'delivered' && oldOrder.delivery_status !== 'delivered') ||
+              (updatedOrder.delivery_status === 'accepted' && oldOrder.delivery_status !== 'accepted')) {
+            // Show toast notification
+            toast({
+              title: 'Order Completed! 🎉',
+              description: updatedOrder.delivery_status === 'accepted' 
+                ? 'Client has accepted the delivery.' 
+                : 'Order has been marked as delivered.',
+            });
+            // Increment the completed count
+            incrementAgencyUnreadCompletedCount();
+            // Refresh to get updated data
+            fetchRequests();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[AgencyRequestsView] Orders channel status:', status);
+      });
+
     return () => {
       supabase.removeChannel(requestsChannel);
       supabase.removeChannel(adminActionChannel);
       supabase.removeChannel(clientActionChannel);
+      supabase.removeChannel(ordersChannel);
     };
   }, [agencyPayoutId]);
 
@@ -624,6 +661,29 @@ export function AgencyRequestsView() {
     }
   };
 
+  const handleCompletedOrderClick = async (order: any, request: ServiceRequest | undefined) => {
+    // Mark completed order as read if it's unread
+    if (!order.agency_read) {
+      // Update database
+      await supabase
+        .from('orders')
+        .update({ agency_read: true })
+        .eq('id', order.id);
+      
+      // Update local state
+      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, agency_read: true } : o));
+      
+      // Decrement completed count
+      const newCount = Math.max(0, agencyUnreadCompletedCount - 1);
+      setAgencyUnreadCompletedCount(newCount);
+    }
+    
+    // Open the chat for the related request
+    if (request) {
+      handleCardClick(request);
+    }
+  };
+
   // Filter and sort requests - separate active from cancelled
   const activeRequests = useMemo(() => {
     return requests.filter(r => r.status !== 'cancelled');
@@ -696,11 +756,11 @@ export function AgencyRequestsView() {
 
   const activeOrders = useMemo(() => 
     orders.filter(o => {
-      // Include pending_payment and paid orders that aren't accepted/cancelled
-      // Note: delivery_status 'delivered' means awaiting client approval, so still active
-      // Only 'accepted' means client approved, so it's completed
+      // Include pending_payment and paid orders that aren't delivered/accepted/cancelled
+      // Orders with delivery_status 'delivered' or 'accepted' go to Completed tab
       return (o.status === 'pending_payment' || o.status === 'paid') &&
         o.delivery_status !== 'accepted' &&
+        o.delivery_status !== 'delivered' &&
         o.status !== 'cancelled' && 
         o.delivery_status !== 'cancelled' &&
         !disputedOrderIds.has(o.id);
@@ -710,7 +770,7 @@ export function AgencyRequestsView() {
   
   const completedOrders = useMemo(() => 
     orders.filter(o => 
-      o.delivery_status === 'accepted' && 
+      (o.delivery_status === 'accepted' || o.delivery_status === 'delivered') && 
       !disputedOrderIds.has(o.id)
     ), 
     [orders, disputedOrderIds]
@@ -1296,26 +1356,34 @@ export function AgencyRequestsView() {
               ) : (
                 completedOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
+                  const isUnread = !order.agency_read;
                   return (
                     <Card 
                       key={order.id}
-                      className="border-border/50 hover:border-border transition-colors cursor-pointer"
-                      onClick={() => relatedRequest && handleCardClick(relatedRequest)}
+                      className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
+                        isUnread ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
+                      }`}
+                      onClick={() => handleCompletedOrderClick(order, relatedRequest)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            {order.media_site?.favicon ? (
-                              <img 
-                                src={order.media_site.favicon} 
-                                alt="" 
-                                className="h-10 w-10 rounded object-cover"
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
-                              </div>
-                            )}
+                            <div className="relative">
+                              {order.media_site?.favicon ? (
+                                <img 
+                                  src={order.media_site.favicon} 
+                                  alt="" 
+                                  className="h-10 w-10 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                                  <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                              )}
+                              {isUnread && (
+                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-card" />
+                              )}
+                            </div>
                             <div>
                               <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
                               <p className="text-sm text-muted-foreground">
