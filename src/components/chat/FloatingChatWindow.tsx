@@ -3331,7 +3331,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Action buttons for agency */}
-            {isAgency && !hasOrder && !isOwnMessage && !hasOpenDispute && (
+            {isAgency && !hasOrder && !isOwnMessage && (
               <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
                 <Button
                   size="sm"
@@ -3426,7 +3426,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       setAcceptingOrder(false);
                     }
                   }}
-                  disabled={acceptingOrder}
+                  disabled={acceptingOrder || hasOpenDispute}
                 >
                   {acceptingOrder && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -3438,7 +3438,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="sm"
                   className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
                   onClick={handleRejectClientOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id}
+                  disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
                 >
                   {rejectingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -3449,14 +3449,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Cancel button for client (when it's their own message and no order placed yet) */}
-            {isOwnMessage && !hasOrder && !hasOpenDispute && (
+            {isOwnMessage && !hasOrder && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
                   variant="outline"
                   className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white dark:hover:border-black"
                   onClick={handleCancelClientOrderRequest}
-                  disabled={cancellingOrderRequestId === msg.id}
+                  disabled={cancellingOrderRequestId === msg.id || hasOpenDispute}
                 >
                   {cancellingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -3528,11 +3528,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Confirm Order button for client */}
-            {isClient && !hasOrder && !isOwnMessage && !hasOpenDispute && (
+            {isClient && !hasOrder && !isOwnMessage && (
               <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  disabled={hasOpenDispute}
                   onClick={() => {
                     setPendingOrderRequest({
                       media_site_id: orderRequestAccepted.media_site_id,
@@ -3627,13 +3628,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Action buttons for client */}
-            {canRespond && !hasOpenDispute && (
+            {canRespond && (
               <div className="flex gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   onClick={handleAcceptDeliveryFromChat}
-                  disabled={acceptingDelivery}
+                  disabled={acceptingDelivery || hasOpenDispute}
                 >
                   {acceptingDelivery ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
                   Accept
@@ -3643,6 +3644,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   variant="outline"
                   className="flex-1 bg-white text-black border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200"
                   onClick={() => setRevisionDialogOpen(true)}
+                  disabled={hasOpenDispute}
                 >
                   Request Revision
                 </Button>
@@ -3874,11 +3876,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             
             {/* Action buttons for client */}
-            {isClient && !hasOrder && !isOwnMessage && !hasOpenDispute && (
+            {isClient && !hasOrder && !isOwnMessage && (
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  disabled={hasOpenDispute}
                   onClick={() => {
                     setPendingOrderRequest({
                       media_site_id: orderRequest.media_site_id,
@@ -3898,7 +3901,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="sm"
                   className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
                   onClick={handleRejectOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id}
+                  disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
                 >
                   {rejectingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -3909,14 +3912,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             )}
             
             {/* Cancel button for agency (when it's their own message and no order placed yet) */}
-            {isAgency && isOwnMessage && !hasOrder && !hasOpenDispute && (
+            {isAgency && isOwnMessage && !hasOrder && (
               <div className="mt-3 pt-3 border-t border-primary-foreground/20">
                 <Button
                   size="sm"
                   variant="outline"
                   className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200"
                   onClick={handleCancelOrderRequest}
-                  disabled={cancellingOrderRequestId === msg.id}
+                  disabled={cancellingOrderRequestId === msg.id || hasOpenDispute}
                 >
                   {cancellingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -3983,14 +3986,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 Reason: {cancelRequest.reason}
               </p>
             )}
-            {canRespond && !hasOpenDispute && (
+            {canRespond && (
               <div className="flex gap-2 mt-3 pt-2 border-t border-orange-200 dark:border-orange-800">
                 <Button
                   size="sm"
                   variant="outline"
                   className="flex-1 h-7 text-xs bg-foreground text-background border-foreground hover:bg-background hover:text-foreground transition-colors duration-200"
                   onClick={() => handleAcceptCancellation(msg.id)}
-                  disabled={acceptingCancellation || rejectingCancellation}
+                  disabled={acceptingCancellation || rejectingCancellation || hasOpenDispute}
                 >
                   {acceptingCancellation ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
                   Accept
@@ -4003,7 +4006,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setPendingRejectMessageId(msg.id);
                     setShowRejectReasonDialog(true);
                   }}
-                  disabled={acceptingCancellation || rejectingCancellation}
+                  disabled={acceptingCancellation || rejectingCancellation || hasOpenDispute}
                 >
                   Reject
                 </Button>
@@ -4831,7 +4834,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   </div>
                 </div>
-                {!hasOpenDispute && (
                 <div className="flex items-center gap-2">
                   {canDeliver && (
                     <TooltipProvider>
@@ -4842,6 +4844,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             variant="outline"
                             className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
+                            disabled={hasOpenDispute}
                           >
                             Deliver Order
                           </Button>
@@ -4862,6 +4865,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             variant="outline"
                             className="bg-black text-white border-white shrink-0 transition-all duration-200 hover:bg-white hover:text-black hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
+                            disabled={hasOpenDispute}
                           >
                             Deliver Again
                           </Button>
@@ -4879,7 +4883,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white shrink-0"
                         onClick={handleAcceptDeliveryFromChat}
-                        disabled={acceptingDelivery}
+                        disabled={acceptingDelivery || hasOpenDispute}
                       >
                         {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                         Accept
@@ -4889,13 +4893,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         variant="outline"
                         className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
                         onClick={() => setRevisionDialogOpen(true)}
+                        disabled={hasOpenDispute}
                       >
                         Request Revision
                       </Button>
                     </div>
                   )}
                 </div>
-                )}
               </div>
             </div>
           );
