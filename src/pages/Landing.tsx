@@ -70,6 +70,7 @@ const Landing = () => {
   const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [navigating, setNavigating] = useState(false);
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
   const [selectedSiteType, setSelectedSiteType] = useState<'wp' | 'media' | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -92,6 +93,7 @@ const Landing = () => {
   const [logoLoading, setLogoLoading] = useState(true);
 
   const handlePublishNewArticle = (siteId: string) => {
+    setNavigating(true);
     setPreselectedSiteId(siteId);
     if (user) {
       setCurrentView('compose');
@@ -930,11 +932,21 @@ const Landing = () => {
               <Button 
                 className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
                 onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)}
+                disabled={navigating}
               >
-                <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
-                <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                  <ArrowRight className="h-4 w-4 shrink-0" />
-                </span>
+                {navigating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
+                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                      <ArrowRight className="h-4 w-4 shrink-0" />
+                    </span>
+                  </>
+                )}
               </Button>
             )}
           </div>
