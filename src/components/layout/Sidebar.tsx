@@ -144,6 +144,7 @@ export function Sidebar({
     setUserUnreadDisputesCount,
     userUnreadCompletedCount,
     setUserUnreadCompletedCount,
+    incrementUserUnreadCompletedCount,
     userUnreadHistoryCount,
     setUserUnreadHistoryCount,
     adminUnreadEngagementsCount,
@@ -883,6 +884,37 @@ export function Sidebar({
           };
 
           refetchCounts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for user order completion notifications
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const channel = supabase
+      .channel('user-orders-completed-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          
+          // If delivery_status changed to accepted, increment completed count
+          if (old?.delivery_status !== 'accepted' && updated.delivery_status === 'accepted') {
+            incrementUserUnreadCompletedCount();
+          }
         }
       )
       .subscribe();
