@@ -4407,10 +4407,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Open Dispute
                       </DropdownMenuItem>
                     )}
-                    {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && (
+                    {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && !isAdmin && (
                       <DropdownMenuItem 
-                        className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isAdmin}
+                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         onSelect={() => {
                           setActionDropdownOpen(false);
                           setCancelPlacedOrderDialogOpen(true);
