@@ -148,6 +148,10 @@ export function Sidebar({
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
     incrementAdminUnreadEngagementsCount,
+    adminUnreadDeliveredCount,
+    setAdminUnreadDeliveredCount,
+    adminUnreadCancelledEngagementsCount,
+    setAdminUnreadCancelledEngagementsCount,
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
@@ -277,12 +281,37 @@ export function Sidebar({
           .eq('status', 'open')
           .eq('admin_read', false);
         
-        // Fetch unread engagements count (service requests that are unread by admin)
+        // Fetch unread engagements count (service requests that are unread by admin - excluding cancelled and delivered)
         const { count: unreadEngagementsCountResult } = await supabase
+          .from('service_requests')
+          .select('*, orders!left(delivery_status)', { count: 'exact', head: true })
+          .eq('read', false)
+          .neq('status', 'cancelled');
+        
+        // For active engagements, we need to filter out delivered ones
+        // First fetch all unread active requests with their order delivery status
+        const { data: activeRequestsData } = await supabase
+          .from('service_requests')
+          .select('id, orders(delivery_status)')
+          .eq('read', false)
+          .neq('status', 'cancelled');
+        
+        // Count active (not delivered) engagements
+        const activeUnreadCount = (activeRequestsData || []).filter(r => 
+          !r.orders || r.orders.delivery_status !== 'accepted'
+        ).length;
+        
+        // Count delivered engagements (delivery_status = 'accepted' and unread)
+        const deliveredUnreadCount = (activeRequestsData || []).filter(r => 
+          r.orders?.delivery_status === 'accepted'
+        ).length;
+        
+        // Fetch unread cancelled engagements count
+        const { count: cancelledEngagementsCountResult } = await supabase
           .from('service_requests')
           .select('*', { count: 'exact', head: true })
           .eq('read', false)
-          .neq('status', 'cancelled');
+          .eq('status', 'cancelled');
         
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
@@ -290,7 +319,9 @@ export function Sidebar({
           setUnreadMediaSubmissionsCount((wpSubmissionsCount || 0) + (mediaSubmissionsCount || 0));
           setUnreadOrdersCount(unreadOrdersCountResult || 0);
           setUnreadDisputesCount(unreadDisputesCountResult || 0);
-          setAdminUnreadEngagementsCount(unreadEngagementsCountResult || 0);
+          setAdminUnreadEngagementsCount(activeUnreadCount);
+          setAdminUnreadDeliveredCount(deliveredUnreadCount);
+          setAdminUnreadCancelledEngagementsCount(cancelledEngagementsCountResult || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -846,9 +877,9 @@ export function Sidebar({
                 const agencyManagementCount = item.id === 'agency-management'
                   ? (agencyUnreadWpSubmissionsCount + agencyUnreadMediaSubmissionsCount + agencyUnreadServiceRequestsCount + agencyUnreadCancelledCount + agencyUnreadDisputesCount + agencyUnreadOrdersCount)
                   : 0;
-                // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include cancelled
+                // Calculate notification count for B2B Media Buying dropdown (user engagements + orders or admin orders + disputes + engagements) - include cancelled and delivered
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
-                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount) : (userUnreadEngagementsCount + userUnreadCancelledCount + userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount))
+                  ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount + adminUnreadDeliveredCount + adminUnreadCancelledEngagementsCount) : (userUnreadEngagementsCount + userUnreadCancelledCount + userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount))
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
                 return (
@@ -896,8 +927,9 @@ export function Sidebar({
                           // Admin Order Management shows unread orders + disputes notifications
                           const showOrdersBadge = subItem.id === 'admin-orders' && (unreadOrdersCount + unreadDisputesCount) > 0;
                           const ordersBadgeCount = unreadOrdersCount + unreadDisputesCount;
-                          // Admin Global Engagements shows unread engagement notifications
-                          const showAdminEngagementsBadge = subItem.id === 'admin-engagements' && adminUnreadEngagementsCount > 0;
+                          // Admin Global Engagements shows unread engagement notifications (active + delivered + cancelled)
+                          const adminEngagementsTotalCount = adminUnreadEngagementsCount + adminUnreadDeliveredCount + adminUnreadCancelledEngagementsCount;
+                          const showAdminEngagementsBadge = subItem.id === 'admin-engagements' && adminEngagementsTotalCount > 0;
                           
                           // Determine notification count for this submenu item
                           let notificationCount = 0;
@@ -908,7 +940,7 @@ export function Sidebar({
                           else if (showEngagementsBadge) notificationCount = userUnreadEngagementsCount + userUnreadCancelledCount;
                           else if (showUserOrdersBadge) notificationCount = userOrdersBadgeCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
-                          else if (showAdminEngagementsBadge) notificationCount = adminUnreadEngagementsCount;
+                          else if (showAdminEngagementsBadge) notificationCount = adminEngagementsTotalCount;
                           
                           return (
                             <div key={subItem.id} className="relative">

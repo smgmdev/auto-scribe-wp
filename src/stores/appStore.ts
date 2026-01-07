@@ -111,6 +111,12 @@ interface AppState {
   incrementAdminUnreadEngagementsCount: () => void;
   decrementAdminUnreadEngagementsCount: () => void;
   
+  // Admin closed engagements notifications (Delivered + Cancelled tabs)
+  adminUnreadDeliveredCount: number;
+  setAdminUnreadDeliveredCount: (count: number) => void;
+  adminUnreadCancelledEngagementsCount: number;
+  setAdminUnreadCancelledEngagementsCount: (count: number) => void;
+  
   // Agency media notifications (for agency users)
   agencyUnreadWpSubmissionsCount: number;
   setAgencyUnreadWpSubmissionsCount: (count: number) => void;
@@ -293,6 +299,12 @@ export const useAppStore = create<AppState>()((set) => ({
   decrementAdminUnreadEngagementsCount: () => set((state) => ({ 
     adminUnreadEngagementsCount: Math.max(0, state.adminUnreadEngagementsCount - 1) 
   })),
+  
+  // Admin closed engagements notifications
+  adminUnreadDeliveredCount: 0,
+  setAdminUnreadDeliveredCount: (count) => set({ adminUnreadDeliveredCount: count }),
+  adminUnreadCancelledEngagementsCount: 0,
+  setAdminUnreadCancelledEngagementsCount: (count) => set({ adminUnreadCancelledEngagementsCount: count }),
   
   // Agency media notifications
   agencyUnreadWpSubmissionsCount: 0,
