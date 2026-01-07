@@ -969,6 +969,14 @@ export function AdminFloatingChat({
     const disputeResolved = parseDisputeResolved(msg.message);
     const quote = parseQuote(msg.message);
 
+    // Debug log for dispute resolved parsing
+    if (msg.message.includes('DISPUTE_RESOLVED')) {
+      console.log('[AdminFloatingChat] Dispute resolved message detected:', { 
+        message: msg.message.substring(0, 100), 
+        parsed: disputeResolved 
+      });
+    }
+
     // Handle dispute resolved message
     if (disputeResolved) {
       const isCompleted = disputeResolved.type === 'dispute_resolved_complete';
