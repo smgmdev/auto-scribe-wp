@@ -38,6 +38,12 @@ interface ServiceRequest {
   };
   profiles: { email: string; username: string | null };
   agency_payouts: { agency_name: string } | null;
+  order?: {
+    id: string;
+    status: string;
+    delivery_status: string;
+    delivery_deadline: string | null;
+  } | null;
 }
 
 interface ServiceMessage {
@@ -120,7 +126,7 @@ export function AdminFloatingChat({
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
-  const [isOrderCompleted, setIsOrderCompleted] = useState(false);
+  const [isOrderCompleted, setIsOrderCompleted] = useState(request.order?.delivery_status === 'accepted');
   const [clientDetailsOpen, setClientDetailsOpen] = useState(false);
   const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null);
   const [loadingClient, setLoadingClient] = useState(false);
@@ -183,23 +189,9 @@ export function AdminFloatingChat({
   }, [request.id, initialMessages]);
   const hasOrder = !!request.order_id;
   
-  // Fetch order completion status on mount
+  // Subscribe to order status changes for real-time updates
   useEffect(() => {
     if (!request.order_id) return;
-    
-    const fetchOrderStatus = async () => {
-      const { data } = await supabase
-        .from('orders')
-        .select('delivery_status')
-        .eq('id', request.order_id)
-        .maybeSingle();
-      
-      if (data?.delivery_status === 'accepted') {
-        setIsOrderCompleted(true);
-      }
-    };
-    
-    fetchOrderStatus();
     
     // Also subscribe to order changes
     const channel = supabase
