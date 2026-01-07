@@ -6153,17 +6153,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       return null;
                     })()}
                   </div>
-                  {orderDetails.delivery_status === 'accepted' && (
+                  {hasOpenDispute && (
+                    <Badge variant="secondary" className="mt-1 bg-red-600 text-white">
+                      In Dispute
+                    </Badge>
+                  )}
+                  {!hasOpenDispute && orderDetails.delivery_status === 'accepted' && (
                     <Badge variant="secondary" className="mt-1 bg-green-600 text-white">
                       Accepted
                     </Badge>
                   )}
-                  {orderDetails.delivery_status === 'pending_revision' && (
+                  {!hasOpenDispute && orderDetails.delivery_status === 'pending_revision' && (
                     <Badge variant="secondary" className="mt-1 bg-black text-orange-400">
                       Revision Requested
                     </Badge>
                   )}
-                  {orderDetails.delivery_status === 'delivered' && (() => {
+                  {!hasOpenDispute && orderDetails.delivery_status === 'delivered' && (() => {
                     // Check if there's a pending revision request (revision requested after the last delivery)
                     const lastDeliveryIdx = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
                     const hasRevision = messages.slice(lastDeliveryIdx + 1).some(m => parseRevisionRequested(m.message));
@@ -6182,7 +6187,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Badge>
                     );
                   })()}
-                  {orderDetails.delivery_status === 'pending' && (() => {
+                  {!hasOpenDispute && orderDetails.delivery_status === 'pending' && (() => {
                     // Try to get countdown from delivery_deadline first
                     if (orderDetails.delivery_deadline) {
                       const deadline = new Date(orderDetails.delivery_deadline);
