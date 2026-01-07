@@ -4770,6 +4770,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Tooltip>
                     </TooltipProvider>
                   )}
+                  {/* Deliver Again button for agency when revision is requested */}
+                  {isAgencyView && hasRevisionAfterDelivery && localOrder.delivery_status === 'delivered' && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
+                            onClick={() => setDeliverOrderDialogOpen(true)}
+                          >
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Deliver Again
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p>Submit a new delivery after addressing the revision request</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   {/* Accept/Request Revision buttons for client when order is delivered */}
                   {canAcceptDelivery && (
                     <div className="flex items-center gap-2">
