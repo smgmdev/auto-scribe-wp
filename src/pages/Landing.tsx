@@ -95,7 +95,12 @@ const Landing = () => {
     setPreselectedSiteId(siteId);
     if (user) {
       setCurrentView('compose');
-      navigate('/dashboard');
+      navigate('/dashboard', { 
+        state: { 
+          targetView: 'compose',
+          preselectedSiteId: siteId
+        } 
+      });
     } else {
       navigate('/auth', { 
         state: { 
