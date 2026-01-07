@@ -4831,6 +4831,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   </div>
                 </div>
+                {!hasOpenDispute && (
                 <div className="flex items-center gap-2">
                   {canDeliver && (
                     <TooltipProvider>
@@ -4894,6 +4895,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                   )}
                 </div>
+                )}
               </div>
             </div>
           );
