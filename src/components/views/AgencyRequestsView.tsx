@@ -1118,7 +1118,7 @@ export function AgencyRequestsView() {
                       key={order.id}
                       className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
                         isNew ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
-                      } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
+                      }`}
                       onClick={() => handleOrderCardClick(order, relatedRequest)}
                     >
                       <CardHeader className="py-3 px-4">
