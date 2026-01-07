@@ -4619,12 +4619,36 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       {(() => {
                         // Check if order has been delivered (awaiting client acceptance)
                         const isDelivered = localOrder.delivery_status === 'delivered';
+                        const isPendingRevision = localOrder.delivery_status === 'pending_revision';
                         
                         // Get the last revision request reason if there's a pending revision
-                        const lastRevisionMessage = hasRevisionAfterDelivery 
+                        const lastRevisionMessage = (hasRevisionAfterDelivery || isPendingRevision)
                           ? messages.slice(lastDeliveryIndex + 1).find(m => parseRevisionRequested(m.message))
                           : null;
                         const revisionData = lastRevisionMessage ? parseRevisionRequested(lastRevisionMessage.message) : null;
+                        
+                        // Show Revision Requested for pending_revision status
+                        if (isPendingRevision) {
+                          return (
+                            <>
+                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 cursor-help text-orange-400">
+                                      <span className="text-xs font-medium">
+                                        Revision Requested
+                                      </span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <p>{revisionData ? <><span className="font-medium">Reason:</span> {revisionData.reason}</> : 'Client has requested a revision for this delivery.'}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          );
+                        }
                         
                         if (isDelivered && hasRevisionAfterDelivery && revisionData) {
                           return (
