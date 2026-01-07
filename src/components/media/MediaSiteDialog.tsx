@@ -597,7 +597,7 @@ export function MediaSiteDialog({
             }`}
           >
             <DialogHeader>
-              <DialogTitle>Submit Your Brief</DialogTitle>
+              <DialogTitle>Send Your Brief</DialogTitle>
               <DialogDescription>
                 Tell the agency what you're looking for. They'll review your request and respond.
               </DialogDescription>
@@ -712,7 +712,7 @@ export function MediaSiteDialog({
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                <span>Submit Brief</span>
+                <span>Send Brief</span>
                 {!isSubmitting && (
                   <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
                     <ArrowRight className="h-4 w-4 shrink-0" />
