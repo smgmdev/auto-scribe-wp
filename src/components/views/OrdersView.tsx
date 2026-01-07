@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Package, ExternalLink, CheckCircle, Clock, Truck, DollarSign, ShoppingBag, CheckCircle2, Search, ChevronDown, X, Copy, AlertTriangle, RefreshCw } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,6 +89,7 @@ export function OrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [revisionOrderIds, setRevisionOrderIds] = useState<Set<string>>(new Set());
+  const [revisionStatusLoading, setRevisionStatusLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [releasing, setReleasing] = useState(false);
@@ -346,12 +348,18 @@ export function OrdersView() {
 
   // Fetch revision status for delivered orders
   const fetchRevisionStatus = async (ordersList: Order[]) => {
-    if (!user) return;
+    if (!user) {
+      setRevisionStatusLoading(false);
+      return;
+    }
+    
+    setRevisionStatusLoading(true);
     
     // Get orders that are delivered
     const deliveredOrders = ordersList.filter(o => o.delivery_status === 'delivered');
     if (deliveredOrders.length === 0) {
       setRevisionOrderIds(new Set());
+      setRevisionStatusLoading(false);
       return;
     }
     
@@ -363,6 +371,7 @@ export function OrdersView() {
     
     if (!serviceRequests || serviceRequests.length === 0) {
       setRevisionOrderIds(new Set());
+      setRevisionStatusLoading(false);
       return;
     }
     
@@ -375,6 +384,7 @@ export function OrdersView() {
     
     if (!messages) {
       setRevisionOrderIds(new Set());
+      setRevisionStatusLoading(false);
       return;
     }
     
@@ -398,6 +408,7 @@ export function OrdersView() {
     }
     
     setRevisionOrderIds(revisionOrders);
+    setRevisionStatusLoading(false);
   };
 
   const handleAcceptDelivery = async (order: Order) => {
@@ -497,6 +508,10 @@ export function OrdersView() {
         }
         return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery</Badge>;
       case 'delivered':
+        // Wait for revision status to load before showing the badge to prevent flash
+        if (revisionStatusLoading) {
+          return <Skeleton className="h-5 w-32" />;
+        }
         // Check if this order has a pending revision request
         if (orderId && revisionOrderIds.has(orderId)) {
           return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
