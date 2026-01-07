@@ -4387,10 +4387,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Deliver Order
                       </DropdownMenuItem>
                     )}
-                    {globalChatType === 'agency-request' && !hasOpenDispute && hasOrder && localOrder?.delivery_status === 'delivered' && (
+                    {globalChatType === 'agency-request' && !hasOpenDispute && hasOrder && localOrder?.delivery_status === 'delivered' && !isAdmin && (
                       <DropdownMenuItem 
-                        className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isAdmin}
+                        className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         onSelect={() => {
                           setActionDropdownOpen(false);
                           setDisputeDialogOpen(true);
@@ -4439,11 +4438,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Order Details
                       </DropdownMenuItem>
                     )}
-                    {globalChatType === 'my-request' && !hasOpenDispute && (
+                    {globalChatType === 'my-request' && !hasOpenDispute && !isAdmin && (
                       hasOrder ? (
                         <DropdownMenuItem 
-                          className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                          disabled={isCancelled || !isDeliveryOverdue || isAdmin}
+                          className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          disabled={isCancelled || !isDeliveryOverdue}
                           onSelect={() => {
                             setActionDropdownOpen(false);
                             setDisputeDialogOpen(true);
