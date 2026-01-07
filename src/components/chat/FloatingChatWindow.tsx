@@ -6604,12 +6604,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <>
                             <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>
                             <p>Last Revised Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                            {orderDetails.accepted_at && (
+                              <p>Order Completed: {new Date(orderDetails.accepted_at).toLocaleString()}</p>
+                            )}
                           </>
                         );
                       }
                       
                       // Otherwise just show the delivered date
-                      return <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>;
+                      return (
+                        <>
+                          <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>
+                          {orderDetails.accepted_at && (
+                            <p>Order Completed: {new Date(orderDetails.accepted_at).toLocaleString()}</p>
+                          )}
+                        </>
+                      );
                     })()}
                   </>
                 )}
