@@ -4662,6 +4662,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           : null;
                         const revisionData = lastRevisionMessage ? parseRevisionRequested(lastRevisionMessage.message) : null;
                         
+                        // Show In Dispute if there's an open dispute - takes priority
+                        if (hasOpenDispute) {
+                          return (
+                            <>
+                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 cursor-help text-red-400">
+                                      <span className="text-xs font-medium">
+                                        In Dispute
+                                      </span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-xs">
+                                    <p>This order is under dispute. A staff member will investigate.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          );
+                        }
+                        
                         // Show Revision Requested for pending_revision status
                         if (isPendingRevision) {
                           return (
