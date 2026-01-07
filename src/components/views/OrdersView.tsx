@@ -705,7 +705,7 @@ export function OrdersView() {
                   <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>
                 ) : (
                   <>
-                    {order.status !== 'paid' && getStatusBadge(order.status)}
+                    {order.status !== 'paid' && order.delivery_status !== 'accepted' && getStatusBadge(order.status)}
                     {getDeliveryBadge(order.delivery_status, order.delivery_deadline, order.id)}
                   </>
                 )}
