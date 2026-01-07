@@ -120,6 +120,7 @@ export function AdminFloatingChat({
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
+  const [isOrderCompleted, setIsOrderCompleted] = useState(false);
   const [clientDetailsOpen, setClientDetailsOpen] = useState(false);
   const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null);
   const [loadingClient, setLoadingClient] = useState(false);
@@ -181,6 +182,49 @@ export function AdminFloatingChat({
     fetchMessages();
   }, [request.id, initialMessages]);
   const hasOrder = !!request.order_id;
+  
+  // Fetch order completion status on mount
+  useEffect(() => {
+    if (!request.order_id) return;
+    
+    const fetchOrderStatus = async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('delivery_status')
+        .eq('id', request.order_id)
+        .maybeSingle();
+      
+      if (data?.delivery_status === 'accepted') {
+        setIsOrderCompleted(true);
+      }
+    };
+    
+    fetchOrderStatus();
+    
+    // Also subscribe to order changes
+    const channel = supabase
+      .channel(`order-status-${request.order_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${request.order_id}`
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          if (updated.delivery_status === 'accepted') {
+            setIsOrderCompleted(true);
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [request.order_id]);
   
   // Timer tick to update relative time display every minute
   useEffect(() => {
@@ -1622,7 +1666,13 @@ export function AdminFloatingChat({
         {/* Input */}
         {!isCancelled && (
           <div className="border-t">
-            {!hasJoined ? (
+            {isOrderCompleted ? (
+              <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
+                <span className="text-muted-foreground text-sm">
+                  Order delivery was completed
+                </span>
+              </div>
+            ) : !hasJoined ? (
               <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
                 <button
                   onClick={handleJoinChat}
