@@ -56,6 +56,8 @@ export const AdminCreditManagementView = () => {
   const [agencyBalances, setAgencyBalances] = useState<{
     id: string;
     agency_name: string;
+    user_id: string | null;
+    credits_available: number;
     revenue: number;
     orders: number;
     payouts: number;
@@ -122,10 +124,10 @@ export const AdminCreditManagementView = () => {
     try {
       setAgencyBalancesLoading(true);
       
-      // Fetch active agencies
+      // Fetch active agencies with user_id
       const { data: agencies } = await supabase
         .from('agency_payouts')
-        .select('id, agency_name, email')
+        .select('id, agency_name, email, user_id')
         .eq('onboarding_complete', true)
         .eq('downgraded', false);
 
@@ -133,6 +135,18 @@ export const AdminCreditManagementView = () => {
         setAgencyBalances([]);
         return;
       }
+
+      // Fetch credits for all agency users
+      const userIds = agencies.map(a => a.user_id).filter(Boolean) as string[];
+      const { data: creditsData } = await supabase
+        .from('user_credits')
+        .select('user_id, credits')
+        .in('user_id', userIds);
+
+      const creditsMap = new Map<string, number>();
+      creditsData?.forEach(c => {
+        creditsMap.set(c.user_id, c.credits);
+      });
 
       // Fetch orders with media_sites to get agency info
       const { data: ordersData } = await supabase
@@ -168,6 +182,8 @@ export const AdminCreditManagementView = () => {
         id: agency.id,
         agency_name: agency.agency_name,
         email: agency.email,
+        user_id: agency.user_id,
+        credits_available: agency.user_id ? creditsMap.get(agency.user_id) || 0 : 0,
         revenue: agencyStatsMap.get(agency.agency_name)?.revenue || 0,
         orders: agencyStatsMap.get(agency.agency_name)?.orders || 0,
         payouts: agencyStatsMap.get(agency.agency_name)?.payouts || 0,
@@ -820,6 +836,7 @@ export const AdminCreditManagementView = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Agency</TableHead>
+                        <TableHead className="text-right">Credits Available</TableHead>
                         <TableHead className="text-right">Revenue</TableHead>
                         <TableHead className="text-right">Refunds</TableHead>
                         <TableHead className="text-right">Orders</TableHead>
@@ -837,11 +854,12 @@ export const AdminCreditManagementView = () => {
                             <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                             <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                             <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
                           </TableRow>
                         ))
                       ) : agencyBalances.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                             No active agencies found
                           </TableCell>
                         </TableRow>
@@ -854,6 +872,11 @@ export const AdminCreditManagementView = () => {
                           .map((agency) => (
                           <TableRow key={agency.id}>
                             <TableCell className="font-medium">{agency.agency_name}</TableCell>
+                            <TableCell className="text-right">
+                              <span className={agency.credits_available > 0 ? "text-green-500 font-medium" : ""}>
+                                {agency.credits_available.toLocaleString()}
+                              </span>
+                            </TableCell>
                             <TableCell className="text-right">${(agency.revenue / 100).toFixed(2)}</TableCell>
                             <TableCell className="text-right">${(agency.refunds / 100).toFixed(2)}</TableCell>
                             <TableCell className="text-right">{agency.orders}</TableCell>
