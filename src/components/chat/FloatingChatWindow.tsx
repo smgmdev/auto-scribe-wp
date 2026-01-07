@@ -7411,7 +7411,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className="font-medium">{userDetails.email || 'Not available'}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Phone</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">WhatsApp</p>
                 <p className="font-medium">{userDetails.phone || 'Not available'}</p>
               </div>
             </div>
