@@ -5936,9 +5936,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             />
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={submittingRevision}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel 
+              disabled={submittingRevision}
+              className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               disabled={!revisionReason.trim() || submittingRevision}
+              className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200"
               onClick={(e) => {
                 e.preventDefault();
                 handleRequestRevision();
