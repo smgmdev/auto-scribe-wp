@@ -626,7 +626,7 @@ const Landing = () => {
           {user ? (
             <Button 
               onClick={() => navigate('/dashboard')}
-              className="bg-black text-white hover:bg-gray-800"
+              className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
             >
               <User className="h-4 w-4" />
               Account
