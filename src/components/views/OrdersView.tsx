@@ -507,7 +507,7 @@ export function OrdersView() {
         if (orderId && revisionOrderIds.has(orderId)) {
           return <Badge className="bg-black text-orange-400">Delivered - Revision Requested</Badge>;
         }
-        return <Badge variant="secondary" className="bg-purple-600/20 text-purple-600">Delivered - Pending Approval</Badge>;
+        return <Badge className="bg-purple-600 text-white">Delivered - Pending Approval</Badge>;
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
       default:
