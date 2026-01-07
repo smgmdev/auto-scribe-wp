@@ -296,7 +296,7 @@ export function AdminEngagementsView() {
     if (hasOrder && request.orders?.delivery_status === 'pending_revision') {
       return (
         <Badge className="bg-orange-500">
-          Revision Requested
+          Delivered - Revision Requested
         </Badge>
       );
     }
