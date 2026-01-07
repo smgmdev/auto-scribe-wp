@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -2289,7 +2289,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return null;
   };
 
-  // Check if there's a pending cancellation request in messages (from counterparty)
+  const parseDisputeOpened = (message: string): { type: string; reason: string; order_id: string; media_site_name: string } | null => {
+    const match = message.match(/\[DISPUTE_OPENED\](.*?)\[\/DISPUTE_OPENED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const hasPendingCancelRequest = messages.some(msg => {
     if (msg.sender_type === senderType) return false; // Not from me
     const cancelRequest = parseCancelOrderRequest(msg.message);
@@ -3031,6 +3042,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const offerRejected = parseOfferRejected(msg.message);
     const orderRequestAccepted = parseOrderRequestAccepted(msg.message);
     const orderRequestRejected = parseOrderRequestRejected(msg.message);
+    const disputeOpened = parseDisputeOpened(msg.message);
 
     // Handle order request rejected message (agency rejected client's order request)
     // Skip if this is a quoted reply - the quote contains the tag but this is a reply message
@@ -3702,7 +3714,35 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       );
     }
 
-    // Handle order request special message (sent by agency to client)
+    // Handle dispute opened message
+    if (disputeOpened && !quote) {
+      return (
+        <div className="space-y-1">
+          <div className={`rounded-lg border p-3 ${
+            isOwnMessage 
+              ? 'bg-primary-foreground/10 border-primary-foreground/30' 
+              : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>
+                Dispute Opened
+              </span>
+            </div>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              {isOwnMessage ? 'You opened' : 'Client opened'} a dispute for {disputeOpened.media_site_name}
+            </p>
+            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              Reason: {disputeOpened.reason}
+            </p>
+          </div>
+          <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
+            {format(new Date(msg.created_at), 'HH:mm')}
+          </p>
+        </div>
+      );
+    }
+
     if (orderRequest && !quote) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
@@ -5937,6 +5977,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     });
                   
                   if (error) throw error;
+                  
+                  // Send auto message with dispute reason
+                  const disputeMessageData = {
+                    type: 'dispute_opened',
+                    reason: disputeReason.trim(),
+                    order_id: globalChatRequest.order.id,
+                    media_site_name: globalChatRequest.media_site?.name || 'Unknown'
+                  };
+                  
+                  const { data: insertedMsg } = await supabase
+                    .from('service_messages')
+                    .insert({
+                      request_id: globalChatRequest.id,
+                      sender_type: 'client',
+                      sender_id: user.id,
+                      message: `[DISPUTE_OPENED]${JSON.stringify(disputeMessageData)}[/DISPUTE_OPENED]`
+                    })
+                    .select()
+                    .single();
+                  
+                  if (insertedMsg) {
+                    setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+                  }
                   
                   setHasOpenDispute(true);
                   toast({
