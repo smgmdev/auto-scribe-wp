@@ -5546,7 +5546,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <div className="flex items-center gap-1.5 text-xs font-medium mb-1 opacity-70 pr-5">
+                      <div className="flex items-center gap-1.5 text-xs font-medium mb-1 pr-5">
                         {/* Show loading spinner while fetching agency info for client view */}
                         {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -5571,7 +5571,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             className="w-4 h-4 rounded-full object-cover"
                           />
                         )}
-                        <span>
+                        <span className="opacity-70">
                           {msg.sender_type === 'admin' 
                             ? 'Arcana Mace Staff' 
                             : isOwnMessage 
