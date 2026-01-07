@@ -233,6 +233,8 @@ export function AgencyRequestsView() {
           const unreadCompletedOrders = ordersData.filter(o => 
             !(o as any).agency_read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted')
           );
+          console.log('[AgencyRequestsView] Unread completed orders:', unreadCompletedOrders.length, 
+            'Orders with agency_read values:', ordersData.map(o => ({ id: o.id, agency_read: (o as any).agency_read, delivery_status: o.delivery_status })));
           setAgencyUnreadCompletedCount(unreadCompletedOrders.length);
 
           // Fetch open disputes for these orders
