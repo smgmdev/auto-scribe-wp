@@ -735,6 +735,11 @@ export function OrdersView() {
                 {revisionOrderIds.has(order.id) ? 'Last order delivery:' : 'Order delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
+            {order.delivery_status === 'accepted' && order.accepted_at && !disputeOrderIds.has(order.id) && (
+              <span className="text-xs text-muted-foreground block">
+                Order completed: {format(new Date(order.accepted_at), 'MMM d, yyyy h:mm a')}
+              </span>
+            )}
             {/* Show delivery info for disputed orders */}
             {disputeOrderIds.has(order.id) && order.delivered_at && (
               <span className="text-xs text-muted-foreground block">
