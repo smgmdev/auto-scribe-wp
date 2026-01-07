@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw } from 'lucide-react';
+import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw, Phone } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -78,6 +78,7 @@ interface ClientDetails {
   created_at: string;
   email_verified: boolean;
   suspended: boolean;
+  whatsapp_phone: string | null;
 }
 
 interface AdminFloatingChatProps {
@@ -825,7 +826,7 @@ export function AdminFloatingChat({
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, email, username, created_at, email_verified, suspended')
+        .select('id, email, username, created_at, email_verified, suspended, whatsapp_phone')
         .eq('id', clientId)
         .maybeSingle();
       
@@ -1984,6 +1985,14 @@ export function AdminFloatingChat({
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
                   <p className="text-foreground">{clientDetails.email || 'No email'}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">WhatsApp</p>
+                  <p className="text-foreground">{clientDetails.whatsapp_phone || 'N/A'}</p>
                 </div>
               </div>
               
