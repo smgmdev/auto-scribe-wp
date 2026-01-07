@@ -198,7 +198,7 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Total Earnings
+                  Total Sales
                 </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
@@ -210,7 +210,7 @@ export function AgencyPayoutsView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Total amount earned from all completed orders</p>
+            <p>Total sales amount from all completed orders</p>
           </TooltipContent>
         </Tooltip>
 
@@ -331,8 +331,8 @@ export function AgencyPayoutsView() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <Badge className={isIncoming ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}>
-                        {isIncoming ? 'Incoming' : 'Outgoing'}
+                      <Badge className={isIncoming ? "bg-foreground text-background border-foreground" : "bg-red-500/20 text-red-400 border-red-500/30"}>
+                        {isIncoming ? 'Credited' : 'Outgoing'}
                       </Badge>
                       <span className={`font-semibold ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
                         {isIncoming ? '+' : ''}{transaction.amount} credits
