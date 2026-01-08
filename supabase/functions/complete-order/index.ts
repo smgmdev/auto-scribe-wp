@@ -261,7 +261,8 @@ serve(async (req) => {
           user_id: agencyUserId,
           amount: creditsToAllocate,
           type: "order_payout",
-          description: `Payout for completed order: ${mediaSiteName} (Platform fee: ${platformFeeCredits} credits)`
+          description: `Earnings from completed order: ${mediaSiteName} (Platform fee: ${platformFeeCredits} credits)`,
+          order_id: order_id
         });
 
       logStep("Credit transaction recorded for agency");
