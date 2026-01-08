@@ -568,7 +568,7 @@ export function MediaSiteDialog({
                   )
                 ) : (
                   <Button 
-                    className="bg-black text-white hover:bg-gray-800 transition-all duration-200 group w-fit px-3"
+                    className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-fit px-3 border border-transparent hover:border-black"
                     onClick={() => {
                       navigate('/auth', { 
                         state: { 
