@@ -209,6 +209,7 @@ export function AgencyRequestsView() {
             amount_cents,
             created_at,
             delivered_at,
+            accepted_at,
             read,
             agency_read,
             media_site:media_sites(id, name, favicon, publication_format)
