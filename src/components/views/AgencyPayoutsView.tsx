@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Percent, Copy } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Clock, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,8 +28,8 @@ interface CompletedOrder {
 interface EarningsSummary {
   totalSales: number;
   totalEarnings: number;
-  totalPlatformFees: number;
-  ordersCount: number;
+  pendingPayouts: number;
+  completedPayouts: number;
 }
 
 export function AgencyPayoutsView() {
@@ -39,8 +39,8 @@ export function AgencyPayoutsView() {
   const [summary, setSummary] = useState<EarningsSummary>({
     totalSales: 0,
     totalEarnings: 0,
-    totalPlatformFees: 0,
-    ordersCount: 0
+    pendingPayouts: 0,
+    completedPayouts: 0
   });
   const [loading, setLoading] = useState(true);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
@@ -177,13 +177,21 @@ export function AgencyPayoutsView() {
       // Calculate summary from completed orders
       const totalSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
       const totalEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
-      const totalPlatformFees = typedOrders.reduce((sum, o) => sum + (o.platform_fee_cents || 0), 0) / 100;
+
+      // Fetch payout transactions for pending/completed payouts
+      const { data: payoutData } = await supabase
+        .from('payout_transactions')
+        .select('amount_cents, status')
+        .eq('agency_payout_id', agencyData.id);
+
+      const pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+      const completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
 
       setSummary({
         totalSales,
         totalEarnings,
-        totalPlatformFees,
-        ordersCount: typedOrders.length
+        pendingPayouts,
+        completedPayouts
       });
 
       setLoading(false);
@@ -262,19 +270,19 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Platform Fees
+                  Pending Payouts
                 </CardTitle>
-                <Percent className="h-4 w-4 text-muted-foreground/60" />
+                <Clock className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  ${summary.totalPlatformFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${summary.pendingPayouts.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Total platform fees deducted from sales</p>
+            <p>Payouts awaiting processing or transfer</p>
           </TooltipContent>
         </Tooltip>
 
@@ -283,19 +291,19 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Completed Orders
+                  Completed Payouts
                 </CardTitle>
                 <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  {summary.ordersCount}
+                  ${summary.completedPayouts.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Number of completed orders (delivered or accepted)</p>
+            <p>Successfully transferred payouts to your account</p>
           </TooltipContent>
         </Tooltip>
       </div>
