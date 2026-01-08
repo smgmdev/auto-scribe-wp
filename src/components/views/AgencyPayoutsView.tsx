@@ -335,7 +335,7 @@ export function AgencyPayoutsView() {
                   >
                     <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                       <Badge className="bg-foreground text-background border-foreground">
-                        {order.delivery_status === 'accepted' ? 'Accepted' : 'Delivered'}
+                        {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
                       </Badge>
                       <p className="font-semibold text-green-500">
                         +${earningsAmount.toFixed(2)}
