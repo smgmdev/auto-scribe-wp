@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Percent } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Percent, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -344,24 +344,35 @@ export function AgencyPayoutsView() {
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-muted-foreground">
-                            Order: {order.order_number || order.id.slice(0, 8) + '...'}
-                          </p>
+                        <div className="flex flex-col gap-1 mt-1">
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs text-muted-foreground">
+                              Order: {order.order_number || order.id.slice(0, 8) + '...'}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(order.order_number || order.id);
+                                toast.success('Order ID copied');
+                              }}
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </button>
+                          </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleViewOrderDetails(order.id);
                             }}
                             disabled={openingChat === order.id}
-                            className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                            className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
                           >
                             {openingChat === order.id ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <ExternalLink className="h-3 w-3" />
-                            )}
+                            ) : null}
                             View order details
+                            <ExternalLink className="h-3 w-3" />
                           </button>
                         </div>
                       </div>
