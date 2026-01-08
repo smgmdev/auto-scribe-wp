@@ -379,7 +379,7 @@ export function AgencyPayoutsView() {
                             View order details
                             <ExternalLink className="h-3 w-3" />
                           </button>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground">
                             Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
                           </p>
                         </div>
