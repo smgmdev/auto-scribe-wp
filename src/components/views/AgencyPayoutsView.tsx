@@ -289,10 +289,15 @@ export function AgencyPayoutsView() {
                   <div 
                     className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                   >
-                    <Badge className={`absolute top-3 right-3 ${isIncoming ? "bg-foreground text-background border-foreground" : "bg-red-500/20 text-red-400 border-red-500/30"}`}>
-                      {isIncoming ? 'Credited' : 'Outgoing'}
-                    </Badge>
-                    <div className="flex items-center gap-3 pr-20">
+                    <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                      <Badge className={isIncoming ? "bg-foreground text-background border-foreground" : "bg-red-500/20 text-red-400 border-red-500/30"}>
+                        {isIncoming ? 'Credited' : 'Outgoing'}
+                      </Badge>
+                      <p className={`font-semibold ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
+                        {isIncoming ? '+' : ''}${transaction.amount.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 pr-24">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isIncoming ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
                         {isIncoming ? (
                           <ArrowDownLeft className="h-5 w-5 text-green-500" />
@@ -308,9 +313,6 @@ export function AgencyPayoutsView() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                        <p className={`font-semibold mt-1 ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
-                          {isIncoming ? '+' : ''}{transaction.amount} credits
                         </p>
                       </div>
                     </div>
