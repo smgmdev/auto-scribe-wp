@@ -326,9 +326,9 @@ export function AgencyPayoutsView() {
                       </TooltipTrigger>
                       <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground px-4 py-3 text-sm shadow-lg">
                         <div className="space-y-1 text-white">
-                          <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${salePrice}</span></p>
-                          <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">-${platformFee}</span></p>
-                          <p><span className="text-white/70">Actual Earnings:</span> <span className="font-semibold">${transaction.amount}</span></p>
+                          <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${salePrice.toFixed(2)}</span></p>
+                          <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">${platformFee.toFixed(2)}</span></p>
+                          <p><span className="text-white/70">Actual Earnings:</span> <span className="font-semibold">${transaction.amount.toFixed(2)}</span></p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
