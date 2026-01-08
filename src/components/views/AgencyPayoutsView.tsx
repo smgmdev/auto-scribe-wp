@@ -374,7 +374,7 @@ export function AgencyPayoutsView() {
                               handleViewOrderDetails(order.id);
                             }}
                             disabled={openingChat === order.id}
-                            className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
+                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
                           >
                             {openingChat === order.id ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
