@@ -1528,7 +1528,7 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
-                              Completed: {order.released_at ? format(new Date(order.released_at), 'MMM d, yyyy h:mm a') : order.accepted_at ? format(new Date(order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
+                              Order Completed: {format(new Date(order.accepted_at || order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
                               {requestMessages.length > 0 && (
                                 <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                               )}
