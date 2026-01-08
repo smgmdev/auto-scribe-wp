@@ -120,20 +120,33 @@ export function AgencyPayoutsView() {
     const fetchCompletedOrders = async () => {
       if (!user) return;
 
-      // Get agency's media sites first
-      const { data: agencyMediaSites } = await supabase
-        .from('media_sites')
+      // Get agency payout id for this user
+      const { data: agencyData } = await supabase
+        .from('agency_payouts')
         .select('id')
-        .eq('agency', user.id);
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (!agencyMediaSites || agencyMediaSites.length === 0) {
+      if (!agencyData) {
         setLoading(false);
         return;
       }
 
-      const mediaSiteIds = agencyMediaSites.map(s => s.id);
+      // Get all service requests for this agency to find associated orders
+      const { data: serviceRequests } = await supabase
+        .from('service_requests')
+        .select('order_id')
+        .eq('agency_payout_id', agencyData.id)
+        .not('order_id', 'is', null);
 
-      // Fetch completed orders (delivered or accepted) for agency's media sites
+      if (!serviceRequests || serviceRequests.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const orderIds = serviceRequests.map(sr => sr.order_id).filter(Boolean) as string[];
+
+      // Fetch completed orders (delivered or accepted) for this agency
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select(`
@@ -148,7 +161,7 @@ export function AgencyPayoutsView() {
           created_at,
           media_site:media_sites(name, favicon)
         `)
-        .in('media_site_id', mediaSiteIds)
+        .in('id', orderIds)
         .in('delivery_status', ['delivered', 'accepted'])
         .order('created_at', { ascending: false });
 
