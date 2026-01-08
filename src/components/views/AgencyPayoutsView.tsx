@@ -333,14 +333,14 @@ export function AgencyPayoutsView() {
                   <div 
                     className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                   >
-                    <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                    <div className="absolute top-3 right-3">
                       <Badge className="bg-foreground text-background border-foreground">
                         {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
                       </Badge>
-                      <p className="font-semibold text-green-500">
-                        +${earningsAmount.toFixed(2)}
-                      </p>
                     </div>
+                    <p className="absolute bottom-3 right-3 font-semibold text-green-500">
+                      +${earningsAmount.toFixed(2)}
+                    </p>
                     <div className="flex items-center gap-3 pr-24">
                       <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
                         <ArrowDownLeft className="h-5 w-5 text-green-500" />
