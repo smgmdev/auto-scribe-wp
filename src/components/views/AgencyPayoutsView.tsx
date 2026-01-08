@@ -315,9 +315,9 @@ export function AgencyPayoutsView() {
                         <p className="text-xs text-muted-foreground">
                           {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
-                        {transaction.type === 'order_payout' && transaction.order_id && (
+                        {transaction.type === 'order_payout' && (transaction as any).order_id && (
                           <p className="text-xs text-muted-foreground">
-                            Order ID: {transaction.order_id.slice(0, 8)}...
+                            Order ID: {((transaction as any).order_id as string).slice(0, 8)}...
                           </p>
                         )}
                       </div>
