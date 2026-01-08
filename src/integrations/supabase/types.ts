@@ -406,6 +406,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          order_id: string | null
           type: string
           user_id: string
         }
@@ -414,6 +415,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          order_id?: string | null
           type: string
           user_id: string
         }
@@ -422,10 +424,19 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          order_id?: string | null
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       disputes: {
         Row: {

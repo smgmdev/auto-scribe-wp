@@ -28,6 +28,7 @@ interface CreditTransaction {
   type: string;
   description: string | null;
   created_at: string;
+  order_id: string | null;
 }
 
 interface EarningsSummary {
@@ -79,7 +80,7 @@ export function AgencyPayoutsView() {
       // Fetch credit transactions for this user (shows earnings from orders)
       const { data: creditTxData } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at')
+        .select('id, amount, type, description, created_at, order_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -314,6 +315,11 @@ export function AgencyPayoutsView() {
                         <p className="text-xs text-muted-foreground">
                           {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
+                        {transaction.type === 'order_payout' && transaction.order_id && (
+                          <p className="text-xs text-muted-foreground">
+                            Order ID: {transaction.order_id.slice(0, 8)}...
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
