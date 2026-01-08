@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard, ArrowDownLeft, ArrowUpRight, Percent } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard, ArrowDownLeft, ArrowUpRight, Percent, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface PayoutTransaction {
   id: string;
@@ -41,6 +43,7 @@ interface EarningsSummary {
 
 export function AgencyPayoutsView() {
   const { user } = useAuth();
+  const { openGlobalChat } = useAppStore();
   const [transactions, setTransactions] = useState<PayoutTransaction[]>([]);
   const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
   const [summary, setSummary] = useState<EarningsSummary>({
@@ -51,6 +54,78 @@ export function AgencyPayoutsView() {
     totalPlatformFees: 0
   });
   const [loading, setLoading] = useState(true);
+  const [openingChat, setOpeningChat] = useState<string | null>(null);
+
+  const handleViewOrderDetails = async (orderId: string) => {
+    setOpeningChat(orderId);
+    try {
+      // Fetch the service request for this order
+      const { data: serviceRequest, error } = await supabase
+        .from('service_requests')
+        .select(`
+          id,
+          title,
+          description,
+          status,
+          read,
+          created_at,
+          updated_at,
+          cancellation_reason,
+          order_id,
+          media_site:media_sites(
+            id,
+            name,
+            favicon,
+            price,
+            publication_format,
+            link,
+            category,
+            subcategory,
+            about,
+            agency
+          )
+        `)
+        .eq('order_id', orderId)
+        .maybeSingle();
+
+      if (error || !serviceRequest) {
+        toast.error('Could not find order details');
+        return;
+      }
+
+      // Fetch the order details
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('id, status, delivery_status, delivery_deadline')
+        .eq('id', orderId)
+        .maybeSingle();
+
+      const chatRequest: GlobalChatRequest = {
+        id: serviceRequest.id,
+        title: serviceRequest.title,
+        description: serviceRequest.description,
+        status: serviceRequest.status,
+        read: serviceRequest.read,
+        created_at: serviceRequest.created_at,
+        updated_at: serviceRequest.updated_at,
+        cancellation_reason: serviceRequest.cancellation_reason,
+        media_site: serviceRequest.media_site as any,
+        order: orderData ? {
+          id: orderData.id,
+          status: orderData.status,
+          delivery_status: orderData.delivery_status,
+          delivery_deadline: orderData.delivery_deadline
+        } : null
+      };
+
+      openGlobalChat(chatRequest, 'agency-request');
+    } catch (err) {
+      console.error('Error opening order chat:', err);
+      toast.error('Failed to open order details');
+    } finally {
+      setOpeningChat(null);
+    }
+  };
 
   useEffect(() => {
     const fetchPayouts = async () => {
@@ -316,9 +391,26 @@ export function AgencyPayoutsView() {
                           {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                         {transaction.type === 'order_payout' && (transaction as any).order_id && (
-                          <p className="text-xs text-muted-foreground">
-                            Order ID: {((transaction as any).order_id as string).slice(0, 8)}...
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              Order ID: {((transaction as any).order_id as string).slice(0, 8)}...
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewOrderDetails((transaction as any).order_id);
+                              }}
+                              disabled={openingChat === (transaction as any).order_id}
+                              className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                            >
+                              {openingChat === (transaction as any).order_id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <ExternalLink className="h-3 w-3" />
+                              )}
+                              View order details
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
