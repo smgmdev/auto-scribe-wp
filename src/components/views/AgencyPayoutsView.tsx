@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, Clock, TrendingUp, HelpCircle, CreditCard, ArrowDownLeft, ArrowUpRight, Percent, ExternalLink } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Percent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -9,52 +9,38 @@ import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
-interface PayoutTransaction {
+interface CompletedOrder {
   id: string;
+  order_number: string | null;
   amount_cents: number;
-  status: string;
+  platform_fee_cents: number;
+  agency_payout_cents: number;
+  delivery_status: string;
+  accepted_at: string | null;
+  delivered_at: string | null;
   created_at: string;
-  completed_at: string | null;
-  order: {
-    id: string;
-    media_site: {
-      name: string;
-      favicon: string | null;
-    } | null;
-  } | null;
-}
-
-interface CreditTransaction {
-  id: string;
-  amount: number;
-  type: string;
-  description: string | null;
-  created_at: string;
-  order_id: string | null;
-  order: {
-    order_number: string | null;
+  media_site: {
+    name: string;
+    favicon: string | null;
   } | null;
 }
 
 interface EarningsSummary {
   totalSales: number;
-  pendingPayouts: number;
-  completedPayouts: number;
-  creditsAvailable: number;
+  totalEarnings: number;
   totalPlatformFees: number;
+  ordersCount: number;
 }
 
 export function AgencyPayoutsView() {
   const { user } = useAuth();
   const { openGlobalChat } = useAppStore();
-  const [transactions, setTransactions] = useState<PayoutTransaction[]>([]);
-  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<CompletedOrder[]>([]);
   const [summary, setSummary] = useState<EarningsSummary>({
     totalSales: 0,
-    pendingPayouts: 0,
-    completedPayouts: 0,
-    creditsAvailable: 0,
-    totalPlatformFees: 0
+    totalEarnings: 0,
+    totalPlatformFees: 0,
+    ordersCount: 0
   });
   const [loading, setLoading] = useState(true);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
@@ -131,105 +117,67 @@ export function AgencyPayoutsView() {
   };
 
   useEffect(() => {
-    const fetchPayouts = async () => {
+    const fetchCompletedOrders = async () => {
       if (!user) return;
 
-      // First get the agency payout id for this user
-      const { data: agencyData } = await supabase
-        .from('agency_payouts')
+      // Get agency's media sites first
+      const { data: agencyMediaSites } = await supabase
+        .from('media_sites')
         .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('agency', user.id);
 
-      if (!agencyData) {
+      if (!agencyMediaSites || agencyMediaSites.length === 0) {
         setLoading(false);
         return;
       }
 
-      // Fetch user's credit balance
-      const { data: creditsData } = await supabase
-        .from('user_credits')
-        .select('credits')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const mediaSiteIds = agencyMediaSites.map(s => s.id);
 
-      const creditsAvailable = creditsData?.credits || 0;
-
-      // Fetch credit transactions for this user (shows earnings from orders)
-      const { data: creditTxData } = await supabase
-        .from('credit_transactions')
-        .select('id, amount, type, description, created_at, order_id, order:orders(order_number)')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (creditTxData) {
-        setCreditTransactions(creditTxData as CreditTransaction[]);
-      }
-
-      // Fetch payout transactions for this agency
-      const { data, error } = await supabase
-        .from('payout_transactions')
+      // Fetch completed orders (delivered or accepted) for agency's media sites
+      const { data: ordersData, error } = await supabase
+        .from('orders')
         .select(`
           id,
+          order_number,
           amount_cents,
-          status,
+          platform_fee_cents,
+          agency_payout_cents,
+          delivery_status,
+          accepted_at,
+          delivered_at,
           created_at,
-          completed_at,
-          order:orders(
-            id,
-            media_site:media_sites(name, favicon)
-          )
+          media_site:media_sites(name, favicon)
         `)
-        .eq('agency_payout_id', agencyData.id)
+        .in('media_site_id', mediaSiteIds)
+        .in('delivery_status', ['delivered', 'accepted'])
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        const typedData = data as unknown as PayoutTransaction[];
-        setTransactions(typedData);
-
-        // Calculate summary from credit transactions (earnings)
-        const orderPayouts = (creditTxData || []).filter(t => t.type === 'order_payout');
-        const pending = typedData.filter(t => t.status === 'pending').reduce((sum, t) => sum + t.amount_cents, 0);
-        const completed = typedData.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount_cents, 0);
-        
-        // Calculate total platform fees from descriptions
-        const totalPlatformFees = orderPayouts.reduce((sum, t) => {
-          const match = t.description?.match(/Platform fee: (\d+) credits/);
-          return sum + (match ? parseInt(match[1]) : 0);
-        }, 0);
-
-        // Calculate total sales (earnings + platform fees = original sale price)
-        const totalEarningsCredits = orderPayouts.reduce((sum, t) => sum + t.amount, 0);
-        const totalSales = totalEarningsCredits + totalPlatformFees;
-
-        setSummary({
-          totalSales,
-          pendingPayouts: pending,
-          completedPayouts: completed,
-          creditsAvailable,
-          totalPlatformFees
-        });
-      } else {
-        setSummary(prev => ({ ...prev, creditsAvailable }));
+      if (error) {
+        console.error('Error fetching completed orders:', error);
+        setLoading(false);
+        return;
       }
+
+      const typedOrders = (ordersData || []) as unknown as CompletedOrder[];
+      setCompletedOrders(typedOrders);
+
+      // Calculate summary from completed orders
+      const totalSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
+      const totalEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
+      const totalPlatformFees = typedOrders.reduce((sum, o) => sum + (o.platform_fee_cents || 0), 0) / 100;
+
+      setSummary({
+        totalSales,
+        totalEarnings,
+        totalPlatformFees,
+        ordersCount: typedOrders.length
+      });
+
       setLoading(false);
     };
 
-    fetchPayouts();
+    fetchCompletedOrders();
   }, [user]);
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>;
-      case 'completed':
-        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Completed</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Failed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   if (loading) {
     return (
@@ -248,7 +196,7 @@ export function AgencyPayoutsView() {
           Earnings
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Track your earnings and payout transactions
+          Track your earnings from completed orders
         </p>
       </div>
 
@@ -265,7 +213,7 @@ export function AgencyPayoutsView() {
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-green-500">
-                  ${summary.creditsAvailable.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
@@ -301,19 +249,19 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Pending Payouts
+                  Platform Fees
                 </CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground/60" />
+                <Percent className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  ${(summary.pendingPayouts / 100).toFixed(2)}
+                  ${summary.totalPlatformFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Payouts awaiting processing or transfer</p>
+            <p>Total platform fees deducted from sales</p>
           </TooltipContent>
         </Tooltip>
 
@@ -322,30 +270,30 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Completed Payouts
+                  Completed Orders
                 </CardTitle>
                 <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  ${(summary.completedPayouts / 100).toFixed(2)}
+                  {summary.ordersCount}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Successfully transferred payouts to your account</p>
+            <p>Number of completed orders (delivered or accepted)</p>
           </TooltipContent>
         </Tooltip>
       </div>
 
-      {/* Credit Transactions (Earnings) */}
+      {/* Completed Orders (Earnings) */}
       <Card className="border-border/50">
         <CardHeader>
           <CardTitle>Earnings History</CardTitle>
         </CardHeader>
         <CardContent>
-          {creditTransactions.length === 0 ? (
+          {completedOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground text-center">
@@ -354,91 +302,74 @@ export function AgencyPayoutsView() {
             </div>
           ) : (
             <div className="space-y-2">
-              {creditTransactions.map((transaction) => {
-                const isIncoming = transaction.amount > 0;
-                // Parse platform fee from description if present
-                const platformFeeMatch = transaction.description?.match(/Platform fee: (\d+) credits/);
-                const platformFee = platformFeeMatch ? parseInt(platformFeeMatch[1]) : null;
-                // Extract main description without platform fee part
-                const mainDescription = transaction.description?.replace(/\s*\(Platform fee:.*\)/, '') || '';
-                // Calculate sale price (earnings + platform fee)
-                const salePrice = platformFee !== null ? transaction.amount + platformFee : transaction.amount;
-                
+              {completedOrders.map((order) => {
+                const earningsAmount = (order.agency_payout_cents || 0) / 100;
+                const saleAmount = (order.amount_cents || 0) / 100;
+                const platformFee = (order.platform_fee_cents || 0) / 100;
+                const completedDate = order.accepted_at || order.delivered_at || order.created_at;
+
                 const rowContent = (
                   <div 
                     className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                   >
                     <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
-                      <Badge className={isIncoming ? "bg-foreground text-background border-foreground" : "bg-red-500/20 text-red-400 border-red-500/30"}>
-                        {isIncoming ? 'Credited' : 'Outgoing'}
+                      <Badge className="bg-foreground text-background border-foreground">
+                        {order.delivery_status === 'accepted' ? 'Accepted' : 'Delivered'}
                       </Badge>
-                      <p className={`font-semibold ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
-                        {isIncoming ? '+' : ''}${transaction.amount.toFixed(2)}
+                      <p className="font-semibold text-green-500">
+                        +${earningsAmount.toFixed(2)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3 pr-24">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isIncoming ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                        {isIncoming ? (
-                          <ArrowDownLeft className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <ArrowUpRight className="h-5 w-5 text-red-500" />
-                        )}
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
+                        <ArrowDownLeft className="h-5 w-5 text-green-500" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">
-                          {transaction.type === 'order_payout' ? 'Order Earning' : 
-                           transaction.type === 'withdrawal' ? 'Withdrawal' :
-                           transaction.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {order.media_site?.name || 'Order Earning'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                          {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
                         </p>
-                        {transaction.type === 'order_payout' && transaction.order_id && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-xs text-muted-foreground">
-                              Order ID: {(transaction.order as any)?.order_number || transaction.order_id.slice(0, 8) + '...'}
-                            </p>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewOrderDetails(transaction.order_id!);
-                              }}
-                              disabled={openingChat === transaction.order_id}
-                              className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
-                            >
-                              {openingChat === transaction.order_id ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : (
-                                <ExternalLink className="h-3 w-3" />
-                              )}
-                              View order details
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            Order: {order.order_number || order.id.slice(0, 8) + '...'}
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewOrderDetails(order.id);
+                            }}
+                            disabled={openingChat === order.id}
+                            className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                          >
+                            {openingChat === order.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <ExternalLink className="h-3 w-3" />
+                            )}
+                            View order details
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 );
 
-                // Only show tooltip for order payouts with platform fee
-                if (transaction.type === 'order_payout' && platformFee !== null) {
-                  return (
-                    <Tooltip key={transaction.id} delayDuration={100}>
-                      <TooltipTrigger asChild>
-                        {rowContent}
-                      </TooltipTrigger>
-                      <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground px-4 py-3 text-sm shadow-lg">
-                        <div className="space-y-1 text-white">
-                          <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${salePrice.toFixed(2)}</span></p>
-                          <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">${platformFee.toFixed(2)}</span></p>
-                          <p><span className="text-white/70">Actual Earnings:</span> <span className="font-semibold">${transaction.amount.toFixed(2)}</span></p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-
-                return <div key={transaction.id}>{rowContent}</div>;
+                return (
+                  <Tooltip key={order.id} delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      {rowContent}
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground px-4 py-3 text-sm shadow-lg">
+                      <div className="space-y-1 text-white">
+                        <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${saleAmount.toFixed(2)}</span></p>
+                        <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">${platformFee.toFixed(2)}</span></p>
+                        <p><span className="text-white/70">Your Earnings:</span> <span className="font-semibold">${earningsAmount.toFixed(2)}</span></p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                );
               })}
             </div>
           )}
