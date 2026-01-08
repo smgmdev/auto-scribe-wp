@@ -349,9 +349,6 @@ export function AgencyPayoutsView() {
                         <p className="font-medium">
                           {order.media_site?.name || 'Order Earning'}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
-                        </p>
                         <div className="flex flex-col gap-1 mt-1">
                           <div className="flex items-center gap-1">
                             <p className="text-xs text-muted-foreground">
@@ -382,6 +379,9 @@ export function AgencyPayoutsView() {
                             View order details
                             <ExternalLink className="h-3 w-3" />
                           </button>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                          </p>
                         </div>
                       </div>
                     </div>
