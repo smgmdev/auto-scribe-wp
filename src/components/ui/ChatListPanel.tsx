@@ -166,32 +166,38 @@ export function ChatListPanel() {
         });
       }
 
-      const engagements = data.map(item => {
-        const lastMsg = lastMessages[item.id];
-        const lastReadAt = (item as any).client_last_read_at;
-        
-        // Count messages from counterparty sent after last_read_at
-        const itemMessages = allMessages.filter(m => m.request_id === item.id);
-        let unreadCount = 0;
-        
-        for (const msg of itemMessages) {
-          // Only count messages from agency/admin that are after last_read_at
-          if (msg.sender_type === 'agency' || msg.sender_type === 'admin') {
-            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
-              unreadCount++;
+      const engagements = data
+        // Filter out completed orders (delivery_status = 'accepted')
+        .filter(item => {
+          const order = Array.isArray(item.order) && item.order.length > 0 ? item.order[0] : item.order;
+          return !order || order.delivery_status !== 'accepted';
+        })
+        .map(item => {
+          const lastMsg = lastMessages[item.id];
+          const lastReadAt = (item as any).client_last_read_at;
+          
+          // Count messages from counterparty sent after last_read_at
+          const itemMessages = allMessages.filter(m => m.request_id === item.id);
+          let unreadCount = 0;
+          
+          for (const msg of itemMessages) {
+            // Only count messages from agency/admin that are after last_read_at
+            if (msg.sender_type === 'agency' || msg.sender_type === 'admin') {
+              if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                unreadCount++;
+              }
             }
           }
-        }
-        
-        return {
-          ...item,
-          read: unreadCount === 0,
-          lastMessage: lastMsg?.message,
-          lastMessageTime: lastMsg?.created_at,
-          unreadCount,
-          favicon: item.media_site?.favicon,
-        };
-      }) as ChatItem[];
+          
+          return {
+            ...item,
+            read: unreadCount === 0,
+            lastMessage: lastMsg?.message,
+            lastMessageTime: lastMsg?.created_at,
+            unreadCount,
+            favicon: item.media_site?.favicon,
+          };
+        }) as ChatItem[];
       
       setMyEngagements(engagements);
       myEngagementsRef.current = engagements;
@@ -269,33 +275,39 @@ export function ChatListPanel() {
         });
       }
 
-      const requests = data.map(item => {
-        const lastMsg = lastMessages[item.id];
-        const lastReadAt = (item as any).agency_last_read_at;
-        
-        // Count messages from client OR admin sent after last_read_at
-        // (agency should see notifications for both client and admin messages)
-        const itemMessages = allMessages.filter(m => m.request_id === item.id);
-        let unreadCount = 0;
-        
-        for (const msg of itemMessages) {
-          // Count messages from client OR admin as unread for agency
-          if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
-            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
-              unreadCount++;
+      const requests = data
+        // Filter out completed orders (delivery_status = 'accepted')
+        .filter(item => {
+          const order = Array.isArray(item.order) && item.order.length > 0 ? item.order[0] : item.order;
+          return !order || order.delivery_status !== 'accepted';
+        })
+        .map(item => {
+          const lastMsg = lastMessages[item.id];
+          const lastReadAt = (item as any).agency_last_read_at;
+          
+          // Count messages from client OR admin sent after last_read_at
+          // (agency should see notifications for both client and admin messages)
+          const itemMessages = allMessages.filter(m => m.request_id === item.id);
+          let unreadCount = 0;
+          
+          for (const msg of itemMessages) {
+            // Count messages from client OR admin as unread for agency
+            if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
+              if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+                unreadCount++;
+              }
             }
           }
-        }
-        
-        return {
-          ...item,
-          read: unreadCount === 0,
-          lastMessage: lastMsg?.message,
-          lastMessageTime: lastMsg?.created_at,
-          unreadCount,
-          favicon: item.media_site?.favicon,
-        };
-      }) as ChatItem[];
+          
+          return {
+            ...item,
+            read: unreadCount === 0,
+            lastMessage: lastMsg?.message,
+            lastMessageTime: lastMsg?.created_at,
+            unreadCount,
+            favicon: item.media_site?.favicon,
+          };
+        }) as ChatItem[];
       
       setServiceRequests(requests);
       // Update ref immediately to avoid race conditions
@@ -1111,6 +1123,68 @@ export function ChatListPanel() {
           if (!isAdmin) return;
           // Refetch disputes when a new one is created
           fetchDisputes();
+        }
+      )
+      // Listen for order completion to remove completed orders from messaging widget
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders'
+        },
+        async (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          
+          // Check if delivery_status just changed to 'accepted' (completed)
+          if (updated.delivery_status === 'accepted' && old?.delivery_status !== 'accepted') {
+            console.log('[ChatListPanel] Order completed, removing from messaging widget:', updated.id);
+            
+            // Find the service request associated with this order
+            const { data: requestData } = await supabase
+              .from('service_requests')
+              .select('id, user_id, agency_payout_id')
+              .eq('order_id', updated.id)
+              .maybeSingle();
+            
+            if (requestData) {
+              const requestId = requestData.id;
+              
+              // Remove from myEngagements if it belongs to current user
+              if (requestData.user_id === user?.id) {
+                setMyEngagements(prev => {
+                  const newEngagements = prev.filter(e => e.id !== requestId);
+                  myEngagementsRef.current = newEngagements;
+                  const unreadCount = newEngagements.filter(e => !e.read && e.status !== 'cancelled').length;
+                  setUserUnreadEngagementsCount(unreadCount);
+                  return newEngagements;
+                });
+              }
+              
+              // Remove from serviceRequests if it belongs to current agency
+              if (agencyPayoutIdRef.current && requestData.agency_payout_id === agencyPayoutIdRef.current) {
+                setServiceRequests(prev => {
+                  const newRequests = prev.filter(r => r.id !== requestId);
+                  serviceRequestsRef.current = newRequests;
+                  const unreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+                  setAgencyUnreadServiceRequestsCount(unreadCount);
+                  return newRequests;
+                });
+              }
+              
+              // Close any open chat window for this request
+              useAppStore.getState().closeGlobalChat(requestId);
+              
+              // Remove from minimized chats (store + DB)
+              useAppStore.getState().removeMinimizedChat(requestId);
+              supabase
+                .from('minimized_chats')
+                .delete()
+                .eq('request_id', requestId)
+                .then(() => console.log('[ChatListPanel] Removed completed order chat from minimized_chats'));
+            }
+          }
         }
       )
       .on(
