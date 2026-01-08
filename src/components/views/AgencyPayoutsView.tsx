@@ -31,6 +31,9 @@ interface CreditTransaction {
   description: string | null;
   created_at: string;
   order_id: string | null;
+  order: {
+    order_number: string | null;
+  } | null;
 }
 
 interface EarningsSummary {
@@ -155,7 +158,7 @@ export function AgencyPayoutsView() {
       // Fetch credit transactions for this user (shows earnings from orders)
       const { data: creditTxData } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at, order_id')
+        .select('id, amount, type, description, created_at, order_id, order:orders(order_number)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -390,20 +393,20 @@ export function AgencyPayoutsView() {
                         <p className="text-xs text-muted-foreground">
                           {mainDescription || format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
-                        {transaction.type === 'order_payout' && (transaction as any).order_id && (
+                        {transaction.type === 'order_payout' && transaction.order_id && (
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-muted-foreground">
-                              Order ID: {((transaction as any).order_id as string).slice(0, 8)}...
+                              Order ID: {(transaction.order as any)?.order_number || transaction.order_id.slice(0, 8) + '...'}
                             </p>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewOrderDetails((transaction as any).order_id);
+                                handleViewOrderDetails(transaction.order_id!);
                               }}
-                              disabled={openingChat === (transaction as any).order_id}
+                              disabled={openingChat === transaction.order_id}
                               className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
                             >
-                              {openingChat === (transaction as any).order_id ? (
+                              {openingChat === transaction.order_id ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
                               ) : (
                                 <ExternalLink className="h-3 w-3" />
