@@ -131,6 +131,8 @@ export function ArticlesView() {
               {article.publishedTo && (() => {
                 const siteInfo = getSiteInfo(article);
                 if (!siteInfo) return null; // Site was deleted and no stored name
+                const isDraft = article.status === 'draft';
+                const label = isDraft ? 'Draft saved on:' : 'Published on:';
                 return (
                   <>
                     <span>•</span>
@@ -144,7 +146,7 @@ export function ArticlesView() {
                         {siteInfo.favicon && (
                           <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
                         )}
-                        Published on: {siteInfo.name}
+                        {label} {siteInfo.name}
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     ) : (
@@ -152,7 +154,7 @@ export function ArticlesView() {
                         {siteInfo.favicon && (
                           <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
                         )}
-                        Published on: {siteInfo.name}
+                        {label} {siteInfo.name}
                       </span>
                     )}
                   </>
