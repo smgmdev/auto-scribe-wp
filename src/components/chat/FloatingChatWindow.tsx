@@ -1017,27 +1017,40 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Filter out client order requests that have been rejected
   // Only consider a request rejected if there's a rejection message AFTER it with matching media_site_id
   const nonRejectedClientOrderMessages = useMemo(() => {
-    return existingClientOrderMessages.filter(clientOrderMsg => {
+    console.log('[FloatingChatWindow] Computing nonRejectedClientOrderMessages, existingClientOrderMessages:', existingClientOrderMessages.length);
+    const filtered = existingClientOrderMessages.filter(clientOrderMsg => {
       const match = clientOrderMsg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
       if (!match) return false;
       try {
         const clientOrderData = JSON.parse(match[1]);
-        const clientOrderIndex = messages.findIndex(m => m.id === clientOrderMsg.id);
+        const clientOrderTime = new Date(clientOrderMsg.created_at).getTime();
         
         // Check if there's a rejection AFTER this message for the same media_site_id
-        const hasRejectionAfter = messages.slice(clientOrderIndex + 1).some(m => {
-          if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
+        const hasRejectionAfter = messages.some(m => {
+          // Must be from agency
+          if (m.sender_type !== 'agency') return false;
+          // Must be after the client order request
+          if (new Date(m.created_at).getTime() <= clientOrderTime) return false;
+          // Must contain rejection tag
+          if (!m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
           const rejMatch = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
           if (!rejMatch) return false;
           try {
             const rejData = JSON.parse(rejMatch[1]);
-            return rejData.media_site_id === clientOrderData.media_site_id;
+            const matches = rejData.media_site_id === clientOrderData.media_site_id;
+            if (matches) {
+              console.log('[FloatingChatWindow] Found matching rejection for client order request:', clientOrderMsg.id, 'rejection:', m.id);
+            }
+            return matches;
           } catch { return false; }
         });
         
+        console.log('[FloatingChatWindow] Client order request:', clientOrderMsg.id, 'hasRejectionAfter:', hasRejectionAfter);
         return !hasRejectionAfter;
       } catch { return false; }
     });
+    console.log('[FloatingChatWindow] nonRejectedClientOrderMessages result:', filtered.length);
+    return filtered;
   }, [existingClientOrderMessages, messages]);
   
   const hasExistingClientOrderRequest = useMemo(() => nonRejectedClientOrderMessages.length > 0, [nonRejectedClientOrderMessages]);
