@@ -951,9 +951,14 @@ export function MyRequestsView() {
                             )}
                             {getOrderPlacedBadge(request)}
                             {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestRejected(request.id) && (
-                              <Badge variant="outline" className="text-muted-foreground border-muted-foreground/50">
-                                Open
-                              </Badge>
+                              <>
+                                <Badge variant="outline" className="text-muted-foreground border-muted-foreground/50">
+                                  Open
+                                </Badge>
+                                <Badge variant="outline" className="text-red-400 border-red-400/50">
+                                  Previously Rejected
+                                </Badge>
+                              </>
                             )}
                             {!request.order && !hasPendingOffer(request.id) && !hasClientOrderRequestRejected(request.id) && getStatusBadge(request.status)}
                           </div>
