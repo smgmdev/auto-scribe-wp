@@ -629,16 +629,16 @@ export function AdminOrdersView() {
         const { text, isOverdue } = getRemainingTime(deliveryDeadline);
         if (isOverdue) {
           return (
-            <Badge variant="destructive" className="gap-1">
-              <Clock className="h-3 w-3" />
-              {text}
+            <Badge variant="destructive" className="bg-red-600 text-white">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Order Placed - Overdue
             </Badge>
           );
         }
         return (
-          <Badge variant="outline" className="gap-1">
-            <Clock className="h-3 w-3" />
-            {deliveryDeadline ? `Remaining: ${text}` : text}
+          <Badge className="bg-black text-white dark:bg-white dark:text-black">
+            <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+            Order Placed {deliveryDeadline && `• ${text}`}
           </Badge>
         );
       case 'delivered':
