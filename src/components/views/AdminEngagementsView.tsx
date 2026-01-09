@@ -437,33 +437,47 @@ export function AdminEngagementsView() {
     return true; // Most recent client order request is still pending
   };
 
-  // Helper function to get the last message time for a request
-  const getLastMessageTime = (requestId: string): Date => {
-    const requestMessages = messages[requestId] || [];
-    if (requestMessages.length === 0) {
-      // If no messages, use request created_at as fallback
-      const request = requests.find(r => r.id === requestId);
-      return request ? new Date(request.created_at) : new Date(0);
+  // Helper function to get the last event time for a request
+  // Considers messages, order updates, request updates, cancellations, etc.
+  const getLastEventTime = (request: ServiceRequest): Date => {
+    const times: Date[] = [];
+    
+    // Request created/updated time
+    times.push(new Date(request.updated_at || request.created_at));
+    
+    // Last message time
+    const requestMessages = messages[request.id] || [];
+    if (requestMessages.length > 0) {
+      times.push(new Date(requestMessages[requestMessages.length - 1].created_at));
     }
-    return new Date(requestMessages[requestMessages.length - 1].created_at);
+    
+    // Order related times
+    if (request.orders) {
+      if (request.orders.delivery_deadline) {
+        times.push(new Date(request.orders.delivery_deadline));
+      }
+    }
+    
+    // Return the most recent time
+    return times.reduce((latest, current) => current > latest ? current : latest, new Date(0));
   };
 
-  // Sort requests by last message time (most recent first)
-  const sortByLastMessage = (a: ServiceRequest, b: ServiceRequest): number => {
-    const timeA = getLastMessageTime(a.id).getTime();
-    const timeB = getLastMessageTime(b.id).getTime();
+  // Sort requests by last event time (most recent first)
+  const sortByLastEvent = (a: ServiceRequest, b: ServiceRequest): number => {
+    const timeA = getLastEventTime(a).getTime();
+    const timeB = getLastEventTime(b).getTime();
     return timeB - timeA; // Descending order (most recent first)
   };
 
   const activeRequests = requests
     .filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted')
-    .sort(sortByLastMessage);
+    .sort(sortByLastEvent);
   const deliveredRequests = requests
     .filter(r => r.orders?.delivery_status === 'accepted')
-    .sort(sortByLastMessage);
+    .sort(sortByLastEvent);
   const cancelledRequests = requests
     .filter(r => r.status === 'cancelled')
-    .sort(sortByLastMessage);
+    .sort(sortByLastEvent);
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
