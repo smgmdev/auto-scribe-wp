@@ -852,14 +852,14 @@ export function ComposeView() {
         }
       }
 
-      // Build featured image object with URL if available
-      const savedFeaturedImage = featuredImage.file || imagePreview ? {
-        file: featuredImage.file,
-        url: imagePreview || undefined,
-        title: featuredImage.title,
-        caption: featuredImage.caption,
-        altText: featuredImage.altText,
-        description: featuredImage.description
+      // Build featured image object with URL if available (exclude file object as it can't be serialized)
+      const savedFeaturedImage = imagePreview ? {
+        file: null,
+        url: imagePreview,
+        title: featuredImage.title || '',
+        caption: featuredImage.caption || '',
+        altText: featuredImage.altText || '',
+        description: featuredImage.description || ''
       } : undefined;
 
       // Always save to database with all data including site ID
