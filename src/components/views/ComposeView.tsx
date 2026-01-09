@@ -1035,6 +1035,30 @@ export function ComposeView() {
       });
       
       if (savedArticle) {
+        // Set the saved draft as editingArticle so publishing updates it instead of creating a duplicate
+        setEditingArticle({
+          id: savedArticle.id,
+          title: savedArticle.title,
+          content: savedArticle.content,
+          tone: savedArticle.tone,
+          status: savedArticle.status,
+          sourceHeadline: savedArticle.sourceHeadline,
+          featuredImage: savedArticle.featuredImage,
+          publishedTo: savedArticle.publishedTo,
+          publishedToName: savedArticle.publishedToName,
+          publishedToFavicon: savedArticle.publishedToFavicon,
+          wpPostId: savedArticle.wpPostId,
+          wpLink: savedArticle.wpLink,
+          wpFeaturedMediaId: savedArticle.wpFeaturedMediaId,
+          categories: savedArticle.categories,
+          tagIds: savedArticle.tagIds,
+          tags: savedArticle.tags,
+          focusKeyword: savedArticle.focusKeyword,
+          metaDescription: savedArticle.metaDescription,
+          createdAt: savedArticle.createdAt,
+          updatedAt: savedArticle.updatedAt,
+        });
+        
         setIsSavingDraft(false);
         setShowDraftSuccess(true);
         setTimeout(() => {
