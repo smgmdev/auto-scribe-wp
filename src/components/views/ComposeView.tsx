@@ -568,7 +568,9 @@ export function ComposeView() {
       let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
       let featuredImageUrl: string | undefined = editingArticle?.featuredImage?.url;
 
-      // Upload featured image first if exists and is a new file
+      // Upload featured image if exists
+      // Case 1: New file from file picker
+      // Case 2: Image from saved draft (data URL in imagePreview but no file)
       if (featuredImage.file) {
         toast({
           title: "Uploading image...",
@@ -582,6 +584,35 @@ export function ComposeView() {
         });
         featuredMediaId = mediaResult.id;
         featuredImageUrl = mediaResult.source_url;
+      } else if (imagePreview && !featuredMediaId) {
+        // Convert data URL to File and upload (for drafts with saved images)
+        toast({
+          title: "Uploading image...",
+          description: "Please wait while we upload your featured image"
+        });
+        
+        try {
+          const response = await fetch(imagePreview);
+          const blob = await response.blob();
+          const fileName = `featured-image-${Date.now()}.${blob.type.split('/')[1] || 'jpg'}`;
+          const file = new File([blob], fileName, { type: blob.type });
+          
+          const mediaResult = await uploadMedia(currentSite, file, {
+            title: featuredImage.title,
+            alt_text: featuredImage.altText,
+            caption: featuredImage.caption,
+            description: featuredImage.description
+          });
+          featuredMediaId = mediaResult.id;
+          featuredImageUrl = mediaResult.source_url;
+        } catch (imgError) {
+          console.error('Failed to upload image from URL:', imgError);
+          toast({
+            title: "Image upload failed",
+            description: "Could not upload the featured image, publishing without it",
+            variant: "destructive"
+          });
+        }
       }
       let result: {
         id: number;
