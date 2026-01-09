@@ -566,9 +566,30 @@ export function MyRequestsView() {
       )
       .subscribe();
 
+    // Subscribe to message deletion broadcasts
+    const deletionChannel = supabase
+      .channel('message-deletions')
+      .on('broadcast', { event: 'message-deleted' }, (payload) => {
+        console.log('[MyRequestsView] Received message-deleted broadcast:', payload);
+        const { messageId, requestId } = payload.payload || {};
+        if (messageId && requestId) {
+          setMessages(prev => {
+            const existingMsgs = prev[requestId] || [];
+            const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
+            console.log('[MyRequestsView] Updated messages after broadcast deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length });
+            return {
+              ...prev,
+              [requestId]: filteredMsgs
+            };
+          });
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(requestsChannel);
       supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(deletionChannel);
     };
   }, [user?.id, setUserUnreadEngagementsCount, setUserUnreadDeliveredCount, setUserUnreadCancelledCount]);
 

@@ -580,11 +580,32 @@ export function AgencyRequestsView() {
         console.log('[AgencyRequestsView] Orders channel status:', status);
       });
 
+    // Subscribe to message deletion broadcasts
+    const deletionChannel = supabase
+      .channel('message-deletions')
+      .on('broadcast', { event: 'message-deleted' }, (payload) => {
+        console.log('[AgencyRequestsView] Received message-deleted broadcast:', payload);
+        const { messageId, requestId } = payload.payload || {};
+        if (messageId && requestId) {
+          setMessages(prev => {
+            const existingMsgs = prev[requestId] || [];
+            const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
+            console.log('[AgencyRequestsView] Updated messages after broadcast deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length });
+            return {
+              ...prev,
+              [requestId]: filteredMsgs
+            };
+          });
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(requestsChannel);
       supabase.removeChannel(adminActionChannel);
       supabase.removeChannel(clientActionChannel);
       supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(deletionChannel);
     };
   }, [agencyPayoutId]);
 
