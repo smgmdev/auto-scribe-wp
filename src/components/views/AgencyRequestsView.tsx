@@ -426,7 +426,19 @@ export function AgencyRequestsView() {
           const requestExists = requestsRef.current.some(r => r.id === newMsg.request_id);
           if (!requestExists) return;
           
-          // Only process client messages (not our own)
+          // Add message to local state for ALL messages (including our own for badge logic)
+          setMessages(prev => {
+            const existingMsgs = prev[newMsg.request_id] || [];
+            // Check if message already exists
+            const isDuplicate = existingMsgs.some(m => m.id === newMsg.id);
+            if (isDuplicate) return prev;
+            return {
+              ...prev,
+              [newMsg.request_id]: [...existingMsgs, newMsg as ServiceMessage]
+            };
+          });
+          
+          // Only process client messages for notifications (not our own)
           if (newMsg.sender_type === 'agency' || newMsg.sender_type === 'admin') return;
           
           // Check if this is an ORDER_PLACED message
@@ -444,12 +456,6 @@ export function AgencyRequestsView() {
             // Refetch to update orders
             fetchRequests();
           }
-          
-          // Add message to local state
-          setMessages(prev => ({
-            ...prev,
-            [newMsg.request_id]: [...(prev[newMsg.request_id] || []), newMsg as ServiceMessage]
-          }));
           
           // Mark the request as unread since we received a new client message
           setRequests(prev => {
