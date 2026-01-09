@@ -744,7 +744,7 @@ export function AdminOrdersView() {
   const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
   // Calculate value stats
-  const activeOrdersData = orders.filter(o => o.status === 'paid' && !disputedOrderIds.has(o.id));
+  const activeOrdersData = orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && !disputedOrderIds.has(o.id));
   const activeOrdersCount = activeOrdersData.length;
   const activeOrdersValue = activeOrdersData.reduce((sum, o) => sum + o.amount_cents, 0);
   
