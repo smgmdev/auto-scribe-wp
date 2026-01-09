@@ -289,7 +289,7 @@ export function ArticlesView() {
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground border border-transparent transition-all duration-300 hover:bg-transparent hover:text-destructive hover:border-destructive"
+              className="bg-destructive text-destructive-foreground border border-transparent transition-all duration-300 hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
