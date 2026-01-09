@@ -3482,20 +3482,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className={`rounded-lg border p-4 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40 border-teal-300 dark:border-teal-700'
+              : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
           }`}>
             <div className="flex items-start gap-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                 isOwnMessage 
                   ? 'bg-primary-foreground/20' 
-                  : 'bg-teal-100 dark:bg-teal-900/50'
+                  : 'bg-amber-100 dark:bg-amber-900/50'
               }`}>
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-teal-600 dark:text-teal-400'}`} />
+                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-teal-700 dark:text-teal-300'}`}>
-                    {isOwnMessage ? 'Order Request Sent' : 'Offer Received'}
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-700 dark:text-amber-300'}`}>
+                    {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
                   </span>
                 </div>
                 <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
@@ -3525,10 +3525,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Action buttons for agency */}
             {isAgency && !hasOrder && !isOwnMessage && (
-              <div className="mt-3 pt-3 border-t border-teal-300 dark:border-teal-700 flex gap-2">
+              <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   onClick={async () => {
                     if (!globalChatRequest) return;
                     
@@ -3629,7 +3629,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200"
+                  className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
                   onClick={handleRejectClientOrderRequest}
                   disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
                 >
