@@ -1398,7 +1398,7 @@ export function ComposeView() {
                 {isSavingDraft ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
-                  </> : 'Save Changes'}
+                  </> : 'Save Draft'}
               </Button>}
             {!editingArticle && <Button variant="outline" className="w-full" onClick={handleSaveDraft} disabled={!title || isPublishing}>
                 Save as Draft
