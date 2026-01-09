@@ -3674,7 +3674,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-                <CheckCircle className="h-6 w-6 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-green-500 fill-green-500" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
