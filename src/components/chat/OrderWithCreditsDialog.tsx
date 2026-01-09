@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,12 +26,21 @@ interface ServiceMessage {
   created_at: string;
 }
 
+interface InitialOrderData {
+  deliveryDays?: number;
+  deliveryHours?: number;
+  deliveryMinutes?: number;
+  specialTerms?: string;
+}
+
 interface OrderWithCreditsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mediaSite: MediaSiteInfo | null;
   serviceRequestId: string;
   onSuccess: (message?: ServiceMessage) => void;
+  isResendMode?: boolean;
+  initialData?: InitialOrderData;
 }
 
 export function OrderWithCreditsDialog({ 
@@ -39,15 +48,27 @@ export function OrderWithCreditsDialog({
   onOpenChange, 
   mediaSite,
   serviceRequestId,
-  onSuccess 
+  onSuccess,
+  isResendMode = false,
+  initialData
 }: OrderWithCreditsDialogProps) {
   const [sending, setSending] = useState(false);
-  const [deliveryDays, setDeliveryDays] = useState<number>(0);
-  const [deliveryHours, setDeliveryHours] = useState<number>(0);
-  const [deliveryMinutes, setDeliveryMinutes] = useState<number>(0);
-  const [specialTerms, setSpecialTerms] = useState('');
+  const [deliveryDays, setDeliveryDays] = useState<number>(initialData?.deliveryDays || 0);
+  const [deliveryHours, setDeliveryHours] = useState<number>(initialData?.deliveryHours || 0);
+  const [deliveryMinutes, setDeliveryMinutes] = useState<number>(initialData?.deliveryMinutes || 0);
+  const [specialTerms, setSpecialTerms] = useState(initialData?.specialTerms || '');
   const { credits, user } = useAuth();
   const { toast } = useToast();
+
+  // Update state when initialData changes (for resend mode)
+  React.useEffect(() => {
+    if (open && initialData) {
+      setDeliveryDays(initialData.deliveryDays || 0);
+      setDeliveryHours(initialData.deliveryHours || 0);
+      setDeliveryMinutes(initialData.deliveryMinutes || 0);
+      setSpecialTerms(initialData.specialTerms || '');
+    }
+  }, [open, initialData]);
 
   const creditCost = mediaSite?.price || 0;
   const hasEnoughCredits = (credits || 0) >= creditCost;
@@ -118,10 +139,10 @@ export function OrderWithCreditsDialog({
       <DialogContent className="sm:max-w-md z-[9999]">
         <DialogHeader>
           <DialogTitle>
-            Send Order Request
+            {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
           </DialogTitle>
           <DialogDescription>
-            Send an order request to the agency for approval
+            {isResendMode ? 'Resend an order request to the agency for approval' : 'Send an order request to the agency for approval'}
           </DialogDescription>
         </DialogHeader>
 
@@ -273,7 +294,7 @@ export function OrderWithCreditsDialog({
                 Sending...
               </>
             ) : hasEnoughCredits ? (
-              `Send Order Request`
+              isResendMode ? 'Resend Order Request' : 'Send Order Request'
             ) : (
               'Insufficient Credits'
             )}
