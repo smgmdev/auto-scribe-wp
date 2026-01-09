@@ -321,22 +321,38 @@ export function MyRequestsView() {
     };
 
     // Listen for message deletions (e.g., when client cancels their order request)
-    const handleServiceMessageDeleted = (event: CustomEvent) => {
+    const handleServiceMessageDeleted = async (event: CustomEvent) => {
       const { messageId, requestId } = event.detail || {};
       console.log('[MyRequestsView] Received service-message-deleted event:', { messageId, requestId });
       if (messageId && requestId) {
+        // First try to remove from local state
         setMessages(prev => {
           const existingMsgs = prev[requestId] || [];
-          // Log existing message IDs to debug
-          console.log('[MyRequestsView] Existing message IDs:', existingMsgs.map(m => m.id));
-          console.log('[MyRequestsView] Looking for messageId:', messageId);
           const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
-          console.log('[MyRequestsView] Updated messages after deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length });
+          // If message wasn't found locally (ID mismatch), we'll refetch below
           return {
             ...prev,
             [requestId]: filteredMsgs
           };
         });
+        
+        // Also refetch messages for this request to ensure sync
+        try {
+          const { data: freshMessages } = await supabase
+            .from('service_messages')
+            .select('*')
+            .eq('request_id', requestId)
+            .order('created_at', { ascending: true });
+          
+          if (freshMessages) {
+            setMessages(prev => ({
+              ...prev,
+              [requestId]: freshMessages
+            }));
+          }
+        } catch (error) {
+          console.error('[MyRequestsView] Error refetching messages after deletion:', error);
+        }
       }
     };
 
