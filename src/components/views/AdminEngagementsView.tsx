@@ -561,7 +561,7 @@ export function AdminEngagementsView() {
           {activeRequests.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No active engagements</CardContent></Card>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-2">
               {activeRequests.map((r) => (
                 <Card 
                   key={r.id} 
@@ -656,7 +656,7 @@ export function AdminEngagementsView() {
               {deliveredRequests.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">No delivered engagements</CardContent></Card>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-2">
                   {deliveredRequests.map((r) => (
                     <Card 
                       key={r.id} 
