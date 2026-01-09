@@ -3237,13 +3237,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                 isOwnMessage 
                   ? 'bg-primary-foreground/20' 
-                  : 'bg-muted'
+                  : 'bg-red-100 dark:bg-red-950/30'
               }`}>
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                <XCircle className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`}>
                     Order Request Rejected
                   </span>
                 </div>
