@@ -5381,7 +5381,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <>
                         <Button
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
                           onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
@@ -5389,7 +5389,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
+                          className="bg-red-600 text-white border border-red-600 hover:bg-transparent hover:text-red-600 transition-all duration-200"
                           onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
                           disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
                         >
