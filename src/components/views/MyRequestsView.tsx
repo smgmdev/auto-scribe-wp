@@ -531,7 +531,7 @@ export function MyRequestsView() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending_review':
-        return null; // No badge for pending review
+        return <Badge variant="outline" className="text-muted-foreground border-muted-foreground/50">Open</Badge>;
       case 'changes_requested':
         return <Badge variant="outline" className="border-amber-500 text-amber-600"><AlertCircle className="h-3 w-3 mr-1" />Changes Requested</Badge>;
       case 'accepted':
@@ -545,7 +545,7 @@ export function MyRequestsView() {
       case 'cancelled':
         return <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Engagement cancelled</Badge>;
       default:
-        return null;
+        return <Badge variant="outline" className="text-muted-foreground border-muted-foreground/50">Open</Badge>;
     }
   };
 
