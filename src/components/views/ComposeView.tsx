@@ -127,9 +127,9 @@ export function ComposeView() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isRefreshingTitle, setIsRefreshingTitle] = useState(false);
 
-  // SEO Settings state
-  const [focusKeyword, setFocusKeyword] = useState('');
-  const [metaDescription, setMetaDescription] = useState('');
+  // SEO Settings state - initialize from editingArticle if available
+  const [focusKeyword, setFocusKeyword] = useState(editingArticle?.focusKeyword || '');
+  const [metaDescription, setMetaDescription] = useState(editingArticle?.metaDescription || '');
   const [isLoadingSEO, setIsLoadingSEO] = useState(false);
 
 
