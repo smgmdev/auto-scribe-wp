@@ -744,9 +744,9 @@ export function AdminOrdersView() {
   const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
   // Calculate value stats
-  const pendingValue = orders
-    .filter(o => o.status === 'paid' && !disputedOrderIds.has(o.id))
-    .reduce((sum, o) => sum + o.amount_cents, 0);
+  const activeOrdersData = orders.filter(o => o.status === 'paid' && !disputedOrderIds.has(o.id));
+  const activeOrdersCount = activeOrdersData.length;
+  const activeOrdersValue = activeOrdersData.reduce((sum, o) => sum + o.amount_cents, 0);
   
   const disputeValue = orders
     .filter(o => disputedOrderIds.has(o.id))
@@ -792,17 +792,17 @@ export function AdminOrdersView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-default">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Pending Delivery
+                  Active Orders
                 </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">${(pendingValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div className="text-2xl font-semibold text-foreground">{activeOrdersCount}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="bg-foreground text-background px-3 py-2 text-sm">
-            <p>Total value of orders awaiting delivery</p>
+            <p>Total: ${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
           </TooltipContent>
         </Tooltip>
         
