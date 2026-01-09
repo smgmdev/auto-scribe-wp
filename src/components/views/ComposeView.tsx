@@ -1387,7 +1387,6 @@ export function ComposeView() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Publishing...
                 </> : <>
-                  <Send className="mr-2 h-4 w-4" />
                   {editingArticle 
                     ? (editingArticle.status === 'published' ? 'Update & Publish' : 'Publish') 
                     : 'Publish Article'}
