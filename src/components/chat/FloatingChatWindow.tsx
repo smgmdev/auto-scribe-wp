@@ -6012,13 +6012,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Send Order Dialog (Agency) */}
       <Dialog open={sendOrderDialogOpen} onOpenChange={setSendOrderDialogOpen}>
         <DialogContent className="sm:max-w-md z-[250]">
-          <DialogHeader className="pb-2">
+          <DialogHeader className="pb-0">
             <DialogTitle>
               {isResendMode ? 'Resend Offer' : 'Send Offer'}
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4">
             <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
               {globalChatRequest?.media_site?.favicon && (
                 <img 
