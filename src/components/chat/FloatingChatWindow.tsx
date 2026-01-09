@@ -3299,8 +3299,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
+                  <XCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`} />
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`}>
                     Offer Rejected
                   </span>
                 </div>
