@@ -482,28 +482,41 @@ export function AgencyRequestsView() {
         (payload) => {
           const deletedMsg = payload.old as any;
           console.log('[AgencyRequestsView] Realtime DELETE received for service_messages:', deletedMsg);
-          if (!deletedMsg?.id || !deletedMsg?.request_id) {
-            console.log('[AgencyRequestsView] DELETE event missing id or request_id, skipping');
+          
+          if (!deletedMsg?.id) {
+            console.log('[AgencyRequestsView] DELETE event missing id, skipping');
             return;
           }
           
-          // Check if this message belongs to one of our requests
-          const requestExists = requestsRef.current.some(r => r.id === deletedMsg.request_id);
-          if (!requestExists) {
-            console.log('[AgencyRequestsView] DELETE event request not found in our list, skipping');
-            return;
-          }
-          
-          // Remove the deleted message from local state
-          console.log('[AgencyRequestsView] Removing deleted message from state:', deletedMsg.id);
+          // Find which request this message belongs to by searching our local state
+          // (since DELETE payload may not include request_id)
           setMessages(prev => {
-            const existingMsgs = prev[deletedMsg.request_id] || [];
-            const filteredMsgs = existingMsgs.filter(m => m.id !== deletedMsg.id);
-            console.log('[AgencyRequestsView] Messages after realtime DELETE:', { before: existingMsgs.length, after: filteredMsgs.length });
-            return {
-              ...prev,
-              [deletedMsg.request_id]: filteredMsgs
-            };
+            let found = false;
+            const newState = { ...prev };
+            
+            for (const requestId in newState) {
+              const existingMsgs = newState[requestId] || [];
+              const msgIndex = existingMsgs.findIndex(m => m.id === deletedMsg.id);
+              
+              if (msgIndex !== -1) {
+                found = true;
+                const filteredMsgs = existingMsgs.filter(m => m.id !== deletedMsg.id);
+                console.log('[AgencyRequestsView] Found and removing message from request:', { 
+                  requestId, 
+                  messageId: deletedMsg.id,
+                  before: existingMsgs.length, 
+                  after: filteredMsgs.length 
+                });
+                newState[requestId] = filteredMsgs;
+                break; // Message found and removed, no need to continue
+              }
+            }
+            
+            if (!found) {
+              console.log('[AgencyRequestsView] DELETE event message not found in any request');
+            }
+            
+            return found ? newState : prev;
           });
         }
       )
