@@ -647,6 +647,26 @@ export function MyRequestsView() {
     return hasOrderRequest && !hasOrderResponse;
   };
 
+  // Check if the client's order request was rejected by the agency
+  const hasClientOrderRequestRejected = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    // Look for client ORDER_REQUEST messages that were rejected
+    let hasClientOrderRequest = false;
+    let wasRejected = false;
+    
+    for (const msg of requestMessages) {
+      if (msg.sender_type === 'client' && msg.message.includes('[ORDER_REQUEST]')) {
+        hasClientOrderRequest = true;
+      }
+      // Check if there's a rejection response from agency
+      if (msg.sender_type === 'agency' && msg.message.includes('[CLIENT_ORDER_REJECTED]')) {
+        wasRejected = true;
+      }
+    }
+    
+    return hasClientOrderRequest && wasRejected;
+  };
+
   const handleCardClick = (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
     
@@ -930,7 +950,12 @@ export function MyRequestsView() {
                               </Badge>
                             )}
                             {getOrderPlacedBadge(request)}
-                            {!request.order && !hasPendingOffer(request.id) && getStatusBadge(request.status)}
+                            {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestRejected(request.id) && (
+                              <Badge variant="outline" className="text-muted-foreground border-muted-foreground/50">
+                                Open
+                              </Badge>
+                            )}
+                            {!request.order && !hasPendingOffer(request.id) && !hasClientOrderRequestRejected(request.id) && getStatusBadge(request.status)}
                           </div>
                         </div>
                       </CardHeader>
