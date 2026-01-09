@@ -1976,21 +1976,21 @@ export function ChatListPanel() {
   const getMessageTypeIcon = (type: 'order' | 'order_placed' | 'order_cancelled' | 'cancel_request' | 'cancel_accepted' | 'cancel_rejected' | 'offer_rejected' | 'client_order_request' | 'order_request_accepted' | 'order_request_rejected' | 'payment' | 'delivery' | 'order_delivered' | 'revision_requested' | 'dispute_opened' | 'dispute_resolved' | 'status' | 'attachment' | 'normal', isAgencyView?: boolean) => {
     switch (type) {
       case 'order':
-        return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <Tag className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'order_placed':
-        return <ShoppingCart className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'order_cancelled':
-        return <ShoppingCart className="h-3 w-3 shrink-0 text-red-500" />;
+        return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'cancel_request':
-        return <XCircle className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <XCircle className="h-3 w-3 shrink-0 text-orange-500" />;
       case 'cancel_accepted':
-        return <XCircle className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'cancel_rejected':
         return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'offer_rejected':
         return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'client_order_request':
-        return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <Tag className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'order_request_accepted':
         return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'order_request_rejected':
@@ -2002,15 +2002,15 @@ export function ChatListPanel() {
       case 'order_delivered':
         return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'revision_requested':
-        return <RefreshCw className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <RefreshCw className="h-3 w-3 shrink-0 text-orange-500" />;
       case 'dispute_opened':
-        return <AlertTriangle className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <AlertTriangle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'dispute_resolved':
-        return <CheckCircle className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'status':
-        return <Bell className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <Bell className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'attachment':
-        return <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <Paperclip className="h-3 w-3 shrink-0 text-blue-500" />;
       default:
         return null;
     }
