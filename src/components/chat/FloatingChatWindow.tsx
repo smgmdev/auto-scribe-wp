@@ -2102,8 +2102,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       )
       .subscribe();
 
+    // Also listen for window events for cross-component sync
+    const handleMessageDeleted = async (event: CustomEvent) => {
+      const { messageId, requestId } = event.detail || {};
+      if (messageId && requestId === globalChatRequest.id) {
+        setMessages(prev => prev.filter(m => m.id !== messageId));
+        
+        // Refetch to ensure sync
+        const { data: freshMessages } = await supabase
+          .from('service_messages')
+          .select('*')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: true });
+        
+        if (freshMessages) {
+          setMessages(freshMessages as ServiceMessage[]);
+        }
+      }
+    };
+    
+    window.addEventListener('service-message-deleted', handleMessageDeleted as EventListener);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('service-message-deleted', handleMessageDeleted as EventListener);
     };
   }, [globalChatRequest?.id, senderType, actualSenderType]);
 
