@@ -1563,11 +1563,6 @@ export function AgencyRequestsView() {
                               <Badge className="bg-black text-orange-400">
                                 Delivered - Revision Requested
                               </Badge>
-                            ) : isOverdue ? (
-                              <Badge variant="destructive" className="bg-red-600 text-white">
-                                <AlertTriangle className="h-3 w-3 mr-1" />
-                                Overdue
-                              </Badge>
                             ) : order.delivery_status === 'in_progress' ? (
                               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                                 In Progress
@@ -1576,10 +1571,15 @@ export function AgencyRequestsView() {
                               <Badge className="bg-purple-600 text-white">
                                 Delivered - Pending Approval
                               </Badge>
+                            ) : isOverdue ? (
+                              <Badge variant="destructive" className="bg-red-600 text-white">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Order Placed - Overdue
+                              </Badge>
                             ) : (
-                              <Badge className="bg-white text-black border-white/30">
-                                <Clock className="h-3 w-3 mr-1" />
-                                Pending Delivery {getTimeRemaining() && `• ${getTimeRemaining()}`}
+                              <Badge className="bg-black text-white dark:bg-white dark:text-black">
+                                <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                                Order Placed {getTimeRemaining() && `• ${getTimeRemaining()}`}
                               </Badge>
                             )}
                           </div>
