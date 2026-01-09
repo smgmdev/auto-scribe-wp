@@ -3290,16 +3290,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/40 dark:to-slate-950/40 border-gray-200 dark:border-gray-800'
           }`}>
             <div className="flex items-start gap-3">
-              {offerRejected.media_site_favicon && (
-                <img 
-                  src={offerRejected.media_site_favicon} 
-                  alt="" 
-                  className="w-10 h-10 rounded-lg object-cover shrink-0"
-                />
-              )}
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                isOwnMessage 
+                  ? 'bg-primary-foreground/20' 
+                  : 'bg-red-100 dark:bg-red-950/30'
+              }`}>
+                <XCircle className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`} />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <XCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`} />
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`}>
                     Offer Rejected
                   </span>
