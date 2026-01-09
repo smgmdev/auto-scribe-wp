@@ -1994,7 +1994,7 @@ export function ChatListPanel() {
       case 'order_request_accepted':
         return <CheckCircle className="h-3 w-3 shrink-0 text-green-500" />;
       case 'order_request_rejected':
-        return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'payment':
         return <CreditCard className="h-3 w-3 shrink-0 text-blue-500" />;
       case 'delivery':
