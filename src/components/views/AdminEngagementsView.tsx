@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format, isPast, differenceInSeconds } from 'date-fns';
@@ -345,6 +345,24 @@ export function AdminEngagementsView() {
     );
   };
 
+  // Check if agency has sent an offer (ORDER_REQUEST) that hasn't been accepted/rejected yet
+  const hasPendingOfferSent = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    let hasOrderRequest = false;
+    let hasOrderResponse = false;
+    
+    for (const msg of requestMessages) {
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]')) {
+        hasOrderRequest = true;
+      }
+      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
+        hasOrderResponse = true;
+      }
+    }
+    
+    return hasOrderRequest && !hasOrderResponse;
+  };
+
   const activeRequests = requests.filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted');
   const deliveredRequests = requests.filter(r => r.orders?.delivery_status === 'accepted');
   const cancelledRequests = requests.filter(r => r.status === 'cancelled');
@@ -418,7 +436,15 @@ export function AdminEngagementsView() {
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        {getEngagementBadge(r)}
+                        <div className="flex items-center gap-1">
+                          {getEngagementBadge(r)}
+                          {!r.order_id && hasPendingOfferSent(r.id) && (
+                            <Badge className="bg-blue-600 text-white">
+                              <Tag className="h-3 w-3 mr-1" />
+                              Offer Sent
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="mt-2 flex items-end justify-between">
