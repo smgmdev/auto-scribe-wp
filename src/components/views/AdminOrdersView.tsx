@@ -293,8 +293,8 @@ export function AdminOrdersView() {
         new Map((data || []).map((order: Order) => [order.id, order])).values()
       ) as Order[];
       setOrders(uniqueOrders);
-      // Update unread count in store
-      const unreadCount = (data || []).filter((o: Order) => o.status === 'paid' && !o.read).length;
+      // Update unread count in store (include both paid and pending_payment statuses)
+      const unreadCount = (data || []).filter((o: Order) => (o.status === 'paid' || o.status === 'pending_payment') && !o.read).length;
       setUnreadOrdersCount(unreadCount);
       
       // Fetch revision status for orders
@@ -342,7 +342,7 @@ export function AdminOrdersView() {
       ));
       
       // Decrement unread count
-      setUnreadOrdersCount(Math.max(0, orders.filter(o => o.status === 'paid' && !o.read).length - 1));
+      setUnreadOrdersCount(Math.max(0, orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && !o.read).length - 1));
     }
   };
 
