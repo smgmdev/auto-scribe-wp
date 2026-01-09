@@ -979,7 +979,7 @@ export function AdminOrdersView() {
                           <div className="flex items-center gap-2">
                             <CardTitle className="text-base">{order.media_sites?.name || 'Unknown Site'}</CardTitle>
                             {hasUnreadNotification && (
-                              <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">NEW</Badge>
+                              <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
                             )}
                           </div>
                           {order.media_sites?.agency && (
