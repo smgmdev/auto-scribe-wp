@@ -648,7 +648,8 @@ export function MyRequestsView() {
 
   // Get order placed badge with countdown
   const getOrderPlacedBadge = (request: ServiceRequest) => {
-    if (!request.order || request.order.status !== 'paid') return null;
+    // Show badge for paid orders or pending_payment (credit orders)
+    if (!request.order || (request.order.status !== 'paid' && request.order.status !== 'pending_payment')) return null;
     if (request.order.delivery_status === 'accepted') return null;
     
     // Check if order is in dispute first (highest priority)
