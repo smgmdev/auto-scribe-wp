@@ -254,6 +254,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [sendingCancelRequest, setSendingCancelRequest] = useState(false);
   const [acceptingCancellation, setAcceptingCancellation] = useState(false);
   const [orderWithCreditsOpen, setOrderWithCreditsOpen] = useState(false);
+  const [isClientResendMode, setIsClientResendMode] = useState(false);
+  const [clientOrderInitialData, setClientOrderInitialData] = useState<{
+    deliveryDays?: number;
+    deliveryHours?: number;
+    deliveryMinutes?: number;
+    specialTerms?: string;
+  } | undefined>(undefined);
   const [acceptOrderDialogOpen, setAcceptOrderDialogOpen] = useState(false);
   const [acceptingOrder, setAcceptingOrder] = useState(false);
   const [pendingOrderRequest, setPendingOrderRequest] = useState<{
@@ -1035,6 +1042,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const parsed = parseClientOrderRequest(lastOrderMsg.message);
     return parsed ? { ...parsed, messageId: lastOrderMsg.id } : null;
   }, [nonRejectedClientOrderMessages]);
+  
+  // Check if there's ANY client order request (including rejected) for resend functionality
+  const hasAnyClientOrderRequest = existingClientOrderMessages.length > 0;
+  
+  // Get the last client order request data (including rejected ones) for resending
+  const getLastClientOrderRequestDataForResend = useCallback(() => {
+    if (existingClientOrderMessages.length === 0) return null;
+    const lastOrderMsg = existingClientOrderMessages[existingClientOrderMessages.length - 1];
+    const parsed = parseClientOrderRequest(lastOrderMsg.message);
+    return parsed ? { ...parsed, messageId: lastOrderMsg.id } : null;
+  }, [existingClientOrderMessages]);
   
   // Check if there's an ORDER_REQUEST_ACCEPTED message (agency accepted client's order request, waiting for payment)
   const existingAcceptedOrderMessages = messages.filter(msg => {
@@ -4672,16 +4690,42 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         >
                           Offer Pending...
                         </DropdownMenuItem>
+                      ) : hasExistingClientOrderRequest ? (
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-muted-foreground"
+                          disabled
+                        >
+                          Order Request Pending...
+                        </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem 
                           className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                           disabled={isCancelled || isAdmin}
                           onSelect={() => {
                             setActionDropdownOpen(false);
+                            // Check if we should be in resend mode
+                            if (hasAnyClientOrderRequest) {
+                              const lastClientOrder = getLastClientOrderRequestDataForResend();
+                              if (lastClientOrder) {
+                                setClientOrderInitialData({
+                                  deliveryDays: lastClientOrder.delivery_duration?.days || 0,
+                                  deliveryHours: lastClientOrder.delivery_duration?.hours || 0,
+                                  deliveryMinutes: lastClientOrder.delivery_duration?.minutes || 0,
+                                  specialTerms: lastClientOrder.special_terms || ''
+                                });
+                                setIsClientResendMode(true);
+                              } else {
+                                setClientOrderInitialData(undefined);
+                                setIsClientResendMode(false);
+                              }
+                            } else {
+                              setClientOrderInitialData(undefined);
+                              setIsClientResendMode(false);
+                            }
                             setOrderWithCreditsOpen(true);
                           }}
                         >
-                          Send Order Request
+                          {hasAnyClientOrderRequest ? 'Resend Order Request' : 'Send Order Request'}
                         </DropdownMenuItem>
                       )
                     )}
@@ -6643,7 +6687,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Order With Credits Dialog */}
       <OrderWithCreditsDialog
         open={orderWithCreditsOpen}
-        onOpenChange={setOrderWithCreditsOpen}
+        onOpenChange={(open) => {
+          setOrderWithCreditsOpen(open);
+          if (!open) {
+            // Reset resend mode when dialog closes
+            setIsClientResendMode(false);
+            setClientOrderInitialData(undefined);
+          }
+        }}
         mediaSite={globalChatRequest?.media_site ? {
           id: globalChatRequest.media_site.id,
           name: globalChatRequest.media_site.name,
@@ -6651,6 +6702,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           favicon: globalChatRequest.media_site.favicon
         } : null}
         serviceRequestId={globalChatRequest?.id || ''}
+        isResendMode={isClientResendMode}
+        initialData={clientOrderInitialData}
         onSuccess={(insertedMsg) => {
           // Add the message to local state immediately so it shows without waiting for realtime
           if (insertedMsg) {
@@ -6660,6 +6713,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             });
           }
           // Don't set temp order here - CLIENT_ORDER_REQUEST is just a request, not an order
+          // Reset resend mode
+          setIsClientResendMode(false);
+          setClientOrderInitialData(undefined);
         }}
       />
 
