@@ -197,13 +197,57 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
     }
 
     const data = await response.json();
+    const postId = data.id;
+
+    // For Rank Math, try updating meta via a separate request to ensure it saves
+    if (params.site.seoPlugin === 'rankmath' && params.seo && (params.seo.focusKeyword || params.seo.metaDescription)) {
+      try {
+        await updateRankMathMeta(params.site, postId, params.seo);
+      } catch (seoError) {
+        console.error('Failed to update Rank Math SEO meta, but post was created:', seoError);
+        // Don't throw - the post was created successfully, just SEO might not have saved
+      }
+    }
+
     return {
-      id: data.id,
+      id: postId,
       link: data.link,
     };
   } catch (error) {
     console.error('Error publishing article:', error);
     throw error;
+  }
+}
+
+// Helper function to update Rank Math meta via REST API
+async function updateRankMathMeta(
+  site: WordPressSite, 
+  postId: number, 
+  seo: { focusKeyword?: string; metaDescription?: string }
+): Promise<void> {
+  const baseUrl = normalizeUrl(site.url);
+  
+  // Update the post with meta fields using PUT/PATCH request
+  const metaBody: Record<string, any> = {
+    meta: {
+      rank_math_focus_keyword: seo.focusKeyword || '',
+      rank_math_description: seo.metaDescription || '',
+    }
+  };
+
+  const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}`, {
+    method: 'POST', // WordPress accepts POST for updates when ID is in URL
+    headers: {
+      'Authorization': createAuthHeader(site),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(metaBody),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Failed to update Rank Math meta:', response.status, errorData);
+    throw new Error(errorData.message || 'Failed to update SEO meta');
   }
 }
 
@@ -265,7 +309,6 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
       }
     }
 
-
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${params.postId}`, {
       method: 'PUT',
       headers: {
@@ -282,6 +325,17 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
     }
 
     const data = await response.json();
+
+    // For Rank Math, try updating meta via a separate request to ensure it saves
+    if (params.site.seoPlugin === 'rankmath' && params.seo && (params.seo.focusKeyword || params.seo.metaDescription)) {
+      try {
+        await updateRankMathMeta(params.site, params.postId, params.seo);
+      } catch (seoError) {
+        console.error('Failed to update Rank Math SEO meta, but article was updated:', seoError);
+        // Don't throw - the post was updated successfully, just SEO might not have saved
+      }
+    }
+
     return {
       id: data.id,
       link: data.link,
