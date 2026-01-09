@@ -730,7 +730,9 @@ export function ComposeView() {
       return;
     }
     if (!editingArticle) return;
-    setIsSaving(true);
+    
+    setIsSavingDraft(true);
+    
     try {
       // Update WordPress if there's an existing post
       if (editingArticle.wpPostId && currentSite) {
@@ -783,24 +785,43 @@ export function ComposeView() {
           tone,
           featuredImage: savedFeaturedImage || editingArticle.featuredImage,
           wpFeaturedMediaId: featuredMediaId,
+          publishedTo: selectedSite || editingArticle.publishedTo,
+          publishedToName: currentSite?.name || editingArticle.publishedToName,
+          publishedToFavicon: currentSite?.favicon || editingArticle.publishedToFavicon,
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
         });
       } else {
+        // Build featured image object for database
+        const savedFeaturedImage = imagePreview ? {
+          file: null,
+          url: imagePreview,
+          title: featuredImage.title || '',
+          caption: featuredImage.caption || '',
+          altText: featuredImage.altText || '',
+          description: featuredImage.description || ''
+        } : editingArticle.featuredImage;
+        
         await updateArticle(editingArticle.id, {
           title,
           content,
           tone,
+          featuredImage: savedFeaturedImage,
+          publishedTo: selectedSite || undefined,
+          publishedToName: currentSite?.name,
+          publishedToFavicon: currentSite?.favicon,
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
         });
       }
-      toast({
-        title: "Article saved",
-        description: editingArticle.wpPostId ? "Changes saved to WordPress" : "Your changes have been saved locally"
-      });
+      
+      setIsSavingDraft(false);
+      setShowDraftSuccess(true);
+      setTimeout(() => {
+        setShowDraftSuccess(false);
+      }, 2000);
     } catch (error) {
       console.error('Save error:', error);
       toast({
@@ -808,8 +829,7 @@ export function ComposeView() {
         description: error instanceof Error ? error.message : "Could not save changes",
         variant: "destructive"
       });
-    } finally {
-      setIsSaving(false);
+      setIsSavingDraft(false);
     }
   };
   const handleSaveDraft = async () => {
@@ -1291,8 +1311,8 @@ export function ComposeView() {
         <div className="space-y-4">
           {/* Actions - At Top */}
           <div className="space-y-3">
-            {editingArticle && <Button variant="default" className="w-full" onClick={handleSaveChanges} disabled={!title || isSaving}>
-                {isSaving ? <>
+            {editingArticle && <Button variant="default" className="w-full" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
+                {isSavingDraft ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </> : 'Save Changes'}
