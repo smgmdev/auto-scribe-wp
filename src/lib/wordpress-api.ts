@@ -394,7 +394,58 @@ export async function fetchPostSEOData(
     let focusKeyword = '';
     let metaDescription = '';
     
-    // Fetch post with meta context
+    if (site.seoPlugin === 'rankmath') {
+      // Try Rank Math's dedicated REST API endpoint first
+      try {
+        const rmResponse = await fetch(`${baseUrl}/wp-json/rankmath/v1/getHead?url=${encodeURIComponent(baseUrl)}/?p=${postId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': createAuthHeader(site),
+          },
+        });
+        
+        if (rmResponse.ok) {
+          const rmData = await rmResponse.json();
+          console.log('[fetchPostSEOData] Rank Math getHead response:', rmData);
+        }
+      } catch (rmError) {
+        console.log('[fetchPostSEOData] Rank Math dedicated endpoint not available:', rmError);
+      }
+      
+      // Fetch post meta directly
+      const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
+        method: 'GET',
+        headers: {
+          'Authorization': createAuthHeader(site),
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Debug: Log all available meta fields
+        console.log('[fetchPostSEOData] RankMath - Post meta:', data.meta);
+        console.log('[fetchPostSEOData] RankMath - All top-level keys:', Object.keys(data));
+        
+        // Check for rank_math prefixed fields in meta
+        if (data.meta) {
+          focusKeyword = data.meta.rank_math_focus_keyword || '';
+          metaDescription = data.meta.rank_math_description || '';
+        }
+        
+        // Also check for rank_math_meta object (some configurations expose it this way)
+        if (data.rank_math_meta) {
+          focusKeyword = focusKeyword || data.rank_math_meta.rank_math_focus_keyword || '';
+          metaDescription = metaDescription || data.rank_math_meta.rank_math_description || '';
+        }
+        
+        console.log('[fetchPostSEOData] RankMath extracted:', { focusKeyword, metaDescription });
+      }
+      
+      return { focusKeyword, metaDescription };
+    }
+    
+    // For AIOSEO and other plugins
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
       method: 'GET',
       headers: {
@@ -416,28 +467,7 @@ export async function fetchPostSEOData(
       Object.keys(data).filter(k => k.toLowerCase().includes('seo') || k.toLowerCase().includes('rank') || k.toLowerCase().includes('aioseo'))
     );
     
-    if (site.seoPlugin === 'rankmath') {
-      // RankMath exposes data via rank_math_meta object when REST API addon is enabled
-      if (data.rank_math_meta) {
-        focusKeyword = data.rank_math_meta.rank_math_focus_keyword || '';
-        metaDescription = data.rank_math_meta.rank_math_description || '';
-      }
-      
-      // Also check direct meta fields (requires server-side registration)
-      if (!focusKeyword) {
-        focusKeyword = data.meta?.rank_math_focus_keyword || '';
-      }
-      if (!metaDescription) {
-        metaDescription = data.meta?.rank_math_description || '';
-      }
-      
-      // Debug log for RankMath
-      console.log('[fetchPostSEOData] RankMath meta:', data.rank_math_meta);
-      console.log('[fetchPostSEOData] RankMath from post.meta:', {
-        focus: data.meta?.rank_math_focus_keyword,
-        desc: data.meta?.rank_math_description
-      });
-    } else if (site.seoPlugin === 'aioseo') {
+    if (site.seoPlugin === 'aioseo') {
       // AIOSEO stores data in various locations depending on version and configuration
       
       // Method 1: aioseo_meta_data at top level or in meta
