@@ -322,8 +322,9 @@ export function AgencyRequestsView() {
       if (messageId && requestId) {
         setMessages(prev => {
           const existingMsgs = prev[requestId] || [];
+          console.log('[AgencyRequestsView] Current messages for request:', requestId, existingMsgs.map(m => ({ id: m.id, hasOrderRequest: m.message?.includes('[ORDER_REQUEST]') })));
           const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
-          console.log('[AgencyRequestsView] Updated messages after deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length });
+          console.log('[AgencyRequestsView] Updated messages after deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length, messageFound: existingMsgs.length !== filteredMsgs.length });
           return {
             ...prev,
             [requestId]: filteredMsgs
@@ -659,6 +660,8 @@ export function AgencyRequestsView() {
         break;
       }
     }
+    
+    console.log('[AgencyRequestsView] hasPendingOfferSent check:', { requestId, messageCount: requestMessages.length, lastOfferIndex });
     
     if (lastOfferIndex === -1) return false;
     
