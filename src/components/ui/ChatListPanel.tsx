@@ -1988,7 +1988,7 @@ export function ChatListPanel() {
       case 'cancel_rejected':
         return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'offer_rejected':
-        return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
+        return <XCircle className="h-3 w-3 shrink-0 text-red-500" />;
       case 'client_order_request':
         return <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />;
       case 'order_request_accepted':
