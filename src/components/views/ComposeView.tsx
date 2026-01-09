@@ -1046,7 +1046,9 @@ export function ComposeView() {
           {editingArticle ? 'Edit Article' : 'New Article'}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {editingArticle ? 'Make changes to your article and save or publish' : 'Write or generate AI-powered articles'}
+          {editingArticle 
+            ? (editingArticle.status === 'draft' ? 'Make changes to your article and save or publish' : 'Make changes to your article') 
+            : 'Write or generate AI-powered articles'}
         </p>
       </div>
 
