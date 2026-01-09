@@ -998,7 +998,7 @@ export function AdminOrdersView() {
                               </Badge>
                             ) : (
                               <>
-                                {order.status !== 'paid' && getStatusBadge(order.status)}
+                                {order.status !== 'paid' && order.status !== 'pending_payment' && getStatusBadge(order.status)}
                                 {activeTab !== 'history' && activeTab !== 'completed' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
                               </>
                             )}
