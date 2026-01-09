@@ -212,10 +212,10 @@ export function useArticles() {
     // Find the article to get WordPress info
     const article = articles.find(a => a.id === id);
     
-    // If article was published to WordPress, delete from WordPress first
-    if (article?.publishedTo && article?.wpPostId) {
+    // If article has a WordPress post ID (draft or published), delete from WordPress first
+    if (article?.wpPostId && article?.publishedTo) {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
+        console.log('Deleting WordPress post:', article.wpPostId, 'from site:', article.publishedTo);
         const { data, error: wpError } = await supabase.functions.invoke('delete-wordpress-post', {
           body: {
             siteId: article.publishedTo,
@@ -233,6 +233,10 @@ export function useArticles() {
           });
         } else if (data?.deleted) {
           console.log('WordPress post and media deleted successfully');
+          toast({
+            title: 'Deleted from WordPress',
+            description: 'The post was also removed from WordPress.',
+          });
         }
       } catch (err) {
         console.error('Error calling delete-wordpress-post:', err);
