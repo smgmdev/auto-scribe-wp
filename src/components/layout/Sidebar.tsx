@@ -277,11 +277,13 @@ export function Sidebar({
           .eq('read', false);
         
         // Fetch unread orders (paid or pending_payment orders that haven't been read)
-        const { count: unreadOrdersCountResult } = await supabase
+        const { count: unreadOrdersCountResult, error: ordersError } = await supabase
           .from('orders')
           .select('*', { count: 'exact', head: true })
           .in('status', ['paid', 'pending_payment'])
           .eq('read', false);
+        
+        console.log('[Sidebar] Admin unread orders count:', unreadOrdersCountResult, 'error:', ordersError);
         
         // Fetch unread disputes count for admin (using admin_read field)
         const { count: unreadDisputesCountResult } = await supabase
