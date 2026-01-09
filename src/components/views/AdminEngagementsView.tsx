@@ -121,6 +121,8 @@ export function AdminEngagementsView() {
             // Add to local messages state
             setMessages(prev => {
               const requestMessages = prev[newMessage.request_id] || [];
+              // Check for duplicates
+              if (requestMessages.some(m => m.id === newMessage.id)) return prev;
               return {
                 ...prev,
                 [newMessage.request_id]: [...requestMessages, newMessage]
@@ -133,6 +135,37 @@ export function AdminEngagementsView() {
             ));
             incrementAdminUnreadEngagementsCount();
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const deletedMsg = payload.old as any;
+          if (!deletedMsg?.id) return;
+          
+          // Find and remove the deleted message from local state
+          setMessages(prev => {
+            let found = false;
+            const newState = { ...prev };
+            
+            for (const requestId in newState) {
+              const existingMsgs = newState[requestId] || [];
+              const msgIndex = existingMsgs.findIndex(m => m.id === deletedMsg.id);
+              
+              if (msgIndex !== -1) {
+                found = true;
+                newState[requestId] = existingMsgs.filter(m => m.id !== deletedMsg.id);
+                break;
+              }
+            }
+            
+            return found ? newState : prev;
+          });
         }
       )
       .subscribe();
@@ -347,21 +380,61 @@ export function AdminEngagementsView() {
   };
 
   // Check if agency has sent an offer (ORDER_REQUEST) that hasn't been accepted/rejected yet
+  // Uses the MOST RECENT offer and checks if there's a response AFTER it
   const hasPendingOfferSent = (requestId: string): boolean => {
     const requestMessages = messages[requestId] || [];
-    let hasOrderRequest = false;
-    let hasOrderResponse = false;
     
-    for (const msg of requestMessages) {
-      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]')) {
-        hasOrderRequest = true;
-      }
-      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
-        hasOrderResponse = true;
+    // Find the most recent ORDER_REQUEST message from agency
+    let lastOfferIndex = -1;
+    for (let i = requestMessages.length - 1; i >= 0; i--) {
+      const msg = requestMessages[i];
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]') && !msg.message.includes('[ORDER_REQUEST_ACCEPTED]') && !msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
+        lastOfferIndex = i;
+        break;
       }
     }
     
-    return hasOrderRequest && !hasOrderResponse;
+    if (lastOfferIndex === -1) return false;
+    
+    // Check if there's a response AFTER this message (accepted, rejected, or offer cancelled)
+    for (let i = lastOfferIndex + 1; i < requestMessages.length; i++) {
+      const msg = requestMessages[i];
+      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || 
+          msg.message.includes('[ORDER_REQUEST_REJECTED]') || 
+          msg.message.includes('[OFFER_REJECTED]')) {
+        return false; // Most recent offer has been responded to or cancelled
+      }
+    }
+    
+    return true; // Most recent agency offer is still pending
+  };
+
+  // Check if client has sent an order request that's pending (not yet accepted/rejected by agency)
+  // Only considers the MOST RECENT client order request and checks if there's a response AFTER it
+  const hasClientOrderRequestPending = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    
+    // Find the most recent CLIENT_ORDER_REQUEST message
+    let lastClientOrderIndex = -1;
+    for (let i = requestMessages.length - 1; i >= 0; i--) {
+      const msg = requestMessages[i];
+      if (msg.sender_type === 'client' && msg.message.includes('[CLIENT_ORDER_REQUEST]')) {
+        lastClientOrderIndex = i;
+        break;
+      }
+    }
+    
+    if (lastClientOrderIndex === -1) return false;
+    
+    // Check if there's a rejection/acceptance AFTER this message
+    for (let i = lastClientOrderIndex + 1; i < requestMessages.length; i++) {
+      const msg = requestMessages[i];
+      if (msg.sender_type === 'agency' && (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]'))) {
+        return false; // Most recent order request has been responded to
+      }
+    }
+    
+    return true; // Most recent client order request is still pending
   };
 
   const activeRequests = requests.filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted');
@@ -437,12 +510,18 @@ export function AdminEngagementsView() {
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap justify-end">
                           {getEngagementBadge(r)}
                           {!r.order_id && hasPendingOfferSent(r.id) && (
                             <Badge className="bg-blue-600 text-white">
                               <Tag className="h-3 w-3 mr-1" />
                               Offer Sent
+                            </Badge>
+                          )}
+                          {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
+                            <Badge className="bg-blue-600 text-white">
+                              <Tag className="h-3 w-3 mr-1" />
+                              Client Order Request
                             </Badge>
                           )}
                         </div>
