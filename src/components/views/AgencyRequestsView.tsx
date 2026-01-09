@@ -315,9 +315,26 @@ export function AgencyRequestsView() {
       }
     };
 
+    // Listen for message deletions (e.g., when order request is cancelled)
+    const handleServiceMessageDeleted = (event: CustomEvent) => {
+      const { messageId, requestId } = event.detail || {};
+      if (messageId && requestId) {
+        setMessages(prev => {
+          const existingMsgs = prev[requestId] || [];
+          const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
+          return {
+            ...prev,
+            [requestId]: filteredMsgs
+          };
+        });
+      }
+    };
+
     window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+    window.addEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
     return () => {
       window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
+      window.removeEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
     };
   }, [setAgencyUnreadServiceRequestsCount]);
 

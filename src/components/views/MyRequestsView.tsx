@@ -320,13 +320,30 @@ export function MyRequestsView() {
       }
     };
 
+    // Listen for message deletions (e.g., when client cancels their order request)
+    const handleServiceMessageDeleted = (event: CustomEvent) => {
+      const { messageId, requestId } = event.detail || {};
+      if (messageId && requestId) {
+        setMessages(prev => {
+          const existingMsgs = prev[requestId] || [];
+          const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
+          return {
+            ...prev,
+            [requestId]: filteredMsgs
+          };
+        });
+      }
+    };
+
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
     window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
     window.addEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
+    window.addEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
       window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
       window.removeEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
+      window.removeEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
     };
   }, [clearUnreadMessageCount, setUserUnreadEngagementsCount]);
 
