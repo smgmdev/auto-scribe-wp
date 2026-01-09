@@ -333,9 +333,11 @@ export function AgencyRequestsView() {
       }
     };
 
+    console.log('[AgencyRequestsView] Setting up event listeners for service-message-deleted');
     window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
     window.addEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
     return () => {
+      console.log('[AgencyRequestsView] Removing event listeners for service-message-deleted');
       window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
       window.removeEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
     };
@@ -479,16 +481,25 @@ export function AgencyRequestsView() {
         },
         (payload) => {
           const deletedMsg = payload.old as any;
-          if (!deletedMsg?.id || !deletedMsg?.request_id) return;
+          console.log('[AgencyRequestsView] Realtime DELETE received for service_messages:', deletedMsg);
+          if (!deletedMsg?.id || !deletedMsg?.request_id) {
+            console.log('[AgencyRequestsView] DELETE event missing id or request_id, skipping');
+            return;
+          }
           
           // Check if this message belongs to one of our requests
           const requestExists = requestsRef.current.some(r => r.id === deletedMsg.request_id);
-          if (!requestExists) return;
+          if (!requestExists) {
+            console.log('[AgencyRequestsView] DELETE event request not found in our list, skipping');
+            return;
+          }
           
           // Remove the deleted message from local state
+          console.log('[AgencyRequestsView] Removing deleted message from state:', deletedMsg.id);
           setMessages(prev => {
             const existingMsgs = prev[deletedMsg.request_id] || [];
             const filteredMsgs = existingMsgs.filter(m => m.id !== deletedMsg.id);
+            console.log('[AgencyRequestsView] Messages after realtime DELETE:', { before: existingMsgs.length, after: filteredMsgs.length });
             return {
               ...prev,
               [deletedMsg.request_id]: filteredMsgs
