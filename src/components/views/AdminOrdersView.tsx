@@ -649,8 +649,8 @@ export function AdminOrdersView() {
     let matchesTab = false;
     switch (activeTab) {
       case 'pending':
-        // Active orders: paid orders that are not completed/cancelled and not in dispute
-        matchesTab = order.status === 'paid' && !disputedOrderIds.has(order.id);
+        // Active orders: paid or pending_payment orders that are not completed/cancelled and not in dispute
+        matchesTab = (order.status === 'paid' || order.status === 'pending_payment') && !disputedOrderIds.has(order.id);
         break;
       case 'disputes':
         matchesTab = disputedOrderIds.has(order.id);
@@ -686,14 +686,14 @@ export function AdminOrdersView() {
   });
 
   // Calculate counts for all tabs (exclude disputed orders from active)
-  const pendingCount = orders.filter(o => o.status === 'paid' && !disputedOrderIds.has(o.id)).length;
+  const pendingCount = orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && !disputedOrderIds.has(o.id)).length;
   const disputesCount = orders.filter(o => disputedOrderIds.has(o.id)).length;
   const cancelledCount = orders.filter(o => o.status === 'cancelled').length;
   const completedCount = orders.filter(o => o.status === 'completed').length;
   const allOrdersCount = orders.filter(o => o.status === 'completed' || o.status === 'cancelled').length;
   
   // Calculate unread counts for notifications (exclude disputed orders from active)
-  const unreadPendingCount = orders.filter(o => o.status === 'paid' && !o.read && !disputedOrderIds.has(o.id)).length;
+  const unreadPendingCount = orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && !o.read && !disputedOrderIds.has(o.id)).length;
   // Use dispute.read for unread disputes count (not order.read)
   const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
