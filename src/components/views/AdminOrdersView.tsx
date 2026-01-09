@@ -957,7 +957,7 @@ export function AdminOrdersView() {
                 >
                   {/* Unread notification badge */}
                   {hasUnreadNotification && (
-                    <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                    <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
                   )}
                   <CardHeader className="pb-2 px-4 pt-3">
                     <div className="flex items-center justify-between">
