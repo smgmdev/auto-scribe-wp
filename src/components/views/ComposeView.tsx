@@ -1365,12 +1365,6 @@ export function ComposeView() {
         <div className="space-y-4">
           {/* Actions - At Top */}
           <div className="space-y-3">
-            {editingArticle && <Button variant="default" className="w-full border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
-                {isSavingDraft ? <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </> : 'Save Changes'}
-              </Button>}
             <Button 
               className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
@@ -1400,6 +1394,12 @@ export function ComposeView() {
                 Insufficient credits. You need {getSiteCreditCost(selectedSite)} credits to publish.
               </p>
             )}
+            {editingArticle && <Button variant="default" className="w-full border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
+                {isSavingDraft ? <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </> : 'Save Changes'}
+              </Button>}
             {!editingArticle && <Button variant="outline" className="w-full" onClick={handleSaveDraft} disabled={!title || isPublishing}>
                 Save as Draft
               </Button>}
