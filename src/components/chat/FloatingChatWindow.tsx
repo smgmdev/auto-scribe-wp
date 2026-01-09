@@ -5243,15 +5243,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           if (!pendingClientOrder) return null;
           const isClient = actualSenderType === 'client';
           return (
-            <div className="sticky top-0 left-0 z-10 p-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="sticky top-0 left-0 z-10 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="flex items-center gap-3">
-                {pendingClientOrder.media_site_favicon && (
-                  <img 
-                    src={pendingClientOrder.media_site_favicon} 
-                    alt="" 
-                    className="w-10 h-10 rounded-lg object-cover shrink-0"
-                  />
-                )}
+                <Tag className="h-6 w-6 text-blue-600 dark:text-blue-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
@@ -5312,17 +5306,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 {!isAdmin && (
                   <div className="flex items-center gap-2 shrink-0">
                     {isClient ? (
-                      <Button
-                        size="sm"
-                        className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white dark:hover:border-black"
-                        onClick={handleBannerCancelClientOrderRequest}
-                        disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
-                      >
-                        {cancellingOrderRequestId === pendingClientOrder.messageId && (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        )}
-                        Cancel Request
-                      </Button>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <Button
+                          size="sm"
+                          className="bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200 dark:bg-black dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
+                          onClick={handleBannerCancelClientOrderRequest}
+                          disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
+                        >
+                          {cancellingOrderRequestId === pendingClientOrder.messageId && (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          )}
+                          Cancel Request
+                        </Button>
+                      </div>
                     ) : (
                       <>
                         <Button
