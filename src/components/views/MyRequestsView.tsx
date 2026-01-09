@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, CreditCard, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, History, RefreshCw, AlertTriangle, Tag } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -627,6 +627,26 @@ export function MyRequestsView() {
     );
   };
 
+  // Check if there's a pending offer (ORDER_REQUEST) in messages from agency
+  const hasPendingOffer = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    // Look for ORDER_REQUEST messages from agency that haven't been accepted/rejected
+    let hasOrderRequest = false;
+    let hasOrderResponse = false;
+    
+    for (const msg of requestMessages) {
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]')) {
+        hasOrderRequest = true;
+      }
+      // Check if there's an accepted or rejected response
+      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
+        hasOrderResponse = true;
+      }
+    }
+    
+    return hasOrderRequest && !hasOrderResponse;
+  };
+
   const handleCardClick = (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
     
@@ -903,8 +923,14 @@ export function MyRequestsView() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
+                            {!request.order && hasPendingOffer(request.id) && (
+                              <Badge className="bg-blue-600 text-white">
+                                <Tag className="h-3 w-3 mr-1" />
+                                Received an Offer
+                              </Badge>
+                            )}
                             {getOrderPlacedBadge(request)}
-                            {!request.order && getStatusBadge(request.status)}
+                            {!request.order && !hasPendingOffer(request.id) && getStatusBadge(request.status)}
                           </div>
                         </div>
                       </CardHeader>
