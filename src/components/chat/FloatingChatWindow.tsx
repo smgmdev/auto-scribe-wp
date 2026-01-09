@@ -3482,19 +3482,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className={`rounded-lg border p-4 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
+              : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
           }`}>
             <div className="flex items-start gap-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                 isOwnMessage 
                   ? 'bg-primary-foreground/20' 
-                  : 'bg-amber-100 dark:bg-amber-900/50'
+                  : 'bg-blue-100 dark:bg-blue-900/50'
               }`}>
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
+                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-700 dark:text-amber-300'}`}>
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
                     {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
                   </span>
                 </div>
@@ -3525,7 +3525,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Action buttons for agency */}
             {isAgency && !hasOrder && !isOwnMessage && (
-              <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800 flex gap-2">
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
