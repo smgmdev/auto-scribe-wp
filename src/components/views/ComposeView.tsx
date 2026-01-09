@@ -415,6 +415,11 @@ export function ComposeView() {
       }
       return [...prev, tagId];
     });
+    // Update editingTagNames for fallback display when adding a tag
+    const tag = availableTags.find(t => t.id === tagId);
+    if (tag && !editingTagNames[tagId]) {
+      setEditingTagNames(prev => ({ ...prev, [tagId]: tag.name }));
+    }
   };
   const addNewTag = async () => {
     const trimmedTag = newTagInput.trim();
@@ -436,6 +441,8 @@ export function ComposeView() {
       const newTag = await createTag(currentSite, trimmedTag);
       setAvailableTags(prev => [...prev, newTag]);
       setSelectedTagIds(prev => [...prev, newTag.id]);
+      // Also update editingTagNames for fallback display
+      setEditingTagNames(prev => ({ ...prev, [newTag.id]: newTag.name }));
       setNewTagInput('');
       toast({
         title: "Tag created",
