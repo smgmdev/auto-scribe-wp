@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
@@ -986,12 +986,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
   
   // Check if there's an existing order request in messages (sent by agency)
-  const existingOrderMessages = messages.filter(msg => {
-    if (msg.sender_type !== 'agency') return false;
-    const match = msg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
-    return !!match;
-  });
-  const hasExistingOrderRequest = existingOrderMessages.length > 0;
+  const existingOrderMessages = useMemo(() => {
+    return messages.filter(msg => {
+      if (msg.sender_type !== 'agency') return false;
+      const match = msg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+      return !!match;
+    });
+  }, [messages]);
+  const hasExistingOrderRequest = useMemo(() => existingOrderMessages.length > 0, [existingOrderMessages]);
   
   // Get the last order request data for resending
   const getLastOrderRequestData = useCallback(() => {
@@ -1003,37 +1005,42 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   
   // Check if there's an existing client order request in messages (sent by client to agency)
   // Also check if it has been rejected - if so, don't show the banner
-  const existingClientOrderMessages = messages.filter(msg => {
-    if (msg.sender_type !== 'client') return false;
-    const match = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
-    return !!match;
-  });
+  // Memoized to ensure proper reactivity when messages change
+  const existingClientOrderMessages = useMemo(() => {
+    return messages.filter(msg => {
+      if (msg.sender_type !== 'client') return false;
+      const match = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+      return !!match;
+    });
+  }, [messages]);
   
   // Filter out client order requests that have been rejected
   // Only consider a request rejected if there's a rejection message AFTER it with matching media_site_id
-  const nonRejectedClientOrderMessages = existingClientOrderMessages.filter(clientOrderMsg => {
-    const match = clientOrderMsg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
-    if (!match) return false;
-    try {
-      const clientOrderData = JSON.parse(match[1]);
-      const clientOrderIndex = messages.findIndex(m => m.id === clientOrderMsg.id);
-      
-      // Check if there's a rejection AFTER this message for the same media_site_id
-      const hasRejectionAfter = messages.slice(clientOrderIndex + 1).some(m => {
-        if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
-        const rejMatch = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
-        if (!rejMatch) return false;
-        try {
-          const rejData = JSON.parse(rejMatch[1]);
-          return rejData.media_site_id === clientOrderData.media_site_id;
-        } catch { return false; }
-      });
-      
-      return !hasRejectionAfter;
-    } catch { return false; }
-  });
+  const nonRejectedClientOrderMessages = useMemo(() => {
+    return existingClientOrderMessages.filter(clientOrderMsg => {
+      const match = clientOrderMsg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+      if (!match) return false;
+      try {
+        const clientOrderData = JSON.parse(match[1]);
+        const clientOrderIndex = messages.findIndex(m => m.id === clientOrderMsg.id);
+        
+        // Check if there's a rejection AFTER this message for the same media_site_id
+        const hasRejectionAfter = messages.slice(clientOrderIndex + 1).some(m => {
+          if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
+          const rejMatch = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
+          if (!rejMatch) return false;
+          try {
+            const rejData = JSON.parse(rejMatch[1]);
+            return rejData.media_site_id === clientOrderData.media_site_id;
+          } catch { return false; }
+        });
+        
+        return !hasRejectionAfter;
+      } catch { return false; }
+    });
+  }, [existingClientOrderMessages, messages]);
   
-  const hasExistingClientOrderRequest = nonRejectedClientOrderMessages.length > 0;
+  const hasExistingClientOrderRequest = useMemo(() => nonRejectedClientOrderMessages.length > 0, [nonRejectedClientOrderMessages]);
   
   // Get the last client order request data (only non-rejected ones)
   const getLastClientOrderRequestData = useCallback(() => {
@@ -1044,7 +1051,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   }, [nonRejectedClientOrderMessages]);
   
   // Check if there's ANY client order request (including rejected) for resend functionality
-  const hasAnyClientOrderRequest = existingClientOrderMessages.length > 0;
+  const hasAnyClientOrderRequest = useMemo(() => existingClientOrderMessages.length > 0, [existingClientOrderMessages]);
   
   // Get the last client order request data (including rejected ones) for resending
   const getLastClientOrderRequestDataForResend = useCallback(() => {
@@ -1055,10 +1062,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   }, [existingClientOrderMessages]);
   
   // Check if there's an ORDER_REQUEST_ACCEPTED message (agency accepted client's order request, waiting for payment)
-  const existingAcceptedOrderMessages = messages.filter(msg => {
-    const match = msg.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
-    return !!match;
-  });
+  const existingAcceptedOrderMessages = useMemo(() => {
+    return messages.filter(msg => {
+      const match = msg.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
+      return !!match;
+    });
+  }, [messages]);
   
   // Get the last accepted order request data (including timestamp for countdown)
   const getLastAcceptedOrderRequestData = useCallback(() => {
@@ -1113,7 +1122,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return { isOverdue: false, text, totalSeconds };
   }, []);
   
-  const hasAcceptedOrderRequest = existingAcceptedOrderMessages.length > 0 && !localOrder;
+  const hasAcceptedOrderRequest = useMemo(() => existingAcceptedOrderMessages.length > 0 && !localOrder, [existingAcceptedOrderMessages, localOrder]);
   
   // Handle reject order request from banner (client side)
   const handleBannerRejectOrderRequest = async () => {
