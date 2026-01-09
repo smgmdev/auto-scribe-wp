@@ -107,6 +107,19 @@ export function ComposeView() {
   const [availableTags, setAvailableTags] = useState<WPTag[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>(editingArticle?.categories || []);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>(editingArticle?.tagIds || []);
+  // Store tag names from editingArticle as fallback (maps tagId to name)
+  const [editingTagNames, setEditingTagNames] = useState<Record<number, string>>(() => {
+    if (editingArticle?.tagIds && editingArticle?.tags) {
+      const map: Record<number, string> = {};
+      editingArticle.tagIds.forEach((id, index) => {
+        if (editingArticle.tags?.[index]) {
+          map[id] = editingArticle.tags[index];
+        }
+      });
+      return map;
+    }
+    return {};
+  });
   const [newTagInput, setNewTagInput] = useState('');
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
@@ -204,6 +217,16 @@ export function ComposeView() {
       }
       if (editingArticle.tagIds) {
         setSelectedTagIds(editingArticle.tagIds);
+        // Build tag name mapping from editingArticle
+        if (editingArticle.tags) {
+          const map: Record<number, string> = {};
+          editingArticle.tagIds.forEach((id, index) => {
+            if (editingArticle.tags?.[index]) {
+              map[id] = editingArticle.tags[index];
+            }
+          });
+          setEditingTagNames(map);
+        }
       }
       
       // Set SEO settings
@@ -1500,10 +1523,10 @@ export function ComposeView() {
                   </div> : <>
                     {/* Selected Tags */}
                     {selectedTagIds.length > 0 && <div className="flex flex-wrap gap-1.5">
-                        {selectedTagIds.map((tagId, index) => {
+                        {selectedTagIds.map((tagId) => {
                           const tag = availableTags.find(t => t.id === tagId);
-                          // Use tag name from availableTags, or fallback to stored tag name from editingArticle
-                          const tagName = tag?.name || editingArticle?.tags?.[index] || `Tag #${tagId}`;
+                          // Use tag name from availableTags, or fallback to stored tag name mapping
+                          const tagName = tag?.name || editingTagNames[tagId] || `Tag #${tagId}`;
                           return (
                             <Badge key={tagId} variant="secondary" className="cursor-pointer hover:bg-destructive/20" onClick={() => toggleTag(tagId)}>
                               {tagName}
