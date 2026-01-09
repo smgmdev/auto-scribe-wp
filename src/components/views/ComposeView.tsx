@@ -1235,6 +1235,7 @@ export function ComposeView() {
                 <Button
                   variant="outline"
                   size="icon"
+                  className="hover:bg-black hover:text-white"
                   onClick={async () => {
                     if (!title) {
                       toast({
