@@ -62,7 +62,8 @@ export function ComposeView() {
     editingArticle,
     setEditingArticle,
     preselectedSiteId,
-    setPreselectedSiteId
+    setPreselectedSiteId,
+    setCurrentView
   } = useAppStore();
   const { sites, loading: sitesLoading } = useSites();
   const { addArticle, updateArticle } = useArticles();
@@ -704,7 +705,7 @@ export function ComposeView() {
       setIsPublishing(false);
       setShowPublishSuccess(true);
 
-      // Reset form after a delay to show success animation
+      // Reset form after a delay to show success animation, then redirect if editing
       setTimeout(() => {
         setShowPublishSuccess(false);
         setPublishedLink(null);
@@ -717,6 +718,12 @@ export function ComposeView() {
         setFocusKeyword('');
         setMetaDescription('');
         removeImage();
+        
+        // If we were editing an article, redirect to articles view
+        if (editingArticle) {
+          setEditingArticle(null);
+          setCurrentView('articles');
+        }
       }, 2500);
     } catch (error) {
       console.error('Publish error:', error);
