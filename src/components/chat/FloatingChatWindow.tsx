@@ -1180,31 +1180,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
   
   // Handle cancel order request from banner (agency side)
+  // Deletes ALL existing order request messages (including resent offers)
   const handleBannerCancelOrderRequest = async () => {
-    const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
-    if (!lastOrderMsg) return;
+    if (existingOrderMessages.length === 0) return;
     
+    const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
     setCancellingOrderRequestId(lastOrderMsg.id);
+    
     try {
+      // Get all order request message IDs to delete
+      const messageIdsToDelete = existingOrderMessages.map(m => m.id);
+      
+      // Delete all order request messages from database
       const { error } = await supabase
         .from('service_messages')
         .delete()
-        .eq('id', lastOrderMsg.id);
+        .in('id', messageIdsToDelete);
       
       if (error) throw error;
       
-      // Remove from local state
-      setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
+      // Remove all from local state
+      setMessages(prev => prev.filter(m => !messageIdsToDelete.includes(m.id)));
       
-      // Dispatch event so other views can update immediately
-      console.log('[FloatingChatWindow] Dispatching service-message-deleted event (agency):', { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id });
-      window.dispatchEvent(new CustomEvent('service-message-deleted', {
-        detail: { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id }
-      }));
+      // Dispatch events for each deleted message so other views can update immediately
+      messageIdsToDelete.forEach(messageId => {
+        console.log('[FloatingChatWindow] Dispatching service-message-deleted event (agency):', { messageId, requestId: globalChatRequest?.id });
+        window.dispatchEvent(new CustomEvent('service-message-deleted', {
+          detail: { messageId, requestId: globalChatRequest?.id }
+        }));
+      });
       
       toast({
         title: "Offer cancelled",
-        description: "The offer has been removed.",
+        description: existingOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
       });
     } catch (error: any) {
       console.error('Error cancelling order request:', error);
@@ -3923,39 +3931,47 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const isClient = actualSenderType === 'client';
       const isAgency = actualSenderType === 'agency';
       
-      // Handle cancel order request
+      // Handle cancel order request - deletes ALL order request messages (including resent offers)
       const handleCancelOrderRequest = async () => {
         setCancellingOrderRequestId(msg.id);
         try {
+          // Get all order request message IDs to delete
+          const messageIdsToDelete = existingOrderMessages.map(m => m.id);
+          
+          // Delete all order request messages from database
           const { error } = await supabase
             .from('service_messages')
             .delete()
-            .eq('id', msg.id);
+            .in('id', messageIdsToDelete);
           
           if (error) throw error;
           
-          // Remove from local state
-          setMessages(prev => prev.filter(m => m.id !== msg.id));
+          // Remove all from local state
+          setMessages(prev => prev.filter(m => !messageIdsToDelete.includes(m.id)));
           
-          // Dispatch event so other views can update immediately
-          console.log('[FloatingChatWindow] Dispatching service-message-deleted event (agency inline):', { messageId: msg.id, requestId: globalChatRequest?.id });
-          window.dispatchEvent(new CustomEvent('service-message-deleted', {
-            detail: { messageId: msg.id, requestId: globalChatRequest?.id }
-          }));
+          // Dispatch events for each deleted message so other views can update immediately
+          messageIdsToDelete.forEach(messageId => {
+            console.log('[FloatingChatWindow] Dispatching service-message-deleted event (agency inline):', { messageId, requestId: globalChatRequest?.id });
+            window.dispatchEvent(new CustomEvent('service-message-deleted', {
+              detail: { messageId, requestId: globalChatRequest?.id }
+            }));
+          });
           
           // Also broadcast via Supabase channel for cross-tab sync
           const channel = supabase.channel('message-deletions');
           await channel.subscribe();
-          await channel.send({
-            type: 'broadcast',
-            event: 'message-deleted',
-            payload: { messageId: msg.id, requestId: globalChatRequest?.id }
-          });
+          for (const messageId of messageIdsToDelete) {
+            await channel.send({
+              type: 'broadcast',
+              event: 'message-deleted',
+              payload: { messageId, requestId: globalChatRequest?.id }
+            });
+          }
           supabase.removeChannel(channel);
           
           toast({
             title: "Offer cancelled",
-            description: "The offer has been removed.",
+            description: existingOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
           });
         } catch (error: any) {
           console.error('Error cancelling order request:', error);
