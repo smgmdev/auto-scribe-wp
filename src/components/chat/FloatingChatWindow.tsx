@@ -3477,7 +3477,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
+                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
