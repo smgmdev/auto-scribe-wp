@@ -97,6 +97,7 @@ interface AppState {
   // Admin order management notifications
   unreadOrdersCount: number;
   setUnreadOrdersCount: (count: number) => void;
+  incrementUnreadOrdersCount: () => void;
   decrementUnreadOrdersCount: () => void;
   
   // Admin dispute notifications (synced between Order Management and Messaging Widget)
@@ -282,6 +283,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // Admin order management notifications
   unreadOrdersCount: 0,
   setUnreadOrdersCount: (count) => set({ unreadOrdersCount: count }),
+  incrementUnreadOrdersCount: () => set((state) => ({ 
+    unreadOrdersCount: state.unreadOrdersCount + 1 
+  })),
   decrementUnreadOrdersCount: () => set((state) => ({ 
     unreadOrdersCount: Math.max(0, state.unreadOrdersCount - 1) 
   })),

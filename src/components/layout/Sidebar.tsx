@@ -118,6 +118,8 @@ export function Sidebar({
     setUnreadMediaSubmissionsCount,
     unreadOrdersCount,
     setUnreadOrdersCount,
+    incrementUnreadOrdersCount,
+    decrementUnreadOrdersCount,
     unreadDisputesCount,
     setUnreadDisputesCount,
     incrementUnreadDisputesCount,
@@ -274,11 +276,11 @@ export function Sidebar({
           .eq('status', 'pending')
           .eq('read', false);
         
-        // Fetch unread orders (paid orders that haven't been read)
+        // Fetch unread orders (paid or pending_payment orders that haven't been read)
         const { count: unreadOrdersCountResult } = await supabase
           .from('orders')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'paid')
+          .in('status', ['paid', 'pending_payment'])
           .eq('read', false);
         
         // Fetch unread disputes count for admin (using admin_read field)
@@ -628,6 +630,50 @@ export function Sidebar({
           // If dispute was marked as read, decrement count
           if (old?.read === false && updated.read === true) {
             decrementUnreadDisputesCount();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for admin orders notifications (new active orders)
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-orders-realtime-sidebar')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          const newOrder = payload.new as { status: string };
+          // Increment the unread orders count when a new active order is created
+          if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
+            incrementUnreadOrdersCount();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          const updated = payload.new as { read: boolean };
+          const old = payload.old as { read: boolean };
+          // If order was marked as read, decrement count
+          if (old?.read === false && updated.read === true) {
+            decrementUnreadOrdersCount();
           }
         }
       )
