@@ -1128,12 +1128,15 @@ export function AgencyRequestsView() {
                     const deliveryDeadline = request.order?.delivery_deadline;
                     const isOverdue = deliveryDeadline && new Date(deliveryDeadline) < currentTime && request.order?.delivery_status !== 'delivered';
                     
-                    // Calculate time remaining for delivery
+                    // Calculate time remaining for delivery with overdue support
                     const getTimeRemaining = () => {
                       if (!deliveryDeadline) return null;
                       const deadline = new Date(deliveryDeadline);
                       const diffMs = deadline.getTime() - currentTime.getTime();
-                      if (diffMs <= 0) return null;
+                      
+                      if (diffMs <= 0) {
+                        return { text: 'Overdue', isOverdue: true };
+                      }
                       
                       const totalSeconds = Math.floor(diffMs / 1000);
                       const days = Math.floor(totalSeconds / 86400);
@@ -1142,9 +1145,9 @@ export function AgencyRequestsView() {
                       const seconds = totalSeconds % 60;
                       
                       if (days > 0) {
-                        return `${days}d ${hours}h ${minutes}m`;
+                        return { text: `${days}d ${hours}h ${minutes}m`, isOverdue: false };
                       }
-                      return `${hours}h ${minutes}m ${seconds}s`;
+                      return { text: `${hours}h ${minutes}m ${seconds}s`, isOverdue: false };
                     };
                     
                     return (
@@ -1202,9 +1205,17 @@ export function AgencyRequestsView() {
                                   Delivered - Pending Approval
                                 </Badge>
                               ) : hasOrder ? (
-                                <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Order Placed {getTimeRemaining() && `• ${getTimeRemaining()}`}
+                                <Badge className="bg-black text-white dark:bg-white dark:text-black">
+                                  <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                                  Order Placed
+                                  {(() => {
+                                    const countdown = getTimeRemaining();
+                                    return countdown && (
+                                      <span className={`ml-2 ${countdown.isOverdue ? 'text-red-400' : ''}`}>
+                                        {countdown.isOverdue ? '• Overdue' : `• ${countdown.text}`}
+                                      </span>
+                                    );
+                                  })()}
                                 </Badge>
                               ) : hasPendingOfferSent(request.id) ? (
                                 <Badge className="bg-blue-600 text-white">
