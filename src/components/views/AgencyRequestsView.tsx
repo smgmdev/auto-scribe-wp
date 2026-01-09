@@ -730,6 +730,55 @@ export function AgencyRequestsView() {
     return true; // Most recent client order request is still pending
   };
 
+  // Helper function to get the last event info for a request
+  const getLastEventInfo = (request: ServiceRequest): { eventName: string; eventTime: Date } => {
+    const events: { name: string; time: Date }[] = [];
+    const requestMessages = messages[request.id] || [];
+    
+    // Request created
+    events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
+    
+    // Last message time
+    if (requestMessages.length > 0) {
+      const lastMsg = requestMessages[requestMessages.length - 1];
+      const senderLabel = lastMsg.sender_type === 'client' ? 'Client' : 
+                          lastMsg.sender_type === 'agency' ? 'You' : 'Staff';
+      events.push({ name: `Message from ${senderLabel}`, time: new Date(lastMsg.created_at) });
+    }
+    
+    // Order related events based on status
+    if (request.order) {
+      if (request.order.delivery_status === 'pending' && request.order.accepted_at) {
+        events.push({ name: 'Awaiting delivery', time: new Date(request.order.accepted_at) });
+      } else if (request.order.delivery_status === 'delivered') {
+        events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
+      } else if (request.order.delivery_status === 'accepted') {
+        events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
+      } else if (request.order.delivery_status === 'rejected' || request.order.delivery_status === 'pending_revision') {
+        events.push({ name: 'Revision requested', time: new Date(request.updated_at) });
+      }
+      
+      if (request.order.status === 'paid') {
+        events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+      }
+    }
+    
+    // Check for offer sent or client order request
+    if (!request.order?.id && hasPendingOfferSent(request.id)) {
+      events.push({ name: 'Offer sent to client', time: new Date(request.updated_at) });
+    } else if (!request.order?.id && hasClientOrderRequestPending(request.id)) {
+      events.push({ name: 'Client requested order', time: new Date(request.updated_at) });
+    }
+    
+    // Find the most recent event
+    const latestEvent = events.reduce((latest, current) => 
+      current.time > latest.time ? current : latest, 
+      events[0]
+    );
+    
+    return { eventName: latestEvent.name, eventTime: latestEvent.time };
+  };
+
   const markAsRead = async (requestId: string) => {
     const request = requests.find(r => r.id === requestId);
     const isCancelled = request?.status === 'cancelled';
@@ -1069,8 +1118,8 @@ export function AgencyRequestsView() {
                 <div className="space-y-2">
                   {sortedRequests.map((request) => {
                     const requestMessages = messages[request.id] || [];
-                    const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
                     const hasUnread = !request.read;
+                    const { eventName, eventTime } = getLastEventInfo(request);
                     
                     // Check order status for badges
                     const hasOrder = request.order?.id;
@@ -1178,15 +1227,10 @@ export function AgencyRequestsView() {
                         <CardContent className="pt-0 pb-3 px-4">
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
-                              {lastMessage && (
-                                <span className="text-xs text-muted-foreground block">
-                                  <Clock className="h-3 w-3 inline mr-1" />
-                                  Last message: {format(new Date(lastMessage.created_at), 'MMM d, h:mm a')}
-                                  {requestMessages.length > 0 && (
-                                    <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                  )}
-                                </span>
-                              )}
+                              <span className="text-xs text-muted-foreground block">
+                                <Clock className="h-3 w-3 inline mr-1" />
+                                <span className="font-medium">Last event:</span> {eventName} · {format(eventTime, 'MMM d, h:mm a')}
+                              </span>
                               <span className="text-xs text-muted-foreground block">
                                 Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </span>
