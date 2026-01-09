@@ -669,6 +669,54 @@ export default function AgencyPortal() {
   );
 }
 
+// Helper function to get the last event info for a request
+function getLastEventInfo(request: ServiceRequest): { eventName: string; eventTime: Date } {
+  const events: { name: string; time: Date }[] = [];
+  
+  // Request created
+  events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
+  
+  // Last message time
+  if (request.messages && request.messages.length > 0) {
+    const lastMsg = request.messages[request.messages.length - 1];
+    const senderLabel = lastMsg.sender_type === 'client' ? 'Client' : 
+                        lastMsg.sender_type === 'agency' ? 'You' : 'Staff';
+    events.push({ name: `Message from ${senderLabel}`, time: new Date(lastMsg.created_at) });
+  }
+  
+  // Order related events based on status
+  if (request.orders) {
+    if (request.orders.delivery_status === 'pending' && request.orders.accepted_at) {
+      events.push({ name: 'Awaiting delivery', time: new Date(request.orders.accepted_at) });
+    } else if (request.orders.delivery_status === 'delivered') {
+      events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
+    } else if (request.orders.delivery_status === 'accepted') {
+      events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
+    } else if (request.orders.delivery_status === 'rejected') {
+      events.push({ name: 'Delivery rejected', time: new Date(request.updated_at) });
+    }
+  }
+  
+  // Request status based events
+  if (request.status === 'rejected') {
+    events.push({ name: 'Request rejected', time: new Date(request.updated_at) });
+  } else if (request.status === 'accepted') {
+    events.push({ name: 'Request accepted', time: new Date(request.updated_at) });
+  } else if (request.status === 'changes_requested') {
+    events.push({ name: 'Changes requested', time: new Date(request.updated_at) });
+  } else if (request.status === 'paid') {
+    events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+  }
+  
+  // Find the most recent event
+  const latestEvent = events.reduce((latest, current) => 
+    current.time > latest.time ? current : latest, 
+    events[0]
+  );
+  
+  return { eventName: latestEvent.name, eventTime: latestEvent.time };
+}
+
 function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: { 
   request: ServiceRequest; 
   hasUnreadAdmin: boolean;
@@ -682,6 +730,9 @@ function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: {
   
   // Check if this is an unread completed order
   const isUnreadCompleted = ['paid', 'completed'].includes(request.status) && request.orders?.agency_read === false;
+  
+  // Get last event info
+  const { eventName, eventTime } = getLastEventInfo(request);
   
   return (
     <Card 
@@ -721,13 +772,13 @@ function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: {
               <p className="text-xs text-muted-foreground mt-1">
                 Client: {request.profiles?.email}
               </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                <span className="font-medium">Last event:</span> {eventName} · {format(eventTime, 'MMM d, h:mm a')}
+              </p>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             {getStatusBadge(request.status, request.messages)}
-            <span className="text-xs text-muted-foreground">
-              {format(new Date(request.updated_at), 'MMM d, yyyy')}
-            </span>
           </div>
         </div>
       </CardContent>
