@@ -101,7 +101,37 @@ export function AdminOrdersView() {
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'INSERT',
+            schema: 'public',
+            table: 'orders'
+          },
+          (payload) => {
+            const newOrder = payload.new as { status: string; order_number: string | null };
+            // Show notification for new active orders
+            if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
+              toast({
+                title: "New Order Received",
+                description: `Order ${newOrder.order_number || 'New'} has been placed`,
+              });
+            }
+            fetchOrders();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders'
+          },
+          () => {
+            fetchOrders();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
             schema: 'public',
             table: 'orders'
           },
