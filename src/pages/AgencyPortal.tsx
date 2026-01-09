@@ -482,7 +482,7 @@ export default function AgencyPortal() {
             </div>
           ) : (
             <>
-              <TabsContent value="pending" className="space-y-4">
+              <TabsContent value="pending" className="space-y-2">
                 {requests
                   .filter(r => r.status === 'pending_review')
                   .sort((a, b) => getLastEventInfo(b).eventTime.getTime() - getLastEventInfo(a).eventTime.getTime())
@@ -500,7 +500,7 @@ export default function AgencyPortal() {
                 )}
               </TabsContent>
 
-              <TabsContent value="in_progress" className="space-y-4">
+              <TabsContent value="in_progress" className="space-y-2">
                 {requests
                   .filter(r => ['changes_requested', 'accepted'].includes(r.status))
                   .sort((a, b) => getLastEventInfo(b).eventTime.getTime() - getLastEventInfo(a).eventTime.getTime())
@@ -518,7 +518,7 @@ export default function AgencyPortal() {
                 )}
               </TabsContent>
 
-              <TabsContent value="completed" className="space-y-4">
+              <TabsContent value="completed" className="space-y-2">
                 {requests
                   .filter(r => ['paid', 'rejected', 'completed'].includes(r.status))
                   .sort((a, b) => getLastEventInfo(b).eventTime.getTime() - getLastEventInfo(a).eventTime.getTime())
