@@ -264,7 +264,7 @@ export function OrderWithCreditsDialog({
           <Button
             onClick={handleSendRequest}
             disabled={sending || !hasEnoughCredits}
-            className="w-full"
+            className="w-full border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             size="lg"
           >
             {sending ? (
