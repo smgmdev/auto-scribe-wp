@@ -117,8 +117,7 @@ export function OrderWithCreditsDialog({
     <Dialog open={open} onOpenChange={(newOpen) => !sending && onOpenChange(newOpen)}>
       <DialogContent className="sm:max-w-md z-[9999]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Tag className="h-5 w-5" />
+          <DialogTitle>
             Send Order Request
           </DialogTitle>
           <DialogDescription>
