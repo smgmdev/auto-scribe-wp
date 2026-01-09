@@ -628,23 +628,33 @@ export function MyRequestsView() {
   };
 
   // Check if there's a pending offer (ORDER_REQUEST) in messages from agency
+  // Uses the MOST RECENT offer and checks if there's a response AFTER it
   const hasPendingOffer = (requestId: string): boolean => {
     const requestMessages = messages[requestId] || [];
-    // Look for ORDER_REQUEST messages from agency that haven't been accepted/rejected
-    let hasOrderRequest = false;
-    let hasOrderResponse = false;
     
-    for (const msg of requestMessages) {
-      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]')) {
-        hasOrderRequest = true;
-      }
-      // Check if there's an accepted or rejected response
-      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
-        hasOrderResponse = true;
+    // Find the most recent ORDER_REQUEST message from agency
+    let lastOfferIndex = -1;
+    for (let i = requestMessages.length - 1; i >= 0; i--) {
+      const msg = requestMessages[i];
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]') && !msg.message.includes('[ORDER_REQUEST_ACCEPTED]') && !msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
+        lastOfferIndex = i;
+        break;
       }
     }
     
-    return hasOrderRequest && !hasOrderResponse;
+    if (lastOfferIndex === -1) return false;
+    
+    // Check if there's a response AFTER this message (accepted, rejected, or offer cancelled)
+    for (let i = lastOfferIndex + 1; i < requestMessages.length; i++) {
+      const msg = requestMessages[i];
+      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || 
+          msg.message.includes('[ORDER_REQUEST_REJECTED]') || 
+          msg.message.includes('[OFFER_REJECTED]')) {
+        return false; // Most recent offer has been responded to or cancelled
+      }
+    }
+    
+    return true; // Most recent agency offer is still pending
   };
 
   // Check if the client has sent an order request that's pending (not yet accepted/rejected by agency)
