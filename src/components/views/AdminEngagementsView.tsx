@@ -611,14 +611,6 @@ export function AdminEngagementsView() {
                             </p>
                           );
                         })()}
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          Last message: {messages[r.id]?.length > 0 
-                            ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                            : 'No messages'}
-                          {messages[r.id]?.length > 0 && (
-                            <span> • {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
-                          )}
-                        </p>
                         <span className="text-xs text-muted-foreground">
                           Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
