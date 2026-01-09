@@ -1235,6 +1235,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
       
       // Dispatch event so other views can update immediately
+      console.log('[FloatingChatWindow] Dispatching service-message-deleted event:', { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id });
       window.dispatchEvent(new CustomEvent('service-message-deleted', {
         detail: { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id }
       }));
