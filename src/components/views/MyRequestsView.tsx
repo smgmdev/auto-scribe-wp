@@ -327,6 +327,9 @@ export function MyRequestsView() {
       if (messageId && requestId) {
         setMessages(prev => {
           const existingMsgs = prev[requestId] || [];
+          // Log existing message IDs to debug
+          console.log('[MyRequestsView] Existing message IDs:', existingMsgs.map(m => m.id));
+          console.log('[MyRequestsView] Looking for messageId:', messageId);
           const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
           console.log('[MyRequestsView] Updated messages after deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length });
           return {
