@@ -3378,6 +3378,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           // Remove from local state
           setMessages(prev => prev.filter(m => m.id !== msg.id));
           
+          // Dispatch event so other views can update immediately
+          console.log('[FloatingChatWindow] Dispatching service-message-deleted event (inline):', { messageId: msg.id, requestId: globalChatRequest?.id });
+          window.dispatchEvent(new CustomEvent('service-message-deleted', {
+            detail: { messageId: msg.id, requestId: globalChatRequest?.id }
+          }));
+          
           toast({
             title: "Order request cancelled",
             description: "The order request has been removed.",
@@ -3921,6 +3927,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           // Remove from local state
           setMessages(prev => prev.filter(m => m.id !== msg.id));
+          
+          // Dispatch event so other views can update immediately
+          console.log('[FloatingChatWindow] Dispatching service-message-deleted event (agency inline):', { messageId: msg.id, requestId: globalChatRequest?.id });
+          window.dispatchEvent(new CustomEvent('service-message-deleted', {
+            detail: { messageId: msg.id, requestId: globalChatRequest?.id }
+          }));
           
           toast({
             title: "Offer cancelled",
