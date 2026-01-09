@@ -1340,6 +1340,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== orderData.messageId));
       
+      // Dispatch event so other components can update
+      window.dispatchEvent(new CustomEvent('service-message-updated', {
+        detail: { requestId: globalChatRequest?.id }
+      }));
+      
       toast({
         title: "Order request accepted",
         description: "Waiting for client to confirm the order.",
@@ -1400,6 +1405,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== messageId));
+      
+      // Dispatch event so other components can update
+      window.dispatchEvent(new CustomEvent('service-message-updated', {
+        detail: { requestId: globalChatRequest?.id }
+      }));
       
       toast({
         title: "Order request rejected",
@@ -2121,11 +2131,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       }
     };
     
+    // Listen for message updates (accept, reject, cancel, etc.)
+    const handleMessageUpdated = async (event: CustomEvent) => {
+      const { requestId } = event.detail || {};
+      if (requestId === globalChatRequest.id) {
+        // Refetch messages to get the latest state
+        const { data: freshMessages } = await supabase
+          .from('service_messages')
+          .select('*')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: true });
+        
+        if (freshMessages) {
+          setMessages(freshMessages as ServiceMessage[]);
+        }
+      }
+    };
+    
     window.addEventListener('service-message-deleted', handleMessageDeleted as EventListener);
+    window.addEventListener('service-message-updated', handleMessageUpdated as EventListener);
 
     return () => {
       supabase.removeChannel(channel);
       window.removeEventListener('service-message-deleted', handleMessageDeleted as EventListener);
+      window.removeEventListener('service-message-updated', handleMessageUpdated as EventListener);
     };
   }, [globalChatRequest?.id, senderType, actualSenderType]);
 
@@ -3414,6 +3443,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           });
           supabase.removeChannel(channel);
           
+          // Dispatch update event for component refresh
+          window.dispatchEvent(new CustomEvent('service-message-updated', {
+            detail: { requestId: globalChatRequest?.id }
+          }));
+          
           toast({
             title: "Order request cancelled",
             description: "The order request has been removed.",
@@ -3473,6 +3507,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           // Remove from local state
           setMessages(prev => prev.filter(m => m.id !== msg.id));
+          
+          // Dispatch update event for component refresh
+          window.dispatchEvent(new CustomEvent('service-message-updated', {
+            detail: { requestId: globalChatRequest?.id }
+          }));
           
           toast({
             title: "Order request rejected",

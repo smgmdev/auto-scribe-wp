@@ -333,13 +333,38 @@ export function AgencyRequestsView() {
       }
     };
 
+    // Listen for message updates (accept, reject, cancel, etc.)
+    const handleServiceMessageUpdated = async (event: CustomEvent) => {
+      const { requestId } = event.detail || {};
+      if (requestId) {
+        try {
+          const { data: freshMessages } = await supabase
+            .from('service_messages')
+            .select('*')
+            .eq('request_id', requestId)
+            .order('created_at', { ascending: true });
+          
+          if (freshMessages) {
+            setMessages(prev => ({
+              ...prev,
+              [requestId]: freshMessages
+            }));
+          }
+        } catch (error) {
+          console.error('[AgencyRequestsView] Error refetching messages after update:', error);
+        }
+      }
+    };
+
     console.log('[AgencyRequestsView] Setting up event listeners for service-message-deleted');
     window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
     window.addEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
+    window.addEventListener('service-message-updated', handleServiceMessageUpdated as EventListener);
     return () => {
       console.log('[AgencyRequestsView] Removing event listeners for service-message-deleted');
       window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
       window.removeEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
+      window.removeEventListener('service-message-updated', handleServiceMessageUpdated as EventListener);
     };
   }, [setAgencyUnreadServiceRequestsCount]);
 
