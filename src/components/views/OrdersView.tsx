@@ -497,11 +497,11 @@ export function OrdersView() {
         if (deliveryDeadline) {
           const { text, isOverdue } = formatTimeRemaining(deliveryDeadline);
           if (isOverdue) {
-            return <Badge variant="destructive"><Clock className="h-3 w-3 mr-1" />Overdue</Badge>;
+            return <Badge variant="destructive" className="bg-red-600 text-white"><AlertTriangle className="h-3 w-3 mr-1" />Order Placed - Overdue</Badge>;
           }
-          return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery: {text}</Badge>;
+          return <Badge className="bg-black text-white dark:bg-white dark:text-black"><CheckCircle className="h-3 w-3 mr-1 text-green-500" />Order Placed • {text}</Badge>;
         }
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Awaiting Delivery</Badge>;
+        return <Badge className="bg-black text-white dark:bg-white dark:text-black"><CheckCircle className="h-3 w-3 mr-1 text-green-500" />Order Placed</Badge>;
       case 'delivered':
         // Check if this order has a pending revision request
         if (orderId && revisionOrderIds.has(orderId)) {
