@@ -1199,8 +1199,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
-      // Remove all from local state
-      setMessages(prev => prev.filter(m => !messageIdsToDelete.includes(m.id)));
+      // Refetch messages from database to ensure UI is fully in sync
+      const { data: freshMessages } = await supabase
+        .from('service_messages')
+        .select('*')
+        .eq('request_id', globalChatRequest?.id)
+        .order('created_at', { ascending: true });
+      
+      if (freshMessages) {
+        setMessages(freshMessages as ServiceMessage[]);
+      }
       
       // Dispatch events for each deleted message so other views can update immediately
       messageIdsToDelete.forEach(messageId => {
@@ -1245,8 +1253,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
-      // Remove from local state
-      setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
+      // Refetch messages from database to ensure UI is fully in sync
+      const { data: freshMessages } = await supabase
+        .from('service_messages')
+        .select('*')
+        .eq('request_id', globalChatRequest?.id)
+        .order('created_at', { ascending: true });
+      
+      if (freshMessages) {
+        setMessages(freshMessages as ServiceMessage[]);
+      }
       
       // Dispatch event so other views can update immediately
       console.log('[FloatingChatWindow] Dispatching service-message-deleted event:', { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id });
@@ -3434,8 +3450,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           if (error) throw error;
           
-          // Remove from local state
-          setMessages(prev => prev.filter(m => m.id !== msg.id));
+          // Refetch messages from database to ensure UI is fully in sync
+          const { data: freshMessages } = await supabase
+            .from('service_messages')
+            .select('*')
+            .eq('request_id', globalChatRequest?.id)
+            .order('created_at', { ascending: true });
+          
+          if (freshMessages) {
+            setMessages(freshMessages as ServiceMessage[]);
+          }
           
           // Dispatch event so other views can update immediately
           console.log('[FloatingChatWindow] Dispatching service-message-deleted event (inline):', { messageId: msg.id, requestId: globalChatRequest?.id });
@@ -4004,8 +4028,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           if (error) throw error;
           
-          // Remove all from local state
-          setMessages(prev => prev.filter(m => !messageIdsToDelete.includes(m.id)));
+          // Refetch messages from database to ensure UI is fully in sync
+          const { data: freshMessages } = await supabase
+            .from('service_messages')
+            .select('*')
+            .eq('request_id', globalChatRequest?.id)
+            .order('created_at', { ascending: true });
+          
+          if (freshMessages) {
+            setMessages(freshMessages as ServiceMessage[]);
+          }
           
           // Dispatch events for each deleted message so other views can update immediately
           messageIdsToDelete.forEach(messageId => {
