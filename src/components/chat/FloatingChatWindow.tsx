@@ -1210,6 +1210,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }));
       });
       
+      // Also dispatch update event for component refresh
+      window.dispatchEvent(new CustomEvent('service-message-updated', {
+        detail: { requestId: globalChatRequest?.id }
+      }));
+      
       toast({
         title: "Offer cancelled",
         description: existingOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
@@ -1247,6 +1252,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       console.log('[FloatingChatWindow] Dispatching service-message-deleted event:', { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id });
       window.dispatchEvent(new CustomEvent('service-message-deleted', {
         detail: { messageId: lastOrderMsg.id, requestId: globalChatRequest?.id }
+      }));
+      
+      // Also dispatch update event for component refresh
+      window.dispatchEvent(new CustomEvent('service-message-updated', {
+        detail: { requestId: globalChatRequest?.id }
       }));
       
       toast({
@@ -4016,6 +4026,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             });
           }
           supabase.removeChannel(channel);
+          
+          // Dispatch update event for component refresh
+          window.dispatchEvent(new CustomEvent('service-message-updated', {
+            detail: { requestId: globalChatRequest?.id }
+          }));
           
           toast({
             title: "Offer cancelled",
