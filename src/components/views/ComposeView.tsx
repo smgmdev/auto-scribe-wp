@@ -310,9 +310,14 @@ export function ComposeView() {
   }, [currentSite?.id]);
 
   // Separate effect to fetch SEO data when editing an article with a WP post ID
+  // Only fetch from WordPress if we don't have local values stored
   useEffect(() => {
-    // Only fetch if we have a WP post ID, the site is loaded, matches the article's site, and has credentials
+    // Skip if we already have local SEO values from the database
+    const hasLocalSEO = editingArticle?.focusKeyword || editingArticle?.metaDescription;
+    
+    // Only fetch from WordPress if we have a WP post ID, the site is loaded, and no local values
     if (
+      !hasLocalSEO &&
       editingArticle?.wpPostId && 
       currentSite && 
       currentSite.id === editingArticle.publishedTo &&
@@ -323,15 +328,20 @@ export function ComposeView() {
       setIsLoadingSEO(true);
       fetchPostSEOData(currentSite, editingArticle.wpPostId).then(seoData => {
         console.log('[ComposeView] SEO data fetched:', seoData);
-        setFocusKeyword(seoData.focusKeyword);
-        setMetaDescription(seoData.metaDescription);
+        // Only update if WordPress returned actual values
+        if (seoData.focusKeyword) {
+          setFocusKeyword(seoData.focusKeyword);
+        }
+        if (seoData.metaDescription) {
+          setMetaDescription(seoData.metaDescription);
+        }
       }).catch(error => {
         console.error('Failed to fetch SEO data:', error);
       }).finally(() => {
         setIsLoadingSEO(false);
       });
     }
-  }, [currentSite?.id, editingArticle?.wpPostId, editingArticle?.publishedTo, currentSite?.username, currentSite?.applicationPassword]);
+  }, [currentSite?.id, editingArticle?.wpPostId, editingArticle?.publishedTo, currentSite?.username, currentSite?.applicationPassword, editingArticle?.focusKeyword, editingArticle?.metaDescription]);
 
   // Don't clear editingArticle on unmount - it causes issues with remounting
   // The article should be cleared when user explicitly creates a new article
