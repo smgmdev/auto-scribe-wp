@@ -43,6 +43,7 @@ interface ServiceRequest {
   updated_at: string;
   order_id: string | null;
   cancellation_reason: string | null;
+  cancelled_by: string | null;
   user_id: string;
   agency_payout_id: string | null;
   media_sites: { 
@@ -591,9 +592,16 @@ export function AdminEngagementsView() {
                                 <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                               </div>
                             </div>
-                            <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
-                              Cancelled
-                            </Badge>
+                            <div className="flex items-center gap-1">
+                              <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                                Cancelled
+                              </Badge>
+                              {r.cancelled_by === 'admin' && (
+                                <Badge className="bg-red-600 text-white">
+                                  By Admin
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
