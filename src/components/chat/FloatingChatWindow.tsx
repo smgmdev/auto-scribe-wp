@@ -3235,7 +3235,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-                <XCircle className={`h-8 w-8 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`} />
+                <XCircle className={`h-8 w-8 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500 fill-red-500'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -3287,7 +3287,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-                <XCircle className={`h-8 w-8 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`} />
+                <XCircle className={`h-8 w-8 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500 fill-red-500'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
