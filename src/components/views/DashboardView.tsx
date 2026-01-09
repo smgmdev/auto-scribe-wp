@@ -58,7 +58,8 @@ const stats = [{
 export function DashboardView() {
   const {
     setCurrentView,
-    setTargetTab
+    setTargetTab,
+    setEditingArticle
   } = useAppStore();
   const {
     isAdmin,
@@ -326,7 +327,13 @@ export function DashboardView() {
                         <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
                       </a>
                     ) : (
-                      <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors cursor-pointer" onClick={() => setCurrentView('compose')}>
+                      <div 
+                        className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors cursor-pointer" 
+                        onClick={() => {
+                          setEditingArticle(article);
+                          setCurrentView('compose');
+                        }}
+                      >
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
