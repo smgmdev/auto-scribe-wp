@@ -168,6 +168,22 @@ serve(async (req) => {
     const orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
     console.log(`Generated unique order number: ${orderNumber}`);
 
+    // Calculate delivery deadline based on delivery_duration
+    let deliveryDeadline: string | null = null;
+    if (delivery_duration) {
+      const now = new Date();
+      const days = delivery_duration.days || 0;
+      const hours = delivery_duration.hours || 0;
+      const minutes = delivery_duration.minutes || 0;
+      
+      now.setDate(now.getDate() + days);
+      now.setHours(now.getHours() + hours);
+      now.setMinutes(now.getMinutes() + minutes);
+      
+      deliveryDeadline = now.toISOString();
+      console.log(`Calculated delivery deadline: ${deliveryDeadline}`);
+    }
+
     // Create order with pending_payment status
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
@@ -179,7 +195,8 @@ serve(async (req) => {
         platform_fee_cents: platformFeeCents,
         agency_payout_cents: agencyPayoutCents,
         status: "pending_payment",
-        delivery_status: "pending"
+        delivery_status: "pending",
+        delivery_deadline: deliveryDeadline
       })
       .select()
       .single();
