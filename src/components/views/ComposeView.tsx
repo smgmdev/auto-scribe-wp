@@ -778,7 +778,7 @@ export function ComposeView() {
       setIsPublishing(false);
       setShowPublishSuccess(true);
 
-      // Reset form after a delay to show success animation, then redirect if editing
+      // Reset form after a delay to show success animation, then redirect to articles
       setTimeout(() => {
         setShowPublishSuccess(false);
         setPublishedLink(null);
@@ -792,11 +792,11 @@ export function ComposeView() {
         setMetaDescription('');
         removeImage();
         
-        // If we were editing an article, redirect to articles view
+        // Clear editing state if applicable and redirect to articles view
         if (editingArticle) {
           setEditingArticle(null);
-          setCurrentView('articles');
         }
+        setCurrentView('articles');
       }, 2500);
     } catch (error) {
       console.error('Publish error:', error);
