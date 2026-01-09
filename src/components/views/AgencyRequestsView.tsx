@@ -574,21 +574,33 @@ export function AgencyRequestsView() {
   };
 
   // Check if agency has sent an offer (ORDER_REQUEST) that hasn't been accepted/rejected yet
+  // Uses the MOST RECENT offer and checks if there's a response AFTER it
   const hasPendingOfferSent = (requestId: string): boolean => {
     const requestMessages = messages[requestId] || [];
-    let hasOrderRequest = false;
-    let hasOrderResponse = false;
     
-    for (const msg of requestMessages) {
-      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]')) {
-        hasOrderRequest = true;
-      }
-      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
-        hasOrderResponse = true;
+    // Find the most recent ORDER_REQUEST message from agency
+    let lastOfferIndex = -1;
+    for (let i = requestMessages.length - 1; i >= 0; i--) {
+      const msg = requestMessages[i];
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]') && !msg.message.includes('[ORDER_REQUEST_ACCEPTED]') && !msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
+        lastOfferIndex = i;
+        break;
       }
     }
     
-    return hasOrderRequest && !hasOrderResponse;
+    if (lastOfferIndex === -1) return false;
+    
+    // Check if there's a response AFTER this message (accepted, rejected, or offer cancelled)
+    for (let i = lastOfferIndex + 1; i < requestMessages.length; i++) {
+      const msg = requestMessages[i];
+      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || 
+          msg.message.includes('[ORDER_REQUEST_REJECTED]') || 
+          msg.message.includes('[OFFER_REJECTED]')) {
+        return false; // Most recent offer has been responded to or cancelled
+      }
+    }
+    
+    return true; // Most recent agency offer is still pending
   };
 
   // Check if client has sent an order request that's pending (not yet accepted/rejected by agency)
