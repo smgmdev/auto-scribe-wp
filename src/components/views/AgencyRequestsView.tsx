@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, AlertTriangle } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, AlertTriangle, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -573,6 +573,24 @@ export function AgencyRequestsView() {
     }
   };
 
+  // Check if agency has sent an offer (ORDER_REQUEST) that hasn't been accepted/rejected yet
+  const hasPendingOfferSent = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    let hasOrderRequest = false;
+    let hasOrderResponse = false;
+    
+    for (const msg of requestMessages) {
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST]')) {
+        hasOrderRequest = true;
+      }
+      if (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
+        hasOrderResponse = true;
+      }
+    }
+    
+    return hasOrderRequest && !hasOrderResponse;
+  };
+
   const markAsRead = async (requestId: string) => {
     const request = requests.find(r => r.id === requestId);
     const isCancelled = request?.status === 'cancelled';
@@ -999,6 +1017,11 @@ export function AgencyRequestsView() {
                                 <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30">
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Order Placed {getTimeRemaining() && `• ${getTimeRemaining()}`}
+                                </Badge>
+                              ) : hasPendingOfferSent(request.id) ? (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Offer Sent
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground">
