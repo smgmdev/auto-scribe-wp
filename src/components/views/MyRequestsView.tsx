@@ -647,6 +647,25 @@ export function MyRequestsView() {
     return hasOrderRequest && !hasOrderResponse;
   };
 
+  // Check if the client has sent an order request that's pending (not yet accepted/rejected by agency)
+  const hasClientOrderRequestPending = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    let hasClientOrderRequest = false;
+    let hasAgencyResponse = false;
+    
+    for (const msg of requestMessages) {
+      if (msg.sender_type === 'client' && msg.message.includes('[ORDER_REQUEST]')) {
+        hasClientOrderRequest = true;
+      }
+      // Check if agency has responded with acceptance or rejection
+      if (msg.sender_type === 'agency' && (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]'))) {
+        hasAgencyResponse = true;
+      }
+    }
+    
+    return hasClientOrderRequest && !hasAgencyResponse;
+  };
+
 
   const handleCardClick = (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
@@ -930,8 +949,14 @@ export function MyRequestsView() {
                                 Received an Offer
                               </Badge>
                             )}
+                            {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestPending(request.id) && (
+                              <Badge className="bg-blue-600 text-white">
+                                <Tag className="h-3 w-3 mr-1" />
+                                Order Request Sent
+                              </Badge>
+                            )}
                             {getOrderPlacedBadge(request)}
-                            {!request.order && !hasPendingOffer(request.id) && getStatusBadge(request.status)}
+                            {!request.order && !hasPendingOffer(request.id) && !hasClientOrderRequestPending(request.id) && getStatusBadge(request.status)}
                           </div>
                         </div>
                       </CardHeader>

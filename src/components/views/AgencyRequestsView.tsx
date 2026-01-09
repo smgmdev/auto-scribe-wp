@@ -591,6 +591,25 @@ export function AgencyRequestsView() {
     return hasOrderRequest && !hasOrderResponse;
   };
 
+  // Check if client has sent an order request that's pending (not yet accepted/rejected by agency)
+  const hasClientOrderRequestPending = (requestId: string): boolean => {
+    const requestMessages = messages[requestId] || [];
+    let hasClientOrderRequest = false;
+    let hasAgencyResponse = false;
+    
+    for (const msg of requestMessages) {
+      if (msg.sender_type === 'client' && msg.message.includes('[ORDER_REQUEST]')) {
+        hasClientOrderRequest = true;
+      }
+      // Check if agency has responded with acceptance or rejection
+      if (msg.sender_type === 'agency' && (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]'))) {
+        hasAgencyResponse = true;
+      }
+    }
+    
+    return hasClientOrderRequest && !hasAgencyResponse;
+  };
+
   const markAsRead = async (requestId: string) => {
     const request = requests.find(r => r.id === requestId);
     const isCancelled = request?.status === 'cancelled';
@@ -1022,6 +1041,11 @@ export function AgencyRequestsView() {
                                 <Badge className="bg-blue-600 text-white">
                                   <Tag className="h-3 w-3 mr-1" />
                                   Offer Sent
+                                </Badge>
+                              ) : hasClientOrderRequestPending(request.id) ? (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Received an Order Request
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground">
