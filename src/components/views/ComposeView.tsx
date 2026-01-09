@@ -79,6 +79,7 @@ export function ComposeView() {
   const [content, setContent] = useState(editingArticle?.content || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const [publishedLink, setPublishedLink] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -828,7 +829,7 @@ export function ComposeView() {
 
     // If site is selected, save as draft to WordPress
     if (currentSite) {
-      setIsPublishing(true);
+      setIsSavingDraft(true);
       try {
         await publishArticle({
           site: currentSite,
@@ -853,19 +854,33 @@ export function ComposeView() {
           variant: "destructive"
         });
       } finally {
-        setIsPublishing(false);
+        setIsSavingDraft(false);
       }
     }
 
-    // Always save to database
+    // Build featured image object with URL if available
+    const savedFeaturedImage = featuredImage.file || imagePreview ? {
+      file: featuredImage.file,
+      url: imagePreview || undefined,
+      title: featuredImage.title,
+      caption: featuredImage.caption,
+      altText: featuredImage.altText,
+      description: featuredImage.description
+    } : undefined;
+
+    // Always save to database with all data including site ID
     await addArticle({
       title,
       content,
       tone,
       sourceHeadline: selectedHeadline || undefined,
-      featuredImage: featuredImage.file ? featuredImage : undefined,
+      featuredImage: savedFeaturedImage,
       status: 'draft',
+      publishedTo: selectedSite || undefined,
+      publishedToName: currentSite?.name,
+      publishedToFavicon: currentSite?.favicon,
       categories: selectedCategories,
+      tagIds: selectedTagIds,
       tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
     });
     
@@ -883,6 +898,19 @@ export function ComposeView() {
             <div className="text-center">
               <p className="text-lg font-medium text-foreground">Publishing Article...</p>
               <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Saving Draft Overlay */}
+      {isSavingDraft && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+            <Loader2 className="h-10 w-10 animate-spin text-accent" />
+            <div className="text-center">
+              <p className="text-lg font-medium text-foreground">Saving Draft...</p>
+              <p className="text-sm text-muted-foreground mt-1">Please wait while your draft is being saved</p>
             </div>
           </div>
         </div>
