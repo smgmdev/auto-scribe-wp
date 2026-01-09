@@ -5136,56 +5136,58 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )}
                   </div>
                 </div>
-                {/* Action buttons */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {isClient ? (
-                    <>
-                      <Button
-                        size="sm"
-                        className="bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
-                        onClick={() => {
-                          setPendingOrderRequest({
-                            media_site_id: pendingOrder.media_site_id,
-                            media_site_name: pendingOrder.media_site_name,
-                            media_site_favicon: pendingOrder.media_site_favicon,
-                            price: pendingOrder.price,
-                            special_terms: pendingOrder.special_terms,
-                            delivery_duration: pendingOrder.delivery_duration
-                          });
-                          setAcceptOrderDialogOpen(true);
-                        }}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200 dark:bg-black dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
-                        onClick={handleBannerRejectOrderRequest}
-                        disabled={rejectingOrderRequestId === pendingOrder.messageId}
-                      >
-                        {rejectingOrderRequestId === pendingOrder.messageId && (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        )}
-                        Reject
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-end gap-1.5">
-                      <Button
-                        size="sm"
-                        className="bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200 dark:bg-black dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
-                        onClick={handleBannerCancelOrderRequest}
-                        disabled={cancellingOrderRequestId === pendingOrder.messageId}
-                      >
-                        {cancellingOrderRequestId === pendingOrder.messageId && (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        )}
-                        Cancel Offer
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                {/* Action buttons - hidden for admin */}
+                {!isAdmin && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isClient ? (
+                      <>
+                        <Button
+                          size="sm"
+                          className="bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                          onClick={() => {
+                            setPendingOrderRequest({
+                              media_site_id: pendingOrder.media_site_id,
+                              media_site_name: pendingOrder.media_site_name,
+                              media_site_favicon: pendingOrder.media_site_favicon,
+                              price: pendingOrder.price,
+                              special_terms: pendingOrder.special_terms,
+                              delivery_duration: pendingOrder.delivery_duration
+                            });
+                            setAcceptOrderDialogOpen(true);
+                          }}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200 dark:bg-black dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
+                          onClick={handleBannerRejectOrderRequest}
+                          disabled={rejectingOrderRequestId === pendingOrder.messageId}
+                        >
+                          {rejectingOrderRequestId === pendingOrder.messageId && (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          )}
+                          Reject
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-end gap-1.5">
+                        <Button
+                          size="sm"
+                          className="bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200 dark:bg-black dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
+                          onClick={handleBannerCancelOrderRequest}
+                          disabled={cancellingOrderRequestId === pendingOrder.messageId}
+                        >
+                          {cancellingOrderRequestId === pendingOrder.messageId && (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          )}
+                          Cancel Offer
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -5262,44 +5264,46 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )}
                   </div>
                 </div>
-                {/* Action buttons */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {isClient ? (
-                    <Button
-                      size="sm"
-                      className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white dark:hover:border-black"
-                      onClick={handleBannerCancelClientOrderRequest}
-                      disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
-                    >
-                      {cancellingOrderRequestId === pendingClientOrder.messageId && (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      )}
-                      Cancel Request
-                    </Button>
-                  ) : (
-                    <>
+                {/* Action buttons - hidden for admin */}
+                {!isAdmin && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isClient ? (
                       <Button
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
+                        className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white dark:hover:border-black"
+                        onClick={handleBannerCancelClientOrderRequest}
+                        disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
-                        onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
-                        disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
-                      >
-                        {rejectingOrderRequestId === pendingClientOrder.messageId && (
+                        {cancellingOrderRequestId === pendingClientOrder.messageId && (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         )}
-                        Reject
+                        Cancel Request
                       </Button>
-                    </>
-                  )}
-                </div>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
+                          onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
+                          disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
+                        >
+                          {rejectingOrderRequestId === pendingClientOrder.messageId && (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          )}
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
