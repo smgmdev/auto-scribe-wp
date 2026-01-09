@@ -323,11 +323,47 @@ export function MediaSiteDialog({
 
       if (error) throw error;
 
+      // Upload files to storage if any
+      const uploadedFiles: { name: string; url: string; type: string; size: number }[] = [];
+      
+      if (files.length > 0) {
+        for (const file of files) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${request.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('chat-attachments')
+            .upload(fileName, file);
+          
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage
+              .from('chat-attachments')
+              .getPublicUrl(fileName);
+            
+            uploadedFiles.push({
+              name: file.name,
+              url: urlData.publicUrl,
+              type: file.type,
+              size: file.size
+            });
+          }
+        }
+      }
+
+      // Build message with attachments info if any
+      let messageContent = description.trim();
+      if (uploadedFiles.length > 0) {
+        const attachmentTags = uploadedFiles.map(file => 
+          `[ATTACHMENT]${JSON.stringify({ url: file.url, name: file.name, type: file.type })}[/ATTACHMENT]`
+        ).join('\n');
+        messageContent = `${description.trim()}\n\n${attachmentTags}`;
+      }
+
       await supabase.from('service_messages').insert({
         request_id: request.id,
         sender_type: 'client',
         sender_id: user.id,
-        message: description.trim()
+        message: messageContent
       });
 
       // Broadcast notification to agency (but not if the user owns this agency)
