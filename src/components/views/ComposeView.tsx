@@ -827,67 +827,72 @@ export function ComposeView() {
       return;
     }
 
-    // If site is selected, save as draft to WordPress
-    if (currentSite) {
-      setIsSavingDraft(true);
-      try {
-        await publishArticle({
-          site: currentSite,
-          title,
-          content,
-          status: 'draft',
-          categories: selectedCategories,
-          tags: selectedTagIds,
-          seo: {
-            focusKeyword,
-            metaDescription
-          }
-        });
-        toast({
-          title: "Draft saved to WordPress",
-          description: `Draft saved to ${currentSite.name}`
-        });
-      } catch (error) {
-        toast({
-          title: "Failed to save draft",
-          description: "Saved locally only",
-          variant: "destructive"
-        });
-      } finally {
-        setIsSavingDraft(false);
-      }
-    }
-
-    // Build featured image object with URL if available
-    const savedFeaturedImage = featuredImage.file || imagePreview ? {
-      file: featuredImage.file,
-      url: imagePreview || undefined,
-      title: featuredImage.title,
-      caption: featuredImage.caption,
-      altText: featuredImage.altText,
-      description: featuredImage.description
-    } : undefined;
-
-    // Always save to database with all data including site ID
-    await addArticle({
-      title,
-      content,
-      tone,
-      sourceHeadline: selectedHeadline || undefined,
-      featuredImage: savedFeaturedImage,
-      status: 'draft',
-      publishedTo: selectedSite || undefined,
-      publishedToName: currentSite?.name,
-      publishedToFavicon: currentSite?.favicon,
-      categories: selectedCategories,
-      tagIds: selectedTagIds,
-      tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
-    });
+    setIsSavingDraft(true);
     
-    toast({
-      title: "Draft saved",
-      description: currentSite ? `Draft saved to ${currentSite.name}` : "Your draft has been saved"
-    });
+    try {
+      // If site is selected, save as draft to WordPress first
+      if (currentSite) {
+        try {
+          await publishArticle({
+            site: currentSite,
+            title,
+            content,
+            status: 'draft',
+            categories: selectedCategories,
+            tags: selectedTagIds,
+            seo: {
+              focusKeyword,
+              metaDescription
+            }
+          });
+        } catch (error) {
+          console.error('WordPress draft save failed:', error);
+          // Continue to save to database even if WordPress fails
+        }
+      }
+
+      // Build featured image object with URL if available
+      const savedFeaturedImage = featuredImage.file || imagePreview ? {
+        file: featuredImage.file,
+        url: imagePreview || undefined,
+        title: featuredImage.title,
+        caption: featuredImage.caption,
+        altText: featuredImage.altText,
+        description: featuredImage.description
+      } : undefined;
+
+      // Always save to database with all data including site ID
+      const savedArticle = await addArticle({
+        title,
+        content,
+        tone,
+        sourceHeadline: selectedHeadline || undefined,
+        featuredImage: savedFeaturedImage,
+        status: 'draft',
+        publishedTo: selectedSite || undefined,
+        publishedToName: currentSite?.name,
+        publishedToFavicon: currentSite?.favicon,
+        categories: selectedCategories,
+        tagIds: selectedTagIds,
+        tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+      });
+      
+      if (savedArticle) {
+        toast({
+          title: "Draft saved",
+          description: currentSite ? `Draft saved to ${currentSite.name}` : "Your draft has been saved"
+        });
+      }
+    } catch (error) {
+      console.error('Draft save error:', error);
+      toast({
+        title: "Failed to save draft",
+        description: error instanceof Error ? error.message : "Could not save draft",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSavingDraft(false);
+    }
   };
   return <div className="space-y-4 animate-fade-in relative">
       {/* Publishing Overlay */}
