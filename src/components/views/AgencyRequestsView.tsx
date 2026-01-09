@@ -1055,7 +1055,7 @@ export function AgencyRequestsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-2 space-y-4">
+            <TabsContent value="active" className="mt-2 space-y-2">
               {activeRequests.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1066,7 +1066,7 @@ export function AgencyRequestsView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {sortedRequests.map((request) => {
                     const requestMessages = messages[request.id] || [];
                     const lastMessage = requestMessages.length > 0 ? requestMessages[requestMessages.length - 1] : null;
