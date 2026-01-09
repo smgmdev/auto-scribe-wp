@@ -683,13 +683,23 @@ export function MyRequestsView() {
       ? formatDeliveryCountdown(request.order.delivery_deadline)
       : null;
     
+    // Show red "Order Placed - Overdue" badge when overdue
+    if (countdown?.isOverdue) {
+      return (
+        <Badge variant="destructive" className="bg-red-600 text-white">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          Order Placed - Overdue
+        </Badge>
+      );
+    }
+    
     return (
       <Badge className="bg-black text-white dark:bg-white dark:text-black">
         <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
         Order Placed
         {countdown && (
-          <span className={`ml-2 ${countdown.isOverdue ? 'text-red-400' : ''}`}>
-            {countdown.isOverdue ? '• Overdue' : `• ${countdown.text}`}
+          <span className="ml-2">
+            • {countdown.text}
           </span>
         )}
       </Badge>
