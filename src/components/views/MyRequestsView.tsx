@@ -754,6 +754,63 @@ export function MyRequestsView() {
     return true; // Most recent client order request is still pending
   };
 
+  // Helper function to get the last event info for a request
+  const getLastEventInfo = (request: ServiceRequest): { eventName: string; eventTime: Date } => {
+    const events: { name: string; time: Date }[] = [];
+    const requestMessages = messages[request.id] || [];
+    
+    // Request created
+    events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
+    
+    // Last message time
+    if (requestMessages.length > 0) {
+      const lastMsg = requestMessages[requestMessages.length - 1];
+      const senderLabel = lastMsg.sender_type === 'client' ? 'You' : 
+                          lastMsg.sender_type === 'agency' ? 'Agency' : 'Staff';
+      events.push({ name: `Message from ${senderLabel}`, time: new Date(lastMsg.created_at) });
+    }
+    
+    // Order related events based on status
+    if (request.order) {
+      if (request.order.delivery_status === 'pending' && request.order.accepted_at) {
+        events.push({ name: 'Awaiting delivery', time: new Date(request.order.accepted_at) });
+      } else if (request.order.delivery_status === 'delivered') {
+        events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
+      } else if (request.order.delivery_status === 'accepted') {
+        events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
+      } else if (request.order.delivery_status === 'rejected' || request.order.delivery_status === 'pending_revision') {
+        events.push({ name: 'Revision requested', time: new Date(request.updated_at) });
+      }
+      
+      if (request.order.status === 'paid') {
+        events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+      }
+    }
+    
+    // Request status events
+    if (request.status === 'cancelled') {
+      events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at || request.updated_at) });
+    } else if (request.status === 'accepted' && !request.order) {
+      events.push({ name: 'Request accepted', time: new Date(request.updated_at) });
+    } else if (request.status === 'changes_requested') {
+      events.push({ name: 'Changes requested', time: new Date(request.updated_at) });
+    }
+    
+    // Check for offer or client order request
+    if (!request.order?.id && hasPendingOffer(request.id)) {
+      events.push({ name: 'Received an offer', time: new Date(request.updated_at) });
+    } else if (!request.order?.id && hasClientOrderRequestPending(request.id)) {
+      events.push({ name: 'Order request sent', time: new Date(request.updated_at) });
+    }
+    
+    // Find the most recent event
+    const latestEvent = events.reduce((latest, current) => 
+      current.time > latest.time ? current : latest, 
+      events[0]
+    );
+    
+    return { eventName: latestEvent.name, eventTime: latestEvent.time };
+  };
 
   const handleCardClick = (request: ServiceRequest) => {
     clearUnreadMessageCount(request.id);
@@ -828,7 +885,7 @@ export function MyRequestsView() {
     [unreadDeliveredCount, unreadCancelledCount]
   );
 
-  // Filter and sort active requests
+  // Filter and sort active requests by last event time
   const sortedActiveRequests = useMemo(() => {
     const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
@@ -838,25 +895,13 @@ export function MyRequestsView() {
       return titleMatch || siteMatch;
     });
     
+    // Always sort by last event time (most recent first)
     return [...filtered].sort((a, b) => {
-      if (sortBy === 'last_message') {
-        const aMessages = messages[a.id] || [];
-        const bMessages = messages[b.id] || [];
-        const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
-        const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
-        if (aLastMessage && bLastMessage) {
-          return bLastMessage - aLastMessage;
-        } else if (aLastMessage) {
-          return -1;
-        } else if (bLastMessage) {
-          return 1;
-        }
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
+      const aEventTime = getLastEventInfo(a).eventTime.getTime();
+      const bEventTime = getLastEventInfo(b).eventTime.getTime();
+      return bEventTime - aEventTime;
     });
-  }, [activeRequests, messages, sortBy, searchQuery]);
+  }, [activeRequests, messages, searchQuery]);
 
   // Filter and sort delivered requests
   const sortedDeliveredRequests = useMemo(() => {
@@ -993,8 +1038,8 @@ export function MyRequestsView() {
             ) : (
               <div className="space-y-2">
                 {sortedActiveRequests.map((request) => {
-                  const requestMessages = messages[request.id] || [];
                   const hasUnread = !request.read;
+                  const { eventName, eventTime } = getLastEventInfo(request);
                   
                   return (
                     <Card 
@@ -1051,12 +1096,10 @@ export function MyRequestsView() {
                       <CardContent className="pt-0 pb-3 px-4">
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
-                            {requestMessages.length > 0 && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                <span>Last message: {format(new Date(requestMessages[requestMessages.length - 1].created_at), 'MMM d, h:mm a')} • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                              </div>
-                            )}
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>Last event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
+                            </div>
                             <span className="text-xs text-muted-foreground">
                               Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
