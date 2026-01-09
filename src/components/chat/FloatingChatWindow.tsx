@@ -5888,11 +5888,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             onChange={(e) => setCancellationReason(e.target.value)}
           />
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Engagement</AlertDialogCancel>
+            <AlertDialogCancel className="hover:bg-black hover:text-white hover:border-black">Keep Engagement</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleCancelEngagement}
               disabled={!cancellationReason.trim() || cancelling}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground border border-destructive hover:bg-transparent hover:text-destructive"
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cancel Engagement
