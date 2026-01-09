@@ -437,35 +437,60 @@ export function AdminEngagementsView() {
     return true; // Most recent client order request is still pending
   };
 
-  // Helper function to get the last event time for a request
-  // Considers messages, order updates, request updates, cancellations, etc.
-  const getLastEventTime = (request: ServiceRequest): Date => {
-    const times: Date[] = [];
+  // Helper function to get the last event info for a request
+  // Returns event name and time
+  const getLastEventInfo = (request: ServiceRequest): { eventName: string; eventTime: Date } => {
+    const events: { name: string; time: Date }[] = [];
     
-    // Request created/updated time
-    times.push(new Date(request.updated_at || request.created_at));
+    // Request created
+    events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
+    
+    // Request updated (if different from created)
+    if (request.updated_at && request.updated_at !== request.created_at) {
+      // Determine event name based on status
+      if (request.status === 'cancelled') {
+        events.push({ name: 'Cancelled', time: new Date(request.updated_at) });
+      } else {
+        events.push({ name: 'Request updated', time: new Date(request.updated_at) });
+      }
+    }
     
     // Last message time
     const requestMessages = messages[request.id] || [];
     if (requestMessages.length > 0) {
-      times.push(new Date(requestMessages[requestMessages.length - 1].created_at));
+      events.push({ name: 'New message', time: new Date(requestMessages[requestMessages.length - 1].created_at) });
     }
     
-    // Order related times
+    // Order related events - use delivery_deadline and delivery_status to infer events
     if (request.orders) {
-      if (request.orders.delivery_deadline) {
-        times.push(new Date(request.orders.delivery_deadline));
+      // If order exists, it was created (use request updated_at as approximation if no better data)
+      if (request.order_id) {
+        events.push({ name: 'Order created', time: new Date(request.updated_at) });
+      }
+      if (request.orders.delivery_status === 'pending' && request.orders.delivery_deadline) {
+        events.push({ name: 'Awaiting delivery', time: new Date(request.orders.delivery_deadline) });
+      }
+      if (request.orders.delivery_status === 'delivered') {
+        events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
+      }
+      if (request.orders.delivery_status === 'accepted') {
+        events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
       }
     }
     
-    // Return the most recent time
-    return times.reduce((latest, current) => current > latest ? current : latest, new Date(0));
+    // Find the most recent event
+    const latestEvent = events.reduce((latest, current) => 
+      current.time > latest.time ? current : latest, 
+      events[0]
+    );
+    
+    return { eventName: latestEvent.name, eventTime: latestEvent.time };
   };
 
   // Sort requests by last event time (most recent first)
   const sortByLastEvent = (a: ServiceRequest, b: ServiceRequest): number => {
-    const timeA = getLastEventTime(a).getTime();
-    const timeB = getLastEventTime(b).getTime();
+    const timeA = getLastEventInfo(a).eventTime.getTime();
+    const timeB = getLastEventInfo(b).eventTime.getTime();
     return timeB - timeA; // Descending order (most recent first)
   };
 
@@ -567,8 +592,16 @@ export function AdminEngagementsView() {
                     </div>
                     <div className="mt-2 flex items-end justify-between">
                       <div className="space-y-0.5">
+                        {(() => {
+                          const lastEvent = getLastEventInfo(r);
+                          return (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Last event: <span className="font-medium">{lastEvent.eventName}</span> • {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
+                            </p>
+                          );
+                        })()}
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
                           Last message: {messages[r.id]?.length > 0 
                             ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
                             : 'No messages'}
