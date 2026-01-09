@@ -6113,7 +6113,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       {/* Send Order Dialog (Agency) */}
       <Dialog open={sendOrderDialogOpen} onOpenChange={setSendOrderDialogOpen}>
-        <DialogContent className="sm:max-w-md z-[250]">
+        <DialogContent className="sm:max-w-md z-[10000]">
           <DialogHeader className="pb-0">
             <DialogTitle>
               {isResendMode ? 'Resend Offer' : 'Send Offer'}
