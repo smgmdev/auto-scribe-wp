@@ -445,37 +445,47 @@ export function AdminEngagementsView() {
     // Request created
     events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
     
-    // Request updated (if different from created)
-    if (request.updated_at && request.updated_at !== request.created_at) {
-      // Determine event name based on status
-      if (request.status === 'cancelled') {
-        events.push({ name: 'Cancelled', time: new Date(request.updated_at) });
-      } else {
-        events.push({ name: 'Request updated', time: new Date(request.updated_at) });
-      }
-    }
-    
     // Last message time
     const requestMessages = messages[request.id] || [];
     if (requestMessages.length > 0) {
       events.push({ name: 'New message', time: new Date(requestMessages[requestMessages.length - 1].created_at) });
     }
     
-    // Order related events - use delivery_deadline and delivery_status to infer events
+    // Order related events based on status
     if (request.orders) {
-      // If order exists, it was created (use request updated_at as approximation if no better data)
-      if (request.order_id) {
-        events.push({ name: 'Order created', time: new Date(request.updated_at) });
+      if (request.orders.status === 'pending') {
+        events.push({ name: 'Order pending payment', time: new Date(request.updated_at) });
+      } else if (request.orders.status === 'paid') {
+        events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+      } else if (request.orders.status === 'cancelled') {
+        events.push({ name: 'Order cancelled', time: new Date(request.updated_at) });
       }
+      
+      // Delivery status events
       if (request.orders.delivery_status === 'pending' && request.orders.delivery_deadline) {
-        events.push({ name: 'Awaiting delivery', time: new Date(request.orders.delivery_deadline) });
-      }
-      if (request.orders.delivery_status === 'delivered') {
+        events.push({ name: 'Awaiting delivery', time: new Date(request.updated_at) });
+      } else if (request.orders.delivery_status === 'delivered') {
         events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
-      }
-      if (request.orders.delivery_status === 'accepted') {
+      } else if (request.orders.delivery_status === 'accepted') {
         events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
+      } else if (request.orders.delivery_status === 'rejected') {
+        events.push({ name: 'Delivery rejected', time: new Date(request.updated_at) });
       }
+    }
+    
+    // Request status based events
+    if (request.status === 'cancelled') {
+      const cancelledBy = request.cancelled_by === 'client' ? 'by client' : 
+                          request.cancelled_by === 'agency' ? 'by agency' : 
+                          request.cancelled_by === 'admin' ? 'by admin' : '';
+      events.push({ name: `Request cancelled ${cancelledBy}`.trim(), time: new Date(request.updated_at) });
+    }
+    
+    // Check for offer sent or client order request
+    if (!request.order_id && hasPendingOfferSent(request.id)) {
+      events.push({ name: 'Offer sent to client', time: new Date(request.updated_at) });
+    } else if (!request.order_id && hasClientOrderRequestPending(request.id)) {
+      events.push({ name: 'Client requested order', time: new Date(request.updated_at) });
     }
     
     // Find the most recent event
