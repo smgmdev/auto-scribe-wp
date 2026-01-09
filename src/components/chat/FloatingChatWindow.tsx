@@ -3528,7 +3528,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  className="flex-1 bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
                   onClick={async () => {
                     if (!globalChatRequest) return;
                     
@@ -3629,7 +3629,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 bg-black text-white border border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white"
+                  className="flex-1 bg-white text-black border border-black hover:bg-black hover:text-white transition-all duration-200"
                   onClick={handleRejectClientOrderRequest}
                   disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
                 >
