@@ -658,8 +658,8 @@ export function MyRequestsView() {
       if (msg.sender_type === 'client' && msg.message.includes('[ORDER_REQUEST]')) {
         hasClientOrderRequest = true;
       }
-      // Check if there's a rejection response from agency
-      if (msg.sender_type === 'agency' && msg.message.includes('[CLIENT_ORDER_REJECTED]')) {
+      // Check if there's a rejection response from agency - format is [ORDER_REQUEST_REJECTED]
+      if (msg.sender_type === 'agency' && msg.message.includes('[ORDER_REQUEST_REJECTED]')) {
         wasRejected = true;
       }
     }
