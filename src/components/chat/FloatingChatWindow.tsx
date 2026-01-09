@@ -6140,14 +6140,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             {/* Delivery Duration */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium">Delivery Duration</Label>
+                <Label className="text-sm font-medium">Delivery Duration <span className="text-destructive">*</span></Label>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Set the delivery time for this order.</p>
+                      <p>Set the delivery time for this order. At least one value must be greater than 0.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -6189,6 +6189,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   />
                 </div>
               </div>
+              {orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0 && (
+                <p className="text-xs text-destructive">Please enter a delivery duration</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -6300,7 +6303,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setOrderDeliveryMinutes(0);
                   }
                 }}
-                disabled={sending}
+                disabled={sending || (orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0)}
               >
                 {sending ? (
                   <>
