@@ -1190,11 +1190,6 @@ export function AgencyRequestsView() {
                                 <Badge className="bg-black text-orange-400">
                                   Delivered - Revision Requested
                                 </Badge>
-                              ) : isOverdue ? (
-                                <Badge variant="destructive" className="bg-red-600 text-white">
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
-                                  Overdue
-                                </Badge>
                               ) : isInDispute ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
@@ -1204,15 +1199,20 @@ export function AgencyRequestsView() {
                                 <Badge className="bg-purple-600 text-white">
                                   Delivered - Pending Approval
                                 </Badge>
+                              ) : hasOrder && isOverdue ? (
+                                <Badge variant="destructive" className="bg-red-600 text-white">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Order Placed - Overdue
+                                </Badge>
                               ) : hasOrder ? (
                                 <Badge className="bg-black text-white dark:bg-white dark:text-black">
                                   <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
                                   Order Placed
                                   {(() => {
                                     const countdown = getTimeRemaining();
-                                    return countdown && (
-                                      <span className={`ml-2 ${countdown.isOverdue ? 'text-red-400' : ''}`}>
-                                        {countdown.isOverdue ? '• Overdue' : `• ${countdown.text}`}
+                                    return countdown && !countdown.isOverdue && (
+                                      <span className="ml-2">
+                                        • {countdown.text}
                                       </span>
                                     );
                                   })()}
