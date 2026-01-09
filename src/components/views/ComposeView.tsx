@@ -1311,7 +1311,7 @@ export function ComposeView() {
         <div className="space-y-4">
           {/* Actions - At Top */}
           <div className="space-y-3">
-            {editingArticle && <Button variant="default" className="w-full" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
+            {editingArticle && <Button variant="default" className="w-full border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
                 {isSavingDraft ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
