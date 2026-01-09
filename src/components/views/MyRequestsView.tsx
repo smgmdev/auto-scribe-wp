@@ -323,10 +323,12 @@ export function MyRequestsView() {
     // Listen for message deletions (e.g., when client cancels their order request)
     const handleServiceMessageDeleted = (event: CustomEvent) => {
       const { messageId, requestId } = event.detail || {};
+      console.log('[MyRequestsView] Received service-message-deleted event:', { messageId, requestId });
       if (messageId && requestId) {
         setMessages(prev => {
           const existingMsgs = prev[requestId] || [];
           const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
+          console.log('[MyRequestsView] Updated messages after deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length });
           return {
             ...prev,
             [requestId]: filteredMsgs
