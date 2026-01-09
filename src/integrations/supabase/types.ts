@@ -866,6 +866,7 @@ export type Database = {
           agency_read: boolean
           cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           client_last_read_at: string | null
           client_read: boolean
           created_at: string
@@ -885,6 +886,7 @@ export type Database = {
           agency_read?: boolean
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           client_last_read_at?: string | null
           client_read?: boolean
           created_at?: string
@@ -904,6 +906,7 @@ export type Database = {
           agency_read?: boolean
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           client_last_read_at?: string | null
           client_read?: boolean
           created_at?: string

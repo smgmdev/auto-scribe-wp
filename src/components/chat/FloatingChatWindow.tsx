@@ -1412,7 +1412,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const updateData: Record<string, any> = { 
         status: 'cancelled',
         cancellation_reason: cancellationReason.trim(),
-        cancelled_at: new Date().toISOString()
+        cancelled_at: new Date().toISOString(),
+        cancelled_by: cancelledBy
       };
       
       // Set unread flags for counterparty notification
@@ -4539,7 +4540,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Order Details
                       </DropdownMenuItem>
                     )}
-                    {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && (
+                    {globalChatType === 'agency-request' && !hasOrder && !hasAcceptedOrderRequest && !isAdmin && (
                       hasExistingClientOrderRequest ? (
                         <DropdownMenuItem 
                           className="cursor-pointer text-muted-foreground"
@@ -4549,8 +4550,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem 
-                          className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                          disabled={isCancelled || isAdmin}
+                          className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          disabled={isCancelled}
                           onSelect={() => {
                             setActionDropdownOpen(false);
                             handleOpenSendOrderDialog();
@@ -4717,8 +4718,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )}
                     {!hasOrder && !hasAcceptedOrderRequest && !isCancelled && (
                       <DropdownMenuItem 
-                        className={`cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                        disabled={isAdmin}
+                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         onSelect={() => {
                           setActionDropdownOpen(false);
                           setCancelDialogOpen(true);
