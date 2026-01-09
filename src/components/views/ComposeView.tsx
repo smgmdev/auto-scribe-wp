@@ -80,6 +80,7 @@ export function ComposeView() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [showDraftSuccess, setShowDraftSuccess] = useState(false);
   const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const [publishedLink, setPublishedLink] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -878,10 +879,11 @@ export function ComposeView() {
       });
       
       if (savedArticle) {
-        toast({
-          title: "Draft saved",
-          description: currentSite ? `Draft saved to ${currentSite.name}` : "Your draft has been saved"
-        });
+        setIsSavingDraft(false);
+        setShowDraftSuccess(true);
+        setTimeout(() => {
+          setShowDraftSuccess(false);
+        }, 2000);
       }
     } catch (error) {
       console.error('Draft save error:', error);
@@ -890,7 +892,6 @@ export function ComposeView() {
         description: error instanceof Error ? error.message : "Could not save draft",
         variant: "destructive"
       });
-    } finally {
       setIsSavingDraft(false);
     }
   };
@@ -921,7 +922,24 @@ export function ComposeView() {
         </div>
       )}
 
-      {/* Success Overlay */}
+      {/* Draft Success Overlay */}
+      {showDraftSuccess && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+            <div className="relative">
+              <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
+                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-semibold text-foreground">Draft Saved!</p>
+              <p className="text-sm text-muted-foreground mt-2">Your draft has been saved successfully</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Success Overlay */}
       {showPublishSuccess && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
           <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
