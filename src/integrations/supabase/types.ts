@@ -310,7 +310,9 @@ export type Database = {
           content: string
           created_at: string
           featured_image: Json | null
+          focus_keyword: string | null
           id: string
+          meta_description: string | null
           published_to: string | null
           published_to_favicon: string | null
           published_to_name: string | null
@@ -331,7 +333,9 @@ export type Database = {
           content: string
           created_at?: string
           featured_image?: Json | null
+          focus_keyword?: string | null
           id?: string
+          meta_description?: string | null
           published_to?: string | null
           published_to_favicon?: string | null
           published_to_name?: string | null
@@ -352,7 +356,9 @@ export type Database = {
           content?: string
           created_at?: string
           featured_image?: Json | null
+          focus_keyword?: string | null
           id?: string
+          meta_description?: string | null
           published_to?: string | null
           published_to_favicon?: string | null
           published_to_name?: string | null
