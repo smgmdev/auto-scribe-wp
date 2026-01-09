@@ -3384,6 +3384,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             detail: { messageId: msg.id, requestId: globalChatRequest?.id }
           }));
           
+          // Also broadcast via Supabase channel for cross-tab sync
+          const channel = supabase.channel('message-deletions');
+          await channel.subscribe();
+          await channel.send({
+            type: 'broadcast',
+            event: 'message-deleted',
+            payload: { messageId: msg.id, requestId: globalChatRequest?.id }
+          });
+          supabase.removeChannel(channel);
+          
           toast({
             title: "Order request cancelled",
             description: "The order request has been removed.",
@@ -3933,6 +3943,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           window.dispatchEvent(new CustomEvent('service-message-deleted', {
             detail: { messageId: msg.id, requestId: globalChatRequest?.id }
           }));
+          
+          // Also broadcast via Supabase channel for cross-tab sync
+          const channel = supabase.channel('message-deletions');
+          await channel.subscribe();
+          await channel.send({
+            type: 'broadcast',
+            event: 'message-deleted',
+            payload: { messageId: msg.id, requestId: globalChatRequest?.id }
+          });
+          supabase.removeChannel(channel);
           
           toast({
             title: "Offer cancelled",
