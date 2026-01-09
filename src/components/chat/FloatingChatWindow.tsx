@@ -3450,13 +3450,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200 dark:border-amber-800'
           }`}>
             <div className="flex items-start gap-3">
-              {clientOrderRequest.media_site_favicon && (
-                <img 
-                  src={clientOrderRequest.media_site_favicon} 
-                  alt="" 
-                  className="w-10 h-10 rounded-lg object-cover shrink-0"
-                />
-              )}
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                isOwnMessage 
+                  ? 'bg-primary-foreground/20' 
+                  : 'bg-amber-100 dark:bg-amber-900/50'
+              }`}>
+                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Tag className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-amber-600 dark:text-amber-400'}`} />
