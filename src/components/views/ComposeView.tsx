@@ -903,21 +903,60 @@ export function ComposeView() {
     setIsSavingDraft(true);
     
     try {
+      let wpPostId: number | undefined;
+      let wpLink: string | undefined;
+      let wpFeaturedMediaId: number | undefined;
+      let featuredImageUrl: string | undefined;
+
       // If site is selected, save as draft to WordPress first
       if (currentSite) {
         try {
-          await publishArticle({
+          // Upload featured image if exists
+          if (featuredImage.file) {
+            const mediaResult = await uploadMedia(currentSite, featuredImage.file, {
+              title: featuredImage.title,
+              alt_text: featuredImage.altText,
+              caption: featuredImage.caption,
+              description: featuredImage.description
+            });
+            wpFeaturedMediaId = mediaResult.id;
+            featuredImageUrl = mediaResult.source_url;
+          } else if (imagePreview) {
+            // Convert data URL to File and upload
+            try {
+              const response = await fetch(imagePreview);
+              const blob = await response.blob();
+              const fileName = `featured-image-${Date.now()}.${blob.type.split('/')[1] || 'jpg'}`;
+              const file = new File([blob], fileName, { type: blob.type });
+              
+              const mediaResult = await uploadMedia(currentSite, file, {
+                title: featuredImage.title,
+                alt_text: featuredImage.altText,
+                caption: featuredImage.caption,
+                description: featuredImage.description
+              });
+              wpFeaturedMediaId = mediaResult.id;
+              featuredImageUrl = mediaResult.source_url;
+            } catch (imgError) {
+              console.error('Failed to upload image for draft:', imgError);
+            }
+          }
+
+          const wpResult = await publishArticle({
             site: currentSite,
             title,
             content,
             status: 'draft',
             categories: selectedCategories,
             tags: selectedTagIds,
+            featuredMediaId: wpFeaturedMediaId,
             seo: {
               focusKeyword,
               metaDescription
             }
           });
+          wpPostId = wpResult.id;
+          wpLink = wpResult.link;
         } catch (error) {
           console.error('WordPress draft save failed:', error);
           // Continue to save to database even if WordPress fails
@@ -925,16 +964,16 @@ export function ComposeView() {
       }
 
       // Build featured image object with URL if available (exclude file object as it can't be serialized)
-      const savedFeaturedImage = imagePreview ? {
+      const savedFeaturedImage = (featuredImageUrl || imagePreview) ? {
         file: null,
-        url: imagePreview,
+        url: featuredImageUrl || imagePreview,
         title: featuredImage.title || '',
         caption: featuredImage.caption || '',
         altText: featuredImage.altText || '',
         description: featuredImage.description || ''
       } : undefined;
 
-      // Always save to database with all data including site ID and SEO settings
+      // Always save to database with all data including site ID, SEO settings, and WP post ID
       const savedArticle = await addArticle({
         title,
         content,
@@ -945,6 +984,9 @@ export function ComposeView() {
         publishedTo: selectedSite || undefined,
         publishedToName: currentSite?.name,
         publishedToFavicon: currentSite?.favicon,
+        wpPostId,
+        wpLink,
+        wpFeaturedMediaId,
         categories: selectedCategories,
         tagIds: selectedTagIds,
         tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
