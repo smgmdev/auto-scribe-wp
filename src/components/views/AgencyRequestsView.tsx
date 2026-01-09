@@ -598,7 +598,8 @@ export function AgencyRequestsView() {
     let hasAgencyResponse = false;
     
     for (const msg of requestMessages) {
-      if (msg.sender_type === 'client' && msg.message.includes('[ORDER_REQUEST]')) {
+      // Client order requests use [CLIENT_ORDER_REQUEST] format
+      if (msg.sender_type === 'client' && msg.message.includes('[CLIENT_ORDER_REQUEST]')) {
         hasClientOrderRequest = true;
       }
       // Check if agency has responded with acceptance or rejection
