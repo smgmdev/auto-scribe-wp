@@ -6186,13 +6186,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       title: isResendMode ? "Order Request Resent" : "Order Request Sent",
                       description: "The client will be notified to complete the payment.",
                     });
-                    
-                    setSendOrderDialogOpen(false);
-                    setSpecialTerms('');
-                    setIsResendMode(false);
-                    setOrderDeliveryDays(0);
-                    setOrderDeliveryHours(0);
-                    setOrderDeliveryMinutes(0);
+                    // Form state reset is handled in finally block
                   } catch (error: any) {
                     toast({
                       variant: 'destructive',
@@ -6201,6 +6195,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     });
                   } finally {
                     setSending(false);
+                    // Always close dialog and reset form in finally block
+                    // This prevents the button from getting stuck if there's a network error
+                    // (the message may have still been sent even if we got an error response)
+                    setSendOrderDialogOpen(false);
+                    setSpecialTerms('');
+                    setIsResendMode(false);
+                    setOrderDeliveryDays(0);
+                    setOrderDeliveryHours(0);
+                    setOrderDeliveryMinutes(0);
                   }
                 }}
                 disabled={sending}
