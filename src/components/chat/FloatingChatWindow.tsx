@@ -3481,7 +3481,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   ? 'bg-primary-foreground/20' 
                   : 'bg-blue-100 dark:bg-blue-900/50'
               }`}>
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
+                <Tag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -3771,7 +3771,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                 Order Delivered
               </span>
@@ -3852,7 +3852,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                 Delivery Accepted
               </span>
@@ -3881,7 +3881,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <RefreshCw className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-600 dark:text-orange-400'}`} />
+              <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-700 dark:text-orange-300'}`}>
                 Revision Requested
               </span>
@@ -4049,7 +4049,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   ? 'bg-primary-foreground/20' 
                   : 'bg-blue-100 dark:bg-blue-900/50'
               }`}>
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
+                <Tag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
