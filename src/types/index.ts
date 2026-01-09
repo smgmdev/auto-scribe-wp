@@ -60,6 +60,8 @@ export interface Article {
   categories?: number[];
   tagIds?: number[];
   tags?: string[];
+  focusKeyword?: string;
+  metaDescription?: string;
   createdAt: Date;
   updatedAt: Date;
 }

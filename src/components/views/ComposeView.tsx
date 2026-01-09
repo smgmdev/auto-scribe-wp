@@ -205,6 +205,14 @@ export function ComposeView() {
         setSelectedTagIds(editingArticle.tagIds);
       }
       
+      // Set SEO settings
+      if (editingArticle.focusKeyword) {
+        setFocusKeyword(editingArticle.focusKeyword);
+      }
+      if (editingArticle.metaDescription) {
+        setMetaDescription(editingArticle.metaDescription);
+      }
+      
       // Set featured image with all metadata
       if (editingArticle.featuredImage?.url) {
         setImagePreview(editingArticle.featuredImage.url);
@@ -791,6 +799,8 @@ export function ComposeView() {
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+          focusKeyword: focusKeyword || undefined,
+          metaDescription: metaDescription || undefined,
         });
       } else {
         // Build featured image object for database
@@ -814,6 +824,8 @@ export function ComposeView() {
           categories: selectedCategories,
           tagIds: selectedTagIds,
           tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+          focusKeyword: focusKeyword || undefined,
+          metaDescription: metaDescription || undefined,
         });
       }
       
@@ -882,7 +894,7 @@ export function ComposeView() {
         description: featuredImage.description || ''
       } : undefined;
 
-      // Always save to database with all data including site ID
+      // Always save to database with all data including site ID and SEO settings
       const savedArticle = await addArticle({
         title,
         content,
@@ -896,6 +908,8 @@ export function ComposeView() {
         categories: selectedCategories,
         tagIds: selectedTagIds,
         tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+        focusKeyword: focusKeyword || undefined,
+        metaDescription: metaDescription || undefined,
       });
       
       if (savedArticle) {

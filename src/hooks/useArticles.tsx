@@ -22,6 +22,8 @@ interface DBArticle {
   categories: number[] | null;
   tag_ids: number[] | null;
   tags: string[] | null;
+  focus_keyword: string | null;
+  meta_description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -43,6 +45,8 @@ const mapDBToArticle = (db: DBArticle): Article => ({
   categories: db.categories || undefined,
   tagIds: db.tag_ids || undefined,
   tags: db.tags || undefined,
+  focusKeyword: db.focus_keyword || undefined,
+  metaDescription: db.meta_description || undefined,
   createdAt: new Date(db.created_at),
   updatedAt: new Date(db.updated_at),
 });
@@ -137,6 +141,8 @@ export function useArticles() {
       categories: article.categories || null,
       tag_ids: article.tagIds || null,
       tags: article.tags || null,
+      focus_keyword: article.focusKeyword || null,
+      meta_description: article.metaDescription || null,
     };
 
     const { data, error } = await supabase
@@ -178,6 +184,8 @@ export function useArticles() {
     if (updates.categories !== undefined) updateData.categories = updates.categories;
     if (updates.tagIds !== undefined) updateData.tag_ids = updates.tagIds;
     if (updates.tags !== undefined) updateData.tags = updates.tags;
+    if (updates.focusKeyword !== undefined) updateData.focus_keyword = updates.focusKeyword;
+    if (updates.metaDescription !== undefined) updateData.meta_description = updates.metaDescription;
 
     const { error } = await supabase
       .from('articles')
