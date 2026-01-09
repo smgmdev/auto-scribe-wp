@@ -235,12 +235,14 @@ export function ComposeView() {
   // Fetch categories and tags when site is selected
   useEffect(() => {
     const siteChanged = previousSiteIdRef.current !== null && previousSiteIdRef.current !== currentSite?.id;
+    // Check if this is an initial load for editing (site matches the article's published site)
+    const isInitialEditLoad = editingArticle && currentSite?.id === editingArticle.publishedTo && previousSiteIdRef.current === null;
     
     if (currentSite) {
       setFetchError(null);
       
-      // Reset selected categories and tags when site changes (but not on initial load)
-      if (siteChanged) {
+      // Reset selected categories and tags when site changes (but not on initial load or initial edit load)
+      if (siteChanged && !isInitialEditLoad) {
         setSelectedCategories([]);
         setSelectedTagIds([]);
         setFocusKeyword('');
