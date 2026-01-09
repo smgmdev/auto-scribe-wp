@@ -473,6 +473,32 @@ export function MyRequestsView() {
           });
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          const deletedMsg = payload.old as any;
+          if (!deletedMsg?.id || !deletedMsg?.request_id) return;
+          
+          // Check if this message belongs to one of our requests
+          const requestExists = requestsRef.current.some(r => r.id === deletedMsg.request_id);
+          if (!requestExists) return;
+          
+          // Remove the deleted message from local state
+          setMessages(prev => {
+            const existingMsgs = prev[deletedMsg.request_id] || [];
+            const filteredMsgs = existingMsgs.filter(m => m.id !== deletedMsg.id);
+            return {
+              ...prev,
+              [deletedMsg.request_id]: filteredMsgs
+            };
+          });
+        }
+      )
       .subscribe();
 
     // Also subscribe to order updates to detect delivery_status changes
