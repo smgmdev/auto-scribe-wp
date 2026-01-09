@@ -1388,7 +1388,9 @@ export function ComposeView() {
                   Publishing...
                 </> : <>
                   <Send className="mr-2 h-4 w-4" />
-                  {editingArticle ? 'Update & Publish' : 'Publish Article'}
+                  {editingArticle 
+                    ? (editingArticle.status === 'published' ? 'Update & Publish' : 'Publish') 
+                    : 'Publish Article'}
                 </>}
             </Button>
             {!isAdmin && selectedSite && !canAffordSite(selectedSite) && (
