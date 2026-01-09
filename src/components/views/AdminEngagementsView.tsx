@@ -437,9 +437,33 @@ export function AdminEngagementsView() {
     return true; // Most recent client order request is still pending
   };
 
-  const activeRequests = requests.filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted');
-  const deliveredRequests = requests.filter(r => r.orders?.delivery_status === 'accepted');
-  const cancelledRequests = requests.filter(r => r.status === 'cancelled');
+  // Helper function to get the last message time for a request
+  const getLastMessageTime = (requestId: string): Date => {
+    const requestMessages = messages[requestId] || [];
+    if (requestMessages.length === 0) {
+      // If no messages, use request created_at as fallback
+      const request = requests.find(r => r.id === requestId);
+      return request ? new Date(request.created_at) : new Date(0);
+    }
+    return new Date(requestMessages[requestMessages.length - 1].created_at);
+  };
+
+  // Sort requests by last message time (most recent first)
+  const sortByLastMessage = (a: ServiceRequest, b: ServiceRequest): number => {
+    const timeA = getLastMessageTime(a.id).getTime();
+    const timeB = getLastMessageTime(b.id).getTime();
+    return timeB - timeA; // Descending order (most recent first)
+  };
+
+  const activeRequests = requests
+    .filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted')
+    .sort(sortByLastMessage);
+  const deliveredRequests = requests
+    .filter(r => r.orders?.delivery_status === 'accepted')
+    .sort(sortByLastMessage);
+  const cancelledRequests = requests
+    .filter(r => r.status === 'cancelled')
+    .sort(sortByLastMessage);
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
