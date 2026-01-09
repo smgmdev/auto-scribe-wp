@@ -738,12 +738,41 @@ export function AgencyRequestsView() {
     // Request created
     events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
     
-    // Last message time
+    // Last message time - check for special card types
     if (requestMessages.length > 0) {
       const lastMsg = requestMessages[requestMessages.length - 1];
-      const senderLabel = lastMsg.sender_type === 'client' ? 'Client' : 
-                          lastMsg.sender_type === 'agency' ? 'You' : 'Staff';
-      events.push({ name: `Message from ${senderLabel}`, time: new Date(lastMsg.created_at) });
+      const msgContent = lastMsg.message;
+      
+      // Check for special card types and use their titles
+      let eventName = '';
+      if (msgContent.includes('[ORDER_REQUEST_ACCEPTED]')) {
+        eventName = 'Order request accepted';
+      } else if (msgContent.includes('[ORDER_REQUEST_REJECTED]')) {
+        eventName = 'Order request rejected';
+      } else if (msgContent.includes('[ORDER_REQUEST]')) {
+        eventName = 'Offer sent to client';
+      } else if (msgContent.includes('[CLIENT_ORDER_REQUEST]')) {
+        eventName = 'Client requested order';
+      } else if (msgContent.includes('[OFFER_REJECTED]')) {
+        eventName = 'Client rejected offer';
+      } else if (msgContent.includes('[DELIVERY]')) {
+        eventName = 'Delivery submitted';
+      } else if (msgContent.includes('[DELIVERY_ACCEPTED]')) {
+        eventName = 'Delivery accepted';
+      } else if (msgContent.includes('[REVISION_REQUESTED]')) {
+        eventName = 'Revision requested';
+      } else if (msgContent.includes('[ORDER_CANCELLED]')) {
+        eventName = 'Order cancelled';
+      } else if (msgContent.includes('[ENGAGEMENT_CANCELLED]')) {
+        eventName = 'Engagement cancelled';
+      } else {
+        // Regular message
+        const senderLabel = lastMsg.sender_type === 'client' ? 'Client' : 
+                            lastMsg.sender_type === 'agency' ? 'You' : 'Staff';
+        eventName = `Message from ${senderLabel}`;
+      }
+      
+      events.push({ name: eventName, time: new Date(lastMsg.created_at) });
     }
     
     // Order related events based on status
