@@ -6099,7 +6099,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              This will send an order request to the client. They will need to confirm and pay to proceed.
+              This will send an offer to the client. Client will need to accept and pay to proceed.
             </p>
 
             <div className="flex gap-2">
