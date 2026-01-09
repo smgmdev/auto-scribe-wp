@@ -1229,7 +1229,7 @@ export function AgencyRequestsView() {
                             <div className="space-y-0.5">
                               <span className="text-xs text-muted-foreground block">
                                 <Clock className="h-3 w-3 inline mr-1" />
-                                <span className="font-medium">Last event:</span> {eventName} · {format(eventTime, 'MMM d, h:mm a')}
+                                Last event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}
                               </span>
                               <span className="text-xs text-muted-foreground block">
                                 Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
