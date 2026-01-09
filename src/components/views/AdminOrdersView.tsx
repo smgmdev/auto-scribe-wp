@@ -54,7 +54,7 @@ interface Order {
 
 export function AdminOrdersView() {
   const { isAdmin } = useAuth();
-  const { openGlobalChat, setUnreadOrdersCount, setUnreadDisputesCount, decrementUnreadDisputesCount } = useAppStore();
+  const { openGlobalChat, setUnreadOrdersCount, setUnreadDisputesCount, decrementUnreadDisputesCount, decrementUnreadOrdersCount } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -469,6 +469,22 @@ export function AdminOrdersView() {
           description: "No engagement chat is associated with this order.",
         });
         return;
+      }
+
+      // Mark the order as read if it's an unread active order
+      if (!targetOrder.read && (targetOrder.status === 'paid' || targetOrder.status === 'pending_payment')) {
+        await supabase
+          .from('orders')
+          .update({ read: true })
+          .eq('id', targetOrder.id);
+        
+        // Update local state
+        setOrders(prev => prev.map(o => 
+          o.id === targetOrder.id ? { ...o, read: true } : o
+        ));
+        
+        // Decrement global count
+        decrementUnreadOrdersCount();
       }
 
       // Mark the dispute as read by admin when investigating (if there's a dispute for this order)
@@ -931,7 +947,7 @@ export function AdminOrdersView() {
                 const dispute = disputes.find(d => d.order_id === order.id);
                 const hasUnreadNotification = isDisputedOrder 
                   ? (dispute && !dispute.read) 
-                  : (!order.read && order.status === 'paid');
+                  : (!order.read && (order.status === 'paid' || order.status === 'pending_payment'));
                 
                 return (
                 <Card 
