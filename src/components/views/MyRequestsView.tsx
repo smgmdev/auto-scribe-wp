@@ -355,16 +355,41 @@ export function MyRequestsView() {
         }
       }
     };
+    
+    // Listen for message updates (accept, reject, cancel, etc.)
+    const handleServiceMessageUpdated = async (event: CustomEvent) => {
+      const { requestId } = event.detail || {};
+      if (requestId) {
+        try {
+          const { data: freshMessages } = await supabase
+            .from('service_messages')
+            .select('*')
+            .eq('request_id', requestId)
+            .order('created_at', { ascending: true });
+          
+          if (freshMessages) {
+            setMessages(prev => ({
+              ...prev,
+              [requestId]: freshMessages
+            }));
+          }
+        } catch (error) {
+          console.error('[MyRequestsView] Error refetching messages after update:', error);
+        }
+      }
+    };
 
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
     window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
     window.addEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
     window.addEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
+    window.addEventListener('service-message-updated', handleServiceMessageUpdated as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
       window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
       window.removeEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
       window.removeEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
+      window.removeEventListener('service-message-updated', handleServiceMessageUpdated as EventListener);
     };
   }, [clearUnreadMessageCount, setUserUnreadEngagementsCount]);
 
