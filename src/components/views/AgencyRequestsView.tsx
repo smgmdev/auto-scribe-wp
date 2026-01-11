@@ -988,18 +988,6 @@ export function AgencyRequestsView() {
     return requests.filter(r => r.status === 'cancelled');
   }, [requests]);
 
-  const unreadCompletedRequestsCount = useMemo(() => {
-    return completedRequests.filter(r => !r.read).length;
-  }, [completedRequests]);
-
-  const unreadCancelledCount = useMemo(() => {
-    return cancelledRequests.filter(r => !r.read).length;
-  }, [cancelledRequests]);
-
-  const unreadActiveCount = useMemo(() => {
-    return activeRequests.filter(r => !r.read).length;
-  }, [activeRequests]);
-
   const sortedRequests = useMemo(() => {
     const filtered = activeRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
@@ -1050,6 +1038,19 @@ export function AgencyRequestsView() {
       return bCancelled - aCancelled;
     });
   }, [cancelledRequests, searchQuery]);
+
+  // Compute unread counts from the DISPLAYED items (after sorting/filtering) to match what user sees
+  const unreadActiveCount = useMemo(() => {
+    return sortedRequests.filter(r => !r.read).length;
+  }, [sortedRequests]);
+
+  const unreadCompletedRequestsCount = useMemo(() => {
+    return sortedCompletedRequests.filter(r => !r.read).length;
+  }, [sortedCompletedRequests]);
+
+  const unreadCancelledCount = useMemo(() => {
+    return sortedCancelledRequests.filter(r => !r.read).length;
+  }, [sortedCancelledRequests]);
 
   // Calculate order counts - first get all disputed order IDs from the disputes table
   const disputedOrderIds = useMemo(() => {
