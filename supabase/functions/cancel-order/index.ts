@@ -109,7 +109,7 @@ serve(async (req) => {
       .from("orders")
       .select(`
         *,
-        media_sites (id, name)
+        media_sites (id, name, price)
       `)
       .eq("id", order_id)
       .single();
@@ -148,11 +148,11 @@ serve(async (req) => {
       );
     }
 
-    // Calculate credit refund (amount_cents = creditCost * 100, so creditCost = amount_cents / 100)
-    const creditRefund = Math.round(order.amount_cents / 100);
-    logStep("Calculated credit refund", { amount_cents: order.amount_cents, creditRefund });
+    // Calculate credit amount (for display purposes only - no actual refund needed)
+    const creditAmount = order.media_sites?.price || Math.round(order.amount_cents / 100);
+    logStep("Credit amount for cancelled order", { amount_cents: order.amount_cents, creditAmount });
 
-    // Get current user credits for the order owner (not the admin if admin is cancelling)
+    // Get current user credits for the order owner (for response)
     const orderOwnerId = order.user_id;
     logStep("Fetching user credits", { orderOwnerId });
     
@@ -173,7 +173,6 @@ serve(async (req) => {
     }
 
     const currentCredits = userCredits?.credits || 0;
-    const newCredits = currentCredits + creditRefund;
 
     // Update the order status to cancelled
     // If admin is cancelling, mark as unread for the user so they see the notification badge
@@ -195,33 +194,11 @@ serve(async (req) => {
       );
     }
 
-    // Refund credits to order owner
-    const { error: updateCreditsError } = await supabaseAdmin
-      .from("user_credits")
-      .update({ 
-        credits: newCredits, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq("user_id", orderOwnerId);
+    // NO credit refund needed - credits were never deducted from balance
+    // They were only "locked" and now the lock is released by cancelling the order
+    // NO transaction created - per user requirement, only show purchases, gifts, and spent
 
-    if (updateCreditsError) {
-      logStep("Error refunding credits", { error: updateCreditsError.message });
-      // Don't fail - order is already cancelled
-    }
-
-    // Record credit refund transaction for the order owner
-    const mediaSiteName = order.media_sites?.name || 'Unknown';
-    const cancelledBy = isAdmin ? 'admin' : 'user';
-    await supabaseAdmin
-      .from("credit_transactions")
-      .insert({
-        user_id: orderOwnerId,
-        amount: creditRefund,
-        type: "refund",
-        description: `Order cancelled by ${cancelledBy} - ${mediaSiteName}`
-      });
-
-    logStep("Credit refund recorded", { creditRefund, newCredits });
+    logStep("Order cancelled - credits unlocked (no balance change)", { creditAmount, balance: currentCredits });
 
     // Get the linked service request to send a cancellation message
     const { data: serviceRequest } = await supabaseAdmin
@@ -275,6 +252,7 @@ serve(async (req) => {
     }
 
     // Send cancellation message to chat (skip if this is a dispute resolution - frontend sends DISPUTE_RESOLVED instead)
+    const mediaSiteName = order.media_sites?.name || 'Unknown';
     const isDisputeResolution = reason && reason.startsWith('Dispute resolution:');
     
     if (serviceRequest) {
@@ -284,7 +262,7 @@ serve(async (req) => {
           type: 'order_cancelled',
           media_site_id: order.media_sites?.id,
           media_site_name: mediaSiteName,
-          credits_refunded: creditRefund,
+          credits_unlocked: creditAmount, // Changed from credits_refunded
           order_id: order_id,
           cancelled_by: isAdmin ? 'admin' : 'user',
           reason: isAdmin ? (reason || null) : null
@@ -326,11 +304,11 @@ serve(async (req) => {
           // Only send dispute-resolved notification for dispute resolutions
           const disputePayload = {
             action: 'dispute-resolved',
-            message: `Dispute resolved - Order cancelled by Arcana Mace Staff. ${creditRefund} credits refunded.`,
+            message: `Dispute resolved - Order cancelled by Arcana Mace Staff. ${creditAmount} credits unlocked.`,
             reason: reason?.replace('Dispute resolution: ', '') || null,
             orderId: order_id,
             requestId: serviceRequest.id,
-            creditsRefunded: creditRefund
+            creditsUnlocked: creditAmount
           };
           
           // Use REST API for reliable broadcast
@@ -357,7 +335,7 @@ serve(async (req) => {
             reason: reason || null,
             orderId: order_id,
             requestId: serviceRequest.id,
-            creditsRefunded: creditRefund
+            creditsUnlocked: creditAmount
           };
           
           // Notify user via REST API
@@ -381,13 +359,13 @@ serve(async (req) => {
       }
     }
 
-    logStep("Order cancelled successfully", { order_id, creditRefund });
+    logStep("Order cancelled successfully", { order_id, creditsUnlocked: creditAmount });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        credits_refunded: creditRefund,
-        new_balance: newCredits
+        credits_unlocked: creditAmount,
+        new_balance: currentCredits // Balance stays the same
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
