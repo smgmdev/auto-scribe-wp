@@ -1115,6 +1115,22 @@ export function AgencyRequestsView() {
     [orders, disputedOrderIds, requests]
   );
 
+  // Compute unread counts based on actual displayed items (matching the filtered lists above)
+  const unreadActiveOrdersCount = useMemo(() => 
+    activeOrders.filter(o => !o.read).length,
+    [activeOrders]
+  );
+
+  const unreadDisputesCount = useMemo(() => 
+    disputes.filter(d => !d.read).length,
+    [disputes]
+  );
+
+  const unreadCompletedOrdersCount = useMemo(() => 
+    completedOrders.filter(o => !(o as any).agency_read).length,
+    [completedOrders]
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -1157,9 +1173,9 @@ export function AgencyRequestsView() {
           </TabsTrigger>
           <TabsTrigger value="orders" className="relative">
             Orders ({orders.length})
-            {(agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount) > 0 && (
+            {(unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount}
+                {unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount}
               </span>
             )}
           </TabsTrigger>
@@ -1547,27 +1563,27 @@ export function AgencyRequestsView() {
               <TabsTrigger value="active" className="gap-2 relative">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
-                {agencyUnreadOrdersCount > 0 && (
+                {unreadActiveOrdersCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {agencyUnreadOrdersCount}
+                    {unreadActiveOrdersCount}
                   </span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="disputes" className="gap-2 relative">
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputedOrders.length})
-                {disputes.filter(d => !d.read).length > 0 && (
+                {unreadDisputesCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {disputes.filter(d => !d.read).length}
+                    {unreadDisputesCount}
                   </span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="completed" className="gap-2 relative">
                 <CheckCircle className="h-4 w-4" />
                 Completed ({completedOrders.length})
-                {agencyUnreadCompletedCount > 0 && (
+                {unreadCompletedOrdersCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {agencyUnreadCompletedCount}
+                    {unreadCompletedOrdersCount}
                   </span>
                 )}
               </TabsTrigger>
