@@ -324,42 +324,26 @@ export function MyRequestsView() {
     const handleServiceMessageDeleted = async (event: CustomEvent) => {
       const { messageId, requestId } = event.detail || {};
       console.log('[MyRequestsView] Received service-message-deleted event:', { messageId, requestId });
-      if (messageId && requestId) {
-        // First try to remove from local state
-        setMessages(prev => {
-          const existingMsgs = prev[requestId] || [];
-          const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
-          console.log('[MyRequestsView] Filtering message from local state:', { 
-            requestId, 
-            messageId, 
-            before: existingMsgs.length, 
-            after: filteredMsgs.length,
-            messageIds: existingMsgs.map(m => m.id)
-          });
-          return {
-            ...prev,
-            [requestId]: filteredMsgs
-          };
-        });
+      if (!requestId) return;
+      
+      // Immediately refetch messages for this request from database (most reliable)
+      try {
+        const { data: freshMessages } = await supabase
+          .from('service_messages')
+          .select('*')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: true });
         
-        // Also refetch messages for this request to ensure sync
-        try {
-          const { data: freshMessages } = await supabase
-            .from('service_messages')
-            .select('*')
-            .eq('request_id', requestId)
-            .order('created_at', { ascending: true });
-          
-          if (freshMessages) {
-            console.log('[MyRequestsView] Refetched messages after deletion:', { requestId, count: freshMessages.length });
-            setMessages(prev => ({
-              ...prev,
-              [requestId]: freshMessages
-            }));
-          }
-        } catch (error) {
-          console.error('[MyRequestsView] Error refetching messages after deletion:', error);
-        }
+        console.log('[MyRequestsView] Refetched messages after deletion:', { requestId, count: freshMessages?.length || 0 });
+        
+        // Create a completely new object reference to ensure React detects the change
+        setMessages(prev => {
+          const newMessages = { ...prev };
+          newMessages[requestId] = (freshMessages || []) as ServiceMessage[];
+          return newMessages;
+        });
+      } catch (error) {
+        console.error('[MyRequestsView] Error refetching messages after deletion:', error);
       }
     };
     

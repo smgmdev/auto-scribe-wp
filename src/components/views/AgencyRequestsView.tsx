@@ -316,20 +316,29 @@ export function AgencyRequestsView() {
     };
 
     // Listen for message deletions (e.g., when order request is cancelled)
-    const handleServiceMessageDeleted = (event: CustomEvent) => {
-      const { messageId, requestId } = event.detail || {};
-      console.log('[AgencyRequestsView] Received service-message-deleted event:', { messageId, requestId });
-      if (messageId && requestId) {
+    const handleServiceMessageDeleted = async (event: CustomEvent) => {
+      const { requestId } = event.detail || {};
+      console.log('[AgencyRequestsView] Received service-message-deleted event:', { requestId });
+      if (!requestId) return;
+      
+      // Immediately refetch messages for this request from database (most reliable)
+      try {
+        const { data: freshMessages } = await supabase
+          .from('service_messages')
+          .select('*')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: true });
+        
+        console.log('[AgencyRequestsView] Refetched messages after deletion:', { requestId, count: freshMessages?.length || 0 });
+        
+        // Create a completely new object reference to ensure React detects the change
         setMessages(prev => {
-          const existingMsgs = prev[requestId] || [];
-          console.log('[AgencyRequestsView] Current messages for request:', requestId, existingMsgs.map(m => ({ id: m.id, hasOrderRequest: m.message?.includes('[ORDER_REQUEST]') })));
-          const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
-          console.log('[AgencyRequestsView] Updated messages after deletion:', { requestId, before: existingMsgs.length, after: filteredMsgs.length, messageFound: existingMsgs.length !== filteredMsgs.length });
-          return {
-            ...prev,
-            [requestId]: filteredMsgs
-          };
+          const newMessages = { ...prev };
+          newMessages[requestId] = (freshMessages || []) as ServiceMessage[];
+          return newMessages;
         });
+      } catch (error) {
+        console.error('[AgencyRequestsView] Error refetching messages after deletion:', error);
       }
     };
 
