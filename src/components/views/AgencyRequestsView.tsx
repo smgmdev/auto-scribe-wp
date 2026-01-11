@@ -1167,7 +1167,7 @@ export function AgencyRequestsView() {
           <TabsTrigger value="requests" className="relative">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                 {unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount}
               </span>
             )}
@@ -1175,7 +1175,7 @@ export function AgencyRequestsView() {
           <TabsTrigger value="orders" className="relative">
             Orders ({orders.length})
             {(unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount) > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                 {unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount}
               </span>
             )}
@@ -1189,7 +1189,7 @@ export function AgencyRequestsView() {
                 <MessageSquare className="h-4 w-4" />
                 Active ({activeRequests.length})
                 {unreadActiveCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {unreadActiveCount}
                   </span>
                 )}
@@ -1198,7 +1198,7 @@ export function AgencyRequestsView() {
                 <CheckCircle className="h-4 w-4" />
                 Closed ({completedRequests.length + cancelledRequests.length})
                 {(unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {unreadCompletedRequestsCount + unreadCancelledCount}
                   </span>
                 )}
@@ -1565,7 +1565,7 @@ export function AgencyRequestsView() {
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
                 {unreadActiveOrdersCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {unreadActiveOrdersCount}
                   </span>
                 )}
@@ -1574,7 +1574,7 @@ export function AgencyRequestsView() {
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputedOrders.length})
                 {unreadDisputesCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {unreadDisputesCount}
                   </span>
                 )}
@@ -1583,7 +1583,7 @@ export function AgencyRequestsView() {
                 <CheckCircle className="h-4 w-4" />
                 Completed ({completedOrders.length})
                 {unreadCompletedOrdersCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 z-10 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {unreadCompletedOrdersCount}
                   </span>
                 )}
