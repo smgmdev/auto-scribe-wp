@@ -38,8 +38,10 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Available credits = total credits minus locked credits (in active orders)
-  const availableCredits = totalCredits - creditsInUse;
+  // user_credits.credits is actually the available balance (already has locked credits deducted)
+  // Total balance = available + locked
+  const availableCredits = totalCredits; // This IS the available balance from DB
+  const actualTotalBalance = totalCredits + creditsInUse; // True total = available + locked
 
   useEffect(() => {
     const fetchData = async () => {
@@ -271,7 +273,7 @@ export function CreditHistoryView() {
             <div className="space-y-1">
               <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">Total credit balance:</span>
-                <span className="font-medium">{totalCredits.toLocaleString()}</span>
+                <span className="font-medium">{actualTotalBalance.toLocaleString()}</span>
               </div>
               {creditsInOrders > 0 && (
                 <div className="flex justify-between gap-4">
