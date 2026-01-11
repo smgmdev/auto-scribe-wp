@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Lock, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -312,6 +312,9 @@ export function CreditHistoryView() {
     if (type === 'order' || type === 'locked') {
       return <Lock className="h-5 w-5 text-amber-500" />;
     }
+    if (type === 'unlocked') {
+      return <LockOpen className="h-5 w-5 text-blue-500" />;
+    }
     if (type === 'spent') {
       return <ShoppingBag className="h-5 w-5 text-red-500" />;
     }
@@ -328,6 +331,8 @@ export function CreditHistoryView() {
       case 'locked':
       case 'order': // Legacy type - treat as locked
         return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Locked</Badge>;
+      case 'unlocked':
+        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Unlocked</Badge>;
       case 'spent':
         return <Badge variant="secondary" className="bg-red-500/10 text-red-500 border-red-500/30">Spent</Badge>;
       case 'gifted':
@@ -340,10 +345,10 @@ export function CreditHistoryView() {
     }
   };
 
-  // Filter transactions to show: purchases, gifts, locked (order requests), spent (completed orders), order_payout (for agencies)
+  // Filter transactions to show: purchases, gifts, locked (order requests), unlocked (cancelled orders), spent (completed orders), order_payout (for agencies)
   // Include legacy "order" type for historical transactions
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'locked', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
+    ['purchase', 'locked', 'unlocked', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
   );
 
   return (
