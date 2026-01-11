@@ -655,14 +655,9 @@ export function OrdersView() {
     <Card 
       key={order.id} 
       className={cn(
-        "hover:bg-muted/30 transition-colors cursor-pointer relative",
-        !order.read && !isAdmin && "bg-primary/5"
+        "border border-transparent hover:border-border transition-colors cursor-pointer relative [box-shadow:none]",
+        !order.read && !isAdmin && "bg-primary/5 !border-l-4 !border-l-primary hover:border-t-border hover:border-r-border hover:border-b-border"
       )}
-      style={{ 
-        border: 'none',
-        boxShadow: 'none',
-        ...((!order.read && !isAdmin) ? { borderLeft: '4px solid hsl(var(--primary))' } : {})
-      }}
       onClick={() => handleOrderClick(order)}
     >
       {/* Unread indicator dot */}
