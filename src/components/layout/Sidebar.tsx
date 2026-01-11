@@ -659,6 +659,20 @@ export function Sidebar({
   useEffect(() => {
     if (!user || !isAdmin) return;
 
+    // Function to refetch unread orders count from database
+    const refetchUnreadOrdersCount = async () => {
+      const { count, error } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['paid', 'pending_payment'])
+        .eq('read', false);
+      
+      if (!error && count !== null) {
+        console.log('[Sidebar] Refetched unread orders count from DB:', count);
+        setUnreadOrdersCount(count);
+      }
+    };
+
     const channel = supabase
       .channel('admin-orders-realtime-sidebar')
       .on(
@@ -671,10 +685,10 @@ export function Sidebar({
         (payload) => {
           console.log('[Sidebar] New order INSERT event received:', payload);
           const newOrder = payload.new as { status: string; order_number: string | null };
-          // Increment the unread orders count and show toast when a new active order is created
+          // Show toast and refetch count when a new active order is created
           if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
-            console.log('[Sidebar] Incrementing unread orders count and showing toast');
-            incrementUnreadOrdersCount();
+            console.log('[Sidebar] New active order detected, refetching count and showing toast');
+            refetchUnreadOrdersCount();
             toast({
               title: "New Order Received 🛒",
               description: `Order ${newOrder.order_number || 'New'} has been placed`,
@@ -690,11 +704,12 @@ export function Sidebar({
           table: 'orders'
         },
         (payload) => {
-          const updated = payload.new as { read: boolean };
-          const old = payload.old as { read: boolean };
-          // If order was marked as read, decrement count
-          if (old?.read === false && updated.read === true) {
-            decrementUnreadOrdersCount();
+          const updated = payload.new as { read: boolean; status: string };
+          const old = payload.old as { read: boolean; status: string };
+          // If order was marked as read or status changed, refetch count from DB
+          if (old?.read !== updated.read || old?.status !== updated.status) {
+            console.log('[Sidebar] Order read/status changed, refetching count');
+            refetchUnreadOrdersCount();
           }
         }
       )
