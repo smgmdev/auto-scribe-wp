@@ -1074,6 +1074,25 @@ export function AgencyRequestsView() {
     [orders, disputedOrderIds]
   );
   
+  // Sort active orders by last event time (most recent first)
+  const sortedActiveOrders = useMemo(() => {
+    return [...activeOrders].sort((a, b) => {
+      // Get the related request for each order to access getLastEventInfo
+      const aRequest = requests.find(r => r.order?.id === a.id);
+      const bRequest = requests.find(r => r.order?.id === b.id);
+      
+      // Use delivered_at, accepted_at, or created_at as event times
+      const aEventTime = a.delivered_at ? new Date(a.delivered_at).getTime() :
+                         a.accepted_at ? new Date(a.accepted_at).getTime() :
+                         new Date(a.created_at).getTime();
+      const bEventTime = b.delivered_at ? new Date(b.delivered_at).getTime() :
+                         b.accepted_at ? new Date(b.accepted_at).getTime() :
+                         new Date(b.created_at).getTime();
+      
+      return bEventTime - aEventTime;
+    });
+  }, [activeOrders, requests]);
+  
   // Only orders with 'accepted' delivery_status are truly completed (client approved)
   // 'delivered' means awaiting client approval - stays in active orders
   const completedOrders = useMemo(() => 
@@ -1564,7 +1583,7 @@ export function AgencyRequestsView() {
                   </CardContent>
                 </Card>
               ) : (
-                activeOrders.map((order) => {
+                sortedActiveOrders.map((order) => {
                   const relatedRequest = requests.find(r => r.order?.id === order.id);
                   const isNew = newOrderIds.has(order.id);
                   
