@@ -158,6 +158,7 @@ export function CreditHistoryView() {
 
       {/* Summary Cards */}
       <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
+        {/* Available Credits */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
@@ -187,6 +188,37 @@ export function CreditHistoryView() {
           </TooltipContent>
         </Tooltip>
 
+        {/* Locked Credits */}
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Locked Credits
+                </CardTitle>
+                <Coins className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    creditsInUse.toLocaleString()
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="bottom" 
+            sideOffset={8}
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+          >
+            <p>Credits currently held in active orders awaiting completion</p>
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Total Purchased */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
@@ -216,6 +248,7 @@ export function CreditHistoryView() {
           </TooltipContent>
         </Tooltip>
 
+        {/* Total Spent */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
@@ -245,6 +278,7 @@ export function CreditHistoryView() {
           </TooltipContent>
         </Tooltip>
 
+        {/* Total Orders */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
@@ -271,35 +305,6 @@ export function CreditHistoryView() {
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
             <p>Number of media site orders placed using credits ({totalOrderCredits.toLocaleString()} credits)</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip delayDuration={100}>
-          <TooltipTrigger asChild>
-            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Locked Credits
-                </CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground/60" />
-              </CardHeader>
-              <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">
-                  {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  ) : (
-                    creditsInUse.toLocaleString()
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TooltipTrigger>
-          <TooltipContent 
-            side="bottom" 
-            sideOffset={8}
-            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
-          >
-            <p>Credits currently held in active orders awaiting completion</p>
           </TooltipContent>
         </Tooltip>
       </div>
