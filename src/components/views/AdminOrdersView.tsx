@@ -107,14 +107,8 @@ export function AdminOrdersView() {
           },
           (payload) => {
             console.log('[AdminOrdersView] New order INSERT event received:', payload);
-            const newOrder = payload.new as { status: string; order_number: string | null };
-            // Show notification for new active orders
-            if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
-              toast({
-                title: "New Order Received",
-                description: `Order ${newOrder.order_number || 'New'} has been placed`,
-              });
-            }
+            // Toast notification is handled globally in Sidebar.tsx
+            // Just refetch orders to update the list
             fetchOrders();
           }
         )
