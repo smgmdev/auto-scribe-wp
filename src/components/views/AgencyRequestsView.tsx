@@ -224,17 +224,18 @@ export function AgencyRequestsView() {
 
         if (ordersData) {
           setOrders(ordersData);
-          // Track new (unread) orders - active orders that haven't been read (pending_payment or paid)
+          // Track new (unread) orders - active orders that haven't been read
+          // Include 'delivered' as active since it's awaiting client approval
           const unreadActiveOrders = ordersData.filter(o => 
             !o.read && (o.status === 'pending_payment' || o.status === 'paid') && 
-            o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted'
+            o.delivery_status !== 'accepted' // Only 'accepted' = completed
           );
           setAgencyUnreadOrdersCount(unreadActiveOrders.length);
           setNewOrderIds(new Set(unreadActiveOrders.map(o => o.id)));
 
-          // Count unread completed orders (delivered but agency hasn't seen)
+          // Count unread completed orders (only 'accepted' = client approved)
           const unreadCompletedOrders = ordersData.filter(o => 
-            !(o as any).agency_read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted')
+            !(o as any).agency_read && o.delivery_status === 'accepted'
           );
           console.log('[AgencyRequestsView] Unread completed orders:', unreadCompletedOrders.length, 
             'Orders with agency_read values:', ordersData.map(o => ({ id: o.id, agency_read: (o as any).agency_read, delivery_status: o.delivery_status })));
@@ -624,19 +625,19 @@ export function AgencyRequestsView() {
           const updatedOrder = payload.new as any;
           const oldOrder = payload.old as any;
           
-          // Check if delivery_status changed to 'delivered' or 'accepted'
-          if ((updatedOrder.delivery_status === 'delivered' && oldOrder.delivery_status !== 'delivered') ||
-              (updatedOrder.delivery_status === 'accepted' && oldOrder.delivery_status !== 'accepted')) {
-            // Show toast notification
+          // Check if delivery_status changed to 'accepted' (client approved = completed)
+          if (updatedOrder.delivery_status === 'accepted' && oldOrder.delivery_status !== 'accepted') {
+            // Show toast notification only when client accepts
             toast({
               title: 'Order Completed! 🎉',
-              description: updatedOrder.delivery_status === 'accepted' 
-                ? 'Client has accepted the delivery.' 
-                : 'Order has been marked as delivered.',
+              description: 'Client has accepted the delivery.',
             });
             // Increment the completed count
             incrementAgencyUnreadCompletedCount();
             // Refresh to get updated data
+            fetchRequests();
+          } else if (updatedOrder.delivery_status === 'delivered' && oldOrder.delivery_status !== 'delivered') {
+            // Delivery submitted - stays in active, just refresh
             fetchRequests();
           }
         }
@@ -958,19 +959,21 @@ export function AgencyRequestsView() {
     }
   };
 
-  // Filter and sort requests - separate active, delivered, and cancelled
-  const deliveredRequests = useMemo(() => {
+  // Filter and sort requests - separate active, completed (client approved), and cancelled
+  // Note: 'delivered' status means awaiting client approval - still active, NOT completed
+  const completedRequests = useMemo(() => {
     return requests.filter(r => 
       r.status !== 'cancelled' && 
       r.order && 
-      (r.order.delivery_status === 'delivered' || r.order.delivery_status === 'accepted')
+      r.order.delivery_status === 'accepted' // Only accepted = completed (client approved)
     );
   }, [requests]);
 
   const activeRequests = useMemo(() => {
     return requests.filter(r => 
       r.status !== 'cancelled' && 
-      !(r.order && (r.order.delivery_status === 'delivered' || r.order.delivery_status === 'accepted'))
+      // Include 'delivered' orders as active (awaiting client approval)
+      !(r.order && r.order.delivery_status === 'accepted')
     );
   }, [requests]);
 
@@ -978,9 +981,9 @@ export function AgencyRequestsView() {
     return requests.filter(r => r.status === 'cancelled');
   }, [requests]);
 
-  const unreadDeliveredCount = useMemo(() => {
-    return deliveredRequests.filter(r => !r.read).length;
-  }, [deliveredRequests]);
+  const unreadCompletedRequestsCount = useMemo(() => {
+    return completedRequests.filter(r => !r.read).length;
+  }, [completedRequests]);
 
   const unreadCancelledCount = useMemo(() => {
     return cancelledRequests.filter(r => !r.read).length;
@@ -1016,8 +1019,8 @@ export function AgencyRequestsView() {
     });
   }, [activeRequests, messages, searchQuery]);
 
-  const sortedDeliveredRequests = useMemo(() => {
-    const filtered = deliveredRequests.filter((request) => {
+  const sortedCompletedRequests = useMemo(() => {
+    const filtered = completedRequests.filter((request) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       const titleMatch = request.title.toLowerCase().includes(query);
@@ -1031,7 +1034,7 @@ export function AgencyRequestsView() {
       const bCompleted = b.order?.released_at || b.order?.accepted_at || b.updated_at;
       return new Date(bCompleted).getTime() - new Date(aCompleted).getTime();
     });
-  }, [deliveredRequests, searchQuery]);
+  }, [completedRequests, searchQuery]);
 
   const sortedCancelledRequests = useMemo(() => {
     const filtered = cancelledRequests.filter((request) => {
@@ -1062,11 +1065,10 @@ export function AgencyRequestsView() {
 
   const activeOrders = useMemo(() => 
     orders.filter(o => {
-      // Include pending_payment and paid orders that aren't delivered/accepted/cancelled
-      // Orders with delivery_status 'delivered' or 'accepted' go to Completed tab
+      // Include pending_payment and paid orders that aren't completed (accepted)
+      // 'delivered' orders stay in Active tab (awaiting client approval)
       return (o.status === 'pending_payment' || o.status === 'paid') &&
-        o.delivery_status !== 'accepted' &&
-        o.delivery_status !== 'delivered' &&
+        o.delivery_status !== 'accepted' && // Only 'accepted' = completed
         o.status !== 'cancelled' && 
         o.delivery_status !== 'cancelled' &&
         !disputedOrderIds.has(o.id);
@@ -1074,9 +1076,11 @@ export function AgencyRequestsView() {
     [orders, disputedOrderIds]
   );
   
+  // Only orders with 'accepted' delivery_status are truly completed (client approved)
+  // 'delivered' means awaiting client approval - stays in active orders
   const completedOrders = useMemo(() => 
     orders.filter(o => 
-      (o.delivery_status === 'accepted' || o.delivery_status === 'delivered') && 
+      o.delivery_status === 'accepted' && 
       !disputedOrderIds.has(o.id)
     ), 
     [orders, disputedOrderIds]
@@ -1127,10 +1131,10 @@ export function AgencyRequestsView() {
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="requests" className="relative">
-            Requests ({activeRequests.length + deliveredRequests.length + cancelledRequests.length})
-            {(unreadActiveCount + unreadDeliveredCount + unreadCancelledCount) > 0 && (
+            Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
+            {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {unreadActiveCount + unreadDeliveredCount + unreadCancelledCount}
+                {unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount}
               </span>
             )}
           </TabsTrigger>
@@ -1158,10 +1162,10 @@ export function AgencyRequestsView() {
               </TabsTrigger>
               <TabsTrigger value="closed" className="gap-2 relative">
                 <CheckCircle className="h-4 w-4" />
-                Closed ({deliveredRequests.length + cancelledRequests.length})
-                {(unreadDeliveredCount + unreadCancelledCount) > 0 && (
+                Closed ({completedRequests.length + cancelledRequests.length})
+                {(unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {unreadDeliveredCount + unreadCancelledCount}
+                    {unreadCompletedRequestsCount + unreadCancelledCount}
                   </span>
                 )}
               </TabsTrigger>
@@ -1331,10 +1335,10 @@ export function AgencyRequestsView() {
                 <TabsList className="w-full max-w-xs">
                   <TabsTrigger value="delivered" className="gap-2 relative flex-1">
                     <CheckCircle className="h-4 w-4" />
-                    Delivered ({deliveredRequests.length})
-                    {unreadDeliveredCount > 0 && (
+                    Completed ({completedRequests.length})
+                    {unreadCompletedRequestsCount > 0 && (
                       <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                        {unreadDeliveredCount}
+                        {unreadCompletedRequestsCount}
                       </span>
                     )}
                   </TabsTrigger>
@@ -1350,16 +1354,16 @@ export function AgencyRequestsView() {
                 </TabsList>
 
                 <TabsContent value="delivered" className="mt-2">
-                  {sortedDeliveredRequests.length === 0 ? (
+                  {sortedCompletedRequests.length === 0 ? (
                     <Card className="border-border/50">
                       <CardContent className="flex flex-col items-center justify-center py-12">
                         <CheckCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                        <p className="text-muted-foreground text-center">No delivered requests</p>
+                        <p className="text-muted-foreground text-center">No completed requests</p>
                       </CardContent>
                     </Card>
                   ) : (
                     <div className="space-y-2">
-                      {sortedDeliveredRequests.map((request) => {
+                      {sortedCompletedRequests.map((request) => {
                         const requestMessages = messages[request.id] || [];
                         const hasUnread = !request.read;
                         
