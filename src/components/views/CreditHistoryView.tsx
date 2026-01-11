@@ -27,8 +27,9 @@ export function CreditHistoryView() {
   const [creditsInUse, setCreditsInUse] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Available credits = total credits - credits in active orders
-  const availableCredits = totalCredits - creditsInUse;
+  // Available credits is what's in user_credits (already accounts for in-use)
+  // We fetch both values separately for display purposes
+  const availableCredits = totalCredits;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,36 +37,31 @@ export function CreditHistoryView() {
 
       setLoading(true);
       
-      // Fetch total credits from user_credits
+      // Fetch available credits from user_credits
       const { data: creditsData } = await supabase
         .rpc('get_user_credits', { _user_id: user.id });
       setTotalCredits(creditsData || 0);
 
-      // Fetch active orders to calculate credits in use
-      // Active orders are: NOT completed (delivery_status != 'accepted') AND NOT cancelled
+      // Fetch active orders (not completed, not cancelled) to calculate credits in use
+      // Active = delivery_status is NOT 'accepted' (completed) AND status is NOT 'cancelled'
       const { data: activeOrders } = await supabase
         .from('orders')
-        .select('id, amount_cents')
+        .select('id, amount_cents, media_site_id, media_sites(price)')
         .eq('user_id', user.id)
         .neq('status', 'cancelled')
         .neq('delivery_status', 'accepted');
 
       if (activeOrders && activeOrders.length > 0) {
-        const activeOrderIds = activeOrders.map(o => o.id);
-        
-        // Get credit transactions for these active orders
-        const { data: orderCredits } = await supabase
-          .from('credit_transactions')
-          .select('amount, order_id')
-          .eq('user_id', user.id)
-          .eq('type', 'order')
-          .in('order_id', activeOrderIds);
-
-        if (orderCredits) {
-          // Sum up absolute credits in active orders
-          const inUse = orderCredits.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-          setCreditsInUse(inUse);
+        // Calculate credits in use from active orders
+        // Each order's credits = media_site price (which is in credits)
+        let totalInUse = 0;
+        for (const order of activeOrders) {
+          const mediaSite = order.media_sites as { price: number } | null;
+          if (mediaSite?.price) {
+            totalInUse += mediaSite.price;
+          }
         }
+        setCreditsInUse(totalInUse);
       } else {
         setCreditsInUse(0);
       }
