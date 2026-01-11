@@ -309,30 +309,18 @@ export function OrderWithCreditsDialog({
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <Coins className="h-4 w-4" />
-                Total Balance
+                Available Balance
               </span>
-              <span className="font-medium text-muted-foreground">
-                {(credits || 0).toLocaleString()} credits
-              </span>
-            </div>
-            {lockedCredits > 0 && (
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-sm text-muted-foreground">Locked in Orders</span>
-                <span className="font-medium text-amber-500">-{lockedCredits.toLocaleString()} credits</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-sm text-muted-foreground">Available Balance</span>
               <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
                 {availableCredits.toLocaleString()} credits (${availableCredits.toLocaleString()})
               </span>
             </div>
-            <div className="border-t border-border my-3" />
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-2">
               <span className="text-sm text-muted-foreground">Order Cost</span>
               <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
             </div>
-            <div className="flex items-center justify-between mt-2">
+            <div className="border-t border-border my-3" />
+            <div className="flex items-center justify-between">
               <span className="font-medium">After Order</span>
               <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
                 {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
