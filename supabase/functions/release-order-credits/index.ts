@@ -117,6 +117,23 @@ serve(async (req) => {
       } else {
         logStep("Lock transaction deleted");
       }
+
+      // Create an "unlocked" transaction to show the request was cancelled/rejected
+      const unlockReason = reason || "Order request cancelled";
+      const { error: unlockTransactionError } = await supabaseAdmin
+        .from("credit_transactions")
+        .insert({
+          user_id: targetUserId,
+          amount: creditAmount,
+          type: "unlocked",
+          description: `Request cancelled: ${mediaSite.name} (credits released)`
+        });
+
+      if (unlockTransactionError) {
+        logStep("Error creating unlock transaction", { error: unlockTransactionError.message });
+      } else {
+        logStep("Unlock transaction created", { creditAmount });
+      }
     }
 
     logStep("Credits released successfully (no balance change needed)", { 

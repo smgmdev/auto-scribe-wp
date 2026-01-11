@@ -285,15 +285,21 @@ serve(async (req) => {
       order = newOrder;
     }
 
-    // Record credit transaction ONLY after order is successfully created
-    await supabaseAdmin
+    // Record credit transaction: "offer_accepted" - when user accepts agency offer
+    const { error: transactionError } = await supabaseAdmin
       .from("credit_transactions")
       .insert({
         user_id: user.id,
         amount: -creditCost,
-        type: "order",
-        description: `Order for ${mediaSite.name}`
+        type: "offer_accepted",
+        description: `Offer accepted: ${mediaSite.name} (credits locked)`,
+        order_id: order.id
       });
+
+    if (transactionError) {
+      console.log("Error creating offer_accepted transaction:", transactionError.message);
+      // Don't fail - order is already created
+    }
 
     // Link order to service request
     const { error: linkError } = await supabaseAdmin
