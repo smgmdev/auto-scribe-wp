@@ -422,10 +422,10 @@ export function Sidebar({
             let unreadOrdersCount = 0;
             let unreadCompletedCount = 0;
             if (agencyPayoutData) {
-              // Fetch all service requests with their agency_last_read_at timestamp
+              // Fetch all service requests with their agency_last_read_at timestamp and order_id
               const { data: requestsData } = await supabase
                 .from('service_requests')
-                .select('id, status, agency_last_read_at')
+                .select('id, status, agency_last_read_at, order_id')
                 .eq('agency_payout_id', agencyPayoutData.id);
               
               if (requestsData && requestsData.length > 0) {
@@ -436,6 +436,23 @@ export function Sidebar({
                   .from('service_messages')
                   .select('request_id, sender_type, created_at')
                   .in('request_id', requestIds);
+                
+                // Fetch order data for all requests with orders
+                const orderIds = requestsData.filter(r => r.order_id).map(r => r.order_id as string);
+                let ordersMap: Record<string, { read: boolean; agency_read: boolean; delivery_status: string; status: string }> = {};
+                if (orderIds.length > 0) {
+                  const { data: ordersForAgency } = await supabase
+                    .from('orders')
+                    .select('id, read, agency_read, delivery_status, status')
+                    .in('id', orderIds);
+                  
+                  if (ordersForAgency) {
+                    ordersMap = Object.fromEntries(ordersForAgency.map(o => [o.id, o]));
+                  }
+                }
+                
+                // Track which requests have already been counted to avoid double counting
+                const countedRequests = new Set<string>();
                 
                 // Count requests with unread messages (messages from client/admin after agency_last_read_at)
                 for (const request of requestsData) {
@@ -453,6 +470,7 @@ export function Sidebar({
                   });
                   
                   if (hasUnreadMessages) {
+                    countedRequests.add(request.id);
                     if (request.status === 'cancelled') {
                       cancelledRequestsCount++;
                     } else {
@@ -461,28 +479,23 @@ export function Sidebar({
                   }
                 }
                 
-                // Count unread orders for agency - orders that haven't been read
-                const requestsWithOrderIds = requestsData.filter(r => r.status !== 'cancelled');
-                if (requestsWithOrderIds.length > 0) {
-                  const { data: ordersForAgency } = await supabase
-                    .from('orders')
-                    .select('id, read, agency_read, delivery_status, status')
-                    .in('id', (await supabase
-                      .from('service_requests')
-                      .select('order_id')
-                      .eq('agency_payout_id', agencyPayoutData.id)
-                      .not('order_id', 'is', null)).data?.map(r => r.order_id) || []);
+                // Count unread orders for agency - only if the request wasn't already counted for unread messages
+                for (const request of requestsData) {
+                  if (countedRequests.has(request.id)) continue; // Already counted
+                  if (!request.order_id) continue;
                   
-                  if (ordersForAgency) {
-                    // Active orders that haven't been read
-                    unreadOrdersCount = ordersForAgency.filter(o => 
-                      !o.read && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && o.status !== 'cancelled'
-                    ).length;
-                    
-                    // Completed orders (delivered or accepted) that agency hasn't seen
-                    unreadCompletedCount = ordersForAgency.filter(o => 
-                      !o.agency_read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted')
-                    ).length;
+                  const order = ordersMap[request.order_id];
+                  if (!order || request.status === 'cancelled') continue;
+                  
+                  // Active orders that haven't been read
+                  if (!order.read && order.delivery_status !== 'delivered' && order.delivery_status !== 'accepted' && order.status !== 'cancelled') {
+                    countedRequests.add(request.id);
+                    unreadOrdersCount++;
+                  }
+                  // Completed orders (delivered or accepted) that agency hasn't seen
+                  else if (!order.agency_read && (order.delivery_status === 'delivered' || order.delivery_status === 'accepted')) {
+                    countedRequests.add(request.id);
+                    unreadCompletedCount++;
                   }
                 }
               }
