@@ -304,12 +304,15 @@ serve(async (req) => {
         logStep("Skipping ORDER_CANCELLED message - dispute resolution handled by frontend");
       }
 
-      // Mark request as unread for agency and admin (UI notification)
+      // Mark request as unread for agency (UI notification)
+      // If admin is cancelling, keep read=true since admin already knows
+      // Only mark agency_read=false to notify the agency
       await supabaseAdmin
         .from("service_requests")
         .update({ 
           agency_read: false,
-          read: false // Also notify admin
+          read: isAdmin ? true : false, // Don't notify admin if admin is the one cancelling
+          cancelled_by: isAdmin ? 'admin' : 'client'
         })
         .eq("id", serviceRequest.id);
 
