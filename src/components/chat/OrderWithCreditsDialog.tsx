@@ -79,6 +79,22 @@ export function OrderWithCreditsDialog({
     setSending(true);
 
     try {
+      // First, lock the credits via edge function
+      const { data: lockResult, error: lockError } = await supabase.functions.invoke('lock-order-credits', {
+        body: {
+          media_site_id: mediaSite.id,
+          service_request_id: serviceRequestId
+        }
+      });
+
+      if (lockError) {
+        throw new Error(lockError.message || 'Failed to lock credits');
+      }
+
+      if (!lockResult?.success) {
+        throw new Error(lockResult?.error || 'Failed to lock credits');
+      }
+
       // Create the order request message (from client to agency)
       const orderRequestData = {
         type: 'CLIENT_ORDER_REQUEST',
@@ -86,6 +102,7 @@ export function OrderWithCreditsDialog({
         media_site_name: mediaSite.name,
         media_site_favicon: mediaSite.favicon,
         price: creditCost,
+        credits_locked: true,
         delivery_duration: {
           days: deliveryDays,
           hours: deliveryHours,
@@ -105,11 +122,21 @@ export function OrderWithCreditsDialog({
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If message insert fails, release the locked credits
+        await supabase.functions.invoke('release-order-credits', {
+          body: {
+            media_site_id: mediaSite.id,
+            service_request_id: serviceRequestId,
+            reason: 'Order request failed to send'
+          }
+        });
+        throw error;
+      }
 
       toast({
         title: "Order Request Sent",
-        description: `Your order request has been sent to the agency for approval.`,
+        description: `Your order request has been sent. ${creditCost} credits have been locked.`,
       });
       
       // Reset form
