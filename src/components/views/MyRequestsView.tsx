@@ -329,7 +329,13 @@ export function MyRequestsView() {
         setMessages(prev => {
           const existingMsgs = prev[requestId] || [];
           const filteredMsgs = existingMsgs.filter(m => m.id !== messageId);
-          // If message wasn't found locally (ID mismatch), we'll refetch below
+          console.log('[MyRequestsView] Filtering message from local state:', { 
+            requestId, 
+            messageId, 
+            before: existingMsgs.length, 
+            after: filteredMsgs.length,
+            messageIds: existingMsgs.map(m => m.id)
+          });
           return {
             ...prev,
             [requestId]: filteredMsgs
@@ -345,6 +351,7 @@ export function MyRequestsView() {
             .order('created_at', { ascending: true });
           
           if (freshMessages) {
+            console.log('[MyRequestsView] Refetched messages after deletion:', { requestId, count: freshMessages.length });
             setMessages(prev => ({
               ...prev,
               [requestId]: freshMessages
@@ -793,16 +800,21 @@ export function MyRequestsView() {
       }
     }
     
-    if (lastClientOrderIndex === -1) return false;
+    if (lastClientOrderIndex === -1) {
+      console.log('[MyRequestsView] hasClientOrderRequestPending:', requestId, '-> false (no CLIENT_ORDER_REQUEST found)');
+      return false;
+    }
     
     // Check if there's a rejection/acceptance AFTER this message
     for (let i = lastClientOrderIndex + 1; i < requestMessages.length; i++) {
       const msg = requestMessages[i];
       if (msg.sender_type === 'agency' && (msg.message.includes('[ORDER_REQUEST_ACCEPTED]') || msg.message.includes('[ORDER_REQUEST_REJECTED]'))) {
+        console.log('[MyRequestsView] hasClientOrderRequestPending:', requestId, '-> false (has response after)');
         return false; // Most recent order request has been responded to
       }
     }
     
+    console.log('[MyRequestsView] hasClientOrderRequestPending:', requestId, '-> true (pending)');
     return true; // Most recent client order request is still pending
   };
 
