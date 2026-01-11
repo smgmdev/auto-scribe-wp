@@ -1303,10 +1303,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return;
     }
     
+    // Parse the order request to get media_site_id for credit release
+    const parsedOrder = parseClientOrderRequest(lastOrderMsg.message);
+    if (!parsedOrder) {
+      console.log('[FloatingChatWindow] Could not parse client order message');
+      return;
+    }
+    
     console.log('[FloatingChatWindow] Cancelling client order request:', lastOrderMsg.id);
     setCancellingOrderRequestId(lastOrderMsg.id);
     
     try {
+      // Release locked credits and create unlock transaction
+      const { error: releaseError } = await supabase.functions.invoke('release-order-credits', {
+        body: {
+          media_site_id: parsedOrder.media_site_id,
+          service_request_id: globalChatRequest?.id,
+          reason: 'Client cancelled order request'
+        }
+      });
+      
+      if (releaseError) {
+        console.error('Error releasing credits:', releaseError);
+        // Continue with deletion even if release fails
+      } else {
+        // Refresh credits after releasing
+        refreshCredits();
+      }
+      
       const { error } = await supabase
         .from('service_messages')
         .delete()
