@@ -81,6 +81,7 @@ export function MyRequestsView() {
   const [refreshing, setRefreshing] = useState(false);
   const [, setTimerTick] = useState(0);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
+  const [disputeCreatedDates, setDisputeCreatedDates] = useState<Record<string, string>>({});
   
   // Timer for real-time countdown updates
   useEffect(() => {
@@ -229,19 +230,25 @@ export function MyRequestsView() {
     
     if (!userOrders || userOrders.length === 0) {
       setDisputeOrderIds(new Set());
+      setDisputeCreatedDates({});
       return;
     }
     
-    // Then fetch open disputes for those orders
+    // Then fetch open disputes for those orders with created_at
     const { data, error } = await supabase
       .from('disputes')
-      .select('order_id')
+      .select('order_id, created_at')
       .in('order_id', userOrders.map(o => o.id))
       .eq('status', 'open');
     
     if (!error && data) {
       const orderIds = new Set(data.map(d => d.order_id));
+      const createdDates: Record<string, string> = {};
+      data.forEach(d => {
+        createdDates[d.order_id] = d.created_at;
+      });
       setDisputeOrderIds(orderIds);
+      setDisputeCreatedDates(createdDates);
     }
   };
 
@@ -894,7 +901,11 @@ export function MyRequestsView() {
       
       // Check for special card types and use their titles
       let eventName = '';
-      if (msgContent.includes('[ORDER_REQUEST_ACCEPTED]')) {
+      if (msgContent.includes('[DISPUTE_OPENED]')) {
+        eventName = 'Dispute opened';
+      } else if (msgContent.includes('[DISPUTE_RESOLVED]')) {
+        eventName = 'Dispute resolved';
+      } else if (msgContent.includes('[ORDER_REQUEST_ACCEPTED]')) {
         eventName = 'Order request accepted';
       } else if (msgContent.includes('[ORDER_REQUEST_REJECTED]')) {
         eventName = 'Order request rejected';
@@ -944,6 +955,11 @@ export function MyRequestsView() {
     // Cancelled event
     if (request.status === 'cancelled' && request.cancelled_at) {
       events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at) });
+    }
+    
+    // Dispute opened event (from disputeCreatedDates if order is in dispute)
+    if (request.order?.id && disputeCreatedDates[request.order.id]) {
+      events.push({ name: 'Dispute opened', time: new Date(disputeCreatedDates[request.order.id]) });
     }
     
     // Find the most recent event
