@@ -154,6 +154,7 @@ export function Sidebar({
     decrementUserUnreadCompletedCount,
     userUnreadHistoryCount,
     setUserUnreadHistoryCount,
+    incrementUserUnreadHistoryCount,
     adminUnreadEngagementsCount,
     setAdminUnreadEngagementsCount,
     incrementAdminUnreadEngagementsCount,
@@ -1112,10 +1113,20 @@ export function Sidebar({
             incrementUserUnreadCompletedCount();
           }
           
+          // If order status changed to cancelled (admin cancelled), increment history count
+          if (old?.status !== 'cancelled' && updated.status === 'cancelled' && !updated.read) {
+            incrementUserUnreadHistoryCount();
+          }
+          
           // If order was marked as read and is a completed order, decrement count
           if (old?.read === false && updated.read === true && 
               (updated.delivery_status === 'accepted' || updated.delivery_status === 'delivered')) {
             decrementUserUnreadCompletedCount();
+          }
+          
+          // If order was marked as read and is a cancelled order, decrement history count
+          if (old?.read === false && updated.read === true && updated.status === 'cancelled') {
+            // Count will be decremented when user clicks on the order
           }
         }
       )

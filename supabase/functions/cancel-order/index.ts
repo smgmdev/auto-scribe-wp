@@ -176,12 +176,14 @@ serve(async (req) => {
     const newCredits = currentCredits + creditRefund;
 
     // Update the order status to cancelled
+    // If admin is cancelling, mark as unread for the user so they see the notification badge
     const { error: updateOrderError } = await supabaseAdmin
       .from("orders")
       .update({
         status: "cancelled",
         delivery_status: "cancelled",
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        read: isAdmin ? false : true  // Mark unread for user when admin cancels
       })
       .eq("id", order_id);
 
