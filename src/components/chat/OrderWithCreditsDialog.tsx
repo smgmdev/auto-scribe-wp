@@ -5,11 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Coins, Tag, AlertTriangle, Info, CreditCard } from 'lucide-react';
+import { Loader2, Coins, Tag, AlertTriangle, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 
 interface MediaSiteInfo {
   id: string;
@@ -59,7 +58,6 @@ export function OrderWithCreditsDialog({
   const [deliveryMinutes, setDeliveryMinutes] = useState<number>(initialData?.deliveryMinutes || 0);
   const [specialTerms, setSpecialTerms] = useState(initialData?.specialTerms || '');
   const [lockedCredits, setLockedCredits] = useState<number>(0);
-  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const { credits, user } = useAuth();
   const { toast } = useToast();
 
@@ -334,25 +332,14 @@ export function OrderWithCreditsDialog({
           {!hasEnoughCredits && (
             <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-              <div className="flex-1">
+              <div>
                 <p className="font-medium text-destructive">Insufficient Credits</p>
                 <p className="text-sm text-muted-foreground">
                   You need {(creditCost - availableCredits).toLocaleString()} more credits (${(creditCost - availableCredits).toLocaleString()}) to send this order request.
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-3 gap-2"
-                  onClick={() => setBuyCreditsOpen(true)}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  Buy Credits
-                </Button>
               </div>
             </div>
           )}
-
-          <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
           <Button
             onClick={handleSendRequest}
