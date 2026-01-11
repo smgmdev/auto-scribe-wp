@@ -2316,7 +2316,7 @@ export function ChatListPanel() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 hover:bg-transparent"
+              className="h-7 w-7 hover:bg-transparent hover:text-current"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(false);
