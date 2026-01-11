@@ -11,6 +11,43 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CANCEL-ORDER] ${step}${detailsStr}`);
 };
 
+// Helper function to send broadcast via REST API (more reliable from edge functions)
+const sendBroadcast = async (topic: string, event: string, payload: any) => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  
+  try {
+    const response = await fetch(`${supabaseUrl}/realtime/v1/api/broadcast`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            topic: topic,
+            event: event,
+            payload: payload
+          }
+        ]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      logStep("Broadcast failed", { topic, event, status: response.status, error: errorText });
+      return false;
+    }
+    
+    logStep("Broadcast sent successfully", { topic, event });
+    return true;
+  } catch (error: any) {
+    logStep("Broadcast error", { topic, event, error: error.message });
+    return false;
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -276,7 +313,7 @@ serve(async (req) => {
 
       logStep("Unread flags updated");
       
-      // If admin cancelled, broadcast notifications to user and agency
+      // If admin cancelled, broadcast notifications to user and agency via REST API
       if (isAdmin) {
         // If this is a dispute resolution, only send dispute-resolved notification
         // Otherwise send order-cancelled notification
@@ -291,23 +328,20 @@ serve(async (req) => {
             creditsRefunded: creditRefund
           };
           
-          await supabaseAdmin
-            .channel(`notify-${orderOwnerId}-admin-action`)
-            .send({
-              type: 'broadcast',
-              event: 'admin-action',
-              payload: disputePayload
-            });
+          // Use REST API for reliable broadcast
+          await sendBroadcast(
+            `notify-${orderOwnerId}-admin-action`,
+            'admin-action',
+            disputePayload
+          );
           logStep("Dispute resolved notification sent to user", { userId: orderOwnerId });
           
           if (serviceRequest.agency_payout_id) {
-            await supabaseAdmin
-              .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
-              .send({
-                type: 'broadcast',
-                event: 'admin-action',
-                payload: disputePayload
-              });
+            await sendBroadcast(
+              `notify-${serviceRequest.agency_payout_id}-admin-action`,
+              'admin-action',
+              disputePayload
+            );
             logStep("Dispute resolved notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
           }
         } else {
@@ -321,25 +355,21 @@ serve(async (req) => {
             creditsRefunded: creditRefund
           };
           
-          // Notify user
-          await supabaseAdmin
-            .channel(`notify-${orderOwnerId}-admin-action`)
-            .send({
-              type: 'broadcast',
-              event: 'admin-action',
-              payload: notificationPayload
-            });
+          // Notify user via REST API
+          await sendBroadcast(
+            `notify-${orderOwnerId}-admin-action`,
+            'admin-action',
+            notificationPayload
+          );
           logStep("Order cancelled notification sent to user", { userId: orderOwnerId });
           
           // Notify agency if there's an agency_payout_id
           if (serviceRequest.agency_payout_id) {
-            await supabaseAdmin
-              .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
-              .send({
-                type: 'broadcast',
-                event: 'admin-action',
-                payload: notificationPayload
-              });
+            await sendBroadcast(
+              `notify-${serviceRequest.agency_payout_id}-admin-action`,
+              'admin-action',
+              notificationPayload
+            );
             logStep("Order cancelled notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
           }
         }
