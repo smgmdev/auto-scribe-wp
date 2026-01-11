@@ -42,13 +42,14 @@ export function CreditHistoryView() {
         .rpc('get_user_credits', { _user_id: user.id });
       setTotalCredits(creditsData || 0);
 
-      // Fetch active orders (not completed, not cancelled) to calculate credits in use
-      // Active = delivery_status is NOT 'accepted' (completed) AND status is NOT 'cancelled'
+      // Fetch only pending/active orders to calculate locked credits
+      // Exclude: cancelled orders, completed orders (status='completed'), and accepted deliveries
       const { data: activeOrders } = await supabase
         .from('orders')
         .select('id, amount_cents, media_site_id, media_sites(price)')
         .eq('user_id', user.id)
         .neq('status', 'cancelled')
+        .neq('status', 'completed')
         .neq('delivery_status', 'accepted');
 
       if (activeOrders && activeOrders.length > 0) {
