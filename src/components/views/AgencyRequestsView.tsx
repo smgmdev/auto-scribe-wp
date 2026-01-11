@@ -1740,7 +1740,7 @@ export function AgencyRequestsView() {
                   return (
                     <Card 
                       key={order.id}
-                      className={`border-border/50 hover:border-border transition-colors cursor-pointer border-l-4 border-l-red-500 ${
+                      className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
                         isUnread ? 'bg-red-500/10' : ''
                       }`}
                       onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
