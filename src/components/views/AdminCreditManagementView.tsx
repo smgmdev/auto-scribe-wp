@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, HelpCircle, Building2, Percent, DollarSign, Wallet, RefreshCcw, ShoppingCart } from 'lucide-react';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, HelpCircle, Building2, Percent, DollarSign, Wallet, RefreshCcw, ShoppingCart, Gift } from 'lucide-react';
+import { SendCreditsDialog } from '@/components/admin/SendCreditsDialog';
 
 interface UserCredit {
   user_id: string;
@@ -83,6 +85,20 @@ export const AdminCreditManagementView = () => {
   }[]>([]);
   const [agencyTransactionsLoading, setAgencyTransactionsLoading] = useState(true);
   const [agencyTransactionsSearchTerm, setAgencyTransactionsSearchTerm] = useState('');
+
+  // Send credits dialog state
+  const [sendCreditsOpen, setSendCreditsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ userId: string; email: string | null; credits: number } | null>(null);
+
+  const handleSendCredits = (userId: string, email: string | null, credits: number) => {
+    setSelectedUser({ userId, email, credits });
+    setSendCreditsOpen(true);
+  };
+
+  const handleSendCreditsSuccess = () => {
+    fetchUserCredits();
+    fetchTransactions();
+  };
 
   useEffect(() => {
     fetchUserCredits();
@@ -522,7 +538,7 @@ export const AdminCreditManagementView = () => {
               </div>
               <Table>
                 <TableHeader>
-                  <TableRow>
+                <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Purchased</TableHead>
                     <TableHead className="text-right">Refunded</TableHead>
@@ -530,6 +546,7 @@ export const AdminCreditManagementView = () => {
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Orders</TableHead>
                     <TableHead className="text-right">Used</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -543,11 +560,12 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -563,6 +581,21 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">
+                          <Tooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleSendCredits(user.user_id, user.email, user.available)}
+                              >
+                                <Gift className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Send credits</TooltipContent>
+                          </Tooltip>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -1089,6 +1122,18 @@ export const AdminCreditManagementView = () => {
           </Tabs>
         </TabsContent>
       </Tabs>
+
+      {/* Send Credits Dialog */}
+      {selectedUser && (
+        <SendCreditsDialog
+          open={sendCreditsOpen}
+          onOpenChange={setSendCreditsOpen}
+          userId={selectedUser.userId}
+          userEmail={selectedUser.email}
+          currentCredits={selectedUser.credits}
+          onSuccess={handleSendCreditsSuccess}
+        />
+      )}
     </div>
   );
 };
