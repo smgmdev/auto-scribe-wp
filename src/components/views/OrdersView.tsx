@@ -742,7 +742,7 @@ export function OrdersView() {
             )}
             {/* Show dispute opened date */}
             {disputeOrderIds.has(order.id) && disputeCreatedDates[order.id] && (
-              <span className="text-xs text-red-500 block">
+              <span className="text-xs text-muted-foreground block">
                 Dispute opened: {format(new Date(disputeCreatedDates[order.id]), 'MMM d, yyyy h:mm a')}
               </span>
             )}
