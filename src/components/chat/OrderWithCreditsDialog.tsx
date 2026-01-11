@@ -76,7 +76,8 @@ export function OrderWithCreditsDialog({
         .eq('user_id', user.id)
         .neq('status', 'cancelled')
         .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
+        .neq('delivery_status', 'accepted')
+        .neq('delivery_status', 'delivered');
 
       if (activeOrders && activeOrders.length > 0) {
         for (const order of activeOrders) {

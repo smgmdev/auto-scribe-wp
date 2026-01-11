@@ -55,14 +55,16 @@ export function CreditHistoryView() {
       setTotalCredits(creditsData || 0);
 
       // Fetch only pending/active orders to calculate locked credits
-      // Exclude: cancelled orders, completed orders (status='completed'), and accepted deliveries
+      // Exclude: cancelled, completed, delivered (waiting for acceptance), and accepted orders
+      // Only count orders that are truly "in progress" (not yet delivered)
       const { data: activeOrders } = await supabase
         .from('orders')
         .select('id, amount_cents, media_site_id, media_sites(name, price)')
         .eq('user_id', user.id)
         .neq('status', 'cancelled')
         .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
+        .neq('delivery_status', 'accepted')
+        .neq('delivery_status', 'delivered');
 
       // Also fetch pending service requests that have order requests sent but no order created yet
       // These are requests where credits have been locked via CLIENT_ORDER_REQUEST
