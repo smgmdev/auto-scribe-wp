@@ -42,12 +42,12 @@ export function CreditHistoryView() {
       setTotalCredits(creditsData || 0);
 
       // Fetch active orders to calculate credits in use
-      // Active orders are: status = 'paid' AND delivery_status NOT 'accepted' (completed) AND NOT cancelled
+      // Active orders are: NOT completed (delivery_status != 'accepted') AND NOT cancelled
       const { data: activeOrders } = await supabase
         .from('orders')
         .select('id, amount_cents')
         .eq('user_id', user.id)
-        .eq('status', 'paid')
+        .neq('status', 'cancelled')
         .neq('delivery_status', 'accepted');
 
       if (activeOrders && activeOrders.length > 0) {
