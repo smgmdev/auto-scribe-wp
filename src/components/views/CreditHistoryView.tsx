@@ -38,10 +38,14 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // user_credits.credits is actually the available balance (already has locked credits deducted)
-  // Total balance = available + locked
-  const availableCredits = totalCredits; // This IS the available balance from DB
-  const actualTotalBalance = totalCredits + creditsInUse; // True total = available + locked
+  // user_credits.credits is the current balance (has order debits already applied)
+  // For pending requests with CLIENT_ORDER_REQUEST, credits are deducted from user_credits
+  // For active orders, credits were also deducted when the order was created
+  // So available = user_credits, and total = user_credits + credits that were deducted for active orders/requests
+  const availableCredits = totalCredits;
+  // Only add back credits that were ACTUALLY deducted (pending requests)
+  // Active orders from the orders table may not have had credits deducted if created through non-credit flow
+  const actualTotalBalance = totalCredits + creditsInPendingRequests;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,16 +59,14 @@ export function CreditHistoryView() {
       setTotalCredits(creditsData || 0);
 
       // Fetch only pending/active orders to calculate locked credits
-      // Exclude: cancelled, completed, delivered (waiting for acceptance), and accepted orders
-      // Only count orders that are truly "in progress" (not yet delivered)
+      // Exclude: cancelled orders, completed orders, and accepted deliveries
       const { data: activeOrders } = await supabase
         .from('orders')
         .select('id, amount_cents, media_site_id, media_sites(name, price)')
         .eq('user_id', user.id)
         .neq('status', 'cancelled')
         .neq('status', 'completed')
-        .neq('delivery_status', 'accepted')
-        .neq('delivery_status', 'delivered');
+        .neq('delivery_status', 'accepted');
 
       // Also fetch pending service requests that have order requests sent but no order created yet
       // These are requests where credits have been locked via CLIENT_ORDER_REQUEST
