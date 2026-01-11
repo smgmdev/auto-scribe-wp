@@ -18,6 +18,12 @@ interface CreditTransaction {
   created_at: string;
 }
 
+interface LockedOrder {
+  id: string;
+  mediaName: string;
+  credits: number;
+}
+
 export function CreditHistoryView() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
@@ -25,6 +31,7 @@ export function CreditHistoryView() {
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [creditsInUse, setCreditsInUse] = useState<number>(0);
+  const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
   // Available credits = total credits minus locked credits (in active orders)
@@ -45,7 +52,7 @@ export function CreditHistoryView() {
       // Exclude: cancelled orders, completed orders (status='completed'), and accepted deliveries
       const { data: activeOrders } = await supabase
         .from('orders')
-        .select('id, amount_cents, media_site_id, media_sites(price)')
+        .select('id, amount_cents, media_site_id, media_sites(name, price)')
         .eq('user_id', user.id)
         .neq('status', 'cancelled')
         .neq('status', 'completed')
@@ -55,15 +62,23 @@ export function CreditHistoryView() {
         // Calculate credits in use from active orders
         // Each order's credits = media_site price (which is in credits)
         let totalInUse = 0;
+        const orders: LockedOrder[] = [];
         for (const order of activeOrders) {
-          const mediaSite = order.media_sites as { price: number } | null;
+          const mediaSite = order.media_sites as { name: string; price: number } | null;
           if (mediaSite?.price) {
             totalInUse += mediaSite.price;
+            orders.push({
+              id: order.id,
+              mediaName: mediaSite.name || 'Unknown',
+              credits: mediaSite.price
+            });
           }
         }
         setCreditsInUse(totalInUse);
+        setLockedOrders(orders);
       } else {
         setCreditsInUse(0);
+        setLockedOrders([]);
       }
 
       // Fetch all transactions
@@ -225,9 +240,27 @@ export function CreditHistoryView() {
           <TooltipContent 
             side="bottom" 
             sideOffset={8}
-            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            className="max-w-[320px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            <p>Credits currently held in active orders awaiting completion</p>
+            {lockedOrders.length === 0 ? (
+              <p>No credits currently locked in orders</p>
+            ) : (
+              <div className="space-y-1">
+                <p className="font-medium mb-2">Credits held in active orders:</p>
+                <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                  {lockedOrders.map((order) => (
+                    <div key={order.id} className="flex justify-between gap-4 text-xs">
+                      <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
+                      <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-muted-foreground/20 pt-1 mt-2 flex justify-between gap-4">
+                  <span className="text-muted-foreground">Total locked:</span>
+                  <span className="font-medium">{creditsInUse.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
           </TooltipContent>
         </Tooltip>
 
