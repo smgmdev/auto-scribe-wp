@@ -1125,10 +1125,23 @@ export function AgencyRequestsView() {
     return new Set(disputes.map(d => d.order_id));
   }, [disputes]);
 
-  const disputedOrders = useMemo(() => 
-    orders.filter(o => disputedOrderIds.has(o.id)), 
-    [orders, disputedOrderIds]
-  );
+  const disputedOrders = useMemo(() => {
+    const filtered = orders.filter(o => disputedOrderIds.has(o.id));
+    // Sort by last event time (most recent first)
+    return filtered.sort((a, b) => {
+      const aRequest = requests.find(r => r.order?.id === a.id);
+      const bRequest = requests.find(r => r.order?.id === b.id);
+      
+      const aEventTime = aRequest 
+        ? getLastEventInfo(aRequest).eventTime.getTime()
+        : new Date(a.created_at).getTime();
+      const bEventTime = bRequest 
+        ? getLastEventInfo(bRequest).eventTime.getTime()
+        : new Date(b.created_at).getTime();
+      
+      return bEventTime - aEventTime;
+    });
+  }, [orders, disputedOrderIds, requests, messages, disputes]);
 
   const activeOrders = useMemo(() => 
     orders.filter(o => {
@@ -1146,21 +1159,25 @@ export function AgencyRequestsView() {
   // Sort active orders by last event time (most recent first)
   const sortedActiveOrders = useMemo(() => {
     return [...activeOrders].sort((a, b) => {
-      // Get the related request for each order to access getLastEventInfo
+      // Get the related request for each order to use getLastEventInfo
       const aRequest = requests.find(r => r.order?.id === a.id);
       const bRequest = requests.find(r => r.order?.id === b.id);
       
-      // Use delivered_at, accepted_at, or created_at as event times
-      const aEventTime = a.delivered_at ? new Date(a.delivered_at).getTime() :
-                         a.accepted_at ? new Date(a.accepted_at).getTime() :
-                         new Date(a.created_at).getTime();
-      const bEventTime = b.delivered_at ? new Date(b.delivered_at).getTime() :
-                         b.accepted_at ? new Date(b.accepted_at).getTime() :
-                         new Date(b.created_at).getTime();
+      // Use getLastEventInfo if request is available, otherwise fall back to order timestamps
+      const aEventTime = aRequest 
+        ? getLastEventInfo(aRequest).eventTime.getTime()
+        : (a.delivered_at ? new Date(a.delivered_at).getTime() :
+           a.accepted_at ? new Date(a.accepted_at).getTime() :
+           new Date(a.created_at).getTime());
+      const bEventTime = bRequest 
+        ? getLastEventInfo(bRequest).eventTime.getTime()
+        : (b.delivered_at ? new Date(b.delivered_at).getTime() :
+           b.accepted_at ? new Date(b.accepted_at).getTime() :
+           new Date(b.created_at).getTime());
       
       return bEventTime - aEventTime;
     });
-  }, [activeOrders, requests]);
+  }, [activeOrders, requests, messages, disputes]);
   
   // Only orders with 'accepted' delivery_status are truly completed (client approved)
   // 'delivered' means awaiting client approval - stays in active orders
