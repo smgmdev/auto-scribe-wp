@@ -1745,8 +1745,8 @@ export function AgencyRequestsView() {
                       }`}
                       onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
+                      <CardHeader className="py-3 px-4">
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="relative">
                               {order.media_site?.favicon ? (
@@ -1768,12 +1768,16 @@ export function AgencyRequestsView() {
                               <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                             </div>
                           </div>
-                          <Badge className="bg-red-600 text-white border-red-600">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            Open Dispute
-                          </Badge>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge className="bg-red-600 text-white border-red-600">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Open Dispute
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-end">
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-4">
+                        <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
                               Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
@@ -1784,11 +1788,11 @@ export function AgencyRequestsView() {
                               </span>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="flex flex-col items-end gap-0.5">
                             {order.media_site?.publication_format && (
-                              <p className="text-xs text-muted-foreground">{order.media_site.publication_format}</p>
+                              <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
                           </div>
                         </div>
                       </CardContent>
