@@ -215,14 +215,26 @@ export function MyRequestsView() {
     }
   };
 
-  // Fetch user's open disputes to identify which orders are in dispute
+  // Fetch open disputes for user's orders (regardless of who opened the dispute)
   const fetchUserDisputes = async () => {
     if (!user) return;
     
+    // First get all order IDs from user's service requests
+    const { data: userOrders } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('user_id', user.id);
+    
+    if (!userOrders || userOrders.length === 0) {
+      setDisputeOrderIds(new Set());
+      return;
+    }
+    
+    // Then fetch open disputes for those orders
     const { data, error } = await supabase
       .from('disputes')
       .select('order_id')
-      .eq('user_id', user.id)
+      .in('order_id', userOrders.map(o => o.id))
       .eq('status', 'open');
     
     if (!error && data) {
