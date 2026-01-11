@@ -40,6 +40,8 @@ interface ServiceRequest {
     delivery_status: string;
     delivery_deadline: string | null;
     accepted_at: string | null;
+    delivered_at: string | null;
+    created_at: string;
   } | null;
 }
 
@@ -111,7 +113,7 @@ export function MyRequestsView() {
           created_at,
           updated_at,
           media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-          order:orders(id, status, delivery_status, delivery_deadline, accepted_at)
+          order:orders(id, status, delivery_status, delivery_deadline, accepted_at, delivered_at, created_at)
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -803,11 +805,15 @@ export function MyRequestsView() {
   };
 
   // Helper function to get the last event info for a request
-  // Priority: Last message timestamp is the source of truth for sorting
+  // Collects all events with their actual timestamps and returns the most recent
   const getLastEventInfo = (request: ServiceRequest): { eventName: string; eventTime: Date } => {
+    const events: { name: string; time: Date }[] = [];
     const requestMessages = messages[request.id] || [];
     
-    // If there are messages, use the last message as the primary sort key
+    // Request created
+    events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
+    
+    // Last message time - check for special card types
     if (requestMessages.length > 0) {
       const lastMsg = requestMessages[requestMessages.length - 1];
       const msgContent = lastMsg.message;
@@ -836,17 +842,44 @@ export function MyRequestsView() {
       } else if (msgContent.includes('[ENGAGEMENT_CANCELLED]')) {
         eventName = 'Engagement cancelled';
       } else {
-        // Regular message
         const senderLabel = lastMsg.sender_type === 'client' ? 'You' : 
                             lastMsg.sender_type === 'agency' ? 'Agency' : 'Staff';
         eventName = `Message from ${senderLabel}`;
       }
       
-      return { eventName, eventTime: msgTime };
+      events.push({ name: eventName, time: msgTime });
     }
     
-    // Fallback: No messages yet, use request creation time
-    return { eventName: 'Engagement opened', eventTime: new Date(request.created_at) };
+    // Order related events with actual timestamps
+    if (request.order) {
+      // Order created/started
+      if (request.order.created_at) {
+        events.push({ name: 'Order started', time: new Date(request.order.created_at) });
+      }
+      
+      // Order accepted by agency
+      if (request.order.accepted_at) {
+        events.push({ name: 'Order accepted', time: new Date(request.order.accepted_at) });
+      }
+      
+      // Delivery submitted
+      if (request.order.delivered_at) {
+        events.push({ name: 'Delivery submitted', time: new Date(request.order.delivered_at) });
+      }
+    }
+    
+    // Cancelled event
+    if (request.status === 'cancelled' && request.cancelled_at) {
+      events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at) });
+    }
+    
+    // Find the most recent event
+    const latestEvent = events.reduce((latest, current) => 
+      current.time > latest.time ? current : latest, 
+      events[0]
+    );
+    
+    return { eventName: latestEvent.name, eventTime: latestEvent.time };
   };
 
   const handleCardClick = (request: ServiceRequest) => {
