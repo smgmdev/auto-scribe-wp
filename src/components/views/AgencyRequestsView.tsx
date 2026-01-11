@@ -76,7 +76,7 @@ export function AgencyRequestsView() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
-  const [disputes, setDisputes] = useState<{ order_id: string; status: string; read: boolean }[]>([]);
+  const [disputes, setDisputes] = useState<{ order_id: string; status: string; read: boolean; created_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'last_message' | 'submitted'>('last_message');
@@ -248,7 +248,7 @@ export function AgencyRequestsView() {
           if (orderIds.length > 0) {
             const { data: disputesData } = await supabase
               .from('disputes')
-              .select('id, order_id, status, read')
+              .select('id, order_id, status, read, created_at')
               .in('order_id', orderIds)
               .eq('status', 'open');
             
@@ -840,7 +840,11 @@ export function AgencyRequestsView() {
       
       // Check for special card types and use their titles
       let eventName = '';
-      if (msgContent.includes('[ORDER_REQUEST_ACCEPTED]')) {
+      if (msgContent.includes('[DISPUTE_OPENED]')) {
+        eventName = 'Dispute opened';
+      } else if (msgContent.includes('[DISPUTE_RESOLVED]')) {
+        eventName = 'Dispute resolved';
+      } else if (msgContent.includes('[ORDER_REQUEST_ACCEPTED]')) {
         eventName = 'Order request accepted';
       } else if (msgContent.includes('[ORDER_REQUEST_REJECTED]')) {
         eventName = 'Order request rejected';
@@ -895,6 +899,14 @@ export function AgencyRequestsView() {
     // Cancelled event
     if (request.status === 'cancelled' && request.cancelled_at) {
       events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at) });
+    }
+    
+    // Dispute opened event (from disputes array if order is in dispute)
+    if (request.order?.id) {
+      const dispute = disputes.find(d => d.order_id === request.order?.id);
+      if (dispute?.created_at) {
+        events.push({ name: 'Dispute opened', time: new Date(dispute.created_at) });
+      }
     }
     
     // Find the most recent event
