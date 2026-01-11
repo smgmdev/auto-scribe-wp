@@ -45,7 +45,7 @@ export function CreditHistoryView() {
     .reduce((sum, t) => sum + t.amount, 0);
   
   const totalFromAdmin = transactions
-    .filter(t => t.type === 'bonus' || t.type === 'admin_credit')
+    .filter(t => t.type === 'admin_credit')
     .reduce((sum, t) => sum + t.amount, 0);
   
   const actualTotalBalance = totalFromPurchases + totalFromAdmin;
