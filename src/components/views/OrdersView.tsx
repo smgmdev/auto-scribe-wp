@@ -655,8 +655,8 @@ export function OrdersView() {
     <Card 
       key={order.id} 
       className={cn(
-        "hover:bg-muted/30 transition-colors cursor-pointer relative !border-0 shadow-sm",
-        !order.read && !isAdmin && "!border-l-4 !border-l-primary bg-primary/5"
+        "hover:bg-muted/30 transition-colors cursor-pointer relative shadow-sm",
+        !order.read && !isAdmin ? "border-l-4 border-l-primary border-t-0 border-r-0 border-b-0 bg-primary/5" : "border-0"
       )} 
       onClick={() => handleOrderClick(order)}
     >
