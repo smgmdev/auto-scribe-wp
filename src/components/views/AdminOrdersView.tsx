@@ -570,11 +570,6 @@ export function AdminOrdersView() {
       // Investigation record is created when admin clicks "Enter Chat" in the chat window
       openGlobalChat(chatRequest, 'agency-request');
       setDetailsDialogOpen(false);
-      
-      toast({
-        title: "Chat Opened",
-        description: "Click 'Enter Chat' to join the conversation and add to Investigations.",
-      });
     } catch (error: any) {
       console.error('Error investigating order:', error);
       toast({
