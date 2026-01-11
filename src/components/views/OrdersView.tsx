@@ -668,8 +668,8 @@ export function OrdersView() {
       key={order.id} 
       className={cn(
         "border border-transparent hover:border-border transition-colors cursor-pointer relative [box-shadow:none]",
-        !order.read && !isAdmin && order.status !== 'cancelled' && "bg-primary/5 !border-l-4 !border-l-primary hover:border-t-border hover:border-r-border hover:border-b-border",
-        !order.read && !isAdmin && order.status === 'cancelled' && "bg-primary/5"
+        !order.read && !isAdmin && order.status !== 'cancelled' && "bg-blue-500/10 !border-l-4 !border-l-blue-500 hover:border-t-border hover:border-r-border hover:border-b-border",
+        !order.read && !isAdmin && order.status === 'cancelled' && "bg-blue-500/10"
       )}
       onClick={() => handleOrderClick(order)}
     >
