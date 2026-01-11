@@ -478,7 +478,7 @@ export function CreditHistoryView() {
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : transactions.length === 0 ? (
+          ) : displayedTransactions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Coins className="h-10 w-10 mx-auto mb-2 opacity-50" />
               <p>No transactions found</p>
@@ -486,7 +486,7 @@ export function CreditHistoryView() {
             </div>
           ) : (
             <div className="space-y-3">
-              {transactions.map((transaction) => (
+              {displayedTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-[#4771d9] transition-colors"
