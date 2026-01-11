@@ -57,8 +57,39 @@ export function OrderWithCreditsDialog({
   const [deliveryHours, setDeliveryHours] = useState<number>(initialData?.deliveryHours || 0);
   const [deliveryMinutes, setDeliveryMinutes] = useState<number>(initialData?.deliveryMinutes || 0);
   const [specialTerms, setSpecialTerms] = useState(initialData?.specialTerms || '');
+  const [lockedCredits, setLockedCredits] = useState<number>(0);
   const { credits, user } = useAuth();
   const { toast } = useToast();
+
+  // Fetch locked credits when dialog opens
+  React.useEffect(() => {
+    const fetchLockedCredits = async () => {
+      if (!open || !user) return;
+      
+      const { data: activeOrders } = await supabase
+        .from('orders')
+        .select('id, media_sites(price)')
+        .eq('user_id', user.id)
+        .neq('status', 'cancelled')
+        .neq('status', 'completed')
+        .neq('delivery_status', 'accepted');
+
+      if (activeOrders && activeOrders.length > 0) {
+        let totalLocked = 0;
+        for (const order of activeOrders) {
+          const mediaSite = order.media_sites as { price: number } | null;
+          if (mediaSite?.price) {
+            totalLocked += mediaSite.price;
+          }
+        }
+        setLockedCredits(totalLocked);
+      } else {
+        setLockedCredits(0);
+      }
+    };
+
+    fetchLockedCredits();
+  }, [open, user]);
 
   // Update state when initialData changes (for resend mode)
   React.useEffect(() => {
@@ -71,7 +102,8 @@ export function OrderWithCreditsDialog({
   }, [open, initialData]);
 
   const creditCost = mediaSite?.price || 0;
-  const hasEnoughCredits = (credits || 0) >= creditCost;
+  const availableCredits = (credits || 0) - lockedCredits;
+  const hasEnoughCredits = availableCredits >= creditCost;
 
   const handleSendRequest = async () => {
     if (!mediaSite || !hasEnoughCredits || !user) return;
@@ -277,21 +309,33 @@ export function OrderWithCreditsDialog({
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <Coins className="h-4 w-4" />
-                Your Balance
+                Total Balance
               </span>
-              <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
-                {(credits || 0).toLocaleString()} credits (${(credits || 0).toLocaleString()})
+              <span className="font-medium text-muted-foreground">
+                {(credits || 0).toLocaleString()} credits
               </span>
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-sm text-muted-foreground">Order Cost</span>
-              <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
+            {lockedCredits > 0 && (
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-sm text-muted-foreground">Locked in Orders</span>
+                <span className="font-medium text-amber-500">-{lockedCredits.toLocaleString()} credits</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between mt-1">
+              <span className="text-sm text-muted-foreground">Available Balance</span>
+              <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
+                {availableCredits.toLocaleString()} credits (${availableCredits.toLocaleString()})
+              </span>
             </div>
             <div className="border-t border-border my-3" />
             <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Order Cost</span>
+              <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
               <span className="font-medium">After Order</span>
               <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
-                {Math.max(0, (credits || 0) - creditCost).toLocaleString()} credits
+                {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
               </span>
             </div>
           </div>
@@ -303,7 +347,7 @@ export function OrderWithCreditsDialog({
               <div>
                 <p className="font-medium text-destructive">Insufficient Credits</p>
                 <p className="text-sm text-muted-foreground">
-                  You need {(creditCost - (credits || 0)).toLocaleString()} more credits (${(creditCost - (credits || 0)).toLocaleString()}) to send this order request.
+                  You need {(creditCost - availableCredits).toLocaleString()} more credits (${(creditCost - availableCredits).toLocaleString()}) to send this order request.
                 </p>
               </div>
             </div>
