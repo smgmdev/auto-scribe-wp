@@ -82,10 +82,10 @@ export function SendCreditsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5" />
-            Send Credits
+            Gift Credits
           </DialogTitle>
           <DialogDescription>
-            Send credits to {userEmail || 'this user'}. Current balance: {currentCredits.toLocaleString()} credits.
+            Gift credits to {userEmail || 'this user'}. Current balance: {currentCredits.toLocaleString()} credits.
           </DialogDescription>
         </DialogHeader>
 
@@ -115,19 +115,28 @@ export function SendCreditsDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)} 
+            disabled={loading}
+            className="hover:bg-black hover:text-white hover:border-black"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={loading || !amount}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={loading || !amount}
+            className="bg-black text-white border border-transparent hover:bg-transparent hover:text-black hover:border-black"
+          >
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sending...
+                Gifting...
               </>
             ) : (
               <>
                 <Gift className="h-4 w-4 mr-2" />
-                Send Credits
+                Gift Credits
               </>
             )}
           </Button>
