@@ -669,9 +669,11 @@ export function Sidebar({
           table: 'orders'
         },
         (payload) => {
+          console.log('[Sidebar] New order INSERT event received:', payload);
           const newOrder = payload.new as { status: string; order_number: string | null };
           // Increment the unread orders count and show toast when a new active order is created
           if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
+            console.log('[Sidebar] Incrementing unread orders count and showing toast');
             incrementUnreadOrdersCount();
             toast({
               title: "New Order Received 🛒",
@@ -696,7 +698,9 @@ export function Sidebar({
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Sidebar] Admin orders realtime subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
