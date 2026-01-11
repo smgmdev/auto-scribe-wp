@@ -49,15 +49,15 @@ export function SendCreditsDialog({
 
       // Create transaction record
       const description = reason 
-        ? `Admin Credit: ${reason}`
-        : 'Admin credit added';
+        ? `Gifted: ${reason}`
+        : 'Gifted credits';
 
       const { error: txError } = await supabase
         .from('credit_transactions')
         .insert({
           user_id: userId,
           amount: creditAmount,
-          type: 'admin_credit',
+          type: 'gifted',
           description
         });
 

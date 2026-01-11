@@ -20,7 +20,7 @@ interface UserCredit {
   locked: number;
   available: number;
   orders: number;
-  used: number;
+  totalSpent: number;
   refunded: number;
   email: string | null;
 }
@@ -292,20 +292,17 @@ export const AdminCreditManagementView = () => {
         emailMap.set(profile.id, profile.email);
       });
 
-      // Calculate purchased, gifted, used, and refunded credits per user
+      // Calculate purchased, gifted, and refunded credits per user
       const purchasedMap = new Map<string, number>();
       const giftedMap = new Map<string, number>();
-      const usedMap = new Map<string, number>();
       const refundedMap = new Map<string, number>();
       transactionsData?.forEach(tx => {
         if (tx.type === 'refund') {
           refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-        } else if (tx.type === 'admin_credit') {
+        } else if (tx.type === 'gifted' || tx.type === 'admin_credit') {
           giftedMap.set(tx.user_id, (giftedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'purchase') {
           purchasedMap.set(tx.user_id, (purchasedMap.get(tx.user_id) || 0) + tx.amount);
-        } else if (tx.amount < 0) {
-          usedMap.set(tx.user_id, (usedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
       });
 
@@ -316,14 +313,17 @@ export const AdminCreditManagementView = () => {
         lockedMap.set(order.user_id, (lockedMap.get(order.user_id) || 0) + price);
       });
 
-      // Fetch orders count per user
-      const { data: ordersData } = await supabase
+      // Fetch completed orders to calculate total spent per user
+      const { data: completedOrdersData } = await supabase
         .from('orders')
-        .select('user_id')
-        .in('status', ['paid', 'completed']);
+        .select('user_id, media_sites(price)')
+        .eq('delivery_status', 'accepted');
 
+      const totalSpentMap = new Map<string, number>();
       const ordersMap = new Map<string, number>();
-      ordersData?.forEach(order => {
+      completedOrdersData?.forEach(order => {
+        const price = (order.media_sites as any)?.price || 0;
+        totalSpentMap.set(order.user_id, (totalSpentMap.get(order.user_id) || 0) + price);
         ordersMap.set(order.user_id, (ordersMap.get(order.user_id) || 0) + 1);
       });
 
@@ -338,7 +338,7 @@ export const AdminCreditManagementView = () => {
           locked: locked,
           available: totalCredits - locked,
           orders: ordersMap.get(credit.user_id) || 0,
-          used: usedMap.get(credit.user_id) || 0,
+          totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
           email: emailMap.get(credit.user_id) || null
         };
@@ -551,7 +551,7 @@ export const AdminCreditManagementView = () => {
                     <TableHead className="text-right">Locked</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Orders</TableHead>
-                    <TableHead className="text-right">Used</TableHead>
+                    <TableHead className="text-right">Total Spent</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -588,7 +588,7 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
                         <TableCell className="text-right">
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>
