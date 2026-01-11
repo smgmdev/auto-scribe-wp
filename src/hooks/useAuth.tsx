@@ -118,6 +118,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Real-time subscription for credit updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`user-credits-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_credits',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          if (payload.new && 'credits' in payload.new) {
+            setCredits(payload.new.credits as number);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
   const verifyPin = async (pin: string): Promise<boolean> => {
     if (!user) return false;
     
