@@ -803,17 +803,15 @@ export function MyRequestsView() {
   };
 
   // Helper function to get the last event info for a request
+  // Priority: Last message timestamp is the source of truth for sorting
   const getLastEventInfo = (request: ServiceRequest): { eventName: string; eventTime: Date } => {
-    const events: { name: string; time: Date }[] = [];
     const requestMessages = messages[request.id] || [];
     
-    // Request created
-    events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
-    
-    // Last message time - check for special card types
+    // If there are messages, use the last message as the primary sort key
     if (requestMessages.length > 0) {
       const lastMsg = requestMessages[requestMessages.length - 1];
       const msgContent = lastMsg.message;
+      const msgTime = new Date(lastMsg.created_at);
       
       // Check for special card types and use their titles
       let eventName = '';
@@ -844,49 +842,11 @@ export function MyRequestsView() {
         eventName = `Message from ${senderLabel}`;
       }
       
-      events.push({ name: eventName, time: new Date(lastMsg.created_at) });
+      return { eventName, eventTime: msgTime };
     }
     
-    // Order related events based on status
-    if (request.order) {
-      if (request.order.delivery_status === 'pending' && request.order.accepted_at) {
-        events.push({ name: 'Awaiting delivery', time: new Date(request.order.accepted_at) });
-      } else if (request.order.delivery_status === 'delivered') {
-        events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
-      } else if (request.order.delivery_status === 'accepted') {
-        events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
-      } else if (request.order.delivery_status === 'rejected' || request.order.delivery_status === 'pending_revision') {
-        events.push({ name: 'Revision requested', time: new Date(request.updated_at) });
-      }
-      
-      if (request.order.status === 'paid') {
-        events.push({ name: 'Order paid', time: new Date(request.updated_at) });
-      }
-    }
-    
-    // Request status events
-    if (request.status === 'cancelled') {
-      events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at || request.updated_at) });
-    } else if (request.status === 'accepted' && !request.order) {
-      events.push({ name: 'Request accepted', time: new Date(request.updated_at) });
-    } else if (request.status === 'changes_requested') {
-      events.push({ name: 'Changes requested', time: new Date(request.updated_at) });
-    }
-    
-    // Check for offer or client order request
-    if (!request.order?.id && hasPendingOffer(request.id)) {
-      events.push({ name: 'Received an offer', time: new Date(request.updated_at) });
-    } else if (!request.order?.id && hasClientOrderRequestPending(request.id)) {
-      events.push({ name: 'Order request sent', time: new Date(request.updated_at) });
-    }
-    
-    // Find the most recent event
-    const latestEvent = events.reduce((latest, current) => 
-      current.time > latest.time ? current : latest, 
-      events[0]
-    );
-    
-    return { eventName: latestEvent.name, eventTime: latestEvent.time };
+    // Fallback: No messages yet, use request creation time
+    return { eventName: 'Engagement opened', eventTime: new Date(request.created_at) };
   };
 
   const handleCardClick = (request: ServiceRequest) => {
