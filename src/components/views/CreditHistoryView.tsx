@@ -33,6 +33,7 @@ export function CreditHistoryView() {
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [creditsInUse, setCreditsInUse] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
+  const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
   // Available credits = total credits minus locked credits (in active orders)
@@ -122,6 +123,24 @@ export function CreditHistoryView() {
       setCreditsInUse(totalInUse);
       setLockedOrders(orders);
 
+      // Fetch completed orders to calculate total spent
+      const { data: completedOrders } = await supabase
+        .from('orders')
+        .select('id, media_sites(price)')
+        .eq('user_id', user.id)
+        .eq('status', 'completed');
+
+      let completedSpent = 0;
+      if (completedOrders && completedOrders.length > 0) {
+        for (const order of completedOrders) {
+          const mediaSite = order.media_sites as { price: number } | null;
+          if (mediaSite?.price) {
+            completedSpent += mediaSite.price;
+          }
+        }
+      }
+      setCompletedOrdersSpent(completedSpent);
+
       // Fetch all transactions
       const { data, error } = await supabase
         .from('credit_transactions')
@@ -148,9 +167,12 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'refund')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalSpent = transactions
-    .filter(t => t.type === 'usage' || t.type === 'deduction' || t.type === 'order')
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0) - totalRefunded;
+  // Total spent = only from completed orders + other usage/deductions - refunds
+  const otherSpending = transactions
+    .filter(t => t.type === 'usage' || t.type === 'deduction')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const totalSpent = completedOrdersSpent + otherSpending - totalRefunded;
 
   const totalOrders = transactions
     .filter(t => t.type === 'order')
