@@ -117,11 +117,15 @@ serve(async (req) => {
 
     // Get current user credits for the order owner (not the admin if admin is cancelling)
     const orderOwnerId = order.user_id;
+    logStep("Fetching user credits", { orderOwnerId });
+    
     const { data: userCredits, error: creditsError } = await supabaseAdmin
       .from("user_credits")
       .select("credits")
       .eq("user_id", orderOwnerId)
       .single();
+
+    logStep("User credits query result", { userCredits, creditsError: creditsError?.message });
 
     if (creditsError) {
       logStep("Error fetching user credits", { error: creditsError.message });
