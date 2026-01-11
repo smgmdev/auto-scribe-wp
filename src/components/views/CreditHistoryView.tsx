@@ -23,28 +23,59 @@ export function CreditHistoryView() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [availableCredits, setAvailableCredits] = useState<number>(0);
+  const [totalCredits, setTotalCredits] = useState<number>(0);
+  const [creditsInUse, setCreditsInUse] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
+  // Available credits = total credits - credits in active orders
+  const availableCredits = totalCredits - creditsInUse;
+
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
       if (!user) return;
 
       setLoading(true);
       
-      // Fetch available credits
+      // Fetch total credits from user_credits
       const { data: creditsData } = await supabase
         .rpc('get_user_credits', { _user_id: user.id });
-      setAvailableCredits(creditsData || 0);
+      setTotalCredits(creditsData || 0);
 
-      let query = supabase
+      // Fetch active orders to calculate credits in use
+      // Active orders are: status = 'paid' AND delivery_status NOT 'accepted' (completed) AND NOT cancelled
+      const { data: activeOrders } = await supabase
+        .from('orders')
+        .select('id, amount_cents')
+        .eq('user_id', user.id)
+        .eq('status', 'paid')
+        .neq('delivery_status', 'accepted');
+
+      if (activeOrders && activeOrders.length > 0) {
+        const activeOrderIds = activeOrders.map(o => o.id);
+        
+        // Get credit transactions for these active orders
+        const { data: orderCredits } = await supabase
+          .from('credit_transactions')
+          .select('amount, order_id')
+          .eq('user_id', user.id)
+          .eq('type', 'order')
+          .in('order_id', activeOrderIds);
+
+        if (orderCredits) {
+          // Sum up absolute credits in active orders
+          const inUse = orderCredits.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+          setCreditsInUse(inUse);
+        }
+      } else {
+        setCreditsInUse(0);
+      }
+
+      // Fetch all transactions
+      const { data, error } = await supabase
         .from('credit_transactions')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching transactions:', error);
@@ -54,7 +85,7 @@ export function CreditHistoryView() {
       setLoading(false);
     };
 
-    fetchTransactions();
+    fetchData();
   }, [user]);
 
   const totalPurchased = transactions
@@ -261,7 +292,7 @@ export function CreditHistoryView() {
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
-                    transactions.length
+                    creditsInUse.toLocaleString()
                   )}
                 </div>
               </CardContent>
@@ -272,7 +303,7 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            <p>Total number of credit transactions</p>
+            <p>Credits currently held in active orders awaiting completion</p>
           </TooltipContent>
         </Tooltip>
       </div>
