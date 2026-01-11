@@ -106,6 +106,7 @@ export function AdminOrdersView() {
             table: 'orders'
           },
           (payload) => {
+            console.log('[AdminOrdersView] New order INSERT event received:', payload);
             const newOrder = payload.new as { status: string; order_number: string | null };
             // Show notification for new active orders
             if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
@@ -166,7 +167,9 @@ export function AdminOrdersView() {
             fetchOrders();
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('[AdminOrdersView] Orders realtime subscription status:', status);
+        });
       
       // Subscribe to disputes changes to refresh the list
       const disputesChannel = supabase
