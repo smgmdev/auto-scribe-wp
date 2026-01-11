@@ -13,6 +13,8 @@ import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, H
 interface UserCredit {
   user_id: string;
   purchased: number;
+  totalCredits: number;
+  locked: number;
   available: number;
   orders: number;
   used: number;
@@ -259,6 +261,15 @@ export const AdminCreditManagementView = () => {
 
       if (transactionsError) throw transactionsError;
 
+      // Fetch active orders to calculate locked credits per user
+      // Active = not cancelled, not completed, and delivery not accepted
+      const { data: activeOrdersData } = await supabase
+        .from('orders')
+        .select('user_id, media_site_id, media_sites(price)')
+        .neq('status', 'cancelled')
+        .neq('status', 'completed')
+        .neq('delivery_status', 'accepted');
+
       const emailMap = new Map<string, string | null>();
       profilesData?.forEach(profile => {
         emailMap.set(profile.id, profile.email);
@@ -278,6 +289,13 @@ export const AdminCreditManagementView = () => {
         }
       });
 
+      // Calculate locked credits per user from active orders
+      const lockedMap = new Map<string, number>();
+      activeOrdersData?.forEach(order => {
+        const price = (order.media_sites as any)?.price || 0;
+        lockedMap.set(order.user_id, (lockedMap.get(order.user_id) || 0) + price);
+      });
+
       // Fetch orders count per user
       const { data: ordersData } = await supabase
         .from('orders')
@@ -289,15 +307,21 @@ export const AdminCreditManagementView = () => {
         ordersMap.set(order.user_id, (ordersMap.get(order.user_id) || 0) + 1);
       });
 
-      const combined: UserCredit[] = (creditsData || []).map(credit => ({
-        user_id: credit.user_id,
-        purchased: purchasedMap.get(credit.user_id) || 0,
-        available: credit.credits,
-        orders: ordersMap.get(credit.user_id) || 0,
-        used: usedMap.get(credit.user_id) || 0,
-        refunded: refundedMap.get(credit.user_id) || 0,
-        email: emailMap.get(credit.user_id) || null
-      }));
+      const combined: UserCredit[] = (creditsData || []).map(credit => {
+        const totalCredits = credit.credits;
+        const locked = lockedMap.get(credit.user_id) || 0;
+        return {
+          user_id: credit.user_id,
+          purchased: purchasedMap.get(credit.user_id) || 0,
+          totalCredits: totalCredits,
+          locked: locked,
+          available: totalCredits - locked,
+          orders: ordersMap.get(credit.user_id) || 0,
+          used: usedMap.get(credit.user_id) || 0,
+          refunded: refundedMap.get(credit.user_id) || 0,
+          email: emailMap.get(credit.user_id) || null
+        };
+      });
 
       setUserCredits(combined);
     } catch (error) {
@@ -502,6 +526,7 @@ export const AdminCreditManagementView = () => {
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Purchased</TableHead>
                     <TableHead className="text-right">Refunded</TableHead>
+                    <TableHead className="text-right">Locked</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Orders</TableHead>
                     <TableHead className="text-right">Used</TableHead>
@@ -517,11 +542,12 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -533,6 +559,7 @@ export const AdminCreditManagementView = () => {
                         </TableCell>
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.used.toLocaleString()}</TableCell>
