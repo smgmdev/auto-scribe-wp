@@ -656,7 +656,7 @@ export function OrdersView() {
       key={order.id} 
       className={cn(
         "hover:bg-muted/30 transition-colors cursor-pointer relative border-0 shadow-sm",
-        !order.read && !isAdmin && "border-l-4 border-l-primary bg-primary/5"
+        !order.read && !isAdmin && "border-l-4 border-l-primary border-y-0 border-r-0 bg-primary/5"
       )} 
       onClick={() => handleOrderClick(order)}
     >
