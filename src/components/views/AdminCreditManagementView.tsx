@@ -15,6 +15,7 @@ import { SendCreditsDialog } from '@/components/admin/SendCreditsDialog';
 interface UserCredit {
   user_id: string;
   purchased: number;
+  gifted: number;
   totalCredits: number;
   locked: number;
   available: number;
@@ -291,16 +292,19 @@ export const AdminCreditManagementView = () => {
         emailMap.set(profile.id, profile.email);
       });
 
-      // Calculate purchased, used, and refunded credits per user
+      // Calculate purchased, gifted, used, and refunded credits per user
       const purchasedMap = new Map<string, number>();
+      const giftedMap = new Map<string, number>();
       const usedMap = new Map<string, number>();
       const refundedMap = new Map<string, number>();
       transactionsData?.forEach(tx => {
         if (tx.type === 'refund') {
           refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-        } else if (tx.amount > 0) {
+        } else if (tx.type === 'admin_credit') {
+          giftedMap.set(tx.user_id, (giftedMap.get(tx.user_id) || 0) + tx.amount);
+        } else if (tx.type === 'purchase') {
           purchasedMap.set(tx.user_id, (purchasedMap.get(tx.user_id) || 0) + tx.amount);
-        } else {
+        } else if (tx.amount < 0) {
           usedMap.set(tx.user_id, (usedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
       });
@@ -329,6 +333,7 @@ export const AdminCreditManagementView = () => {
         return {
           user_id: credit.user_id,
           purchased: purchasedMap.get(credit.user_id) || 0,
+          gifted: giftedMap.get(credit.user_id) || 0,
           totalCredits: totalCredits,
           locked: locked,
           available: totalCredits - locked,
@@ -541,6 +546,7 @@ export const AdminCreditManagementView = () => {
                 <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Purchased</TableHead>
+                    <TableHead className="text-right">Gifted</TableHead>
                     <TableHead className="text-right">Refunded</TableHead>
                     <TableHead className="text-right">Locked</TableHead>
                     <TableHead className="text-right">Available</TableHead>
@@ -561,11 +567,12 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -576,6 +583,7 @@ export const AdminCreditManagementView = () => {
                           {user.email || <span className="text-muted-foreground italic">No email</span>}
                         </TableCell>
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                         <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>

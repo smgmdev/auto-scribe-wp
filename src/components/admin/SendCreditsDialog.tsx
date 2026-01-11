@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Gift } from 'lucide-react';
@@ -28,7 +27,6 @@ export function SendCreditsDialog({
 }: SendCreditsDialogProps) {
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
-  const [transactionType, setTransactionType] = useState<'bonus' | 'admin_credit'>('bonus');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -51,15 +49,15 @@ export function SendCreditsDialog({
 
       // Create transaction record
       const description = reason 
-        ? `${transactionType === 'bonus' ? 'Bonus' : 'Admin Credit'}: ${reason}`
-        : `${transactionType === 'bonus' ? 'Bonus credits' : 'Admin credit'} added`;
+        ? `Admin Credit: ${reason}`
+        : 'Admin credit added';
 
       const { error: txError } = await supabase
         .from('credit_transactions')
         .insert({
           user_id: userId,
           amount: creditAmount,
-          type: transactionType,
+          type: 'admin_credit',
           description
         });
 
@@ -93,19 +91,6 @@ export function SendCreditsDialog({
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="type">Transaction Type</Label>
-            <Select value={transactionType} onValueChange={(v) => setTransactionType(v as 'bonus' | 'admin_credit')}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bonus">Bonus</SelectItem>
-                <SelectItem value="admin_credit">Admin Credit</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
             <Label htmlFor="amount">Credit Amount</Label>
             <Input
               id="amount"
@@ -121,7 +106,7 @@ export function SendCreditsDialog({
             <Label htmlFor="reason">Reason (optional)</Label>
             <Textarea
               id="reason"
-              placeholder="e.g., Promotional bonus, Compensation for issue..."
+              placeholder="e.g., Compensation for issue, promotional gift..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
