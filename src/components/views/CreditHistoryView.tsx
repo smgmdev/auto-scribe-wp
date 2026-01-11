@@ -215,6 +215,7 @@ export function CreditHistoryView() {
       case 'purchase':
         return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Purchase</Badge>;
       case 'spent':
+      case 'order': // Legacy type
         return <Badge variant="secondary" className="bg-red-500/10 text-red-500 border-red-500/30">Spent</Badge>;
       case 'gifted':
       case 'admin_credit':
@@ -226,9 +227,10 @@ export function CreditHistoryView() {
     }
   };
 
-  // Filter transactions to only show: purchases, gifts, spent (completed orders), and order_payout (for agencies)
+  // Filter transactions to only show: purchases, gifts, spent (completed orders), order_payout (for agencies)
+  // Include legacy "order" type for historical transactions
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'spent', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
+    ['purchase', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
   );
 
   return (
