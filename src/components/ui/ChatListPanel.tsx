@@ -635,15 +635,125 @@ export function ChatListPanel() {
       }
     };
 
+    // Listen for message deletions to update last message display (e.g., when order request is cancelled)
+    const handleServiceMessageDeleted = async (event: CustomEvent) => {
+      const { requestId } = event.detail || {};
+      console.log('[ChatListPanel] Received service-message-deleted event:', { requestId });
+      if (!requestId) return;
+      
+      // Refetch the last message for this request
+      try {
+        const { data: messagesData } = await supabase
+          .from('service_messages')
+          .select('message, created_at, sender_type')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        const lastMsg = messagesData?.[0];
+        console.log('[ChatListPanel] Refetched last message after deletion:', { requestId, lastMsg: lastMsg?.message?.substring(0, 50) });
+        
+        // Update myEngagements
+        setMyEngagements(prev => {
+          const updated = prev.map(e => {
+            if (e.id === requestId) {
+              return {
+                ...e,
+                lastMessage: lastMsg?.message || undefined,
+                lastMessageTime: lastMsg?.created_at || e.lastMessageTime
+              };
+            }
+            return e;
+          });
+          myEngagementsRef.current = updated;
+          return updated;
+        });
+        
+        // Update serviceRequests
+        setServiceRequests(prev => {
+          const updated = prev.map(r => {
+            if (r.id === requestId) {
+              return {
+                ...r,
+                lastMessage: lastMsg?.message || undefined,
+                lastMessageTime: lastMsg?.created_at || r.lastMessageTime
+              };
+            }
+            return r;
+          });
+          serviceRequestsRef.current = updated;
+          return updated;
+        });
+      } catch (error) {
+        console.error('[ChatListPanel] Error refetching last message after deletion:', error);
+      }
+    };
+
+    // Listen for message updates to refresh last message display
+    const handleServiceMessageUpdated = async (event: CustomEvent) => {
+      const { requestId } = event.detail || {};
+      if (!requestId) return;
+      
+      // Refetch the last message for this request
+      try {
+        const { data: messagesData } = await supabase
+          .from('service_messages')
+          .select('message, created_at, sender_type')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        const lastMsg = messagesData?.[0];
+        
+        // Update myEngagements
+        setMyEngagements(prev => {
+          const updated = prev.map(e => {
+            if (e.id === requestId) {
+              return {
+                ...e,
+                lastMessage: lastMsg?.message || e.lastMessage,
+                lastMessageTime: lastMsg?.created_at || e.lastMessageTime
+              };
+            }
+            return e;
+          });
+          myEngagementsRef.current = updated;
+          return updated;
+        });
+        
+        // Update serviceRequests
+        setServiceRequests(prev => {
+          const updated = prev.map(r => {
+            if (r.id === requestId) {
+              return {
+                ...r,
+                lastMessage: lastMsg?.message || r.lastMessage,
+                lastMessageTime: lastMsg?.created_at || r.lastMessageTime
+              };
+            }
+            return r;
+          });
+          serviceRequestsRef.current = updated;
+          return updated;
+        });
+      } catch (error) {
+        console.error('[ChatListPanel] Error refetching last message after update:', error);
+      }
+    };
+
     window.addEventListener('engagement-removed', handleEngagementRemoved as EventListener);
     window.addEventListener('engagement-added', handleEngagementAdded as EventListener);
     window.addEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
     window.addEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
+    window.addEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
+    window.addEventListener('service-message-updated', handleServiceMessageUpdated as EventListener);
     return () => {
       window.removeEventListener('engagement-removed', handleEngagementRemoved as EventListener);
       window.removeEventListener('engagement-added', handleEngagementAdded as EventListener);
       window.removeEventListener('service-request-updated', handleServiceRequestUpdated as EventListener);
       window.removeEventListener('my-engagement-updated', handleMyEngagementUpdated as EventListener);
+      window.removeEventListener('service-message-deleted', handleServiceMessageDeleted as EventListener);
+      window.removeEventListener('service-message-updated', handleServiceMessageUpdated as EventListener);
     };
   }, [clearUnreadMessageCount]);
 
