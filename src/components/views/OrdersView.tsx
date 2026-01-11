@@ -668,13 +668,14 @@ export function OrdersView() {
       key={order.id} 
       className={cn(
         "border border-transparent hover:border-border transition-colors cursor-pointer relative [box-shadow:none]",
-        !order.read && !isAdmin && "bg-primary/5 !border-l-4 !border-l-primary hover:border-t-border hover:border-r-border hover:border-b-border"
+        !order.read && !isAdmin && order.status !== 'cancelled' && "bg-primary/5 !border-l-4 !border-l-primary hover:border-t-border hover:border-r-border hover:border-b-border",
+        !order.read && !isAdmin && order.status === 'cancelled' && "bg-primary/5"
       )}
       onClick={() => handleOrderClick(order)}
     >
       {/* Unread indicator dot */}
       {!order.read && !isAdmin && (
-        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
       )}
       <CardHeader className="pb-2 px-4 pt-3">
         <div className="flex items-center justify-between">
