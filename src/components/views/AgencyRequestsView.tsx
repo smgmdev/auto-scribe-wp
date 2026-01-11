@@ -1189,17 +1189,25 @@ export function AgencyRequestsView() {
     [orders, disputedOrderIds]
   );
   
-  const cancelledOrders = useMemo(() => 
-    orders.filter(o => {
+  const cancelledOrders = useMemo(() => {
+    const filtered = orders.filter(o => {
       // Check if related request is cancelled
       const relatedRequest = requests.find(r => r.order?.id === o.id);
       const isRequestCancelled = relatedRequest?.status === 'cancelled';
       
       return (o.status === 'cancelled' || o.delivery_status === 'cancelled' || isRequestCancelled) && 
         !disputedOrderIds.has(o.id);
-    }), 
-    [orders, disputedOrderIds, requests]
-  );
+    });
+    
+    // Sort by cancelled_at date from related request (most recent first)
+    return filtered.sort((a, b) => {
+      const aRequest = requests.find(r => r.order?.id === a.id);
+      const bRequest = requests.find(r => r.order?.id === b.id);
+      const aCancelledAt = aRequest?.cancelled_at ? new Date(aRequest.cancelled_at).getTime() : 0;
+      const bCancelledAt = bRequest?.cancelled_at ? new Date(bRequest.cancelled_at).getTime() : 0;
+      return bCancelledAt - aCancelledAt;
+    });
+  }, [orders, disputedOrderIds, requests]);
 
   // Compute unread counts based on actual displayed items (matching the filtered lists above)
   const unreadActiveOrdersCount = useMemo(() => 
@@ -2013,7 +2021,7 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
-                              Cancelled order: {order.updated_at ? format(new Date(order.updated_at), 'MMM d, yyyy h:mm a') : 'N/A'}
+                              Cancelled order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Order started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
