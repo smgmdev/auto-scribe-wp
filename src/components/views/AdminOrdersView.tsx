@@ -124,7 +124,34 @@ export function AdminOrdersView() {
             schema: 'public',
             table: 'orders'
           },
-          () => {
+          (payload) => {
+            const updated = payload.new as { delivery_status: string; status: string; order_number: string | null };
+            const old = payload.old as { delivery_status: string; status: string };
+            
+            // Show notification for delivery status changes
+            if (old?.delivery_status !== updated.delivery_status) {
+              if (updated.delivery_status === 'accepted') {
+                toast({
+                  title: "Delivery Accepted ✓",
+                  description: `Order ${updated.order_number || ''} has been accepted by the client`,
+                });
+              } else if (updated.delivery_status === 'delivered' && old?.delivery_status !== 'delivered') {
+                toast({
+                  title: "Order Delivered",
+                  description: `Order ${updated.order_number || ''} has been marked as delivered`,
+                });
+              }
+            }
+            
+            // Show notification for cancellations
+            if (old?.status !== 'cancelled' && updated.status === 'cancelled') {
+              toast({
+                title: "Order Cancelled",
+                description: `Order ${updated.order_number || ''} has been cancelled`,
+                variant: 'destructive',
+              });
+            }
+            
             fetchOrders();
           }
         )
@@ -151,7 +178,15 @@ export function AdminOrdersView() {
             schema: 'public',
             table: 'disputes'
           },
-          () => {
+          (payload) => {
+            const newDispute = payload.new as { status: string };
+            if (newDispute.status === 'open') {
+              toast({
+                title: "New Dispute Opened ⚠️",
+                description: "A client has opened a dispute on an order",
+                variant: 'destructive',
+              });
+            }
             fetchDisputedOrders();
           }
         )
