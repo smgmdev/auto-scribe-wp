@@ -235,26 +235,35 @@ serve(async (req) => {
       logStep("Closed open disputes for order", { disputeIds: closedDisputes.map(d => d.id) });
     }
 
-    // Send cancellation message to chat
+    // Send cancellation message to chat (skip if this is a dispute resolution - frontend sends DISPUTE_RESOLVED instead)
+    const isDisputeResolution = reason && reason.startsWith('Dispute resolution:');
+    
     if (serviceRequest) {
-      const cancellationMessage = JSON.stringify({
-        type: 'order_cancelled',
-        media_site_id: order.media_sites?.id,
-        media_site_name: mediaSiteName,
-        credits_refunded: creditRefund,
-        order_id: order_id,
-        cancelled_by: isAdmin ? 'admin' : 'user',
-        reason: isAdmin ? (reason || null) : null
-      });
-
-      await supabaseAdmin
-        .from("service_messages")
-        .insert({
-          request_id: serviceRequest.id,
-          sender_type: isAdmin ? 'admin' : 'client',
-          sender_id: user.id,
-          message: `[ORDER_CANCELLED]${cancellationMessage}[/ORDER_CANCELLED]`
+      // Only send ORDER_CANCELLED message if not a dispute resolution
+      if (!isDisputeResolution) {
+        const cancellationMessage = JSON.stringify({
+          type: 'order_cancelled',
+          media_site_id: order.media_sites?.id,
+          media_site_name: mediaSiteName,
+          credits_refunded: creditRefund,
+          order_id: order_id,
+          cancelled_by: isAdmin ? 'admin' : 'user',
+          reason: isAdmin ? (reason || null) : null
         });
+
+        await supabaseAdmin
+          .from("service_messages")
+          .insert({
+            request_id: serviceRequest.id,
+            sender_type: isAdmin ? 'admin' : 'client',
+            sender_id: user.id,
+            message: `[ORDER_CANCELLED]${cancellationMessage}[/ORDER_CANCELLED]`
+          });
+        
+        logStep("Cancellation message sent to chat");
+      } else {
+        logStep("Skipping ORDER_CANCELLED message - dispute resolution handled by frontend");
+      }
 
       // Mark request as unread for agency and admin (UI notification)
       await supabaseAdmin
@@ -265,7 +274,7 @@ serve(async (req) => {
         })
         .eq("id", serviceRequest.id);
 
-      logStep("Cancellation message sent to chat and unread flags updated");
+      logStep("Unread flags updated");
       
       // If admin cancelled, broadcast notifications to user and agency
       if (isAdmin) {
