@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -318,6 +318,9 @@ export function CreditHistoryView() {
     if (type === 'order_accepted') {
       return <CheckCircle className="h-5 w-5 text-green-500" />;
     }
+    if (type === 'offer_accepted') {
+      return <HandCoins className="h-5 w-5 text-amber-500" />;
+    }
     if (type === 'order_delivered') {
       return <Package className="h-5 w-5 text-purple-500" />;
     }
@@ -341,6 +344,8 @@ export function CreditHistoryView() {
         return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Unlocked</Badge>;
       case 'order_accepted':
         return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Accepted</Badge>;
+      case 'offer_accepted':
+        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Offer Accepted</Badge>;
       case 'order_delivered':
         return <Badge variant="secondary" className="bg-purple-500/10 text-purple-500 border-purple-500/30">Delivered</Badge>;
       case 'spent':
@@ -357,7 +362,7 @@ export function CreditHistoryView() {
 
   // Filter transactions to show all order-related events
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'locked', 'unlocked', 'order_accepted', 'order_delivered', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
+    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
   );
 
   return (
