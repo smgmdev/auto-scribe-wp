@@ -41,6 +41,8 @@ interface ServiceRequest {
     delivery_deadline: string | null;
     released_at?: string | null;
     accepted_at?: string | null;
+    delivered_at?: string | null;
+    created_at?: string;
   } | null;
 }
 interface ServiceMessage {
@@ -128,7 +130,7 @@ export function AgencyRequestsView() {
         created_at,
         updated_at,
         media_site:media_sites(id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
-        order:orders(id, status, delivery_status, delivery_deadline, released_at, accepted_at)
+        order:orders(id, status, delivery_status, delivery_deadline, released_at, accepted_at, delivered_at, created_at)
       `)
       .eq('agency_payout_id', agencyData.id)
       .order('created_at', { ascending: false });
@@ -766,6 +768,7 @@ export function AgencyRequestsView() {
   };
 
   // Helper function to get the last event info for a request
+  // Collects all events with their actual timestamps and returns the most recent
   const getLastEventInfo = (request: ServiceRequest): { eventName: string; eventTime: Date } => {
     const events: { name: string; time: Date }[] = [];
     const requestMessages = messages[request.id] || [];
@@ -777,6 +780,7 @@ export function AgencyRequestsView() {
     if (requestMessages.length > 0) {
       const lastMsg = requestMessages[requestMessages.length - 1];
       const msgContent = lastMsg.message;
+      const msgTime = new Date(lastMsg.created_at);
       
       // Check for special card types and use their titles
       let eventName = '';
@@ -801,37 +805,40 @@ export function AgencyRequestsView() {
       } else if (msgContent.includes('[ENGAGEMENT_CANCELLED]')) {
         eventName = 'Engagement cancelled';
       } else {
-        // Regular message
         const senderLabel = lastMsg.sender_type === 'client' ? 'Client' : 
                             lastMsg.sender_type === 'agency' ? 'You' : 'Staff';
         eventName = `Message from ${senderLabel}`;
       }
       
-      events.push({ name: eventName, time: new Date(lastMsg.created_at) });
+      events.push({ name: eventName, time: msgTime });
     }
     
-    // Order related events based on status
+    // Order related events with actual timestamps
     if (request.order) {
-      if (request.order.delivery_status === 'pending' && request.order.accepted_at) {
-        events.push({ name: 'Awaiting delivery', time: new Date(request.order.accepted_at) });
-      } else if (request.order.delivery_status === 'delivered') {
-        events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
-      } else if (request.order.delivery_status === 'accepted') {
-        events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
-      } else if (request.order.delivery_status === 'rejected' || request.order.delivery_status === 'pending_revision') {
-        events.push({ name: 'Revision requested', time: new Date(request.updated_at) });
+      // Order created/started
+      if (request.order.created_at) {
+        events.push({ name: 'Order started', time: new Date(request.order.created_at) });
       }
       
-      if (request.order.status === 'paid') {
-        events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+      // Order accepted by agency
+      if (request.order.accepted_at) {
+        events.push({ name: 'Order accepted', time: new Date(request.order.accepted_at) });
+      }
+      
+      // Delivery submitted
+      if (request.order.delivered_at) {
+        events.push({ name: 'Order delivered', time: new Date(request.order.delivered_at) });
+      }
+      
+      // Delivery released/completed
+      if (request.order.released_at) {
+        events.push({ name: 'Order completed', time: new Date(request.order.released_at) });
       }
     }
     
-    // Check for offer sent or client order request
-    if (!request.order?.id && hasPendingOfferSent(request.id)) {
-      events.push({ name: 'Offer sent to client', time: new Date(request.updated_at) });
-    } else if (!request.order?.id && hasClientOrderRequestPending(request.id)) {
-      events.push({ name: 'Client requested order', time: new Date(request.updated_at) });
+    // Cancelled event
+    if (request.status === 'cancelled' && request.cancelled_at) {
+      events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at) });
     }
     
     // Find the most recent event
@@ -1002,20 +1009,11 @@ export function AgencyRequestsView() {
       return titleMatch || siteMatch;
     });
     
-    // Always sort by latest message
+    // Sort by last event time (most recent first)
     return filtered.sort((a, b) => {
-      const aMessages = messages[a.id] || [];
-      const bMessages = messages[b.id] || [];
-      const aLastMessage = aMessages.length > 0 ? new Date(aMessages[aMessages.length - 1].created_at).getTime() : 0;
-      const bLastMessage = bMessages.length > 0 ? new Date(bMessages[bMessages.length - 1].created_at).getTime() : 0;
-      if (aLastMessage && bLastMessage) {
-        return bLastMessage - aLastMessage;
-      } else if (aLastMessage) {
-        return -1;
-      } else if (bLastMessage) {
-        return 1;
-      }
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      const aEventTime = getLastEventInfo(a).eventTime.getTime();
+      const bEventTime = getLastEventInfo(b).eventTime.getTime();
+      return bEventTime - aEventTime;
     });
   }, [activeRequests, messages, searchQuery]);
 
