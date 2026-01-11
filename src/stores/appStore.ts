@@ -187,6 +187,7 @@ interface AppState {
   // User unread history orders count (for Order History tab in My Orders)
   userUnreadHistoryCount: number;
   setUserUnreadHistoryCount: (count: number) => void;
+  incrementUserUnreadHistoryCount: () => void;
   decrementUserUnreadHistoryCount: () => void;
   
   // User agency application status
@@ -417,6 +418,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // User unread history orders count
   userUnreadHistoryCount: 0,
   setUserUnreadHistoryCount: (count) => set({ userUnreadHistoryCount: count }),
+  incrementUserUnreadHistoryCount: () => set((state) => ({ 
+    userUnreadHistoryCount: state.userUnreadHistoryCount + 1 
+  })),
   decrementUserUnreadHistoryCount: () => set((state) => ({ 
     userUnreadHistoryCount: Math.max(0, state.userUnreadHistoryCount - 1) 
   })),
