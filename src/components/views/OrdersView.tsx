@@ -87,6 +87,7 @@ export function OrdersView() {
   } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
+  const [disputeCreatedDates, setDisputeCreatedDates] = useState<Record<string, string>>({});
   const [revisionOrderIds, setRevisionOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -318,19 +319,25 @@ export function OrdersView() {
     
     if (!userOrders || userOrders.length === 0) {
       setDisputeOrderIds(new Set());
+      setDisputeCreatedDates({});
       return;
     }
     
-    // Then fetch open disputes for those orders
+    // Then fetch open disputes for those orders with created_at
     const { data, error } = await supabase
       .from('disputes')
-      .select('order_id')
+      .select('order_id, created_at')
       .in('order_id', userOrders.map(o => o.id))
       .eq('status', 'open');
     
     if (!error && data) {
       const orderIds = new Set(data.map(d => d.order_id));
+      const createdDates: Record<string, string> = {};
+      data.forEach(d => {
+        createdDates[d.order_id] = d.created_at;
+      });
       setDisputeOrderIds(orderIds);
+      setDisputeCreatedDates(createdDates);
     }
   };
 
@@ -731,6 +738,12 @@ export function OrdersView() {
             {disputeOrderIds.has(order.id) && order.delivered_at && (
               <span className="text-xs text-muted-foreground block">
                 Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+              </span>
+            )}
+            {/* Show dispute opened date */}
+            {disputeOrderIds.has(order.id) && disputeCreatedDates[order.id] && (
+              <span className="text-xs text-red-500 block">
+                Dispute opened: {format(new Date(disputeCreatedDates[order.id]), 'MMM d, yyyy h:mm a')}
               </span>
             )}
           </div>
