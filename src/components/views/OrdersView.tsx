@@ -696,9 +696,6 @@ export function OrdersView() {
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-base">{order.media_sites?.name || 'Unknown Site'}</CardTitle>
-                {!order.read && !isAdmin && (
-                  <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">NEW</Badge>
-                )}
               </div>
               {order.media_sites?.agency && (
                 <span className="text-xs text-muted-foreground">via {order.media_sites.agency}</span>
