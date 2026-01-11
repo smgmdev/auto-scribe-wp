@@ -669,10 +669,14 @@ export function Sidebar({
           table: 'orders'
         },
         (payload) => {
-          const newOrder = payload.new as { status: string };
-          // Increment the unread orders count when a new active order is created
+          const newOrder = payload.new as { status: string; order_number: string | null };
+          // Increment the unread orders count and show toast when a new active order is created
           if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
             incrementUnreadOrdersCount();
+            toast({
+              title: "New Order Received 🛒",
+              description: `Order ${newOrder.order_number || 'New'} has been placed`,
+            });
           }
         }
       )
