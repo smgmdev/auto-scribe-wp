@@ -1464,6 +1464,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     setRejectingOrderRequestId(messageId);
     try {
+      // Check if credits were locked with this order request
+      const creditsLocked = (orderData as any).credits_locked === true;
+      
+      // Release the locked credits back to the client if they were locked
+      if (creditsLocked) {
+        // Fetch the user_id from service_requests since it's not in GlobalChatRequest
+        const { data: requestData } = await supabase
+          .from('service_requests')
+          .select('user_id')
+          .eq('id', globalChatRequest.id)
+          .single();
+        
+        if (requestData?.user_id) {
+          const { error: releaseError } = await supabase.functions.invoke('release-order-credits', {
+            body: {
+              media_site_id: orderData.media_site_id,
+              service_request_id: globalChatRequest.id,
+              user_id: requestData.user_id,
+              reason: 'Order request rejected by agency'
+            }
+          });
+          
+          if (releaseError) {
+            console.error('Error releasing credits:', releaseError);
+          }
+        }
+      }
+
       // Send rejection message
       const rejectionData = {
         type: 'ORDER_REQUEST_REJECTED',
@@ -1471,6 +1499,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         media_site_name: orderData.media_site_name,
         media_site_favicon: orderData.media_site_favicon,
         price: orderData.price,
+        credits_released: creditsLocked,
         delivery_duration: orderData.delivery_duration,
         special_terms: orderData.special_terms
       };
@@ -1509,7 +1538,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       toast({
         title: "Order request rejected",
-        description: "The order request has been declined.",
+        description: creditsLocked ? `Order request declined. ${orderData.price} credits released to client.` : "The order request has been declined.",
       });
     } catch (error: any) {
       console.error('Error rejecting order request:', error);
@@ -3585,6 +3614,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         
         setRejectingOrderRequestId(msg.id);
         try {
+          // Check if credits were locked with this order request
+          const creditsLocked = (clientOrderRequest as any).credits_locked === true;
+          
+          // Release the locked credits back to the client if they were locked
+          if (creditsLocked) {
+            // Fetch the user_id from service_requests
+            const { data: requestData } = await supabase
+              .from('service_requests')
+              .select('user_id')
+              .eq('id', globalChatRequest.id)
+              .single();
+            
+            if (requestData?.user_id) {
+              const { error: releaseError } = await supabase.functions.invoke('release-order-credits', {
+                body: {
+                  media_site_id: clientOrderRequest.media_site_id,
+                  service_request_id: globalChatRequest.id,
+                  user_id: requestData.user_id,
+                  reason: 'Order request rejected by agency'
+                }
+              });
+              
+              if (releaseError) {
+                console.error('Error releasing credits:', releaseError);
+              }
+            }
+          }
+
           // Send rejection message
           const rejectionData = {
             type: 'ORDER_REQUEST_REJECTED',
@@ -3592,6 +3649,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             media_site_name: clientOrderRequest.media_site_name,
             media_site_favicon: clientOrderRequest.media_site_favicon,
             price: clientOrderRequest.price,
+            credits_released: creditsLocked,
             delivery_duration: clientOrderRequest.delivery_duration,
             special_terms: clientOrderRequest.special_terms
           };
@@ -3630,7 +3688,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           toast({
             title: "Order request rejected",
-            description: "The order request has been declined.",
+            description: creditsLocked ? `Order request declined. ${clientOrderRequest.price} credits released to client.` : "The order request has been declined.",
           });
         } catch (error: any) {
           console.error('Error rejecting order request:', error);
