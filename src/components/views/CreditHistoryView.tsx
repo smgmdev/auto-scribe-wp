@@ -309,8 +309,11 @@ export function CreditHistoryView() {
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const getTransactionIcon = (type: string, amount: number) => {
-    if (type === 'order') {
-      return <ShoppingBag className="h-5 w-5 text-blue-500" />;
+    if (type === 'order' || type === 'locked') {
+      return <Lock className="h-5 w-5 text-amber-500" />;
+    }
+    if (type === 'spent') {
+      return <ShoppingBag className="h-5 w-5 text-red-500" />;
     }
     if (type === 'purchase' || amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
@@ -322,8 +325,10 @@ export function CreditHistoryView() {
     switch (type) {
       case 'purchase':
         return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Purchase</Badge>;
+      case 'locked':
+      case 'order': // Legacy type - treat as locked
+        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Locked</Badge>;
       case 'spent':
-      case 'order': // Legacy type
         return <Badge variant="secondary" className="bg-red-500/10 text-red-500 border-red-500/30">Spent</Badge>;
       case 'gifted':
       case 'admin_credit':
@@ -335,10 +340,10 @@ export function CreditHistoryView() {
     }
   };
 
-  // Filter transactions to only show: purchases, gifts, spent (completed orders), order_payout (for agencies)
+  // Filter transactions to show: purchases, gifts, locked (order requests), spent (completed orders), order_payout (for agencies)
   // Include legacy "order" type for historical transactions
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
+    ['purchase', 'locked', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
   );
 
   return (

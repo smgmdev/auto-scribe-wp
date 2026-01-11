@@ -264,8 +264,23 @@ serve(async (req) => {
       newBalance: newClientCredits 
     });
 
-    // 2. Record credit transaction for client (spent)
+    // 2. Delete the "locked" transaction (will be replaced by "spent")
     const mediaSiteName = mediaSiteData?.name || "Unknown";
+    const { error: deleteLockError } = await supabaseAdmin
+      .from("credit_transactions")
+      .delete()
+      .eq("user_id", order.user_id)
+      .eq("type", "locked")
+      .like("description", `%${mediaSiteName}%`);
+
+    if (deleteLockError) {
+      logStep("Error deleting lock transaction", { error: deleteLockError.message });
+      // Don't fail - continue with spent transaction
+    } else {
+      logStep("Lock transaction deleted");
+    }
+
+    // 3. Record credit transaction for client (spent)
     await supabaseAdmin
       .from("credit_transactions")
       .insert({

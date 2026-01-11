@@ -101,7 +101,23 @@ serve(async (req) => {
 
     // NO balance update needed - credits were never deducted
     // The lock is simply released by updating order/request status (done by caller)
-    // NO transaction created - per user requirement, only show purchases, gifts, and spent
+
+    // Delete the "locked" transaction that was created when order request was sent
+    if (service_request_id) {
+      const { error: deleteError } = await supabaseAdmin
+        .from("credit_transactions")
+        .delete()
+        .eq("user_id", targetUserId)
+        .eq("type", "locked")
+        .like("description", `%${mediaSite.name}%`);
+
+      if (deleteError) {
+        logStep("Error deleting lock transaction", { error: deleteError.message });
+        // Don't fail - main operation is still valid
+      } else {
+        logStep("Lock transaction deleted");
+      }
+    }
 
     logStep("Credits released successfully (no balance change needed)", { 
       creditAmount, 

@@ -173,8 +173,23 @@ serve(async (req) => {
     }
 
     // DO NOT deduct from user_credits.credits - credits stay in the balance
-    // The lock is tracked via the CLIENT_ORDER_REQUEST message and order status
+    // The lock is tracked via transaction and CLIENT_ORDER_REQUEST message
     // Credits will only be deducted when order is completed
+
+    // Create a "locked" transaction to show in transaction history
+    const { error: transactionError } = await supabaseAdmin
+      .from("credit_transactions")
+      .insert({
+        user_id: user.id,
+        amount: -creditCost,
+        type: "locked",
+        description: `Order request sent: ${mediaSite.name} (credits reserved)`
+      });
+
+    if (transactionError) {
+      logStep("Error recording lock transaction", { error: transactionError.message });
+      // Don't fail - lock is still tracked via message
+    }
 
     logStep("Credits locked successfully (no balance deduction)", { 
       creditCost, 
