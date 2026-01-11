@@ -65,7 +65,9 @@ export function MyRequestsView() {
     userUnreadCancelledCount,
     setUserUnreadCancelledCount,
     userUnreadDeliveredCount,
-    setUserUnreadDeliveredCount
+    setUserUnreadDeliveredCount,
+    incrementUserUnreadDisputesCount,
+    decrementUserUnreadDisputesCount
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
@@ -635,12 +637,71 @@ export function MyRequestsView() {
       })
       .subscribe();
 
+    // Subscribe to disputes changes for real-time badge updates
+    const disputesChannel = supabase
+      .channel('user-engagements-disputes-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'disputes'
+        },
+        async (payload) => {
+          console.log('[MyRequestsView] Dispute change:', payload);
+          const updated = payload.new as { order_id: string; status: string } | undefined;
+          const deleted = payload.old as { order_id: string } | undefined;
+          
+          if (payload.eventType === 'DELETE' && deleted) {
+            // Remove from disputeOrderIds
+            setDisputeOrderIds(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(deleted.order_id);
+              return newSet;
+            });
+          } else if (payload.eventType === 'UPDATE' && updated) {
+            // If dispute is no longer open, remove from disputeOrderIds
+            if (updated.status !== 'open') {
+              setDisputeOrderIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(updated.order_id);
+                return newSet;
+              });
+              decrementUserUnreadDisputesCount();
+            }
+          } else if (payload.eventType === 'INSERT' && updated) {
+            // Check if this dispute is for one of the user's orders
+            const { data: orderData } = await supabase
+              .from('orders')
+              .select('id')
+              .eq('id', updated.order_id)
+              .eq('user_id', user.id)
+              .single();
+            
+            if (orderData) {
+              // This is a dispute for user's order - add to disputeOrderIds and increment count
+              setDisputeOrderIds(prev => new Set([...prev, updated.order_id]));
+              incrementUserUnreadDisputesCount();
+              
+              // Show toast notification
+              toast({
+                title: "Dispute Opened",
+                description: "A dispute has been opened for one of your engagements.",
+                variant: "destructive",
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(requestsChannel);
       supabase.removeChannel(ordersChannel);
       supabase.removeChannel(deletionChannel);
+      supabase.removeChannel(disputesChannel);
     };
-  }, [user?.id, setUserUnreadEngagementsCount, setUserUnreadDeliveredCount, setUserUnreadCancelledCount]);
+  }, [user?.id, setUserUnreadEngagementsCount, setUserUnreadDeliveredCount, setUserUnreadCancelledCount, incrementUserUnreadDisputesCount, decrementUserUnreadDisputesCount]);
 
 
   const getStatusBadge = (status: string) => {
