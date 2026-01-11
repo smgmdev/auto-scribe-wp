@@ -38,14 +38,10 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // user_credits.credits is the current balance (has order debits already applied)
-  // For pending requests with CLIENT_ORDER_REQUEST, credits are deducted from user_credits
-  // For active orders, credits were also deducted when the order was created
-  // So available = user_credits, and total = user_credits + credits that were deducted for active orders/requests
-  const availableCredits = totalCredits;
-  // Only add back credits that were ACTUALLY deducted (pending requests)
-  // Active orders from the orders table may not have had credits deducted if created through non-credit flow
-  const actualTotalBalance = totalCredits + creditsInPendingRequests;
+  // Total balance = current user_credits + all locked credits (orders + pending requests)
+  // Available = Total - Locked = user_credits (what's actually spendable)
+  const actualTotalBalance = totalCredits + creditsInUse;
+  const availableCredits = actualTotalBalance - creditsInUse; // This equals totalCredits
 
   useEffect(() => {
     const fetchData = async () => {
