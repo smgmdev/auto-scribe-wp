@@ -11,6 +11,43 @@ const logStep = (step: string, details?: any) => {
   console.log(`[COMPLETE-ORDER] ${step}${detailsStr}`);
 };
 
+// Helper function to send broadcast via REST API (more reliable from edge functions)
+const sendBroadcast = async (topic: string, event: string, payload: any) => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  
+  try {
+    const response = await fetch(`${supabaseUrl}/realtime/v1/api/broadcast`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            topic: topic,
+            event: event,
+            payload: payload
+          }
+        ]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      logStep("Broadcast failed", { topic, event, status: response.status, error: errorText });
+      return false;
+    }
+    
+    logStep("Broadcast sent successfully", { topic, event });
+    return true;
+  } catch (error: any) {
+    logStep("Broadcast error", { topic, event, error: error.message });
+    return false;
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -287,20 +324,18 @@ serve(async (req) => {
     // 7. Send notifications
     const mediaSiteName = (order.media_sites as any)?.name || "Unknown";
 
-    // Notify agency about completed order and credits
-    await supabaseAdmin
-      .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
-      .send({
-        type: 'broadcast',
-        event: 'admin-action',
-        payload: {
-          action: 'order-completed',
-          message: `Order for ${mediaSiteName} completed! ${creditsToAllocate} credits have been added to your account.`,
-          orderId: order_id,
-          mediaSiteName,
-          creditsEarned: creditsToAllocate
-        }
-      });
+    // Notify agency about completed order and credits via REST API
+    await sendBroadcast(
+      `notify-${serviceRequest.agency_payout_id}-admin-action`,
+      'admin-action',
+      {
+        action: 'order-completed',
+        message: `Order for ${mediaSiteName} completed! ${creditsToAllocate} credits have been added to your account.`,
+        orderId: order_id,
+        mediaSiteName,
+        creditsEarned: creditsToAllocate
+      }
+    );
 
     logStep("Order completion flow finished successfully", {
       orderId: order_id,

@@ -12,6 +12,43 @@ const logStep = (step: string, details?: any) => {
   console.log(`[MARK-DELIVERED] ${step}${detailsStr}`);
 };
 
+// Helper function to send broadcast via REST API (more reliable from edge functions)
+const sendBroadcast = async (topic: string, event: string, payload: any) => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  
+  try {
+    const response = await fetch(`${supabaseUrl}/realtime/v1/api/broadcast`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            topic: topic,
+            event: event,
+            payload: payload
+          }
+        ]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      logStep("Broadcast failed", { topic, event, status: response.status, error: errorText });
+      return false;
+    }
+    
+    logStep("Broadcast sent successfully", { topic, event });
+    return true;
+  } catch (error: any) {
+    logStep("Broadcast error", { topic, event, error: error.message });
+    return false;
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -153,14 +190,12 @@ serve(async (req) => {
       requestId: serviceRequest?.id
     };
 
-    // Notify user about delivery
-    await supabaseClient
-      .channel(`notify-${orderOwnerId}-admin-action`)
-      .send({
-        type: 'broadcast',
-        event: 'admin-action',
-        payload: orderDeliveredPayload
-      });
+    // Notify user about delivery via REST API
+    await sendBroadcast(
+      `notify-${orderOwnerId}-admin-action`,
+      'admin-action',
+      orderDeliveredPayload
+    );
     logStep("Order delivered notification sent to user", { userId: orderOwnerId });
 
     // Notify agency about delivery completion
@@ -173,13 +208,11 @@ serve(async (req) => {
         requestId: serviceRequest.id
       };
 
-      await supabaseClient
-        .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
-        .send({
-          type: 'broadcast',
-          event: 'admin-action',
-          payload: agencyDeliveredPayload
-        });
+      await sendBroadcast(
+        `notify-${serviceRequest.agency_payout_id}-admin-action`,
+        'admin-action',
+        agencyDeliveredPayload
+      );
       logStep("Order delivered notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
     }
 
@@ -192,25 +225,21 @@ serve(async (req) => {
         requestId: serviceRequest.id
       };
 
-      // Notify user about dispute resolution
-      await supabaseClient
-        .channel(`notify-${orderOwnerId}-admin-action`)
-        .send({
-          type: 'broadcast',
-          event: 'admin-action',
-          payload: disputeResolvedPayload
-        });
+      // Notify user about dispute resolution via REST API
+      await sendBroadcast(
+        `notify-${orderOwnerId}-admin-action`,
+        'admin-action',
+        disputeResolvedPayload
+      );
       logStep("Dispute resolved notification sent to user", { userId: orderOwnerId });
 
       // Notify agency about dispute resolution
       if (serviceRequest.agency_payout_id) {
-        await supabaseClient
-          .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
-          .send({
-            type: 'broadcast',
-            event: 'admin-action',
-            payload: disputeResolvedPayload
-          });
+        await sendBroadcast(
+          `notify-${serviceRequest.agency_payout_id}-admin-action`,
+          'admin-action',
+          disputeResolvedPayload
+        );
         logStep("Dispute resolved notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
       }
     }
