@@ -50,6 +50,7 @@ interface Order {
   } | null;
   service_requests?: {
     cancellation_reason: string | null;
+    cancelled_at: string | null;
   }[] | null;
 }
 
@@ -278,7 +279,7 @@ export function OrdersView() {
       .select(`
         *,
         media_sites (name, agency, favicon, link, publication_format),
-        service_requests (cancellation_reason)
+        service_requests (cancellation_reason, cancelled_at)
       `)
       .eq('user_id', user.id) // Only show orders where user is the buyer (not agency orders)
       .order('created_at', { ascending: false });
@@ -536,9 +537,20 @@ export function OrdersView() {
     [orders, disputeOrderIds]
   );
   
-  // History: cancelled orders
+  // History: cancelled orders - sorted by cancelled_at date (most recent first)
   const historyOrders = useMemo(() => 
-    orders.filter(o => o.status === 'cancelled'), 
+    orders
+      .filter(o => o.status === 'cancelled')
+      .sort((a, b) => {
+        const aCancelledAt = a.service_requests?.[0]?.cancelled_at;
+        const bCancelledAt = b.service_requests?.[0]?.cancelled_at;
+        if (aCancelledAt && bCancelledAt) {
+          return new Date(bCancelledAt).getTime() - new Date(aCancelledAt).getTime();
+        }
+        if (aCancelledAt) return -1;
+        if (bCancelledAt) return 1;
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      }), 
     [orders]
   );
 
