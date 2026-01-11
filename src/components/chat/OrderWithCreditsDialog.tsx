@@ -62,11 +62,14 @@ export function OrderWithCreditsDialog({
   const { credits, user } = useAuth();
   const { toast } = useToast();
 
-  // Fetch locked credits when dialog opens
+  // Fetch locked credits when dialog opens (includes active orders AND pending requests)
   React.useEffect(() => {
     const fetchLockedCredits = async () => {
       if (!open || !user) return;
       
+      let totalLocked = 0;
+
+      // Fetch active orders
       const { data: activeOrders } = await supabase
         .from('orders')
         .select('id, media_sites(price)')
@@ -76,17 +79,42 @@ export function OrderWithCreditsDialog({
         .neq('delivery_status', 'accepted');
 
       if (activeOrders && activeOrders.length > 0) {
-        let totalLocked = 0;
         for (const order of activeOrders) {
           const mediaSite = order.media_sites as { price: number } | null;
           if (mediaSite?.price) {
             totalLocked += mediaSite.price;
           }
         }
-        setLockedCredits(totalLocked);
-      } else {
-        setLockedCredits(0);
       }
+
+      // Also fetch pending service requests with locked credits (CLIENT_ORDER_REQUEST sent but no order created)
+      const { data: pendingRequests } = await supabase
+        .from('service_requests')
+        .select('id, media_site_id, media_sites(price)')
+        .eq('user_id', user.id)
+        .is('order_id', null)
+        .neq('status', 'cancelled');
+
+      if (pendingRequests && pendingRequests.length > 0) {
+        for (const request of pendingRequests) {
+          // Check if this request has a CLIENT_ORDER_REQUEST message (credits locked)
+          const { data: orderRequestMessages } = await supabase
+            .from('service_messages')
+            .select('id')
+            .eq('request_id', request.id)
+            .like('message', '%CLIENT_ORDER_REQUEST%')
+            .limit(1);
+
+          if (orderRequestMessages && orderRequestMessages.length > 0) {
+            const mediaSite = request.media_sites as { price: number } | null;
+            if (mediaSite?.price) {
+              totalLocked += mediaSite.price;
+            }
+          }
+        }
+      }
+
+      setLockedCredits(totalLocked);
     };
 
     fetchLockedCredits();

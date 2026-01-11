@@ -22,6 +22,7 @@ interface LockedOrder {
   id: string;
   mediaName: string;
   credits: number;
+  type: 'order' | 'pending_request';
 }
 
 export function CreditHistoryView() {
@@ -58,11 +59,46 @@ export function CreditHistoryView() {
         .neq('status', 'completed')
         .neq('delivery_status', 'accepted');
 
+      // Also fetch pending service requests that have order requests sent but no order created yet
+      // These are requests where credits have been locked via CLIENT_ORDER_REQUEST
+      const { data: pendingRequests } = await supabase
+        .from('service_requests')
+        .select('id, media_site_id, media_sites(name, price)')
+        .eq('user_id', user.id)
+        .is('order_id', null)
+        .neq('status', 'cancelled');
+
+      // Check which pending requests have CLIENT_ORDER_REQUEST messages (credits locked)
+      const pendingWithLockedCredits: LockedOrder[] = [];
+      if (pendingRequests && pendingRequests.length > 0) {
+        for (const request of pendingRequests) {
+          // Check if this request has a CLIENT_ORDER_REQUEST message
+          const { data: orderRequestMessages } = await supabase
+            .from('service_messages')
+            .select('id')
+            .eq('request_id', request.id)
+            .like('message', '%CLIENT_ORDER_REQUEST%')
+            .limit(1);
+
+          if (orderRequestMessages && orderRequestMessages.length > 0) {
+            const mediaSite = request.media_sites as { name: string; price: number } | null;
+            if (mediaSite?.price) {
+              pendingWithLockedCredits.push({
+                id: request.id,
+                mediaName: mediaSite.name || 'Unknown',
+                credits: mediaSite.price,
+                type: 'pending_request'
+              });
+            }
+          }
+        }
+      }
+
+      let totalInUse = 0;
+      const orders: LockedOrder[] = [];
+
+      // Add active orders
       if (activeOrders && activeOrders.length > 0) {
-        // Calculate credits in use from active orders
-        // Each order's credits = media_site price (which is in credits)
-        let totalInUse = 0;
-        const orders: LockedOrder[] = [];
         for (const order of activeOrders) {
           const mediaSite = order.media_sites as { name: string; price: number } | null;
           if (mediaSite?.price) {
@@ -70,16 +106,21 @@ export function CreditHistoryView() {
             orders.push({
               id: order.id,
               mediaName: mediaSite.name || 'Unknown',
-              credits: mediaSite.price
+              credits: mediaSite.price,
+              type: 'order'
             });
           }
         }
-        setCreditsInUse(totalInUse);
-        setLockedOrders(orders);
-      } else {
-        setCreditsInUse(0);
-        setLockedOrders([]);
       }
+
+      // Add pending requests with locked credits
+      for (const pendingOrder of pendingWithLockedCredits) {
+        totalInUse += pendingOrder.credits;
+        orders.push(pendingOrder);
+      }
+
+      setCreditsInUse(totalInUse);
+      setLockedOrders(orders);
 
       // Fetch all transactions
       const { data, error } = await supabase
@@ -250,7 +291,12 @@ export function CreditHistoryView() {
                 <div className="space-y-1 max-h-[200px] overflow-y-auto">
                   {lockedOrders.map((order) => (
                     <div key={order.id} className="flex justify-between gap-4 text-xs">
-                      <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
+                      <span className="text-muted-foreground truncate max-w-[180px]">
+                        {order.mediaName}
+                        {order.type === 'pending_request' && (
+                          <span className="text-amber-400 ml-1">(pending)</span>
+                        )}
+                      </span>
                       <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
                     </div>
                   ))}
