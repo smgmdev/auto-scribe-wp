@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Coins, Tag, AlertTriangle, Info } from 'lucide-react';
+import { Loader2, Coins, Tag, AlertTriangle, Info, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-
+import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 interface MediaSiteInfo {
   id: string;
   name: string;
@@ -58,6 +58,7 @@ export function OrderWithCreditsDialog({
   const [deliveryMinutes, setDeliveryMinutes] = useState<number>(initialData?.deliveryMinutes || 0);
   const [specialTerms, setSpecialTerms] = useState(initialData?.specialTerms || '');
   const [lockedCredits, setLockedCredits] = useState<number>(0);
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const { credits, user } = useAuth();
   const { toast } = useToast();
 
@@ -341,6 +342,18 @@ export function OrderWithCreditsDialog({
             </div>
           )}
 
+          {!hasEnoughCredits && (
+            <Button
+              onClick={() => setBuyCreditsOpen(true)}
+              variant="default"
+              className="w-full"
+              size="lg"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Buy Credits
+            </Button>
+          )}
+
           <Button
             onClick={handleSendRequest}
             disabled={sending || !hasEnoughCredits}
@@ -359,6 +372,8 @@ export function OrderWithCreditsDialog({
             )}
           </Button>
         </div>
+
+        <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
       </DialogContent>
     </Dialog>
   );
