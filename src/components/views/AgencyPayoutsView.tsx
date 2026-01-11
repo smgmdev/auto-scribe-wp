@@ -239,8 +239,21 @@ export function AgencyPayoutsView() {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Your total earnings after platform fees</p>
+          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
+            <div className="space-y-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total Sales:</span>
+                <span className="font-semibold">${summary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Platform Fees:</span>
+                <span className="font-semibold">${(summary.totalSales - summary.totalEarnings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                <span className="text-white/70">Total Earnings:</span>
+                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
 
