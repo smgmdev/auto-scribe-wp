@@ -761,6 +761,24 @@ export function AdminOrdersView() {
     }
     
     return true;
+  }).sort((a, b) => {
+    // Sort history tab by latest event date (released_at for completed, updated_at for cancelled)
+    if (activeTab === 'history' && historySubTab === 'all') {
+      const getLatestDate = (order: Order): number => {
+        if (order.status === 'completed' && order.released_at) {
+          return new Date(order.released_at).getTime();
+        }
+        // For cancelled orders, use updated_at as the cancellation time
+        return new Date(order.updated_at).getTime();
+      };
+      return getLatestDate(b) - getLatestDate(a);
+    }
+    // For cancelled sub-tab, sort by updated_at (cancellation time)
+    if (activeTab === 'history' && historySubTab === 'cancelled') {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    // Default: maintain original order (created_at desc from query)
+    return 0;
   });
 
   // Calculate counts for all tabs (exclude disputed orders from active)
