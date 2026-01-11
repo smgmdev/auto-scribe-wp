@@ -987,13 +987,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   
   // Check if there's an existing order request in messages (sent by agency)
   const existingOrderMessages = useMemo(() => {
-    return messages.filter(msg => {
+    const filtered = messages.filter(msg => {
       if (msg.sender_type !== 'agency') return false;
       const match = msg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
       return !!match;
     });
+    console.log('[FloatingChatWindow] existingOrderMessages computed, count:', filtered.length, 'from messages count:', messages.length);
+    return filtered;
   }, [messages]);
-  const hasExistingOrderRequest = useMemo(() => existingOrderMessages.length > 0, [existingOrderMessages]);
+  const hasExistingOrderRequest = useMemo(() => {
+    const has = existingOrderMessages.length > 0;
+    console.log('[FloatingChatWindow] hasExistingOrderRequest:', has);
+    return has;
+  }, [existingOrderMessages]);
   
   // Get the last order request data for resending
   const getLastOrderRequestData = useCallback(() => {
