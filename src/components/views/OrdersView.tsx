@@ -662,7 +662,7 @@ export function OrdersView() {
     >
       {/* Unread indicator dot */}
       {!order.read && !isAdmin && (
-        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-primary rounded-full animate-pulse" />
+        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
       )}
       <CardHeader className="pb-2 px-4 pt-3">
         <div className="flex items-center justify-between">
@@ -829,7 +829,7 @@ export function OrdersView() {
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
                 {userUnreadOrdersCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadOrdersCount}
                   </span>
                 )}
@@ -838,7 +838,7 @@ export function OrdersView() {
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputeOrders.length})
                 {userUnreadDisputesCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadDisputesCount}
                   </span>
                 )}
@@ -847,7 +847,7 @@ export function OrdersView() {
                 <CheckCircle2 className="h-4 w-4" />
                 Completed ({completedOrders.length})
                 {userUnreadCompletedCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadCompletedCount}
                   </span>
                 )}
@@ -856,7 +856,7 @@ export function OrdersView() {
                 <X className="h-4 w-4" />
                 Cancelled Orders ({historyOrders.length})
                 {userUnreadHistoryCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadHistoryCount}
                   </span>
                 )}
