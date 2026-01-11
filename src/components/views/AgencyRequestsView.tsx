@@ -1753,11 +1753,11 @@ export function AgencyRequestsView() {
                                 <img 
                                   src={order.media_site.favicon} 
                                   alt="" 
-                                  className="h-10 w-10 rounded object-cover"
+                                  className="h-8 w-8 rounded object-cover"
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                  <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                                 </div>
                               )}
                               {isUnread && (
@@ -1765,7 +1765,7 @@ export function AgencyRequestsView() {
                               )}
                             </div>
                             <div>
-                              <p className="font-medium">{order.media_site?.name || 'Unknown Site'}</p>
+                              <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                             </div>
                           </div>
                           <Badge className="bg-red-600 text-white border-red-600">
