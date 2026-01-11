@@ -1342,15 +1342,15 @@ export function AgencyRequestsView() {
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-1">
-                              {/* Status badges */}
-                              {hasOrder && request.order?.delivery_status === 'pending_revision' ? (
-                                <Badge className="bg-black text-orange-400">
-                                  Delivered - Revision Requested
-                                </Badge>
-                              ) : isInDispute ? (
+                              {/* Status badges - Dispute takes priority */}
+                              {isInDispute ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   In Dispute
+                                </Badge>
+                              ) : hasOrder && request.order?.delivery_status === 'pending_revision' ? (
+                                <Badge className="bg-black text-orange-400">
+                                  Delivered - Revision Requested
                                 </Badge>
                               ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
                                 <Badge className="bg-purple-600 text-white">
