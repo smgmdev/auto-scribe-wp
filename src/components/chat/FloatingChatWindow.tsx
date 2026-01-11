@@ -6630,19 +6630,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (error) throw error;
                   
+                  // Determine sender type based on who is opening the dispute
+                  const isAgencyOpening = globalChatType === 'agency-request';
+                  const senderType = isAgencyOpening ? 'agency' : 'client';
+                  
                   // Send auto message with dispute reason
                   const disputeMessageData = {
                     type: 'dispute_opened',
                     reason: disputeReason.trim(),
                     order_id: globalChatRequest.order.id,
-                    media_site_name: globalChatRequest.media_site?.name || 'Unknown'
+                    media_site_name: globalChatRequest.media_site?.name || 'Unknown',
+                    opened_by: isAgencyOpening ? 'agency' : 'client'
                   };
                   
                   const { data: insertedMsg } = await supabase
                     .from('service_messages')
                     .insert({
                       request_id: globalChatRequest.id,
-                      sender_type: 'client',
+                      sender_type: senderType,
                       sender_id: user.id,
                       message: `[DISPUTE_OPENED]${JSON.stringify(disputeMessageData)}[/DISPUTE_OPENED]`
                     })
