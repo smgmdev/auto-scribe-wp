@@ -86,7 +86,7 @@ serve(async (req) => {
     const creditCost = mediaSite.price;
     logStep("Media site found", { name: mediaSite.name, price: creditCost });
 
-    // Get user's current credits
+    // Get user's current available credits
     const { data: userCredits, error: creditsError } = await supabaseAdmin
       .from("user_credits")
       .select("credits")
@@ -103,59 +103,92 @@ serve(async (req) => {
 
     const currentCredits = userCredits?.credits || 0;
     
-    // Check if user has enough credits
-    if (currentCredits < creditCost) {
-      logStep("Insufficient credits", { current: currentCredits, required: creditCost });
+    // Calculate already locked credits from active orders and pending requests with order requests
+    // Active orders (not cancelled, not completed, not accepted)
+    const { data: activeOrders } = await supabaseAdmin
+      .from("orders")
+      .select("id, media_sites(price)")
+      .eq("user_id", user.id)
+      .neq("status", "cancelled")
+      .neq("status", "completed")
+      .neq("delivery_status", "accepted");
+
+    let lockedInOrders = 0;
+    if (activeOrders) {
+      for (const order of activeOrders) {
+        const mediaSiteData = order.media_sites as unknown as { price: number } | null;
+        if (mediaSiteData?.price) {
+          lockedInOrders += mediaSiteData.price;
+        }
+      }
+    }
+
+    // Pending requests with CLIENT_ORDER_REQUEST messages (excluding current request)
+    const { data: pendingRequests } = await supabaseAdmin
+      .from("service_requests")
+      .select("id, media_sites(price)")
+      .eq("user_id", user.id)
+      .is("order_id", null)
+      .neq("status", "cancelled")
+      .neq("id", service_request_id);
+
+    let lockedInPending = 0;
+    if (pendingRequests && pendingRequests.length > 0) {
+      for (const request of pendingRequests) {
+        const { data: orderRequestMessages } = await supabaseAdmin
+          .from("service_messages")
+          .select("id")
+          .eq("request_id", request.id)
+          .like("message", "%CLIENT_ORDER_REQUEST%")
+          .limit(1);
+
+        if (orderRequestMessages && orderRequestMessages.length > 0) {
+          const mediaSiteData = request.media_sites as unknown as { price: number } | null;
+          if (mediaSiteData?.price) {
+            lockedInPending += mediaSiteData.price;
+          }
+        }
+      }
+    }
+
+    const totalLocked = lockedInOrders + lockedInPending;
+    const availableCredits = currentCredits - totalLocked;
+    
+    // Check if user has enough AVAILABLE credits
+    if (availableCredits < creditCost) {
+      logStep("Insufficient available credits", { 
+        totalCredits: currentCredits, 
+        locked: totalLocked, 
+        available: availableCredits, 
+        required: creditCost 
+      });
       return new Response(
-        JSON.stringify({ error: "Insufficient credits", current: currentCredits, required: creditCost }),
+        JSON.stringify({ 
+          error: "Insufficient credits", 
+          current: availableCredits, 
+          required: creditCost 
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
-    // Deduct credits (lock them)
-    const newCredits = currentCredits - creditCost;
-    const { error: updateError } = await supabaseAdmin
-      .from("user_credits")
-      .update({ 
-        credits: newCredits, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq("user_id", user.id);
+    // DO NOT deduct from user_credits.credits - credits stay in the balance
+    // The lock is tracked via the CLIENT_ORDER_REQUEST message and order status
+    // Credits will only be deducted when order is completed
 
-    if (updateError) {
-      logStep("Error deducting credits", { error: updateError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to lock credits" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
-    }
-
-    // Record credit transaction
-    const { error: transactionError } = await supabaseAdmin
-      .from("credit_transactions")
-      .insert({
-        user_id: user.id,
-        amount: -creditCost,
-        type: "order",
-        description: `Order request for ${mediaSite.name} (locked)`
-      });
-
-    if (transactionError) {
-      logStep("Error recording transaction", { error: transactionError.message });
-      // Don't fail - credits are already deducted
-    }
-
-    logStep("Credits locked successfully", { 
+    logStep("Credits locked successfully (no balance deduction)", { 
       creditCost, 
-      previousBalance: currentCredits, 
-      newBalance: newCredits 
+      totalBalance: currentCredits, 
+      previouslyLocked: totalLocked,
+      newTotalLocked: totalLocked + creditCost,
+      newAvailableBalance: availableCredits - creditCost
     });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         credits_locked: creditCost,
-        new_balance: newCredits
+        new_balance: currentCredits // Balance stays the same
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );

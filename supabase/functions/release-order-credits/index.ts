@@ -79,10 +79,10 @@ serve(async (req) => {
       );
     }
 
-    const creditRefund = mediaSite.price;
-    logStep("Media site found", { name: mediaSite.name, price: creditRefund });
+    const creditAmount = mediaSite.price;
+    logStep("Media site found", { name: mediaSite.name, price: creditAmount });
 
-    // Get target user's current credits
+    // Get target user's current credits (for response only - no changes needed)
     const { data: userCredits, error: creditsError } = await supabaseAdmin
       .from("user_credits")
       .select("credits")
@@ -98,52 +98,22 @@ serve(async (req) => {
     }
 
     const currentCredits = userCredits?.credits || 0;
-    const newCredits = currentCredits + creditRefund;
 
-    // Refund credits (release them)
-    const { error: updateError } = await supabaseAdmin
-      .from("user_credits")
-      .update({ 
-        credits: newCredits, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq("user_id", targetUserId);
+    // NO balance update needed - credits were never deducted
+    // The lock is simply released by updating order/request status (done by caller)
+    // NO transaction created - per user requirement, only show purchases, gifts, and spent
 
-    if (updateError) {
-      logStep("Error refunding credits", { error: updateError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to release credits" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
-    }
-
-    // Record credit refund transaction
-    const reasonText = reason || "Order request rejected/cancelled";
-    const { error: transactionError } = await supabaseAdmin
-      .from("credit_transactions")
-      .insert({
-        user_id: targetUserId,
-        amount: creditRefund,
-        type: "refund",
-        description: `${reasonText} - ${mediaSite.name} (credits released)`
-      });
-
-    if (transactionError) {
-      logStep("Error recording transaction", { error: transactionError.message });
-      // Don't fail - credits are already refunded
-    }
-
-    logStep("Credits released successfully", { 
-      creditRefund, 
-      previousBalance: currentCredits, 
-      newBalance: newCredits 
+    logStep("Credits released successfully (no balance change needed)", { 
+      creditAmount, 
+      balance: currentCredits,
+      reason: reason || "Order request rejected/cancelled"
     });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        credits_released: creditRefund,
-        new_balance: newCredits
+        credits_released: creditAmount,
+        new_balance: currentCredits // Balance stays the same
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );

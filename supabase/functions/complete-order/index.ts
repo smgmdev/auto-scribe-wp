@@ -114,7 +114,7 @@ serve(async (req) => {
         agency_payout_cents,
         status,
         delivery_status,
-        media_sites (id, name, agency)
+        media_sites (id, name, agency, price)
       `)
       .eq("id", order_id)
       .single();
@@ -197,12 +197,17 @@ serve(async (req) => {
       );
     }
 
-    // Calculate credits to allocate (agency_payout_cents / 100 for dollars, which equals credits)
+    // Get the credit cost from media site price
+    const mediaSiteData = order.media_sites as unknown as { id: string; name: string; agency: string; price: number } | null;
+    const creditCost = mediaSiteData?.price || Math.floor(order.amount_cents / 100);
+
+    // Calculate credits to allocate to agency (agency_payout_cents / 100 for dollars, which equals credits)
     // 1 credit = $1 = 100 cents
     const creditsToAllocate = Math.floor(order.agency_payout_cents / 100);
     const platformFeeCredits = Math.floor(order.platform_fee_cents / 100);
     
     logStep("Credit calculation", { 
+      creditCost,
       agencyPayoutCents: order.agency_payout_cents,
       platformFeeCents: order.platform_fee_cents,
       creditsToAllocate,
@@ -213,7 +218,67 @@ serve(async (req) => {
     // Start transaction-like operations
     const now = new Date().toISOString();
 
-    // 1. Update order status to completed
+    // 1. NOW deduct credits from user's balance (this is when credits are actually spent)
+    const { data: clientCredits, error: clientCreditsError } = await supabaseAdmin
+      .from("user_credits")
+      .select("credits")
+      .eq("user_id", order.user_id)
+      .single();
+
+    if (clientCreditsError) {
+      logStep("ERROR", { message: "Failed to fetch client credits", error: clientCreditsError.message });
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch client credits" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    const currentClientCredits = clientCredits?.credits || 0;
+    const newClientCredits = currentClientCredits - creditCost;
+
+    if (newClientCredits < 0) {
+      logStep("ERROR", { message: "Insufficient credits for completion", current: currentClientCredits, required: creditCost });
+      return new Response(
+        JSON.stringify({ error: "Insufficient credits" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Deduct credits from client's balance
+    const { error: deductError } = await supabaseAdmin
+      .from("user_credits")
+      .update({ credits: newClientCredits, updated_at: now })
+      .eq("user_id", order.user_id);
+
+    if (deductError) {
+      logStep("ERROR", { message: "Failed to deduct credits", error: deductError.message });
+      return new Response(
+        JSON.stringify({ error: "Failed to deduct credits" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    logStep("Credits deducted from client", { 
+      previousBalance: currentClientCredits, 
+      deducted: creditCost, 
+      newBalance: newClientCredits 
+    });
+
+    // 2. Record credit transaction for client (spent)
+    const mediaSiteName = mediaSiteData?.name || "Unknown";
+    await supabaseAdmin
+      .from("credit_transactions")
+      .insert({
+        user_id: order.user_id,
+        amount: -creditCost,
+        type: "spent",
+        description: `Order completed: ${mediaSiteName}`,
+        order_id: order_id
+      });
+
+    logStep("Client spent transaction recorded");
+
+    // 3. Update order status to completed
     const { error: updateOrderError } = await supabaseAdmin
       .from("orders")
       .update({
@@ -235,7 +300,7 @@ serve(async (req) => {
     }
     logStep("Order marked as completed");
 
-    // 2. Update service request status to completed
+    // 4. Update service request status to completed
     if (service_request_id) {
       await supabaseAdmin
         .from("service_requests")
@@ -244,7 +309,7 @@ serve(async (req) => {
       logStep("Service request marked as completed");
     }
 
-    // 3. Resolve any open disputes
+    // 5. Resolve any open disputes
     const { data: resolvedDisputes } = await supabaseAdmin
       .from("disputes")
       .update({
@@ -261,7 +326,7 @@ serve(async (req) => {
       logStep("Resolved open disputes", { count: resolvedDisputes.length });
     }
 
-    // 4. Allocate credits to agency if credits > 0
+    // 6. Allocate credits to agency if credits > 0
     if (creditsToAllocate > 0) {
       // Get or create agency's credit balance
       const { data: agencyCredits } = await supabaseAdmin
@@ -270,14 +335,14 @@ serve(async (req) => {
         .eq("user_id", agencyUserId)
         .maybeSingle();
 
-      const currentCredits = agencyCredits?.credits || 0;
-      const newCredits = currentCredits + creditsToAllocate;
+      const currentAgencyCredits = agencyCredits?.credits || 0;
+      const newAgencyCredits = currentAgencyCredits + creditsToAllocate;
 
       if (agencyCredits) {
         // Update existing credits
         await supabaseAdmin
           .from("user_credits")
-          .update({ credits: newCredits, updated_at: now })
+          .update({ credits: newAgencyCredits, updated_at: now })
           .eq("user_id", agencyUserId);
       } else {
         // Insert new credit record
@@ -288,13 +353,12 @@ serve(async (req) => {
 
       logStep("Credits allocated to agency", { 
         agencyUserId, 
-        previousCredits: currentCredits, 
-        newCredits,
+        previousCredits: currentAgencyCredits, 
+        newCredits: newAgencyCredits,
         creditsAdded: creditsToAllocate 
       });
 
-      // 5. Record credit transaction for agency
-      const mediaSiteName = (order.media_sites as any)?.name || "Unknown";
+      // 7. Record credit transaction for agency
       await supabaseAdmin
         .from("credit_transactions")
         .insert({
@@ -308,7 +372,7 @@ serve(async (req) => {
       logStep("Credit transaction recorded for agency");
     }
 
-    // 6. Create payout transaction record
+    // 8. Create payout transaction record
     await supabaseAdmin
       .from("payout_transactions")
       .insert({
@@ -321,9 +385,7 @@ serve(async (req) => {
 
     logStep("Payout transaction recorded");
 
-    // 7. Send notifications
-    const mediaSiteName = (order.media_sites as any)?.name || "Unknown";
-
+    // 9. Send notifications
     // Notify agency about completed order and credits via REST API
     await sendBroadcast(
       `notify-${serviceRequest.agency_payout_id}-admin-action`,
@@ -339,6 +401,8 @@ serve(async (req) => {
 
     logStep("Order completion flow finished successfully", {
       orderId: order_id,
+      clientCreditsSpent: creditCost,
+      clientNewBalance: newClientCredits,
       agencyCreditsAllocated: creditsToAllocate,
       platformFee: platformFeeCredits
     });
@@ -347,6 +411,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         order_id,
+        credits_spent: creditCost,
+        new_balance: newClientCredits,
         credits_allocated: creditsToAllocate,
         platform_fee: platformFeeCredits
       }),

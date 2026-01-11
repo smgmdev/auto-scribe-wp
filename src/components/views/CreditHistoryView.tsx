@@ -214,20 +214,22 @@ export function CreditHistoryView() {
     switch (type) {
       case 'purchase':
         return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Purchase</Badge>;
-      case 'order':
-        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Order</Badge>;
-      case 'usage':
-        return <Badge variant="secondary" className="bg-orange-500/10 text-orange-500 border-orange-500/30">Usage</Badge>;
-      case 'deduction':
-        return <Badge variant="secondary" className="bg-orange-500/10 text-orange-500 border-orange-500/30">Deduction</Badge>;
-      case 'refund':
-        return <Badge variant="secondary" className="bg-purple-500/10 text-purple-500 border-purple-500/30">Refund</Badge>;
-      case 'bonus':
-        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">Bonus</Badge>;
+      case 'spent':
+        return <Badge variant="secondary" className="bg-red-500/10 text-red-500 border-red-500/30">Spent</Badge>;
+      case 'gifted':
+      case 'admin_credit':
+        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">Gift</Badge>;
+      case 'order_payout':
+        return <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30">Earnings</Badge>;
       default:
         return <Badge variant="secondary">{type}</Badge>;
     }
   };
+
+  // Filter transactions to only show: purchases, gifts, spent (completed orders), and order_payout (for agencies)
+  const displayedTransactions = transactions.filter(t => 
+    ['purchase', 'spent', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
+  );
 
   return (
     <div className="space-y-2">
