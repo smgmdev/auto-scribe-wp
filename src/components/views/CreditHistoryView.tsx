@@ -347,10 +347,6 @@ export function CreditHistoryView() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex justify-between gap-4 text-xs mt-1 pt-1 border-t border-muted-foreground/10">
-                      <span className="text-muted-foreground">Subtotal:</span>
-                      <span className="font-medium text-amber-400">{creditsInOrders.toLocaleString()}</span>
-                    </div>
                   </div>
                 )}
 
@@ -365,10 +361,6 @@ export function CreditHistoryView() {
                           <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
                         </div>
                       ))}
-                    </div>
-                    <div className="flex justify-between gap-4 text-xs mt-1 pt-1 border-t border-muted-foreground/10">
-                      <span className="text-muted-foreground">Subtotal:</span>
-                      <span className="font-medium text-amber-400">{creditsInPendingRequests.toLocaleString()}</span>
                     </div>
                   </div>
                 )}
