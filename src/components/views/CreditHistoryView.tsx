@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CreditCard, Lock, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,132 +53,240 @@ export function CreditHistoryView() {
   // Available = Total - Locked credits
   const availableCredits = actualTotalBalance - creditsInUse;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+  // Extract fetch logic into a reusable function
+  const fetchData = useCallback(async (showLoader = true) => {
+    if (!user) return;
 
-      setLoading(true);
-      
-      // Fetch available credits from user_credits
-      const { data: creditsData } = await supabase
-        .rpc('get_user_credits', { _user_id: user.id });
-      setTotalCredits(creditsData || 0);
+    if (showLoader) setLoading(true);
+    
+    // Fetch available credits from user_credits
+    const { data: creditsData } = await supabase
+      .rpc('get_user_credits', { _user_id: user.id });
+    setTotalCredits(creditsData || 0);
 
-      // Fetch only pending/active orders to calculate locked credits
-      // Exclude: cancelled orders, completed orders, and accepted deliveries
-      const { data: activeOrders } = await supabase
-        .from('orders')
-        .select('id, amount_cents, media_site_id, media_sites(name, price)')
-        .eq('user_id', user.id)
-        .neq('status', 'cancelled')
-        .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
+    // Fetch only pending/active orders to calculate locked credits
+    // Exclude: cancelled orders, completed orders, and accepted deliveries
+    const { data: activeOrders } = await supabase
+      .from('orders')
+      .select('id, amount_cents, media_site_id, media_sites(name, price)')
+      .eq('user_id', user.id)
+      .neq('status', 'cancelled')
+      .neq('status', 'completed')
+      .neq('delivery_status', 'accepted');
 
-      // Also fetch pending service requests that have order requests sent but no order created yet
-      // These are requests where credits have been locked via CLIENT_ORDER_REQUEST
-      const { data: pendingRequests } = await supabase
-        .from('service_requests')
-        .select('id, media_site_id, media_sites(name, price)')
-        .eq('user_id', user.id)
-        .is('order_id', null)
-        .neq('status', 'cancelled');
+    // Also fetch pending service requests that have order requests sent but no order created yet
+    // These are requests where credits have been locked via CLIENT_ORDER_REQUEST
+    const { data: pendingRequests } = await supabase
+      .from('service_requests')
+      .select('id, media_site_id, media_sites(name, price)')
+      .eq('user_id', user.id)
+      .is('order_id', null)
+      .neq('status', 'cancelled');
 
-      // Check which pending requests have CLIENT_ORDER_REQUEST messages (credits locked)
-      const pendingWithLockedCredits: LockedOrder[] = [];
-      if (pendingRequests && pendingRequests.length > 0) {
-        for (const request of pendingRequests) {
-          // Check if this request has a CLIENT_ORDER_REQUEST message
-          const { data: orderRequestMessages } = await supabase
-            .from('service_messages')
-            .select('id')
-            .eq('request_id', request.id)
-            .like('message', '%CLIENT_ORDER_REQUEST%')
-            .limit(1);
+    // Check which pending requests have CLIENT_ORDER_REQUEST messages (credits locked)
+    const pendingWithLockedCredits: LockedOrder[] = [];
+    if (pendingRequests && pendingRequests.length > 0) {
+      for (const request of pendingRequests) {
+        // Check if this request has a CLIENT_ORDER_REQUEST message
+        const { data: orderRequestMessages } = await supabase
+          .from('service_messages')
+          .select('id')
+          .eq('request_id', request.id)
+          .like('message', '%CLIENT_ORDER_REQUEST%')
+          .limit(1);
 
-          if (orderRequestMessages && orderRequestMessages.length > 0) {
-            const mediaSite = request.media_sites as { name: string; price: number } | null;
-            if (mediaSite?.price) {
-              pendingWithLockedCredits.push({
-                id: request.id,
-                mediaName: mediaSite.name || 'Unknown',
-                credits: mediaSite.price,
-                type: 'pending_request'
-              });
-            }
-          }
-        }
-      }
-
-      let totalInUse = 0;
-      let ordersTotal = 0;
-      let pendingTotal = 0;
-      const orders: LockedOrder[] = [];
-
-      // Add active orders
-      if (activeOrders && activeOrders.length > 0) {
-        for (const order of activeOrders) {
-          const mediaSite = order.media_sites as { name: string; price: number } | null;
+        if (orderRequestMessages && orderRequestMessages.length > 0) {
+          const mediaSite = request.media_sites as { name: string; price: number } | null;
           if (mediaSite?.price) {
-            totalInUse += mediaSite.price;
-            ordersTotal += mediaSite.price;
-            orders.push({
-              id: order.id,
+            pendingWithLockedCredits.push({
+              id: request.id,
               mediaName: mediaSite.name || 'Unknown',
               credits: mediaSite.price,
-              type: 'order'
+              type: 'pending_request'
             });
           }
         }
       }
+    }
 
-      // Add pending requests with locked credits
-      for (const pendingOrder of pendingWithLockedCredits) {
-        totalInUse += pendingOrder.credits;
-        pendingTotal += pendingOrder.credits;
-        orders.push(pendingOrder);
-      }
+    let totalInUse = 0;
+    let ordersTotal = 0;
+    let pendingTotal = 0;
+    const orders: LockedOrder[] = [];
 
-      setCreditsInUse(totalInUse);
-      setCreditsInOrders(ordersTotal);
-      setCreditsInPendingRequests(pendingTotal);
-      setLockedOrders(orders);
-
-      // Fetch completed orders to calculate total spent
-      // Only count orders where client has accepted delivery
-      const { data: completedOrders } = await supabase
-        .from('orders')
-        .select('id, media_sites(price)')
-        .eq('user_id', user.id)
-        .eq('delivery_status', 'accepted');
-
-      let completedSpent = 0;
-      if (completedOrders && completedOrders.length > 0) {
-        for (const order of completedOrders) {
-          const mediaSite = order.media_sites as { price: number } | null;
-          if (mediaSite?.price) {
-            completedSpent += mediaSite.price;
-          }
+    // Add active orders
+    if (activeOrders && activeOrders.length > 0) {
+      for (const order of activeOrders) {
+        const mediaSite = order.media_sites as { name: string; price: number } | null;
+        if (mediaSite?.price) {
+          totalInUse += mediaSite.price;
+          ordersTotal += mediaSite.price;
+          orders.push({
+            id: order.id,
+            mediaName: mediaSite.name || 'Unknown',
+            credits: mediaSite.price,
+            type: 'order'
+          });
         }
       }
-      setCompletedOrdersSpent(completedSpent);
+    }
 
-      // Fetch all transactions
-      const { data, error } = await supabase
-        .from('credit_transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+    // Add pending requests with locked credits
+    for (const pendingOrder of pendingWithLockedCredits) {
+      totalInUse += pendingOrder.credits;
+      pendingTotal += pendingOrder.credits;
+      orders.push(pendingOrder);
+    }
 
-      if (error) {
-        console.error('Error fetching transactions:', error);
-      } else {
-        setTransactions(data || []);
+    setCreditsInUse(totalInUse);
+    setCreditsInOrders(ordersTotal);
+    setCreditsInPendingRequests(pendingTotal);
+    setLockedOrders(orders);
+
+    // Fetch completed orders to calculate total spent
+    // Only count orders where client has accepted delivery
+    const { data: completedOrders } = await supabase
+      .from('orders')
+      .select('id, media_sites(price)')
+      .eq('user_id', user.id)
+      .eq('delivery_status', 'accepted');
+
+    let completedSpent = 0;
+    if (completedOrders && completedOrders.length > 0) {
+      for (const order of completedOrders) {
+        const mediaSite = order.media_sites as { price: number } | null;
+        if (mediaSite?.price) {
+          completedSpent += mediaSite.price;
+        }
       }
-      setLoading(false);
-    };
+    }
+    setCompletedOrdersSpent(completedSpent);
 
-    fetchData();
+    // Fetch all transactions
+    const { data, error } = await supabase
+      .from('credit_transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching transactions:', error);
+    } else {
+      setTransactions(data || []);
+    }
+    setLoading(false);
   }, [user]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Real-time subscriptions for live updates
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to user_credits changes
+    const creditsChannel = supabase
+      .channel('credit-management-credits')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_credits',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          console.log('Credits updated, refreshing...');
+          fetchData(false);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to credit_transactions changes
+    const transactionsChannel = supabase
+      .channel('credit-management-transactions')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'credit_transactions',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          console.log('New transaction, refreshing...');
+          fetchData(false);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to orders changes
+    const ordersChannel = supabase
+      .channel('credit-management-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          console.log('Orders updated, refreshing...');
+          fetchData(false);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to service_requests changes
+    const requestsChannel = supabase
+      .channel('credit-management-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          console.log('Service requests updated, refreshing...');
+          fetchData(false);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to service_messages changes (for detecting CLIENT_ORDER_REQUEST)
+    const messagesChannel = supabase
+      .channel('credit-management-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        (payload) => {
+          // Only refresh if message contains CLIENT_ORDER_REQUEST
+          const message = (payload.new as { message?: string })?.message || '';
+          if (message.includes('CLIENT_ORDER_REQUEST')) {
+            console.log('Order request message detected, refreshing...');
+            fetchData(false);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(creditsChannel);
+      supabase.removeChannel(transactionsChannel);
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(requestsChannel);
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [user, fetchData]);
 
   const totalPurchased = transactions
     .filter(t => t.type === 'purchase')
