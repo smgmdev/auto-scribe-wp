@@ -4912,7 +4912,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Open Dispute
                       </DropdownMenuItem>
                     )}
-                    {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && !isAdmin && !hasOpenDispute && (
+                    {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && localOrder?.delivery_status !== 'delivered' && !isAdmin && !hasOpenDispute && (
                       <DropdownMenuItem 
                         className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                         onSelect={() => {
@@ -5130,7 +5130,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const hasRevisionAfterDelivery = messages.slice(lastDeliveryIndex + 1).some(m => parseRevisionRequested(m.message));
           
           const canAcceptDelivery = isClientView && localOrder.delivery_status === 'delivered' && !hasRevisionAfterDelivery;
-          const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted';
+          const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted' && localOrder.delivery_status !== 'delivered';
           
           return (
             <div className="p-3 bg-black text-white border-b border-black">
