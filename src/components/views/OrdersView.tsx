@@ -712,7 +712,7 @@ export function OrdersView() {
                 Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
-            {order.delivery_status === 'pending_revision' && order.delivered_at && (
+            {order.delivery_status === 'pending_revision' && order.delivered_at && !disputeOrderIds.has(order.id) && (
               <span className="text-xs text-muted-foreground block">
                 Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
               </span>
