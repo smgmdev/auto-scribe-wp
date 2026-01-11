@@ -492,8 +492,8 @@ export function Sidebar({
                     countedRequests.add(request.id);
                     unreadOrdersCount++;
                   }
-                  // Completed orders (delivered or accepted) that agency hasn't seen
-                  else if (!order.agency_read && (order.delivery_status === 'delivered' || order.delivery_status === 'accepted')) {
+                  // Completed orders (only 'accepted' = client approved) that agency hasn't seen
+                  else if (!order.agency_read && order.delivery_status === 'accepted') {
                     countedRequests.add(request.id);
                     unreadCompletedCount++;
                   }
