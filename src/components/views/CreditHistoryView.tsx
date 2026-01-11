@@ -171,16 +171,13 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'purchase')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalRefunded = transactions
-    .filter(t => t.type === 'refund')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  // Total spent = only from completed orders + other usage/deductions - refunds
+  // Total spent = only from completed orders + other usage/deductions
+  // Don't subtract refunds here - refunds are for cancelled orders, not completed ones
   const otherSpending = transactions
     .filter(t => t.type === 'usage' || t.type === 'deduction')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  const totalSpent = completedOrdersSpent + otherSpending - totalRefunded;
+  const totalSpent = completedOrdersSpent + otherSpending;
 
   const totalOrders = transactions
     .filter(t => t.type === 'order')
