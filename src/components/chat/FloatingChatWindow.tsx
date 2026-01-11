@@ -1204,14 +1204,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Handle cancel order request from banner (agency side)
   // Deletes ALL existing order request messages (including resent offers)
   const handleBannerCancelOrderRequest = async () => {
-    if (existingOrderMessages.length === 0) return;
+    // Get the current order request messages from state at the moment of cancellation
+    const currentOrderMessages = messages.filter(m => {
+      const match = m.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+      return !!match;
+    });
     
-    const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
+    if (currentOrderMessages.length === 0) {
+      console.log('[FloatingChatWindow] No order request messages to cancel');
+      return;
+    }
+    
+    const lastOrderMsg = currentOrderMessages[currentOrderMessages.length - 1];
+    console.log('[FloatingChatWindow] Banner cancel order request, deleting', currentOrderMessages.length, 'messages');
     setCancellingOrderRequestId(lastOrderMsg.id);
     
     try {
       // Get all order request message IDs to delete
-      const messageIdsToDelete = existingOrderMessages.map(m => m.id);
+      const messageIdsToDelete = currentOrderMessages.map(m => m.id);
       
       // Delete all order request messages from database
       const { error } = await supabase
@@ -1221,7 +1231,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
-      // Refetch messages from database to ensure UI is fully in sync
+      console.log('[FloatingChatWindow] Delete successful, updating local state immediately');
+      
+      // Immediately update local state to remove the messages (don't wait for refetch)
+      setMessages(prev => {
+        const filtered = prev.filter(m => !messageIdsToDelete.includes(m.id));
+        console.log('[FloatingChatWindow] Local state updated after banner order cancel, messages count:', filtered.length);
+        return filtered;
+      });
+      
+      // Then also refetch to ensure we're in sync with database
       const { data: freshMessages } = await supabase
         .from('service_messages')
         .select('*')
@@ -1229,6 +1248,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .order('created_at', { ascending: true });
       
       if (freshMessages) {
+        console.log('[FloatingChatWindow] Fresh messages fetched after banner order cancel, count:', freshMessages.length);
         setMessages(freshMessages as ServiceMessage[]);
       }
       
@@ -1247,7 +1267,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       toast({
         title: "Offer cancelled",
-        description: existingOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
+        description: currentOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
       });
     } catch (error: any) {
       console.error('Error cancelling order request:', error);
@@ -1263,10 +1283,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   
   // Handle cancel client order request from banner (client side - cancelling their own request)
   const handleBannerCancelClientOrderRequest = async () => {
-    const lastOrderMsg = existingClientOrderMessages[existingClientOrderMessages.length - 1];
-    if (!lastOrderMsg) return;
+    // Get the current message from state at the moment of cancellation
+    const currentClientOrderMessages = messages.filter(msg => {
+      if (msg.sender_type !== 'client') return false;
+      const match = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
+      return !!match;
+    });
     
+    const lastOrderMsg = currentClientOrderMessages[currentClientOrderMessages.length - 1];
+    if (!lastOrderMsg) {
+      console.log('[FloatingChatWindow] No client order message to cancel');
+      return;
+    }
+    
+    console.log('[FloatingChatWindow] Cancelling client order request:', lastOrderMsg.id);
     setCancellingOrderRequestId(lastOrderMsg.id);
+    
     try {
       const { error } = await supabase
         .from('service_messages')
@@ -1275,7 +1307,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
-      // Refetch messages from database to ensure UI is fully in sync
+      console.log('[FloatingChatWindow] Delete successful, refetching messages...');
+      
+      // Immediately update local state to remove the message (don't wait for refetch)
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== lastOrderMsg.id);
+        console.log('[FloatingChatWindow] Local state updated, messages count:', filtered.length);
+        return filtered;
+      });
+      
+      // Then also refetch to ensure we're in sync with database
       const { data: freshMessages } = await supabase
         .from('service_messages')
         .select('*')
@@ -1283,6 +1324,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         .order('created_at', { ascending: true });
       
       if (freshMessages) {
+        console.log('[FloatingChatWindow] Fresh messages fetched, count:', freshMessages.length);
         setMessages(freshMessages as ServiceMessage[]);
       }
       
@@ -3463,6 +3505,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       // Handle cancel client order request
       const handleCancelClientOrderRequest = async () => {
+        console.log('[FloatingChatWindow] Inline cancel client order request for msg:', msg.id);
         setCancellingOrderRequestId(msg.id);
         try {
           const { error } = await supabase
@@ -3472,7 +3515,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           if (error) throw error;
           
-          // Refetch messages from database to ensure UI is fully in sync
+          console.log('[FloatingChatWindow] Delete successful, updating local state immediately');
+          
+          // Immediately update local state to remove the message (don't wait for refetch)
+          setMessages(prev => {
+            const filtered = prev.filter(m => m.id !== msg.id);
+            console.log('[FloatingChatWindow] Local state updated after inline cancel, messages count:', filtered.length);
+            return filtered;
+          });
+          
+          // Then also refetch to ensure we're in sync with database
           const { data: freshMessages } = await supabase
             .from('service_messages')
             .select('*')
@@ -3480,6 +3532,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             .order('created_at', { ascending: true });
           
           if (freshMessages) {
+            console.log('[FloatingChatWindow] Fresh messages fetched after inline cancel, count:', freshMessages.length);
             setMessages(freshMessages as ServiceMessage[]);
           }
           
@@ -4037,10 +4090,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       // Handle cancel order request - deletes ALL order request messages (including resent offers)
       const handleCancelOrderRequest = async () => {
+        console.log('[FloatingChatWindow] Inline cancel order request for msg:', msg.id);
         setCancellingOrderRequestId(msg.id);
         try {
-          // Get all order request message IDs to delete
-          const messageIdsToDelete = existingOrderMessages.map(m => m.id);
+          // Get all order request message IDs from current messages state
+          const currentOrderMessages = messages.filter(m => {
+            const match = m.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+            return !!match;
+          });
+          const messageIdsToDelete = currentOrderMessages.map(m => m.id);
+          
+          console.log('[FloatingChatWindow] Deleting', messageIdsToDelete.length, 'order request messages');
           
           // Delete all order request messages from database
           const { error } = await supabase
@@ -4050,7 +4110,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           if (error) throw error;
           
-          // Refetch messages from database to ensure UI is fully in sync
+          console.log('[FloatingChatWindow] Delete successful, updating local state immediately');
+          
+          // Immediately update local state to remove the messages (don't wait for refetch)
+          setMessages(prev => {
+            const filtered = prev.filter(m => !messageIdsToDelete.includes(m.id));
+            console.log('[FloatingChatWindow] Local state updated after inline order cancel, messages count:', filtered.length);
+            return filtered;
+          });
+          
+          // Then also refetch to ensure we're in sync with database
           const { data: freshMessages } = await supabase
             .from('service_messages')
             .select('*')
@@ -4058,6 +4127,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             .order('created_at', { ascending: true });
           
           if (freshMessages) {
+            console.log('[FloatingChatWindow] Fresh messages fetched after inline order cancel, count:', freshMessages.length);
             setMessages(freshMessages as ServiceMessage[]);
           }
           
@@ -4088,7 +4158,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           toast({
             title: "Offer cancelled",
-            description: existingOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
+            description: currentOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
           });
         } catch (error: any) {
           console.error('Error cancelling order request:', error);
