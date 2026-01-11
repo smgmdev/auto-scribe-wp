@@ -1149,9 +1149,19 @@ export function AgencyRequestsView() {
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="requests" className="relative">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
+            {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="orders" className="relative">
             Orders ({orders.length})
+            {(agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount) > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {agencyUnreadOrdersCount + agencyUnreadDisputesCount + agencyUnreadCompletedCount}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -1170,6 +1180,11 @@ export function AgencyRequestsView() {
               <TabsTrigger value="closed" className="gap-2 relative">
                 <CheckCircle className="h-4 w-4" />
                 Closed ({completedRequests.length + cancelledRequests.length})
+                {(unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {unreadCompletedRequestsCount + unreadCancelledCount}
+                  </span>
+                )}
               </TabsTrigger>
             </TabsList>
 
