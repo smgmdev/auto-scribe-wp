@@ -109,8 +109,11 @@ serve(async (req) => {
       );
     }
 
-    // Check order is in correct state (must be paid and delivered)
-    if (order.status !== "paid" || order.delivery_status !== "delivered") {
+    // Check order is in correct state (must be paid/pending_payment and delivered)
+    // Note: Orders paid with credits have status 'pending_payment' (credits are locked)
+    // Orders paid with Stripe have status 'paid'
+    const validStatuses = ["paid", "pending_payment"];
+    if (!validStatuses.includes(order.status) || order.delivery_status !== "delivered") {
       logStep("ERROR", { message: "Order not in correct state", status: order.status, delivery_status: order.delivery_status });
       return new Response(
         JSON.stringify({ error: "Order must be paid and delivered to complete" }),
