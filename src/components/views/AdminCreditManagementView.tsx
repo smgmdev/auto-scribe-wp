@@ -545,11 +545,11 @@ export const AdminCreditManagementView = () => {
                 <TableHeader>
                 <TableRow>
                     <TableHead>Email</TableHead>
+                    <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Purchased</TableHead>
                     <TableHead className="text-right">Gifted</TableHead>
                     <TableHead className="text-right">Refunded</TableHead>
                     <TableHead className="text-right">Locked</TableHead>
-                    <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Orders</TableHead>
                     <TableHead className="text-right">Total Spent</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -582,11 +582,11 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="font-medium">
                           {user.email || <span className="text-muted-foreground italic">No email</span>}
                         </TableCell>
+                        <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
                         <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                         <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
                         <TableCell className="text-right">
