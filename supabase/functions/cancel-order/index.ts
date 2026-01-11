@@ -278,45 +278,17 @@ serve(async (req) => {
       
       // If admin cancelled, broadcast notifications to user and agency
       if (isAdmin) {
-        const notificationPayload = {
-          action: 'order-cancelled',
-          message: `Order for ${mediaSiteName} has been cancelled by Arcana Mace Staff.`,
-          reason: reason || null,
-          orderId: order_id,
-          requestId: serviceRequest.id,
-          creditsRefunded: creditRefund
-        };
-        
-        // Notify user
-        await supabaseAdmin
-          .channel(`notify-${orderOwnerId}-admin-action`)
-          .send({
-            type: 'broadcast',
-            event: 'admin-action',
-            payload: notificationPayload
-          });
-        logStep("Broadcast notification sent to user", { userId: orderOwnerId });
-        
-        // Notify agency if there's an agency_payout_id
-        if (serviceRequest.agency_payout_id) {
-          await supabaseAdmin
-            .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
-            .send({
-              type: 'broadcast',
-              event: 'admin-action',
-              payload: notificationPayload
-            });
-          logStep("Broadcast notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
-        }
-        
-        // If there was a dispute, also send dispute-resolved notification
-        if (closedDisputes && closedDisputes.length > 0) {
+        // If this is a dispute resolution, only send dispute-resolved notification
+        // Otherwise send order-cancelled notification
+        if (isDisputeResolution && closedDisputes && closedDisputes.length > 0) {
+          // Only send dispute-resolved notification for dispute resolutions
           const disputePayload = {
             action: 'dispute-resolved',
-            message: `Dispute resolved - Order cancelled by Arcana Mace Staff.${reason ? ` Reason: ${reason}` : ''}`,
-            reason: reason || null,
+            message: `Dispute resolved - Order cancelled by Arcana Mace Staff. ${creditRefund} credits refunded.`,
+            reason: reason?.replace('Dispute resolution: ', '') || null,
             orderId: order_id,
-            requestId: serviceRequest.id
+            requestId: serviceRequest.id,
+            creditsRefunded: creditRefund
           };
           
           await supabaseAdmin
@@ -326,6 +298,7 @@ serve(async (req) => {
               event: 'admin-action',
               payload: disputePayload
             });
+          logStep("Dispute resolved notification sent to user", { userId: orderOwnerId });
           
           if (serviceRequest.agency_payout_id) {
             await supabaseAdmin
@@ -335,8 +308,40 @@ serve(async (req) => {
                 event: 'admin-action',
                 payload: disputePayload
               });
+            logStep("Dispute resolved notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
           }
-          logStep("Dispute resolved notifications sent");
+        } else {
+          // Regular admin cancellation (not dispute resolution)
+          const notificationPayload = {
+            action: 'order-cancelled',
+            message: `Order for ${mediaSiteName} has been cancelled by Arcana Mace Staff.`,
+            reason: reason || null,
+            orderId: order_id,
+            requestId: serviceRequest.id,
+            creditsRefunded: creditRefund
+          };
+          
+          // Notify user
+          await supabaseAdmin
+            .channel(`notify-${orderOwnerId}-admin-action`)
+            .send({
+              type: 'broadcast',
+              event: 'admin-action',
+              payload: notificationPayload
+            });
+          logStep("Order cancelled notification sent to user", { userId: orderOwnerId });
+          
+          // Notify agency if there's an agency_payout_id
+          if (serviceRequest.agency_payout_id) {
+            await supabaseAdmin
+              .channel(`notify-${serviceRequest.agency_payout_id}-admin-action`)
+              .send({
+                type: 'broadcast',
+                event: 'admin-action',
+                payload: notificationPayload
+              });
+            logStep("Order cancelled notification sent to agency", { agencyPayoutId: serviceRequest.agency_payout_id });
+          }
         }
       }
     }
