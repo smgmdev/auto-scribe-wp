@@ -220,6 +220,22 @@ serve(async (req) => {
       // Don't fail the request, just log
     }
 
+    // Create "order_accepted" transaction for transaction history
+    const { error: transactionError } = await supabaseAdmin
+      .from("credit_transactions")
+      .insert({
+        user_id: client_user_id,
+        amount: 0, // Informational - no credit change
+        type: "order_accepted",
+        description: `Order accepted by agency: ${mediaSite.name}`,
+        order_id: order.id
+      });
+
+    if (transactionError) {
+      console.log("Error creating order_accepted transaction:", transactionError.message);
+      // Don't fail the request
+    }
+
     console.log(`Successfully created pending order ${order.id} for service request ${service_request_id}`);
 
     return new Response(
