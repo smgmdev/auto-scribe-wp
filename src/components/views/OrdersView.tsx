@@ -175,7 +175,7 @@ export function OrdersView() {
             schema: 'public',
             table: 'disputes'
           },
-          (payload) => {
+          async (payload) => {
             console.log('[OrdersView] Dispute change:', payload);
             const updated = payload.new as { order_id: string; status: string } | undefined;
             const deleted = payload.old as { order_id: string } | undefined;
@@ -199,8 +199,26 @@ export function OrdersView() {
                 decrementUserUnreadDisputesCount();
               }
             } else if (payload.eventType === 'INSERT' && updated) {
-              // New dispute - refetch to get full data
-              fetchUserDisputes();
+              // Check if this dispute is for one of the user's orders
+              const { data: orderData } = await supabase
+                .from('orders')
+                .select('id')
+                .eq('id', updated.order_id)
+                .eq('user_id', user.id)
+                .single();
+              
+              if (orderData) {
+                // This is a dispute for user's order - add to disputeOrderIds and increment count
+                setDisputeOrderIds(prev => new Set([...prev, updated.order_id]));
+                incrementUserUnreadDisputesCount();
+                
+                // Show toast notification
+                toast({
+                  title: "Dispute Opened",
+                  description: "A dispute has been opened for one of your orders.",
+                  variant: "destructive",
+                });
+              }
             }
           }
         )
@@ -288,14 +306,26 @@ export function OrdersView() {
     setTimeout(() => setInitialLoadComplete(true), 500);
   };
 
-  // Fetch user's open disputes to identify which orders are in dispute
+  // Fetch open disputes for orders that belong to this user (regardless of who opened the dispute)
   const fetchUserDisputes = async () => {
     if (!user) return;
     
+    // First get all order IDs that belong to this user
+    const { data: userOrders } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('user_id', user.id);
+    
+    if (!userOrders || userOrders.length === 0) {
+      setDisputeOrderIds(new Set());
+      return;
+    }
+    
+    // Then fetch open disputes for those orders
     const { data, error } = await supabase
       .from('disputes')
       .select('order_id')
-      .eq('user_id', user.id)
+      .in('order_id', userOrders.map(o => o.id))
       .eq('status', 'open');
     
     if (!error && data) {
