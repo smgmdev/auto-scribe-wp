@@ -4922,7 +4922,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Cancel Order
                       </DropdownMenuItem>
                     )}
-                    {hasOpenDispute && !isAdmin && (
+                    {hasOpenDispute && !isAdmin && globalChatType === 'agency-request' && (
                       <DropdownMenuItem 
                         className="cursor-pointer text-muted-foreground"
                         disabled
@@ -4970,6 +4970,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         }}
                       >
                         Order Details
+                      </DropdownMenuItem>
+                    )}
+                    {hasOpenDispute && !isAdmin && globalChatType === 'my-request' && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer text-muted-foreground"
+                        disabled
+                      >
+                        Dispute Opened
                       </DropdownMenuItem>
                     )}
                     {globalChatType === 'my-request' && !hasOpenDispute && !isAdmin && localOrder?.delivery_status !== 'accepted' && (
