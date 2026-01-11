@@ -132,11 +132,12 @@ export function CreditHistoryView() {
       setLockedOrders(orders);
 
       // Fetch completed orders to calculate total spent
+      // Only count orders where client has accepted delivery
       const { data: completedOrders } = await supabase
         .from('orders')
         .select('id, media_sites(price)')
         .eq('user_id', user.id)
-        .eq('status', 'completed');
+        .eq('delivery_status', 'accepted');
 
       let completedSpent = 0;
       if (completedOrders && completedOrders.length > 0) {
