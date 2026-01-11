@@ -184,7 +184,20 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            <p>Your current credit balance available for orders</p>
+            <div className="space-y-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Total credit balance:</span>
+                <span className="font-medium">{totalCredits.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Locked credits in orders:</span>
+                <span className="font-medium text-amber-400">-{creditsInUse.toLocaleString()}</span>
+              </div>
+              <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
+                <span className="text-muted-foreground">Available credits:</span>
+                <span className="font-medium">{availableCredits.toLocaleString()}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
 
