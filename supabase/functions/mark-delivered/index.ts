@@ -125,13 +125,32 @@ serve(async (req) => {
 
     logStep("Order marked as delivered", { orderId: order.id });
 
+    // Create "order_delivered" transaction for transaction history
+    const mediaSiteName = orderDetails.media_sites?.name || 'Unknown';
+    const { error: transactionError } = await supabaseClient
+      .from("credit_transactions")
+      .insert({
+        user_id: orderDetails.user_id,
+        amount: 0, // Informational - no credit change
+        type: "order_delivered",
+        description: `Order delivered: ${mediaSiteName}`,
+        order_id: order_id
+      });
+
+    if (transactionError) {
+      logStep("Error creating order_delivered transaction", { error: transactionError.message });
+      // Don't fail the request
+    } else {
+      logStep("Order delivered transaction created");
+    }
+
     // Send delivery message to chat if there's a linked service request
     if (serviceRequest?.id) {
       const deliveryMessagePayload = {
         type: 'order_delivered',
         order_id: order.id,
         media_site_id: orderDetails.media_sites?.id,
-        media_site_name: orderDetails.media_sites?.name || 'Unknown',
+        media_site_name: mediaSiteName,
         delivery_url: delivery_url || null,
         delivery_notes: delivery_notes || null,
         delivered_by: 'admin'
@@ -178,7 +197,6 @@ serve(async (req) => {
     logStep("Order delivery marked - awaiting client acceptance before completion");
 
     // Send notifications to user and agency
-    const mediaSiteName = orderDetails.media_sites?.name || 'Unknown';
     const orderOwnerId = orderDetails.user_id;
 
     // Always send order delivered notification to user
