@@ -213,6 +213,24 @@ serve(async (req) => {
       logStep("Lock transaction deleted");
     }
 
+    // Create an "unlocked" transaction to show in history
+    const { error: unlockedTransactionError } = await supabaseAdmin
+      .from("credit_transactions")
+      .insert({
+        user_id: orderOwnerId,
+        amount: creditAmount,
+        type: "unlocked",
+        description: `Order cancelled: ${mediaSiteName} (credits released)`,
+        order_id: order_id
+      });
+
+    if (unlockedTransactionError) {
+      logStep("Error creating unlocked transaction", { error: unlockedTransactionError.message });
+      // Don't fail - order is already cancelled
+    } else {
+      logStep("Unlocked transaction created", { creditAmount });
+    }
+
     logStep("Order cancelled - credits unlocked (no balance change)", { creditAmount, balance: currentCredits });
 
     // Get the linked service request to send a cancellation message
