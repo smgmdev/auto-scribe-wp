@@ -279,7 +279,7 @@ export function CreditHistoryView() {
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 hover:border-[#4771d9] cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Credits in-use
+                  Locked Credits
                 </CardTitle>
                 <Coins className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
