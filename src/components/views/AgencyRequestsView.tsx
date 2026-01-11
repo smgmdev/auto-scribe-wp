@@ -648,6 +648,61 @@ export function AgencyRequestsView() {
         console.log('[AgencyRequestsView] Orders channel status:', status);
       });
 
+    // Subscribe to disputes for real-time updates when client opens a dispute
+    const disputesChannel = supabase
+      .channel('agency-disputes-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'disputes'
+        },
+        (payload) => {
+          console.log('[AgencyRequestsView] New dispute received:', payload);
+          const newDispute = payload.new as any;
+          
+          // Check if this dispute is for one of our orders
+          const isOurOrder = orders.some(o => o.id === newDispute.order_id);
+          if (isOurOrder) {
+            toast({
+              title: 'Dispute Opened',
+              description: 'A client has opened a dispute on an order.',
+              variant: 'destructive',
+            });
+            // Play sound
+            playMessageSound();
+            // Refresh to get updated data
+            fetchRequests();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'disputes'
+        },
+        (payload) => {
+          console.log('[AgencyRequestsView] Dispute update received:', payload);
+          const updatedDispute = payload.new as any;
+          
+          // Update local state
+          setDisputes(prev => prev.map(d => 
+            d.order_id === updatedDispute.order_id ? { ...d, ...updatedDispute } : d
+          ));
+          
+          // If dispute was resolved (status changed from open)
+          if (updatedDispute.status !== 'open') {
+            fetchRequests();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[AgencyRequestsView] Disputes channel status:', status);
+      });
+
     // Subscribe to message deletion broadcasts
     const deletionChannel = supabase
       .channel('message-deletions')
@@ -673,6 +728,7 @@ export function AgencyRequestsView() {
       supabase.removeChannel(adminActionChannel);
       supabase.removeChannel(clientActionChannel);
       supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(disputesChannel);
       supabase.removeChannel(deletionChannel);
     };
   }, [agencyPayoutId]);
