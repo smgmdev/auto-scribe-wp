@@ -50,7 +50,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     updateGlobalChatRequest,
     clearUnreadMessageCount,
     updateChatPosition,
-    incrementUserUnreadOrdersCount
+    incrementUserUnreadOrdersCount,
+    incrementUserUnreadDisputesCount
   } = useAppStore();
   
   const globalChatRequest = chat.request;
@@ -6656,6 +6657,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (insertedMsg) {
                     setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
+                  }
+                  
+                  // If agency opened dispute, notify the client (user) side
+                  if (isAgencyOpening) {
+                    incrementUserUnreadDisputesCount();
                   }
                   
                   setHasOpenDispute(true);
