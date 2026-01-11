@@ -102,7 +102,9 @@ serve(async (req) => {
       );
     }
 
-    if (order.delivery_status === 'delivered' || order.delivery_status === 'accepted') {
+    // Check if order can be cancelled - admins can cancel any order (for dispute resolution)
+    // Regular users cannot cancel delivered or accepted orders
+    if (!isAdmin && (order.delivery_status === 'delivered' || order.delivery_status === 'accepted')) {
       return new Response(
         JSON.stringify({ error: "Cannot cancel delivered or accepted orders" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
