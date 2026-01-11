@@ -146,7 +146,7 @@ export function AgencyPayoutsView() {
 
       const orderIds = serviceRequests.map(sr => sr.order_id).filter(Boolean) as string[];
 
-      // Fetch completed orders (delivered or accepted) for this agency
+      // Fetch completed orders (only 'accepted' = client confirmed) for this agency
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select(`
@@ -162,8 +162,8 @@ export function AgencyPayoutsView() {
           media_site:media_sites(name, favicon)
         `)
         .in('id', orderIds)
-        .in('delivery_status', ['delivered', 'accepted'])
-        .order('created_at', { ascending: false });
+        .eq('delivery_status', 'accepted')
+        .order('accepted_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching completed orders:', error);
