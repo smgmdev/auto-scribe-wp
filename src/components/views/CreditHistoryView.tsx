@@ -27,9 +27,8 @@ export function CreditHistoryView() {
   const [creditsInUse, setCreditsInUse] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Available credits is what's in user_credits (already accounts for in-use)
-  // We fetch both values separately for display purposes
-  const availableCredits = totalCredits;
+  // Available credits = total credits minus locked credits (in active orders)
+  const availableCredits = totalCredits - creditsInUse;
 
   useEffect(() => {
     const fetchData = async () => {
