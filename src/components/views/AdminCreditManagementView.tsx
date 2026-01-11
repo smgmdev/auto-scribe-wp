@@ -587,7 +587,7 @@ export const AdminCreditManagementView = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="h-8 w-8 hover:bg-black hover:text-white"
                                 onClick={() => handleSendCredits(user.user_id, user.email, user.available)}
                               >
                                 <Gift className="h-4 w-4" />
