@@ -38,10 +38,20 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Total balance = current user_credits + all locked credits (orders + pending requests)
-  // Available = Total - Locked = user_credits (what's actually spendable)
-  const actualTotalBalance = totalCredits + creditsInUse;
-  const availableCredits = actualTotalBalance - creditsInUse; // This equals totalCredits
+  // Total balance = all credits received (purchases + admin bonuses)
+  // This is calculated from transactions, not user_credits table
+  const totalFromPurchases = transactions
+    .filter(t => t.type === 'purchase')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const totalFromAdmin = transactions
+    .filter(t => t.type === 'bonus' || t.type === 'admin_credit')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const actualTotalBalance = totalFromPurchases + totalFromAdmin;
+  
+  // Available = Total - Locked credits
+  const availableCredits = actualTotalBalance - creditsInUse;
 
   useEffect(() => {
     const fetchData = async () => {
