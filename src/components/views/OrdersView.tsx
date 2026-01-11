@@ -103,52 +103,6 @@ export function OrdersView() {
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
 
-  // Mark all orders in the current tab as read when switching tabs
-  // Only applies to tabs with notifications: active, disputes, completed, history (cancelled)
-  // Skip on initial load to preserve notification badges until user actually views content
-  useEffect(() => {
-    const markTabOrdersAsRead = async () => {
-      if (isAdmin || !user || orders.length === 0 || !initialLoadComplete) return;
-      
-      // Get the unread order IDs that belong to the current tab
-      let unreadTabOrderIds: string[] = [];
-      
-      if (activeTab === 'active') {
-        unreadTabOrderIds = orders
-          .filter(o => !o.read && o.status === 'paid' && o.delivery_status !== 'delivered' && o.delivery_status !== 'accepted' && !disputeOrderIds.has(o.id))
-          .map(o => o.id);
-        if (unreadTabOrderIds.length > 0) setUserUnreadOrdersCount(0);
-      } else if (activeTab === 'disputes') {
-        unreadTabOrderIds = orders.filter(o => !o.read && disputeOrderIds.has(o.id)).map(o => o.id);
-        if (unreadTabOrderIds.length > 0) setUserUnreadDisputesCount(0);
-      } else if (activeTab === 'completed') {
-        unreadTabOrderIds = orders.filter(o => !o.read && (o.delivery_status === 'delivered' || o.delivery_status === 'accepted') && !disputeOrderIds.has(o.id)).map(o => o.id);
-        if (unreadTabOrderIds.length > 0) setUserUnreadCompletedCount(0);
-      } else if (activeTab === 'history') {
-        unreadTabOrderIds = orders.filter(o => !o.read && o.status === 'cancelled').map(o => o.id);
-        if (unreadTabOrderIds.length > 0) setUserUnreadHistoryCount(0);
-      }
-      
-      if (unreadTabOrderIds.length === 0) return;
-      
-      // Mark these specific orders as read in DB
-      const { error } = await supabase
-        .from('orders')
-        .update({ read: true })
-        .eq('user_id', user.id)
-        .in('id', unreadTabOrderIds);
-      
-      if (!error) {
-        // Update local state to reflect read status
-        setOrders(prev => prev.map(o => 
-          unreadTabOrderIds.includes(o.id) ? { ...o, read: true } : o
-        ));
-      }
-    };
-    
-    markTabOrdersAsRead();
-  }, [activeTab, initialLoadComplete, disputeOrderIds, isAdmin, user, setUserUnreadOrdersCount, setUserUnreadDisputesCount, setUserUnreadCompletedCount, setUserUnreadHistoryCount]);
-
   // Timer tick for live countdown updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -584,6 +538,9 @@ export function OrdersView() {
             break;
           case 'disputes':
             decrementUserUnreadDisputesCount();
+            break;
+          case 'completed':
+            decrementUserUnreadCompletedCount();
             break;
           case 'history':
             decrementUserUnreadHistoryCount();
