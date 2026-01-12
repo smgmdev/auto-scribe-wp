@@ -269,7 +269,7 @@ export function OrderWithCreditsDialog({
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Specify a delivery time for the agency. This is required.</p>
+                    <p>Specify a delivery time for the agency. Recommended to discuss with the agency.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
