@@ -204,19 +204,19 @@ export function CreditHistoryView() {
       )
       .subscribe();
 
-    // Subscribe to credit_transactions changes
+    // Subscribe to credit_transactions changes (INSERT, UPDATE, DELETE)
     const transactionsChannel = supabase
       .channel('credit-management-transactions')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'credit_transactions',
           filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log('New transaction, refreshing...');
+        (payload) => {
+          console.log('Transaction updated:', payload.eventType, payload);
           fetchData(false);
         }
       )
