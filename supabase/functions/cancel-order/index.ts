@@ -197,21 +197,9 @@ serve(async (req) => {
     // NO credit refund needed - credits were never deducted from balance
     // They were only "locked" and now the lock is released by cancelling the order
 
-    // Delete the "locked" transaction for this order
+    // Keep full history - DO NOT delete the locked transaction
+    // Just create an "unlocked" transaction to show the order was cancelled
     const mediaSiteName = order.media_sites?.name || 'Unknown';
-    const { error: deleteLockError } = await supabaseAdmin
-      .from("credit_transactions")
-      .delete()
-      .eq("user_id", orderOwnerId)
-      .eq("type", "locked")
-      .like("description", `%${mediaSiteName}%`);
-
-    if (deleteLockError) {
-      logStep("Error deleting lock transaction", { error: deleteLockError.message });
-      // Don't fail - order is already cancelled
-    } else {
-      logStep("Lock transaction deleted");
-    }
 
     // Create an "unlocked" transaction to show in history
     const { error: unlockedTransactionError } = await supabaseAdmin

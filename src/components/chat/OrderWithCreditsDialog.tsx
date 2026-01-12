@@ -133,9 +133,13 @@ export function OrderWithCreditsDialog({
   const creditCost = mediaSite?.price || 0;
   const availableCredits = (credits || 0) - lockedCredits;
   const hasEnoughCredits = availableCredits >= creditCost;
+  
+  // Check if delivery duration is valid (at least some time specified)
+  const totalDurationMinutes = (deliveryDays * 24 * 60) + (deliveryHours * 60) + deliveryMinutes;
+  const hasValidDuration = totalDurationMinutes > 0;
 
   const handleSendRequest = async () => {
-    if (!mediaSite || !hasEnoughCredits || !user) return;
+    if (!mediaSite || !hasEnoughCredits || !user || !hasValidDuration) return;
 
     setSending(true);
 
@@ -258,14 +262,14 @@ export function OrderWithCreditsDialog({
           {/* Proposed Delivery Duration */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">Proposed Delivery Duration</Label>
+              <Label className="text-sm font-medium">Proposed Delivery Duration <span className="text-destructive">*</span></Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Propose a delivery time for the agency to consider.</p>
+                    <p>Specify a delivery time for the agency. This is required.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -370,6 +374,19 @@ export function OrderWithCreditsDialog({
             </div>
           )}
 
+          {/* Missing Duration Warning */}
+          {!hasValidDuration && (
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-amber-600 dark:text-amber-400">Delivery Duration Required</p>
+                <p className="text-sm text-muted-foreground">
+                  Please specify a delivery duration (days, hours, or minutes).
+                </p>
+              </div>
+            </div>
+          )}
+
           {!hasEnoughCredits && (
             <Button
               onClick={() => setBuyCreditsOpen(true)}
@@ -384,7 +401,7 @@ export function OrderWithCreditsDialog({
 
           <Button
             onClick={handleSendRequest}
-            disabled={sending || !hasEnoughCredits}
+            disabled={sending || !hasEnoughCredits || !hasValidDuration}
             className="w-full border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             size="lg"
           >
@@ -393,6 +410,8 @@ export function OrderWithCreditsDialog({
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 Sending...
               </>
+            ) : !hasValidDuration ? (
+              'Enter Delivery Duration'
             ) : hasEnoughCredits ? (
               isResendMode ? 'Resend Order Request' : 'Send Order Request'
             ) : (

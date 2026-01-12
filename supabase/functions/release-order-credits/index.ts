@@ -102,23 +102,9 @@ serve(async (req) => {
     // NO balance update needed - credits were never deducted
     // The lock is simply released by updating order/request status (done by caller)
 
-    // Delete the "locked" transaction that was created when order request was sent
+    // Keep full history - DO NOT delete the locked transaction
+    // Just create an "unlocked" transaction to show the request was cancelled/rejected
     if (service_request_id) {
-      const { error: deleteError } = await supabaseAdmin
-        .from("credit_transactions")
-        .delete()
-        .eq("user_id", targetUserId)
-        .eq("type", "locked")
-        .like("description", `%${mediaSite.name}%`);
-
-      if (deleteError) {
-        logStep("Error deleting lock transaction", { error: deleteError.message });
-        // Don't fail - main operation is still valid
-      } else {
-        logStep("Lock transaction deleted");
-      }
-
-      // Create an "unlocked" transaction to show the request was cancelled/rejected
       const unlockReason = reason || "Order request cancelled";
       const { error: unlockTransactionError } = await supabaseAdmin
         .from("credit_transactions")
@@ -132,7 +118,7 @@ serve(async (req) => {
       if (unlockTransactionError) {
         logStep("Error creating unlock transaction", { error: unlockTransactionError.message });
       } else {
-        logStep("Unlock transaction created", { creditAmount });
+        logStep("Unlock transaction created", { creditAmount, reason: unlockReason });
       }
     }
 
