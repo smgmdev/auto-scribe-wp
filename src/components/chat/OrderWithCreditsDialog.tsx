@@ -374,18 +374,6 @@ export function OrderWithCreditsDialog({
             </div>
           )}
 
-          {/* Missing Duration Warning */}
-          {!hasValidDuration && (
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-amber-600 dark:text-amber-400">Delivery Duration Required</p>
-                <p className="text-sm text-muted-foreground">
-                  Please specify a delivery duration (days, hours, or minutes).
-                </p>
-              </div>
-            </div>
-          )}
 
           {!hasEnoughCredits && (
             <Button
