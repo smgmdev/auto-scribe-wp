@@ -288,6 +288,17 @@ export function ComposeView() {
       setIsLoadingTags(true);
       fetchTags(currentSite).then(tags => {
         setAvailableTags(tags);
+        // Update editingTagNames with fetched tag names for selected tags
+        if (selectedTagIds.length > 0) {
+          const newTagNames: Record<number, string> = { ...editingTagNames };
+          selectedTagIds.forEach(id => {
+            const tag = tags.find(t => t.id === id);
+            if (tag && !newTagNames[id]) {
+              newTagNames[id] = tag.name;
+            }
+          });
+          setEditingTagNames(newTagNames);
+        }
         setIsLoadingTags(false);
       }).catch(error => {
         console.error('Failed to fetch tags:', error);
@@ -610,9 +621,13 @@ export function ComposeView() {
       let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
       let featuredImageUrl: string | undefined = editingArticle?.featuredImage?.url;
 
+      // Detect if the image has changed from the original
+      const originalImageUrl = editingArticle?.featuredImage?.url;
+      const imageChanged = imagePreview !== originalImageUrl;
+
       // Upload featured image if exists
       // Case 1: New file from file picker
-      // Case 2: Image from saved draft (data URL in imagePreview but no file)
+      // Case 2: Image from saved draft (data URL in imagePreview but no file) - also applies to edits with new image
       if (featuredImage.file) {
         toast({
           title: "Uploading image...",
@@ -626,8 +641,8 @@ export function ComposeView() {
         });
         featuredMediaId = mediaResult.id;
         featuredImageUrl = mediaResult.source_url;
-      } else if (imagePreview && !featuredMediaId) {
-        // Convert data URL to File and upload (for drafts with saved images)
+      } else if (imagePreview && (!featuredMediaId || imageChanged) && imagePreview.startsWith('data:')) {
+        // Convert data URL to File and upload (for drafts with saved images or new images in edit mode)
         toast({
           title: "Uploading image...",
           description: "Please wait while we upload your featured image"
@@ -717,7 +732,15 @@ export function ComposeView() {
           wpFeaturedMediaId: featuredMediaId,
           categories: selectedCategories,
           tagIds: selectedTagIds,
-          tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+          // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames or existing tags
+          tags: selectedTagIds.map(id => {
+            const tag = availableTags.find(t => t.id === id);
+            if (tag) return tag.name;
+            if (editingTagNames[id]) return editingTagNames[id];
+            const existingIdx = editingArticle?.tagIds?.indexOf(id) ?? -1;
+            if (existingIdx >= 0 && editingArticle?.tags?.[existingIdx]) return editingArticle.tags[existingIdx];
+            return `Tag #${id}`;
+          }),
         });
       } else {
         await addArticle({
@@ -735,7 +758,11 @@ export function ComposeView() {
           wpFeaturedMediaId: featuredMediaId,
           categories: selectedCategories,
           tagIds: selectedTagIds,
-          tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+          // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames
+          tags: selectedTagIds.map(id => {
+            const tag = availableTags.find(t => t.id === id);
+            return tag?.name || editingTagNames[id] || `Tag #${id}`;
+          }),
         });
       }
       // Deduct credits for non-admin users via backend (only for new articles, not updates)
@@ -878,7 +905,15 @@ export function ComposeView() {
           publishedToFavicon: currentSite?.favicon || editingArticle.publishedToFavicon,
           categories: selectedCategories,
           tagIds: selectedTagIds,
-          tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+          // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames or existing tags
+          tags: selectedTagIds.map(id => {
+            const tag = availableTags.find(t => t.id === id);
+            if (tag) return tag.name;
+            if (editingTagNames[id]) return editingTagNames[id];
+            const existingIdx = editingArticle?.tagIds?.indexOf(id) ?? -1;
+            if (existingIdx >= 0 && editingArticle?.tags?.[existingIdx]) return editingArticle.tags[existingIdx];
+            return `Tag #${id}`;
+          }),
           focusKeyword: focusKeyword || undefined,
           metaDescription: metaDescription || undefined,
         });
@@ -903,7 +938,15 @@ export function ComposeView() {
           publishedToFavicon: currentSite?.favicon,
           categories: selectedCategories,
           tagIds: selectedTagIds,
-          tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+          // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames or existing tags
+          tags: selectedTagIds.map(id => {
+            const tag = availableTags.find(t => t.id === id);
+            if (tag) return tag.name;
+            if (editingTagNames[id]) return editingTagNames[id];
+            const existingIdx = editingArticle?.tagIds?.indexOf(id) ?? -1;
+            if (existingIdx >= 0 && editingArticle?.tags?.[existingIdx]) return editingArticle.tags[existingIdx];
+            return `Tag #${id}`;
+          }),
           focusKeyword: focusKeyword || undefined,
           metaDescription: metaDescription || undefined,
         });
@@ -1029,7 +1072,11 @@ export function ComposeView() {
         wpFeaturedMediaId,
         categories: selectedCategories,
         tagIds: selectedTagIds,
-        tags: availableTags.filter(t => selectedTagIds.includes(t.id)).map(t => t.name),
+        // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames
+        tags: selectedTagIds.map(id => {
+          const tag = availableTags.find(t => t.id === id);
+          return tag?.name || editingTagNames[id] || `Tag #${id}`;
+        }),
         focusKeyword: focusKeyword || undefined,
         metaDescription: metaDescription || undefined,
       });
