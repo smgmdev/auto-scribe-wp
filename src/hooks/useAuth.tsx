@@ -64,43 +64,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [pinRequired, setPinRequired] = useState(false);
   const [pinVerified, setPinVerified] = useState(false);
   const hasShownWelcomeRef = useRef(false);
+  const previousUserIdRef = useRef<string | null>(null);
+
+  // Helper to fully reset auth state
+  const resetAuthState = () => {
+    setSession(null);
+    setUser(null);
+    setRole(null);
+    setCredits(0);
+    setPinRequired(false);
+    setPinVerified(false);
+    hasShownWelcomeRef.current = false;
+    previousUserIdRef.current = null;
+  };
 
   const fetchUserData = async (userId: string): Promise<void> => {
-    // Fetch role
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
-    
-    if (roleData) {
-      setRole(roleData.role as AppRole);
-    }
+    try {
+      // Fetch role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+      
+      if (roleError) {
+        console.log('[Auth] No role found for user:', userId);
+        setRole(null);
+      } else if (roleData) {
+        setRole(roleData.role as AppRole);
+      }
 
-    // Fetch credits
-    const { data: creditsData } = await supabase
-      .from('user_credits')
-      .select('credits')
-      .eq('user_id', userId)
-      .single();
-    
-    if (creditsData) {
-      setCredits(creditsData.credits);
-    }
+      // Fetch credits
+      const { data: creditsData, error: creditsError } = await supabase
+        .from('user_credits')
+        .select('credits')
+        .eq('user_id', userId)
+        .single();
+      
+      if (creditsError) {
+        console.log('[Auth] No credits found for user:', userId);
+        setCredits(0);
+      } else if (creditsData) {
+        setCredits(creditsData.credits);
+      }
 
-    // Check if PIN is required
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('pin_enabled, pin_hash')
-      .eq('id', userId)
-      .maybeSingle();
-    
-    if (profileData?.pin_enabled && profileData?.pin_hash) {
-      setPinRequired(true);
-      setPinVerified(false);
-    } else {
-      setPinRequired(false);
-      setPinVerified(true);
+      // Check if PIN is required
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('pin_enabled, pin_hash')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (profileData?.pin_enabled && profileData?.pin_hash) {
+        setPinRequired(true);
+        setPinVerified(false);
+      } else {
+        setPinRequired(false);
+        setPinVerified(true);
+      }
+    } catch (error) {
+      console.error('[Auth] Error fetching user data:', error);
     }
   };
 
@@ -176,15 +199,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, newSession) => {
         if (!isMounted) return;
         
+        console.log('[Auth] onAuthStateChange event:', event, 'user:', newSession?.user?.id);
+        
         // Always process sign out
         if (event === 'SIGNED_OUT') {
-          setSession(null);
-          setUser(null);
-          setRole(null);
-          setCredits(0);
-          setPinRequired(false);
-          setPinVerified(false);
-          hasShownWelcomeRef.current = false;
+          console.log('[Auth] User signed out, resetting state');
+          resetAuthState();
           isInitialLoadRef.current = false;
           return;
         }
@@ -196,6 +216,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(newSession);
           return;
         }
+        
+        // Check if this is a different user than before (account switch)
+        const newUserId = newSession?.user?.id || null;
+        if (previousUserIdRef.current !== null && previousUserIdRef.current !== newUserId && newUserId !== null) {
+          console.log('[Auth] User changed from', previousUserIdRef.current, 'to', newUserId, ', resetting state');
+          // Different user - reset everything before setting new state
+          setRole(null);
+          setCredits(0);
+          setPinRequired(false);
+          setPinVerified(false);
+          hasShownWelcomeRef.current = false;
+        }
+        
+        previousUserIdRef.current = newUserId;
         
         // Show welcome back notification on actual sign in (not on page refresh/session restore)
         // SIGNED_IN fires on refresh too, so we check if this is NOT the initial load
@@ -232,6 +266,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
       if (!isMounted) return;
+      
+      console.log('[Auth] Initial session check, user:', existingSession?.user?.id);
+      
+      // Track the initial user ID
+      previousUserIdRef.current = existingSession?.user?.id || null;
       
       setSession(existingSession);
       setUser(existingSession?.user ?? null);

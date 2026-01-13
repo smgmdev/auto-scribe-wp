@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
@@ -57,6 +57,7 @@ export function useArticles() {
   const [hasFetched, setHasFetched] = useState(false);
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+  const lastUserIdRef = useRef<string | null>(null);
 
   const fetchArticles = useCallback(async (showLoading = true) => {
     if (!user) {
@@ -98,16 +99,32 @@ export function useArticles() {
     setLoading(false);
   }, [user, isAdmin, toast, hasFetched]);
 
-  // Only fetch once on mount or when user/isAdmin changes
+  // Reset and refetch when user changes
   useEffect(() => {
-    if (user && !hasFetched) {
-      fetchArticles(true);
-    } else if (!user) {
+    // If user logged out
+    if (!user) {
       setArticles([]);
       setLoading(false);
       setHasFetched(false);
+      lastUserIdRef.current = null;
+      return;
     }
-  }, [user?.id, isAdmin]);
+    
+    // If user changed (different user ID), reset and refetch
+    if (lastUserIdRef.current !== null && lastUserIdRef.current !== user.id) {
+      console.log('[useArticles] User changed, resetting data');
+      setArticles([]);
+      setHasFetched(false);
+      setLoading(true);
+    }
+    
+    lastUserIdRef.current = user.id;
+    
+    // Fetch if not already fetched for this user
+    if (!hasFetched) {
+      fetchArticles(true);
+    }
+  }, [user?.id, isAdmin, hasFetched]);
 
   // Subscribe to realtime updates - only for this user's articles (or all for admin)
   useEffect(() => {
