@@ -4334,7 +4334,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   ? 'bg-primary-foreground/20' 
                   : 'bg-blue-100 dark:bg-blue-900/50'
               }`}>
-                <Tag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
