@@ -176,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, newSession) => {
         if (!isMounted) return;
         
-        // Always process sign out and sign in events
+        // Always process sign out
         if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
@@ -186,6 +186,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setPinVerified(false);
           hasShownWelcomeRef.current = false;
           isInitialLoadRef.current = false;
+          return;
+        }
+        
+        // Ignore TOKEN_REFRESHED events - these happen when switching tabs
+        // and we don't need to refetch all user data for a token refresh
+        if (event === 'TOKEN_REFRESHED') {
+          // Just update the session silently without triggering data refetch
+          setSession(newSession);
           return;
         }
         
