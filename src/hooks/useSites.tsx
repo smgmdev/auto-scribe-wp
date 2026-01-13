@@ -61,9 +61,11 @@ export function useSites() {
   const [hasFetched, setHasFetched] = useState(false);
   const [lastIsAdmin, setLastIsAdmin] = useState<boolean | null>(null);
 
-  const fetchSites = useCallback(async () => {
-    console.log('[useSites] fetchSites called, isAdmin:', isAdmin);
-    setLoading(true);
+  const fetchSites = useCallback(async (showLoading = true) => {
+    console.log('[useSites] fetchSites called, isAdmin:', isAdmin, 'showLoading:', showLoading);
+    if (showLoading && !hasFetched) {
+      setLoading(true);
+    }
     setError(null);
     
     if (isAdmin) {
@@ -99,7 +101,7 @@ export function useSites() {
     }
     setLoading(false);
     setHasFetched(true);
-  }, [isAdmin]);
+  }, [isAdmin, hasFetched]);
 
   useEffect(() => {
     // Wait for auth to load before fetching
@@ -139,8 +141,8 @@ export function useSites() {
         },
         (payload) => {
           console.log('[useSites] Real-time update:', payload.eventType);
-          // Refetch sites when any change occurs
-          fetchSites();
+          // Background refresh without loading spinner
+          fetchSites(false);
         }
       )
       .subscribe();
@@ -148,7 +150,7 @@ export function useSites() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authLoading, fetchSites]);
+  }, [authLoading, isAdmin]);
 
   const addSite = async (site: Omit<WordPressSite, 'id' | 'connected'>) => {
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
