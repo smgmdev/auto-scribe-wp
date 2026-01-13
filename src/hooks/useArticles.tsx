@@ -54,17 +54,21 @@ const mapDBToArticle = (db: DBArticle): Article => ({
 export function useArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
 
-  const fetchArticles = useCallback(async () => {
+  const fetchArticles = useCallback(async (showLoading = true) => {
     if (!user) {
       setArticles([]);
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    // Only show loading spinner on initial fetch, not on background refreshes
+    if (showLoading && !hasFetched) {
+      setLoading(true);
+    }
     
     // Admins see all articles, regular users see only their own personal articles
     let query = supabase
@@ -88,38 +92,44 @@ export function useArticles() {
       });
     } else {
       setArticles((data || []).map(mapDBToArticle));
+      setHasFetched(true);
     }
     
     setLoading(false);
-  }, [user, isAdmin, toast]);
+  }, [user, isAdmin, toast, hasFetched]);
 
+  // Only fetch once on mount or when user/isAdmin changes
   useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+    if (user && !hasFetched) {
+      fetchArticles(true);
+    } else if (!user) {
+      setArticles([]);
+      setLoading(false);
+      setHasFetched(false);
+    }
+  }, [user?.id, isAdmin]);
 
-  // Subscribe to realtime updates
+  // Subscribe to realtime updates - only for this user's articles (or all for admin)
   useEffect(() => {
     if (!user) return;
 
+    // Filter realtime updates to only this user's articles (unless admin)
+    const channelConfig = isAdmin
+      ? { event: '*' as const, schema: 'public', table: 'articles' }
+      : { event: '*' as const, schema: 'public', table: 'articles', filter: `user_id=eq.${user.id}` };
+
     const channel = supabase
       .channel('articles-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'articles',
-        },
-        () => {
-          fetchArticles();
-        }
-      )
+      .on('postgres_changes', channelConfig, () => {
+        // Background refresh without loading spinner
+        fetchArticles(false);
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchArticles]);
+  }, [user?.id, isAdmin]);
 
   const addArticle = async (article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return null;
