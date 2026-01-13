@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { WordPressSite, SEOPlugin } from '@/types';
@@ -57,9 +57,10 @@ export function useSites() {
   const [sites, setSites] = useState<WordPressSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, loading: authLoading, user } = useAuth();
   const [hasFetched, setHasFetched] = useState(false);
   const [lastIsAdmin, setLastIsAdmin] = useState<boolean | null>(null);
+  const lastUserIdRef = useRef<string | null>(null);
 
   const fetchSites = useCallback(async (showLoading = true) => {
     console.log('[useSites] fetchSites called, isAdmin:', isAdmin, 'showLoading:', showLoading);
@@ -110,6 +111,26 @@ export function useSites() {
       return;
     }
     
+    // If user logged out, reset state
+    if (!user) {
+      setSites([]);
+      setHasFetched(false);
+      setLastIsAdmin(null);
+      lastUserIdRef.current = null;
+      setLoading(false);
+      return;
+    }
+    
+    // If user changed (different user ID), reset and refetch
+    if (lastUserIdRef.current !== null && lastUserIdRef.current !== user.id) {
+      console.log('[useSites] User changed, resetting data');
+      setSites([]);
+      setHasFetched(false);
+      setLastIsAdmin(null);
+    }
+    
+    lastUserIdRef.current = user.id;
+    
     // Fetch on first load after auth is ready
     if (!hasFetched) {
       console.log('[useSites] Initial fetch, isAdmin:', isAdmin);
@@ -124,7 +145,7 @@ export function useSites() {
       setLastIsAdmin(isAdmin);
       fetchSites();
     }
-  }, [fetchSites, authLoading, isAdmin, lastIsAdmin, hasFetched]);
+  }, [fetchSites, authLoading, isAdmin, lastIsAdmin, hasFetched, user?.id]);
 
   // Real-time subscription for wordpress_sites changes
   useEffect(() => {
