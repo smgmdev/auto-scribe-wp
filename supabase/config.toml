@@ -28,7 +28,6 @@ verify_jwt = false
 [functions.create-connect-account]
 verify_jwt = true
 
-
 [functions.mark-delivered]
 verify_jwt = true
 
@@ -123,4 +122,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.wordpress-create-tag]
+verify_jwt = true
+
+[functions.wordpress-upload-media]
+verify_jwt = true
+
+[functions.wordpress-publish-article]
 verify_jwt = true
