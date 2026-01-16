@@ -169,6 +169,11 @@ export interface PublishArticleParams {
 }
 
 export async function publishArticle(params: PublishArticleParams): Promise<{ id: number; link: string }> {
+  // If credentials are missing, use edge function
+  if (!params.site.username || !params.site.applicationPassword) {
+    return publishArticleViaEdgeFunction(params);
+  }
+  
   try {
     const baseUrl = normalizeUrl(params.site.url);
     
@@ -247,6 +252,39 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
     console.error('Error publishing article:', error);
     throw error;
   }
+}
+
+// Publish article via edge function (for users without direct credentials)
+async function publishArticleViaEdgeFunction(params: PublishArticleParams): Promise<{ id: number; link: string }> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  
+  const { data, error } = await supabase.functions.invoke('wordpress-publish-article', {
+    body: {
+      siteId: params.site.id,
+      title: params.title,
+      content: params.content,
+      status: params.status,
+      categories: params.categories,
+      tags: params.tags,
+      featuredMediaId: params.featuredMediaId,
+      seo: params.seo,
+    },
+  });
+
+  if (error) {
+    console.error('Error publishing article via edge function:', error);
+    throw new Error(error.message || 'Failed to publish article');
+  }
+
+  if (data.error) {
+    console.error('Edge function returned error:', data.error);
+    throw new Error(data.error);
+  }
+
+  return {
+    id: data.id,
+    link: data.link,
+  };
 }
 
 // Helper function to update Rank Math meta via REST API
@@ -544,6 +582,11 @@ export async function uploadMedia(
   file: File,
   metadata: { title?: string; alt_text?: string; caption?: string; description?: string }
 ): Promise<{ id: number; source_url: string }> {
+  // If credentials are missing, use edge function
+  if (!site.username || !site.applicationPassword) {
+    return uploadMediaViaEdgeFunction(site.id, file, metadata);
+  }
+  
   try {
     const baseUrl = normalizeUrl(site.url);
     
@@ -620,6 +663,60 @@ export async function uploadMedia(
     console.error('Error uploading media:', error);
     throw error;
   }
+}
+
+// Upload media via edge function (for users without direct credentials)
+async function uploadMediaViaEdgeFunction(
+  siteId: string,
+  file: File,
+  metadata: { title?: string; alt_text?: string; caption?: string; description?: string }
+): Promise<{ id: number; source_url: string }> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  
+  // For file uploads, we need to use FormData with fetch directly
+  // because supabase.functions.invoke doesn't support file uploads well
+  const formData = new FormData();
+  formData.append('siteId', siteId);
+  formData.append('file', file);
+  formData.append('title', metadata.title || '');
+  formData.append('altText', metadata.alt_text || '');
+  formData.append('caption', metadata.caption || '');
+  formData.append('description', metadata.description || '');
+
+  // Get the current session for auth
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wordpress-upload-media`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Error uploading media via edge function:', response.status, errorData);
+    throw new Error(errorData.error || 'Failed to upload media');
+  }
+
+  const data = await response.json();
+  
+  if (data.error) {
+    console.error('Edge function returned error:', data.error);
+    throw new Error(data.error);
+  }
+
+  return {
+    id: data.id,
+    source_url: data.source_url,
+  };
 }
 
 // Test connection to a WordPress site
