@@ -72,6 +72,11 @@ export async function fetchTags(site: WordPressSite): Promise<WPTag[]> {
 }
 
 export async function createTag(site: WordPressSite, tagName: string): Promise<WPTag> {
+  // If credentials are missing, use edge function
+  if (!site.username || !site.applicationPassword) {
+    return createTagViaEdgeFunction(site.id, tagName);
+  }
+  
   try {
     const baseUrl = normalizeUrl(site.url);
     const response = await fetch(`${baseUrl}/wp-json/wp/v2/tags`, {
@@ -122,6 +127,31 @@ export async function createTag(site: WordPressSite, tagName: string): Promise<W
     console.error('Error creating tag:', error);
     throw error;
   }
+}
+
+// Create tag via edge function (for users without direct credentials)
+async function createTagViaEdgeFunction(siteId: string, tagName: string): Promise<WPTag> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  
+  const { data, error } = await supabase.functions.invoke('wordpress-create-tag', {
+    body: { siteId, tagName },
+  });
+
+  if (error) {
+    console.error('Error creating tag via edge function:', error);
+    throw new Error(error.message || 'Failed to create tag');
+  }
+
+  if (data.error) {
+    console.error('Edge function returned error:', data.error);
+    throw new Error(data.error);
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+  };
 }
 
 export interface PublishArticleParams {

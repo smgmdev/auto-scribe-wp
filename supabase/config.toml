@@ -115,3 +115,12 @@ verify_jwt = true
 
 [functions.complete-order]
 verify_jwt = true
+
+[functions.lock-order-credits]
+verify_jwt = true
+
+[functions.release-order-credits]
+verify_jwt = true
+
+[functions.wordpress-create-tag]
+verify_jwt = true
