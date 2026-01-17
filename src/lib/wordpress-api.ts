@@ -256,35 +256,46 @@ export async function publishArticle(params: PublishArticleParams): Promise<{ id
 
 // Publish article via edge function (for users without direct credentials)
 async function publishArticleViaEdgeFunction(params: PublishArticleParams): Promise<{ id: number; link: string }> {
+  console.log('[publishArticleViaEdgeFunction] Starting publish for site:', params.site.id, 'title:', params.title?.substring(0, 50));
+  
   const { supabase } = await import('@/integrations/supabase/client');
   
-  const { data, error } = await supabase.functions.invoke('wordpress-publish-article', {
-    body: {
-      siteId: params.site.id,
-      title: params.title,
-      content: params.content,
-      status: params.status,
-      categories: params.categories,
-      tags: params.tags,
-      featuredMediaId: params.featuredMediaId,
-      seo: params.seo,
-    },
-  });
+  try {
+    const { data, error } = await supabase.functions.invoke('wordpress-publish-article', {
+      body: {
+        siteId: params.site.id,
+        title: params.title,
+        content: params.content,
+        status: params.status,
+        categories: params.categories,
+        tags: params.tags,
+        featuredMediaId: params.featuredMediaId,
+        seo: params.seo,
+      },
+    });
 
-  if (error) {
-    console.error('Error publishing article via edge function:', error);
-    throw new Error(error.message || 'Failed to publish article');
+    console.log('[publishArticleViaEdgeFunction] Response received:', { data, error });
+
+    if (error) {
+      console.error('[publishArticleViaEdgeFunction] Invoke error:', error);
+      throw new Error(error.message || 'Failed to publish article');
+    }
+
+    if (data?.error) {
+      console.error('[publishArticleViaEdgeFunction] Edge function error:', data.error);
+      throw new Error(data.error);
+    }
+
+    console.log('[publishArticleViaEdgeFunction] Success:', data);
+
+    return {
+      id: data.id,
+      link: data.link,
+    };
+  } catch (error) {
+    console.error('[publishArticleViaEdgeFunction] Exception:', error);
+    throw error;
   }
-
-  if (data.error) {
-    console.error('Edge function returned error:', data.error);
-    throw new Error(data.error);
-  }
-
-  return {
-    id: data.id,
-    link: data.link,
-  };
 }
 
 // Helper function to update Rank Math meta via REST API
@@ -671,6 +682,8 @@ async function uploadMediaViaEdgeFunction(
   file: File,
   metadata: { title?: string; alt_text?: string; caption?: string; description?: string }
 ): Promise<{ id: number; source_url: string }> {
+  console.log('[uploadMediaViaEdgeFunction] Starting upload for site:', siteId, 'file:', file.name);
+  
   const { supabase } = await import('@/integrations/supabase/client');
   
   // For file uploads, we need to use FormData with fetch directly
@@ -686,37 +699,56 @@ async function uploadMediaViaEdgeFunction(
   // Get the current session for auth
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
+    console.error('[uploadMediaViaEdgeFunction] No session found');
     throw new Error('Not authenticated');
   }
 
-  const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wordpress-upload-media`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: formData,
+  console.log('[uploadMediaViaEdgeFunction] Session found, calling edge function...');
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+    
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wordpress-upload-media`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: formData,
+        signal: controller.signal,
+      }
+    );
+    
+    clearTimeout(timeoutId);
+    console.log('[uploadMediaViaEdgeFunction] Response status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[uploadMediaViaEdgeFunction] Error:', response.status, errorData);
+      throw new Error(errorData.error || 'Failed to upload media');
     }
-  );
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('Error uploading media via edge function:', response.status, errorData);
-    throw new Error(errorData.error || 'Failed to upload media');
+    const data = await response.json();
+    console.log('[uploadMediaViaEdgeFunction] Success:', data);
+    
+    if (data.error) {
+      console.error('[uploadMediaViaEdgeFunction] Edge function returned error:', data.error);
+      throw new Error(data.error);
+    }
+
+    return {
+      id: data.id,
+      source_url: data.source_url,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[uploadMediaViaEdgeFunction] Request timed out');
+      throw new Error('Upload timed out. Please try again.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  
-  if (data.error) {
-    console.error('Edge function returned error:', data.error);
-    throw new Error(data.error);
-  }
-
-  return {
-    id: data.id,
-    source_url: data.source_url,
-  };
 }
 
 // Test connection to a WordPress site
