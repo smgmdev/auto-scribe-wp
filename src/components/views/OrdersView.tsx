@@ -116,8 +116,10 @@ export function OrdersView() {
 
   useEffect(() => {
     if (user) {
-      fetchOrders();
-      fetchUserDisputes();
+      // Fetch orders first, then disputes (disputes depend on orders being loaded)
+      fetchOrders().then(() => {
+        fetchUserDisputes();
+      });
       
       // Subscribe to orders changes for real-time updates
       const ordersChannel = supabase
@@ -209,7 +211,7 @@ export function OrdersView() {
                 .select('id')
                 .eq('id', updated.order_id)
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
               
               if (orderData) {
                 // This is a dispute for user's order - add to disputeOrderIds
@@ -227,6 +229,9 @@ export function OrdersView() {
                     variant: "destructive",
                   });
                 }
+                
+                // Refetch orders to ensure the disputed order appears in the list
+                fetchOrders();
               }
             }
           }
