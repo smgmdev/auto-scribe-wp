@@ -218,11 +218,11 @@ export function AdminFloatingChat({
     };
   }, [request.order_id]);
   
-  // Timer tick to update relative time display every minute
+  // Timer tick for real-time countdown updates (every second)
   useEffect(() => {
     const interval = setInterval(() => {
       setTimerTick(tick => tick + 1);
-    }, 60000); // Update every minute for "Xm ago" display
+    }, 1000); // Update every second for live countdown
     
     return () => clearInterval(interval);
   }, []);
@@ -976,21 +976,28 @@ export function AdminFloatingChat({
     }
   };
 
-  const formatTimeRemaining = (deadline: string) => {
+  const formatTimeRemaining = (deadline: string): { text: string; isOverdue: boolean } => {
     const now = new Date();
     const target = new Date(deadline);
     const diff = target.getTime() - now.getTime();
     
     if (diff <= 0) return { text: 'Overdue', isOverdue: true };
     
-    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return { text: `${days}d ${hours % 24}h`, isOverdue: false };
+    let text = '';
+    if (days > 0) {
+      text = `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      text = `${hours}h ${minutes}m ${seconds}s`;
+    } else {
+      text = `${minutes}m ${seconds}s`;
     }
-    return { text: `${hours}h ${minutes}m`, isOverdue: false };
+    
+    return { text, isOverdue: false };
   };
 
   // Render message content with special message handling
