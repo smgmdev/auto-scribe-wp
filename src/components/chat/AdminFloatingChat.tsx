@@ -147,7 +147,7 @@ export function AdminFloatingChat({
   const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const userPresenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  const [, setTimerTick] = useState(0); // Force re-render for last seen updates
+  const [timerTick, setTimerTick] = useState(0); // Force re-render for countdown timer
   
   // Auto-focus input when chat opens
   useEffect(() => {
@@ -1225,7 +1225,7 @@ export function AdminFloatingChat({
               {orderPlaced.credits_used} credits
             </p>
             {timeInfo && (
-              <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-green-200 dark:border-green-800">
+              <div key={`countdown-${timerTick}`} className="flex items-center gap-1.5 mt-2 pt-2 border-t border-green-200 dark:border-green-800">
                 <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`} />
                 <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
                   {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}

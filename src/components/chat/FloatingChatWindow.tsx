@@ -314,7 +314,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     accepted_at: string | null;
   } | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
-  const [, setTimerTick] = useState(0); // Force re-render for countdown timer
+  const [timerTick, setTimerTick] = useState(0); // Force re-render for countdown timer
   
   // Admin dispute resolution states
   const [completeViaDisputeDialogOpen, setCompleteViaDisputeDialogOpen] = useState(false);
@@ -4598,7 +4598,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {orderPlaced.credits_used} credits
             </p>
             {timeInfo && (
-              <div className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
+              <div key={`countdown-${timerTick}`} className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
                 <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
                 <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
                   {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
