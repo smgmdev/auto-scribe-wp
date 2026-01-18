@@ -1476,7 +1476,7 @@ export function AdminFloatingChat({
         </div>
 
         {/* Order Status Banner */}
-        {hasOrder && orderDetails && (() => {
+        {hasOrder && orderDetails && !loadingMessages && (() => {
           // Get order data from messages for credits and special terms
           const orderPlacedMsg = messages.find(m => parseOrderPlaced(m.message));
           const orderPlacedData = orderPlacedMsg ? parseOrderPlaced(orderPlacedMsg.message) : null;
