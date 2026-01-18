@@ -252,6 +252,19 @@ export function AdminFloatingChat({
     return null;
   };
 
+  // Parse ORDER_REQUEST (agency sending order offer to client)
+  const parseOrderRequest = (message: string): { type: string; media_site_id: string; media_site_name: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
+    const match = message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   const parseOrderCancelled = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_refunded: number; order_id: string; cancelled_by?: string; reason?: string | null } | null => {
     const match = message.match(/\[ORDER_CANCELLED\](.*?)\[\/ORDER_CANCELLED\]/);
     if (match) {
@@ -1482,13 +1495,16 @@ export function AdminFloatingChat({
           const orderPlacedData = orderPlacedMsg ? parseOrderPlaced(orderPlacedMsg.message) : null;
           const orderAcceptedMsg = messages.find(m => parseOrderRequestAccepted(m.message));
           const orderAcceptedData = orderAcceptedMsg ? parseOrderRequestAccepted(orderAcceptedMsg.message) : null;
+          // Also check ORDER_REQUEST (agency sending order offer which client then placed)
+          const orderRequestMsg = messages.find(m => parseOrderRequest(m.message));
+          const orderRequestData = orderRequestMsg ? parseOrderRequest(orderRequestMsg.message) : null;
           
-          // Get credits from ORDER_PLACED or ORDER_REQUEST_ACCEPTED
-          const credits = orderPlacedData?.credits_used || orderAcceptedData?.price || (orderDetails.amount_cents / 100);
-          // Get special terms from either message type
-          const specialTerms = orderPlacedData?.special_terms || orderAcceptedData?.special_terms;
+          // Get credits from ORDER_PLACED, ORDER_REQUEST_ACCEPTED, or ORDER_REQUEST
+          const credits = orderPlacedData?.credits_used || orderAcceptedData?.price || orderRequestData?.price || (orderDetails.amount_cents / 100);
+          // Get special terms from any message type
+          const specialTerms = orderPlacedData?.special_terms || orderAcceptedData?.special_terms || orderRequestData?.special_terms;
           // Get media site name from messages or request
-          const mediaSiteName = orderPlacedData?.media_site_name || orderAcceptedData?.media_site_name || request.media_sites?.name || 'Order Placed';
+          const mediaSiteName = orderPlacedData?.media_site_name || orderAcceptedData?.media_site_name || orderRequestData?.media_site_name || request.media_sites?.name || 'Order Placed';
           
           const timeInfo = orderDetails.delivery_deadline ? formatTimeRemaining(orderDetails.delivery_deadline) : null;
           const isOverdue = timeInfo?.isOverdue || false;
