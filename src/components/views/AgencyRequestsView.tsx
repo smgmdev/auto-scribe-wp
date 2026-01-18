@@ -1182,10 +1182,17 @@ export function AgencyRequestsView() {
   // Only orders with 'accepted' delivery_status are truly completed (client approved)
   // 'delivered' means awaiting client approval - stays in active orders
   const completedOrders = useMemo(() => 
-    orders.filter(o => 
-      o.delivery_status === 'accepted' && 
-      !disputedOrderIds.has(o.id)
-    ), 
+    orders
+      .filter(o => 
+        o.delivery_status === 'accepted' && 
+        !disputedOrderIds.has(o.id)
+      )
+      .sort((a, b) => {
+        // Sort by completion date (accepted_at) - most recent first
+        const aDate = a.accepted_at ? new Date(a.accepted_at).getTime() : 0;
+        const bDate = b.accepted_at ? new Date(b.accepted_at).getTime() : 0;
+        return bDate - aDate;
+      }), 
     [orders, disputedOrderIds]
   );
   
