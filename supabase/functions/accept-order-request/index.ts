@@ -134,18 +134,16 @@ serve(async (req) => {
       );
     }
 
-    // Check if order already exists for this service request
-    const { data: existingOrder } = await supabaseAdmin
-      .from("orders")
-      .select("id")
-      .eq("media_site_id", media_site_id)
-      .eq("user_id", client_user_id)
-      .in("status", ["pending_payment", "paid"])
-      .maybeSingle();
+    // Check if order already exists for this specific service request
+    const { data: existingRequest } = await supabaseAdmin
+      .from("service_requests")
+      .select("order_id")
+      .eq("id", service_request_id)
+      .single();
 
-    if (existingOrder) {
+    if (existingRequest?.order_id) {
       return new Response(
-        JSON.stringify({ error: "An order already exists for this request", order_id: existingOrder.id }),
+        JSON.stringify({ error: "An order already exists for this request", order_id: existingRequest.order_id }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
