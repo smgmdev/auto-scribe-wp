@@ -89,6 +89,7 @@ export function OrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [disputeCreatedDates, setDisputeCreatedDates] = useState<Record<string, string>>({});
+  const [unreadDisputeOrderIds, setUnreadDisputeOrderIds] = useState<Set<string>>(new Set()); // Track disputes with read=false
   const [revisionOrderIds, setRevisionOrderIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -324,21 +325,26 @@ export function OrdersView() {
       return;
     }
     
-    // Then fetch open disputes for those orders with created_at
+    // Then fetch open disputes for those orders with created_at and read status
     const { data, error } = await supabase
       .from('disputes')
-      .select('order_id, created_at')
+      .select('order_id, created_at, read')
       .in('order_id', userOrders.map(o => o.id))
       .eq('status', 'open');
     
     if (!error && data) {
       const orderIds = new Set(data.map(d => d.order_id));
       const createdDates: Record<string, string> = {};
+      const unreadOrderIds = new Set<string>();
       data.forEach(d => {
         createdDates[d.order_id] = d.created_at;
+        if (!d.read) {
+          unreadOrderIds.add(d.order_id);
+        }
       });
       setDisputeOrderIds(orderIds);
       setDisputeCreatedDates(createdDates);
+      setUnreadDisputeOrderIds(unreadOrderIds);
     }
   };
 
@@ -601,6 +607,28 @@ export function OrdersView() {
       }
     }
     
+    // Mark dispute as read if this order has an unread dispute
+    if (!isAdmin && user && unreadDisputeOrderIds.has(order.id)) {
+      const { error } = await supabase
+        .from('disputes')
+        .update({ read: true })
+        .eq('order_id', order.id)
+        .eq('status', 'open');
+      
+      if (!error) {
+        // Decrement disputes count if order wasn't already marked unread
+        if (order.read) {
+          decrementUserUnreadDisputesCount();
+        }
+        // Remove from local unread set
+        setUnreadDisputeOrderIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(order.id);
+          return newSet;
+        });
+      }
+    }
+    
     // Fetch the service request associated with this order
     const { data: serviceRequest } = await supabase
       .from('service_requests')
@@ -663,18 +691,23 @@ export function OrdersView() {
     }
   };
 
-  const renderOrderCard = (order: Order) => (
+  const renderOrderCard = (order: Order) => {
+    // Check if this order has an unread dispute (for disputes tab highlighting)
+    const hasUnreadDispute = unreadDisputeOrderIds.has(order.id);
+    const isUnread = !order.read || hasUnreadDispute;
+    
+    return (
     <Card 
       key={order.id} 
       className={cn(
         "border border-transparent hover:border-border transition-colors cursor-pointer relative [box-shadow:none]",
-        !order.read && !isAdmin && order.status !== 'cancelled' && "bg-blue-500/10 !border-l-4 !border-l-blue-500 hover:border-t-border hover:border-r-border hover:border-b-border",
-        !order.read && !isAdmin && order.status === 'cancelled' && "bg-blue-500/10"
+        isUnread && !isAdmin && order.status !== 'cancelled' && "bg-blue-500/10 !border-l-4 !border-l-blue-500 hover:border-t-border hover:border-r-border hover:border-b-border",
+        isUnread && !isAdmin && order.status === 'cancelled' && "bg-blue-500/10"
       )}
       onClick={() => handleOrderClick(order)}
     >
       {/* Unread indicator dot */}
-      {!order.read && !isAdmin && (
+      {isUnread && !isAdmin && (
         <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
       )}
       <CardHeader className="pb-2 px-4 pt-3">
@@ -771,7 +804,8 @@ export function OrdersView() {
         </div>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   const renderEmptyState = (message: string) => (
     <Card className="border-dashed border-2">
@@ -1141,26 +1175,15 @@ export function OrdersView() {
                       service_request_id: serviceRequest.id,
                       user_id: user.id,
                       status: 'open',
-                      reason: 'Delivery overdue - dispute opened by client'
+                      reason: 'Delivery overdue - dispute opened by client',
+                      read: true // Client opened it, so it's already read by them
                     });
                   
                   if (error) throw error;
                   
-                  // Mark the order as unread so it shows highlight in disputes tab
-                  await supabase
-                    .from('orders')
-                    .update({ read: false })
-                    .eq('id', selectedOrder.id);
-                  
-                  // Add to local dispute set and update local order state
+                  // Add to local dispute set (but NOT unread since client opened it)
                   setDisputeOrderIds(prev => new Set([...prev, selectedOrder.id]));
-                  setOrders(prev => prev.map(o => 
-                    o.id === selectedOrder.id ? { ...o, read: false } : o
-                  ));
-                  
-                  // Update notification counts: add to disputes, remove from active orders
-                  incrementUserUnreadDisputesCount();
-                  decrementUserUnreadOrdersCount();
+                  // Don't add to unread since the client just opened it themselves
                   
                   toast({
                     title: "Dispute Request Sent",
