@@ -789,13 +789,19 @@ export function AdminOrdersView() {
   const unreadDisputesCount = disputes.filter(d => !d.read).length;
 
   // Calculate value stats
-  const activeOrdersData = orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && !disputedOrderIds.has(o.id));
-  const activeOrdersCount = activeOrdersData.length;
-  const activeOrdersValue = activeOrdersData.reduce((sum, o) => sum + o.amount_cents, 0);
+  // Regular active orders (not in dispute)
+  const regularActiveOrdersData = orders.filter(o => (o.status === 'paid' || o.status === 'pending_payment') && !disputedOrderIds.has(o.id));
+  const regularActiveOrdersCount = regularActiveOrdersData.length;
+  const regularActiveOrdersValue = regularActiveOrdersData.reduce((sum, o) => sum + o.amount_cents, 0);
   
-  const disputeValue = orders
-    .filter(o => disputedOrderIds.has(o.id))
-    .reduce((sum, o) => sum + o.amount_cents, 0);
+  // Orders in open dispute (still active)
+  const disputeOrdersData = orders.filter(o => disputedOrderIds.has(o.id));
+  const disputeOrdersCount = disputeOrdersData.length;
+  const disputeValue = disputeOrdersData.reduce((sum, o) => sum + o.amount_cents, 0);
+  
+  // Combined active orders (regular + disputes)
+  const activeOrdersCount = regularActiveOrdersCount + disputeOrdersCount;
+  const activeOrdersValue = regularActiveOrdersValue + disputeValue;
   
   const deliveredValue = orders
     .filter(o => o.status === 'completed')
@@ -847,7 +853,13 @@ export function AdminOrdersView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="bg-foreground text-background px-3 py-2 text-sm">
-            <p>Total: ${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <div className="space-y-1">
+              <p className="font-medium">Active Orders Breakdown:</p>
+              <p>Regular Active: {regularActiveOrdersCount} (${(regularActiveOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })})</p>
+              <p className="text-orange-400">Open Disputes: {disputeOrdersCount} (${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })})</p>
+              <hr className="border-background/30 my-1" />
+              <p className="font-medium">Total: {activeOrdersCount} orders (${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })})</p>
+            </div>
           </TooltipContent>
         </Tooltip>
         
