@@ -146,17 +146,42 @@ serve(async (req) => {
       );
     }
 
-    // Check order is in correct state (must be paid/pending_payment and delivered)
+    // Check order is in correct state
     // Note: Orders paid with credits have status 'pending_payment' (credits are locked)
     // Orders paid with Stripe have status 'paid'
+    // Admins can complete orders in dispute regardless of delivery_status
     const validStatuses = ["paid", "pending_payment"];
-    if (!validStatuses.includes(order.status) || order.delivery_status !== "delivered") {
-      logStep("ERROR", { message: "Order not in correct state", status: order.status, delivery_status: order.delivery_status });
+    
+    // Check if there's an open dispute for this order (admin can bypass delivery check)
+    const { data: openDispute } = await supabaseAdmin
+      .from("disputes")
+      .select("id")
+      .eq("order_id", order_id)
+      .eq("status", "open")
+      .maybeSingle();
+    
+    const hasOpenDispute = !!openDispute;
+    const isAdminDisputeResolution = isAdmin && hasOpenDispute;
+    
+    // For normal completion: must be paid and delivered
+    // For admin dispute resolution: must be paid, delivery check bypassed
+    if (!validStatuses.includes(order.status)) {
+      logStep("ERROR", { message: "Order not in valid payment state", status: order.status });
       return new Response(
-        JSON.stringify({ error: "Order must be paid and delivered to complete" }),
+        JSON.stringify({ error: "Order must be paid to complete" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
+    
+    if (!isAdminDisputeResolution && order.delivery_status !== "delivered") {
+      logStep("ERROR", { message: "Order not delivered", status: order.status, delivery_status: order.delivery_status });
+      return new Response(
+        JSON.stringify({ error: "Order must be delivered to complete" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+    
+    logStep("Order state validated", { isAdmin, hasOpenDispute, isAdminDisputeResolution, status: order.status, delivery_status: order.delivery_status });
 
     // Get the service request to find agency_payout_id
     const { data: serviceRequest } = await supabaseAdmin
