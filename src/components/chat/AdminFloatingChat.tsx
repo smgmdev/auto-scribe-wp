@@ -228,8 +228,20 @@ export function AdminFloatingChat({
   }, []);
 
   // Parse special message types
-  const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string; delivery_deadline?: string } | null => {
+  const parseOrderPlaced = (message: string): { type: string; media_site_id: string; media_site_name: string; credits_used: number; order_id: string; delivery_deadline?: string; special_terms?: string } | null => {
     const match = message.match(/\[ORDER_PLACED\](.*?)\[\/ORDER_PLACED\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const parseOrderRequestAccepted = (message: string): { type: string; media_site_id: string; media_site_name: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number } } | null => {
+    const match = message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
     if (match) {
       try {
         return JSON.parse(match[1]);
@@ -1464,58 +1476,97 @@ export function AdminFloatingChat({
         </div>
 
         {/* Order Status Banner */}
-        {hasOrder && orderDetails && (
-          <div className="p-3 bg-black text-white border-b border-black">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Order Placed</p>
-                  {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-xs text-white/70">Awaiting delivery</span>
-                      <span className="text-white/40">•</span>
-                      {(() => {
+        {hasOrder && orderDetails && (() => {
+          // Get order data from messages for credits and special terms
+          const orderPlacedMsg = messages.find(m => parseOrderPlaced(m.message));
+          const orderPlacedData = orderPlacedMsg ? parseOrderPlaced(orderPlacedMsg.message) : null;
+          const orderAcceptedMsg = messages.find(m => parseOrderRequestAccepted(m.message));
+          const orderAcceptedData = orderAcceptedMsg ? parseOrderRequestAccepted(orderAcceptedMsg.message) : null;
+          
+          // Get credits from ORDER_PLACED or ORDER_REQUEST_ACCEPTED
+          const credits = orderPlacedData?.credits_used || orderAcceptedData?.price || (orderDetails.amount_cents / 100);
+          // Get special terms from either message type
+          const specialTerms = orderPlacedData?.special_terms || orderAcceptedData?.special_terms;
+          
+          return (
+            <div className="p-3 bg-black text-white border-b border-black">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <CheckCircle className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-white">Order Placed</p>
+                      {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (() => {
                         const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
-                        return (
-                          <>
-                            <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
-                            <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                              {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
-                            </span>
-                          </>
-                        );
+                        return timeInfo.isOverdue ? (
+                          <span className="text-xs text-red-400 font-medium">• Overdue</span>
+                        ) : null;
                       })()}
                     </div>
-                  )}
-                  {orderDetails.delivery_status === 'delivered' && (
-                    <p className="text-xs text-white/70">Awaiting client approval</p>
-                  )}
-                  {orderDetails.delivery_status === 'accepted' && (
-                    <p className="text-xs text-white/70">Completed</p>
-                  )}
+                    <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                      {credits && (
+                        <span className="text-xs text-white/70">{credits.toLocaleString()} credits</span>
+                      )}
+                      {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (
+                        <>
+                          {credits && <span className="text-white/40">•</span>}
+                          {(() => {
+                            const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
+                            return (
+                              <div key={`countdown-${timerTick}`} className="flex items-center gap-1">
+                                <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
+                                <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                                  {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </>
+                      )}
+                      {specialTerms && (
+                        <>
+                          <span className="text-white/40">•</span>
+                          <span className="text-xs text-white/70 underline decoration-dotted underline-offset-2" title={specialTerms}>
+                            Special Terms
+                          </span>
+                        </>
+                      )}
+                      {orderDetails.delivery_status === 'delivered' && (
+                        <>
+                          {credits && <span className="text-white/40">•</span>}
+                          <span className="text-xs text-green-400">Awaiting client approval</span>
+                        </>
+                      )}
+                      {orderDetails.delivery_status === 'accepted' && (
+                        <>
+                          {credits && <span className="text-white/40">•</span>}
+                          <span className="text-xs text-green-400">Completed</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
+                <Badge 
+                  variant="secondary" 
+                  className={`cursor-pointer shrink-0 ${
+                    orderDetails.delivery_status === 'accepted' 
+                      ? 'bg-green-500 text-white hover:bg-green-600' 
+                      : orderDetails.delivery_status === 'delivered'
+                      ? 'bg-purple-500 text-white hover:bg-purple-600'
+                      : 'bg-white text-black hover:bg-white/80'
+                  }`}
+                  onClick={fetchOrderDetails}
+                >
+                  {orderDetails.delivery_status === 'accepted' && 'Completed'}
+                  {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
+                  {orderDetails.delivery_status === 'pending' && 'View Details'}
+                </Badge>
               </div>
-              <Badge 
-                variant="secondary" 
-                className={`cursor-pointer ${
-                  orderDetails.delivery_status === 'accepted' 
-                    ? 'bg-green-500 text-white hover:bg-green-600' 
-                    : orderDetails.delivery_status === 'delivered'
-                    ? 'bg-purple-500 text-white hover:bg-purple-600'
-                    : 'bg-white text-black hover:bg-white/80'
-                }`}
-                onClick={fetchOrderDetails}
-              >
-                {orderDetails.delivery_status === 'accepted' && 'Completed'}
-                {orderDetails.delivery_status === 'delivered' && 'Pending Approval'}
-                {orderDetails.delivery_status === 'pending' && 'View Details'}
-              </Badge>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Cancellation notice */}
         {isCancelled && (
