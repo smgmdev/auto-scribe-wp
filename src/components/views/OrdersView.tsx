@@ -356,6 +356,9 @@ export function OrdersView() {
       setDisputeOrderIds(orderIds);
       setDisputeCreatedDates(createdDates);
       setUnreadDisputeOrderIds(unreadOrderIds);
+      
+      // Set the global unread disputes count for notification badge
+      setUserUnreadDisputesCount(unreadOrderIds.size);
     }
   };
 
