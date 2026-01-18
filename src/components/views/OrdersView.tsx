@@ -203,6 +203,7 @@ export function OrdersView() {
               }
             } else if (payload.eventType === 'INSERT' && updated) {
               // Check if this dispute is for one of the user's orders
+              const newDispute = payload.new as { order_id: string; status: string; read: boolean };
               const { data: orderData } = await supabase
                 .from('orders')
                 .select('id')
@@ -211,16 +212,21 @@ export function OrdersView() {
                 .single();
               
               if (orderData) {
-                // This is a dispute for user's order - add to disputeOrderIds and increment count
+                // This is a dispute for user's order - add to disputeOrderIds
                 setDisputeOrderIds(prev => new Set([...prev, updated.order_id]));
-                incrementUserUnreadDisputesCount();
                 
-                // Show toast notification
-                toast({
-                  title: "Dispute Opened",
-                  description: "A dispute has been opened for one of your orders.",
-                  variant: "destructive",
-                });
+                // If dispute is unread, add to unreadDisputeOrderIds and increment count
+                if (!newDispute.read) {
+                  setUnreadDisputeOrderIds(prev => new Set([...prev, updated.order_id]));
+                  incrementUserUnreadDisputesCount();
+                  
+                  // Show toast notification
+                  toast({
+                    title: "Dispute Opened",
+                    description: "A dispute has been opened for one of your orders.",
+                    variant: "destructive",
+                  });
+                }
               }
             }
           }
