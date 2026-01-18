@@ -1487,48 +1487,40 @@ export function AdminFloatingChat({
           const credits = orderPlacedData?.credits_used || orderAcceptedData?.price || (orderDetails.amount_cents / 100);
           // Get special terms from either message type
           const specialTerms = orderPlacedData?.special_terms || orderAcceptedData?.special_terms;
+          // Get media site name from messages or request
+          const mediaSiteName = orderPlacedData?.media_site_name || orderAcceptedData?.media_site_name || request.media_sites?.name || 'Order Placed';
+          
+          const timeInfo = orderDetails.delivery_deadline ? formatTimeRemaining(orderDetails.delivery_deadline) : null;
+          const isOverdue = timeInfo?.isOverdue || false;
           
           return (
             <div className="p-3 bg-black text-white border-b border-black">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-white" />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                    <CheckCircle className={`h-6 w-6 ${isOverdue ? 'text-red-400' : 'text-green-500'}`} />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-white">Order Placed</p>
-                      {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (() => {
-                        const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
-                        return timeInfo.isOverdue ? (
-                          <span className="text-xs text-red-400 font-medium">• Overdue</span>
-                        ) : null;
-                      })()}
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                    <p className="font-medium text-sm text-white truncate">{mediaSiteName}</p>
+                    <div className="flex items-center gap-3 flex-wrap mt-0.5">
                       {credits && (
                         <span className="text-xs text-white/70">{credits.toLocaleString()} credits</span>
                       )}
                       {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (
                         <>
                           {credits && <span className="text-white/40">•</span>}
-                          {(() => {
-                            const timeInfo = formatTimeRemaining(orderDetails.delivery_deadline);
-                            return (
-                              <div key={`countdown-${timerTick}`} className="flex items-center gap-1">
-                                <Clock className={`h-3 w-3 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`} />
-                                <span className={`text-xs ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                                  {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
-                                </span>
-                              </div>
-                            );
-                          })()}
+                          <div key={`countdown-${timerTick}`} className="flex items-center gap-1">
+                            <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-white/70'}`} />
+                            <span className={`text-xs font-medium ${isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                              {isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo?.text}`}
+                            </span>
+                          </div>
                         </>
                       )}
                       {specialTerms && (
                         <>
                           <span className="text-white/40">•</span>
-                          <span className="text-xs text-white/70 underline decoration-dotted underline-offset-2" title={specialTerms}>
+                          <span className="text-xs text-white/70 underline decoration-dotted underline-offset-2 cursor-help" title={specialTerms}>
                             Special Terms
                           </span>
                         </>
@@ -1536,13 +1528,13 @@ export function AdminFloatingChat({
                       {orderDetails.delivery_status === 'delivered' && (
                         <>
                           {credits && <span className="text-white/40">•</span>}
-                          <span className="text-xs text-green-400">Awaiting client approval</span>
+                          <span className="text-xs text-green-400 font-medium">Awaiting client approval</span>
                         </>
                       )}
                       {orderDetails.delivery_status === 'accepted' && (
                         <>
                           {credits && <span className="text-white/40">•</span>}
-                          <span className="text-xs text-green-400">Completed</span>
+                          <span className="text-xs text-green-400 font-medium">Completed</span>
                         </>
                       )}
                     </div>
