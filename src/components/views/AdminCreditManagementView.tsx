@@ -934,7 +934,7 @@ export const AdminCreditManagementView = () => {
                           <DollarSign className="h-4 w-4 text-muted-foreground/60" />
                         </CardHeader>
                         <CardContent className="pt-0 pb-0 px-4">
-                          <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
+                          <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalRevenue / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         </CardContent>
                       </Card>
                     </TooltipTrigger>
