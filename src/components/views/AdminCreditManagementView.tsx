@@ -422,7 +422,9 @@ export const AdminCreditManagementView = () => {
   });
 
   const uniqueTypes = [...new Set(transactions.map(tx => tx.type))];
-  const totalPurchased = transactions.filter(tx => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0);
+  const totalPurchasedOnly = transactions.filter(tx => tx.type === 'purchase').reduce((sum, tx) => sum + tx.amount, 0);
+  const totalGiftedOnly = transactions.filter(tx => tx.type === 'gifted' || tx.type === 'admin_credit').reduce((sum, tx) => sum + tx.amount, 0);
+  const totalPurchased = totalPurchasedOnly + totalGiftedOnly;
   const totalRefunds = transactions.filter(tx => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
   const totalRefundRequests = transactions.filter(tx => tx.type === 'refund').length;
 
@@ -660,7 +662,7 @@ export const AdminCreditManagementView = () => {
                 <Card className="transition-colors hover:border-[#4771d9] py-3">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                     <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Total Purchased
+                      Total Acquired
                     </CardTitle>
                     <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
                   </CardHeader>
@@ -670,7 +672,11 @@ export const AdminCreditManagementView = () => {
                 </Card>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total credits purchased by all users</p>
+                <div className="space-y-1">
+                  <p className="font-medium">Purchased + Gifted Credits</p>
+                  <p>Purchased: ${totalPurchasedOnly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p>Gifted: ${totalGiftedOnly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
               </TooltipContent>
             </Tooltip>
 
