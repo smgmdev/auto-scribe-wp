@@ -10,8 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, Building2, Percent, DollarSign, Wallet, ShoppingCart, Gift } from 'lucide-react';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, Building2, Percent, DollarSign, Wallet, ShoppingCart, Gift, ChevronDown, ChevronRight } from 'lucide-react';
 import { SendCreditsDialog } from '@/components/admin/SendCreditsDialog';
+import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 
 interface UserCredit {
   user_id: string;
@@ -91,6 +92,21 @@ export const AdminCreditManagementView = () => {
   // Send credits dialog state
   const [sendCreditsOpen, setSendCreditsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ userId: string; email: string | null; credits: number } | null>(null);
+  
+  // Expanded user rows state
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+
+  const toggleUserExpanded = (userId: string) => {
+    setExpandedUsers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
 
   const handleSendCredits = (userId: string, email: string | null, credits: number) => {
     setSelectedUser({ userId, email, credits });
@@ -542,6 +558,7 @@ export const AdminCreditManagementView = () => {
               <Table>
                 <TableHeader>
                 <TableRow>
+                    <TableHead className="w-10"></TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Locked</TableHead>
@@ -556,6 +573,7 @@ export const AdminCreditManagementView = () => {
                   {balancesLoading ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-4" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
@@ -568,39 +586,65 @@ export const AdminCreditManagementView = () => {
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredCredits.map((user) => (
-                      <TableRow key={user.user_id}>
-                        <TableCell className="font-medium">
-                          {user.email || <span className="text-muted-foreground italic">No email</span>}
-                        </TableCell>
-                        <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">
-                          <Tooltip delayDuration={100}>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 hover:bg-black hover:text-white"
-                                onClick={() => handleSendCredits(user.user_id, user.email, user.available)}
-                              >
-                                <Gift className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Send credits</TooltipContent>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    filteredCredits.map((user) => {
+                      const isExpanded = expandedUsers.has(user.user_id);
+                      return (
+                        <>
+                          <TableRow 
+                            key={user.user_id} 
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => toggleUserExpanded(user.user_id)}
+                          >
+                            <TableCell>
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {user.email || <span className="text-muted-foreground italic">No email</span>}
+                            </TableCell>
+                            <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">
+                              <Tooltip delayDuration={100}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 hover:bg-black hover:text-white"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSendCredits(user.user_id, user.email, user.available);
+                                    }}
+                                  >
+                                    <Gift className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Send credits</TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                          {isExpanded && (
+                            <TableRow key={`${user.user_id}-expanded`}>
+                              <TableCell colSpan={9} className="p-0">
+                                <UserTransactionsExpanded userId={user.user_id} />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
