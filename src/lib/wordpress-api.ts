@@ -593,87 +593,9 @@ export async function uploadMedia(
   file: File,
   metadata: { title?: string; alt_text?: string; caption?: string; description?: string }
 ): Promise<{ id: number; source_url: string }> {
-  // If credentials are missing, use edge function
-  if (!site.username || !site.applicationPassword) {
-    return uploadMediaViaEdgeFunction(site.id, file, metadata);
-  }
-  
-  try {
-    const baseUrl = normalizeUrl(site.url);
-    
-    // Sanitize and truncate filename to prevent guid errors
-    const originalName = file.name;
-    const extension = originalName.includes('.') ? originalName.split('.').pop() || '' : '';
-    let baseName = originalName.includes('.') ? originalName.slice(0, originalName.lastIndexOf('.')) : originalName;
-    
-    // Remove special characters and replace spaces with hyphens
-    baseName = baseName.replace(/[^a-zA-Z0-9\-_]/g, '-').replace(/-+/g, '-').slice(0, 50);
-    
-    // Create sanitized filename
-    const sanitizedName = extension ? `${baseName}.${extension}` : baseName;
-    
-    // Create new file with sanitized name
-    const sanitizedFile = new File([file], sanitizedName, { type: file.type });
-    
-    // Upload the file with all metadata in FormData
-    const formData = new FormData();
-    formData.append('file', sanitizedFile);
-    
-    // WordPress ignores empty strings for title and uses filename as default
-    // Use a single space ' ' to actually clear the title, but only if explicitly set to empty
-    // If undefined, don't send the field so WordPress uses its default
-    const titleValue = metadata.title !== undefined ? (metadata.title || ' ') : undefined;
-    const altValue = metadata.alt_text ?? '';
-    const captionValue = metadata.caption ?? '';
-    const descValue = metadata.description ?? '';
-    
-    if (titleValue !== undefined) {
-      formData.append('title', titleValue);
-    }
-    formData.append('alt_text', altValue);
-    formData.append('caption', captionValue);
-    formData.append('description', descValue);
-
-    console.log('Uploading media with metadata:', {
-      title: titleValue,
-      alt_text: altValue,
-      caption: captionValue,
-      description: descValue,
-      originalFilename: originalName,
-      sanitizedFilename: sanitizedName,
-    });
-
-    const uploadResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
-      method: 'POST',
-      headers: {
-        'Authorization': createAuthHeader(site),
-      },
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json().catch(() => ({}));
-      console.error('Failed to upload media:', uploadResponse.status, errorData);
-      throw new Error(errorData.message || `Failed to upload: ${uploadResponse.statusText}`);
-    }
-
-    const uploadData = await uploadResponse.json();
-    console.log('Media uploaded, response:', {
-      id: uploadData.id,
-      title: uploadData.title,
-      caption: uploadData.caption,
-      alt_text: uploadData.alt_text,
-      description: uploadData.description,
-    });
-    
-    return {
-      id: uploadData.id,
-      source_url: uploadData.source_url,
-    };
-  } catch (error) {
-    console.error('Error uploading media:', error);
-    throw error;
-  }
+  // Always use edge function to avoid CORS issues with direct browser requests
+  // The edge function fetches credentials from the database securely
+  return uploadMediaViaEdgeFunction(site.id, file, metadata);
 }
 
 // Upload media via edge function (for users without direct credentials)
