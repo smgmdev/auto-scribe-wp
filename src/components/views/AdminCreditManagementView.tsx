@@ -419,20 +419,20 @@ export const AdminCreditManagementView = () => {
   };
 
   const getTypeBadge = (type: string) => {
-    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-      purchase: { variant: 'default', label: 'Purchase' },
-      gifted: { variant: 'default', label: 'Gifted' },
-      spent: { variant: 'destructive', label: 'Spent' },
-      locked: { variant: 'secondary', label: 'Locked' },
-      unlocked: { variant: 'outline', label: 'Unlocked' },
-      order_accepted: { variant: 'secondary', label: 'Order Accepted' },
-      offer_accepted: { variant: 'secondary', label: 'Offer Accepted' },
-      order_delivered: { variant: 'default', label: 'Order Delivered' },
-      refund: { variant: 'outline', label: 'Refund' },
-      adjustment: { variant: 'destructive', label: 'Adjustment' }
+    const config: Record<string, { className: string; label: string }> = {
+      purchase: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Purchase' },
+      gifted: { className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100', label: 'Gifted' },
+      spent: { className: 'bg-red-100 text-red-700 hover:bg-red-100', label: 'Spent' },
+      locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Locked' },
+      unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Unlocked' },
+      order_accepted: { className: 'bg-purple-100 text-purple-700 hover:bg-purple-100', label: 'Order Accepted' },
+      offer_accepted: { className: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-100', label: 'Offer Accepted' },
+      order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
+      refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
+      adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' }
     };
-    const config = variants[type] || { variant: 'outline' as const, label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+    return <Badge className={badge.className}>{badge.label}</Badge>;
   };
 
   return (
