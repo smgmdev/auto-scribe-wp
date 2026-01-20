@@ -404,8 +404,8 @@ export const AdminCreditManagementView = () => {
   };
 
   // Balances computed values
-  // Only include users with purchased or available credits
-  const activeUsers = userCredits.filter(user => user.purchased > 0 || user.available > 0);
+  // Only include users with purchased, gifted, or available credits
+  const activeUsers = userCredits.filter(user => user.purchased > 0 || user.gifted > 0 || user.available > 0);
   const filteredCredits = activeUsers.filter(user => 
     user.email?.toLowerCase().includes(balancesSearchTerm.toLowerCase())
   );
