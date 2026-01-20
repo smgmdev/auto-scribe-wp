@@ -421,11 +421,17 @@ export const AdminCreditManagementView = () => {
   const getTypeBadge = (type: string) => {
     const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
       purchase: { variant: 'default', label: 'Purchase' },
-      publish: { variant: 'secondary', label: 'Publish' },
+      gifted: { variant: 'default', label: 'Gifted' },
+      spent: { variant: 'destructive', label: 'Spent' },
+      locked: { variant: 'secondary', label: 'Locked' },
+      unlocked: { variant: 'outline', label: 'Unlocked' },
+      order_accepted: { variant: 'secondary', label: 'Order Accepted' },
+      offer_accepted: { variant: 'secondary', label: 'Offer Accepted' },
+      order_delivered: { variant: 'default', label: 'Order Delivered' },
       refund: { variant: 'outline', label: 'Refund' },
       adjustment: { variant: 'destructive', label: 'Adjustment' }
     };
-    const config = variants[type] || { variant: 'outline' as const, label: type };
+    const config = variants[type] || { variant: 'outline' as const, label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
