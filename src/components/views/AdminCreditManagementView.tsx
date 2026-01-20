@@ -526,7 +526,7 @@ export const AdminCreditManagementView = () => {
                 <Card className="transition-colors hover:border-[#4771d9] py-3">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                     <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Total Credits
+                      Total Available Credits
                     </CardTitle>
                     <CreditCard className="h-4 w-4 text-muted-foreground/60" />
                   </CardHeader>
