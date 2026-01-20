@@ -549,7 +549,6 @@ export const AdminCreditManagementView = () => {
                     <TableHead className="text-right">Locked</TableHead>
                     <TableHead className="text-right">Purchased</TableHead>
                     <TableHead className="text-right">Gifted</TableHead>
-                    <TableHead className="text-right">Refunded</TableHead>
                     <TableHead className="text-right">Orders</TableHead>
                     <TableHead className="text-right">Total Spent</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -567,12 +566,11 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -586,7 +584,6 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
                         <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{user.refunded.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
                         <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
                         <TableCell className="text-right">
