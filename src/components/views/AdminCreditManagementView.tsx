@@ -469,7 +469,7 @@ export const AdminCreditManagementView = () => {
                     <Users className="h-4 w-4 text-muted-foreground/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">{activeUsers.length}</div>
+                    <div className="text-2xl font-semibold text-foreground">{activeUsers.length.toLocaleString()}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
@@ -488,7 +488,7 @@ export const AdminCreditManagementView = () => {
                     <CreditCard className="h-4 w-4 text-muted-foreground/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">{usersWithCredits}</div>
+                    <div className="text-2xl font-semibold text-foreground">{usersWithCredits.toLocaleString()}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
@@ -615,7 +615,7 @@ export const AdminCreditManagementView = () => {
                     <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">${totalPurchased.toFixed(2)}</div>
+                    <div className="text-2xl font-semibold text-foreground">${totalPurchased.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
@@ -634,7 +634,7 @@ export const AdminCreditManagementView = () => {
                     <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">${totalRefunds.toFixed(2)}</div>
+                    <div className="text-2xl font-semibold text-foreground">${totalRefunds.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
@@ -780,7 +780,7 @@ export const AdminCreditManagementView = () => {
                           <Building2 className="h-4 w-4 text-muted-foreground/60" />
                         </CardHeader>
                         <CardContent className="pt-0 pb-0 px-4">
-                          <div className="text-2xl font-semibold text-foreground">{agencyStats.totalAgencies}</div>
+                          <div className="text-2xl font-semibold text-foreground">{agencyStats.totalAgencies.toLocaleString()}</div>
                         </CardContent>
                       </Card>
                     </TooltipTrigger>
@@ -799,7 +799,7 @@ export const AdminCreditManagementView = () => {
                           <DollarSign className="h-4 w-4 text-muted-foreground/60" />
                         </CardHeader>
                         <CardContent className="pt-0 pb-0 px-4">
-                          <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalRevenue / 100).toFixed(2)}</div>
+                          <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalRevenue / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         </CardContent>
                       </Card>
                     </TooltipTrigger>
@@ -818,7 +818,7 @@ export const AdminCreditManagementView = () => {
                           <Wallet className="h-4 w-4 text-muted-foreground/60" />
                         </CardHeader>
                         <CardContent className="pt-0 pb-0 px-4">
-                          <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
+                          <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders.toLocaleString()}</div>
                         </CardContent>
                       </Card>
                     </TooltipTrigger>
@@ -837,7 +837,7 @@ export const AdminCreditManagementView = () => {
                           <Percent className="h-4 w-4 text-muted-foreground/60" />
                         </CardHeader>
                         <CardContent className="pt-0 pb-0 px-4">
-                          <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalCommission / 100).toFixed(2)}</div>
+                          <div className="text-2xl font-semibold text-foreground">${(agencyStats.totalCommission / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         </CardContent>
                       </Card>
                     </TooltipTrigger>
@@ -991,7 +991,7 @@ export const AdminCreditManagementView = () => {
                           <ShoppingCart className="h-4 w-4 text-muted-foreground/60" />
                         </CardHeader>
                         <CardContent className="pt-0 pb-0 px-4">
-                          <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders}</div>
+                          <div className="text-2xl font-semibold text-foreground">{agencyStats.totalOrders.toLocaleString()}</div>
                         </CardContent>
                       </Card>
                     </TooltipTrigger>
