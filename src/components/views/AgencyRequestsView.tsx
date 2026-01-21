@@ -1263,7 +1263,7 @@ export function AgencyRequestsView() {
       </div>
 
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start">
           <TabsTrigger value="requests" className="relative">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
@@ -1284,7 +1284,7 @@ export function AgencyRequestsView() {
 
         <TabsContent value="requests" className="mt-2">
           <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start">
               <TabsTrigger value="active" className="gap-2 relative">
                 <MessageSquare className="h-4 w-4" />
                 Active ({activeRequests.length})
@@ -1466,7 +1466,7 @@ export function AgencyRequestsView() {
 
             <TabsContent value="closed" className="mt-2">
               <Tabs defaultValue="delivered" className="w-full">
-                <TabsList className="w-full max-w-xs">
+                <TabsList className="flex w-full overflow-x-auto md:w-auto md:max-w-xs scrollbar-hide justify-start">
                   <TabsTrigger value="delivered" className="gap-2 relative flex-1">
                     <CheckCircle className="h-4 w-4" />
                     Completed ({completedRequests.length})
@@ -1660,7 +1660,7 @@ export function AgencyRequestsView() {
 
         <TabsContent value="orders" className="mt-2">
           <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-2xl md:grid-cols-4 scrollbar-hide justify-start">
               <TabsTrigger value="active" className="gap-2 relative">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
