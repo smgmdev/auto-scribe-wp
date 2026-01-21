@@ -789,11 +789,11 @@ const Landing = () => {
                                 {site.agency && (
                                   <>
                                     <span>· via {site.agency}</span>
-                                    {agencyLogos[site.agency] && (
-                                      <img
-                                        src={agencyLogos[site.agency]}
-                                        alt={site.agency}
-                                        className="hidden md:block h-4 w-4 rounded object-contain flex-shrink-0"
+{agencyLogos[site.agency] && (
+                              <img
+                                src={agencyLogos[site.agency]}
+                                alt={site.agency}
+                                className="hidden md:block h-4 w-4 rounded-full object-cover flex-shrink-0"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
