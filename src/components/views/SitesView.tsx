@@ -1189,19 +1189,6 @@ export function SitesView() {
                   )}
                 </div>
               )}
-              {isAdmin && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveMediaSite(site.id, site.name);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
               <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </div>
