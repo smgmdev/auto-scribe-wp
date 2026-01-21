@@ -2006,25 +2006,31 @@ export function AdminMediaManagementView() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5">
-                                  <p className="font-medium text-sm truncate leading-tight">
-                                    {submission.rejected_media && submission.rejected_media.length > 0 
-                                      ? 'Partially Approved Media Sheet' 
-                                      : 'Approved Media Sheet'}
-                                  </p>
-                                  <Tooltip delayDuration={100}>
-                                    <TooltipTrigger asChild>
-                                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
-                                    </TooltipTrigger>
-                                    <TooltipContent 
-                                      side="bottom" 
-                                      align="center"
-                                      sideOffset={8}
-                                      className="max-w-[250px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-                                    >
-                                      <p>Approved media sites are now available in Global Library under Media Network.</p>
-                                    </TooltipContent>
-                                  </Tooltip>
+                                <div className="flex items-center justify-between gap-1.5">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <p className="font-medium text-sm truncate leading-tight">
+                                      {submission.rejected_media && submission.rejected_media.length > 0 
+                                        ? 'Partially Approved Media Sheet' 
+                                        : 'Approved Media Sheet'}
+                                    </p>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
+                                      </TooltipTrigger>
+                                      <TooltipContent 
+                                        side="bottom" 
+                                        align="center"
+                                        sideOffset={8}
+                                        className="max-w-[250px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                                      >
+                                        <p>Approved media sites are now available in Global Library under Media Network.</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </div>
+                                  {/* Arrow on mobile - same line as tooltip */}
+                                  <div className="md:hidden h-6 w-6 flex items-center justify-center text-muted-foreground flex-shrink-0">
+                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                  </div>
                                 </div>
                               <button 
                                 onClick={(e) => {
@@ -2086,7 +2092,8 @@ export function AdminMediaManagementView() {
                               <Badge variant="secondary" className="text-xs whitespace-nowrap hidden md:inline-flex">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
-                              <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                              {/* Arrow - hidden on mobile (shown in title line instead) */}
+                              <div className="h-7 w-7 hidden md:flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                               </div>
                             </div>
