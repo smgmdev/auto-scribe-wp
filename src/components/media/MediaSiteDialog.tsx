@@ -647,7 +647,7 @@ export function MediaSiteDialog({
               />
               <div>
                 <p className="font-medium">{mediaSite.name}</p>
-                <p className="text-sm text-muted-foreground">${mediaSite.price.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">{mediaSite.price.toLocaleString()} USD</p>
               </div>
             </div>
 
