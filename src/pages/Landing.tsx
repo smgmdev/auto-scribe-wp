@@ -793,7 +793,7 @@ const Landing = () => {
                                       <img
                                         src={agencyLogos[site.agency]}
                                         alt={site.agency}
-                                        className="h-4 w-4 rounded object-contain flex-shrink-0"
+                                        className="hidden md:block h-4 w-4 rounded object-contain flex-shrink-0"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
