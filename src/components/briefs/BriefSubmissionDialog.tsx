@@ -326,7 +326,7 @@ export function BriefSubmissionDialog({
             )}
             <div>
               <p className="font-medium">{mediaSite.name}</p>
-              <p className="text-sm text-muted-foreground">${mediaSite.price} USD</p>
+              <p className="text-sm text-muted-foreground">{mediaSite.price.toLocaleString()} USD</p>
             </div>
           </div>
         )}
