@@ -761,15 +761,15 @@ export function AdminUsersView() {
                         value={userCardTabs[user.id] || 'logs'} 
                         onValueChange={(v) => setUserCardTabs(prev => ({ ...prev, [user.id]: v as UserCardTab }))}
                       >
-                        <TabsList className="w-full grid grid-cols-4 mb-4">
-                          <TabsTrigger value="logs" className="text-xs">Account Logs</TabsTrigger>
-                          <TabsTrigger value="credits" className="text-xs">
+                        <TabsList className="w-full flex md:grid md:grid-cols-4 mb-4 overflow-x-auto scrollbar-hide">
+                          <TabsTrigger value="logs" className="text-xs whitespace-nowrap flex-shrink-0">Account Logs</TabsTrigger>
+                          <TabsTrigger value="credits" className="text-xs whitespace-nowrap flex-shrink-0">
                             Credit History ({(userCreditTransactions[user.id] || []).length})
                           </TabsTrigger>
-                          <TabsTrigger value="orders" className="text-xs">
+                          <TabsTrigger value="orders" className="text-xs whitespace-nowrap flex-shrink-0">
                             Orders ({(userOrders[user.id] || []).length})
                           </TabsTrigger>
-                          <TabsTrigger value="engagements" className="text-xs">
+                          <TabsTrigger value="engagements" className="text-xs whitespace-nowrap flex-shrink-0">
                             Engagements ({(userEngagements[user.id] || []).length})
                           </TabsTrigger>
                         </TabsList>
