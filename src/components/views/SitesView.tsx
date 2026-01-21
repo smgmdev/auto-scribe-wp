@@ -1164,15 +1164,22 @@ export function SitesView() {
               </div>
               <div className="min-w-0 flex-1 ml-3">
                 <h3 className="text-sm truncate">{site.name}</h3>
+                {/* Price and format - visible only on mobile under name */}
+                <div className="flex md:hidden items-center gap-2 mt-0.5">
+                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                    {site.price > 0 ? `$${site.price.toLocaleString()}` : 'Free'}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
-              {/* Price badge */}
-              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+              {/* Price badge - hidden on mobile */}
+              <Badge variant="secondary" className="hidden md:inline-flex text-xs whitespace-nowrap">
                 {site.price > 0 ? `$${site.price.toLocaleString()}` : 'Free'}
               </Badge>
-              {/* Format */}
-              <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+              {/* Format - hidden on mobile */}
+              <span className="hidden md:inline text-xs text-muted-foreground">{site.publication_format}</span>
               {/* Agency info - hidden on mobile */}
               {site.agency && (
                 <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
