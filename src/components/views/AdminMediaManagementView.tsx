@@ -1517,7 +1517,7 @@ export function AdminMediaManagementView() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible">
+        <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start overflow-visible">
           <TabsTrigger value="media" className="relative overflow-visible">
             Media Sites ({mediaSites.length})
             {unreadMediaCount > 0 && (
@@ -1540,7 +1540,7 @@ export function AdminMediaManagementView() {
         <TabsContent value="wordpress" className="mt-2">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
-            <TabsList>
+            <TabsList className="flex w-full overflow-x-auto md:w-auto scrollbar-hide justify-start">
               <TabsTrigger value="approved">
                 Approved ({approvedSites.length})
               </TabsTrigger>
@@ -1938,7 +1938,7 @@ export function AdminMediaManagementView() {
         <TabsContent value="media" className="mt-2">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList>
+            <TabsList className="flex w-full overflow-x-auto md:w-auto scrollbar-hide justify-start">
               <TabsTrigger value="added">
                 Added Media Sites ({approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0)})
               </TabsTrigger>
