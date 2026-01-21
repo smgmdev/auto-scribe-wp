@@ -490,7 +490,7 @@ export function MediaSiteDialog({
                 <img
                   src={mediaSite.favicon || getFaviconUrl(mediaSite.link)}
                   alt={mediaSite.name}
-                  className="h-12 w-12 rounded-xl bg-muted object-contain"
+                  className="h-12 w-12 rounded-xl object-cover"
                 />
                 <span>{mediaSite.name}</span>
               </DialogTitle>
