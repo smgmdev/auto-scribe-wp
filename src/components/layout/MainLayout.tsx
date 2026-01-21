@@ -1,5 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { ChatListPanel } from '@/components/ui/ChatListPanel';
@@ -14,6 +15,7 @@ export function MainLayout({
   children
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   return <div className="min-h-screen bg-background">
       {/* Mobile Header with Burger Menu */}
@@ -21,8 +23,13 @@ export function MainLayout({
         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full">
           <Menu className="h-6 w-6" />
         </Button>
-        <img src={amlogo} alt="Logo" className="ml-3 h-7 w-7 object-contain" />
-        <span className="ml-2 text-lg font-semibold text-sidebar-foreground">Arcana Mace</span>
+        <button 
+          onClick={() => navigate('/')} 
+          className="flex items-center ml-3"
+        >
+          <img src={amlogo} alt="Logo" className="h-7 w-7 object-contain" />
+          <span className="ml-2 text-lg font-semibold text-sidebar-foreground">Arcana Mace</span>
+        </button>
       </header>
 
       {/* Mobile Overlay */}
