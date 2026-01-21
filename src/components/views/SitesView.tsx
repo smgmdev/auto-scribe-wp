@@ -1575,8 +1575,14 @@ export function SitesView() {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{site.name}</p>
-                                {/* URL and format on desktop */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-sm font-medium truncate">{site.name}</p>
+                                  {/* Price on mobile - right side of name */}
+                                  {site.price > 0 && (
+                                    <span className="md:hidden text-xs text-muted-foreground flex-shrink-0">{site.price.toLocaleString()} USD</span>
+                                  )}
+                                </div>
+                                {/* URL on desktop */}
                                 <p className="hidden md:block text-xs text-muted-foreground truncate">
                                   {site.link.replace(/^https?:\/\//, '')}
                                 </p>
