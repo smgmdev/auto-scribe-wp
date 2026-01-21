@@ -28,7 +28,7 @@ export function MainLayout({
           className="flex items-center ml-3"
         >
           <img src={amlogo} alt="Logo" className="h-7 w-7 object-contain" />
-          <span className="ml-2 text-lg font-semibold text-sidebar-foreground">Arcana Mace</span>
+          <span className="ml-2 text-lg font-semibold text-white">Arcana Mace</span>
         </button>
       </header>
 
