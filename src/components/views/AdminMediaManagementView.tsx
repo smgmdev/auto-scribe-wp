@@ -2040,39 +2040,39 @@ export function AdminMediaManagementView() {
                                 <ArrowUpRight className="h-3 w-3" />
                               </button>
                               {submission.reply_sheet_url && (
-                                <div className="flex items-center gap-2 -mt-0.5">
-                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                    {submission.reply_sheet_url.length > 40 
-                                      ? `${submission.reply_sheet_url.substring(0, 40)}...` 
-                                      : submission.reply_sheet_url}
+                                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 -mt-0.5">
+                                  <p className="text-xs text-muted-foreground break-all md:truncate md:max-w-[200px]">
+                                    {submission.reply_sheet_url}
                                   </p>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigator.clipboard.writeText(submission.reply_sheet_url || '');
-                                      toast({
-                                        title: 'Copied',
-                                        description: 'Link copied to clipboard',
-                                      });
-                                    }}
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Copy link"
-                                  >
-                                    <Copy className="h-3.5 w-3.5" />
-                                  </button>
-                                  <a
-                                    href={submission.reply_sheet_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Open link"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <ExternalLink className="h-3.5 w-3.5" />
-                                  </a>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(submission.reply_sheet_url || '');
+                                        toast({
+                                          title: 'Copied',
+                                          description: 'Link copied to clipboard',
+                                        });
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Copy link"
+                                    >
+                                      <Copy className="h-3.5 w-3.5" />
+                                    </button>
+                                    <a
+                                      href={submission.reply_sheet_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Open link"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                    </a>
+                                  </div>
                                 </div>
                               )}
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground w-full">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                   : 'N/A'}
