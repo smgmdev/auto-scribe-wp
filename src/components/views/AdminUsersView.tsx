@@ -1042,7 +1042,7 @@ export function AdminUsersView() {
                   variant="destructive"
                   onClick={handleDeleteUser}
                   disabled={processing || (!deleteAccount && !deleteCredits && !deleteArticles && !deleteOrders)}
-                  className="hover:bg-transparent hover:text-destructive hover:border hover:border-destructive"
+                  className="border border-transparent hover:bg-transparent hover:text-destructive hover:border-destructive"
                 >
                   {processing ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
