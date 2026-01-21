@@ -1653,8 +1653,8 @@ export function AdminMediaManagementView() {
                                     <ExternalLink className="h-3 w-3" />
                                   </a>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                  {new Date(site.created_at).toLocaleDateString()} at {new Date(site.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                <p className="text-xs text-muted-foreground whitespace-nowrap">
+                                  {new Date(site.created_at).toLocaleDateString()} {new Date(site.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                               </div>
                             </div>
