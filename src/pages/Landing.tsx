@@ -977,7 +977,7 @@ const Landing = () => {
                   <img 
                     src={agencyDetails.logo_url} 
                     alt={agencyDetails.agency_name}
-                    className={`h-12 w-12 rounded-xl bg-muted object-contain ${logoLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
+                    className={`h-12 w-12 rounded-xl object-cover ${logoLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
                     onLoad={() => setLogoLoading(false)}
                     onError={() => setLogoLoading(false)}
                   />
