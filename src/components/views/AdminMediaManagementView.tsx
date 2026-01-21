@@ -1603,7 +1603,7 @@ export function AdminMediaManagementView() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5">
-                                  <p className="font-medium text-sm truncate leading-tight">Approved WordPress Site</p>
+                                  <p className="font-medium text-sm truncate leading-tight">{site.name}</p>
                                   <Tooltip delayDuration={100}>
                                     <TooltipTrigger asChild>
                                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
