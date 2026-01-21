@@ -104,13 +104,31 @@ export function ArticlesView() {
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-between mb-2">
               <Badge 
                 variant="outline" 
                 className={statusColors[article.status]}
               >
                 {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
               </Badge>
+              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                  onClick={() => handleEdit(article)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                  onClick={() => handleDeleteClick(article)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <h3 className="text-xl font-semibold text-foreground">
               {article.title}
@@ -194,25 +212,6 @@ export function ArticlesView() {
                 );
               })()}
             </div>
-          </div>
-          
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-              onClick={() => handleEdit(article)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-              onClick={() => handleDeleteClick(article)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </CardContent>
