@@ -1586,9 +1586,10 @@ export function SitesView() {
                                 <p className="hidden md:block text-xs text-muted-foreground truncate">
                                   {site.link.replace(/^https?:\/\//, '')}
                                 </p>
-                                {/* Format on mobile - under name */}
+                                {/* Format and agency on mobile - under name */}
                                 <p className="md:hidden text-xs text-muted-foreground">
                                   {site.publication_format}
+                                  {site.agency && <span> · via {site.agency}</span>}
                                 </p>
                               </div>
                               <div className="hidden md:flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
