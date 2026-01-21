@@ -2119,7 +2119,7 @@ export function AdminMediaManagementView() {
                                   >
                                     <CardContent className="p-3">
                                       <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                                        <div className="flex items-center gap-3 min-w-0 flex-1 md:w-[280px] md:flex-shrink-0 md:flex-grow-0">
                                           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
                                             {site.favicon ? (
                                               <img 
@@ -2134,20 +2134,24 @@ export function AdminMediaManagementView() {
                                             ) : null}
                                             <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
                                           </div>
-                                          <div className="min-w-0 flex-1">
-                                            <h3 className="text-sm break-words">{site.name}</h3>
+                                          <div className="min-w-0 flex-1 flex items-center gap-2">
+                                            <h3 className="text-sm truncate md:break-words md:whitespace-normal">{site.name}</h3>
+                                            {/* Price badge on mobile - inline with name */}
+                                            <Badge variant="secondary" className="text-xs whitespace-nowrap md:hidden flex-shrink-0">
+                                              {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                            </Badge>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-3 flex-1 justify-end">
+                                        <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
                                           <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                             {site.price > 0 ? `${site.price} USD` : 'Free'}
                                           </Badge>
-                                          <div className="w-[100px] flex justify-start hidden md:flex">
+                                          <div className="w-[100px] flex justify-start">
                                             <span className="text-xs text-muted-foreground">{site.publication_format}</span>
                                           </div>
-                                          {/* Agency info - use submission's agency logo - hidden on mobile, shown in expanded view */}
+                                          {/* Agency info - use submission's agency logo */}
                                           {site.agency && (
-                                            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                               <span>via</span>
                                               <span className="text-foreground">{site.agency}</span>
                                               {agencyLogos[site.agency] && (
@@ -2162,6 +2166,10 @@ export function AdminMediaManagementView() {
                                           <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                             {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                           </div>
+                                        </div>
+                                        {/* Chevron for mobile */}
+                                        <div className="md:hidden h-7 w-7 flex items-center justify-center text-muted-foreground flex-shrink-0">
+                                          {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                         </div>
                                       </div>
                                       
