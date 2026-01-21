@@ -764,7 +764,7 @@ export function AdminAgenciesView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-4 scrollbar-hide justify-start">
           <TabsTrigger value="pending" className="relative">
             New ({pendingApplications.length})
             {unreadPendingCount > 0 && (
@@ -872,7 +872,7 @@ export function AdminAgenciesView() {
         <TabsContent value="void" className="mt-2">
           {/* Sub-tabs for void stages */}
           <Tabs value={voidSubTab} onValueChange={setVoidSubTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 md:max-w-md scrollbar-hide justify-start">
               <TabsTrigger value="cancelled" className="relative">
                 Cancelled ({cancelledApplications.length})
                 {unreadCancelledCount > 0 && (
@@ -1077,7 +1077,7 @@ export function AdminAgenciesView() {
         <TabsContent value="verification" className="mt-2">
           {/* Sub-tabs for verification stages */}
           <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 md:max-w-md scrollbar-hide justify-start">
               <TabsTrigger value="pending-verification" className="relative">
                 Pending Verification ({agenciesPendingVerification.length})
               </TabsTrigger>
@@ -1278,7 +1278,7 @@ export function AdminAgenciesView() {
         <TabsContent value="onboarded" className="mt-2">
           {/* Sub-tabs for Active and Downgraded */}
           <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 md:max-w-md scrollbar-hide justify-start">
               <TabsTrigger value="active" className="relative">
                 Active ({agencies.filter(a => a.onboarding_complete && !a.downgraded).length})
               </TabsTrigger>
