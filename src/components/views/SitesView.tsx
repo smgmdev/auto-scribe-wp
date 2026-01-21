@@ -1173,9 +1173,9 @@ export function SitesView() {
               </Badge>
               {/* Format */}
               <span className="text-xs text-muted-foreground">{site.publication_format}</span>
-              {/* Agency info */}
+              {/* Agency info - hidden on mobile */}
               {site.agency && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
                   <span>via</span>
                   <span className="text-foreground truncate max-w-[80px]">{site.agency}</span>
                   {agencyLogos[site.agency] && (
@@ -1224,7 +1224,7 @@ export function SitesView() {
                 </p>
               )}
               {/* Link and button row */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
                 <a 
                   href={ensureHttps(site.link)}
                   target="_blank"
@@ -1234,6 +1234,22 @@ export function SitesView() {
                   <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
                 </a>
+                {/* Agency info - visible only on mobile in expanded view */}
+                {site.agency && (
+                  <div className="flex md:hidden items-center gap-1 text-xs text-muted-foreground">
+                    <span>via</span>
+                    <span className="text-foreground truncate">{site.agency}</span>
+                    {agencyLogos[site.agency] && (
+                      <img 
+                        src={agencyLogos[site.agency]} 
+                        alt={site.agency} 
+                        className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-end">
                 {!isAdmin && !(userAgencyName && site.agency === userAgencyName) && (
                   openEngagements[site.id] ? (
                     <Badge 
