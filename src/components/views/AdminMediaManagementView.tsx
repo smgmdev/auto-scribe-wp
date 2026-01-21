@@ -2072,15 +2072,20 @@ export function AdminMediaManagementView() {
                                   </a>
                                 </div>
                               )}
-                              <p className="text-xs text-muted-foreground w-full">
+                              <p className="text-xs text-muted-foreground">
                                 {submission.reviewed_at 
                                   ? `${new Date(submission.reviewed_at).toLocaleDateString()} ${new Date(submission.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
                                   : 'N/A'}
                               </p>
+                              {/* Sites added badge - shown on mobile under date */}
+                              <Badge variant="secondary" className="text-xs whitespace-nowrap md:hidden w-fit">
+                                {submission.imported_sites?.length || 0} sites added
+                              </Badge>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                              {/* Sites added badge - hidden on mobile */}
+                              <Badge variant="secondary" className="text-xs whitespace-nowrap hidden md:inline-flex">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
