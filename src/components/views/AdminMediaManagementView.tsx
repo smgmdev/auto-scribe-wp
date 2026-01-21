@@ -2160,7 +2160,7 @@ export function AdminMediaManagementView() {
                                               {site.agency ? `via ${site.agency}` : site.publication_format}
                                             </p>
                                             {/* Arrow in bottom-right corner on mobile */}
-                                            <div className="flex md:hidden justify-end -mb-2">
+                                            <div className="flex md:hidden justify-end -mb-3">
                                               <div className="h-5 w-5 flex items-center justify-center text-muted-foreground">
                                                 {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                               </div>
