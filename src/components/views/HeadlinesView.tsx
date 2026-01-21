@@ -202,7 +202,7 @@ export function HeadlinesView() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-4 mb-4 scrollbar-hide ps-0">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-4 mb-4 scrollbar-hide justify-start">
               <TabsTrigger value="political">Political</TabsTrigger>
               <TabsTrigger value="business">Business</TabsTrigger>
               <TabsTrigger value="middleeast">Middle East</TabsTrigger>
