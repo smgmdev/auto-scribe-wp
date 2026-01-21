@@ -1033,19 +1033,18 @@ export function SitesView() {
                 )}
               </div>
               <div className="min-w-0 flex-1 ml-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm truncate">{site.name}</h3>
-                  {/* Price badge - visible on mobile inline with title */}
-                  <Badge variant="secondary" className="md:hidden flex-shrink-0">
+                <h3 className="text-sm truncate">{site.name}</h3>
+                {/* Price and Plugin badges - visible only on mobile under name */}
+                <div className="flex md:hidden items-center gap-2 mt-0.5">
+                  <Badge variant="secondary" className="text-xs">
                     {siteCredits[site.id] || 1} USD
                   </Badge>
+                  {isAdmin && (
+                    <Badge variant="outline" className="text-xs">
+                      {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                    </Badge>
+                  )}
                 </div>
-                {/* Plugin badge - visible only on mobile under name */}
-                {isAdmin && (
-                  <Badge variant="outline" className="md:hidden text-xs mt-0.5">
-                    {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
-                  </Badge>
-                )}
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
