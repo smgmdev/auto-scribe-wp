@@ -1170,7 +1170,7 @@ export function SitesView() {
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
               {/* Price badge - always visible, positioned top right on mobile */}
               <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                {site.price > 0 ? `$${site.price.toLocaleString()}` : 'Free'}
+                {site.price > 0 ? `${site.price.toLocaleString()} USD` : 'Free'}
               </Badge>
               {/* Format - hidden on mobile */}
               <span className="hidden md:inline text-xs text-muted-foreground">{site.publication_format}</span>
@@ -1577,7 +1577,7 @@ export function SitesView() {
                               </div>
                               <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
                                 {site.price > 0 && (
-                                  <span>${site.price.toLocaleString()}</span>
+                                  <span>{site.price.toLocaleString()} USD</span>
                                 )}
                                 <span>{site.publication_format}</span>
                                 {site.agency && (
