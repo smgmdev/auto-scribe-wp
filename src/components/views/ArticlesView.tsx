@@ -143,13 +143,13 @@ export function ArticlesView() {
                         href={article.wpLink} 
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-accent hover:underline cursor-pointer"
+                        className="inline-flex items-center gap-1 text-accent hover:underline cursor-pointer whitespace-nowrap"
                       >
                         {siteInfo.favicon && (
-                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                          <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm flex-shrink-0" />
                         )}
-                        {label} {siteInfo.name}
-                        <ExternalLink className="h-3 w-3" />
+                        <span>{label} {siteInfo.name}</span>
+                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
                       </a>
                     ) : (
                       <span className="flex items-center gap-1">
