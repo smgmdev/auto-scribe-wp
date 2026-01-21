@@ -1580,7 +1580,7 @@ export function AdminMediaManagementView() {
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <CardContent className="p-3">
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
                               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-green-500/10 rounded mt-0.5 relative">
                                 {site.favicon ? (
@@ -1623,14 +1623,14 @@ export function AdminMediaManagementView() {
                                     e.stopPropagation();
                                     if (site.user_id) fetchAgencyDetails(site.user_id);
                                   }}
-                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5 truncate max-w-full"
+                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5"
                                   disabled={isLoadingAgencyDetails}
                                 >
-                                  <span className="truncate">{agencyName || 'Unknown Agency'}</span>
+                                  <span className="truncate max-w-[150px] md:max-w-[200px]">{agencyName || 'Unknown Agency'}</span>
                                   <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
                                 </button>
                                 <div className="flex items-center gap-2 -mt-0.5">
-                                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                  <span className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-[200px]">
                                     {site.url.replace(/^https?:\/\//, '')}
                                   </span>
                                   <button
@@ -1658,7 +1658,7 @@ export function AdminMediaManagementView() {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="flex items-center gap-2 flex-shrink-0 ml-[52px] md:ml-0">
                               <Badge variant="outline" className="text-xs">
                                 {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                               </Badge>
