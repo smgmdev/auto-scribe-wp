@@ -2141,7 +2141,13 @@ export function AdminMediaManagementView() {
                                           
                                           {/* Name & Mobile Info */}
                                           <div className="min-w-0 flex-1">
-                                            <h3 className="text-sm truncate">{site.name || 'Unnamed Site'}</h3>
+                                            <div className="flex items-center justify-between gap-2">
+                                              <h3 className="text-sm truncate">{site.name || 'Unnamed Site'}</h3>
+                                              {/* Price Badge - visible on mobile in same line */}
+                                              <Badge variant="secondary" className="text-xs whitespace-nowrap md:hidden flex-shrink-0">
+                                                {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                              </Badge>
+                                            </div>
                                             {/* Agency info on mobile */}
                                             <p className="text-xs text-muted-foreground md:hidden truncate">
                                               {site.agency ? `via ${site.agency}` : site.publication_format}
@@ -2151,8 +2157,8 @@ export function AdminMediaManagementView() {
                                         
                                         {/* Badges & Controls */}
                                         <div className="flex items-center gap-2 ml-11 md:ml-0 flex-shrink-0">
-                                          {/* Price Badge */}
-                                          <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                          {/* Price Badge - hidden on mobile, shown on desktop */}
+                                          <Badge variant="secondary" className="text-xs whitespace-nowrap hidden md:inline-flex">
                                             {site.price > 0 ? `${site.price} USD` : 'Free'}
                                           </Badge>
                                           
