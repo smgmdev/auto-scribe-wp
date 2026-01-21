@@ -101,6 +101,34 @@ export function AdminEngagementsView() {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle opening a specific engagement from localStorage (e.g., from Admin Users view)
+  useEffect(() => {
+    if (loading || requests.length === 0) return;
+    
+    const selectedEngagementId = localStorage.getItem('selectedEngagementId');
+    if (selectedEngagementId) {
+      const targetRequest = requests.find(r => r.id === selectedEngagementId);
+      if (targetRequest) {
+        // Determine which tab to switch to based on request status
+        if (targetRequest.status === 'cancelled') {
+          setActiveTab('closed');
+          setClosedSubTab('cancelled');
+        } else if (targetRequest.orders?.delivery_status === 'accepted') {
+          setActiveTab('closed');
+          setClosedSubTab('delivered');
+        } else {
+          setActiveTab('active');
+        }
+        
+        // Open the chat after a short delay to allow tab switch
+        setTimeout(() => {
+          handleOpenChat(targetRequest);
+        }, 100);
+      }
+      localStorage.removeItem('selectedEngagementId');
+    }
+  }, [loading, requests]);
+
   useEffect(() => {
     fetchRequests();
 
