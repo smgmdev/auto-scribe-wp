@@ -1223,22 +1223,22 @@ export function SitesView() {
                   {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                 </p>
               )}
-              {/* Link and button row */}
-              <div className="flex flex-col gap-1">
+              {/* Link and agency row */}
+              <div className="flex items-center justify-between gap-2">
                 <a 
                   href={ensureHttps(site.link)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
+                  className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 min-w-0"
                 >
                   <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
                 </a>
                 {/* Agency info - visible only on mobile in expanded view */}
                 {site.agency && (
-                  <div className="flex md:hidden items-center gap-1 text-xs text-muted-foreground">
+                  <div className="flex md:hidden items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
                     <span>via</span>
-                    <span className="text-foreground truncate">{site.agency}</span>
+                    <span className="text-foreground truncate max-w-[80px]">{site.agency}</span>
                     {agencyLogos[site.agency] && (
                       <img 
                         src={agencyLogos[site.agency]} 
