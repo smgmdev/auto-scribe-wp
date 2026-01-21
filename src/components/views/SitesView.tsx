@@ -1587,10 +1587,21 @@ export function SitesView() {
                                   {site.link.replace(/^https?:\/\//, '')}
                                 </p>
                                 {/* Format and agency on mobile - under name */}
-                                <p className="md:hidden text-xs text-muted-foreground">
-                                  {site.publication_format}
-                                  {site.agency && <span> · via {site.agency}</span>}
-                                </p>
+                                <div className="md:hidden flex items-center gap-1 text-xs text-muted-foreground">
+                                  <span>{site.publication_format}</span>
+                                  {site.agency && (
+                                    <>
+                                      <span>· via {site.agency}</span>
+                                      {agencyLogos[site.agency] && (
+                                        <img 
+                                          src={agencyLogos[site.agency]} 
+                                          alt={site.agency} 
+                                          className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                        />
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                               <div className="hidden md:flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
                                 {site.price > 0 && (
