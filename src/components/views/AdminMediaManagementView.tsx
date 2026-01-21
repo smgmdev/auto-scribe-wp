@@ -2205,7 +2205,7 @@ export function AdminMediaManagementView() {
                                       {/* Expanded Section with Details */}
                                       {isSiteExpanded && (
                                         <div 
-                                          className="mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
+                                          className="mt-1 md:mt-3 pt-3 border-t border-border space-y-3 animate-fade-in"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           {site.about && (
