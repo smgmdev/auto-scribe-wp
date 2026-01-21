@@ -2148,10 +2148,15 @@ export function AdminMediaManagementView() {
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
                                             </div>
-                                            {/* Agency info on mobile */}
-                                            <p className="text-xs text-muted-foreground md:hidden truncate">
-                                              {site.agency ? `via ${site.agency}` : site.publication_format}
-                                            </p>
+                                            {/* Agency info on mobile with arrow on right */}
+                                            <div className="flex items-center justify-between md:hidden">
+                                              <p className="text-xs text-muted-foreground truncate">
+                                                {site.agency ? `via ${site.agency}` : site.publication_format}
+                                              </p>
+                                              <div className="h-5 w-5 flex items-center justify-center text-muted-foreground flex-shrink-0">
+                                                {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                         
@@ -2182,8 +2187,8 @@ export function AdminMediaManagementView() {
                                             </div>
                                           )}
                                           
-                                          {/* Chevron - hidden on mobile when expanded (shown in expanded section instead) */}
-                                          <div className={`h-6 w-6 flex items-center justify-center text-muted-foreground ${isSiteExpanded ? 'hidden md:flex' : ''}`}>
+                                          {/* Chevron - hidden on mobile (shown in agency line instead) */}
+                                          <div className="h-6 w-6 hidden md:flex items-center justify-center text-muted-foreground">
                                             {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                           </div>
                                         </div>
@@ -2220,31 +2225,18 @@ export function AdminMediaManagementView() {
                                             <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                                             <ExternalLink className="h-3 w-3 flex-shrink-0" />
                                           </a>
-                                          {/* Agency info on mobile - shown below link with arrow on right */}
+                                          {/* Agency info on mobile - shown below link */}
                                           {site.agency && (
-                                            <div className="flex md:hidden items-center justify-between">
-                                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                                <span>via</span>
-                                                <span className="text-foreground">{site.agency}</span>
-                                                {agencyLogos[site.agency] && (
-                                                  <img 
-                                                    src={agencyLogos[site.agency]} 
-                                                    alt={site.agency} 
-                                                    className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                                  />
-                                                )}
-                                              </div>
-                                              <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
-                                                <ChevronUp className="h-4 w-4" />
-                                              </div>
-                                            </div>
-                                          )}
-                                          {/* Arrow for cards without agency on mobile */}
-                                          {!site.agency && (
-                                            <div className="flex md:hidden justify-end">
-                                              <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
-                                                <ChevronUp className="h-4 w-4" />
-                                              </div>
+                                            <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground">
+                                              <span>via</span>
+                                              <span className="text-foreground">{site.agency}</span>
+                                              {agencyLogos[site.agency] && (
+                                                <img 
+                                                  src={agencyLogos[site.agency]} 
+                                                  alt={site.agency} 
+                                                  className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                />
+                                              )}
                                             </div>
                                           )}
                                         </div>
