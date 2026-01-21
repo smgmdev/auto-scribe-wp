@@ -1163,7 +1163,7 @@ export function SitesView() {
                 )}
               </div>
               <div className="min-w-0 flex-1 ml-3">
-                <h3 className="text-sm break-words">{site.name}</h3>
+                <h3 className="text-sm truncate">{site.name}</h3>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
@@ -1313,7 +1313,7 @@ export function SitesView() {
                 )}
               </div>
               <div className="min-w-0 flex-1 ml-3">
-                <h3 className="text-sm break-words">{site.name}</h3>
+                <h3 className="text-sm truncate">{site.name}</h3>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
