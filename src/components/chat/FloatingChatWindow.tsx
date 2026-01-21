@@ -4842,13 +4842,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className="flex justify-center mb-1">
             <GripHorizontal className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               {globalChatRequest.media_site?.favicon && (
-                <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded" />
+                <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded shrink-0" />
               )}
-              <div className="flex flex-col">
-                <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
+              <div className="flex flex-col min-w-0">
+                <h3 className="font-semibold text-sm truncate">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
                 <div className="flex items-center gap-2">
                   <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
                     <span className={`w-2 h-2 rounded-full ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
@@ -4857,7 +4857,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               {!isCancelled && localOrder?.status !== 'cancelled' && (
                 <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
                   <DropdownMenuTrigger asChild>
