@@ -2017,12 +2017,10 @@ export function AdminMediaManagementView() {
                                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
                                     </TooltipTrigger>
                                     <TooltipContent 
-                                      side="right" 
-                                      align="start"
+                                      side="bottom" 
+                                      align="center"
                                       sideOffset={8}
-                                      collisionPadding={16}
-                                      avoidCollisions={true}
-                                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                                      className="max-w-[250px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
                                     >
                                       <p>Approved media sites are now available in Global Library under Media Network.</p>
                                     </TooltipContent>
