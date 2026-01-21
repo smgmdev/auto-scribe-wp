@@ -1391,7 +1391,7 @@ export function ComposeView() {
                 <div className="h-4 bg-muted rounded w-10/12" />
               </div>
             ) : (
-              <Textarea id="content" placeholder="Your article content will appear here after generation, or you can write manually..." value={content} onChange={e => setContent(e.target.value)} className="min-h-[400px] font-body text-base leading-relaxed" />
+              <Textarea id="content" placeholder="Your article content will appear here after generation, or you can write manually..." value={content} onChange={e => setContent(e.target.value)} className="min-h-[400px] font-body text-sm md:text-base leading-relaxed" />
             )}
             <p className="text-xs text-muted-foreground text-right">
               {content.split(/\s+/).filter(Boolean).length} words
