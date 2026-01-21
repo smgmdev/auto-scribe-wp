@@ -172,7 +172,7 @@ export function AccountSettings() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email"
-              className="flex-1"
+              className="flex-1 text-sm placeholder:text-sm"
             />
             <Button 
               onClick={handleUpdateEmail} 
@@ -204,7 +204,7 @@ export function AccountSettings() {
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
               placeholder="+1 234 567 8900"
-              className="flex-1"
+              className="flex-1 text-sm placeholder:text-sm"
             />
             <Button 
               onClick={handleUpdateWhatsapp} 
@@ -237,12 +237,14 @@ export function AccountSettings() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
+              className="text-sm placeholder:text-sm"
             />
             <Input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
+              className="text-sm placeholder:text-sm"
             />
             <Button 
               onClick={handleUpdatePassword} 
