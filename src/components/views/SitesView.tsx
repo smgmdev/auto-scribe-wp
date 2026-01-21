@@ -1034,6 +1034,12 @@ export function SitesView() {
               </div>
               <div className="min-w-0 flex-1 ml-3">
                 <h3 className="text-sm truncate">{site.name}</h3>
+                {/* Plugin badge - visible only on mobile under name */}
+                {isAdmin && (
+                  <Badge variant="outline" className="md:hidden text-xs mt-0.5">
+                    {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                  </Badge>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
@@ -1056,8 +1062,9 @@ export function SitesView() {
                 </div>
               )}
 
+              {/* Plugin badge - hidden on mobile */}
               {isAdmin && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="hidden md:inline-flex text-xs">
                   {site.seoPlugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                 </Badge>
               )}
