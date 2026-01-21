@@ -4839,24 +4839,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           className={`px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
           onMouseDown={handleDragStart}
         >
-          <div className="flex justify-center mb-1">
+          {/* Top row: Grip handle and action buttons */}
+          <div className="flex items-center justify-between mb-2">
             <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="flex items-center justify-between gap-2 flex-wrap md:flex-nowrap">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              {globalChatRequest.media_site?.favicon && (
-                <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded shrink-0" />
-              )}
-              <div className="flex flex-col min-w-0">
-                <h3 className="font-semibold text-sm whitespace-nowrap">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
-                <div className="flex items-center gap-2">
-                  <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                    {renderLastSeenStatus()}
-                  </span>
-                </div>
-              </div>
-            </div>
             <div className="flex items-center gap-1 shrink-0">
               {!isCancelled && localOrder?.status !== 'cancelled' && (
                 <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
@@ -4933,21 +4918,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           setDisputeDialogOpen(true);
                         }}
                       >
-                        Open Dispute
+                        Request Revision
                       </DropdownMenuItem>
                     )}
-                    {globalChatType === 'agency-request' && hasOrder && localOrder?.delivery_status !== 'accepted' && localOrder?.delivery_status !== 'delivered' && !isAdmin && !hasOpenDispute && (
-                      <DropdownMenuItem 
-                        className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                        onSelect={() => {
-                          setActionDropdownOpen(false);
-                          setCancelPlacedOrderDialogOpen(true);
-                        }}
-                      >
-                        Cancel Order
-                      </DropdownMenuItem>
-                    )}
-                    {hasOpenDispute && !isAdmin && globalChatType === 'agency-request' && (
+                    {globalChatType === 'agency-request' && hasOpenDispute && !isAdmin && (
                       <DropdownMenuItem 
                         className="cursor-pointer text-muted-foreground"
                         disabled
@@ -4955,7 +4929,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         Dispute Opened
                       </DropdownMenuItem>
                     )}
-                    {hasOpenDispute && isAdmin && (
+                    {isAdmin && hasOpenDispute && (
                       <>
                         <DropdownMenuItem 
                           className="cursor-pointer text-green-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black whitespace-nowrap"
@@ -5067,40 +5041,43 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             setOrderWithCreditsOpen(true);
                           }}
                         >
-                          {hasAnyClientOrderRequest ? 'Resend Order Request' : 'Send Order Request'}
+                          {hasAnyClientOrderRequest ? 'Resend Order Request' : 'Order Now'}
                         </DropdownMenuItem>
                       )
                     )}
-                    {hasOrder && localOrder?.delivery_status === 'pending' && globalChatType === 'my-request' && (
-                      hasSentPendingCancelRequest ? (
-                        <DropdownMenuItem 
-                          className={`cursor-pointer text-muted-foreground ${isAdmin ? 'opacity-50' : ''}`}
-                          disabled
-                        >
-                          Cancellation Pending...
-                        </DropdownMenuItem>
-                      ) : hasPendingCancelRequest ? (
-                        <DropdownMenuItem 
-                          className={`cursor-pointer text-orange-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
-                          onSelect={() => {
-                            setActionDropdownOpen(false);
-                            // Find the pending request and accept it
-                            const pendingMsg = messages.find(msg => {
-                              if (msg.sender_type === senderType) return false;
-                              const cr = parseCancelOrderRequest(msg.message);
-                              if (!cr) return false;
-                              const msgIndex = messages.findIndex(m => m.id === msg.id);
-                              return !messages.slice(msgIndex + 1).some(m => 
-                                parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
-                              );
-                            });
-                            if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
-                          }}
-                          disabled={acceptingCancellation || isAdmin}
-                        >
-                          {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
-                        </DropdownMenuItem>
-                      ) : null
+                    {globalChatType === 'agency-request' && !hasOrder && (
+                      (() => {
+                        // Check if there's a pending cancel request from client
+                        const pendingCancelRequest = messages.find(msg => {
+                          const cr = parseCancelOrderRequest(msg.message);
+                          if (!cr) return false;
+                          const msgIndex = messages.findIndex(m => m.id === msg.id);
+                          return !messages.slice(msgIndex + 1).some(m => 
+                            parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+                          );
+                        });
+                        return pendingCancelRequest ? (
+                          <DropdownMenuItem 
+                            className={`cursor-pointer text-green-600 focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
+                            onSelect={() => {
+                              setActionDropdownOpen(false);
+                              // Find the pending cancel request message and accept it
+                              const pendingMsg = messages.find(msg => {
+                                const cr = parseCancelOrderRequest(msg.message);
+                                if (!cr) return false;
+                                const msgIndex = messages.findIndex(m => m.id === msg.id);
+                                return !messages.slice(msgIndex + 1).some(m => 
+                                  parseCancelOrderAccepted(m.message) || parseCancelOrderRejected(m.message)
+                                );
+                              });
+                              if (pendingMsg) handleAcceptCancellation(pendingMsg.id);
+                            }}
+                            disabled={acceptingCancellation || isAdmin}
+                          >
+                            {acceptingCancellation ? 'Accepting...' : 'Accept Cancellation'}
+                          </DropdownMenuItem>
+                        ) : null
+                      })()
                     )}
                     {!hasOrder && !hasAcceptedOrderRequest && !isCancelled && (
                       <DropdownMenuItem 
@@ -5122,6 +5099,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="icon"
                   className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                   onClick={() => setMediaListingOpen(true)}
+                  onMouseDown={(e) => e.stopPropagation()}
                   title="Media Listing Info"
                 >
                   <Info className="h-4 w-4" />
@@ -5132,10 +5110,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 size="icon"
                 className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                 onClick={handleClose}
+                onMouseDown={(e) => e.stopPropagation()}
                 title="Close"
               >
                 <X className="h-4 w-4" />
               </Button>
+            </div>
+          </div>
+          {/* Product title row */}
+          <div className="flex items-center gap-3">
+            {globalChatRequest.media_site?.favicon && (
+              <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded shrink-0" />
+            )}
+            <div className="flex flex-col min-w-0">
+              <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
+              <div className="flex items-center gap-2">
+                <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
+                  {renderLastSeenStatus()}
+                </span>
+              </div>
             </div>
           </div>
         </div>
