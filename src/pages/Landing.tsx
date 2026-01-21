@@ -768,7 +768,13 @@ const Landing = () => {
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
-                            <span className="font-semibold text-foreground">{site.name}</span>
+                            <div className="flex items-center justify-between flex-1 min-w-0 gap-2">
+                              <span className="font-semibold text-foreground truncate">{site.name}</span>
+                              {/* Price on right side of name */}
+                              {site.price > 0 && site.category !== 'Agencies/People' && (
+                                <span className="text-sm text-muted-foreground flex-shrink-0">{site.price.toLocaleString()} USD</span>
+                              )}
+                            </div>
                           </div>
                           
                           {/* Right: Format/Country + via agency + agency logo */}
@@ -781,9 +787,6 @@ const Landing = () => {
                               </>
                             ) : (
                               <>
-                                {site.price > 0 && (
-                                  <span className="text-sm text-foreground">{site.price} USD</span>
-                                )}
                                 <span className="text-sm text-foreground">{site.publication_format}</span>
                                 {site.agency && (
                                   <>
