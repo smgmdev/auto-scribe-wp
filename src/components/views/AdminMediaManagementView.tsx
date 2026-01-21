@@ -1609,10 +1609,10 @@ export function AdminMediaManagementView() {
                                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
                                     </TooltipTrigger>
                                     <TooltipContent 
-                                      side="right" 
-                                      align="start"
-                                      className="max-w-[220px] text-xs bg-background border border-border shadow-lg z-50"
-                                      sideOffset={5}
+                                      side="bottom" 
+                                      align="center"
+                                      sideOffset={8}
+                                      className="max-w-[250px] text-xs bg-foreground text-background shadow-lg z-[9999]"
                                     >
                                       <p>Approved WordPress site is now available in Instant Publishing Library under Media Network.</p>
                                     </TooltipContent>
