@@ -2148,12 +2148,13 @@ export function AdminMediaManagementView() {
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
                                             </div>
-                                            {/* Agency info on mobile with arrow on right */}
-                                            <div className="flex items-center justify-between md:hidden">
-                                              <p className="text-xs text-muted-foreground truncate">
-                                                {site.agency ? `via ${site.agency}` : site.publication_format}
-                                              </p>
-                                              <div className="h-5 w-5 flex items-center justify-center text-muted-foreground flex-shrink-0">
+                                            {/* Agency info on mobile */}
+                                            <p className="text-xs text-muted-foreground md:hidden truncate">
+                                              {site.agency ? `via ${site.agency}` : site.publication_format}
+                                            </p>
+                                            {/* Arrow in bottom-right corner on mobile */}
+                                            <div className="flex md:hidden justify-end mt-1">
+                                              <div className="h-5 w-5 flex items-center justify-center text-muted-foreground">
                                                 {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                               </div>
                                             </div>
