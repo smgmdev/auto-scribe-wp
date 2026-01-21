@@ -1623,11 +1623,11 @@ export function AdminMediaManagementView() {
                                     e.stopPropagation();
                                     if (site.user_id) fetchAgencyDetails(site.user_id);
                                   }}
-                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5"
+                                  className="text-sm hover:text-accent transition-colors text-left flex items-center gap-1 -mt-0.5 truncate max-w-full"
                                   disabled={isLoadingAgencyDetails}
                                 >
-                                  {agencyName || 'Unknown Agency'}
-                                  <ArrowUpRight className="h-3 w-3" />
+                                  <span className="truncate">{agencyName || 'Unknown Agency'}</span>
+                                  <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
                                 </button>
                                 <div className="flex items-center gap-2 -mt-0.5">
                                   <span className="text-xs text-muted-foreground truncate max-w-[200px]">
