@@ -2041,8 +2041,10 @@ export function AdminMediaManagementView() {
                               </button>
                               {submission.reply_sheet_url && (
                                 <div className="flex items-center gap-2 -mt-0.5">
-                                  <p className="hidden md:block text-xs text-muted-foreground truncate max-w-[200px]">
-                                    {submission.reply_sheet_url}
+                                  <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-[200px]">
+                                    {submission.reply_sheet_url.length > 25 
+                                      ? `${submission.reply_sheet_url.substring(0, 25)}...` 
+                                      : submission.reply_sheet_url}
                                   </p>
                                   <button
                                     onClick={(e) => {
