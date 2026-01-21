@@ -674,7 +674,7 @@ const Landing = () => {
                   placeholder="Search media outlets..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-transparent text-sm md:text-lg text-foreground placeholder:text-sm md:placeholder:text-lg placeholder:text-muted-foreground outline-none"
+                  className="flex-1 bg-transparent text-base md:text-lg text-foreground placeholder:text-base md:placeholder:text-lg placeholder:text-muted-foreground outline-none"
                 />
                 {searchQuery && (
                   <button
