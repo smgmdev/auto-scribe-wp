@@ -1576,11 +1576,16 @@ export function SitesView() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">{site.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">
+                                {/* URL and format on desktop */}
+                                <p className="hidden md:block text-xs text-muted-foreground truncate">
                                   {site.link.replace(/^https?:\/\//, '')}
                                 </p>
+                                {/* Format on mobile - under name */}
+                                <p className="md:hidden text-xs text-muted-foreground">
+                                  {site.publication_format}
+                                </p>
                               </div>
-                              <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
+                              <div className="hidden md:flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
                                 {site.price > 0 && (
                                   <span>{site.price.toLocaleString()} USD</span>
                                 )}
