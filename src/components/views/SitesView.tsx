@@ -1062,20 +1062,6 @@ export function SitesView() {
                 </Badge>
               )}
 
-              {isAdmin && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:bg-[hsl(var(--icon-hover))] hover:text-white" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openDeleteWPDialog(site.id, site.name);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
-
               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                 {isExpanded ? (
                   <ChevronUp className="h-4 w-4" />
