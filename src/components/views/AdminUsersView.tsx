@@ -528,7 +528,7 @@ export function AdminUsersView() {
             placeholder="Search users by email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-xs md:text-sm placeholder:text-xs md:placeholder:text-sm"
+            className="pl-10 text-sm placeholder:text-sm"
           />
         </div>
         
