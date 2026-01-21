@@ -2142,12 +2142,12 @@ export function AdminMediaManagementView() {
                                           <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                             {site.price > 0 ? `${site.price} USD` : 'Free'}
                                           </Badge>
-                                          <div className="w-[100px] flex justify-start">
+                                          <div className="w-[100px] flex justify-start hidden md:flex">
                                             <span className="text-xs text-muted-foreground">{site.publication_format}</span>
                                           </div>
-                                          {/* Agency info - use submission's agency logo */}
+                                          {/* Agency info - use submission's agency logo - hidden on mobile, shown in expanded view */}
                                           {site.agency && (
-                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
                                               <span>via</span>
                                               <span className="text-foreground">{site.agency}</span>
                                               {agencyLogos[site.agency] && (
@@ -2182,6 +2182,10 @@ export function AdminMediaManagementView() {
                                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                                             </p>
                                           )}
+                                          {/* Publication format on mobile */}
+                                          <p className="text-xs text-muted-foreground md:hidden">
+                                            {site.publication_format}
+                                          </p>
                                           {/* Link at the bottom */}
                                           <a 
                                             href={ensureHttps(site.link)}
@@ -2192,6 +2196,20 @@ export function AdminMediaManagementView() {
                                             <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                                             <ExternalLink className="h-3 w-3 flex-shrink-0" />
                                           </a>
+                                          {/* Agency info on mobile - shown below link */}
+                                          {site.agency && (
+                                            <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground">
+                                              <span>via</span>
+                                              <span className="text-foreground">{site.agency}</span>
+                                              {agencyLogos[site.agency] && (
+                                                <img 
+                                                  src={agencyLogos[site.agency]} 
+                                                  alt={site.agency} 
+                                                  className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                />
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
                                       )}
                                     </CardContent>
