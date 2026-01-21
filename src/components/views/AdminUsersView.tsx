@@ -667,48 +667,37 @@ export function AdminUsersView() {
 
                     {/* Mobile layout */}
                     <div className="md:hidden space-y-2">
-                      {/* Row 1: Avatar + Badge above Email */}
+                      {/* Row 1: Avatar + Buttons above Email */}
                       <div className="flex items-start gap-3">
                         <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                           <Users className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          {/* Badge above email */}
+                          {/* Buttons above email */}
                           <div className="flex items-center gap-2 mb-1">
-                            {user.suspended ? (
-                              <Badge variant="destructive" className="w-[80px] justify-center pr-3">
-                                <Ban className="h-3 w-3 mr-1" />
-                                Suspended
-                              </Badge>
-                            ) : user.role === 'admin' ? (
-                              <Badge 
-                                variant="outline"
-                                className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
-                              >
-                                <Shield className="h-3 w-3 mr-1" />
-                                Admin
-                              </Badge>
-                            ) : user.isAgency ? (
-                              <Badge 
-                                className="bg-black text-white hover:bg-black w-[72px] justify-center"
-                              >
-                                Agency
-                              </Badge>
-                            ) : (
-                              <Badge 
-                                variant="outline"
-                                className="w-[72px] justify-center"
-                              >
-                                <Shield className="h-3 w-3 mr-1" />
-                                User
-                              </Badge>
-                            )}
                             {user.role !== 'admin' && (
-                              <Badge variant="secondary" className="min-w-[90px] justify-start">
-                                <Coins className="h-3 w-3 mr-1" />
-                                {user.credits} credits
-                              </Badge>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => openCreditDialog(user, e)}
+                                className="hover:bg-black hover:text-white text-xs h-7"
+                              >
+                                Manage Credits
+                              </Button>
                             )}
+                            {user.id !== currentUser?.id ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="hover:bg-black hover:text-white h-7 w-7 p-0"
+                                onClick={(e) => openActionDialog(user, e)}
+                              >
+                                <AlertCircle className="h-3.5 w-3.5" />
+                              </Button>
+                            ) : null}
+                            <ChevronDown 
+                              className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                            />
                           </div>
                           {/* Email + Status icon */}
                           <div className="flex items-center gap-2">
@@ -727,33 +716,42 @@ export function AdminUsersView() {
                         </div>
                       </div>
 
-                      {/* Row 2: Buttons + Dropdown aligned right */}
-                      <div className="flex items-center justify-end gap-2">
-                        {user.role !== 'admin' && (
-                          <Button
+                      {/* Row 2: Badges aligned left */}
+                      <div className="flex items-center gap-2">
+                        {user.suspended ? (
+                          <Badge variant="destructive" className="w-[80px] justify-center pr-3">
+                            <Ban className="h-3 w-3 mr-1" />
+                            Suspended
+                          </Badge>
+                        ) : user.role === 'admin' ? (
+                          <Badge 
                             variant="outline"
-                            size="sm"
-                            onClick={(e) => openCreditDialog(user, e)}
-                            className="hover:bg-black hover:text-white text-xs h-8"
+                            className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
                           >
-                            Manage Credits
-                          </Button>
-                        )}
-                        {user.id !== currentUser?.id ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-black hover:text-white h-8 w-8 p-0"
-                            onClick={(e) => openActionDialog(user, e)}
+                            <Shield className="h-3 w-3 mr-1" />
+                            Admin
+                          </Badge>
+                        ) : user.isAgency ? (
+                          <Badge 
+                            className="bg-black text-white hover:bg-black w-[72px] justify-center"
                           >
-                            <AlertCircle className="h-4 w-4" />
-                          </Button>
+                            Agency
+                          </Badge>
                         ) : (
-                          <div className="w-8" />
+                          <Badge 
+                            variant="outline"
+                            className="w-[72px] justify-center"
+                          >
+                            <Shield className="h-3 w-3 mr-1" />
+                            User
+                          </Badge>
                         )}
-                        <ChevronDown 
-                          className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                        />
+                        {user.role !== 'admin' && (
+                          <Badge variant="secondary" className="min-w-[90px] justify-start">
+                            <Coins className="h-3 w-3 mr-1" />
+                            {user.credits} credits
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
