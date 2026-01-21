@@ -2118,56 +2118,65 @@ export function AdminMediaManagementView() {
                                     }}
                                   >
                                     <CardContent className="p-3">
-                                      <div className="flex items-center gap-3">
-                                        {/* Favicon */}
-                                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden">
-                                          {site.favicon ? (
-                                            <img 
-                                              src={site.favicon} 
-                                              alt={`${site.name} favicon`} 
-                                              className="h-5 w-5 object-contain"
-                                              onError={e => {
-                                                e.currentTarget.style.display = 'none';
-                                                (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                                              }}
-                                            />
-                                          ) : null}
-                                          <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
-                                        </div>
-                                        
-                                        {/* Name */}
-                                        <div className="min-w-0 flex-1">
-                                          <h3 className="text-sm truncate">{site.name || 'Unnamed Site'}</h3>
-                                        </div>
-                                        
-                                        {/* Price Badge */}
-                                        <Badge variant="secondary" className="text-xs whitespace-nowrap flex-shrink-0">
-                                          {site.price > 0 ? `${site.price} USD` : 'Free'}
-                                        </Badge>
-                                        
-                                        {/* Format - hidden on mobile */}
-                                        <div className="hidden md:block w-[80px] flex-shrink-0">
-                                          <span className="text-xs text-muted-foreground">{site.publication_format}</span>
-                                        </div>
-                                        
-                                        {/* Agency info - hidden on mobile */}
-                                        {site.agency && (
-                                          <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
-                                            <span>via</span>
-                                            <span className="text-foreground">{site.agency}</span>
-                                            {agencyLogos[site.agency] && (
+                                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                          {/* Favicon */}
+                                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden">
+                                            {site.favicon ? (
                                               <img 
-                                                src={agencyLogos[site.agency]} 
-                                                alt={site.agency} 
-                                                className="h-4 w-4 object-contain rounded-full"
+                                                src={site.favicon} 
+                                                alt={`${site.name} favicon`} 
+                                                className="h-5 w-5 object-contain"
+                                                onError={e => {
+                                                  e.currentTarget.style.display = 'none';
+                                                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+                                                }}
                                               />
-                                            )}
+                                            ) : null}
+                                            <Globe className={`h-4 w-4 text-muted-foreground ${site.favicon ? 'hidden' : ''}`} />
                                           </div>
-                                        )}
+                                          
+                                          {/* Name & Mobile Info */}
+                                          <div className="min-w-0 flex-1">
+                                            <h3 className="text-sm truncate">{site.name || 'Unnamed Site'}</h3>
+                                            {/* Agency info on mobile */}
+                                            <p className="text-xs text-muted-foreground md:hidden truncate">
+                                              {site.agency ? `via ${site.agency}` : site.publication_format}
+                                            </p>
+                                          </div>
+                                        </div>
                                         
-                                        {/* Chevron */}
-                                        <div className="h-6 w-6 flex items-center justify-center text-muted-foreground flex-shrink-0">
-                                          {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                        {/* Badges & Controls */}
+                                        <div className="flex items-center gap-2 ml-11 md:ml-0 flex-shrink-0">
+                                          {/* Price Badge */}
+                                          <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                            {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                          </Badge>
+                                          
+                                          {/* Format - hidden on mobile */}
+                                          <div className="hidden md:block w-[80px]">
+                                            <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                                          </div>
+                                          
+                                          {/* Agency info - hidden on mobile */}
+                                          {site.agency && (
+                                            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
+                                              <span>via</span>
+                                              <span className="text-foreground">{site.agency}</span>
+                                              {agencyLogos[site.agency] && (
+                                                <img 
+                                                  src={agencyLogos[site.agency]} 
+                                                  alt={site.agency} 
+                                                  className="h-4 w-4 object-contain rounded-full"
+                                                />
+                                              )}
+                                            </div>
+                                          )}
+                                          
+                                          {/* Chevron */}
+                                          <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
+                                            {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                          </div>
                                         </div>
                                       </div>
                                       
