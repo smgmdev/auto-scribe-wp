@@ -629,7 +629,7 @@ async function uploadMediaViaEdgeFunction(
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 second timeout for slow WordPress servers
     
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wordpress-upload-media`,
