@@ -716,7 +716,7 @@ const Landing = () => {
                 {/* Subcategory Pills */}
                 {subcategories.length > 0 && (
                   <div className="border-b border-border px-4 py-3 flex-shrink-0">
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1 md:gap-2">
                       <button
                         onClick={() => setActiveSubcategory(null)}
                         className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
