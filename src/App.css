@@ -33,9 +33,7 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
+/* Removed .card class to avoid conflict with shadcn Card component */
 
 .read-the-docs {
   color: #888;
