@@ -118,8 +118,8 @@ export function ArticlesView() {
             <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
               {article.content.substring(0, 200)}...
             </p>
-            <div className="mt-4 flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-4">
+            <div className="mt-4 flex flex-col gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center justify-between w-full md:w-auto md:justify-start md:gap-4">
                 <span>
                   {new Date(article.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -127,7 +127,7 @@ export function ArticlesView() {
                     day: 'numeric',
                   })}
                 </span>
-                <span>•</span>
+                <span className="hidden md:inline">•</span>
                 <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
               </div>
               {article.publishedTo && (() => {
