@@ -576,27 +576,150 @@ export function AdminUsersView() {
               <Card key={user.id} className="group">
                 <CardContent className="p-4">
                   <div 
-                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"
+                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"
                     onClick={() => toggleUserExpand(user.id)}
                   >
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{user.email}</p>
-                        {user.suspended && (
-                          <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
-                        )}
-                        {user.role !== 'admin' && !user.suspended && (
-                          user.emailConfirmed ? (
-                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                          )
-                        )}
+                    {/* Desktop layout */}
+                    <div className="hidden md:grid grid-cols-[auto_1fr_auto] items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <Users className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium truncate">{user.email}</p>
+                          {user.suspended && (
+                            <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
+                          )}
+                          {user.role !== 'admin' && !user.suspended && (
+                            user.emailConfirmed ? (
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            ) : (
+                              <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                            )
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {user.suspended ? (
+                            <Badge variant="destructive" className="w-[80px] justify-center pr-3">
+                              <Ban className="h-3 w-3 mr-1" />
+                              Suspended
+                            </Badge>
+                          ) : user.role === 'admin' ? (
+                            <Badge 
+                              variant="outline"
+                              className="bg-primary/10 text-primary border-primary/30 w-[72px] justify-center"
+                            >
+                              <Shield className="h-3 w-3 mr-1" />
+                              Admin
+                            </Badge>
+                          ) : user.isAgency ? (
+                            <Badge 
+                              className="bg-black text-white hover:bg-black w-[72px] justify-center"
+                            >
+                              Agency
+                            </Badge>
+                          ) : (
+                            <Badge 
+                              variant="outline"
+                              className="w-[72px] justify-center"
+                            >
+                              <Shield className="h-3 w-3 mr-1" />
+                              User
+                            </Badge>
+                          )}
+                          {user.role !== 'admin' && (
+                            <Badge variant="secondary" className="min-w-[90px] justify-start">
+                              <Coins className="h-3 w-3 mr-1" />
+                              {user.credits} credits
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {user.role !== 'admin' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => openCreditDialog(user, e)}
+                            className="hover:bg-black hover:text-white"
+                          >
+                            Manage Credits
+                          </Button>
+                        )}
+                        {user.id !== currentUser?.id ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white"
+                            onClick={(e) => openActionDialog(user, e)}
+                          >
+                            <AlertCircle className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <div className="w-9" />
+                        )}
+                        <ChevronDown 
+                          className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mobile layout */}
+                    <div className="md:hidden space-y-2">
+                      {/* Row 1: Avatar + Email + Status icon */}
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <Users className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate text-sm">{user.email}</p>
+                            {user.suspended && (
+                              <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
+                            )}
+                            {user.role !== 'admin' && !user.suspended && (
+                              user.emailConfirmed ? (
+                                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              ) : (
+                                <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 2: Buttons + Dropdown aligned right */}
+                      <div className="flex items-center justify-end gap-2">
+                        {user.role !== 'admin' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => openCreditDialog(user, e)}
+                            className="hover:bg-black hover:text-white text-xs h-8"
+                          >
+                            Manage Credits
+                          </Button>
+                        )}
+                        {user.id !== currentUser?.id ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white h-8 w-8 p-0"
+                            onClick={(e) => openActionDialog(user, e)}
+                          >
+                            <AlertCircle className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <div className="w-8" />
+                        )}
+                        <ChevronDown 
+                          className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                        />
+                      </div>
+
+                      {/* Row 3: Badges */}
+                      <div className="flex items-center gap-2 flex-wrap">
                         {user.suspended ? (
                           <Badge variant="destructive" className="w-[80px] justify-center pr-3">
                             <Ban className="h-3 w-3 mr-1" />
@@ -632,34 +755,6 @@ export function AdminUsersView() {
                           </Badge>
                         )}
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {user.role !== 'admin' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => openCreditDialog(user, e)}
-                          className="hover:bg-black hover:text-white"
-                        >
-                          Manage Credits
-                        </Button>
-                      )}
-                      {user.id !== currentUser?.id ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="hover:bg-black hover:text-white"
-                          onClick={(e) => openActionDialog(user, e)}
-                        >
-                          <AlertCircle className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <div className="w-9" />
-                      )}
-                      <ChevronDown 
-                        className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                      />
                     </div>
                   </div>
 
