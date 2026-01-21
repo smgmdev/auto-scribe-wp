@@ -2182,8 +2182,8 @@ export function AdminMediaManagementView() {
                                             </div>
                                           )}
                                           
-                                          {/* Chevron */}
-                                          <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
+                                          {/* Chevron - hidden on mobile when expanded (shown in expanded section instead) */}
+                                          <div className={`h-6 w-6 flex items-center justify-center text-muted-foreground ${isSiteExpanded ? 'hidden md:flex' : ''}`}>
                                             {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                           </div>
                                         </div>
@@ -2220,18 +2220,31 @@ export function AdminMediaManagementView() {
                                             <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                                             <ExternalLink className="h-3 w-3 flex-shrink-0" />
                                           </a>
-                                          {/* Agency info on mobile - shown below link */}
+                                          {/* Agency info on mobile - shown below link with arrow on right */}
                                           {site.agency && (
-                                            <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground">
-                                              <span>via</span>
-                                              <span className="text-foreground">{site.agency}</span>
-                                              {agencyLogos[site.agency] && (
-                                                <img 
-                                                  src={agencyLogos[site.agency]} 
-                                                  alt={site.agency} 
-                                                  className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                                />
-                                              )}
+                                            <div className="flex md:hidden items-center justify-between">
+                                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                <span>via</span>
+                                                <span className="text-foreground">{site.agency}</span>
+                                                {agencyLogos[site.agency] && (
+                                                  <img 
+                                                    src={agencyLogos[site.agency]} 
+                                                    alt={site.agency} 
+                                                    className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                  />
+                                                )}
+                                              </div>
+                                              <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
+                                                <ChevronUp className="h-4 w-4" />
+                                              </div>
+                                            </div>
+                                          )}
+                                          {/* Arrow for cards without agency on mobile */}
+                                          {!site.agency && (
+                                            <div className="flex md:hidden justify-end">
+                                              <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
+                                                <ChevronUp className="h-4 w-4" />
+                                              </div>
                                             </div>
                                           )}
                                         </div>
