@@ -2078,7 +2078,7 @@ export function AdminMediaManagementView() {
                                   : 'N/A'}
                               </p>
                               {/* Sites added badge - shown on mobile under date */}
-                              <Badge variant="secondary" className="text-xs whitespace-nowrap md:hidden w-fit">
+                              <Badge variant="secondary" className="text-xs whitespace-nowrap md:hidden w-fit mt-1">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
                               </div>
