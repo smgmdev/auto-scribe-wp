@@ -118,24 +118,26 @@ export function ArticlesView() {
             <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
               {article.content.substring(0, 200)}...
             </p>
-            <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-              <span>
-                {new Date(article.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
-              <span>•</span>
-              <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
+            <div className="mt-4 flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <span>
+                  {new Date(article.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+                <span>•</span>
+                <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
+              </div>
               {article.publishedTo && (() => {
                 const siteInfo = getSiteInfo(article);
-                if (!siteInfo) return null; // Site was deleted and no stored name
+                if (!siteInfo) return null;
                 const isDraft = article.status === 'draft';
                 const label = isDraft ? 'Draft saved on:' : 'Published on:';
                 return (
-                  <>
-                    <span>•</span>
+                  <div className="flex items-center gap-1">
+                    <span className="hidden md:inline">•</span>
                     {article.wpLink ? (
                       <a 
                         href={article.wpLink} 
@@ -157,7 +159,7 @@ export function ArticlesView() {
                         {label} {siteInfo.name}
                       </span>
                     )}
-                  </>
+                  </div>
                 );
               })()}
             </div>
