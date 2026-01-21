@@ -673,8 +673,8 @@ export function AdminUsersView() {
                           <Users className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          {/* Buttons above email */}
-                          <div className="flex items-center gap-2 mb-1">
+                          {/* Buttons above email - right aligned */}
+                          <div className="flex items-center justify-end gap-2 mb-1">
                             {user.role !== 'admin' && (
                               <Button
                                 variant="outline"
