@@ -756,7 +756,7 @@ const Landing = () => {
                         <button
                           key={site.id}
                           onClick={() => handleDropdownSiteClick(site, 'media')}
-                          className="flex items-center w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+                          className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
                           {/* Media logo */}
                           <img
