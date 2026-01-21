@@ -758,45 +758,42 @@ const Landing = () => {
                           onClick={() => handleDropdownSiteClick(site, 'media')}
                           className="flex items-center w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
-                          {/* Left: Media logo + name */}
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <img
-                              src={site.favicon || getFaviconUrl(site.link)}
-                              alt={site.name}
-                              className="h-10 w-10 rounded-lg bg-muted object-cover flex-shrink-0"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                            <div className="flex items-center justify-between flex-1 min-w-0 gap-2">
+                          {/* Media logo */}
+                          <img
+                            src={site.favicon || getFaviconUrl(site.link)}
+                            alt={site.name}
+                            className="h-10 w-10 rounded-lg bg-muted object-cover flex-shrink-0"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          
+                          {/* Content container */}
+                          <div className="flex-1 min-w-0">
+                            {/* Row 1: Name + Price */}
+                            <div className="flex items-center justify-between gap-2">
                               <span className="font-semibold text-foreground truncate">{site.name}</span>
-                              {/* Price on right side of name */}
                               {site.price > 0 && site.category !== 'Agencies/People' && (
                                 <span className="text-sm text-muted-foreground flex-shrink-0">{site.price.toLocaleString()} USD</span>
                               )}
                             </div>
-                          </div>
-                          
-                          {/* Right: Format/Country + via agency + agency logo */}
-                          <div className="flex items-center gap-3 flex-shrink-0">
+                            
+                            {/* Row 2: Format + Agency (mobile) / Right side info (desktop) */}
                             {site.category === 'Agencies/People' ? (
-                              <>
-                                {(site as any).country && (
-                                  <span className="text-sm text-foreground">{(site as any).country}</span>
-                                )}
-                              </>
+                              (site as any).country && (
+                                <span className="text-xs text-muted-foreground">{(site as any).country}</span>
+                              )
                             ) : (
-                              <>
-                                <span className="text-sm text-foreground">{site.publication_format}</span>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <span>{site.publication_format}</span>
                                 {site.agency && (
                                   <>
-                                    <span className="text-xs text-muted-foreground">via</span>
-                                    <span className="text-sm text-foreground">{site.agency}</span>
+                                    <span>· via {site.agency}</span>
                                     {agencyLogos[site.agency] && (
                                       <img
                                         src={agencyLogos[site.agency]}
                                         alt={site.agency}
-                                        className="h-5 w-5 rounded object-contain flex-shrink-0"
+                                        className="h-4 w-4 rounded object-contain flex-shrink-0"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
@@ -804,7 +801,7 @@ const Landing = () => {
                                     )}
                                   </>
                                 )}
-                              </>
+                              </div>
                             )}
                           </div>
                         </button>
