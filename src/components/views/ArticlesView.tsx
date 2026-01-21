@@ -118,7 +118,7 @@ export function ArticlesView() {
             <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
               {article.content.substring(0, 200)}...
             </p>
-            <div className="mt-4 flex flex-col gap-2 text-xs text-muted-foreground">
+            <div className="mt-4 flex flex-col md:flex-row md:flex-wrap md:items-center gap-2 md:gap-4 text-xs text-muted-foreground">
               <div className="flex items-center justify-between w-full md:w-auto md:justify-start md:gap-4">
                 <span>
                   {new Date(article.createdAt).toLocaleDateString('en-US', {
@@ -129,6 +129,38 @@ export function ArticlesView() {
                 </span>
                 <span className="hidden md:inline">•</span>
                 <span>{article.content.split(/\s+/).filter(Boolean).length} words</span>
+                {article.publishedTo && (() => {
+                  const siteInfo = getSiteInfo(article);
+                  if (!siteInfo) return null;
+                  const isDraft = article.status === 'draft';
+                  const label = isDraft ? 'Draft saved on:' : 'Published on:';
+                  return (
+                    <>
+                      <span className="hidden md:inline">•</span>
+                      {article.wpLink ? (
+                        <a 
+                          href={article.wpLink} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hidden md:inline-flex items-center gap-1 text-accent hover:underline cursor-pointer whitespace-nowrap"
+                        >
+                          {siteInfo.favicon && (
+                            <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm flex-shrink-0" />
+                          )}
+                          <span>{label} {siteInfo.name}</span>
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                        </a>
+                      ) : (
+                        <span className="hidden md:inline-flex items-center gap-1">
+                          {siteInfo.favicon && (
+                            <img src={siteInfo.favicon} alt="" className="h-3 w-3 rounded-sm" />
+                          )}
+                          {label} {siteInfo.name}
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               {article.publishedTo && (() => {
                 const siteInfo = getSiteInfo(article);
@@ -136,8 +168,7 @@ export function ArticlesView() {
                 const isDraft = article.status === 'draft';
                 const label = isDraft ? 'Draft saved on:' : 'Published on:';
                 return (
-                  <div className="flex items-center gap-1">
-                    <span className="hidden md:inline">•</span>
+                  <div className="flex md:hidden items-center gap-1">
                     {article.wpLink ? (
                       <a 
                         href={article.wpLink} 
