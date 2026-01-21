@@ -667,43 +667,44 @@ export function AdminUsersView() {
 
                     {/* Mobile layout */}
                     <div className="md:hidden space-y-2">
-                      {/* Row 1: Avatar + Buttons above Email */}
+                      {/* Row 1: Buttons on right */}
+                      <div className="flex items-center justify-end gap-2">
+                        {user.role !== 'admin' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => openCreditDialog(user, e)}
+                            className="hover:bg-black hover:text-white text-xs h-7"
+                          >
+                            Manage Credits
+                          </Button>
+                        )}
+                        {user.id !== currentUser?.id ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-black hover:text-white h-7 w-7 p-0"
+                            onClick={(e) => openActionDialog(user, e)}
+                          >
+                            <AlertCircle className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : null}
+                        <ChevronDown 
+                          className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                        />
+                      </div>
+
+                      {/* Row 2: Avatar with email underneath */}
                       <div className="flex items-start gap-3">
                         <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                           <Users className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          {/* Buttons above email - right aligned */}
-                          <div className="flex items-center justify-end gap-2 mb-1">
-                            {user.role !== 'admin' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => openCreditDialog(user, e)}
-                                className="hover:bg-black hover:text-white text-xs h-7"
-                              >
-                                Manage Credits
-                              </Button>
-                            )}
-                            {user.id !== currentUser?.id ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="hover:bg-black hover:text-white h-7 w-7 p-0"
-                                onClick={(e) => openActionDialog(user, e)}
-                              >
-                                <AlertCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            ) : null}
-                            <ChevronDown 
-                              className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                            />
-                          </div>
                           {/* Email + Status icon */}
                           <div className="flex items-center gap-2">
                             <p className="font-medium truncate text-sm">{user.email}</p>
                             {user.suspended && (
-                              <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
+                              <Ban className="h-4 w-4 text-destructive flex-shrink-0" />
                             )}
                             {user.role !== 'admin' && !user.suspended && (
                               user.emailConfirmed ? (
@@ -716,7 +717,7 @@ export function AdminUsersView() {
                         </div>
                       </div>
 
-                      {/* Row 2: Badges aligned left */}
+                      {/* Row 3: Badges aligned left */}
                       <div className="flex items-center gap-2">
                         {user.suspended ? (
                           <Badge variant="destructive" className="w-[80px] justify-center pr-3">
