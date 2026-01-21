@@ -748,11 +748,6 @@ export function AdminEngagementsView() {
                               <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
                                 Cancelled
                               </Badge>
-                              {r.cancelled_by === 'admin' && (
-                                <Badge className="bg-red-600 text-white">
-                                  By Admin
-                                </Badge>
-                              )}
                             </div>
                           </div>
                           <div className="flex items-end justify-between">
@@ -766,7 +761,11 @@ export function AdminEngagementsView() {
                               <p className="text-xs text-muted-foreground">
                                 Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                               </p>
-                              {r.cancellation_reason && (
+                              {r.cancelled_by === 'admin' ? (
+                                <p className="text-xs text-destructive">
+                                  Reason: Cancelled by Arcana Mace Staff{r.cancellation_reason ? ` - ${r.cancellation_reason}` : ''}
+                                </p>
+                              ) : r.cancellation_reason && (
                                 <p className="text-xs text-destructive">Reason: {r.cancellation_reason}</p>
                               )}
                             </div>
