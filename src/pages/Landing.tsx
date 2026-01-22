@@ -848,7 +848,7 @@ const Landing = () => {
         ) : (
           <>
             <LatestPublishedCarousel />
-            {renderSection('Instant Self Publishing Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
+            {renderSection('Self Publishing Local Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
             {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
             {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
           </>
