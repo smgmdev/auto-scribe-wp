@@ -83,7 +83,7 @@ export function LatestPublishedCarousel() {
         .eq('status', 'published')
         .not('published_to', 'is', null)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(6);
 
       if (!error && data) {
         const mapped = data.map(item => ({
