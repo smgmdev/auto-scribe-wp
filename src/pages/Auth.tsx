@@ -232,7 +232,12 @@ export default function Auth() {
       <Card className="w-full max-w-md bg-[#1c1c1c] border-0 rounded-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-2">
-            <img src={amlogo} alt="Logo" className="h-20 w-20 object-contain" />
+            <img 
+              src={amlogo} 
+              alt="Logo" 
+              className="h-20 w-20 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => navigate('/')}
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-white">Arcana Mace</CardTitle>
           <CardDescription className="text-white/70">AI-Powered Controlled Media Publishing Platform</CardDescription>
