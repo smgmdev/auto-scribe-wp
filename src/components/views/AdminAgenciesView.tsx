@@ -127,7 +127,6 @@ export function AdminAgenciesView() {
   const [agencyToEditCommission, setAgencyToEditCommission] = useState<AgencyPayout | null>(null);
   const [newCommissionPercentage, setNewCommissionPercentage] = useState<string>('');
   const [updatingCommission, setUpdatingCommission] = useState(false);
-  const [migratingLogos, setMigratingLogos] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoLoading, setLogoLoading] = useState(false);
   const [dialogLogoLoaded, setDialogLogoLoaded] = useState(false);
@@ -334,6 +333,13 @@ export function AdminAgenciesView() {
           description: 'Processing agency setup...',
           className: 'bg-blue-600 text-white border-blue-600'
         });
+
+        // Automatically migrate logo to public bucket if exists
+        if (selectedApp.logo_url) {
+          supabase.functions.invoke('migrate-agency-logos').catch(err => 
+            console.error('Logo migration failed:', err)
+          );
+        }
 
         // All agencies now use custom payout flow
         const response = await supabase.functions.invoke('approve-custom-payout', {
@@ -748,37 +754,6 @@ export function AdminAgenciesView() {
           <p className="mt-2 text-muted-foreground">Manage agency applications and approvals</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
-            onClick={async () => {
-              setMigratingLogos(true);
-              try {
-                const { data, error } = await supabase.functions.invoke('migrate-agency-logos');
-                if (error) throw error;
-                toast({
-                  title: 'Logo Migration Complete',
-                  description: `Migrated ${data?.results?.filter((r: any) => r.status === 'migrated').length || 0} logos to public bucket`,
-                });
-              } catch (err: any) {
-                toast({
-                  variant: 'destructive',
-                  title: 'Migration Failed',
-                  description: err.message,
-                });
-              } finally {
-                setMigratingLogos(false);
-              }
-            }}
-            disabled={migratingLogos}
-          >
-            {migratingLogos ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            {migratingLogos ? 'Migrating...' : 'Migrate Logos'}
-          </Button>
           <Button
             className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
             onClick={() => fetchData(true)}
