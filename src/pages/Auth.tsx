@@ -231,7 +231,7 @@ export default function Auth() {
     <div className="min-h-screen bg-black flex items-center justify-center p-4" style={{ backgroundImage: 'url(/background-tile.svg)', backgroundRepeat: 'repeat' }}>
       <Card className="w-full max-w-md bg-[#1c1c1c] border-0 rounded-sm">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-2">
+          <div className="flex justify-center">
             <img 
               src={amlogo} 
               alt="Logo" 
