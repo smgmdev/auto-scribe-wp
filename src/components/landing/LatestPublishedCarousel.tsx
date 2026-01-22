@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isYesterday } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,26 @@ interface PublishedArticle {
   published_to_name: string | null;
   published_to_favicon: string | null;
   featured_image: FeaturedImage | null;
+}
+
+function ImageWithLoader({ src, alt }: { src: string; alt: string }) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <div className="aspect-video w-full overflow-hidden bg-muted relative">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        onLoad={() => setIsLoading(false)}
+      />
+    </div>
+  );
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -117,13 +137,10 @@ export function LatestPublishedCarousel() {
                 <div className="rounded-2xl bg-card border border-border overflow-hidden h-full hover:border-accent/50 hover:shadow-lg transition-all duration-200 flex flex-col">
                   {/* Featured Image */}
                   {article.featured_image?.url && (
-                    <div className="aspect-video w-full overflow-hidden bg-muted">
-                      <img
-                        src={article.featured_image.url}
-                        alt={article.featured_image.alt || article.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
+                    <ImageWithLoader
+                      src={article.featured_image.url}
+                      alt={article.featured_image.alt || article.title}
+                    />
                   )}
                   
                   <div className="p-5 flex flex-col flex-1">
