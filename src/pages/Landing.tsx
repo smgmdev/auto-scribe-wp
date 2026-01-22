@@ -649,7 +649,7 @@ const Landing = () => {
           ) : (
             <Button 
               onClick={() => navigate('/auth')}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
             >
               Sign In
             </Button>
