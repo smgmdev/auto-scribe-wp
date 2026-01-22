@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isYesterday } from 'date-fns';
@@ -9,6 +9,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  type CarouselApi,
 } from '@/components/ui/carousel';
 
 interface FeaturedImage {
@@ -70,10 +71,24 @@ function formatRelativeTime(dateString: string): string {
 export function LatestPublishedCarousel() {
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
   
   const autoplayPlugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
   );
+
+  useEffect(() => {
+    if (!api) return;
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -123,6 +138,7 @@ export function LatestPublishedCarousel() {
     <section className="mb-10">
       <h2 className="text-xl font-semibold text-foreground mb-4">Latest Published News</h2>
       <Carousel
+        setApi={setApi}
         opts={{
           align: 'start',
           loop: true,
@@ -188,6 +204,24 @@ export function LatestPublishedCarousel() {
         <CarouselPrevious className="-left-2 md:-left-4 hover:bg-foreground hover:border-foreground hover:text-background" />
         <CarouselNext className="-right-2 md:-right-4 hover:bg-foreground hover:border-foreground hover:text-background" />
       </Carousel>
+      
+      {/* Progress Dots */}
+      {count > 0 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {Array.from({ length: count }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => api?.scrollTo(index)}
+              className={`h-2 rounded-full transition-all duration-200 ${
+                index === current 
+                  ? 'w-6 bg-foreground' 
+                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
