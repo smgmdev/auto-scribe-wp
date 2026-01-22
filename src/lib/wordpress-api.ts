@@ -604,20 +604,13 @@ async function uploadMediaViaEdgeFunction(
   file: File,
   metadata: { title?: string; alt_text?: string; caption?: string; description?: string }
 ): Promise<{ id: number; source_url: string }> {
+  const MAX_RETRIES = 3;
+  const TIMEOUT_MS = 180000; // 3 minute timeout for very slow WordPress servers
+  
   console.log('[uploadMediaViaEdgeFunction] Starting upload for site:', siteId, 'file:', file.name);
   
   const { supabase } = await import('@/integrations/supabase/client');
   
-  // For file uploads, we need to use FormData with fetch directly
-  // because supabase.functions.invoke doesn't support file uploads well
-  const formData = new FormData();
-  formData.append('siteId', siteId);
-  formData.append('file', file);
-  formData.append('title', metadata.title || '');
-  formData.append('altText', metadata.alt_text || '');
-  formData.append('caption', metadata.caption || '');
-  formData.append('description', metadata.description || '');
-
   // Get the current session for auth
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
@@ -627,50 +620,87 @@ async function uploadMediaViaEdgeFunction(
 
   console.log('[uploadMediaViaEdgeFunction] Session found, calling edge function...');
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 second timeout for slow WordPress servers
-    
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wordpress-upload-media`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: formData,
-        signal: controller.signal,
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      console.log(`[uploadMediaViaEdgeFunction] Attempt ${attempt}/${MAX_RETRIES}`);
+      
+      // Create fresh FormData for each attempt
+      const formData = new FormData();
+      formData.append('siteId', siteId);
+      formData.append('file', file);
+      formData.append('title', metadata.title || '');
+      formData.append('altText', metadata.alt_text || '');
+      formData.append('caption', metadata.caption || '');
+      formData.append('description', metadata.description || '');
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wordpress-upload-media`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: formData,
+          signal: controller.signal,
+        }
+      );
+      
+      clearTimeout(timeoutId);
+      console.log('[uploadMediaViaEdgeFunction] Response status:', response.status);
+
+      // Handle 503 Service Unavailable - retry
+      if (response.status === 503) {
+        console.warn(`[uploadMediaViaEdgeFunction] Server unavailable (503), attempt ${attempt}/${MAX_RETRIES}`);
+        lastError = new Error('WordPress server temporarily unavailable');
+        if (attempt < MAX_RETRIES) {
+          const waitTime = Math.min(5000 * attempt, 15000); // 5s, 10s, 15s
+          console.log(`[uploadMediaViaEdgeFunction] Waiting ${waitTime}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        throw lastError;
       }
-    );
-    
-    clearTimeout(timeoutId);
-    console.log('[uploadMediaViaEdgeFunction] Response status:', response.status);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('[uploadMediaViaEdgeFunction] Error:', response.status, errorData);
-      throw new Error(errorData.error || 'Failed to upload media');
-    }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[uploadMediaViaEdgeFunction] Error:', response.status, errorData);
+        throw new Error(errorData.error || 'Failed to upload media');
+      }
 
-    const data = await response.json();
-    console.log('[uploadMediaViaEdgeFunction] Success:', data);
-    
-    if (data.error) {
-      console.error('[uploadMediaViaEdgeFunction] Edge function returned error:', data.error);
-      throw new Error(data.error);
-    }
+      const data = await response.json();
+      console.log('[uploadMediaViaEdgeFunction] Success:', data);
+      
+      if (data.error) {
+        console.error('[uploadMediaViaEdgeFunction] Edge function returned error:', data.error);
+        throw new Error(data.error);
+      }
 
-    return {
-      id: data.id,
-      source_url: data.source_url,
-    };
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.error('[uploadMediaViaEdgeFunction] Request timed out');
-      throw new Error('Upload timed out. Please try again.');
+      return {
+        id: data.id,
+        source_url: data.source_url,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error(`[uploadMediaViaEdgeFunction] Request timed out, attempt ${attempt}/${MAX_RETRIES}`);
+        lastError = new Error('Upload timed out. The WordPress server is slow to respond.');
+        if (attempt < MAX_RETRIES) {
+          console.log('[uploadMediaViaEdgeFunction] Retrying after timeout...');
+          continue;
+        }
+      } else {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        // Don't retry on non-timeout errors
+        throw lastError;
+      }
     }
-    throw error;
   }
+  
+  throw lastError || new Error('Upload failed after multiple attempts');
 }
 
 // Test connection to a WordPress site
