@@ -223,7 +223,7 @@ export default function Auth() {
     });
   };
 
-  const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200 pl-10 text-base placeholder:text-base";
+  const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200 pl-10 text-sm placeholder:text-sm h-9";
 
   const buttonClassName = "w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200 rounded-sm";
 
