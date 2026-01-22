@@ -239,8 +239,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`;
 
+      // Upload logo to PUBLIC agency-logos bucket for public access
       const { error: uploadError } = await supabase.storage
-        .from('agency-documents')
+        .from('agency-logos')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
