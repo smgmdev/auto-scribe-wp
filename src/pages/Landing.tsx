@@ -1054,8 +1054,62 @@ const Landing = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-card mt-12">
-        <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Arcana Mace. All rights reserved.
+        <div className="container mx-auto px-4 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            {/* Company */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Company</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Our Mission</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
+              </ul>
+            </div>
+            
+            {/* How It Works */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">How It Works</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">Self Publishing</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Media Library</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">AI Article Generation</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">For Agencies</a></li>
+              </ul>
+            </div>
+            
+            {/* Resources */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">FAQs</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
+              </ul>
+            </div>
+            
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">GDPR</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          {/* Bottom bar */}
+          <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Arcana Mace. All rights reserved.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              AI-Powered Controlled Media Publishing Platform
+            </p>
+          </div>
         </div>
       </footer>
     </div>
