@@ -139,7 +139,7 @@ export function LatestPublishedCarousel() {
                 rel="noopener noreferrer"
                 className="block h-full group"
               >
-                <div className="rounded-2xl bg-card border border-border overflow-hidden h-full hover:border-accent/50 hover:shadow-lg transition-all duration-200 flex flex-col">
+                <div className="rounded-2xl bg-card border border-border overflow-hidden h-full hover:border-accent/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-200 flex flex-col">
                   {/* Featured Image */}
                   {article.featured_image?.url && (
                     <ImageWithLoader
