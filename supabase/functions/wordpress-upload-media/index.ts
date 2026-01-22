@@ -5,6 +5,62 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Retry configuration
+const MAX_RETRIES = 3;
+const TIMEOUT_MS = 180000; // 3 minutes timeout per attempt
+
+async function uploadWithRetry(
+  url: string,
+  authHeader: string,
+  wpFormData: FormData,
+  attempt: number = 1
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    console.log(`[wordpress-upload-media] Upload attempt ${attempt}/${MAX_RETRIES}`);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+      },
+      body: wpFormData,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    
+    // Retry on 503 Service Unavailable
+    if (response.status === 503 && attempt < MAX_RETRIES) {
+      console.log(`[wordpress-upload-media] Got 503, retrying after delay...`);
+      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
+    }
+
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    
+    // Retry on timeout or network errors
+    if (attempt < MAX_RETRIES) {
+      const isTimeout = error instanceof Error && error.name === 'AbortError';
+      const isNetworkError = error instanceof Error && error.message.includes('fetch');
+      
+      if (isTimeout || isNetworkError) {
+        console.log(`[wordpress-upload-media] ${isTimeout ? 'Timeout' : 'Network error'}, retrying after delay...`);
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
+      }
+    }
+    
+    throw error;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -76,14 +132,12 @@ Deno.serve(async (req) => {
     if (caption) wpFormData.append('caption', caption);
     if (description) wpFormData.append('description', description);
 
-    // Upload to WordPress
-    const wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-      },
-      body: wpFormData,
-    });
+    // Upload to WordPress with retry logic
+    const wpResponse = await uploadWithRetry(
+      `${baseUrl}/wp-json/wp/v2/media`,
+      authHeader,
+      wpFormData
+    );
 
     console.log('[wordpress-upload-media] WP API response status:', wpResponse.status);
 
