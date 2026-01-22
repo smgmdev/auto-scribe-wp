@@ -14,6 +14,7 @@ import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { ChatListPanel } from '@/components/ui/ChatListPanel';
 import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
+import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCarousel';
 import amblack from '@/assets/amblack.png';
 
 interface SiteTag {
@@ -846,6 +847,7 @@ const Landing = () => {
           </div>
         ) : (
           <>
+            <LatestPublishedCarousel />
             {renderSection('Instant Self Publishing Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
             {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
             {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
