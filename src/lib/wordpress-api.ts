@@ -474,24 +474,7 @@ export async function fetchPostSEOData(
     let metaDescription = '';
     
     if (site.seoPlugin === 'rankmath') {
-      // Try Rank Math's dedicated REST API endpoint first
-      try {
-        const rmResponse = await fetch(`${baseUrl}/wp-json/rankmath/v1/getHead?url=${encodeURIComponent(baseUrl)}/?p=${postId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': createAuthHeader(site),
-          },
-        });
-        
-        if (rmResponse.ok) {
-          const rmData = await rmResponse.json();
-          console.log('[fetchPostSEOData] Rank Math getHead response:', rmData);
-        }
-      } catch (rmError) {
-        console.log('[fetchPostSEOData] Rank Math dedicated endpoint not available:', rmError);
-      }
-      
-      // Fetch post meta directly
+      // Fetch post meta directly with context=edit to get all meta fields
       const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
         method: 'GET',
         headers: {
@@ -508,8 +491,17 @@ export async function fetchPostSEOData(
         
         // Check for rank_math prefixed fields in meta
         if (data.meta) {
+          // Primary: Standard RankMath fields
           focusKeyword = data.meta.rank_math_focus_keyword || '';
           metaDescription = data.meta.rank_math_description || '';
+          
+          // Fallback: Check for underscore-prefixed versions (private meta)
+          if (!focusKeyword) {
+            focusKeyword = data.meta._rank_math_focus_keyword || '';
+          }
+          if (!metaDescription) {
+            metaDescription = data.meta._rank_math_description || '';
+          }
         }
         
         // Also check for rank_math_meta object (some configurations expose it this way)
@@ -518,7 +510,35 @@ export async function fetchPostSEOData(
           metaDescription = metaDescription || data.rank_math_meta.rank_math_description || '';
         }
         
+        // Fallback: Try to fetch from yoast_head_json if RankMath exposes data there
+        if ((!focusKeyword || !metaDescription) && data.yoast_head_json) {
+          if (!metaDescription && data.yoast_head_json.description) {
+            metaDescription = data.yoast_head_json.description;
+          }
+        }
+        
         console.log('[fetchPostSEOData] RankMath extracted:', { focusKeyword, metaDescription });
+      }
+      
+      // If still no data, try RankMath's REST API for post meta
+      if (!focusKeyword && !metaDescription) {
+        try {
+          const rmMetaResponse = await fetch(`${baseUrl}/wp-json/rankmath/v1/posts/${postId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': createAuthHeader(site),
+            },
+          });
+          
+          if (rmMetaResponse.ok) {
+            const rmData = await rmMetaResponse.json();
+            console.log('[fetchPostSEOData] RankMath API response:', rmData);
+            focusKeyword = rmData.focus_keyword || rmData.focusKeyword || '';
+            metaDescription = rmData.description || rmData.metaDescription || '';
+          }
+        } catch (rmError) {
+          console.log('[fetchPostSEOData] RankMath API not available:', rmError);
+        }
       }
       
       return { focusKeyword, metaDescription };
