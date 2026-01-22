@@ -130,16 +130,16 @@ export function LatestPublishedCarousel() {
         plugins={[autoplayPlugin.current]}
         className="w-full"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="-ml-2">
           {articles.map((article) => (
-            <CarouselItem key={article.id} className="pl-4 md:basis-1/3">
+            <CarouselItem key={article.id} className="pl-2 md:basis-1/3">
               <a
                 href={article.wp_link || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block h-full group"
               >
-                <div className="rounded-2xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
+                <div className="rounded-xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
                   {/* Featured Image */}
                   {article.featured_image?.url && (
                     <ImageWithLoader
