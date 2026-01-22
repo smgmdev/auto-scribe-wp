@@ -741,6 +741,8 @@ export function ComposeView() {
             if (existingIdx >= 0 && editingArticle?.tags?.[existingIdx]) return editingArticle.tags[existingIdx];
             return `Tag #${id}`;
           }),
+          focusKeyword,
+          metaDescription,
         });
       } else {
         await addArticle({
@@ -763,6 +765,8 @@ export function ComposeView() {
             const tag = availableTags.find(t => t.id === id);
             return tag?.name || editingTagNames[id] || `Tag #${id}`;
           }),
+          focusKeyword,
+          metaDescription,
         });
       }
       // Deduct credits for non-admin users via backend (only for new articles, not updates)
