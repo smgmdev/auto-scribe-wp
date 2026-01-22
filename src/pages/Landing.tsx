@@ -184,9 +184,14 @@ const Landing = () => {
             for (const app of appData) {
               let logoUrl: string | null = null;
               if (app.logo_url) {
-                const { data: signed } = await supabase.storage
+                const { data: signed, error: signedError } = await supabase.storage
                   .from('agency-documents')
                   .createSignedUrl(app.logo_url, 3600);
+                console.log('[Landing] Agency logo signed URL result:', { 
+                  logo_url: app.logo_url, 
+                  signed: signed?.signedUrl ? 'success' : 'null',
+                  error: signedError 
+                });
                 if (signed?.signedUrl) {
                   logoUrl = signed.signedUrl;
                 }
