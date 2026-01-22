@@ -1,4 +1,5 @@
 import type { WordPressSite, WPCategory, WPTag } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 // Create Basic Auth header from username and application password
 function createAuthHeader(site: WordPressSite): string {
@@ -462,148 +463,48 @@ export async function updateMediaMetadata(
   }
 }
 
-// Fetch post SEO data from WordPress
+// Fetch post SEO data from WordPress via edge function
 export async function fetchPostSEOData(
   site: WordPressSite,
   postId: number
 ): Promise<{ focusKeyword: string; metaDescription: string }> {
   try {
-    const baseUrl = normalizeUrl(site.url);
+    console.log('[fetchPostSEOData] Fetching SEO data via edge function for post:', postId);
     
-    let focusKeyword = '';
-    let metaDescription = '';
-    
-    if (site.seoPlugin === 'rankmath') {
-      // Fetch post meta directly with context=edit to get all meta fields
-      const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
-        method: 'GET',
-        headers: {
-          'Authorization': createAuthHeader(site),
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Debug: Log all available meta fields
-        console.log('[fetchPostSEOData] RankMath - Post meta:', data.meta);
-        console.log('[fetchPostSEOData] RankMath - All top-level keys:', Object.keys(data));
-        
-        // Check for rank_math prefixed fields in meta
-        if (data.meta) {
-          // Primary: Standard RankMath fields
-          focusKeyword = data.meta.rank_math_focus_keyword || '';
-          metaDescription = data.meta.rank_math_description || '';
-          
-          // Fallback: Check for underscore-prefixed versions (private meta)
-          if (!focusKeyword) {
-            focusKeyword = data.meta._rank_math_focus_keyword || '';
-          }
-          if (!metaDescription) {
-            metaDescription = data.meta._rank_math_description || '';
-          }
-        }
-        
-        // Also check for rank_math_meta object (some configurations expose it this way)
-        if (data.rank_math_meta) {
-          focusKeyword = focusKeyword || data.rank_math_meta.rank_math_focus_keyword || '';
-          metaDescription = metaDescription || data.rank_math_meta.rank_math_description || '';
-        }
-        
-        // Fallback: Try to fetch from yoast_head_json if RankMath exposes data there
-        if ((!focusKeyword || !metaDescription) && data.yoast_head_json) {
-          if (!metaDescription && data.yoast_head_json.description) {
-            metaDescription = data.yoast_head_json.description;
-          }
-        }
-        
-        console.log('[fetchPostSEOData] RankMath extracted:', { focusKeyword, metaDescription });
-      }
-      
-      // If still no data, try RankMath's REST API for post meta
-      if (!focusKeyword && !metaDescription) {
-        try {
-          const rmMetaResponse = await fetch(`${baseUrl}/wp-json/rankmath/v1/posts/${postId}`, {
-            method: 'GET',
-            headers: {
-              'Authorization': createAuthHeader(site),
-            },
-          });
-          
-          if (rmMetaResponse.ok) {
-            const rmData = await rmMetaResponse.json();
-            console.log('[fetchPostSEOData] RankMath API response:', rmData);
-            focusKeyword = rmData.focus_keyword || rmData.focusKeyword || '';
-            metaDescription = rmData.description || rmData.metaDescription || '';
-          }
-        } catch (rmError) {
-          console.log('[fetchPostSEOData] RankMath API not available:', rmError);
-        }
-      }
-      
-      return { focusKeyword, metaDescription };
+    // Use edge function to fetch SEO data with proper credentials
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[fetchPostSEOData] No session found');
+      return { focusKeyword: '', metaDescription: '' };
     }
-    
-    // For AIOSEO and other plugins
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}?context=edit`, {
-      method: 'GET',
+
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-post-seo-data`, {
+      method: 'POST',
       headers: {
-        'Authorization': createAuthHeader(site),
+        'Authorization': `Bearer ${sessionData.session.access_token}`,
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
+      body: JSON.stringify({
+        siteId: site.id,
+        postId,
+      }),
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch post SEO data:', response.status);
+      console.error('[fetchPostSEOData] Edge function error:', response.status);
       return { focusKeyword: '', metaDescription: '' };
     }
 
     const data = await response.json();
+    console.log('[fetchPostSEOData] Edge function response:', data);
     
-    // Debug: Log all available meta and SEO-related fields
-    console.log('[fetchPostSEOData] Site SEO Plugin:', site.seoPlugin);
-    console.log('[fetchPostSEOData] Post meta keys:', data.meta ? Object.keys(data.meta) : 'no meta');
-    console.log('[fetchPostSEOData] Top-level keys with seo/rank/aioseo:', 
-      Object.keys(data).filter(k => k.toLowerCase().includes('seo') || k.toLowerCase().includes('rank') || k.toLowerCase().includes('aioseo'))
-    );
-    
-    if (site.seoPlugin === 'aioseo') {
-      // AIOSEO stores data in various locations depending on version and configuration
-      
-      // Method 1: aioseo_meta_data at top level or in meta
-      const aioseoData = data.aioseo_meta_data || data.meta?.aioseo_meta_data;
-      if (aioseoData && typeof aioseoData === 'object' && aioseoData.description) {
-        metaDescription = aioseoData.description || '';
-        focusKeyword = aioseoData.keyphrases?.focus?.keyphrase || '';
-      }
-      
-      // Method 2: Check post meta for AIOSEO v4+ format
-      if (!focusKeyword && data.meta?._aioseo_keywords) {
-        focusKeyword = data.meta._aioseo_keywords;
-      }
-      if (!metaDescription && data.meta?._aioseo_description) {
-        metaDescription = data.meta._aioseo_description;
-      }
-      
-      // Method 3: Check for _aioseo_og_description as fallback
-      if (!metaDescription && data.meta?._aioseo_og_description) {
-        metaDescription = data.meta._aioseo_og_description;
-      }
-      
-      // Method 4: Check yoast_head_json if AIOSEO exposes via similar format
-      if (data.yoast_head_json) {
-        if (!metaDescription && data.yoast_head_json.description) {
-          metaDescription = data.yoast_head_json.description;
-        }
-      }
-      
-      // Debug log for AIOSEO
-      console.log('[fetchPostSEOData] AIOSEO data:', aioseoData);
-      console.log('[fetchPostSEOData] Full meta object:', data.meta);
-    }
-    
-    return { focusKeyword, metaDescription };
+    return {
+      focusKeyword: data.focusKeyword || '',
+      metaDescription: data.metaDescription || '',
+    };
   } catch (error) {
-    console.error('Error fetching post SEO data:', error);
+    console.error('[fetchPostSEOData] Error:', error);
     return { focusKeyword: '', metaDescription: '' };
   }
 }
