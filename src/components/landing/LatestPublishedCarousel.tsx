@@ -139,7 +139,7 @@ export function LatestPublishedCarousel() {
                 rel="noopener noreferrer"
                 className="block h-full group"
               >
-                <div className="rounded-2xl bg-card border border-border overflow-hidden h-full hover:border-accent/50 transition-all duration-200 flex flex-col">
+                <div className="rounded-2xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
                   {/* Featured Image */}
                   {article.featured_image?.url && (
                     <ImageWithLoader
@@ -185,8 +185,8 @@ export function LatestPublishedCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex -left-4" />
-        <CarouselNext className="hidden md:flex -right-4" />
+        <CarouselPrevious className="hidden md:flex -left-4 hover:bg-foreground hover:border-foreground hover:text-background" />
+        <CarouselNext className="hidden md:flex -right-4 hover:bg-foreground hover:border-foreground hover:text-background" />
       </Carousel>
     </section>
   );
