@@ -201,8 +201,6 @@ export function LatestPublishedCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex -left-4 hover:bg-foreground hover:border-foreground hover:text-background" />
-        <CarouselNext className="hidden md:flex -right-4 hover:bg-foreground hover:border-foreground hover:text-background" />
       </Carousel>
       
       {/* Progress Dots */}
