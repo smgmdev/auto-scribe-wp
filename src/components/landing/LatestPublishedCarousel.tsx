@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isYesterday } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import Autoplay from 'embla-carousel-autoplay';
 import {
   Carousel,
   CarouselContent,
@@ -70,6 +70,10 @@ function formatRelativeTime(dateString: string): string {
 export function LatestPublishedCarousel() {
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
+  );
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -121,8 +125,9 @@ export function LatestPublishedCarousel() {
       <Carousel
         opts={{
           align: 'start',
-          loop: false,
+          loop: true,
         }}
+        plugins={[autoplayPlugin.current]}
         className="w-full"
       >
         <CarouselContent className="-ml-4">
