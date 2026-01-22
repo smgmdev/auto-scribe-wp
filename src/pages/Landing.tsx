@@ -184,16 +184,25 @@ const Landing = () => {
             for (const app of appData) {
               let logoUrl: string | null = null;
               if (app.logo_url) {
-                const { data: signed, error: signedError } = await supabase.storage
-                  .from('agency-documents')
-                  .createSignedUrl(app.logo_url, 3600);
-                console.log('[Landing] Agency logo signed URL result:', { 
-                  logo_url: app.logo_url, 
-                  signed: signed?.signedUrl ? 'success' : 'null',
-                  error: signedError 
-                });
-                if (signed?.signedUrl) {
-                  logoUrl = signed.signedUrl;
+                // Check if logo exists in public bucket (new format)
+                // or in private bucket (legacy format - requires migration)
+                const { data: publicUrl } = supabase.storage
+                  .from('agency-logos')
+                  .getPublicUrl(app.logo_url);
+                
+                // The public bucket URL will work if the file exists there
+                // For legacy logos in agency-documents, authenticated users will see them
+                // but unauthenticated users will see the fallback
+                logoUrl = publicUrl?.publicUrl || null;
+                
+                // For authenticated users, also try signed URL from private bucket as fallback
+                if (user) {
+                  const { data: signed } = await supabase.storage
+                    .from('agency-documents')
+                    .createSignedUrl(app.logo_url, 3600);
+                  if (signed?.signedUrl) {
+                    logoUrl = signed.signedUrl;
+                  }
                 }
               }
               const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
