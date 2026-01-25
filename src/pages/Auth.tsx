@@ -228,7 +228,7 @@ export default function Auth() {
   const buttonClassName = "w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200 rounded-sm";
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4" style={{ backgroundImage: 'url(/background-tile.svg)', backgroundRepeat: 'repeat' }}>
       <Card className="w-full max-w-md bg-[#1c1c1c] border-0 rounded-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center">
