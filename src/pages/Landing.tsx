@@ -1114,9 +1114,11 @@ const Landing = () => {
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
               <span>·</span>
-              <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-foreground transition-colors">Sales and Refunds</a>
               <span>·</span>
-              <a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a>
+              <a href="#" className="hover:text-foreground transition-colors">Legal</a>
+              <span>·</span>
+              <a href="#" className="hover:text-foreground transition-colors">Site Map</a>
             </div>
           </div>
         </div>
