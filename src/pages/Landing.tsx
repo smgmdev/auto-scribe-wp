@@ -1090,7 +1090,7 @@ const Landing = () => {
             <div>
               <h4 className="font-semibold text-foreground mb-2 text-xs">For Business</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">For Agencies</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Become an Agency</a></li>
               </ul>
             </div>
             
