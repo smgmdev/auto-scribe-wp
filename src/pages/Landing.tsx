@@ -1058,7 +1058,7 @@ const Landing = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
             {/* Media Buying */}
             <div>
-              <h4 className="font-semibold text-foreground mb-2 text-xs">Media Buying</h4>
+              <h4 className="font-semibold text-foreground mb-2 text-xs">Media Buying Categories</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 {GLOBAL_SUBCATEGORIES.map((subcategory) => (
                   <li key={subcategory}>
