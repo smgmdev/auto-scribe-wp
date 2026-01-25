@@ -1078,7 +1078,7 @@ const Landing = () => {
             
             {/* How It Works */}
             <div>
-              <h4 className="font-semibold text-foreground mb-2 text-xs">How It Works</h4>
+              <h4 className="font-semibold text-foreground mb-2 text-xs">For Clients</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Self Publishing</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Media Buying</a></li>
