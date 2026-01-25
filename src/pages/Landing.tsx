@@ -1058,8 +1058,8 @@ const Landing = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
             {/* Media Buying */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Media Buying</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground mb-4 text-sm">Media Buying</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 {GLOBAL_SUBCATEGORIES.map((subcategory) => (
                   <li key={subcategory}>
                     <a href="#" className="hover:text-foreground transition-colors">{subcategory}</a>
@@ -1070,16 +1070,16 @@ const Landing = () => {
             
             {/* Account */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Account</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground mb-4 text-sm">Account</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Manage Your Account</a></li>
               </ul>
             </div>
             
             {/* How It Works */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">How It Works</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground mb-4 text-sm">How It Works</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Self Publishing</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Media Buying</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">AI Article Generation</a></li>
@@ -1088,16 +1088,16 @@ const Landing = () => {
             
             {/* For Business */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">For Business</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground mb-4 text-sm">For Business</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">For Agencies</a></li>
               </ul>
             </div>
             
             {/* Arcana Mace */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Arcana Mace</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground mb-4 text-sm">Arcana Mace</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Newsroom</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Career Opportunities</a></li>
@@ -1108,10 +1108,10 @@ const Landing = () => {
           
           {/* Bottom bar */}
           <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Arcana Mace. All rights reserved.
             </p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
               <span>·</span>
               <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
