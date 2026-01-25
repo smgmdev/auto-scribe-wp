@@ -1058,7 +1058,7 @@ const Landing = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
             {/* Media Buying */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4 text-sm">Media Buying</h4>
+              <h4 className="font-semibold text-foreground mb-4 text-xs">Media Buying</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 {GLOBAL_SUBCATEGORIES.map((subcategory) => (
                   <li key={subcategory}>
@@ -1070,7 +1070,7 @@ const Landing = () => {
             
             {/* Account */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4 text-sm">Account</h4>
+              <h4 className="font-semibold text-foreground mb-4 text-xs">Account</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Manage Your Account</a></li>
               </ul>
@@ -1078,7 +1078,7 @@ const Landing = () => {
             
             {/* How It Works */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4 text-sm">How It Works</h4>
+              <h4 className="font-semibold text-foreground mb-4 text-xs">How It Works</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Self Publishing</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Media Buying</a></li>
@@ -1088,7 +1088,7 @@ const Landing = () => {
             
             {/* For Business */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4 text-sm">For Business</h4>
+              <h4 className="font-semibold text-foreground mb-4 text-xs">For Business</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">For Agencies</a></li>
               </ul>
@@ -1096,7 +1096,7 @@ const Landing = () => {
             
             {/* Arcana Mace */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4 text-sm">Arcana Mace</h4>
+              <h4 className="font-semibold text-foreground mb-4 text-xs">Arcana Mace</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Newsroom</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
