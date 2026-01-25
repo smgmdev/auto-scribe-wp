@@ -1055,15 +1055,24 @@ const Landing = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-card mt-12">
         <div className="container mx-auto px-4 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            {/* Company */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
+            {/* Media Buying */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Company</h4>
+              <h4 className="font-semibold text-foreground mb-4">Media Buying</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Our Mission</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
+                {GLOBAL_SUBCATEGORIES.map((subcategory) => (
+                  <li key={subcategory}>
+                    <a href="#" className="hover:text-foreground transition-colors">{subcategory}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Account */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">Account</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">Manage Your Account</a></li>
               </ul>
             </div>
             
@@ -1072,31 +1081,27 @@ const Landing = () => {
               <h4 className="font-semibold text-foreground mb-4">How It Works</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">Self Publishing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Media Library</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Media Buying</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">AI Article Generation</a></li>
+              </ul>
+            </div>
+            
+            {/* For Business */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-4">For Business</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#" className="hover:text-foreground transition-colors">For Agencies</a></li>
               </ul>
             </div>
             
-            {/* Resources */}
+            {/* Arcana Mace */}
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Resources</h4>
+              <h4 className="font-semibold text-foreground mb-4">Arcana Mace</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">FAQs</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-              </ul>
-            </div>
-            
-            {/* Legal */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">GDPR</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Newsroom</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Career Opportunities</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Contact Arcana Mace</a></li>
               </ul>
             </div>
           </div>
@@ -1106,9 +1111,13 @@ const Landing = () => {
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Arcana Mace. All rights reserved.
             </p>
-            <p className="text-sm text-muted-foreground">
-              AI-Powered Controlled Media Publishing Platform
-            </p>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+              <span>·</span>
+              <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+              <span>·</span>
+              <a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a>
+            </div>
           </div>
         </div>
       </footer>
