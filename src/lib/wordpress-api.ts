@@ -261,42 +261,65 @@ async function publishArticleViaEdgeFunction(params: PublishArticleParams): Prom
   
   const { supabase } = await import('@/integrations/supabase/client');
   
-  try {
-    const { data, error } = await supabase.functions.invoke('wordpress-publish-article', {
-      body: {
-        siteId: params.site.id,
-        title: params.title,
-        content: params.content,
-        status: params.status,
-        categories: params.categories,
-        tags: params.tags,
-        featuredMediaId: params.featuredMediaId,
-        seo: params.seo,
-      },
-    });
+  const maxRetries = 3;
+  let lastError: Error | null = null;
 
-    console.log('[publishArticleViaEdgeFunction] Response received:', { data, error });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[publishArticleViaEdgeFunction] Attempt ${attempt}/${maxRetries}`);
+      
+      const { data, error } = await supabase.functions.invoke('wordpress-publish-article', {
+        body: {
+          siteId: params.site.id,
+          title: params.title,
+          content: params.content,
+          status: params.status,
+          categories: params.categories,
+          tags: params.tags,
+          featuredMediaId: params.featuredMediaId,
+          seo: params.seo,
+        },
+      });
 
-    if (error) {
-      console.error('[publishArticleViaEdgeFunction] Invoke error:', error);
-      throw new Error(error.message || 'Failed to publish article');
+      console.log('[publishArticleViaEdgeFunction] Response received:', { data, error });
+
+      if (error) {
+        console.error('[publishArticleViaEdgeFunction] Invoke error:', error);
+        throw new Error(error.message || 'Failed to publish article');
+      }
+
+      if (data?.error) {
+        console.error('[publishArticleViaEdgeFunction] Edge function error:', data.error);
+        throw new Error(data.error);
+      }
+
+      console.log('[publishArticleViaEdgeFunction] Success:', data);
+
+      return {
+        id: data.id,
+        link: data.link,
+      };
+    } catch (error) {
+      console.error(`[publishArticleViaEdgeFunction] Attempt ${attempt} failed:`, error);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // Check if it's a network error that should be retried
+      const isNetworkError = lastError.message.includes('Failed to fetch') || 
+                            lastError.message.includes('NetworkError') ||
+                            lastError.message.includes('timeout');
+      
+      if (attempt < maxRetries && isNetworkError) {
+        const delay = attempt * 2000; // 2s, 4s delay
+        console.log(`[publishArticleViaEdgeFunction] Retrying after ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else if (!isNetworkError) {
+        // Non-network errors should not be retried
+        throw lastError;
+      }
     }
-
-    if (data?.error) {
-      console.error('[publishArticleViaEdgeFunction] Edge function error:', data.error);
-      throw new Error(data.error);
-    }
-
-    console.log('[publishArticleViaEdgeFunction] Success:', data);
-
-    return {
-      id: data.id,
-      link: data.link,
-    };
-  } catch (error) {
-    console.error('[publishArticleViaEdgeFunction] Exception:', error);
-    throw error;
   }
+
+  throw lastError || new Error('Failed to publish article after multiple attempts');
 }
 
 // Helper function to update Rank Math meta via REST API
