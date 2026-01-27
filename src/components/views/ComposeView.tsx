@@ -1219,7 +1219,7 @@ export function ComposeView() {
                   <p className="text-xs text-muted-foreground mb-1">Based on headline from</p>
                   <p className="font-medium text-sm">{selectedHeadline.source}.com</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedHeadline(null)}>
+                <Button variant="ghost" size="icon" className="hover:bg-black hover:text-white" onClick={() => setSelectedHeadline(null)}>
                   <X className="h-4 w-4" />
                 </Button>
               </CardContent>
