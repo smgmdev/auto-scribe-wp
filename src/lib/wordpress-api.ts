@@ -629,16 +629,25 @@ async function uploadMediaViaEdgeFunction(
         source_url: data.source_url,
       };
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.error(`[uploadMediaViaEdgeFunction] Request timed out, attempt ${attempt}/${MAX_RETRIES}`);
-        lastError = new Error('Upload timed out. The WordPress server is slow to respond.');
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      const isNetworkError = error instanceof Error && (
+        error.name === 'AbortError' ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('timeout')
+      );
+      
+      if (isNetworkError) {
+        console.error(`[uploadMediaViaEdgeFunction] Network error on attempt ${attempt}/${MAX_RETRIES}:`, lastError.message);
         if (attempt < MAX_RETRIES) {
-          console.log('[uploadMediaViaEdgeFunction] Retrying after timeout...');
+          const waitTime = Math.min(3000 * attempt, 9000); // 3s, 6s, 9s
+          console.log(`[uploadMediaViaEdgeFunction] Retrying after ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         }
       } else {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
-        // Don't retry on non-timeout errors
+        // Non-network errors should not be retried
+        console.error('[uploadMediaViaEdgeFunction] Non-network error:', lastError);
         throw lastError;
       }
     }
