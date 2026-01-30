@@ -1062,7 +1062,31 @@ const Landing = () => {
               <ul className="space-y-2 text-xs text-muted-foreground">
                 {GLOBAL_SUBCATEGORIES.map((subcategory) => (
                   <li key={subcategory}>
-                    <a href="#" className="hover:text-foreground transition-colors">{subcategory}</a>
+                    <button 
+                      onClick={() => {
+                        if (user) {
+                          navigate('/dashboard', { 
+                            state: { 
+                              targetView: 'sites', 
+                              targetTab: 'global',
+                              targetSubcategory: subcategory 
+                            } 
+                          });
+                        } else {
+                          navigate('/auth', { 
+                            state: { 
+                              redirectTo: '/dashboard', 
+                              targetView: 'sites', 
+                              targetTab: 'global',
+                              targetSubcategory: subcategory 
+                            } 
+                          });
+                        }
+                      }}
+                      className="hover:text-foreground transition-colors text-left"
+                    >
+                      {subcategory}
+                    </button>
                   </li>
                 ))}
               </ul>
