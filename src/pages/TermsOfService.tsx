@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 
 const TermsOfService = () => {
@@ -120,6 +121,8 @@ const TermsOfService = () => {
           </section>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
