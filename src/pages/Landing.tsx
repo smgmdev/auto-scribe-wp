@@ -1148,7 +1148,7 @@ const Landing = () => {
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Arcana Mace. All rights reserved.
             </p>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-xs text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
               <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
               <a href="#" className="hover:text-foreground transition-colors">Do not sell or share my personal information</a>
