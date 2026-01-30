@@ -1,17 +1,16 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/hooks/useAuth';
+import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
 
 const TermsOfService = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const handleSearchClick = () => {
-    navigate('/', { state: { openSearch: true } });
-  };
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,7 +25,7 @@ const TermsOfService = () => {
           {/* Search Trigger - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
-              onClick={handleSearchClick}
+              onClick={() => setShowSearchModal(true)}
               className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
             >
               <Search className="h-4 w-4" />
@@ -41,7 +40,7 @@ const TermsOfService = () => {
               variant="ghost"
               size="icon"
               className="md:hidden hover:bg-black hover:text-white"
-              onClick={handleSearchClick}
+              onClick={() => setShowSearchModal(true)}
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -65,6 +64,9 @@ const TermsOfService = () => {
           </div>
         </div>
       </header>
+
+      {/* Search Modal */}
+      <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Content */}
       <main className="container mx-auto px-4 py-12 max-w-3xl">
