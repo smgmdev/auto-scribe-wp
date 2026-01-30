@@ -13,63 +13,124 @@ function normalizeUrl(url: string): string {
 }
 
 export async function fetchCategories(site: WordPressSite): Promise<WPCategory[]> {
-  try {
-    const baseUrl = normalizeUrl(site.url);
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
-      headers: {
-        'Authorization': createAuthHeader(site),
-        'Content-Type': 'application/json',
-      },
-    });
+  const MAX_RETRIES = 3;
+  const TIMEOUT_MS = 30000; // 30 second timeout
+  let lastError: Error | null = null;
 
-    if (!response.ok) {
-      console.error('Failed to fetch categories:', response.status, response.statusText);
-      throw new Error(`Failed to fetch categories: ${response.statusText}`);
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const baseUrl = normalizeUrl(site.url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      console.log(`[fetchCategories] Attempt ${attempt}/${MAX_RETRIES} for ${site.name}`);
+
+      const response = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
+        headers: {
+          'Authorization': createAuthHeader(site),
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error('Failed to fetch categories:', response.status, response.statusText);
+        throw new Error(`Failed to fetch categories: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      // Decode HTML entities in category names (e.g., &amp; -> &)
+      const decodeHtmlEntities = (text: string): string => {
+        const doc = new DOMParser().parseFromString(text, 'text/html');
+        return doc.documentElement.textContent || text;
+      };
+      return data.map((cat: any) => ({
+        id: cat.id,
+        name: decodeHtmlEntities(cat.name),
+        slug: cat.slug,
+      }));
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      const isNetworkError = error instanceof Error && (
+        error.name === 'AbortError' ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('timeout')
+      );
+
+      if (isNetworkError && attempt < MAX_RETRIES) {
+        const waitTime = Math.min(2000 * attempt, 6000);
+        console.log(`[fetchCategories] Network error, retrying after ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      console.error('Error fetching categories:', lastError);
+      throw lastError;
     }
-
-    const data = await response.json();
-    // Decode HTML entities in category names (e.g., &amp; -> &)
-    // Using DOMParser instead of innerHTML to prevent XSS
-    const decodeHtmlEntities = (text: string): string => {
-      const doc = new DOMParser().parseFromString(text, 'text/html');
-      return doc.documentElement.textContent || text;
-    };
-    return data.map((cat: any) => ({
-      id: cat.id,
-      name: decodeHtmlEntities(cat.name),
-      slug: cat.slug,
-    }));
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
   }
+
+  throw lastError || new Error('Failed to fetch categories after multiple attempts');
 }
 
 export async function fetchTags(site: WordPressSite): Promise<WPTag[]> {
-  try {
-    const baseUrl = normalizeUrl(site.url);
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/tags?per_page=100`, {
-      headers: {
-        'Authorization': createAuthHeader(site),
-        'Content-Type': 'application/json',
-      },
-    });
+  const MAX_RETRIES = 3;
+  const TIMEOUT_MS = 30000; // 30 second timeout
+  let lastError: Error | null = null;
 
-    if (!response.ok) {
-      console.error('Failed to fetch tags:', response.status, response.statusText);
-      throw new Error(`Failed to fetch tags: ${response.statusText}`);
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const baseUrl = normalizeUrl(site.url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      console.log(`[fetchTags] Attempt ${attempt}/${MAX_RETRIES} for ${site.name}`);
+
+      const response = await fetch(`${baseUrl}/wp-json/wp/v2/tags?per_page=100`, {
+        headers: {
+          'Authorization': createAuthHeader(site),
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error('Failed to fetch tags:', response.status, response.statusText);
+        throw new Error(`Failed to fetch tags: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.map((tag: any) => ({
+        id: tag.id,
+        name: tag.name,
+        slug: tag.slug,
+      }));
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      const isNetworkError = error instanceof Error && (
+        error.name === 'AbortError' ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('timeout')
+      );
+
+      if (isNetworkError && attempt < MAX_RETRIES) {
+        const waitTime = Math.min(2000 * attempt, 6000);
+        console.log(`[fetchTags] Network error, retrying after ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      console.error('Error fetching tags:', lastError);
+      throw lastError;
     }
-
-    const data = await response.json();
-    return data.map((tag: any) => ({
-      id: tag.id,
-      name: tag.name,
-      slug: tag.slug,
-    }));
-  } catch (error) {
-    console.error('Error fetching tags:', error);
-    throw error;
   }
+
+  throw lastError || new Error('Failed to fetch tags after multiple attempts');
 }
 
 export async function createTag(site: WordPressSite, tagName: string): Promise<WPTag> {
