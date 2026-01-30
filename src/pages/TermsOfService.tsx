@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
+import { useAuth } from '@/hooks/useAuth';
 import amblack from '@/assets/amblack.png';
 
 const TermsOfService = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -17,14 +19,25 @@ const TermsOfService = () => {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(-1)}
-            className="hover:bg-black hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
