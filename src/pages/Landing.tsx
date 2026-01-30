@@ -627,7 +627,7 @@ const Landing = () => {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           
-          {/* Search Trigger */}
+          {/* Search Trigger - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setShowSearchModal(true)}
@@ -638,35 +638,38 @@ const Landing = () => {
             </button>
           </div>
           
-          {user ? (
-            <Button 
-              onClick={() => navigate('/dashboard')}
-              className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setShowSearchModal(true)}
             >
-              <User className="h-4 w-4" />
-              Account
+              <Search className="h-5 w-5" />
             </Button>
-          ) : (
-            <Button 
-              onClick={() => navigate('/auth')}
-              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
-            >
-              Sign In
-            </Button>
-          )}
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Mobile search trigger */}
-      <div className="md:hidden px-4 py-3 border-b border-border bg-card">
-        <button
-          onClick={() => setShowSearchModal(true)}
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
-        >
-          <Search className="h-4 w-4" />
-          <span>Search media outlets...</span>
-        </button>
-      </div>
 
       {/* TradingView-style Search Overlay */}
       {showSearchModal && (
