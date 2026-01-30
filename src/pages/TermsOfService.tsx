@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +8,10 @@ import amblack from '@/assets/amblack.png';
 const TermsOfService = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const handleSearchClick = () => {
+    navigate('/', { state: { openSearch: true } });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -19,8 +23,29 @@ const TermsOfService = () => {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={handleSearchClick}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
           {/* Right side buttons */}
           <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={handleSearchClick}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
