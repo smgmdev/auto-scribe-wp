@@ -621,7 +621,7 @@ const Landing = () => {
     <>
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
@@ -835,7 +835,7 @@ const Landing = () => {
       )}
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 pt-24">
         {loading ? (
           <div className="space-y-10">
             {[...Array(3)].map((_, i) => (
