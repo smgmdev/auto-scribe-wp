@@ -1144,7 +1144,7 @@ const Landing = () => {
           </div>
           
           {/* Bottom bar */}
-          <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Arcana Mace. All rights reserved.
             </p>
