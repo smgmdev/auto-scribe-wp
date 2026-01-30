@@ -13,6 +13,11 @@ function normalizeUrl(url: string): string {
 }
 
 export async function fetchCategories(site: WordPressSite): Promise<WPCategory[]> {
+  // If credentials are missing, use edge function
+  if (!site.username || !site.applicationPassword) {
+    return fetchCategoriesViaEdgeFunction(site.id);
+  }
+
   const MAX_RETRIES = 3;
   const TIMEOUT_MS = 30000; // 30 second timeout
   let lastError: Error | null = null;
@@ -75,7 +80,43 @@ export async function fetchCategories(site: WordPressSite): Promise<WPCategory[]
   throw lastError || new Error('Failed to fetch categories after multiple attempts');
 }
 
+// Fetch categories via edge function (for users without direct credentials)
+async function fetchCategoriesViaEdgeFunction(siteId: string): Promise<WPCategory[]> {
+  console.log('[fetchCategoriesViaEdgeFunction] Fetching categories via edge function for site:', siteId);
+  
+  const { data, error } = await supabase.functions.invoke('wordpress-get-categories', {
+    body: { siteId },
+  });
+
+  if (error) {
+    console.error('[fetchCategoriesViaEdgeFunction] Invoke error:', error);
+    throw new Error(error.message || 'Failed to fetch categories');
+  }
+
+  if (data?.error) {
+    console.error('[fetchCategoriesViaEdgeFunction] Edge function error:', data.error);
+    throw new Error(data.error);
+  }
+
+  // Decode HTML entities in category names
+  const decodeHtmlEntities = (text: string): string => {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    return doc.documentElement.textContent || text;
+  };
+
+  return (data.categories || []).map((cat: any) => ({
+    id: cat.id,
+    name: decodeHtmlEntities(cat.name),
+    slug: cat.slug,
+  }));
+}
+
 export async function fetchTags(site: WordPressSite): Promise<WPTag[]> {
+  // If credentials are missing, use edge function
+  if (!site.username || !site.applicationPassword) {
+    return fetchTagsViaEdgeFunction(site.id);
+  }
+
   const MAX_RETRIES = 3;
   const TIMEOUT_MS = 30000; // 30 second timeout
   let lastError: Error | null = null;
@@ -131,6 +172,31 @@ export async function fetchTags(site: WordPressSite): Promise<WPTag[]> {
   }
 
   throw lastError || new Error('Failed to fetch tags after multiple attempts');
+}
+
+// Fetch tags via edge function (for users without direct credentials)
+async function fetchTagsViaEdgeFunction(siteId: string): Promise<WPTag[]> {
+  console.log('[fetchTagsViaEdgeFunction] Fetching tags via edge function for site:', siteId);
+  
+  const { data, error } = await supabase.functions.invoke('wordpress-get-tags', {
+    body: { siteId },
+  });
+
+  if (error) {
+    console.error('[fetchTagsViaEdgeFunction] Invoke error:', error);
+    throw new Error(error.message || 'Failed to fetch tags');
+  }
+
+  if (data?.error) {
+    console.error('[fetchTagsViaEdgeFunction] Edge function error:', data.error);
+    throw new Error(data.error);
+  }
+
+  return (data.tags || []).map((tag: any) => ({
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+  }));
 }
 
 export async function createTag(site: WordPressSite, tagName: string): Promise<WPTag> {
