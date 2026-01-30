@@ -1102,8 +1102,6 @@ const Landing = () => {
                 <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Press & News</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Career Opportunities</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact Arcana Mace</a></li>
               </ul>
             </div>
           </div>
