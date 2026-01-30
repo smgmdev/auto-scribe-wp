@@ -67,7 +67,9 @@ export function DashboardView() {
   } = useAuth();
   const {
     articles,
-    loading: articlesLoading
+    loading: articlesLoading,
+    publishedCount,
+    draftsCount
   } = useArticles();
   const { sites, loading: sitesLoading } = useSites();
   const [isAgency, setIsAgency] = useState<boolean | null>(null);
@@ -130,9 +132,9 @@ export function DashboardView() {
       case 'globalLibrary':
         return globalLibraryCount;
       case 'published':
-        return articles.filter(a => a.status === 'published').length;
+        return publishedCount;
       case 'drafts':
-        return articles.filter(a => a.status === 'draft').length;
+        return draftsCount;
       default:
         return 0;
     }
