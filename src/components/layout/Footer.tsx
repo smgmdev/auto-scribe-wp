@@ -105,7 +105,7 @@ export function Footer() {
           </p>
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-4 text-xs text-muted-foreground">
             <button onClick={() => navigate('/terms')} className="hover:text-foreground transition-colors text-left">Terms of Service</button>
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors text-left">Privacy Policy</button>
             <a href="#" className="hover:text-foreground transition-colors">Do not sell or share my personal information</a>
             <a href="#" className="hover:text-foreground transition-colors">Site Map</a>
           </div>

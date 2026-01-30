@@ -16,6 +16,7 @@ import PaymentCancelled from "./pages/PaymentCancelled";
 import AgencyPortal from "./pages/AgencyPortal";
 import VerifyEmail from "./pages/VerifyEmail";
 import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ const App = () => {
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/agency" element={<AgencyPortal />} />
               <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
