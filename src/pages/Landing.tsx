@@ -644,7 +644,7 @@ const Landing = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden hover:bg-black hover:text-white"
               onClick={() => setShowSearchModal(true)}
             >
               <Search className="h-5 w-5" />
