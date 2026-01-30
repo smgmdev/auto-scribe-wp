@@ -4,6 +4,8 @@ import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import type { Article, Headline, FeaturedImage, ArticleTone } from '@/types';
 
+const ARTICLES_PER_PAGE = 15;
+
 interface DBArticle {
   id: string;
   user_id: string;
@@ -54,10 +56,36 @@ const mapDBToArticle = (db: DBArticle): Article => ({
 export function useArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [hasMorePublished, setHasMorePublished] = useState(true);
+  const [hasMoreDrafts, setHasMoreDrafts] = useState(true);
+  const [publishedCount, setPublishedCount] = useState(0);
+  const [draftsCount, setDraftsCount] = useState(0);
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const lastUserIdRef = useRef<string | null>(null);
+
+  // Fetch counts for both statuses
+  const fetchCounts = useCallback(async () => {
+    if (!user) return;
+
+    const baseQuery = isAdmin ? {} : { user_id: user.id };
+
+    const [publishedResult, draftsResult] = await Promise.all([
+      supabase
+        .from('articles')
+        .select('id', { count: 'exact', head: true })
+        .match({ ...baseQuery, status: 'published' }),
+      supabase
+        .from('articles')
+        .select('id', { count: 'exact', head: true })
+        .match({ ...baseQuery, status: 'draft' }),
+    ]);
+
+    setPublishedCount(publishedResult.count || 0);
+    setDraftsCount(draftsResult.count || 0);
+  }, [user, isAdmin]);
 
   const fetchArticles = useCallback(async (showLoading = true) => {
     if (!user) {
@@ -66,38 +94,52 @@ export function useArticles() {
       return;
     }
 
-    // Only show loading spinner on initial fetch, not on background refreshes
     if (showLoading && !hasFetched) {
       setLoading(true);
     }
     
-    // Admins see all articles, regular users see only their own personal articles
-    let query = supabase
-      .from('articles')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    // For non-admin users, filter to only their own articles
-    if (!isAdmin) {
-      query = query.eq('user_id', user.id);
-    }
+    // Fetch only first page of each status (published and drafts)
+    const baseFilter = isAdmin ? {} : { user_id: user.id };
 
-    const { data, error } = await query;
+    const [publishedResult, draftsResult] = await Promise.all([
+      supabase
+        .from('articles')
+        .select('*')
+        .match({ ...baseFilter, status: 'published' })
+        .order('created_at', { ascending: false })
+        .range(0, ARTICLES_PER_PAGE - 1),
+      supabase
+        .from('articles')
+        .select('*')
+        .match({ ...baseFilter, status: 'draft' })
+        .order('created_at', { ascending: false })
+        .range(0, ARTICLES_PER_PAGE - 1),
+    ]);
 
-    if (error) {
-      console.error('Error fetching articles:', error);
+    if (publishedResult.error) {
+      console.error('Error fetching published articles:', publishedResult.error);
       toast({
         variant: 'destructive',
         title: 'Error loading articles',
-        description: error.message,
+        description: publishedResult.error.message,
       });
-    } else {
-      setArticles((data || []).map(mapDBToArticle));
-      setHasFetched(true);
     }
+
+    if (draftsResult.error) {
+      console.error('Error fetching draft articles:', draftsResult.error);
+    }
+
+    const published = (publishedResult.data || []).map(mapDBToArticle);
+    const drafts = (draftsResult.data || []).map(mapDBToArticle);
+    
+    setArticles([...published, ...drafts]);
+    setHasFetched(true);
+    
+    // Fetch counts to determine if there's more
+    await fetchCounts();
     
     setLoading(false);
-  }, [user, isAdmin, toast, hasFetched]);
+  }, [user, isAdmin, toast, hasFetched, fetchCounts]);
 
   // Reset and refetch when user changes
   useEffect(() => {
@@ -287,15 +329,65 @@ export function useArticles() {
     }
 
     setArticles(prev => prev.filter(a => a.id !== id));
+    setPublishedCount(prev => prev - (article?.status === 'published' ? 1 : 0));
+    setDraftsCount(prev => prev - (article?.status === 'draft' ? 1 : 0));
     return true;
+  };
+
+  const loadMoreArticles = async (status: 'published' | 'draft') => {
+    if (!user) return;
+    
+    setLoadingMore(true);
+    
+    const currentArticles = articles.filter(a => a.status === status);
+    const offset = currentArticles.length;
+    
+    const baseFilter = isAdmin ? {} : { user_id: user.id };
+    
+    const { data, error } = await supabase
+      .from('articles')
+      .select('*')
+      .match({ ...baseFilter, status })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + ARTICLES_PER_PAGE - 1);
+
+    if (error) {
+      console.error('Error loading more articles:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error loading more articles',
+        description: error.message,
+      });
+      setLoadingMore(false);
+      return;
+    }
+
+    const newArticles = (data || []).map(mapDBToArticle);
+    setArticles(prev => [...prev, ...newArticles]);
+    
+    // Update hasMore flags
+    const totalCount = status === 'published' ? publishedCount : draftsCount;
+    if (status === 'published') {
+      setHasMorePublished(offset + newArticles.length < totalCount);
+    } else {
+      setHasMoreDrafts(offset + newArticles.length < totalCount);
+    }
+    
+    setLoadingMore(false);
   };
 
   return {
     articles,
     loading,
+    loadingMore,
+    hasMorePublished,
+    hasMoreDrafts,
+    publishedCount,
+    draftsCount,
     addArticle,
     updateArticle,
     deleteArticle,
+    loadMoreArticles,
     refreshArticles: fetchArticles,
   };
 }

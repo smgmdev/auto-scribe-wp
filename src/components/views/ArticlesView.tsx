@@ -26,18 +26,24 @@ const statusColors: Record<string, string> = {
   scheduled: 'bg-warning/10 text-warning border-warning/30',
 };
 
-const ARTICLES_PER_PAGE = 15;
-
 export function ArticlesView() {
   const { setEditingArticle, setCurrentView } = useAppStore();
   const { sites } = useSites();
-  const { articles, loading, deleteArticle } = useArticles();
+  const { 
+    articles, 
+    loading, 
+    loadingMore,
+    hasMorePublished,
+    hasMoreDrafts,
+    publishedCount,
+    draftsCount,
+    deleteArticle,
+    loadMoreArticles 
+  } = useArticles();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [visiblePublished, setVisiblePublished] = useState(ARTICLES_PER_PAGE);
-  const [visibleDrafts, setVisibleDrafts] = useState(ARTICLES_PER_PAGE);
 
   const getSiteInfo = (article: Article) => {
     // Use stored name/favicon if available, otherwise try to look up from sites
@@ -79,21 +85,12 @@ export function ArticlesView() {
   const publishedArticles = articles.filter(a => a.status === 'published');
   const draftArticles = articles.filter(a => a.status === 'draft');
   
-  const filteredArticles = activeTab === 'published' ? publishedArticles : draftArticles;
-  const visibleCount = activeTab === 'published' ? visiblePublished : visibleDrafts;
-  const displayedArticles = filteredArticles.slice(0, visibleCount);
-  const hasMore = filteredArticles.length > visibleCount;
+  const displayedArticles = activeTab === 'published' ? publishedArticles : draftArticles;
+  const hasMore = activeTab === 'published' ? hasMorePublished : hasMoreDrafts;
 
   const handleLoadMore = () => {
-    if (activeTab === 'published') {
-      setVisiblePublished(prev => prev + ARTICLES_PER_PAGE);
-    } else {
-      setVisibleDrafts(prev => prev + ARTICLES_PER_PAGE);
-    }
+    loadMoreArticles(activeTab === 'published' ? 'published' : 'draft');
   };
-
-  const publishedCount = publishedArticles.length;
-  const draftsCount = draftArticles.length;
 
   const renderArticleCard = (article: Article, index: number) => (
     <Card 
@@ -275,8 +272,15 @@ export function ArticlesView() {
                   {displayedArticles.map((article, index) => renderArticleCard(article, index))}
                   {hasMore && (
                     <div className="flex justify-center pt-4">
-                      <Button variant="outline" onClick={handleLoadMore}>
-                        Load More ({filteredArticles.length - visibleCount} remaining)
+                      <Button variant="outline" onClick={handleLoadMore} disabled={loadingMore}>
+                        {loadingMore ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          `Load More (${publishedCount - publishedArticles.length} remaining)`
+                        )}
                       </Button>
                     </div>
                   )}
@@ -285,15 +289,22 @@ export function ArticlesView() {
             </TabsContent>
 
             <TabsContent value="drafts" className="mt-2">
-              {displayedArticles.length === 0 ? (
+              {draftArticles.length === 0 ? (
                 renderEmptyState('No draft articles. Start writing a new article to save it as a draft.')
               ) : (
                 <div className="space-y-4">
-                  {displayedArticles.map((article, index) => renderArticleCard(article, index))}
-                  {hasMore && (
+                  {draftArticles.map((article, index) => renderArticleCard(article, index))}
+                  {hasMoreDrafts && (
                     <div className="flex justify-center pt-4">
-                      <Button variant="outline" onClick={handleLoadMore}>
-                        Load More ({filteredArticles.length - visibleCount} remaining)
+                      <Button variant="outline" onClick={handleLoadMore} disabled={loadingMore}>
+                        {loadingMore ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          `Load More (${draftsCount - draftArticles.length} remaining)`
+                        )}
                       </Button>
                     </div>
                   )}
