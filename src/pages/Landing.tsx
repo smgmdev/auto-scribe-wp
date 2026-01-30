@@ -1096,7 +1096,20 @@ const Landing = () => {
             <div>
               <h4 className="font-semibold text-foreground mb-2 text-xs">Account</h4>
               <ul className="space-y-2 text-xs text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Manage Your Account</a></li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      if (user) {
+                        navigate('/dashboard', { state: { targetView: 'account' } });
+                      } else {
+                        navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'account' } });
+                      }
+                    }}
+                    className="hover:text-foreground transition-colors text-left"
+                  >
+                    Manage Your Account
+                  </button>
+                </li>
               </ul>
             </div>
             
