@@ -193,8 +193,8 @@ export default function PressNews() {
         </div>
       </div>
 
-      {/* Sentinel for filter sticky detection - placed at filter's natural position */}
-      <div ref={filterSentinelRef} className="h-0" />
+      {/* Sentinel at exact filter position - triggers when this hits the header */}
+      <div ref={filterSentinelRef} className="h-0 w-full" />
 
       {/* Spacer when filter is fixed */}
       {isFilterFixed && <div className="h-[56px]" />}
@@ -203,7 +203,7 @@ export default function PressNews() {
       <div 
         className={`border-b border-border z-40 transition-all duration-300 ease-out ${
           isFilterFixed 
-            ? 'fixed top-16 left-0 right-0 shadow-md bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80' 
+            ? 'fixed top-16 left-0 right-0 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80' 
             : 'bg-background'
         }`}
       >
