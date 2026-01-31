@@ -185,11 +185,9 @@ export default function About() {
       <div className="h-16" />
 
       {/* Sub-header - About Arcana Mace - Sticky like Auth page */}
-      <div className={`sticky z-40 bg-white ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center relative">
+      <div className={`sticky z-40 bg-white border-b border-border ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
           <span className="text-xl font-semibold text-foreground">About Arcana Mace</span>
-          {/* Bottom line */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
         </div>
       </div>
 
