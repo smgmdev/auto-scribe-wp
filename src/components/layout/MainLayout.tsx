@@ -37,8 +37,8 @@ export function MainLayout({
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <main className="lg:pl-64 pt-14 lg:pt-0">
-        <div className="min-h-screen p-4 lg:p-8">
+      <main className="lg:pl-64 pt-14 lg:pt-0 h-screen overflow-y-auto">
+        <div className="min-h-full p-4 lg:p-8">
           {children}
         </div>
       </main>
