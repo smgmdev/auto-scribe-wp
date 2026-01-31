@@ -337,15 +337,15 @@ export function AdminNewPressReleaseView() {
 
   return (
     <div className="space-y-4 animate-fade-in relative">
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">New Press Release</h1>
-        <p className="mt-2 text-muted-foreground">Create and publish a new press release. This press release will be published in Press & News page.</p>
-      </div>
-
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Main Editor */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Header */}
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">New Press Release</h1>
+            <p className="mt-2 text-muted-foreground">Create and publish a new press release. This press release will be published in Press & News page.</p>
+          </div>
+
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
