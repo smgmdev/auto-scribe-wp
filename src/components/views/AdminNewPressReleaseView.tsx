@@ -28,6 +28,15 @@ interface Category {
   name: string;
 }
 
+interface PressContact {
+  id: string;
+  title: string;
+  name: string;
+  company: string;
+  email: string;
+  phone: string | null;
+}
+
 const FOOTER_CONTACT_OPTIONS = [
   { id: 'press_contact', label: 'Press Contact' },
   { id: 'investor_relations', label: 'Investor Relations Contact' },
@@ -52,8 +61,12 @@ export function AdminNewPressReleaseView() {
   const [editingCategoryName, setEditingCategoryName] = useState('');
   const [isSavingCategory, setIsSavingCategory] = useState(false);
   const [footerContacts, setFooterContacts] = useState<string[]>([]);
+  const [pressContacts, setPressContacts] = useState<PressContact[]>([]);
+  const [manageContactsOpen, setManageContactsOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<PressContact | null>(null);
+  const [isSavingContact, setIsSavingContact] = useState(false);
 
-  // Fetch categories from database
+  // Fetch categories and contacts from database
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -74,7 +87,22 @@ export function AdminNewPressReleaseView() {
       }
     };
 
+    const fetchContacts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('press_release_contacts')
+          .select('*')
+          .order('id');
+
+        if (error) throw error;
+        setPressContacts(data || []);
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+      }
+    };
+
     fetchCategories();
+    fetchContacts();
   }, []);
 
   const handleAddCategory = async () => {
@@ -195,6 +223,38 @@ export function AdminNewPressReleaseView() {
     } catch (error: any) {
       console.error('Error deleting category:', error);
       toast({ title: 'Error', description: error.message || 'Failed to delete category', variant: 'destructive' });
+    }
+  };
+
+  const handleSaveContact = async () => {
+    if (!editingContact) return;
+
+    setIsSavingContact(true);
+    try {
+      const { error } = await supabase
+        .from('press_release_contacts')
+        .update({
+          title: editingContact.title,
+          name: editingContact.name,
+          company: editingContact.company,
+          email: editingContact.email,
+          phone: editingContact.phone || null,
+        })
+        .eq('id', editingContact.id);
+
+      if (error) throw error;
+
+      setPressContacts(prev =>
+        prev.map(c => c.id === editingContact.id ? editingContact : c)
+      );
+
+      setEditingContact(null);
+      toast({ title: 'Success', description: 'Contact updated successfully' });
+    } catch (error: any) {
+      console.error('Error updating contact:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to update contact', variant: 'destructive' });
+    } finally {
+      setIsSavingContact(false);
     }
   };
 
@@ -591,33 +651,160 @@ export function AdminNewPressReleaseView() {
 
           {/* Footer Contacts Selection */}
           <div className="space-y-2">
-            <Label>Footer Contacts</Label>
+            <div className="flex items-center justify-between">
+              <Label>Footer Contacts</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setManageContactsOpen(true)}
+                className="h-8 hover:bg-foreground hover:text-background"
+              >
+                <Settings className="h-3.5 w-3.5 mr-1.5" />
+                Manage Contacts
+              </Button>
+            </div>
             <p className="text-xs text-muted-foreground mb-3">
               Select which contact sections to display at the bottom of this press release
             </p>
             <div className="space-y-2">
-              {FOOTER_CONTACT_OPTIONS.map((option) => (
-                <label
-                  key={option.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={footerContacts.includes(option.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setFooterContacts(prev => [...prev, option.id]);
-                      } else {
-                        setFooterContacts(prev => prev.filter(id => id !== option.id));
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-border"
-                  />
-                  <span className="text-sm font-medium">{option.label}</span>
-                </label>
-              ))}
+              {FOOTER_CONTACT_OPTIONS.map((option) => {
+                const contact = pressContacts.find(c => c.id === option.id);
+                return (
+                  <label
+                    key={option.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={footerContacts.includes(option.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFooterContacts(prev => [...prev, option.id]);
+                        } else {
+                          setFooterContacts(prev => prev.filter(id => id !== option.id));
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-border"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">{option.label}</span>
+                      {contact && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {contact.name} • {contact.email}
+                        </p>
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
+
+          {/* Manage Contacts Dialog */}
+          <Dialog open={manageContactsOpen} onOpenChange={setManageContactsOpen}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Manage Press Contacts</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4 max-h-[500px] overflow-y-auto">
+                {pressContacts.map(contact => (
+                  <div key={contact.id} className="p-4 rounded-lg border border-border">
+                    {editingContact?.id === contact.id ? (
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Title</Label>
+                          <Input
+                            value={editingContact.title}
+                            onChange={(e) => setEditingContact({ ...editingContact, title: e.target.value })}
+                            placeholder="e.g. Press Contact"
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Name</Label>
+                          <Input
+                            value={editingContact.name}
+                            onChange={(e) => setEditingContact({ ...editingContact, name: e.target.value })}
+                            placeholder="e.g. John Smith"
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Company</Label>
+                          <Input
+                            value={editingContact.company}
+                            onChange={(e) => setEditingContact({ ...editingContact, company: e.target.value })}
+                            placeholder="e.g. Arcana Mace"
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Email</Label>
+                          <Input
+                            type="email"
+                            value={editingContact.email}
+                            onChange={(e) => setEditingContact({ ...editingContact, email: e.target.value })}
+                            placeholder="e.g. press@arcanamace.com"
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Phone (optional)</Label>
+                          <Input
+                            value={editingContact.phone || ''}
+                            onChange={(e) => setEditingContact({ ...editingContact, phone: e.target.value })}
+                            placeholder="e.g. (408) 862-1142"
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            size="sm"
+                            onClick={handleSaveContact}
+                            disabled={isSavingContact || !editingContact.title || !editingContact.name || !editingContact.email}
+                          >
+                            {isSavingContact ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingContact(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-medium text-sm">{contact.title}</h4>
+                          <p className="text-sm text-foreground mt-1">{contact.name}</p>
+                          <p className="text-sm text-muted-foreground">{contact.company}</p>
+                          <p className="text-sm text-[#06c]">{contact.email}</p>
+                          {contact.phone && <p className="text-sm text-muted-foreground">{contact.phone}</p>}
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 hover:bg-foreground hover:text-background"
+                          onClick={() => setEditingContact(contact)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setManageContactsOpen(false)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Sidebar */}

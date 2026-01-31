@@ -20,21 +20,14 @@ interface PressRelease {
   footer_contacts: string[] | null;
 }
 
-// Contact information for footer sections
-const CONTACT_INFO = {
-  press_contact: {
-    title: 'Press Contact',
-    name: 'Press Team',
-    company: 'Arcana Mace',
-    email: 'press@arcanamace.com',
-  },
-  investor_relations: {
-    title: 'Investor Relations Contact',
-    name: 'Investor Relations',
-    company: 'Arcana Mace',
-    email: 'ir@arcanamace.com',
-  },
-};
+interface PressContact {
+  id: string;
+  title: string;
+  name: string;
+  company: string;
+  email: string;
+  phone: string | null;
+}
 
 export default function PressReleaseDetail() {
   const navigate = useNavigate();
@@ -42,6 +35,7 @@ export default function PressReleaseDetail() {
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [pressRelease, setPressRelease] = useState<PressRelease | null>(null);
+  const [pressContacts, setPressContacts] = useState<PressContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
@@ -72,7 +66,7 @@ export default function PressReleaseDetail() {
   }, []);
 
   useEffect(() => {
-    const fetchPressRelease = async () => {
+    const fetchData = async () => {
       if (!id) {
         setError('Press release not found');
         setLoading(false);
@@ -80,20 +74,27 @@ export default function PressReleaseDetail() {
       }
 
       try {
-        const { data, error: fetchError } = await supabase
-          .from('press_releases')
-          .select('id, title, content, category, image_url, published_at, created_at, footer_contacts')
-          .eq('id', id)
-          .eq('published', true)
-          .single();
+        // Fetch press release and contacts in parallel
+        const [releaseResult, contactsResult] = await Promise.all([
+          supabase
+            .from('press_releases')
+            .select('id, title, content, category, image_url, published_at, created_at, footer_contacts')
+            .eq('id', id)
+            .eq('published', true)
+            .single(),
+          supabase
+            .from('press_release_contacts')
+            .select('*')
+        ]);
 
-        if (fetchError) throw fetchError;
-        if (!data) {
+        if (releaseResult.error) throw releaseResult.error;
+        if (!releaseResult.data) {
           setError('Press release not found');
           return;
         }
 
-        setPressRelease(data);
+        setPressRelease(releaseResult.data);
+        setPressContacts(contactsResult.data || []);
       } catch (err) {
         console.error('Error fetching press release:', err);
         setError('Failed to load press release');
@@ -102,7 +103,7 @@ export default function PressReleaseDetail() {
       }
     };
 
-    fetchPressRelease();
+    fetchData();
   }, [id]);
 
   return (
@@ -250,7 +251,7 @@ export default function PressReleaseDetail() {
                 {pressRelease.footer_contacts && pressRelease.footer_contacts.length > 0 && (
                   <div className="border-t border-border mt-12 pt-8 space-y-8">
                     {pressRelease.footer_contacts.map((contactId) => {
-                      const contact = CONTACT_INFO[contactId as keyof typeof CONTACT_INFO];
+                      const contact = pressContacts.find(c => c.id === contactId);
                       if (!contact) return null;
                       return (
                         <div key={contactId}>
@@ -262,6 +263,9 @@ export default function PressReleaseDetail() {
                               {contact.email}
                             </a>
                           </p>
+                          {contact.phone && (
+                            <p className="text-[15px] text-foreground">{contact.phone}</p>
+                          )}
                         </div>
                       );
                     })}
