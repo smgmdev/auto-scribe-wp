@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Loader2, FileText, Plus, Settings, Pencil, Trash2, Check } from 'lucide-react';
+import { Upload, X, Loader2, Plus, Settings, Pencil, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -564,12 +564,10 @@ export function AdminNewPressReleaseView() {
           {/* Content */}
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              placeholder="Write your press release content..."
+            <RichTextEditor
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[300px] resize-y text-sm"
+              onChange={setContent}
+              placeholder="Write your press release content..."
             />
           </div>
         </div>
