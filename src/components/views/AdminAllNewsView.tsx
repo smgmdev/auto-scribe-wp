@@ -585,7 +585,7 @@ export function AdminAllNewsView() {
                               e.stopPropagation();
                               openEditDialog(pr);
                             }}
-                            className="cursor-pointer"
+                            className="cursor-pointer hover:bg-foreground hover:text-background focus:bg-foreground focus:text-background"
                           >
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
@@ -596,7 +596,7 @@ export function AdminAllNewsView() {
                               togglePublished(pr.id, pr.published);
                             }}
                             disabled={toggling === pr.id}
-                            className="cursor-pointer"
+                            className="cursor-pointer hover:bg-foreground hover:text-background focus:bg-foreground focus:text-background"
                           >
                             {toggling === pr.id ? (
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -612,7 +612,7 @@ export function AdminAllNewsView() {
                               e.stopPropagation();
                               setDeleteId(pr.id);
                             }}
-                            className="cursor-pointer text-destructive focus:text-destructive"
+                            className="cursor-pointer hover:bg-foreground hover:text-background focus:bg-foreground focus:text-background"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
