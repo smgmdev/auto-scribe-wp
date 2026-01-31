@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Search, User, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,32 @@ export default function PressReleaseDetail() {
   const [pressRelease, setPressRelease] = useState<PressRelease | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  // Scroll-driven header hiding
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const currentScrollY = scrollContainer.scrollTop;
+      const scrollThreshold = 64; // Height of main header
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
+        // Scrolling down past threshold
+        setIsHeaderHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        // Scrolling up
+        setIsHeaderHidden(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchPressRelease = async () => {
@@ -63,9 +89,9 @@ export default function PressReleaseDetail() {
   }, [id]);
 
   return (
-    <div className="h-screen overflow-y-auto bg-white">
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <button 
             onClick={() => navigate('/')}
@@ -122,7 +148,7 @@ export default function PressReleaseDetail() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className="sticky top-16 z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center">
+      <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="container mx-auto px-4">
           <button 
             onClick={() => navigate('/press')}
