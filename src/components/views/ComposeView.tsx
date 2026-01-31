@@ -141,6 +141,11 @@ export function ComposeView() {
   useEffect(() => {
     // Use setTimeout to ensure scroll happens after render
     const timer = setTimeout(() => {
+      // Try to scroll the main content container first, then fallback to window
+      const mainContainer = document.querySelector('main');
+      if (mainContainer) {
+        mainContainer.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, 50);
     return () => clearTimeout(timer);
