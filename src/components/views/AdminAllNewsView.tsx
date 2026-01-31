@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
@@ -268,7 +269,7 @@ export function AdminAllNewsView() {
   };
 
   const { setCurrentView } = useAppStore();
-
+  const navigate = useNavigate();
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -310,13 +311,16 @@ export function AdminAllNewsView() {
                     className="group border-t border-border py-8"
                   >
                     <div className="flex gap-6 items-start">
-                      {/* Image or Logo placeholder */}
-                      <div className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                      {/* Image or Logo placeholder - clickable */}
+                      <div 
+                        onClick={() => navigate(`/press/${pr.id}`)}
+                        className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted cursor-pointer"
+                      >
                         {pr.image_url ? (
                           <img 
                             src={pr.image_url} 
                             alt={pr.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -325,8 +329,11 @@ export function AdminAllNewsView() {
                         )}
                       </div>
                       
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
+                      {/* Content - clickable */}
+                      <div 
+                        onClick={() => navigate(`/press/${pr.id}`)}
+                        className="flex-1 min-w-0 cursor-pointer"
+                      >
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                             {pr.category}
@@ -335,7 +342,7 @@ export function AdminAllNewsView() {
                             {pr.published ? 'Published' : 'Draft'}
                           </Badge>
                         </div>
-                        <h3 className="text-lg md:text-xl font-semibold text-foreground">
+                        <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-[#06c] transition-colors">
                           {pr.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mt-2">
