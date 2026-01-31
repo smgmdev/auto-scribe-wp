@@ -107,7 +107,7 @@ export default function PressNews() {
   }, [filteredReleases]);
 
   return (
-    <div className="h-screen overflow-y-auto bg-background">
+    <div className="h-screen overflow-y-auto bg-white">
       {/* Header - same as homepage */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
