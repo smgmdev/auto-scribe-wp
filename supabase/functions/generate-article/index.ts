@@ -315,13 +315,13 @@ Remember: Write like a seasoned journalist, not an AI. No lists. No excessive fo
     
     const rawContent = lines.slice(contentStartIndex).join('\n').trim();
     
-    // Convert plain text paragraphs to HTML paragraphs
+    // Convert plain text paragraphs to HTML paragraphs with spacing
     // Split by double newlines (paragraph breaks) and wrap each in <p> tags
     const paragraphs = rawContent.split(/\n\s*\n/).filter((p: string) => p.trim());
     const htmlContent = paragraphs.map((p: string) => {
       // Replace single newlines within paragraphs with spaces
       const cleanedParagraph = p.trim().replace(/\n/g, ' ');
-      return `<p>${cleanedParagraph}</p>`;
+      return `<p style="margin-bottom: 1em;">${cleanedParagraph}</p>`;
     }).join('');
 
     console.log('Generated title:', newTitle);
