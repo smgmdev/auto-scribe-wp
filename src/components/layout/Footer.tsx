@@ -100,7 +100,7 @@ export function Footer({ narrow = false }: FooterProps) {
             <h4 className="font-semibold text-foreground mb-2 text-xs">Arcana Mace</h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li><button onClick={() => navigate('/press')} className="hover:text-foreground transition-colors text-left">Newsroom</button></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
+              <li><button onClick={() => navigate('/about')} className="hover:text-foreground transition-colors text-left">About</button></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
             </ul>
           </div>
