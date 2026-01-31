@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Check } from 'lucide-react';
+import { Search, User, Check, Hand } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -246,6 +246,29 @@ export default function About() {
               </h2>
             </AnimatedSection>
           </div>
+        </div>
+      </section>
+
+      {/* Safe and Secure Section - Apple style */}
+      <section className="bg-black py-20 md:py-32">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {/* Large headline */}
+          <AnimatedSection>
+            <h2 className="text-5xl md:text-7xl lg:text-[80px] font-semibold text-white tracking-tight leading-[1.05] mb-32 md:mb-40">
+              Safe and sound.<br />
+              And secure.
+            </h2>
+          </AnimatedSection>
+
+          {/* Feature with hand icon */}
+          <AnimatedSection>
+            <div className="max-w-3xl">
+              <Hand className="w-10 h-10 text-white mb-6" strokeWidth={1.5} />
+              <p className="text-lg md:text-xl text-[#86868b] leading-relaxed">
+                <span className="text-white font-semibold">Personal data. Protected.</span> When you place an order, Arcana Mace uses encrypted connections and secure payment processing. Your payment details are never shared with publishers or stored on our servers. We use industry-standard encryption to keep your data safe at every step.
+              </p>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
