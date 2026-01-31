@@ -184,51 +184,54 @@ export default function About() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header - About Arcana Mace Marketplace - Sticky like Auth page */}
-      <div className={`sticky z-40 bg-white border-b border-border transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-          <span className="text-xl font-semibold text-foreground">About Arcana Mace Marketplace</span>
-          <nav className="hidden md:flex items-center gap-6">
-            <button 
-              onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Overview
-            </button>
-            <button 
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Features
-            </button>
-            <button 
-              onClick={() => document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Security
-            </button>
-            <button 
-              onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              FAQ
-            </button>
-          </nav>
+      {/* Sub-header with banner - Sticky container */}
+      <div className={`sticky z-40 transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        {/* Sub-header - About Arcana Mace Marketplace */}
+        <div className="bg-white border-b border-border">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+            <span className="text-xl font-semibold text-foreground">About Arcana Mace Marketplace</span>
+            <nav className="hidden md:flex items-center gap-6">
+              <button 
+                onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Overview
+              </button>
+              <button 
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Features
+              </button>
+              <button 
+                onClick={() => document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Security
+              </button>
+              <button 
+                onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                FAQ
+              </button>
+            </nav>
+          </div>
         </div>
-      </div>
 
-      {/* Promo Banner - Apple style - NOT sticky, scrolls with content */}
-      <div className="bg-[#1d1d1f] py-3">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <span className="text-sm text-white/90">
-            Set up Arcana Mace in seconds.{' '}
-            <button 
-              onClick={() => navigate('/auth')}
-              className="text-[#2997ff] hover:underline"
-            >
-              Learn how ›
-            </button>
-          </span>
+        {/* Promo Banner - Apple style - Part of sticky header group */}
+        <div className="bg-[#1d1d1f] py-3">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+            <span className="text-sm text-white/90">
+              Set up Arcana Mace in seconds.{' '}
+              <button 
+                onClick={() => navigate('/auth')}
+                className="text-[#2997ff] hover:underline"
+              >
+                Learn how ›
+              </button>
+            </span>
+          </div>
         </div>
       </div>
 
