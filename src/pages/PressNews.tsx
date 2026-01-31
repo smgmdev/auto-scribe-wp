@@ -166,7 +166,7 @@ export default function PressNews() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - in normal flow, will scroll away */}
-      <div className="border-b border-border bg-background">
+      <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 h-12 flex items-center">
           <h1 className="text-xl font-semibold text-foreground">Newsroom</h1>
         </div>
