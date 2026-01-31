@@ -184,10 +184,10 @@ export default function About() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header - About */}
-      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      {/* Sub-header - About Arcana Mace - Apple style sticky */}
+      <div className={`sticky z-40 bg-white/95 backdrop-blur-md border-b border-[#d2d2d7] h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
-          <span className="text-sm font-medium text-[#1d1d1f]">About</span>
+          <span className="text-sm font-medium text-[#1d1d1f]">About Arcana Mace</span>
         </div>
       </div>
 
@@ -204,7 +204,7 @@ export default function About() {
           
           <AnimatedSection delay={100}>
             <h1 className="text-5xl md:text-7xl lg:text-[80px] font-semibold tracking-tight leading-[1.05] mb-6">
-              Distribute the<br />Arcana way.
+              Media Buying<br />Marketplace.
             </h1>
           </AnimatedSection>
           
