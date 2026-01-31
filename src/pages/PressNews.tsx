@@ -390,7 +390,7 @@ export default function PressNews() {
                             
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                                 {release.category}
                               </span>
                               <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1 group-hover:text-[#06c] transition-colors">
