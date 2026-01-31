@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Loader2, FileText, Plus } from 'lucide-react';
+import { Upload, X, Loader2, FileText, Plus, Settings, Pencil, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,6 +42,10 @@ export function AdminNewPressReleaseView() {
   const [newCategoryDialogOpen, setNewCategoryDialogOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [manageCategoriesOpen, setManageCategoriesOpen] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
 
   // Fetch categories from database
   useEffect(() => {
@@ -101,6 +105,90 @@ export function AdminNewPressReleaseView() {
       toast({ title: 'Error', description: error.message || 'Failed to add category', variant: 'destructive' });
     } finally {
       setIsAddingCategory(false);
+    }
+  };
+
+  const handleEditCategory = (cat: Category) => {
+    setEditingCategoryId(cat.id);
+    setEditingCategoryName(cat.name);
+  };
+
+  const handleSaveCategory = async () => {
+    if (!editingCategoryName.trim() || !editingCategoryId) return;
+
+    setIsSavingCategory(true);
+    try {
+      const oldCategory = categories.find(c => c.id === editingCategoryId);
+      const oldName = oldCategory?.name;
+
+      const { error } = await supabase
+        .from('press_release_categories')
+        .update({ name: editingCategoryName.trim() })
+        .eq('id', editingCategoryId);
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({ title: 'Error', description: 'This category name already exists', variant: 'destructive' });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // Update press releases that use this category
+      if (oldName) {
+        await supabase
+          .from('press_releases')
+          .update({ category: editingCategoryName.trim() })
+          .eq('category', oldName);
+      }
+
+      setCategories(prev => 
+        prev.map(c => c.id === editingCategoryId ? { ...c, name: editingCategoryName.trim() } : c)
+          .sort((a, b) => a.name.localeCompare(b.name))
+      );
+
+      // Update selected category if it was the one being edited
+      if (category === oldName) {
+        setCategory(editingCategoryName.trim());
+      }
+
+      setEditingCategoryId(null);
+      setEditingCategoryName('');
+      toast({ title: 'Success', description: 'Category updated successfully' });
+    } catch (error: any) {
+      console.error('Error updating category:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to update category', variant: 'destructive' });
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (catId: string, catName: string) => {
+    if (!confirm(`Delete "${catName}"? Press releases using this category will keep their current category.`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('press_release_categories')
+        .delete()
+        .eq('id', catId);
+
+      if (error) throw error;
+
+      setCategories(prev => prev.filter(c => c.id !== catId));
+      
+      // If deleted category was selected, select first available
+      if (category === catName && categories.length > 1) {
+        const remaining = categories.filter(c => c.id !== catId);
+        if (remaining.length > 0) {
+          setCategory(remaining[0].name);
+        }
+      }
+
+      toast({ title: 'Success', description: 'Category deleted successfully' });
+    } catch (error: any) {
+      console.error('Error deleting category:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to delete category', variant: 'destructive' });
     }
   };
 
@@ -290,6 +378,15 @@ export function AdminNewPressReleaseView() {
             >
               <Plus className="h-4 w-4" />
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => setManageCategoriesOpen(true)}
+              title="Manage categories"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -329,6 +426,93 @@ export function AdminNewPressReleaseView() {
                 ) : (
                   'Add Category'
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Categories Dialog */}
+        <Dialog open={manageCategoriesOpen} onOpenChange={setManageCategoriesOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Manage Categories</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4 max-h-[400px] overflow-y-auto">
+              {categories.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No categories yet</p>
+              ) : (
+                categories.map(cat => (
+                  <div key={cat.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50">
+                    {editingCategoryId === cat.id ? (
+                      <>
+                        <Input
+                          value={editingCategoryName}
+                          onChange={(e) => setEditingCategoryName(e.target.value)}
+                          className="flex-1 h-8"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveCategory();
+                            } else if (e.key === 'Escape') {
+                              setEditingCategoryId(null);
+                              setEditingCategoryName('');
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={handleSaveCategory}
+                          disabled={isSavingCategory || !editingCategoryName.trim()}
+                        >
+                          {isSavingCategory ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4 text-primary" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => {
+                            setEditingCategoryId(null);
+                            setEditingCategoryName('');
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="flex-1 text-sm">{cat.name}</span>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => handleEditCategory(cat)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setManageCategoriesOpen(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>
