@@ -19,6 +19,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -65,6 +75,8 @@ export function AdminNewPressReleaseView() {
   const [manageContactsOpen, setManageContactsOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<PressContact | null>(null);
   const [isSavingContact, setIsSavingContact] = useState(false);
+  const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState<{ id: string; name: string } | null>(null);
+  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
 
   // Fetch categories and contacts from database
   useEffect(() => {
@@ -198,31 +210,35 @@ export function AdminNewPressReleaseView() {
     }
   };
 
-  const handleDeleteCategory = async (catId: string, catName: string) => {
-    if (!confirm(`Delete "${catName}"? Press releases using this category will keep their current category.`)) return;
+  const handleDeleteCategory = async () => {
+    if (!deleteCategoryConfirm) return;
 
+    setIsDeletingCategory(true);
     try {
       const { error } = await supabase
         .from('press_release_categories')
         .delete()
-        .eq('id', catId);
+        .eq('id', deleteCategoryConfirm.id);
 
       if (error) throw error;
 
-      setCategories(prev => prev.filter(c => c.id !== catId));
+      setCategories(prev => prev.filter(c => c.id !== deleteCategoryConfirm.id));
       
       // If deleted category was selected, select first available
-      if (category === catName && categories.length > 1) {
-        const remaining = categories.filter(c => c.id !== catId);
+      if (category === deleteCategoryConfirm.name && categories.length > 1) {
+        const remaining = categories.filter(c => c.id !== deleteCategoryConfirm.id);
         if (remaining.length > 0) {
           setCategory(remaining[0].name);
         }
       }
 
       toast({ title: 'Success', description: 'Category deleted successfully' });
+      setDeleteCategoryConfirm(null);
     } catch (error: any) {
       console.error('Error deleting category:', error);
       toast({ title: 'Error', description: error.message || 'Failed to delete category', variant: 'destructive' });
+    } finally {
+      setIsDeletingCategory(false);
     }
   };
 
@@ -583,7 +599,7 @@ export function AdminNewPressReleaseView() {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 hover:bg-foreground hover:text-background"
-                            onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                            onClick={() => setDeleteCategoryConfirm({ id: cat.id, name: cat.name })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -600,6 +616,35 @@ export function AdminNewPressReleaseView() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {/* Delete Category Confirmation */}
+          <AlertDialog open={!!deleteCategoryConfirm} onOpenChange={(open) => !open && setDeleteCategoryConfirm(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{deleteCategoryConfirm?.name}"? Press releases using this category will keep their current category.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeletingCategory}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteCategory}
+                  disabled={isDeletingCategory}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isDeletingCategory ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Image Upload */}
           <div className="space-y-2">
