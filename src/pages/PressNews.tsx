@@ -188,7 +188,7 @@ export default function PressNews() {
       </div>
 
       {/* Filter Bar - Fixed, transitions between below Newsroom and below header */}
-      <div className={`fixed left-0 right-0 bg-background border-b border-border z-40 transition-all duration-200 ${isScrolled ? 'top-16' : 'top-[112px]'}`}>
+      <div className={`fixed left-0 right-0 bg-background border-b border-border z-40 ${isScrolled ? 'top-16' : 'top-[112px]'}`}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
