@@ -321,45 +321,23 @@ export default function Auth() {
           {/* Logo with orbiting dots animation - Apple style */}
           <div className="flex justify-center mb-8">
             <div className="relative w-40 h-40 flex items-center justify-center">
-              {/* Orbiting dots container */}
+              {/* Ring 1 - Outermost */}
               <div 
                 className="absolute inset-0"
-                style={{
-                  animation: 'orbit-rotate 20s linear infinite',
-                }}
+                style={{ animation: 'orbit-rotate 20s linear infinite' }}
               >
-                {/* Generate 16 dots in a circle pattern like Apple */}
                 {Array.from({ length: 16 }).map((_, i) => {
                   const angle = (i / 16) * 360;
-                  const baseRadius = 50;
-                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 40;
-                  const colors = [
-                    '#34C759', // Green
-                    '#30D158', // Light green
-                    '#32ADE6', // Light blue
-                    '#007AFF', // Blue
-                    '#5856D6', // Purple
-                    '#AF52DE', // Violet
-                    '#FF2D55', // Pink
-                    '#FF3B30', // Red
-                    '#FF9500', // Orange
-                    '#FFCC00', // Yellow
-                    '#34C759', // Green
-                    '#30D158', // Light green
-                    '#32ADE6', // Light blue
-                    '#007AFF', // Blue
-                    '#5856D6', // Purple
-                    '#AF52DE', // Violet
-                  ];
-                  const size = 6; // All same size
-                  
+                  const baseRadius = 60;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 35;
+                  const colors = ['#34C759', '#30D158', '#32ADE6', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#30D158', '#32ADE6', '#007AFF', '#5856D6', '#AF52DE'];
                   return (
                     <div
                       key={i}
                       className="absolute rounded-full"
                       style={{
-                        width: `${size}px`,
-                        height: `${size}px`,
+                        width: '7px',
+                        height: '7px',
                         backgroundColor: colors[i],
                         left: '50%',
                         top: '50%',
@@ -372,41 +350,86 @@ export default function Auth() {
                 })}
               </div>
               
-              {/* Secondary orbit - counter rotation */}
+              {/* Ring 2 */}
               <div 
                 className="absolute inset-0"
-                style={{
-                  animation: 'orbit-rotate-reverse 25s linear infinite',
-                }}
+                style={{ animation: 'orbit-rotate-reverse 18s linear infinite' }}
               >
-                {Array.from({ length: 8 }).map((_, i) => {
-                  const angle = (i / 8) * 360 + 22.5;
-                  const baseRadius = 50; // Same radius as outer
-                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 40; // Same expansion
-                  const colors = [
-                    '#FFCC00', // Yellow
-                    '#FF9500', // Orange
-                    '#FF3B30', // Red
-                    '#FF2D55', // Pink
-                    '#AF52DE', // Violet
-                    '#5856D6', // Purple
-                    '#007AFF', // Blue
-                    '#32ADE6', // Light blue
-                  ];
-                  const size = 5; // Slightly smaller inner dots
-                  
+                {Array.from({ length: 12 }).map((_, i) => {
+                  const angle = (i / 12) * 360 + 15;
+                  const baseRadius = 48;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 28;
+                  const colors = ['#FFCC00', '#FF9500', '#FF3B30', '#FF2D55', '#AF52DE', '#5856D6', '#007AFF', '#32ADE6', '#30D158', '#34C759', '#FFCC00', '#FF9500'];
                   return (
                     <div
                       key={i}
                       className="absolute rounded-full"
                       style={{
-                        width: `${size}px`,
-                        height: `${size}px`,
+                        width: '6px',
+                        height: '6px',
                         backgroundColor: colors[i],
                         left: '50%',
                         top: '50%',
                         transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
-                        opacity: 0.8 - (headerLineWidth / 100) * 0.3,
+                        opacity: 0.85 - (headerLineWidth / 100) * 0.25,
+                        transition: 'all 0.15s ease-out',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Ring 3 */}
+              <div 
+                className="absolute inset-0"
+                style={{ animation: 'orbit-rotate 15s linear infinite' }}
+              >
+                {Array.from({ length: 10 }).map((_, i) => {
+                  const angle = (i / 10) * 360 + 18;
+                  const baseRadius = 38;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 20;
+                  const colors = ['#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#32ADE6', '#30D158'];
+                  return (
+                    <div
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        width: '5px',
+                        height: '5px',
+                        backgroundColor: colors[i],
+                        left: '50%',
+                        top: '50%',
+                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        opacity: 0.8 - (headerLineWidth / 100) * 0.2,
+                        transition: 'all 0.15s ease-out',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Ring 4 - Innermost */}
+              <div 
+                className="absolute inset-0"
+                style={{ animation: 'orbit-rotate-reverse 12s linear infinite' }}
+              >
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const angle = (i / 8) * 360 + 22.5;
+                  const baseRadius = 28;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 12;
+                  const colors = ['#AF52DE', '#FF2D55', '#FF9500', '#FFCC00', '#34C759', '#32ADE6', '#007AFF', '#5856D6'];
+                  return (
+                    <div
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        width: '4px',
+                        height: '4px',
+                        backgroundColor: colors[i],
+                        left: '50%',
+                        top: '50%',
+                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        opacity: 0.75 - (headerLineWidth / 100) * 0.15,
                         transition: 'all 0.15s ease-out',
                       }}
                     />
