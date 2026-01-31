@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp, Check, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -558,19 +564,19 @@ export function AdminAllNewsView() {
                 {releases.map((pr) => (
                   <article 
                     key={pr.id}
-                    className="group border-t border-border py-8"
+                    className="group border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex gap-6 items-start">
+                    <div className="flex gap-8 items-center">
                       {/* Image or Logo placeholder - clickable */}
                       <div 
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
-                        className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted cursor-pointer"
+                        className="hidden sm:block w-[200px] h-[134px] flex-shrink-0 rounded-xl overflow-hidden bg-muted"
                       >
                         {pr.image_url ? (
                           <img 
                             src={pr.image_url} 
                             alt={pr.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -587,7 +593,7 @@ export function AdminAllNewsView() {
                         <span className="text-[13px] font-bold text-muted-foreground uppercase">
                           {pr.category}
                         </span>
-                        <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1">
+                        <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 leading-tight">
                           {pr.title}
                         </h3>
                         <p className="text-sm font-bold text-muted-foreground mt-2">
@@ -595,39 +601,59 @@ export function AdminAllNewsView() {
                         </p>
                       </div>
                       
-                      {/* Actions */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(pr)}
-                          className="hover:bg-foreground hover:text-background"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => togglePublished(pr.id, pr.published)}
-                          disabled={toggling === pr.id}
-                          className="hover:bg-foreground hover:text-background"
-                        >
-                          {toggling === pr.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : pr.published ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteId(pr.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      {/* Actions Dropdown */}
+                      <div className="flex-shrink-0">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="hover:bg-foreground hover:text-background"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 bg-background">
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditDialog(pr);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePublished(pr.id, pr.published);
+                              }}
+                              disabled={toggling === pr.id}
+                              className="cursor-pointer"
+                            >
+                              {toggling === pr.id ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : pr.published ? (
+                                <EyeOff className="h-4 w-4 mr-2" />
+                              ) : (
+                                <Eye className="h-4 w-4 mr-2" />
+                              )}
+                              {pr.published ? 'Unpublish' : 'Publish'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteId(pr.id);
+                              }}
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </article>
