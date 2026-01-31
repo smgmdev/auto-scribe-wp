@@ -77,6 +77,7 @@ export function AdminNewPressReleaseView() {
   const [isSavingContact, setIsSavingContact] = useState(false);
   const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState<{ id: string; name: string } | null>(null);
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Fetch categories and contacts from database
   useEffect(() => {
@@ -294,6 +295,51 @@ export function AdminNewPressReleaseView() {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      // Check file size - max 2MB
+      const maxSizeBytes = 2 * 1024 * 1024;
+      if (file.size > maxSizeBytes) {
+        toast({
+          title: "File too large",
+          description: "Image size must be under 2MB",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else if (file) {
+      toast({
+        title: "Invalid file type",
+        description: "Please drop an image file (PNG, JPG, GIF)",
+        variant: "destructive"
+      });
     }
   };
 
@@ -666,9 +712,18 @@ export function AdminNewPressReleaseView() {
                 </Button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+              <label 
+                className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                  isDragging 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border hover:bg-muted/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="h-10 w-10 text-muted-foreground mb-3" />
+                  <Upload className={`h-10 w-10 mb-3 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
                   <p className="mb-2 text-sm text-muted-foreground">
                     <span className="font-semibold">Click to upload</span> or drag and drop
                   </p>
