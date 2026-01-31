@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,22 +40,6 @@ export default function PressNews() {
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All Topics']);
   const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const newsroomRef = useRef<HTMLDivElement>(null);
-
-  // Handle scroll to toggle filter bar position
-  useEffect(() => {
-    const handleScroll = () => {
-      if (newsroomRef.current) {
-        const newsroomBottom = newsroomRef.current.getBoundingClientRect().bottom;
-        // When newsroom title scrolls past the header (64px), switch to top-16
-        setIsScrolled(newsroomBottom <= 64);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,14 +165,14 @@ export default function PressNews() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header */}
-      <div ref={newsroomRef} className="border-b border-border bg-background">
+      <div className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-12 flex items-center">
           <h1 className="text-xl font-semibold text-foreground">Newsroom</h1>
         </div>
       </div>
 
-      {/* Filter Bar - Fixed, transitions between below Newsroom and below header */}
-      <div className={`fixed left-0 right-0 bg-background border-b border-border z-40 ${isScrolled ? 'top-16' : 'top-[112px]'}`}>
+      {/* Filter Bar - Fixed directly below header */}
+      <div className="fixed top-16 left-0 right-0 bg-background border-b border-border z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
