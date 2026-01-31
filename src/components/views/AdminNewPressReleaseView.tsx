@@ -376,6 +376,7 @@ export function AdminNewPressReleaseView() {
               size="icon"
               onClick={() => setNewCategoryDialogOpen(true)}
               title="Add new category"
+              className="hover:bg-foreground hover:text-background"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -385,6 +386,7 @@ export function AdminNewPressReleaseView() {
               size="icon"
               onClick={() => setManageCategoriesOpen(true)}
               title="Manage categories"
+              className="hover:bg-foreground hover:text-background"
             >
               <Settings className="h-4 w-4" />
             </Button>
@@ -582,18 +584,8 @@ export function AdminNewPressReleaseView() {
                 Publishing...
               </>
             ) : (
-              <>
-                <FileText className="h-4 w-4 mr-2" />
-                Publish
-              </>
+              'Publish'
             )}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleSaveDraft}
-            disabled={isSubmitting || !title.trim()}
-          >
-            Save as Draft
           </Button>
         </div>
       </div>
