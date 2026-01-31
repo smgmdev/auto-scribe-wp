@@ -322,8 +322,8 @@ Remember: Write like a seasoned journalist, not an AI. No lists. No excessive fo
     const htmlContent = paragraphs.map((p: string) => {
       // Replace single newlines within paragraphs with spaces
       const cleanedParagraph = p.trim().replace(/\n/g, ' ');
-      return `<p>${cleanedParagraph}</p>`;
-    }).join('');
+      return cleanedParagraph;
+    }).join('<br><br>');
 
     console.log('Generated title:', newTitle);
     console.log('Article length:', rawContent.split(/\s+/).length, 'words');
