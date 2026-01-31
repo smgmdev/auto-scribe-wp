@@ -121,8 +121,8 @@ export default function PressReleaseDetail() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Newsroom Sub-header */}
-      <div className="border-b border-border bg-background">
+      {/* Newsroom Sub-header - Sticky */}
+      <div className="sticky top-16 z-40 border-b border-border bg-white">
         <div className="container mx-auto px-4 h-12 flex items-center">
           <button 
             onClick={() => navigate('/press')}
