@@ -313,17 +313,27 @@ Remember: Write like a seasoned journalist, not an AI. No lists. No excessive fo
       contentStartIndex++;
     }
     
-    const articleContent = lines.slice(contentStartIndex).join('\n').trim();
+    const rawContent = lines.slice(contentStartIndex).join('\n').trim();
+    
+    // Convert plain text paragraphs to HTML paragraphs
+    // Split by double newlines (paragraph breaks) and wrap each in <p> tags
+    const paragraphs = rawContent.split(/\n\s*\n/).filter((p: string) => p.trim());
+    const htmlContent = paragraphs.map((p: string) => {
+      // Replace single newlines within paragraphs with spaces
+      const cleanedParagraph = p.trim().replace(/\n/g, ' ');
+      return `<p>${cleanedParagraph}</p>`;
+    }).join('');
 
     console.log('Generated title:', newTitle);
-    console.log('Article length:', articleContent.split(/\s+/).length, 'words');
+    console.log('Article length:', rawContent.split(/\s+/).length, 'words');
+    console.log('Paragraphs created:', paragraphs.length);
     console.log('Used source content:', sourceContent ? 'yes' : 'no');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         title: newTitle,
-        content: articleContent,
+        content: htmlContent,
         usedSource: !!sourceContent
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
