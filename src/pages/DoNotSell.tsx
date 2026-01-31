@@ -4,6 +4,7 @@ import { Menu, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
+import { Footer } from '@/components/layout/Footer';
 import amlogo from '@/assets/amlogo.png';
 
 const DoNotSell = () => {
@@ -161,6 +162,9 @@ const DoNotSell = () => {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
