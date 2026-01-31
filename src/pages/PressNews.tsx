@@ -40,28 +40,7 @@ export default function PressNews() {
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All Topics']);
   const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
-  const [isFilterFixed, setIsFilterFixed] = useState(false);
-  const filterSentinelRef = useRef<HTMLDivElement>(null);
-
-  // Use IntersectionObserver to detect when filter bar reaches the header
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // When the sentinel (at filter position) passes the header, fix the filter
-        setIsFilterFixed(!entry.isIntersecting);
-      },
-      {
-        rootMargin: '-64px 0px 0px 0px', // Trigger when element reaches header bottom (64px)
-        threshold: 0,
-      }
-    );
-
-    if (filterSentinelRef.current) {
-      observer.observe(filterSentinelRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+  // No state needed - using native CSS sticky positioning
 
   useEffect(() => {
     const fetchData = async () => {
@@ -193,19 +172,9 @@ export default function PressNews() {
         </div>
       </div>
 
-      {/* Sentinel at exact filter position - triggers when this hits the header */}
-      <div ref={filterSentinelRef} className="h-0 w-full" />
-
-      {/* Spacer when filter is fixed */}
-      {isFilterFixed && <div className="h-[56px]" />}
-
-      {/* Filter Bar - toggles between normal and fixed positioning with smooth transition */}
+      {/* Filter Bar - native CSS sticky positioning for smooth behavior */}
       <div 
-        className={`border-b border-border z-40 transition-all duration-300 ease-out ${
-          isFilterFixed 
-            ? 'fixed top-16 left-0 right-0 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80' 
-            : 'bg-background'
-        }`}
+        className="sticky top-16 z-40 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80"
       >
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
