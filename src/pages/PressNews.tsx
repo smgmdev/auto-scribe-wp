@@ -390,13 +390,13 @@ export default function PressNews() {
                             
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
+                              <span className="text-[13px] font-bold text-muted-foreground uppercase tracking-wide">
                                 {release.category}
                               </span>
                               <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 leading-tight">
                                 {release.title}
                               </h3>
-                              <p className="text-sm text-muted-foreground mt-2">
+                              <p className="text-sm font-bold text-muted-foreground mt-2">
                                 {format(new Date(release.published_at || release.created_at), 'MMMM d, yyyy')}
                               </p>
                             </div>
