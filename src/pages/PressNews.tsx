@@ -230,6 +230,7 @@ export default function PressNews() {
                   {releases.map((release) => (
                     <article 
                       key={release.id}
+                      onClick={() => navigate(`/press/${release.id}`)}
                       className="group border-t border-border py-8 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 px-4"
                     >
                       <div className="flex gap-6 items-start">
