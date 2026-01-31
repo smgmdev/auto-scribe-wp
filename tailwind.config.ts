@@ -231,6 +231,18 @@ export default {
 			'overlay-out': {
 				from: { opacity: '1' },
 				to: { opacity: '0' }
+			},
+			'orbit-spin-1': {
+				'0%': { transform: 'rotateX(70deg) rotateY(-20deg) rotateZ(0deg)' },
+				'100%': { transform: 'rotateX(70deg) rotateY(-20deg) rotateZ(360deg)' }
+			},
+			'orbit-spin-2': {
+				'0%': { transform: 'rotateX(70deg) rotateY(40deg) rotateZ(0deg)' },
+				'100%': { transform: 'rotateX(70deg) rotateY(40deg) rotateZ(360deg)' }
+			},
+			'orbit-spin-3': {
+				'0%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(0deg)' },
+				'100%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(360deg)' }
 			}
 		},
 		animation: {
@@ -246,7 +258,10 @@ export default {
 			'dialog-slide-left': 'dialog-slide-left 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 			'dialog-slide-right': 'dialog-slide-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
 			'overlay-in': 'overlay-in 0.2s ease-out forwards',
-			'overlay-out': 'overlay-out 0.15s ease-out forwards'
+			'overlay-out': 'overlay-out 0.15s ease-out forwards',
+			'orbit-spin-1': 'orbit-spin-1 8s linear infinite',
+			'orbit-spin-2': 'orbit-spin-2 10s linear infinite reverse',
+			'orbit-spin-3': 'orbit-spin-3 12s linear infinite'
 		}
   	}
   },

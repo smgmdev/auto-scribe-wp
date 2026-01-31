@@ -326,10 +326,8 @@ export default function Auth() {
             >
               {/* Orbit Ring 1 - Tilted forward-left, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center orbit-ring-1"
-                style={{ 
-                  transformStyle: 'preserve-3d',
-                }}
+                className="absolute inset-0 flex items-center justify-center animate-orbit-spin-1"
+                style={{ transformStyle: 'preserve-3d' }}
               >
                 <div 
                   className="absolute rounded-full border-2 border-[#007AFF]"
@@ -344,10 +342,8 @@ export default function Auth() {
               
               {/* Orbit Ring 2 - Tilted forward-right, spins counter-clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center orbit-ring-2"
-                style={{ 
-                  transformStyle: 'preserve-3d',
-                }}
+                className="absolute inset-0 flex items-center justify-center animate-orbit-spin-2"
+                style={{ transformStyle: 'preserve-3d' }}
               >
                 <div 
                   className="absolute rounded-full border-2 border-[#5856D6]"
@@ -362,10 +358,8 @@ export default function Auth() {
               
               {/* Orbit Ring 3 - Tilted backward, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center orbit-ring-3"
-                style={{ 
-                  transformStyle: 'preserve-3d',
-                }}
+                className="absolute inset-0 flex items-center justify-center animate-orbit-spin-3"
+                style={{ transformStyle: 'preserve-3d' }}
               >
                 <div 
                   className="absolute rounded-full border-2 border-[#32ADE6]"
@@ -385,31 +379,6 @@ export default function Auth() {
                 className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
                 onClick={() => navigate('/')}
               />
-              
-              {/* Keyframe styles - each ring rotates along its own tilted axis */}
-              <style>{`
-                .orbit-ring-1 {
-                  animation: orbit-spin-1 8s linear infinite;
-                }
-                .orbit-ring-2 {
-                  animation: orbit-spin-2 10s linear infinite reverse;
-                }
-                .orbit-ring-3 {
-                  animation: orbit-spin-3 12s linear infinite;
-                }
-                @keyframes orbit-spin-1 {
-                  0% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
-                  100% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
-                }
-                @keyframes orbit-spin-2 {
-                  0% { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
-                  100% { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
-                }
-                @keyframes orbit-spin-3 {
-                  0% { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
-                  100% { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
-                }
-              `}</style>
             </div>
           </div>
 
