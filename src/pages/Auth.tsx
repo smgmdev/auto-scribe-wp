@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight, Search } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
@@ -280,6 +280,12 @@ export default function Auth() {
           >
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+          </button>
+          <button 
+            className="p-2 rounded-full hover:bg-black/5 transition-colors"
+            onClick={() => navigate('/')}
+          >
+            <Search size={20} className="text-foreground" />
           </button>
         </div>
       </header>
