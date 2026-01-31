@@ -226,14 +226,31 @@ export default function Auth() {
       {/* Main Content - Centered */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-[400px]">
-          {/* Logo */}
+          {/* Logo with rotating gradient ring */}
           <div className="flex justify-center mb-8">
-            <img 
-              src={amblack} 
-              alt="Arcana Mace" 
-              className="h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
-              onClick={() => navigate('/')}
-            />
+            <div className="relative">
+              {/* Rotating gradient ring */}
+              <div className="absolute -inset-3 rounded-full opacity-75">
+                <div 
+                  className="w-full h-full rounded-full animate-spin"
+                  style={{
+                    background: 'conic-gradient(from 0deg, transparent, #3b82f6, #8b5cf6, #ec4899, #f97316, #eab308, #22c55e, #3b82f6, transparent)',
+                    animationDuration: '3s',
+                    animationTimingFunction: 'linear',
+                    animationIterationCount: 'infinite',
+                  }}
+                />
+              </div>
+              {/* Mask to create ring effect */}
+              <div className="absolute -inset-1 rounded-full bg-white" />
+              {/* Logo */}
+              <img 
+                src={amblack} 
+                alt="Arcana Mace" 
+                className="relative h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
+                onClick={() => navigate('/')}
+              />
+            </div>
           </div>
 
           {/* Title */}
