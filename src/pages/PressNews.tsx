@@ -345,7 +345,7 @@ export default function PressNews() {
 
       {/* Main Content */}
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -370,7 +370,7 @@ export default function PressNews() {
                         <article 
                           key={release.id}
                           onClick={() => navigate(`/press/${release.id}`)}
-                          className={`group border-t border-border py-8 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 px-4 ${isLastItem ? 'border-b' : ''}`}
+                          className={`group border-t border-border py-8 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 md:-mx-6 px-4 md:px-6 ${isLastItem ? 'border-b' : ''}`}
                         >
                           <div className="flex gap-6 items-start">
                             {/* Image or Logo placeholder */}
@@ -410,36 +410,38 @@ export default function PressNews() {
 
               {/* Apple-style Pagination */}
               {totalItems > 0 && (
-                <div className="flex items-center justify-center gap-6 py-8 border-t border-border mt-4">
-                  <button
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-full transition-colors ${
-                      currentPage === 1 
-                        ? 'text-muted-foreground/40 cursor-not-allowed' 
-                        : 'text-[#06c] hover:bg-muted'
-                    }`}
-                    aria-label="Previous page"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  
-                  <span className="text-sm text-muted-foreground">
-                    {startIndex + 1}-{endIndex} of {totalItems} results
-                  </span>
-                  
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage >= totalPages}
-                    className={`p-2 rounded-full transition-colors ${
-                      currentPage >= totalPages 
-                        ? 'text-muted-foreground/40 cursor-not-allowed' 
-                        : 'text-[#06c] hover:bg-muted'
-                    }`}
-                    aria-label="Next page"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
+                <div className="flex items-center justify-center py-12 mt-4">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 1}
+                      className={`p-1.5 transition-colors ${
+                        currentPage === 1 
+                          ? 'text-muted-foreground/30 cursor-not-allowed' 
+                          : 'text-[#06c] hover:text-[#06c]/70'
+                      }`}
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    
+                    <span className="text-sm text-muted-foreground px-2">
+                      {startIndex + 1}-{endIndex} of {totalItems} results
+                    </span>
+                    
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage >= totalPages}
+                      className={`p-1.5 transition-colors ${
+                        currentPage >= totalPages 
+                          ? 'text-muted-foreground/30 cursor-not-allowed' 
+                          : 'text-[#06c] hover:text-[#06c]/70'
+                      }`}
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </>
