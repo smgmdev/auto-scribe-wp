@@ -135,7 +135,7 @@ const SiteMap = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 pt-24">
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-24">
         {/* Title Section */}
         <div className="mb-10 pb-4 border-b border-neutral-200">
           <h1 className="text-2xl font-semibold text-neutral-900">
