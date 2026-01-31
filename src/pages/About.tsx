@@ -184,15 +184,41 @@ export default function About() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header - About Arcana Mace - Sticky like Auth page */}
+      {/* Sub-header - About Arcana Mace Marketplace - Sticky like Auth page */}
       <div className={`sticky z-40 bg-white border-b border-border ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
-          <span className="text-xl font-semibold text-foreground">About Arcana Mace</span>
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+          <span className="text-xl font-semibold text-foreground">About Arcana Mace Marketplace</span>
+          <nav className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Overview
+            </button>
+            <button 
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Features
+            </button>
+            <button 
+              onClick={() => document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Security
+            </button>
+            <button 
+              onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              FAQ
+            </button>
+          </nav>
         </div>
       </div>
 
       {/* Hero Section - Apple style with solid blue background */}
-      <section className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden py-32">
+      <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden py-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <AnimatedSection>
             <img 
@@ -221,7 +247,7 @@ export default function About() {
       </section>
 
       {/* Apple-style Dark Feature Sections with Blue Checkmarks */}
-      <section className="bg-black py-20 md:py-32">
+      <section id="features" className="bg-black py-20 md:py-32">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 space-y-24 md:space-y-32">
           {/* Feature 1 */}
           <div>
@@ -278,7 +304,7 @@ export default function About() {
       </section>
 
       {/* Safe and Secure Section - Apple style */}
-      <section className="bg-black py-20 md:py-32">
+      <section id="security" className="bg-black py-20 md:py-32">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {/* Large headline */}
           <AnimatedSection>
@@ -492,7 +518,7 @@ export default function About() {
       </section>
 
       {/* Questions Section - Apple style FAQ */}
-      <section className="bg-white py-20 md:py-28 px-4">
+      <section id="faq" className="bg-white py-20 md:py-28 px-4">
         <div className="max-w-[980px] mx-auto">
           <AnimatedSection>
             <h2 className="text-5xl md:text-7xl lg:text-[80px] font-semibold text-[#1d1d1f] tracking-tight leading-[1.05] text-center mb-16 md:mb-20">
