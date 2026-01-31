@@ -79,20 +79,20 @@ const SiteMap = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
-            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+            <span className="text-lg font-semibold text-neutral-900">Arcana Mace</span>
           </div>
           
           {/* Search Trigger - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-500 hover:bg-neutral-200 transition-colors text-left"
             >
               <Search className="h-4 w-4" />
               <span>Search media outlets...</span>
@@ -137,33 +137,33 @@ const SiteMap = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 pt-24">
         {/* Title Section */}
-        <div className="mb-12 pb-6 border-b border-border">
-          <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
+        <div className="mb-10 pb-4 border-b border-neutral-200">
+          <h1 className="text-2xl font-semibold text-neutral-900">
             Arcana Mace Site Map
           </h1>
         </div>
 
         {/* Site Map Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8">
           {SITEMAP_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h2 className="text-sm font-semibold text-foreground mb-4">
+              <h2 className="text-xs font-semibold text-neutral-900 mb-3">
                 {section.title}
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     {link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-sm text-primary hover:underline"
+                        className="text-xs text-[#0066cc] hover:underline"
                       >
                         {link.label}
                       </a>
                     ) : (
                       <button
                         onClick={() => handleLinkClick(link)}
-                        className="text-sm text-primary hover:underline text-left"
+                        className="text-xs text-[#0066cc] hover:underline text-left"
                       >
                         {link.label}
                       </button>
