@@ -574,7 +574,7 @@ export default function Auth() {
           <p className="text-center text-muted-foreground text-[15px] mb-8">
             {mode === 'signin' 
               ? 'Manage your Arcana Mace Account' 
-              : 'Create Arcana Mace Account to access all services.'
+              : 'Create Arcana Mace Account to access services'
             }
           </p>
 
