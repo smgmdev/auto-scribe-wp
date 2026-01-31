@@ -96,8 +96,15 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       label: 'More',
       icon: MoreHorizontal,
       submenu: [
-        { id: 'admin-new-press-release', label: 'New Press Release', icon: Plus },
-        { id: 'admin-all-news', label: 'All News', icon: Newspaper }
+        { 
+          id: 'admin-press-releases', 
+          label: 'Press Releases', 
+          icon: Newspaper,
+          submenu: [
+            { id: 'admin-new-press-release', label: 'New', icon: Plus },
+            { id: 'admin-all-news', label: 'All', icon: FileText }
+          ]
+        }
       ]
     }];
   }
@@ -201,6 +208,8 @@ export function Sidebar({
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     const adminAgenciesIds = ['admin-agencies', 'admin-media-management'];
+    const adminMoreIds = ['admin-new-press-release', 'admin-all-news'];
+    const pressReleasesIds = ['admin-new-press-release', 'admin-all-news'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
@@ -213,6 +222,12 @@ export function Sidebar({
     }
     if (adminAgenciesIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'admin-agencies': true }));
+    }
+    if (adminMoreIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'admin-more': true }));
+    }
+    if (pressReleasesIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'admin-press-releases': true }));
     }
   }, [currentView, hasUserNavigated]);
 
@@ -1235,6 +1250,8 @@ export function Sidebar({
                         {item.submenu?.map(subItem => {
                           const SubIcon = subItem.icon;
                           const isSubActive = currentView === subItem.id;
+                          const hasNestedSubmenu = 'submenu' in subItem && subItem.submenu;
+                          
                           // Admin Agency Management shows agency application notifications
                           const showAgencyBadge = subItem.id === 'admin-agencies' && (unreadAgencyApplicationsCount + unreadCustomVerificationsCount) > 0;
                           const agencyBadgeCount = unreadAgencyApplicationsCount + unreadCustomVerificationsCount;
@@ -1269,6 +1286,54 @@ export function Sidebar({
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
                           else if (showAdminEngagementsBadge) notificationCount = adminEngagementsTotalCount;
                           
+                          // Handle nested submenu (e.g., Press Releases under More)
+                          if (hasNestedSubmenu) {
+                            const isNestedExpanded = expandedMenus[subItem.id] || false;
+                            const isNestedSubmenuActive = subItem.submenu?.some(nested => currentView === nested.id);
+                            
+                            return (
+                              <div key={subItem.id}>
+                                <Button
+                                  variant="ghost"
+                                  className={cn(
+                                    "w-full justify-start gap-3 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                    isNestedSubmenuActive && "text-[#3872e0] font-medium"
+                                  )}
+                                  onClick={() => toggleMenu(subItem.id)}
+                                >
+                                  <SubIcon className={cn("h-4 w-4 flex-shrink-0", isNestedSubmenuActive && "text-[#3872e0]")} />
+                                  <span className="truncate flex-1 text-left">{subItem.label}</span>
+                                  <ChevronDown className={cn(
+                                    "h-3 w-3 transition-transform duration-200 ml-auto flex-shrink-0",
+                                    isNestedExpanded && "rotate-180"
+                                  )} />
+                                </Button>
+                                {isNestedExpanded && (
+                                  <div className="ml-4 mt-1 space-y-1">
+                                    {subItem.submenu?.map(nestedItem => {
+                                      const NestedIcon = nestedItem.icon;
+                                      const isNestedActive = currentView === nestedItem.id;
+                                      return (
+                                        <Button
+                                          key={nestedItem.id}
+                                          variant="ghost"
+                                          className={cn(
+                                            "w-full justify-start gap-3 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                                            isNestedActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                                          )}
+                                          onClick={() => handleNavClick(nestedItem.id)}
+                                        >
+                                          <NestedIcon className={cn("h-4 w-4 flex-shrink-0", isNestedActive && "text-[#3872e0]")} />
+                                          <span className="truncate flex-1 text-left">{nestedItem.label}</span>
+                                        </Button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                          
                           return (
                             <div key={subItem.id} className="relative">
                               <Button
@@ -1283,7 +1348,7 @@ export function Sidebar({
                                 <span className="truncate flex-1 text-left">{subItem.label}</span>
                               </Button>
                               {notificationCount > 0 && (
-                                <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                                <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
                                   {notificationCount}
                                 </span>
                               )}
