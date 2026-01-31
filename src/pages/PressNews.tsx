@@ -171,8 +171,8 @@ export default function PressNews() {
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-muted/30 border-b border-border">
+      {/* Filter Bar - Sticky below header */}
+      <div className="bg-muted/30 border-b border-border sticky top-16 z-40 backdrop-blur supports-[backdrop-filter]:bg-muted/60">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
