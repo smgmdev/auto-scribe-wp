@@ -326,20 +326,17 @@ export default function Auth() {
             >
               {/* Orbit Ring 1 - Tilted forward-left, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0 flex items-center justify-center orbit-ring-1"
                 style={{ 
                   transformStyle: 'preserve-3d',
-                  transform: 'rotateX(70deg) rotateY(-20deg)',
-                  animation: 'orbit-axis-1 8s linear infinite',
                 }}
               >
                 <div 
-                  className="absolute rounded-full border-2"
+                  className="absolute rounded-full border-2 border-[#007AFF]"
                   style={{
-                    width: `${70 + (headerLineWidth / 100) * 20}px`,
-                    height: `${70 + (headerLineWidth / 100) * 20}px`,
-                    borderColor: '#007AFF',
-                    opacity: 0.9 - (headerLineWidth / 100) * 0.2,
+                    width: `${100 + (headerLineWidth / 100) * 30}px`,
+                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    opacity: 0.9,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                   }}
                 />
@@ -347,20 +344,17 @@ export default function Auth() {
               
               {/* Orbit Ring 2 - Tilted forward-right, spins counter-clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0 flex items-center justify-center orbit-ring-2"
                 style={{ 
                   transformStyle: 'preserve-3d',
-                  transform: 'rotateX(70deg) rotateY(40deg)',
-                  animation: 'orbit-axis-2 10s linear infinite reverse',
                 }}
               >
                 <div 
-                  className="absolute rounded-full border-2"
+                  className="absolute rounded-full border-2 border-[#5856D6]"
                   style={{
-                    width: `${75 + (headerLineWidth / 100) * 25}px`,
-                    height: `${75 + (headerLineWidth / 100) * 25}px`,
-                    borderColor: '#5856D6',
-                    opacity: 0.85 - (headerLineWidth / 100) * 0.2,
+                    width: `${100 + (headerLineWidth / 100) * 30}px`,
+                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    opacity: 0.85,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                   }}
                 />
@@ -368,38 +362,52 @@ export default function Auth() {
               
               {/* Orbit Ring 3 - Tilted backward, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0 flex items-center justify-center orbit-ring-3"
                 style={{ 
                   transformStyle: 'preserve-3d',
-                  transform: 'rotateX(70deg) rotateY(100deg)',
-                  animation: 'orbit-axis-3 12s linear infinite',
                 }}
               >
                 <div 
-                  className="absolute rounded-full border-2"
+                  className="absolute rounded-full border-2 border-[#32ADE6]"
                   style={{
-                    width: `${80 + (headerLineWidth / 100) * 30}px`,
-                    height: `${80 + (headerLineWidth / 100) * 30}px`,
-                    borderColor: '#32ADE6',
-                    opacity: 0.8 - (headerLineWidth / 100) * 0.2,
+                    width: `${100 + (headerLineWidth / 100) * 30}px`,
+                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    opacity: 0.8,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                   }}
                 />
               </div>
               
+              {/* Logo - centered on top */}
+              <img 
+                src={amblack} 
+                alt="Arcana Mace" 
+                className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
+                onClick={() => navigate('/')}
+              />
+              
               {/* Keyframe styles - each ring rotates along its own tilted axis */}
               <style>{`
-                @keyframes orbit-axis-1 {
-                  from { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
-                  to { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
+                .orbit-ring-1 {
+                  animation: orbit-spin-1 8s linear infinite;
                 }
-                @keyframes orbit-axis-2 {
-                  from { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
-                  to { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
+                .orbit-ring-2 {
+                  animation: orbit-spin-2 10s linear infinite reverse;
                 }
-                @keyframes orbit-axis-3 {
-                  from { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
-                  to { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
+                .orbit-ring-3 {
+                  animation: orbit-spin-3 12s linear infinite;
+                }
+                @keyframes orbit-spin-1 {
+                  0% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
+                  100% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
+                }
+                @keyframes orbit-spin-2 {
+                  0% { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
+                  100% { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
+                }
+                @keyframes orbit-spin-3 {
+                  0% { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
+                  100% { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
                 }
               `}</style>
             </div>
