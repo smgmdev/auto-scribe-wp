@@ -153,9 +153,9 @@ export default function PressNews() {
 
   return (
     <div className="h-screen overflow-y-auto bg-white">
-      {/* Header - same as homepage */}
+      {/* Header - Apple-style centered */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button 
             onClick={() => navigate('/')}
             className="flex items-center gap-3"
@@ -449,7 +449,7 @@ export default function PressNews() {
         </div>
       </main>
 
-      <Footer />
+      <Footer narrow />
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
