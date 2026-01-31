@@ -575,22 +575,24 @@ export function AdminNewPressReleaseView() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
-          {/* Publish Button */}
-          <Button
-            className="w-full border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground"
-            onClick={handlePublish}
-            disabled={isSubmitting || !title.trim() || !content.trim()}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Publishing...
-              </>
-            ) : (
-              'Publish'
-            )}
-          </Button>
+        <div className="lg:col-span-1">
+          <div className="sticky top-4 space-y-4">
+            {/* Publish Button */}
+            <Button
+              className="w-full border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground"
+              onClick={handlePublish}
+              disabled={isSubmitting || !title.trim() || !content.trim()}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                'Publish'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
