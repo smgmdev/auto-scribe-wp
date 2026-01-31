@@ -217,8 +217,8 @@ export default function About() {
         </div>
       </div>
 
-      {/* Promo Banner - Apple style - scrolls away */}
-      <div className="relative z-30 bg-[#1d1d1f] py-3">
+      {/* Promo Banner - Apple style - NOT sticky, scrolls with content */}
+      <div className="bg-[#1d1d1f] py-3">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <span className="text-sm text-white/90">
             Set up Arcana Mace in seconds.{' '}
