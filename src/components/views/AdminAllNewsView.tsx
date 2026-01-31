@@ -1042,7 +1042,7 @@ export function AdminAllNewsView() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="hover:bg-foreground hover:text-background">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:!bg-transparent hover:!text-destructive hover:!border-destructive border border-transparent">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
