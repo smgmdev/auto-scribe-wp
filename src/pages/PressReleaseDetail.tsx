@@ -110,7 +110,7 @@ export default function PressReleaseDetail() {
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white">
       {/* Header */}
       <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button 
             onClick={() => navigate('/')}
             className="flex items-center gap-3"
@@ -167,7 +167,7 @@ export default function PressReleaseDetail() {
 
       {/* Newsroom Sub-header - Sticky */}
       <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="container mx-auto px-4">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
           <button 
             onClick={() => navigate('/press')}
             className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
@@ -277,7 +277,7 @@ export default function PressReleaseDetail() {
         )}
       </main>
 
-      <Footer />
+      <Footer narrow />
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
