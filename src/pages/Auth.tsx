@@ -337,123 +337,232 @@ export default function Auth() {
       {/* Main Content - Centered */}
       <div className="flex-1 flex items-center justify-center px-4 pt-16 sm:pt-20 pb-12">
         <div className="w-full max-w-[400px]">
-          {/* Logo with geometric sphere wireframe - Genius Bar inspired */}
+          {/* Logo with 3D orbital rings animation - Atom style */}
           <div className="flex justify-center mb-2 sm:mb-4">
             <style>{`
-              @keyframes sphere-rotate {
-                0% { transform: rotateY(0deg) rotateX(15deg); }
-                100% { transform: rotateY(360deg) rotateX(15deg); }
+              @keyframes orbit-ring-1 {
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); }
+              }
+              @keyframes orbit-ring-2 {
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
+              }
+              @keyframes orbit-ring-3 {
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); }
+              }
+              @keyframes orbit-ring-4 {
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
+              }
+              @keyframes glow-spin-fast {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes glow-spin-fast-reverse {
+                0% { transform: rotate(360deg); }
+                100% { transform: rotate(0deg); }
+              }
+              @keyframes sphere-pulse {
+                0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+                50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
               }
               @keyframes rings-entrance {
                 0% { 
                   opacity: 0; 
-                  transform: scale(0.7) rotateY(0deg) rotateX(15deg);
-                }
-                100% { 
-                  opacity: 1; 
-                  transform: scale(1) rotateY(0deg) rotateX(15deg);
-                }
-              }
-              @keyframes logo-entrance {
-                0% { 
-                  opacity: 0; 
-                  transform: scale(0.85);
+                  transform: scale(0.8);
                 }
                 100% { 
                   opacity: 1; 
                   transform: scale(1);
                 }
               }
-              .sphere-container {
-                animation: rings-entrance 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards,
-                           sphere-rotate 20s linear 1.2s infinite;
+              @keyframes logo-entrance {
+                0% { 
+                  opacity: 0; 
+                  transform: translateZ(0px) scale(0.9);
+                }
+                100% { 
+                  opacity: 1; 
+                  transform: translateZ(0px) scale(1);
+                }
+              }
+              .rings-container {
+                animation: rings-entrance 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
               }
               .logo-entrance {
-                animation: logo-entrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+                animation: logo-entrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
                 opacity: 0;
               }
-              .ring-base {
-                position: absolute;
-                border-radius: 50%;
-                border: 2px solid #007AFF;
-              }
             `}</style>
-            <div className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center">
-              {/* Logo - centered, stays static */}
+            <div 
+              className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center rings-container"
+              style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
+            >
+              {/* Logo - centered as the nucleus */}
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="absolute z-20 h-12 w-12 sm:h-16 sm:w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity logo-entrance"
+                className="absolute z-10 h-12 w-12 sm:h-20 sm:w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity logo-entrance"
                 onClick={() => navigate('/')}
+                style={{ transform: 'translateZ(0px)' }}
               />
               
-              {/* Rotating sphere wireframe */}
+              {/* Orbit Ring 1 - Tilted forward-left, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center sphere-container"
+                className="absolute inset-0 flex items-center justify-center"
                 style={{ 
                   transformStyle: 'preserve-3d',
-                  perspective: '800px'
+                  animation: 'orbit-ring-1 8s linear infinite'
                 }}
               >
-                {/* Ring 1 - Horizontal base ring */}
                 <div 
-                  className="ring-base"
+                  className="absolute rounded-full"
                   style={{
-                    width: isMobile ? '100px' : '150px',
-                    height: isMobile ? '100px' : '150px',
-                    transform: 'rotateX(90deg)',
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    transition: 'width 0.15s ease-out, height 0.15s ease-out',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #007AFF`,
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)',
                   }}
-                />
-                
-                {/* Ring 2 - Vertical front */}
+                >
+                  {/* 3D glowing sphere spinning fast around the ring */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-spin-fast 1s linear infinite' }}
+                  >
+                    <div 
+                      className="absolute w-4 h-4 rounded-full"
+                      style={{
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #007AFF 30%, #0055cc 70%, #003399 100%)',
+                        boxShadow: '0 0 8px 2px rgba(0, 122, 255, 1), 0 0 16px 6px rgba(0, 122, 255, 0.7), 0 0 24px 10px rgba(0, 122, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-10px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.5s ease-in-out infinite',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Orbit Ring 2 - Tilted forward-right, spins counter-clockwise */}
+              <div 
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-2 10s linear infinite'
+                }}
+              >
                 <div 
-                  className="ring-base"
+                  className="absolute rounded-full"
                   style={{
-                    width: isMobile ? '100px' : '150px',
-                    height: isMobile ? '100px' : '150px',
-                    transform: 'rotateY(0deg)',
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    transition: 'width 0.15s ease-out, height 0.15s ease-out',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #5856D6`,
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)',
                   }}
-                />
-                
-                {/* Ring 3 - Tilted 60deg */}
+                >
+                  {/* 3D glowing sphere spinning fast around the ring */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-spin-fast-reverse 1.2s linear infinite' }}
+                  >
+                    <div 
+                      className="absolute w-4 h-4 rounded-full"
+                      style={{
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #5856D6 30%, #4240a8 70%, #2d2b7a 100%)',
+                        boxShadow: '0 0 8px 2px rgba(88, 86, 214, 1), 0 0 16px 6px rgba(88, 86, 214, 0.7), 0 0 24px 10px rgba(88, 86, 214, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-10px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.6s ease-in-out infinite',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Orbit Ring 3 - Tilted backward, spins clockwise */}
+              <div 
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-3 12s linear infinite'
+                }}
+              >
                 <div 
-                  className="ring-base"
+                  className="absolute rounded-full"
                   style={{
-                    width: isMobile ? '100px' : '150px',
-                    height: isMobile ? '100px' : '150px',
-                    transform: 'rotateY(60deg)',
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    transition: 'width 0.15s ease-out, height 0.15s ease-out',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #32ADE6`,
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)',
                   }}
-                />
-                
-                {/* Ring 4 - Tilted 120deg */}
+                >
+                  {/* 3D glowing sphere spinning fast around the ring */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-spin-fast 0.8s linear infinite' }}
+                  >
+                    <div 
+                      className="absolute w-4 h-4 rounded-full"
+                      style={{
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #32ADE6 30%, #1a8fc4 70%, #0d6a99 100%)',
+                        boxShadow: '0 0 8px 2px rgba(50, 173, 230, 1), 0 0 16px 6px rgba(50, 173, 230, 0.7), 0 0 24px 10px rgba(50, 173, 230, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-10px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.4s ease-in-out infinite',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Orbit Ring 4 - Tilted left, spins counter-clockwise */}
+              <div 
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-4 9s linear infinite'
+                }}
+              >
                 <div 
-                  className="ring-base"
+                  className="absolute rounded-full"
                   style={{
-                    width: isMobile ? '100px' : '150px',
-                    height: isMobile ? '100px' : '150px',
-                    transform: 'rotateY(120deg)',
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    transition: 'width 0.15s ease-out, height 0.15s ease-out',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #FF9500`,
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)',
                   }}
-                />
-                
-                {/* Ring 5 - Tilted 30deg on X */}
-                <div 
-                  className="ring-base"
-                  style={{
-                    width: isMobile ? '100px' : '150px',
-                    height: isMobile ? '100px' : '150px',
-                    transform: 'rotateX(60deg) rotateZ(30deg)',
-                  }}
-                />
-                
-                {/* Ring 6 - Tilted -30deg on X */}
-                <div 
-                  className="ring-base"
-                  style={{
-                    width: isMobile ? '100px' : '150px',
-                    height: isMobile ? '100px' : '150px',
-                    transform: 'rotateX(60deg) rotateZ(-30deg)',
-                  }}
-                />
+                >
+                  {/* 3D glowing sphere spinning fast around the ring */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-spin-fast-reverse 0.9s linear infinite' }}
+                  >
+                    <div 
+                      className="absolute w-4 h-4 rounded-full"
+                      style={{
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #FF9500 30%, #cc7700 70%, #995900 100%)',
+                        boxShadow: '0 0 8px 2px rgba(255, 149, 0, 1), 0 0 16px 6px rgba(255, 149, 0, 0.7), 0 0 24px 10px rgba(255, 149, 0, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-10px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.45s ease-in-out infinite',
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
