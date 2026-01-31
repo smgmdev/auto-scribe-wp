@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Shield, Globe, Users, TrendingUp, Award, Search, User } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -48,41 +48,11 @@ function AnimatedSection({
       className={`transition-all duration-1000 ease-out ${className}`}
       style={{
         opacity: isInView ? 1 : 0,
-        transform: isInView ? 'translateY(0)' : 'translateY(60px)',
+        transform: isInView ? 'translateY(0)' : 'translateY(50px)',
         transitionDelay: `${delay}ms`
       }}
     >
       {children}
-    </div>
-  );
-}
-
-// Staggered text animation component
-function StaggeredText({ 
-  text, 
-  className = '' 
-}: { 
-  text: string; 
-  className?: string;
-}) {
-  const { ref, isInView } = useInView();
-  const words = text.split(' ');
-  
-  return (
-    <div ref={ref} className={className}>
-      {words.map((word, index) => (
-        <span 
-          key={index}
-          className="inline-block transition-all duration-700 ease-out"
-          style={{
-            opacity: isInView ? 1 : 0,
-            transform: isInView ? 'translateY(0)' : 'translateY(40px)',
-            transitionDelay: `${index * 80}ms`
-          }}
-        >
-          {word}{index < words.length - 1 ? '\u00A0' : ''}
-        </span>
-      ))}
     </div>
   );
 }
@@ -178,238 +148,205 @@ export default function About() {
       <div className="h-16" />
 
       {/* Sub-header - About */}
-      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
-          <button 
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm font-medium"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            About
-          </button>
+          <span className="text-sm font-medium text-[#1d1d1f]">About</span>
         </div>
       </div>
 
-      {/* Hero Section - Full viewport with gradient */}
-      <section className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-b from-[#1d1d1f] to-[#000000] text-white overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
-        
+      {/* Hero Section - Apple style with solid blue background */}
+      <section className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden pt-20 pb-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <AnimatedSection>
-            <img src={amlogo} alt="Arcana Mace" className="h-20 w-20 mx-auto mb-8 object-contain" />
+            <img 
+              src={amlogo} 
+              alt="Arcana Mace" 
+              className="h-16 md:h-20 mx-auto mb-6 object-contain" 
+            />
           </AnimatedSection>
           
-          <StaggeredText 
-            text="The future of media distribution."
-            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8"
-          />
+          <AnimatedSection delay={100}>
+            <h1 className="text-5xl md:text-7xl lg:text-[80px] font-semibold tracking-tight leading-[1.05] mb-6">
+              Distribute the<br />Arcana way.
+            </h1>
+          </AnimatedSection>
           
-          <AnimatedSection delay={600}>
-            <p className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto">
-              Arcana Mace connects brands with premium publishers worldwide.
+          <AnimatedSection delay={200}>
+            <button 
+              onClick={() => navigate('/auth')}
+              className="inline-flex items-center gap-2 text-xl text-white hover:underline"
+            >
+              Get started
+              <span className="text-2xl">›</span>
+            </button>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Feature Tiles - Apple style grid */}
+      <section className="bg-[#f5f5f7] py-4 px-4">
+        <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Tile 1 - Speed */}
+          <AnimatedSection className="bg-white rounded-3xl p-12 md:p-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
+              Faster and easier<br />
+              <span className="text-[#86868b]">than traditional</span><br />
+              <span className="text-[#86868b]">media buying.</span>
+            </h2>
+          </AnimatedSection>
+
+          {/* Tile 2 - Payment Options */}
+          <AnimatedSection delay={100} className="bg-white rounded-3xl p-12 md:p-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
+              Pay in full, with<br />
+              <span className="text-[#86868b]">credits, or</span><br />
+              <span className="text-[#86868b]">crypto.</span>
+            </h2>
+          </AnimatedSection>
+
+          {/* Tile 3 - Privacy */}
+          <AnimatedSection delay={150} className="bg-white rounded-3xl p-12 md:p-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
+              Privacy and security<br />
+              <span className="text-[#86868b]">built in.</span>
+            </h2>
+          </AnimatedSection>
+
+          {/* Tile 4 - Global */}
+          <AnimatedSection delay={200} className="bg-white rounded-3xl p-12 md:p-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
+              Accepted by 500+<br />
+              <span className="text-[#86868b]">premium publishers</span><br />
+              <span className="text-[#86868b]">worldwide.</span>
+            </h2>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Setup Section */}
+      <section className="bg-[#f5f5f7] py-4 px-4">
+        <div className="max-w-[980px] mx-auto">
+          <AnimatedSection className="bg-white rounded-3xl overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="p-12 md:p-16 flex flex-col justify-center">
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
+                  It's ready<br />and set.<br />
+                  <span className="text-[#86868b]">Just go.</span>
+                </h2>
+              </div>
+              <div className="bg-[#f5f5f7] p-12 md:p-16 flex flex-col justify-center">
+                <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
+                  <span className="font-semibold">Set up in seconds.</span> Right on your browser. Arcana Mace is built for brands, agencies, and PR professionals. To get started, simply create an account and browse our curated network of premium publishers. When you want to publish, just submit, pay, and you're set.
+                </p>
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="inline-flex items-center gap-2 text-[#0066cc] hover:underline text-lg"
+                >
+                  Learn how to set up Arcana Mace
+                  <span>›</span>
+                </button>
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Flexibility Section */}
+      <section className="bg-[#f5f5f7] py-4 px-4">
+        <div className="max-w-[980px] mx-auto">
+          <AnimatedSection className="bg-white rounded-3xl overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="p-12 md:p-16 flex flex-col justify-center order-2 md:order-1">
+                <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
+                  <span className="font-semibold">Flexibility that fits your needs.</span> Whether you're running a single campaign or managing multiple brands, choose the payment option that works best for you. Pay per article, buy credits in bulk for savings, or use USDT for seamless transactions.
+                </p>
+                <button 
+                  onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
+                  className="inline-flex items-center gap-2 text-[#0066cc] hover:underline text-lg"
+                >
+                  Learn about payment options
+                  <span>›</span>
+                </button>
+              </div>
+              <div className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center order-1 md:order-2">
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight">
+                  Choose how<br />you pay.<br />
+                  <span className="text-[#86868b]">Credits. Cash.</span><br />
+                  <span className="text-[#86868b]">Crypto.</span>
+                </h2>
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Global Coverage Section */}
+      <section className="bg-[#f5f5f7] py-4 px-4">
+        <div className="max-w-[980px] mx-auto">
+          <AnimatedSection className="bg-[#1d1d1f] rounded-3xl p-12 md:p-20 text-center text-white">
+            <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-8">
+              Global coverage.<br />
+              <span className="text-[#86868b]">Local expertise.</span>
+            </h2>
+            <p className="text-xl text-[#86868b] max-w-2xl mx-auto mb-8">
+              From Business & Finance to Crypto, Tech to Politics — our network spans every major market. MENA, China, and beyond.
             </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {['Business & Finance', 'Crypto', 'Tech', 'Campaign', 'Politics', 'MENA', 'China'].map((category) => (
+                <span 
+                  key={category}
+                  className="px-4 py-2 bg-white/10 rounded-full text-sm text-white/80"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Speed Section */}
-      <section className="py-32 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <AnimatedSection className="text-center mb-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-              <Zap className="h-8 w-8 text-primary" />
-            </div>
-            <h2 className="text-4xl md:text-6xl font-bold text-[#1d1d1f] tracking-tight">
-              Fast. Simple.<br />Powerful.
-            </h2>
+      {/* Trust Section */}
+      <section className="bg-[#f5f5f7] py-4 px-4">
+        <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+          <AnimatedSection className="bg-white rounded-3xl p-10 text-center">
+            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">24h</p>
+            <p className="text-lg text-[#86868b]">Average publishing time</p>
           </AnimatedSection>
           
-          <div className="grid md:grid-cols-3 gap-12">
-            <AnimatedSection delay={100}>
-              <div className="text-center">
-                <p className="text-5xl md:text-6xl font-bold text-primary mb-4">24h</p>
-                <p className="text-lg text-muted-foreground">Average publishing time</p>
-              </div>
-            </AnimatedSection>
-            <AnimatedSection delay={200}>
-              <div className="text-center">
-                <p className="text-5xl md:text-6xl font-bold text-primary mb-4">500+</p>
-                <p className="text-lg text-muted-foreground">Premium publishers</p>
-              </div>
-            </AnimatedSection>
-            <AnimatedSection delay={300}>
-              <div className="text-center">
-                <p className="text-5xl md:text-6xl font-bold text-primary mb-4">50M+</p>
-                <p className="text-lg text-muted-foreground">Monthly readers reached</p>
-              </div>
-            </AnimatedSection>
-          </div>
-        </div>
-      </section>
-
-      {/* Global Reach Section */}
-      <section className="py-32 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <AnimatedSection>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
-                <Globe className="h-8 w-8 text-accent" />
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-[#1d1d1f] tracking-tight mb-6">
-                Global reach.<br />Local impact.
-              </h2>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                From business and finance to tech and crypto, our network spans every major market and niche. 
-                Get your story in front of the right audience, anywhere in the world.
-              </p>
-            </AnimatedSection>
-            
-            <AnimatedSection delay={200}>
-              <div className="grid grid-cols-2 gap-6">
-                {['Business & Finance', 'Technology', 'Crypto & Web3', 'MENA Region', 'China Market', 'Politics & Economy'].map((category, index) => (
-                  <div 
-                    key={category}
-                    className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-300"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <p className="font-semibold text-[#1d1d1f]">{category}</p>
-                  </div>
-                ))}
-              </div>
-            </AnimatedSection>
-          </div>
-        </div>
-      </section>
-
-      {/* Security Section */}
-      <section className="py-32 bg-[#1d1d1f] text-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <AnimatedSection>
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-6">
-              <Shield className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8">
-              Privacy and trust<br />built in.
-            </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto mb-16">
-              Your content, your control. We ensure secure transactions and protect your data 
-              with industry-leading security measures.
-            </p>
+          <AnimatedSection delay={100} className="bg-white rounded-3xl p-10 text-center">
+            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">500+</p>
+            <p className="text-lg text-[#86868b]">Premium publishers</p>
           </AnimatedSection>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <AnimatedSection delay={100}>
-              <div className="bg-white/5 rounded-2xl p-8 backdrop-blur-sm">
-                <Shield className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Secure Payments</h3>
-                <p className="text-white/60">Protected transactions with industry-standard encryption</p>
-              </div>
-            </AnimatedSection>
-            <AnimatedSection delay={200}>
-              <div className="bg-white/5 rounded-2xl p-8 backdrop-blur-sm">
-                <Users className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Verified Publishers</h3>
-                <p className="text-white/60">Every publisher in our network is vetted and verified</p>
-              </div>
-            </AnimatedSection>
-            <AnimatedSection delay={300}>
-              <div className="bg-white/5 rounded-2xl p-8 backdrop-blur-sm">
-                <Award className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Quality Guaranteed</h3>
-                <p className="text-white/60">Full refund if publication doesn't meet standards</p>
-              </div>
-            </AnimatedSection>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-32 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <AnimatedSection className="text-center mb-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
-              <TrendingUp className="h-8 w-8 text-accent" />
-            </div>
-            <h2 className="text-4xl md:text-6xl font-bold text-[#1d1d1f] tracking-tight">
-              It's ready and set.<br />Just go.
-            </h2>
+          <AnimatedSection delay={200} className="bg-white rounded-3xl p-10 text-center">
+            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">50M+</p>
+            <p className="text-lg text-[#86868b]">Monthly readers</p>
           </AnimatedSection>
-          
-          <div className="space-y-24">
-            <AnimatedSection>
-              <div className="flex flex-col md:flex-row items-center gap-12">
-                <div className="flex-shrink-0 w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-5xl font-bold">
-                  1
-                </div>
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] mb-4">Browse Publishers</h3>
-                  <p className="text-xl text-muted-foreground">
-                    Explore our curated network of 500+ premium publishers. Filter by category, 
-                    region, and audience to find the perfect match for your content.
-                  </p>
-                </div>
-              </div>
-            </AnimatedSection>
-            
-            <AnimatedSection>
-              <div className="flex flex-col md:flex-row-reverse items-center gap-12">
-                <div className="flex-shrink-0 w-32 h-32 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center text-white text-5xl font-bold">
-                  2
-                </div>
-                <div className="md:text-right">
-                  <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] mb-4">Submit Your Content</h3>
-                  <p className="text-xl text-muted-foreground">
-                    Upload your article or let our AI help you create one. Add images, 
-                    set your preferences, and submit with a single click.
-                  </p>
-                </div>
-              </div>
-            </AnimatedSection>
-            
-            <AnimatedSection>
-              <div className="flex flex-col md:flex-row items-center gap-12">
-                <div className="flex-shrink-0 w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-5xl font-bold">
-                  3
-                </div>
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] mb-4">Get Published</h3>
-                  <p className="text-xl text-muted-foreground">
-                    Sit back while we handle the rest. Your content goes live on premium 
-                    sites within 24 hours, reaching millions of readers worldwide.
-                  </p>
-                </div>
-              </div>
-            </AnimatedSection>
-          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 bg-gradient-to-b from-[#f5f5f7] to-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+      <section className="bg-[#f5f5f7] py-16 px-4">
+        <div className="max-w-[980px] mx-auto text-center">
           <AnimatedSection>
-            <h2 className="text-4xl md:text-6xl font-bold text-[#1d1d1f] tracking-tight mb-8">
-              Ready to amplify<br />your message?
+            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              Ready to get started?
             </h2>
-            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Join thousands of brands and agencies who trust Arcana Mace for their media distribution needs.
+            <p className="text-xl text-[#86868b] mb-8">
+              Join thousands of brands distributing with Arcana Mace.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={() => navigate('/auth')}
-                className="px-8 py-4 bg-primary text-primary-foreground rounded-full text-lg font-medium hover:bg-primary/90 transition-colors"
+                className="px-8 py-4 bg-[#0071e3] text-white rounded-full text-lg font-medium hover:bg-[#0077ed] transition-colors"
               >
                 Get Started
               </button>
               <button 
                 onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
-                className="px-8 py-4 bg-[#1d1d1f] text-white rounded-full text-lg font-medium hover:bg-[#1d1d1f]/90 transition-colors"
+                className="px-8 py-4 bg-transparent text-[#0066cc] rounded-full text-lg font-medium hover:bg-[#0066cc]/10 transition-colors"
               >
-                Browse Publishers
+                Browse Publishers ›
               </button>
             </div>
           </AnimatedSection>
