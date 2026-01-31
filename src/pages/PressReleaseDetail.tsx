@@ -124,13 +124,15 @@ export default function PressReleaseDetail() {
       {/* Newsroom Sub-header - Sticky */}
       <div className="sticky top-16 z-40 border-b border-border bg-white">
         <div className="container mx-auto px-4 h-12 flex items-center">
-          <button 
-            onClick={() => navigate('/press')}
-            className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Newsroom
-          </button>
+          <div className="w-full max-w-[680px] mx-auto">
+            <button 
+              onClick={() => navigate('/press')}
+              className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Newsroom
+            </button>
+          </div>
         </div>
       </div>
 
