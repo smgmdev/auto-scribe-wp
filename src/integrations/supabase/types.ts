@@ -773,6 +773,45 @@ export type Database = {
           },
         ]
       }
+      press_releases: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          published: boolean
+          published_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          published?: boolean
+          published_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          published?: boolean
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

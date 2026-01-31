@@ -23,6 +23,8 @@ import { AgencyPayoutsView } from '@/components/views/AgencyPayoutsView';
 import { AgencyMediaView } from '@/components/views/AgencyMediaView';
 import { MyAgencyView } from '@/components/views/MyAgencyView';
 import { CreditHistoryView } from '@/components/views/CreditHistoryView';
+import { AdminNewPressReleaseView } from '@/components/views/AdminNewPressReleaseView';
+import { AdminAllNewsView } from '@/components/views/AdminAllNewsView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,6 +73,8 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-orders': AdminOrdersView,
   'admin-engagements': AdminEngagementsView,
   'admin-media-management': AdminMediaManagementView,
+  'admin-new-press-release': AdminNewPressReleaseView,
+  'admin-all-news': AdminAllNewsView,
 };
 
 const Index = () => {
