@@ -581,7 +581,7 @@ export default function Auth() {
                 onClick={() => setIsDataDialogOpen(true)}
                 className="text-[#06c] hover:underline inline"
               >
-                See how your data is managed
+                See how your data is managed...
               </button>
             </p>
 
