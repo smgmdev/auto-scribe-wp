@@ -333,13 +333,13 @@ export default function Auth() {
                 0% { transform: rotateZ(0deg) rotateX(75deg) rotateY(120deg); }
                 100% { transform: rotateZ(360deg) rotateX(75deg) rotateY(120deg); }
               }
-              @keyframes glow-orbit {
-                0% { transform: rotate(0deg) translateX(50px); }
-                100% { transform: rotate(360deg) translateX(50px); }
+              @keyframes glow-travel {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
               }
-              @keyframes glow-orbit-reverse {
-                0% { transform: rotate(360deg) translateX(50px); }
-                100% { transform: rotate(0deg) translateX(50px); }
+              @keyframes glow-travel-reverse {
+                0% { transform: rotate(360deg); }
+                100% { transform: rotate(0deg); }
               }
             `}</style>
             <div 
@@ -364,19 +364,19 @@ export default function Auth() {
                     boxShadow: '0 0 10px rgba(0, 122, 255, 0.3)',
                   }}
                 >
-                  {/* Glowing dot orbiting this ring */}
+                  {/* Glowing dot traveling along this ring */}
                   <div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
-                    style={{ animation: 'glow-orbit 3s linear infinite' }}
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-travel 3s linear infinite' }}
                   >
                     <div 
                       className="absolute w-3 h-3 rounded-full"
                       style={{
                         background: 'radial-gradient(circle, #007AFF 0%, rgba(0, 122, 255, 0.8) 40%, transparent 70%)',
                         boxShadow: '0 0 12px 4px rgba(0, 122, 255, 0.8), 0 0 20px 8px rgba(0, 122, 255, 0.4)',
+                        top: '-6px',
                         left: '50%',
-                        top: '0',
-                        transform: 'translate(-50%, -50%)',
+                        transform: 'translateX(-50%)',
                       }}
                     />
                   </div>
@@ -401,19 +401,19 @@ export default function Auth() {
                     boxShadow: '0 0 10px rgba(88, 86, 214, 0.3)',
                   }}
                 >
-                  {/* Glowing dot orbiting this ring */}
+                  {/* Glowing dot traveling along this ring */}
                   <div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
-                    style={{ animation: 'glow-orbit-reverse 4s linear infinite' }}
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-travel-reverse 4s linear infinite' }}
                   >
                     <div 
                       className="absolute w-3 h-3 rounded-full"
                       style={{
                         background: 'radial-gradient(circle, #5856D6 0%, rgba(88, 86, 214, 0.8) 40%, transparent 70%)',
                         boxShadow: '0 0 12px 4px rgba(88, 86, 214, 0.8), 0 0 20px 8px rgba(88, 86, 214, 0.4)',
+                        top: '-6px',
                         left: '50%',
-                        top: '0',
-                        transform: 'translate(-50%, -50%)',
+                        transform: 'translateX(-50%)',
                       }}
                     />
                   </div>
@@ -438,19 +438,19 @@ export default function Auth() {
                     boxShadow: '0 0 10px rgba(50, 173, 230, 0.3)',
                   }}
                 >
-                  {/* Glowing dot orbiting this ring */}
+                  {/* Glowing dot traveling along this ring */}
                   <div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
-                    style={{ animation: 'glow-orbit 2.5s linear infinite' }}
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-travel 2.5s linear infinite' }}
                   >
                     <div 
                       className="absolute w-3 h-3 rounded-full"
                       style={{
                         background: 'radial-gradient(circle, #32ADE6 0%, rgba(50, 173, 230, 0.8) 40%, transparent 70%)',
                         boxShadow: '0 0 12px 4px rgba(50, 173, 230, 0.8), 0 0 20px 8px rgba(50, 173, 230, 0.4)',
+                        top: '-6px',
                         left: '50%',
-                        top: '0',
-                        transform: 'translate(-50%, -50%)',
+                        transform: 'translateX(-50%)',
                       }}
                     />
                   </div>
