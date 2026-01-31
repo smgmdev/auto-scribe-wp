@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
@@ -268,7 +267,7 @@ export function AdminAllNewsView() {
   };
 
   const { setCurrentView } = useAppStore();
-  const navigate = useNavigate();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -312,7 +311,7 @@ export function AdminAllNewsView() {
                     <div className="flex gap-6 items-start">
                       {/* Image or Logo placeholder - clickable */}
                       <div 
-                        onClick={() => navigate(`/press/${pr.id}`)}
+                        onClick={() => window.open(`/press/${pr.id}`, '_blank')}
                         className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted cursor-pointer"
                       >
                         {pr.image_url ? (
@@ -330,7 +329,7 @@ export function AdminAllNewsView() {
                       
                       {/* Content - clickable */}
                       <div 
-                        onClick={() => navigate(`/press/${pr.id}`)}
+                        onClick={() => window.open(`/press/${pr.id}`, '_blank')}
                         className="flex-1 min-w-0 cursor-pointer"
                       >
                         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
