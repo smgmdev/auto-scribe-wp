@@ -96,7 +96,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       label: 'More',
       icon: MoreHorizontal,
       submenu: [
-        { id: 'admin-new-press-release', label: 'New Press Release', icon: Plus }
+        { id: 'admin-new-press-release', label: 'New Press Release', icon: Plus },
+        { id: 'admin-all-news', label: 'All News', icon: Newspaper }
       ]
     }];
   }
