@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -1395,7 +1396,11 @@ export function ComposeView() {
                 <div className="h-4 bg-muted rounded w-10/12" />
               </div>
             ) : (
-              <Textarea id="content" placeholder="Your article content will appear here after generation, or you can write manually..." value={content} onChange={e => setContent(e.target.value)} className="min-h-[400px] font-body text-sm leading-relaxed" />
+              <RichTextEditor 
+                value={content} 
+                onChange={setContent}
+                placeholder="Your article content will appear here after generation, or you can write manually..."
+              />
             )}
             <p className="text-xs text-muted-foreground text-right">
               {content.split(/\s+/).filter(Boolean).length} words
