@@ -564,9 +564,14 @@ export function AdminAllNewsView() {
                 {releases.map((pr) => (
                   <article 
                     key={pr.id}
-                    className="group border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors"
+                    className="group relative border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex gap-8 items-center">
+                    {/* Status dot indicator */}
+                    <div className="absolute top-4 right-4">
+                      <div className={`w-2.5 h-2.5 rounded-full ${pr.published ? 'bg-green-500' : 'bg-amber-500'}`} />
+                    </div>
+                    
+                    <div className="flex gap-8 items-center pr-8">
                       {/* Image or Logo placeholder - clickable */}
                       <div 
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
