@@ -101,8 +101,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
           label: 'Press Releases', 
           icon: null,
           submenu: [
-            { id: 'admin-new-press-release', label: 'New', icon: Plus },
-            { id: 'admin-all-news', label: 'All', icon: FileText }
+            { id: 'admin-new-press-release', label: 'New', icon: null },
+            { id: 'admin-all-news', label: 'All', icon: null }
           ]
         }
       ]
