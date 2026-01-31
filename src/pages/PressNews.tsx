@@ -393,7 +393,7 @@ export default function PressNews() {
                               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
                                 {release.category}
                               </span>
-                              <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 group-hover:text-[#06c] transition-colors leading-tight">
+                              <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 leading-tight">
                                 {release.title}
                               </h3>
                               <p className="text-sm text-muted-foreground mt-2">
