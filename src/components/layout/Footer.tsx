@@ -93,7 +93,7 @@ export function Footer() {
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Press & News</a></li>
+              <li><button onClick={() => navigate('/press')} className="hover:text-foreground transition-colors text-left">Press & News</button></li>
             </ul>
           </div>
         </div>
