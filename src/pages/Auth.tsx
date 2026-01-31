@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/layout/Footer';
+import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
 import {
   Dialog,
@@ -39,6 +40,7 @@ export default function Auth() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const [isDataDialogOpen, setIsDataDialogOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -283,12 +285,15 @@ export default function Auth() {
           </button>
           <button 
             className="p-2 rounded-full hover:bg-black/5 transition-colors"
-            onClick={() => navigate('/')}
+            onClick={() => setIsSearchOpen(true)}
           >
             <Search size={20} className="text-foreground" />
           </button>
         </div>
       </header>
+
+      {/* Search Modal */}
+      <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
       {/* Spacer for fixed header */}
       <div className="h-16" />
