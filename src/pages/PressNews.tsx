@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,28 @@ export default function PressNews() {
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All Topics']);
   const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
+  const [isFilterFixed, setIsFilterFixed] = useState(false);
+  const newsroomRef = useRef<HTMLDivElement>(null);
+
+  // Use IntersectionObserver to detect when newsroom title scrolls out of view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When the newsroom title is not intersecting (scrolled past), fix the filter
+        setIsFilterFixed(!entry.isIntersecting);
+      },
+      {
+        rootMargin: '-64px 0px 0px 0px', // Account for fixed header height
+        threshold: 0,
+      }
+    );
+
+    if (newsroomRef.current) {
+      observer.observe(newsroomRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,14 +187,17 @@ export default function PressNews() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - in normal flow, will scroll away */}
-      <div className="border-b border-border bg-background">
+      <div ref={newsroomRef} className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-12 flex items-center">
           <h1 className="text-xl font-semibold text-foreground">Newsroom</h1>
         </div>
       </div>
 
-      {/* Filter Bar - Sticky below header */}
-      <div className="sticky top-16 bg-background border-b border-border z-40">
+      {/* Spacer when filter is fixed */}
+      {isFilterFixed && <div className="h-[56px]" />}
+
+      {/* Filter Bar - toggles between normal and fixed positioning */}
+      <div className={`bg-background border-b border-border z-40 ${isFilterFixed ? 'fixed top-16 left-0 right-0' : ''}`}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
