@@ -627,11 +627,11 @@ export function AdminNewPressReleaseView() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={isDeletingCategory}>Cancel</AlertDialogCancel>
+                <AlertDialogCancel disabled={isDeletingCategory} className="hover:bg-foreground hover:text-background">Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDeleteCategory}
                   disabled={isDeletingCategory}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className="bg-destructive text-destructive-foreground hover:bg-transparent hover:text-destructive border border-transparent hover:border-destructive"
                 >
                   {isDeletingCategory ? (
                     <>
