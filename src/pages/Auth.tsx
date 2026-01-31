@@ -333,6 +333,10 @@ export default function Auth() {
                 0% { transform: rotateZ(0deg) rotateX(75deg) rotateY(120deg); }
                 100% { transform: rotateZ(360deg) rotateX(75deg) rotateY(120deg); }
               }
+              @keyframes orbit-ring-4 {
+                0% { transform: rotateZ(0deg) rotateX(65deg) rotateY(-80deg); }
+                100% { transform: rotateZ(-360deg) rotateX(65deg) rotateY(-80deg); }
+              }
               @keyframes glow-spin-fast {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
@@ -467,11 +471,50 @@ export default function Auth() {
                 </div>
               </div>
               
+              {/* Orbit Ring 4 - Tilted left, spins counter-clockwise */}
+              <div 
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-4 9s linear infinite'
+                }}
+              >
+                <div 
+                  className="absolute rounded-full"
+                  style={{
+                    width: `${100 + (headerLineWidth / 100) * 30}px`,
+                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    transition: 'width 0.15s ease-out, height 0.15s ease-out',
+                    border: '2px solid #FF9500',
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)',
+                  }}
+                >
+                  {/* 3D glowing sphere spinning fast around the ring */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{ animation: 'glow-spin-fast-reverse 0.9s linear infinite' }}
+                  >
+                    <div 
+                      className="absolute w-4 h-4 rounded-full"
+                      style={{
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #FF9500 30%, #cc7700 70%, #995900 100%)',
+                        boxShadow: '0 0 8px 2px rgba(255, 149, 0, 1), 0 0 16px 6px rgba(255, 149, 0, 0.7), 0 0 24px 10px rgba(255, 149, 0, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-10px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.45s ease-in-out infinite',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
               {/* Logo - centered on top */}
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
+                className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity"
                 onClick={() => navigate('/')}
               />
             </div>
