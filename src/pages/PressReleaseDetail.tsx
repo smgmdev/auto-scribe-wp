@@ -172,7 +172,7 @@ export default function PressReleaseDetail() {
 
       {/* Newsroom Sub-header - Sticky */}
       <div className={`sticky z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center relative ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full relative">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
           <button 
             onClick={() => navigate('/press')}
             className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
@@ -180,8 +180,13 @@ export default function PressReleaseDetail() {
             <ArrowLeft className="h-5 w-5" />
             Newsroom
           </button>
-          {/* Default line - spans content width */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-border" style={{ bottom: '-18px' }} />
+        </div>
+        {/* Default line - spans content width, hidden when expanded line is visible */}
+        <div 
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 max-w-[980px] w-full px-4 md:px-6 transition-opacity duration-200"
+          style={{ opacity: headerLineWidth > 0 ? 0 : 1 }}
+        >
+          <div className="h-px bg-border w-full" />
         </div>
         {/* Expanding line overlay - grows from 0 to full viewport */}
         <div 
