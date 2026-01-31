@@ -193,60 +193,54 @@ export default function About() {
       </section>
 
       {/* Apple-style Dark Feature Sections with Blue Checkmarks */}
-      <section className="bg-black">
-        {/* Feature 1 */}
-        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
-          <div className="max-w-[980px] mx-auto">
+      <section className="bg-black py-20 md:py-32">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 space-y-24 md:space-y-32">
+          {/* Feature 1 */}
+          <div>
             <AnimatedSection>
-              <BlueCheckIcon className="mb-8" />
+              <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 Faster and easier than<br />
                 traditional media buying.
               </h2>
             </AnimatedSection>
           </div>
-        </div>
 
-        {/* Feature 2 */}
-        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
-          <div className="max-w-[980px] mx-auto">
+          {/* Feature 2 */}
+          <div>
             <AnimatedSection>
-              <BlueCheckIcon className="mb-8" />
+              <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 No agency fees.<br />
                 No contracts. Just publish.
               </h2>
             </AnimatedSection>
           </div>
-        </div>
 
-        {/* Feature 3 */}
-        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
-          <div className="max-w-[980px] mx-auto">
+          {/* Feature 3 */}
+          <div>
             <AnimatedSection>
-              <BlueCheckIcon className="mb-8" />
+              <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 Privacy and security<br />
                 built in from the start.
               </h2>
             </AnimatedSection>
           </div>
-        </div>
 
-        {/* Feature 4 */}
-        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
-          <div className="max-w-[980px] mx-auto">
+          {/* Feature 4 */}
+          <div>
             <AnimatedSection>
-              <BlueCheckIcon className="mb-8" />
+              <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 500+ premium publishers<br />
                 across 50+ countries.
               </h2>
