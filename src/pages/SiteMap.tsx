@@ -144,26 +144,26 @@ const SiteMap = () => {
         </div>
 
         {/* Site Map Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-8">
           {SITEMAP_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h2 className="text-xs font-semibold text-neutral-900 mb-3">
+              <h2 className="text-[12px] font-semibold text-neutral-900 mb-2">
                 {section.title}
               </h2>
-              <ul className="space-y-1.5">
+              <ul className="space-y-1">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     {link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-xs text-[#0066cc] hover:underline"
+                        className="text-[12px] text-[#06c] hover:underline leading-relaxed"
                       >
                         {link.label}
                       </a>
                     ) : (
                       <button
                         onClick={() => handleLinkClick(link)}
-                        className="text-xs text-[#0066cc] hover:underline text-left"
+                        className="text-[12px] text-[#06c] hover:underline text-left leading-relaxed"
                       >
                         {link.label}
                       </button>
