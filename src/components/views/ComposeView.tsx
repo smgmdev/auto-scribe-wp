@@ -382,17 +382,17 @@ export function ComposeView() {
     };
     reader.readAsDataURL(file);
   };
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -1407,44 +1407,73 @@ export function ComposeView() {
             </p>
           </div>
 
-          {/* Featured Image - Under Content */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Featured Image</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              
-              {imagePreview ? <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
-                  <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={removeImage}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div> : <div onClick={() => fileInputRef.current?.click()} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className={`w-full h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${isDragging ? 'border-accent bg-accent/10' : 'border-border hover:border-accent hover:bg-accent/5'}`}>
-                  <Upload className={`h-8 w-8 ${isDragging ? 'text-accent' : 'text-muted-foreground'}`} />
-                  <span className={`text-sm ${isDragging ? 'text-accent' : 'text-muted-foreground'}`}>
-                    {isDragging ? 'Drop image here' : 'Drag & drop or click to upload'}
-                  </span>
-                </div>}
+          {/* Featured Image */}
+          <div className="space-y-2">
+            <Label>Featured Image</Label>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            
+            {imagePreview ? (
+              <div className="relative w-full">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="w-full h-48 object-cover rounded-lg border border-border"
+                />
+                <Button 
+                  variant="destructive" 
+                  size="icon" 
+                  className="absolute top-2 right-2 h-8 w-8" 
+                  onClick={removeImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label 
+                className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted/50'}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className={`h-10 w-10 mb-3 ${isDragging ? 'text-accent' : 'text-muted-foreground'}`} />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+              </label>
+            )}
 
-              {imagePreview && <div className="space-y-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="img-caption" className="text-xs">Caption</Label>
-                    {editingArticle && isLoadingCategories ? (
-                      <div className="flex items-center gap-2 h-8 text-sm text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Loading image data...</span>
-                      </div>
-                    ) : (
-                      <Input id="img-caption" placeholder="Image caption (optional)" value={featuredImage.caption} onChange={e => setFeaturedImage({
-                        ...featuredImage,
-                        caption: e.target.value
-                      })} className="h-8 text-sm" />
-                    )}
+            {imagePreview && (
+              <div className="space-y-1">
+                <Label htmlFor="img-caption" className="text-xs">Caption</Label>
+                {editingArticle && isLoadingCategories ? (
+                  <div className="flex items-center gap-2 h-8 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Loading image data...</span>
                   </div>
-                </div>}
-            </CardContent>
-          </Card>
+                ) : (
+                  <Input 
+                    id="img-caption" 
+                    placeholder="Image caption (optional)" 
+                    value={featuredImage.caption} 
+                    onChange={e => setFeaturedImage({
+                      ...featuredImage,
+                      caption: e.target.value
+                    })} 
+                    className="h-8 text-sm" 
+                  />
+                )}
+              </div>
+            )}
+          </div>
 
           {/* SEO Settings - Under Featured Image */}
           {selectedSite && currentSite && <Card>
