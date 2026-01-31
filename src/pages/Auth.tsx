@@ -596,7 +596,7 @@ export default function Auth() {
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="w-full h-12 text-[17px] font-medium bg-foreground text-background rounded-xl hover:bg-foreground/90 transition-all"
+              className="group w-full h-12 text-[17px] font-medium bg-foreground text-background rounded-xl hover:bg-foreground/90 transition-all"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -605,7 +605,13 @@ export default function Auth() {
                   {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : (
-                mode === 'signin' ? 'Sign In' : 'Create Account'
+                <span className="flex items-center justify-center gap-1">
+                  {mode === 'signin' ? 'Sign In' : 'Create Account'}
+                  <ChevronRight 
+                    size={18} 
+                    className="opacity-0 -translate-x-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-x-0" 
+                  />
+                </span>
               )}
             </Button>
           </form>
