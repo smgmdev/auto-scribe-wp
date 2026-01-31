@@ -608,18 +608,14 @@ export default function Auth() {
                 </>
               ) : (
                 <span className="flex items-center justify-center gap-0 group-hover:gap-2 transition-all duration-200 ease-out">
-                  <span className="transition-transform duration-200 ease-out group-hover:-translate-x-1">
+                  <span>
                     {mode === 'signin' ? 'Sign In' : 'Create Account'}
                   </span>
-                  {/* Long arrow: line + arrowhead */}
-                  <span className="flex items-center w-0 overflow-hidden opacity-0 transition-all duration-200 ease-out group-hover:w-10 group-hover:opacity-100">
-                    <span className="w-6 h-[1px] bg-current" />
-                    <ArrowRight 
-                      size={18} 
-                      strokeWidth={2}
-                      className="-ml-1 flex-shrink-0"
-                    />
-                  </span>
+                  <ArrowRight 
+                    size={18} 
+                    strokeWidth={2}
+                    className="w-0 opacity-0 transition-all duration-200 ease-out group-hover:w-5 group-hover:opacity-100"
+                  />
                 </span>
               )}
             </Button>
