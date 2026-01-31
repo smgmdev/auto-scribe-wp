@@ -1,7 +1,8 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import { Bold, Italic, Link as LinkIcon, Unlink } from 'lucide-react';
+import TextAlign from '@tiptap/extension-text-align';
+import { Bold, Italic, Link as LinkIcon, Unlink, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useState } from 'react';
@@ -42,6 +43,9 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         HTMLAttributes: {
           class: 'text-primary underline',
         },
+      }),
+      TextAlign.configure({
+        types: ['paragraph'],
       }),
     ],
     content: value,
@@ -94,8 +98,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           variant="ghost"
           size="icon"
           className={cn(
-            "h-8 w-8",
-            editor.isActive('bold') && "bg-muted"
+            "h-8 w-8 hover:bg-foreground hover:text-background",
+            editor.isActive('bold') && "bg-foreground text-background"
           )}
           onClick={() => editor.chain().focus().toggleBold().run()}
           title="Bold"
@@ -107,8 +111,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           variant="ghost"
           size="icon"
           className={cn(
-            "h-8 w-8",
-            editor.isActive('italic') && "bg-muted"
+            "h-8 w-8 hover:bg-foreground hover:text-background",
+            editor.isActive('italic') && "bg-foreground text-background"
           )}
           onClick={() => editor.chain().focus().toggleItalic().run()}
           title="Italic"
@@ -121,8 +125,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           variant="ghost"
           size="icon"
           className={cn(
-            "h-8 w-8",
-            editor.isActive('link') && "bg-muted"
+            "h-8 w-8 hover:bg-foreground hover:text-background",
+            editor.isActive('link') && "bg-foreground text-background"
           )}
           onClick={openLinkDialog}
           title="Add Link"
@@ -134,13 +138,53 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-foreground hover:text-background"
             onClick={() => editor.chain().focus().unsetLink().run()}
             title="Remove Link"
           >
             <Unlink className="h-4 w-4" />
           </Button>
         )}
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-8 w-8 hover:bg-foreground hover:text-background",
+            editor.isActive({ textAlign: 'left' }) && "bg-foreground text-background"
+          )}
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          title="Align Left"
+        >
+          <AlignLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-8 w-8 hover:bg-foreground hover:text-background",
+            editor.isActive({ textAlign: 'center' }) && "bg-foreground text-background"
+          )}
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          title="Align Center"
+        >
+          <AlignCenter className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-8 w-8 hover:bg-foreground hover:text-background",
+            editor.isActive({ textAlign: 'right' }) && "bg-foreground text-background"
+          )}
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          title="Align Right"
+        >
+          <AlignRight className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Editor */}
