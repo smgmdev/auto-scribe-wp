@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { Badge } from '@/components/ui/badge';
@@ -287,9 +287,8 @@ export function AdminAllNewsView() {
         </div>
         <Button 
           onClick={() => setCurrentView('admin-new-press-release')}
-          className="bg-foreground text-background hover:bg-foreground/90"
+          className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-200"
         >
-          <Plus className="h-4 w-4 mr-2" />
           New Press Release
         </Button>
       </div>
