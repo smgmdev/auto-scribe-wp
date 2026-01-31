@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
+import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 
 const authSchema = z.object({
@@ -409,12 +410,7 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="py-6 text-center">
-        <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Arcana Mace. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }
