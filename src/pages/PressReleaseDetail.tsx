@@ -109,7 +109,7 @@ export default function PressReleaseDetail() {
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white">
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-white/90 backdrop-blur-sm ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-white/90 backdrop-blur-sm transition-transform duration-300 ease-out ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button 
             onClick={() => navigate('/')}
@@ -166,7 +166,7 @@ export default function PressReleaseDetail() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
           <button 
             onClick={() => navigate('/press')}
