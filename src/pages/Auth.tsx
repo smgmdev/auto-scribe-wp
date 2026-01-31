@@ -320,14 +320,31 @@ export default function Auth() {
         <div className="w-full max-w-[400px]">
           {/* Logo with 3D orbital rings animation - Atom style */}
           <div className="flex justify-center mb-8">
+            <style>{`
+              @keyframes orbit-ring-1 {
+                from { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
+                to { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
+              }
+              @keyframes orbit-ring-2 {
+                from { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
+                to { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
+              }
+              @keyframes orbit-ring-3 {
+                from { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
+                to { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
+              }
+            `}</style>
             <div 
               className="relative w-44 h-44 flex items-center justify-center"
               style={{ perspective: '800px' }}
             >
               {/* Orbit Ring 1 - Tilted forward-left, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center animate-orbit-spin-1"
-                style={{ transformStyle: 'preserve-3d' }}
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-1 8s linear infinite'
+                }}
               >
                 <div 
                   className="absolute rounded-full border-2 border-[#007AFF]"
@@ -342,8 +359,11 @@ export default function Auth() {
               
               {/* Orbit Ring 2 - Tilted forward-right, spins counter-clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center animate-orbit-spin-2"
-                style={{ transformStyle: 'preserve-3d' }}
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-2 10s linear infinite'
+                }}
               >
                 <div 
                   className="absolute rounded-full border-2 border-[#5856D6]"
@@ -358,8 +378,11 @@ export default function Auth() {
               
               {/* Orbit Ring 3 - Tilted backward, spins clockwise */}
               <div 
-                className="absolute inset-0 flex items-center justify-center animate-orbit-spin-3"
-                style={{ transformStyle: 'preserve-3d' }}
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  animation: 'orbit-ring-3 12s linear infinite'
+                }}
               >
                 <div 
                   className="absolute rounded-full border-2 border-[#32ADE6]"
