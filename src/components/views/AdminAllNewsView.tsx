@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { Input } from '@/components/ui/input';
@@ -88,6 +88,9 @@ export function AdminAllNewsView() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editCategoryName, setEditCategoryName] = useState('');
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
 
   // Contact management state
   const [isContactsOpen, setIsContactsOpen] = useState(false);
@@ -368,6 +371,48 @@ export function AdminAllNewsView() {
     }
   };
 
+  const startEditCategory = (cat: Category) => {
+    setEditingCategoryId(cat.id);
+    setEditCategoryName(cat.name);
+  };
+
+  const cancelEditCategory = () => {
+    setEditingCategoryId(null);
+    setEditCategoryName('');
+  };
+
+  const handleSaveCategory = async (categoryId: string) => {
+    if (!editCategoryName.trim()) return;
+    
+    setIsSavingCategory(true);
+    try {
+      const oldCategory = categories.find(c => c.id === categoryId);
+      const { error } = await supabase
+        .from('press_release_categories')
+        .update({ name: editCategoryName.trim() })
+        .eq('id', categoryId);
+
+      if (error) throw error;
+
+      setCategories(prev => prev.map(c => 
+        c.id === categoryId ? { ...c, name: editCategoryName.trim() } : c
+      ).sort((a, b) => a.name.localeCompare(b.name)));
+      
+      // Update current selection if it was the edited category
+      if (oldCategory && editCategory === oldCategory.name) {
+        setEditCategory(editCategoryName.trim());
+      }
+      
+      cancelEditCategory();
+      toast({ title: 'Success', description: 'Category updated' });
+    } catch (error: any) {
+      console.error('Error updating category:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to update category', variant: 'destructive' });
+    } finally {
+      setIsSavingCategory(false);
+    }
+  };
+
   // Contact management handlers
   const resetContactForm = () => {
     setContactForm({ id: '', title: '', name: '', company: '', email: '', phone: '' });
@@ -629,7 +674,7 @@ export function AdminAllNewsView() {
               {/* Manage Categories */}
               <Collapsible open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto">
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground p-0 h-auto">
                     {isCategoriesOpen ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
                     Manage Categories
                   </Button>
@@ -657,20 +702,68 @@ export function AdminAllNewsView() {
                   <div className="space-y-1 max-h-32 overflow-y-auto">
                     {categories.map(cat => (
                       <div key={cat.id} className="flex items-center justify-between py-1.5 px-2 rounded bg-muted/50">
-                        <span className="text-sm">{cat.name}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDeleteCategory(cat.id)}
-                          disabled={deletingCategoryId === cat.id}
-                        >
-                          {deletingCategoryId === cat.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-3 w-3" />
-                          )}
-                        </Button>
+                        {editingCategoryId === cat.id ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <Input
+                              value={editCategoryName}
+                              onChange={(e) => setEditCategoryName(e.target.value)}
+                              className="h-7 text-sm flex-1"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSaveCategory(cat.id);
+                                if (e.key === 'Escape') cancelEditCategory();
+                              }}
+                              autoFocus
+                            />
+                            <Button
+                              size="icon"
+                              className="h-6 w-6 bg-foreground text-background hover:bg-foreground/90"
+                              onClick={() => handleSaveCategory(cat.id)}
+                              disabled={isSavingCategory || !editCategoryName.trim()}
+                            >
+                              {isSavingCategory ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 hover:bg-foreground hover:text-background"
+                              onClick={cancelEditCategory}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span 
+                              className="text-sm cursor-pointer hover:underline flex-1"
+                              onClick={() => startEditCategory(cat)}
+                            >
+                              {cat.name}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 hover:bg-foreground hover:text-background"
+                                onClick={() => startEditCategory(cat)}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteCategory(cat.id)}
+                                disabled={deletingCategoryId === cat.id}
+                              >
+                                {deletingCategoryId === cat.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -766,7 +859,7 @@ export function AdminAllNewsView() {
               {/* Manage Contacts */}
               <Collapsible open={isContactsOpen} onOpenChange={setIsContactsOpen}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto">
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground p-0 h-auto">
                     {isContactsOpen ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
                     Manage Contacts
                   </Button>
@@ -849,7 +942,7 @@ export function AdminAllNewsView() {
                       </Button>
                     </div>
                   ) : (
-                    <Button variant="outline" size="sm" onClick={openAddContact} className="w-full">
+                    <Button variant="outline" size="sm" onClick={openAddContact} className="w-full hover:bg-foreground hover:text-background">
                       <Plus className="h-4 w-4 mr-2" />
                       Add New Contact
                     </Button>
@@ -867,7 +960,7 @@ export function AdminAllNewsView() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-6 w-6 hover:bg-foreground hover:text-background"
                             onClick={() => openEditContact(contact)}
                           >
                             <Pencil className="h-3 w-3" />
@@ -875,7 +968,7 @@ export function AdminAllNewsView() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            className="h-6 w-6 text-destructive hover:text-white hover:bg-destructive"
                             onClick={() => handleDeleteContact(contact.id)}
                             disabled={deletingContactId === contact.id}
                           >
