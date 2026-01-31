@@ -166,7 +166,7 @@ export default function PressReleaseDetail() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
           <button 
             onClick={() => navigate('/press')}
