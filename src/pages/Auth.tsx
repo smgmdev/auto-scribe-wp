@@ -364,9 +364,9 @@ export default function Auth() {
                     width: `${100 + (headerLineWidth / 100) * 30}px`,
                     height: `${100 + (headerLineWidth / 100) * 30}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid transparent',
-                    background: 'transparent padding-box, linear-gradient(145deg, #4da6ff 0%, #007AFF 25%, #0055cc 50%, #003d99 75%, #007AFF 100%) border-box',
-                    boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), inset 0 0 10px rgba(0, 122, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)',
+                    border: '2px solid #007AFF',
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)',
                   }}
                 >
                   {/* 3D glowing sphere spinning fast around the ring */}
@@ -403,9 +403,9 @@ export default function Auth() {
                     width: `${100 + (headerLineWidth / 100) * 30}px`,
                     height: `${100 + (headerLineWidth / 100) * 30}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid transparent',
-                    background: 'transparent padding-box, linear-gradient(145deg, #8b89e8 0%, #5856D6 25%, #4240a8 50%, #2d2b7a 75%, #5856D6 100%) border-box',
-                    boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), inset 0 0 10px rgba(88, 86, 214, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)',
+                    border: '2px solid #5856D6',
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)',
                   }}
                 >
                   {/* 3D glowing sphere spinning fast around the ring */}
@@ -442,9 +442,9 @@ export default function Auth() {
                     width: `${100 + (headerLineWidth / 100) * 30}px`,
                     height: `${100 + (headerLineWidth / 100) * 30}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid transparent',
-                    background: 'transparent padding-box, linear-gradient(145deg, #6bc9f0 0%, #32ADE6 25%, #1a8fc4 50%, #0d6a99 75%, #32ADE6 100%) border-box',
-                    boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), inset 0 0 10px rgba(50, 173, 230, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)',
+                    border: '2px solid #32ADE6',
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)',
                   }}
                 >
                   {/* 3D glowing sphere spinning fast around the ring */}
