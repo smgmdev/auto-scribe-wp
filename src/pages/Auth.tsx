@@ -273,7 +273,7 @@ export default function Auth() {
 
       {/* Sub-header - Sticky with navigation links and expanding bottom line */}
       <div className={`sticky z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between relative">
           <h1 className="text-xl font-semibold text-foreground">Arcana Mace Account</h1>
           <nav className="hidden md:flex items-center gap-6">
             <button
@@ -295,9 +295,17 @@ export default function Auth() {
               Create Your Arcana Mace Account
             </button>
           </nav>
+          {/* Default line - spans content width */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
         </div>
-        {/* Expanding bottom line */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px bg-border transition-all duration-200 ease-out" style={{ width: `${headerLineWidth}%` }} />
+        {/* Expanding line overlay - grows from content width to full viewport */}
+        <div 
+          className="absolute bottom-0 left-0 h-px bg-border transition-all duration-200 ease-out"
+          style={{ 
+            width: headerLineWidth > 0 ? '100%' : '0%',
+            opacity: headerLineWidth > 0 ? 1 : 0
+          }} 
+        />
       </div>
 
       {/* Main Content - Centered */}
