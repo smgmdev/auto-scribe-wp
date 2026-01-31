@@ -351,9 +351,18 @@ export default function Auth() {
               }
             `}</style>
             <div 
-              className="relative w-44 h-44 flex items-center justify-center"
-              style={{ perspective: '800px' }}
+              className="relative w-48 h-48 flex items-center justify-center"
+              style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
             >
+              {/* Logo - centered as the nucleus */}
+              <img 
+                src={amblack} 
+                alt="Arcana Mace" 
+                className="absolute z-10 h-14 w-14 object-contain cursor-pointer hover:opacity-70 transition-opacity"
+                onClick={() => navigate('/')}
+                style={{ transform: 'translateZ(0px)' }}
+              />
+              
               {/* Orbit Ring 1 - Tilted forward-left, spins clockwise */}
               <div 
                 className="absolute inset-0 flex items-center justify-center"
@@ -365,8 +374,8 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${100 + (headerLineWidth / 100) * 30}px`,
-                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    width: `${130 + (headerLineWidth / 100) * 40}px`,
+                    height: `${130 + (headerLineWidth / 100) * 40}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                     border: '2px solid #007AFF',
                     backgroundColor: 'transparent',
@@ -404,8 +413,8 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${100 + (headerLineWidth / 100) * 30}px`,
-                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    width: `${130 + (headerLineWidth / 100) * 40}px`,
+                    height: `${130 + (headerLineWidth / 100) * 40}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                     border: '2px solid #5856D6',
                     backgroundColor: 'transparent',
@@ -443,8 +452,8 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${100 + (headerLineWidth / 100) * 30}px`,
-                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    width: `${130 + (headerLineWidth / 100) * 40}px`,
+                    height: `${130 + (headerLineWidth / 100) * 40}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                     border: '2px solid #32ADE6',
                     backgroundColor: 'transparent',
@@ -482,8 +491,8 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${100 + (headerLineWidth / 100) * 30}px`,
-                    height: `${100 + (headerLineWidth / 100) * 30}px`,
+                    width: `${130 + (headerLineWidth / 100) * 40}px`,
+                    height: `${130 + (headerLineWidth / 100) * 40}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                     border: '2px solid #FF9500',
                     backgroundColor: 'transparent',
@@ -509,14 +518,6 @@ export default function Auth() {
                   </div>
                 </div>
               </div>
-              
-              {/* Logo - centered on top */}
-              <img 
-                src={amblack} 
-                alt="Arcana Mace" 
-                className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity"
-                onClick={() => navigate('/')}
-              />
             </div>
           </div>
 
