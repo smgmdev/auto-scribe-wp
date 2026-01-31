@@ -171,50 +171,52 @@ export default function PressNews() {
         </div>
       </div>
 
-      {/* Filter Bar - Sticky below header */}
-      <div className="bg-muted/30 border-b border-border z-40" style={{ position: 'sticky', top: '64px' }}>
+      {/* Filter Bar - Fixed below header */}
+      <div className="fixed top-16 left-0 right-0 bg-background border-b border-border z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
-            
-            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger className="w-[160px] bg-background">
-                <SelectValue placeholder="All Topics" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableCategories.map(topic => (
-                  <SelectItem key={topic} value={topic}>{topic}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              
+              <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+                <SelectTrigger className="w-[160px] bg-background">
+                  <SelectValue placeholder="All Topics" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories.map(topic => (
+                    <SelectItem key={topic} value={topic}>{topic}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[130px] bg-background">
-                <SelectValue placeholder="All Years" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableYears.map(year => (
-                  <SelectItem key={year} value={year}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-[130px] bg-background">
+                  <SelectValue placeholder="All Years" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableYears.map(year => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[140px] bg-background">
-                <SelectValue placeholder="All Months" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map(month => (
-                  <SelectItem key={month} value={month}>{month}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[140px] bg-background">
+                  <SelectValue placeholder="All Months" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map(month => (
+                    <SelectItem key={month} value={month}>{month}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
           </div>
         </div>
       </div>
+      {/* Spacer for fixed filter bar */}
+      <div className="h-[56px]" />
 
       {/* Main Content */}
-      <main className="min-h-[50vh]">
+      <main className="min-h-screen">
         <div className="container mx-auto px-4 py-8">
           {loading ? (
             <div className="flex items-center justify-center py-16">
