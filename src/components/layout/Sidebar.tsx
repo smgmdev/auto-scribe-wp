@@ -91,6 +91,13 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       id: 'admin-users',
       label: 'Users',
       icon: Users
+    }, {
+      id: 'admin-more',
+      label: 'More',
+      icon: Plus,
+      submenu: [
+        { id: 'admin-new-press-release', label: 'New Press Release', icon: Plus }
+      ]
     }];
   }
   return base;
