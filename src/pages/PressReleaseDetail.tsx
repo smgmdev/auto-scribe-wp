@@ -202,7 +202,7 @@ export default function PressReleaseDetail() {
               <div className="max-w-[680px] mx-auto">
                 {/* Category & Date */}
                 <div className="mb-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase">
                     {pressRelease.category}
                   </span>
                   <span className="text-muted-foreground mx-2">·</span>
