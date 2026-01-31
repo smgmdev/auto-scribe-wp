@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +31,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import amlogo from '@/assets/amlogo.png';
 
 interface PressRelease {
   id: string;
@@ -102,6 +95,19 @@ export function AdminAllNewsView() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Group by month/year like PressNews page
+  const groupedReleases = useMemo(() => {
+    return pressReleases.reduce((acc, release) => {
+      const date = new Date(release.published_at || release.created_at);
+      const key = format(date, 'MMMM yyyy');
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(release);
+      return acc;
+    }, {} as Record<string, PressRelease[]>);
+  }, [pressReleases]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -281,87 +287,91 @@ export function AdminAllNewsView() {
           No press releases yet. Create your first one!
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pressReleases.map(pr => (
-                <TableRow key={pr.id}>
-                  <TableCell>
-                    {pr.image_url ? (
-                      <img 
-                        src={pr.image_url} 
-                        alt={pr.title}
-                        className="w-16 h-12 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-16 h-12 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                        No image
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium max-w-[300px] truncate">
-                    {pr.title}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{pr.category}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={pr.published ? 'default' : 'secondary'}>
-                      {pr.published ? 'Published' : 'Draft'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {format(new Date(pr.created_at), 'MMM d, yyyy')}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(pr)}
-                        className="hover:bg-foreground hover:text-background"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => togglePublished(pr.id, pr.published)}
-                        disabled={toggling === pr.id}
-                        className="hover:bg-foreground hover:text-background"
-                      >
-                        {toggling === pr.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : pr.published ? (
-                          <EyeOff className="h-4 w-4" />
+        <div className="space-y-12">
+          {Object.entries(groupedReleases).map(([monthYear, releases]) => (
+            <div key={monthYear}>
+              <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-8">{monthYear}</h2>
+              
+              <div className="space-y-0">
+                {releases.map((pr) => (
+                  <article 
+                    key={pr.id}
+                    className="group border-t border-border py-8"
+                  >
+                    <div className="flex gap-6 items-start">
+                      {/* Image or Logo placeholder */}
+                      <div className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                        {pr.image_url ? (
+                          <img 
+                            src={pr.image_url} 
+                            alt={pr.title}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <div className="w-full h-full flex items-center justify-center bg-muted">
+                            <img src={amlogo} alt="Arcana Mace" className="h-12 w-auto opacity-50" />
+                          </div>
                         )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(pr.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {pr.category}
+                          </span>
+                          <Badge variant={pr.published ? 'default' : 'secondary'} className="text-xs">
+                            {pr.published ? 'Published' : 'Draft'}
+                          </Badge>
+                        </div>
+                        <h3 className="text-lg md:text-xl font-semibold text-foreground">
+                          {pr.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {format(new Date(pr.published_at || pr.created_at), 'MMMM d, yyyy')}
+                        </p>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog(pr)}
+                          className="hover:bg-foreground hover:text-background"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => togglePublished(pr.id, pr.published)}
+                          disabled={toggling === pr.id}
+                          className="hover:bg-foreground hover:text-background"
+                        >
+                          {toggling === pr.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : pr.published ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteId(pr.id)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
