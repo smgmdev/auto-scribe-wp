@@ -153,21 +153,6 @@ export default function PressReleaseDetail() {
           </div>
         ) : (
           <>
-            {/* Hero Image */}
-            {pressRelease.image_url && (
-              <div className="w-full bg-muted">
-                <div className="container mx-auto px-4">
-                  <div className="max-w-3xl mx-auto">
-                    <img 
-                      src={pressRelease.image_url} 
-                      alt={pressRelease.title}
-                      className="w-full h-auto max-h-[320px] object-cover rounded-lg"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Article Content - Apple Style */}
             <article className="container mx-auto px-4 py-12 md:py-16">
               <div className="max-w-[680px] mx-auto">
@@ -186,6 +171,17 @@ export default function PressReleaseDetail() {
                 <h1 className="text-3xl md:text-4xl lg:text-[44px] font-semibold text-foreground leading-tight tracking-tight mb-8">
                   {pressRelease.title}
                 </h1>
+
+                {/* Featured Image - Under Title */}
+                {pressRelease.image_url && (
+                  <div className="mb-8">
+                    <img 
+                      src={pressRelease.image_url} 
+                      alt={pressRelease.title}
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </div>
+                )}
 
                 {/* Divider */}
                 <div className="border-t border-border mb-10" />
