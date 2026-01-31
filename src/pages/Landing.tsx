@@ -513,7 +513,7 @@ const Landing = () => {
         <h3 className="font-medium text-foreground truncate text-sm">
           {site.name}
         </h3>
-        <p className="text-xs text-muted-foreground truncate">
+        <p className="text-[10px] text-muted-foreground truncate">
           {extractDomain(site.url)}
         </p>
       </div>
@@ -546,7 +546,7 @@ const Landing = () => {
         <h3 className="font-medium text-foreground truncate text-sm">
           {site.name}
         </h3>
-        <p className="text-xs text-muted-foreground truncate">
+        <p className="text-[10px] text-muted-foreground truncate">
           {extractDomain(site.link)}
         </p>
       </div>
