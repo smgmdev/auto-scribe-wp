@@ -198,7 +198,7 @@ export default function PressReleaseDetail() {
         ) : (
           <>
             {/* Article Content - Apple Style */}
-            <article className="container mx-auto px-4 pt-8 pb-6 md:pt-10 md:pb-8">
+            <article className="max-w-[980px] mx-auto px-4 md:px-6 pt-8 pb-6 md:pt-10 md:pb-8">
               <div className="max-w-[680px] mx-auto">
                 {/* Category & Date */}
                 <div className="mb-4">

@@ -69,7 +69,7 @@ const TermsOfService = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Content */}
-      <main className="container mx-auto px-4 py-12 max-w-3xl pt-28">
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-28">
         {/* Title Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">

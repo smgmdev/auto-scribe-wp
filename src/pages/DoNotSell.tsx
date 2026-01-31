@@ -69,8 +69,8 @@ const DoNotSell = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 pt-24">
-        <div className="max-w-3xl mx-auto">
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-24">
+        <div className="max-w-3xl">
           {/* Title Section */}
           <div className="text-center mb-8 pb-8 border-b border-border">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
