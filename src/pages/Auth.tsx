@@ -607,14 +607,14 @@ export default function Auth() {
                   {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : (
-                <span className="flex items-center justify-center gap-0 group-hover:gap-2 transition-all duration-200 ease-out">
-                  <span>
+                <span className="relative flex items-center justify-center w-full">
+                  <span className="transition-transform duration-200 ease-out group-hover:-translate-x-3">
                     {mode === 'signin' ? 'Sign In' : 'Create Account'}
                   </span>
                   <ArrowRight 
                     size={18} 
                     strokeWidth={2}
-                    className="w-0 opacity-0 transition-all duration-200 ease-out group-hover:w-5 group-hover:opacity-100"
+                    className="absolute right-[calc(50%-70px)] opacity-0 translate-x-2 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-x-6"
                   />
                 </span>
               )}
