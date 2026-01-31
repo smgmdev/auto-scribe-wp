@@ -27,7 +27,6 @@ interface PressRelease {
   created_at: string;
 }
 
-const years = ['All Years', '2026', '2025', '2024', '2023'];
 const months = ['All Months', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function PressNews() {
@@ -38,31 +37,35 @@ export default function PressNews() {
   const [selectedYear, setSelectedYear] = useState('All Years');
   const [selectedMonth, setSelectedMonth] = useState('All Months');
   const [pressReleases, setPressReleases] = useState<PressRelease[]>([]);
-  const [categories, setCategories] = useState<string[]>(['All Topics']);
+  const [availableCategories, setAvailableCategories] = useState<string[]>(['All Topics']);
+  const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch categories and press releases in parallel
-        const [categoriesRes, releasesRes] = await Promise.all([
-          supabase
-            .from('press_release_categories')
-            .select('name')
-            .order('name'),
-          supabase
-            .from('press_releases')
-            .select('id, title, content, category, image_url, published_at, created_at')
-            .eq('published', true)
-            .order('published_at', { ascending: false })
-        ]);
+        // Fetch published press releases
+        const { data: releasesData, error: releasesError } = await supabase
+          .from('press_releases')
+          .select('id, title, content, category, image_url, published_at, created_at')
+          .eq('published', true)
+          .order('published_at', { ascending: false });
 
-        if (categoriesRes.error) throw categoriesRes.error;
-        if (releasesRes.error) throw releasesRes.error;
+        if (releasesError) throw releasesError;
 
-        const categoryNames = categoriesRes.data?.map(c => c.name) || [];
-        setCategories(['All Topics', ...categoryNames]);
-        setPressReleases(releasesRes.data || []);
+        const releases = releasesData || [];
+        setPressReleases(releases);
+
+        // Extract unique categories from published releases
+        const uniqueCategories = [...new Set(releases.map(r => r.category))].sort();
+        setAvailableCategories(['All Topics', ...uniqueCategories]);
+
+        // Extract unique years from published releases
+        const uniqueYears = [...new Set(releases.map(r => {
+          const date = new Date(r.published_at || r.created_at);
+          return date.getFullYear().toString();
+        }))].sort((a, b) => parseInt(b) - parseInt(a)); // Sort descending
+        setAvailableYears(['All Years', ...uniqueYears]);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -179,7 +182,7 @@ export default function PressNews() {
                 <SelectValue placeholder="All Topics" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map(topic => (
+                {availableCategories.map(topic => (
                   <SelectItem key={topic} value={topic}>{topic}</SelectItem>
                 ))}
               </SelectContent>
@@ -190,7 +193,7 @@ export default function PressNews() {
                 <SelectValue placeholder="All Years" />
               </SelectTrigger>
               <SelectContent>
-                {years.map(year => (
+                {availableYears.map(year => (
                   <SelectItem key={year} value={year}>{year}</SelectItem>
                 ))}
               </SelectContent>
