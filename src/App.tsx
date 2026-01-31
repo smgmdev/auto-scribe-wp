@@ -22,6 +22,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DoNotSell from "./pages/DoNotSell";
 import SiteMap from "./pages/SiteMap";
 import PressNews from "./pages/PressNews";
+import PressReleaseDetail from "./pages/PressReleaseDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +89,7 @@ const App = () => {
               <Route path="/do-not-sell" element={<DoNotSell />} />
               <Route path="/sitemap" element={<SiteMap />} />
               <Route path="/press" element={<PressNews />} />
+              <Route path="/press/:id" element={<PressReleaseDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
