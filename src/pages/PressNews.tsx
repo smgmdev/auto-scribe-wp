@@ -212,7 +212,7 @@ export default function PressNews() {
 
       {/* Newsroom Sub-header - in normal flow, will scroll away */}
       <div className="border-b border-border bg-white">
-        <div className="container mx-auto px-4 h-12 flex items-center">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
           <h1 className="text-xl font-semibold text-foreground">Newsroom</h1>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function PressNews() {
       <div 
         className="sticky top-16 z-40 border-b border-border/50 bg-[#f5f5f7]"
       >
-        <div className="container mx-auto px-4 py-3">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-3">
           {/* Mobile Filter Button */}
           <div className="md:hidden">
             <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
