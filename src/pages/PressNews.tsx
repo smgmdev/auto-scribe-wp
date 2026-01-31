@@ -198,10 +198,10 @@ export default function PressNews() {
 
       {/* Filter Bar - toggles between normal and fixed positioning with smooth transition */}
       <div 
-        className={`bg-background border-b border-border z-40 transition-all duration-300 ease-out ${
+        className={`border-b border-border z-40 transition-all duration-300 ease-out ${
           isFilterFixed 
-            ? 'fixed top-16 left-0 right-0 shadow-sm' 
-            : ''
+            ? 'fixed top-16 left-0 right-0 shadow-md bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/80' 
+            : 'bg-background'
         }`}
       >
         <div className="container mx-auto px-4 py-4">
