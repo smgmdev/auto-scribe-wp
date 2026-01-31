@@ -468,20 +468,20 @@ export function AdminNewPressReleaseView() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8"
+                            className="h-8 w-8 hover:bg-foreground hover:text-background"
                             onClick={handleSaveCategory}
                             disabled={isSavingCategory || !editingCategoryName.trim()}
                           >
                             {isSavingCategory ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Check className="h-4 w-4 text-primary" />
+                              <Check className="h-4 w-4" />
                             )}
                           </Button>
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8"
+                            className="h-8 w-8 hover:bg-foreground hover:text-background"
                             onClick={() => {
                               setEditingCategoryId(null);
                               setEditingCategoryName('');
@@ -496,7 +496,7 @@ export function AdminNewPressReleaseView() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8"
+                            className="h-8 w-8 hover:bg-foreground hover:text-background"
                             onClick={() => handleEditCategory(cat)}
                           >
                             <Pencil className="h-4 w-4" />
@@ -504,7 +504,7 @@ export function AdminNewPressReleaseView() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            className="h-8 w-8 hover:bg-foreground hover:text-background"
                             onClick={() => handleDeleteCategory(cat.id, cat.name)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -527,7 +527,7 @@ export function AdminNewPressReleaseView() {
           <div className="space-y-2">
             <Label>Featured Image</Label>
             {imagePreview ? (
-              <div className="relative w-full max-w-md">
+              <div className="relative w-full">
                 <img 
                   src={imagePreview} 
                   alt="Preview" 
@@ -543,7 +543,7 @@ export function AdminNewPressReleaseView() {
                 </Button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full max-w-md h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="h-10 w-10 text-muted-foreground mb-3" />
                   <p className="mb-2 text-sm text-muted-foreground">
