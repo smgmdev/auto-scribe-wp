@@ -1323,7 +1323,7 @@ export function Sidebar({
                                           )}
                                           onClick={() => handleNavClick(nestedItem.id)}
                                         >
-                                          <NestedIcon className={cn("h-4 w-4 flex-shrink-0", isNestedActive && "text-[#3872e0]")} />
+                                          {NestedIcon && <NestedIcon className={cn("h-4 w-4 flex-shrink-0", isNestedActive && "text-[#3872e0]")} />}
                                           <span className="truncate flex-1 text-left">{nestedItem.label}</span>
                                         </Button>
                                       );
@@ -1344,7 +1344,7 @@ export function Sidebar({
                                 )}
                                 onClick={() => handleNavClick(subItem.id)}
                               >
-                                <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />
+                                {SubIcon && <SubIcon className={cn("h-4 w-4 flex-shrink-0", isSubActive && "text-[#3872e0]")} />}
                                 <span className="truncate flex-1 text-left">{subItem.label}</span>
                               </Button>
                               {notificationCount > 0 && (
