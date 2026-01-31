@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -334,15 +333,10 @@ export function AdminAllNewsView() {
                         onClick={() => navigate(`/press/${pr.id}`)}
                         className="flex-1 min-w-0 cursor-pointer"
                       >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                            {pr.category}
-                          </span>
-                          <Badge variant={pr.published ? 'default' : 'secondary'} className="text-xs">
-                            {pr.published ? 'Published' : 'Draft'}
-                          </Badge>
-                        </div>
-                        <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-[#06c] transition-colors">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {pr.category}
+                        </span>
+                        <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-[#06c] transition-colors mt-1">
                           {pr.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mt-2">
