@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAppStore } from '@/stores/appStore';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -266,6 +267,8 @@ export function AdminAllNewsView() {
     }
   };
 
+  const { setCurrentView } = useAppStore();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -277,9 +280,18 @@ export function AdminAllNewsView() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header - matching ArticlesView style */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">All Press Releases</h1>
-        <p className="mt-2 text-muted-foreground">Manage all press releases and news</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">All Press Releases</h1>
+          <p className="mt-2 text-muted-foreground">Manage all press releases and news</p>
+        </div>
+        <Button 
+          onClick={() => setCurrentView('admin-new-press-release')}
+          className="bg-foreground text-background hover:bg-foreground/90"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New Press Release
+        </Button>
       </div>
 
       {pressReleases.length === 0 ? (
