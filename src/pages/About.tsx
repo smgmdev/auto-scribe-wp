@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Check, Hand } from 'lucide-react';
+import { Search, User, Check, Hand, Lock, Smartphone } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -262,13 +262,34 @@ export default function About() {
 
           {/* Feature with hand icon */}
           <AnimatedSection>
-            <div className="max-w-3xl">
+            <div className="max-w-3xl mb-20 md:mb-28">
               <Hand className="w-10 h-10 text-white mb-6" strokeWidth={1.5} />
               <p className="text-lg md:text-xl text-[#86868b] leading-relaxed">
                 <span className="text-white font-semibold">Personal data. Protected.</span> When you place an order, Arcana Mace uses encrypted connections and secure payment processing. Your payment details are never shared with publishers or stored on our servers. We use industry-standard encryption to keep your data safe at every step.
               </p>
             </div>
           </AnimatedSection>
+
+          {/* Two column features */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+            <AnimatedSection>
+              <div>
+                <Lock className="w-10 h-10 text-white mb-6" strokeWidth={1.5} />
+                <p className="text-lg md:text-xl text-[#86868b] leading-relaxed">
+                  <span className="text-white font-semibold">Your orders stay private.</span> When you publish through Arcana Mace, we don't share your personal information with publishers unless required for delivery. All transaction data is encrypted and stored securely, used only for order fulfillment and fraud prevention.
+                </p>
+              </div>
+            </AnimatedSection>
+
+            <AnimatedSection delay={100}>
+              <div>
+                <Smartphone className="w-10 h-10 text-white mb-6" strokeWidth={1.5} />
+                <p className="text-lg md:text-xl text-[#86868b] leading-relaxed">
+                  <span className="text-white font-semibold">Publish more. Worry less.</span> Arcana Mace works seamlessly from any device, so you can manage campaigns on the go. Every transaction is secured with modern authentication and encrypted payments — keeping your security in your hands.
+                </p>
+              </div>
+            </AnimatedSection>
+          </div>
         </div>
       </section>
 
