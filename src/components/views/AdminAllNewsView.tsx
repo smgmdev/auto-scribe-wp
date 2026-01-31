@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Trash2, Eye, EyeOff, Pencil, X } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -54,11 +59,6 @@ interface PressContact {
   phone: string | null;
 }
 
-const FOOTER_CONTACT_OPTIONS = [
-  { id: 'press_contact', label: 'Press Contact' },
-  { id: 'investor_relations', label: 'Investor Relations Contact' },
-];
-
 interface Category {
   id: string;
   name: string;
@@ -82,6 +82,27 @@ export function AdminAllNewsView() {
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [editFooterContacts, setEditFooterContacts] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Category management state
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+
+  // Contact management state
+  const [isContactsOpen, setIsContactsOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<PressContact | null>(null);
+  const [isAddingContact, setIsAddingContact] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    id: '',
+    title: '',
+    name: '',
+    company: '',
+    email: '',
+    phone: ''
+  });
+  const [isSavingContact, setIsSavingContact] = useState(false);
+  const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -292,6 +313,166 @@ export function AdminAllNewsView() {
     }
   };
 
+  // Category management handlers
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    
+    setIsAddingCategory(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('press_release_categories')
+        .insert({ name: newCategoryName.trim(), created_by: userData.user.id })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setCategories(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setNewCategoryName('');
+      toast({ title: 'Success', description: 'Category added' });
+    } catch (error: any) {
+      console.error('Error adding category:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to add category', variant: 'destructive' });
+    } finally {
+      setIsAddingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    setDeletingCategoryId(categoryId);
+    try {
+      const { error } = await supabase
+        .from('press_release_categories')
+        .delete()
+        .eq('id', categoryId);
+
+      if (error) throw error;
+
+      const deletedCategory = categories.find(c => c.id === categoryId);
+      setCategories(prev => prev.filter(c => c.id !== categoryId));
+      
+      // If current edit category was deleted, reset it
+      if (deletedCategory && editCategory === deletedCategory.name) {
+        setEditCategory('');
+      }
+      
+      toast({ title: 'Success', description: 'Category deleted' });
+    } catch (error: any) {
+      console.error('Error deleting category:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to delete category', variant: 'destructive' });
+    } finally {
+      setDeletingCategoryId(null);
+    }
+  };
+
+  // Contact management handlers
+  const resetContactForm = () => {
+    setContactForm({ id: '', title: '', name: '', company: '', email: '', phone: '' });
+    setEditingContact(null);
+    setIsAddingContact(false);
+  };
+
+  const openAddContact = () => {
+    resetContactForm();
+    setIsAddingContact(true);
+  };
+
+  const openEditContact = (contact: PressContact) => {
+    setContactForm({
+      id: contact.id,
+      title: contact.title,
+      name: contact.name,
+      company: contact.company,
+      email: contact.email,
+      phone: contact.phone || ''
+    });
+    setEditingContact(contact);
+    setIsAddingContact(false);
+  };
+
+  const handleSaveContact = async () => {
+    if (!contactForm.id.trim() || !contactForm.title.trim() || !contactForm.name.trim() || !contactForm.email.trim() || !contactForm.company.trim()) {
+      toast({ title: 'Error', description: 'ID, title, name, company and email are required', variant: 'destructive' });
+      return;
+    }
+
+    setIsSavingContact(true);
+    try {
+      if (editingContact) {
+        // Update existing contact
+        const { error } = await supabase
+          .from('press_release_contacts')
+          .update({
+            title: contactForm.title.trim(),
+            name: contactForm.name.trim(),
+            company: contactForm.company.trim(),
+            email: contactForm.email.trim(),
+            phone: contactForm.phone.trim() || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingContact.id);
+
+        if (error) throw error;
+
+        setPressContacts(prev => prev.map(c => 
+          c.id === editingContact.id 
+            ? { ...c, title: contactForm.title.trim(), name: contactForm.name.trim(), company: contactForm.company.trim(), email: contactForm.email.trim(), phone: contactForm.phone.trim() || null }
+            : c
+        ));
+        toast({ title: 'Success', description: 'Contact updated' });
+      } else {
+        // Add new contact
+        const { data, error } = await supabase
+          .from('press_release_contacts')
+          .insert({
+            id: contactForm.id.trim(),
+            title: contactForm.title.trim(),
+            name: contactForm.name.trim(),
+            company: contactForm.company.trim(),
+            email: contactForm.email.trim(),
+            phone: contactForm.phone.trim() || null
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setPressContacts(prev => [...prev, data]);
+        toast({ title: 'Success', description: 'Contact added' });
+      }
+      resetContactForm();
+    } catch (error: any) {
+      console.error('Error saving contact:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to save contact', variant: 'destructive' });
+    } finally {
+      setIsSavingContact(false);
+    }
+  };
+
+  const handleDeleteContact = async (contactId: string) => {
+    setDeletingContactId(contactId);
+    try {
+      const { error } = await supabase
+        .from('press_release_contacts')
+        .delete()
+        .eq('id', contactId);
+
+      if (error) throw error;
+
+      setPressContacts(prev => prev.filter(c => c.id !== contactId));
+      setEditFooterContacts(prev => prev.filter(id => id !== contactId));
+      toast({ title: 'Success', description: 'Contact deleted' });
+    } catch (error: any) {
+      console.error('Error deleting contact:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to delete contact', variant: 'destructive' });
+    } finally {
+      setDeletingContactId(null);
+    }
+  };
+
   const { setCurrentView } = useAppStore();
 
   if (loading) {
@@ -444,6 +625,57 @@ export function AdminAllNewsView() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* Manage Categories */}
+              <Collapsible open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto">
+                    {isCategoriesOpen ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
+                    Manage Categories
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3">
+                  {/* Add new category */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="New category name"
+                      className="flex-1"
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+                    />
+                    <Button
+                      size="sm"
+                      onClick={handleAddCategory}
+                      disabled={isAddingCategory || !newCategoryName.trim()}
+                    >
+                      {isAddingCategory ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                    </Button>
+                  </div>
+
+                  {/* List existing categories */}
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {categories.map(cat => (
+                      <div key={cat.id} className="flex items-center justify-between py-1.5 px-2 rounded bg-muted/50">
+                        <span className="text-sm">{cat.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteCategory(cat.id)}
+                          disabled={deletingCategoryId === cat.id}
+                        >
+                          {deletingCategoryId === cat.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Featured Image */}
@@ -501,37 +733,164 @@ export function AdminAllNewsView() {
                 Select which contact sections to display at the bottom of this press release
               </p>
               <div className="space-y-2">
-                {FOOTER_CONTACT_OPTIONS.map((option) => {
-                  const contact = pressContacts.find(c => c.id === option.id);
-                  return (
-                    <label
-                      key={option.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={editFooterContacts.includes(option.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setEditFooterContacts(prev => [...prev, option.id]);
-                          } else {
-                            setEditFooterContacts(prev => prev.filter(id => id !== option.id));
-                          }
-                        }}
-                        className="h-4 w-4 rounded border-border"
-                      />
-                      <div className="flex-1">
-                        <span className="text-sm font-medium">{option.label}</span>
-                        {contact && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {contact.name} • {contact.email}
-                          </p>
-                        )}
-                      </div>
-                    </label>
-                  );
-                })}
+                {pressContacts.map((contact) => (
+                  <label
+                    key={contact.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={editFooterContacts.includes(contact.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setEditFooterContacts(prev => [...prev, contact.id]);
+                        } else {
+                          setEditFooterContacts(prev => prev.filter(id => id !== contact.id));
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-border"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">{contact.title}</span>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {contact.name} • {contact.email}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+                {pressContacts.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-2">No contacts available</p>
+                )}
               </div>
+
+              {/* Manage Contacts */}
+              <Collapsible open={isContactsOpen} onOpenChange={setIsContactsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto">
+                    {isContactsOpen ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
+                    Manage Contacts
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3">
+                  {/* Add/Edit Contact Form */}
+                  {(isAddingContact || editingContact) ? (
+                    <div className="p-3 rounded-lg border border-border space-y-3 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{editingContact ? 'Edit Contact' : 'Add New Contact'}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={resetContactForm}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">ID (unique key)</Label>
+                          <Input
+                            value={contactForm.id}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, id: e.target.value }))}
+                            placeholder="e.g. press_contact"
+                            className="text-sm"
+                            disabled={!!editingContact}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Title</Label>
+                          <Input
+                            value={contactForm.title}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, title: e.target.value }))}
+                            placeholder="e.g. Press Contact"
+                            className="text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Name</Label>
+                          <Input
+                            value={contactForm.name}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="Full name"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Company</Label>
+                          <Input
+                            value={contactForm.company}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, company: e.target.value }))}
+                            placeholder="Company name"
+                            className="text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Email</Label>
+                          <Input
+                            value={contactForm.email}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                            placeholder="email@example.com"
+                            className="text-sm"
+                            type="email"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Phone (optional)</Label>
+                          <Input
+                            value={contactForm.phone}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                            placeholder="+1 234 567 890"
+                            className="text-sm"
+                          />
+                        </div>
+                      </div>
+                      <Button size="sm" onClick={handleSaveContact} disabled={isSavingContact} className="w-full">
+                        {isSavingContact ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                        {editingContact ? 'Update Contact' : 'Add Contact'}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={openAddContact} className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Contact
+                    </Button>
+                  )}
+
+                  {/* List existing contacts */}
+                  <div className="space-y-1 max-h-40 overflow-y-auto">
+                    {pressContacts.map(contact => (
+                      <div key={contact.id} className="flex items-center justify-between py-2 px-2 rounded bg-muted/50">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm font-medium block truncate">{contact.title}</span>
+                          <span className="text-xs text-muted-foreground truncate block">{contact.name} • {contact.email}</span>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => openEditContact(contact)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteContact(contact.id)}
+                            disabled={deletingContactId === contact.id}
+                          >
+                            {deletingContactId === contact.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
           </div>
 
