@@ -371,17 +371,17 @@ export default function Auth() {
               @keyframes rings-entrance {
                 0% { 
                   opacity: 0; 
-                  transform: scale(0.5) rotateX(90deg);
+                  transform: scale(0.8);
                 }
                 100% { 
                   opacity: 1; 
-                  transform: scale(1) rotateX(0deg);
+                  transform: scale(1);
                 }
               }
               @keyframes logo-entrance {
                 0% { 
                   opacity: 0; 
-                  transform: translateZ(0px) scale(0.8);
+                  transform: translateZ(0px) scale(0.9);
                 }
                 100% { 
                   opacity: 1; 
@@ -389,10 +389,10 @@ export default function Auth() {
                 }
               }
               .rings-container {
-                animation: rings-entrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                animation: rings-entrance 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
               }
               .logo-entrance {
-                animation: logo-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+                animation: logo-entrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
                 opacity: 0;
               }
             `}</style>
