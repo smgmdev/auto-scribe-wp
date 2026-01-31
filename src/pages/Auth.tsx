@@ -266,13 +266,6 @@ export default function Auth() {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
         </div>
-        {/* Expanding bottom line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-border">
-          <div 
-            className="h-full bg-border transition-all duration-150 ease-out mx-auto"
-            style={{ width: `${headerLineWidth}%` }}
-          />
-        </div>
       </header>
 
       {/* Spacer for fixed header */}
