@@ -157,11 +157,11 @@ export default function PressReleaseDetail() {
             {pressRelease.image_url && (
               <div className="w-full bg-muted">
                 <div className="container mx-auto px-4">
-                  <div className="max-w-4xl mx-auto">
+                  <div className="max-w-3xl mx-auto">
                     <img 
                       src={pressRelease.image_url} 
                       alt={pressRelease.title}
-                      className="w-full h-auto max-h-[500px] object-cover"
+                      className="w-full h-auto max-h-[320px] object-cover rounded-lg"
                     />
                   </div>
                 </div>
