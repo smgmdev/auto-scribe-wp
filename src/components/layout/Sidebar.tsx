@@ -99,7 +99,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         { 
           id: 'admin-press-releases', 
           label: 'Press Releases', 
-          icon: Newspaper,
+          icon: null,
           submenu: [
             { id: 'admin-new-press-release', label: 'New', icon: Plus },
             { id: 'admin-all-news', label: 'All', icon: FileText }
@@ -1301,7 +1301,7 @@ export function Sidebar({
                                   )}
                                   onClick={() => toggleMenu(subItem.id)}
                                 >
-                                  <SubIcon className={cn("h-4 w-4 flex-shrink-0", isNestedSubmenuActive && "text-[#3872e0]")} />
+                                  {SubIcon && <SubIcon className={cn("h-4 w-4 flex-shrink-0", isNestedSubmenuActive && "text-[#3872e0]")} />}
                                   <span className="truncate flex-1 text-left">{subItem.label}</span>
                                   <ChevronDown className={cn(
                                     "h-3 w-3 transition-transform duration-200 ml-auto flex-shrink-0",
