@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Loader2 } from 'lucide-react';
+import { Search, User, Loader2, SlidersHorizontal, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -12,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import amlogo from '@/assets/amlogo.png';
@@ -40,7 +47,16 @@ export default function PressNews() {
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All Topics']);
   const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
-  // No state needed - using native CSS sticky positioning
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  // Check if any filters are active
+  const hasActiveFilters = selectedTopic !== 'All Topics' || selectedYear !== 'All Years' || selectedMonth !== 'All Months';
+  
+  const resetFilters = () => {
+    setSelectedTopic('All Topics');
+    setSelectedYear('All Years');
+    setSelectedMonth('All Months');
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,14 +190,96 @@ export default function PressNews() {
 
       {/* Filter Bar - native CSS sticky positioning for smooth behavior */}
       <div 
-        className="sticky top-16 z-40 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80"
+        className="sticky top-16 z-40 border-b border-border bg-white"
       >
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-wrap items-center gap-4">
+        <div className="container mx-auto px-4 py-3">
+          {/* Mobile Filter Button */}
+          <div className="md:hidden">
+            <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
+              <SheetTrigger asChild>
+                <button className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  <span>Filter</span>
+                  {hasActiveFilters && (
+                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-[10px] text-background">
+                      {[selectedTopic !== 'All Topics', selectedYear !== 'All Years', selectedMonth !== 'All Months'].filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-auto max-h-[80vh] rounded-t-2xl">
+                <SheetHeader className="flex flex-row items-center justify-between border-b pb-4">
+                  <SheetTitle className="text-lg font-semibold">Filter</SheetTitle>
+                  {hasActiveFilters && (
+                    <button 
+                      onClick={resetFilters}
+                      className="text-sm text-[#06c] font-medium"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </SheetHeader>
+                <div className="py-6 space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Topic</label>
+                    <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="All Topics" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCategories.map(topic => (
+                          <SelectItem key={topic} value={topic}>{topic}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Year</label>
+                    <Select value={selectedYear} onValueChange={setSelectedYear}>
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="All Years" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableYears.map(year => (
+                          <SelectItem key={year} value={year}>{year}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Month</label>
+                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="All Months" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {months.map(month => (
+                          <SelectItem key={month} value={month}>{month}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="border-t pt-4 pb-2">
+                  <Button 
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="w-full bg-foreground text-background hover:bg-foreground/90"
+                  >
+                    Done
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Desktop Filters */}
+          <div className="hidden md:flex items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
               
             <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger className="w-[160px] bg-background">
+              <SelectTrigger className="w-[160px] bg-white">
                 <SelectValue placeholder="All Topics" />
               </SelectTrigger>
               <SelectContent>
@@ -192,7 +290,7 @@ export default function PressNews() {
             </Select>
 
             <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[130px] bg-background">
+              <SelectTrigger className="w-[130px] bg-white">
                 <SelectValue placeholder="All Years" />
               </SelectTrigger>
               <SelectContent>
@@ -203,7 +301,7 @@ export default function PressNews() {
             </Select>
 
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[140px] bg-background">
+              <SelectTrigger className="w-[140px] bg-white">
                 <SelectValue placeholder="All Months" />
               </SelectTrigger>
               <SelectContent>
