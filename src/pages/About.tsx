@@ -217,6 +217,21 @@ export default function About() {
         </div>
       </div>
 
+      {/* Promo Banner - Apple style */}
+      <div className="bg-[#1d1d1f] py-3">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          <span className="text-sm text-white/90">
+            Set up Arcana Mace in seconds.{' '}
+            <button 
+              onClick={() => navigate('/auth')}
+              className="text-[#2997ff] hover:underline"
+            >
+              Learn how ›
+            </button>
+          </span>
+        </div>
+      </div>
+
       {/* Hero Section - Apple style with solid blue background */}
       <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden py-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
