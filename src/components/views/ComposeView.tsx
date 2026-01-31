@@ -1197,21 +1197,21 @@ export function ComposeView() {
         </div>
       )}
 
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">
-          {editingArticle ? 'Edit Article' : 'New Article'}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {editingArticle 
-            ? (editingArticle.status === 'draft' ? 'Make changes to your article and save or publish' : 'Make changes to your article') 
-            : 'Write or generate AI-powered articles'}
-        </p>
-      </div>
-
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Main Editor */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Header */}
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">
+              {editingArticle ? 'Edit Article' : 'New Article'}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {editingArticle 
+                ? (editingArticle.status === 'draft' ? 'Make changes to your article and save or publish' : 'Make changes to your article') 
+                : 'Write or generate AI-powered articles'}
+            </p>
+          </div>
+
           {/* Selected Headline */}
           {selectedHeadline && <Card className="border-accent/30 bg-accent/5">
               <CardContent className="flex items-center justify-between p-4">
