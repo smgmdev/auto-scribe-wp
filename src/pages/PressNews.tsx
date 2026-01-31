@@ -390,7 +390,7 @@ export default function PressNews() {
                             
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <span className="text-[13px] font-bold text-muted-foreground uppercase tracking-wide">
+                              <span className="text-[13px] font-bold text-muted-foreground uppercase">
                                 {release.category}
                               </span>
                               <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 leading-tight">
