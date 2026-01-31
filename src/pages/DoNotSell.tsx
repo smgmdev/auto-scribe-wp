@@ -1,97 +1,72 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Search } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
-import amlogo from '@/assets/amlogo.png';
+import amblack from '@/assets/amblack.png';
 
 const DoNotSell = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const { user } = useAuth();
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
-            <button 
-              onClick={() => navigate('/')} 
-              className="flex items-center gap-2"
-            >
-              <img src={amlogo} alt="Arcana Mace" className="h-8 w-8" />
-              <span className="font-semibold text-lg">Arcana Mace</span>
-            </button>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-6">
-              <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)}>
-                <Search className="h-5 w-5" />
-              </Button>
-              <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
-              {user ? (
-                <>
-                  <Button variant="ghost" onClick={() => navigate('/dashboard')}>
-                    Dashboard
-                  </Button>
-                  <Button variant="outline" onClick={() => signOut()}>
-                    Sign Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" onClick={() => navigate('/auth')}>
-                    Sign In
-                  </Button>
-                  <Button onClick={() => navigate('/auth')}>
-                    Get Started
-                  </Button>
-                </>
-              )}
-            </nav>
-
-            {/* Mobile menu button */}
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+          </div>
+          
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
-              className="md:hidden p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
             </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border bg-background">
-            <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
-              {user ? (
-                <>
-                  <Button variant="ghost" className="justify-start" onClick={() => navigate('/dashboard')}>
-                    Dashboard
-                  </Button>
-                  <Button variant="outline" className="justify-start" onClick={() => signOut()}>
-                    Sign Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" className="justify-start" onClick={() => navigate('/auth')}>
-                    Sign In
-                  </Button>
-                  <Button className="justify-start" onClick={() => navigate('/auth')}>
-                    Get Started
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </header>
+
+      {/* Search Modal */}
+      <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 pt-24">
