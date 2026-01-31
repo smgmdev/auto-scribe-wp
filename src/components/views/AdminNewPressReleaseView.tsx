@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Loader2, FileText } from 'lucide-react';
+import { Upload, X, Loader2, FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,21 +12,97 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
-const categories = ['Press Release', 'Update', 'Announcement', 'Company News', 'Product'];
+interface Category {
+  id: string;
+  name: string;
+}
 
 export function AdminNewPressReleaseView() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('Press Release');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newCategoryDialogOpen, setNewCategoryDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+
+  // Fetch categories from database
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('press_release_categories')
+          .select('id, name')
+          .order('name');
+
+        if (error) throw error;
+        setCategories(data || []);
+        if (data && data.length > 0 && !category) {
+          setCategory(data[0].name);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast({ title: 'Error', description: 'Please enter a category name', variant: 'destructive' });
+      return;
+    }
+    if (!user) return;
+
+    setIsAddingCategory(true);
+    try {
+      const { data, error } = await supabase
+        .from('press_release_categories')
+        .insert({ name: newCategoryName.trim(), created_by: user.id })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({ title: 'Error', description: 'This category already exists', variant: 'destructive' });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      setCategories(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setCategory(data.name);
+      setNewCategoryName('');
+      setNewCategoryDialogOpen(false);
+      toast({ title: 'Success', description: 'Category added successfully' });
+    } catch (error: any) {
+      console.error('Error adding category:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to add category', variant: 'destructive' });
+    } finally {
+      setIsAddingCategory(false);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,17 +270,69 @@ export function AdminNewPressReleaseView() {
         {/* Category */}
         <div className="space-y-2">
           <Label>Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map(cat => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select value={category} onValueChange={setCategory} disabled={loadingCategories}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder={loadingCategories ? "Loading..." : "Select category"} />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(cat => (
+                  <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => setNewCategoryDialogOpen(true)}
+              title="Add new category"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
+
+        {/* Add Category Dialog */}
+        <Dialog open={newCategoryDialogOpen} onOpenChange={setNewCategoryDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-category">Category Name</Label>
+                <Input
+                  id="new-category"
+                  placeholder="Enter category name..."
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCategory();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNewCategoryDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddCategory} disabled={isAddingCategory || !newCategoryName.trim()}>
+                {isAddingCategory ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  'Add Category'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Image Upload */}
         <div className="space-y-2">

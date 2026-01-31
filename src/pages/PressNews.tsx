@@ -27,7 +27,6 @@ interface PressRelease {
   created_at: string;
 }
 
-const topics = ['All Topics', 'Press Release', 'Update', 'Announcement', 'Company News', 'Product'];
 const years = ['All Years', '2026', '2025', '2024', '2023'];
 const months = ['All Months', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -39,27 +38,39 @@ export default function PressNews() {
   const [selectedYear, setSelectedYear] = useState('All Years');
   const [selectedMonth, setSelectedMonth] = useState('All Months');
   const [pressReleases, setPressReleases] = useState<PressRelease[]>([]);
+  const [categories, setCategories] = useState<string[]>(['All Topics']);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPressReleases = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
-          .from('press_releases')
-          .select('id, title, content, category, image_url, published_at, created_at')
-          .eq('published', true)
-          .order('published_at', { ascending: false });
+        // Fetch categories and press releases in parallel
+        const [categoriesRes, releasesRes] = await Promise.all([
+          supabase
+            .from('press_release_categories')
+            .select('name')
+            .order('name'),
+          supabase
+            .from('press_releases')
+            .select('id, title, content, category, image_url, published_at, created_at')
+            .eq('published', true)
+            .order('published_at', { ascending: false })
+        ]);
 
-        if (error) throw error;
-        setPressReleases(data || []);
+        if (categoriesRes.error) throw categoriesRes.error;
+        if (releasesRes.error) throw releasesRes.error;
+
+        const categoryNames = categoriesRes.data?.map(c => c.name) || [];
+        setCategories(['All Topics', ...categoryNames]);
+        setPressReleases(releasesRes.data || []);
       } catch (error) {
-        console.error('Error fetching press releases:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPressReleases();
+    fetchData();
   }, []);
 
   // Filter press releases
@@ -168,7 +179,7 @@ export default function PressNews() {
                 <SelectValue placeholder="All Topics" />
               </SelectTrigger>
               <SelectContent>
-                {topics.map(topic => (
+                {categories.map(topic => (
                   <SelectItem key={topic} value={topic}>{topic}</SelectItem>
                 ))}
               </SelectContent>
