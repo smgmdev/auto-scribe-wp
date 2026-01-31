@@ -109,7 +109,7 @@ export default function PressReleaseDetail() {
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white">
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-white/90 backdrop-blur-sm ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button 
             onClick={() => navigate('/')}
