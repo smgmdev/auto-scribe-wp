@@ -584,13 +584,13 @@ export function AdminAllNewsView() {
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
                         className="flex-1 min-w-0 cursor-pointer"
                       >
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <span className="text-[13px] font-bold text-muted-foreground uppercase">
                           {pr.category}
                         </span>
-                        <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-[#06c] transition-colors mt-1">
+                        <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1">
                           {pr.title}
                         </h3>
-                        <p className="text-sm text-muted-foreground mt-2">
+                        <p className="text-sm font-bold text-muted-foreground mt-2">
                           {format(new Date(pr.published_at || pr.created_at), 'MMMM d, yyyy')}
                         </p>
                       </div>
