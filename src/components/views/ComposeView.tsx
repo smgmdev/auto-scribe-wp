@@ -1522,7 +1522,8 @@ export function ComposeView() {
 
 
         {/* Sidebar */}
-        <div className="space-y-4">
+        <div className="lg:col-span-1">
+          <div className="sticky top-4 space-y-4">
           {/* Actions - At Top */}
           <div className="space-y-3">
             <Button 
@@ -1660,6 +1661,7 @@ export function ComposeView() {
                   </>}
               </CardContent>
             </Card>}
+          </div>
         </div>
       </div>
     </div>;
