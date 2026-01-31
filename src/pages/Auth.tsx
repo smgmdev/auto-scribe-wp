@@ -271,8 +271,8 @@ export default function Auth() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header - Sticky with navigation links */}
-      <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      {/* Sub-header - Sticky with navigation links and expanding bottom line */}
+      <div className={`sticky z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">Arcana Mace Account</h1>
           <nav className="hidden md:flex items-center gap-6">
@@ -296,6 +296,8 @@ export default function Auth() {
             </button>
           </nav>
         </div>
+        {/* Expanding bottom line */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px bg-border transition-all duration-200 ease-out" style={{ width: `${headerLineWidth}%` }} />
       </div>
 
       {/* Main Content - Centered */}
