@@ -39,8 +39,17 @@ export default function Auth() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const [isDataDialogOpen, setIsDataDialogOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+  
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -351,14 +360,14 @@ export default function Auth() {
               }
             `}</style>
             <div 
-              className="relative w-48 h-48 flex items-center justify-center"
+              className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center"
               style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
             >
               {/* Logo - centered as the nucleus */}
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="absolute z-10 h-20 w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity"
+                className="absolute z-10 h-12 w-12 sm:h-20 sm:w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity"
                 onClick={() => navigate('/')}
                 style={{ transform: 'translateZ(0px)' }}
               />
@@ -374,10 +383,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${130 + (headerLineWidth / 100) * 40}px`,
-                    height: `${130 + (headerLineWidth / 100) * 40}px`,
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid #007AFF',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #007AFF`,
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)',
                   }}
@@ -413,10 +422,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${130 + (headerLineWidth / 100) * 40}px`,
-                    height: `${130 + (headerLineWidth / 100) * 40}px`,
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid #5856D6',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #5856D6`,
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)',
                   }}
@@ -452,10 +461,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${130 + (headerLineWidth / 100) * 40}px`,
-                    height: `${130 + (headerLineWidth / 100) * 40}px`,
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid #32ADE6',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #32ADE6`,
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)',
                   }}
@@ -491,10 +500,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${130 + (headerLineWidth / 100) * 40}px`,
-                    height: `${130 + (headerLineWidth / 100) * 40}px`,
+                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: '2px solid #FF9500',
+                    border: `${isMobile ? '1.5px' : '2px'} solid #FF9500`,
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)',
                   }}
