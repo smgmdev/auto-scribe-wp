@@ -333,13 +333,17 @@ export default function Auth() {
                 0% { transform: rotateZ(0deg) rotateX(75deg) rotateY(120deg); }
                 100% { transform: rotateZ(360deg) rotateX(75deg) rotateY(120deg); }
               }
-              @keyframes glow-travel {
+              @keyframes glow-spin-fast {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
               }
-              @keyframes glow-travel-reverse {
+              @keyframes glow-spin-fast-reverse {
                 0% { transform: rotate(360deg); }
                 100% { transform: rotate(0deg); }
+              }
+              @keyframes sphere-pulse {
+                0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+                50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
               }
             `}</style>
             <div 
@@ -364,19 +368,20 @@ export default function Auth() {
                     boxShadow: '0 0 10px rgba(0, 122, 255, 0.3)',
                   }}
                 >
-                  {/* Glowing dot traveling along this ring */}
+                  {/* 3D glowing sphere spinning fast around the ring */}
                   <div 
                     className="absolute inset-0"
-                    style={{ animation: 'glow-travel 3s linear infinite' }}
+                    style={{ animation: 'glow-spin-fast 1s linear infinite' }}
                   >
                     <div 
-                      className="absolute w-3 h-3 rounded-full"
+                      className="absolute w-4 h-4 rounded-full"
                       style={{
-                        background: 'radial-gradient(circle, #007AFF 0%, rgba(0, 122, 255, 0.8) 40%, transparent 70%)',
-                        boxShadow: '0 0 12px 4px rgba(0, 122, 255, 0.8), 0 0 20px 8px rgba(0, 122, 255, 0.4)',
-                        top: '-6px',
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #007AFF 30%, #0055cc 70%, #003399 100%)',
+                        boxShadow: '0 0 8px 2px rgba(0, 122, 255, 1), 0 0 16px 6px rgba(0, 122, 255, 0.7), 0 0 24px 10px rgba(0, 122, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-8px',
                         left: '50%',
                         transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.5s ease-in-out infinite',
                       }}
                     />
                   </div>
@@ -401,19 +406,20 @@ export default function Auth() {
                     boxShadow: '0 0 10px rgba(88, 86, 214, 0.3)',
                   }}
                 >
-                  {/* Glowing dot traveling along this ring */}
+                  {/* 3D glowing sphere spinning fast around the ring */}
                   <div 
                     className="absolute inset-0"
-                    style={{ animation: 'glow-travel-reverse 4s linear infinite' }}
+                    style={{ animation: 'glow-spin-fast-reverse 1.2s linear infinite' }}
                   >
                     <div 
-                      className="absolute w-3 h-3 rounded-full"
+                      className="absolute w-4 h-4 rounded-full"
                       style={{
-                        background: 'radial-gradient(circle, #5856D6 0%, rgba(88, 86, 214, 0.8) 40%, transparent 70%)',
-                        boxShadow: '0 0 12px 4px rgba(88, 86, 214, 0.8), 0 0 20px 8px rgba(88, 86, 214, 0.4)',
-                        top: '-6px',
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #5856D6 30%, #4240a8 70%, #2d2b7a 100%)',
+                        boxShadow: '0 0 8px 2px rgba(88, 86, 214, 1), 0 0 16px 6px rgba(88, 86, 214, 0.7), 0 0 24px 10px rgba(88, 86, 214, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-8px',
                         left: '50%',
                         transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.6s ease-in-out infinite',
                       }}
                     />
                   </div>
@@ -438,19 +444,20 @@ export default function Auth() {
                     boxShadow: '0 0 10px rgba(50, 173, 230, 0.3)',
                   }}
                 >
-                  {/* Glowing dot traveling along this ring */}
+                  {/* 3D glowing sphere spinning fast around the ring */}
                   <div 
                     className="absolute inset-0"
-                    style={{ animation: 'glow-travel 2.5s linear infinite' }}
+                    style={{ animation: 'glow-spin-fast 0.8s linear infinite' }}
                   >
                     <div 
-                      className="absolute w-3 h-3 rounded-full"
+                      className="absolute w-4 h-4 rounded-full"
                       style={{
-                        background: 'radial-gradient(circle, #32ADE6 0%, rgba(50, 173, 230, 0.8) 40%, transparent 70%)',
-                        boxShadow: '0 0 12px 4px rgba(50, 173, 230, 0.8), 0 0 20px 8px rgba(50, 173, 230, 0.4)',
-                        top: '-6px',
+                        background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #32ADE6 30%, #1a8fc4 70%, #0d6a99 100%)',
+                        boxShadow: '0 0 8px 2px rgba(50, 173, 230, 1), 0 0 16px 6px rgba(50, 173, 230, 0.7), 0 0 24px 10px rgba(50, 173, 230, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                        top: '-8px',
                         left: '50%',
                         transform: 'translateX(-50%)',
+                        animation: 'sphere-pulse 0.4s ease-in-out infinite',
                       }}
                     />
                   </div>
