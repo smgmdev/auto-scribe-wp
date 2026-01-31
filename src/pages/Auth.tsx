@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ChevronRight } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
@@ -297,26 +297,18 @@ export default function Auth() {
                 setMode('signin');
                 setErrors({});
               }}
-              className={`group flex items-center gap-1 text-[13px] font-normal transition-colors ${mode === 'signin' ? 'text-muted-foreground' : 'text-foreground hover:text-foreground'}`}
+              className={`text-[13px] font-normal transition-colors ${mode === 'signin' ? 'text-muted-foreground' : 'text-foreground hover:text-foreground'}`}
             >
               Sign In
-              <ChevronRight 
-                size={14} 
-                className="opacity-0 -translate-x-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-x-0" 
-              />
             </button>
             <button
               onClick={() => {
                 setMode('signup');
                 setErrors({});
               }}
-              className={`group flex items-center gap-1 text-[13px] font-normal transition-colors ${mode === 'signup' ? 'text-muted-foreground' : 'text-foreground hover:text-foreground'}`}
+              className={`text-[13px] font-normal transition-colors ${mode === 'signup' ? 'text-muted-foreground' : 'text-foreground hover:text-foreground'}`}
             >
               Create Your Arcana Mace Account
-              <ChevronRight 
-                size={14} 
-                className="opacity-0 -translate-x-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-x-0" 
-              />
             </button>
           </nav>
           {/* Default line - spans content width */}
@@ -605,11 +597,11 @@ export default function Auth() {
                   {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : (
-                <span className="flex items-center justify-center gap-1">
+                <span className="flex items-center justify-center gap-2">
                   {mode === 'signin' ? 'Sign In' : 'Create Account'}
-                  <ChevronRight 
+                  <ArrowRight 
                     size={18} 
-                    className="opacity-0 -translate-x-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-x-0" 
+                    className="opacity-0 -translate-x-2 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-x-0" 
                   />
                 </span>
               )}
