@@ -39,7 +39,6 @@ export default function PressReleaseDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
-  const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -51,10 +50,6 @@ export default function PressReleaseDetail() {
     const handleScroll = () => {
       const currentScrollY = scrollContainer.scrollTop;
       const scrollThreshold = 64; // Height of main header
-
-      // Calculate line width based on scroll (0 to 100% over first 100px)
-      const lineProgress = Math.min(currentScrollY / 100, 1);
-      setHeaderLineWidth(lineProgress * 100);
 
       if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
         // Scrolling down past threshold
@@ -171,7 +166,7 @@ export default function PressReleaseDetail() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className={`sticky z-40 bg-[#f5f5f7] backdrop-blur supports-[backdrop-filter]:bg-[#f5f5f7]/95 h-12 flex items-center relative ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
           <button 
             onClick={() => navigate('/press')}
@@ -181,21 +176,6 @@ export default function PressReleaseDetail() {
             Newsroom
           </button>
         </div>
-        {/* Default line - spans content width, hidden when expanded line is visible */}
-        <div 
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 max-w-[980px] w-full px-4 md:px-6 transition-opacity duration-200"
-          style={{ opacity: headerLineWidth > 0 ? 0 : 1 }}
-        >
-          <div className="h-px bg-border w-full" />
-        </div>
-        {/* Expanding line overlay - grows from 0 to full viewport */}
-        <div 
-          className="absolute bottom-0 left-0 h-px bg-border transition-all duration-200 ease-out"
-          style={{ 
-            width: headerLineWidth > 0 ? '100%' : '0%',
-            opacity: headerLineWidth > 0 ? 1 : 0
-          }} 
-        />
       </div>
 
       {/* Main Content */}
