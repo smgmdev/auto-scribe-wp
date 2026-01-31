@@ -42,7 +42,22 @@ interface PressRelease {
   published: boolean;
   published_at: string | null;
   created_at: string;
+  footer_contacts: string[] | null;
 }
+
+interface PressContact {
+  id: string;
+  title: string;
+  name: string;
+  company: string;
+  email: string;
+  phone: string | null;
+}
+
+const FOOTER_CONTACT_OPTIONS = [
+  { id: 'press_contact', label: 'Press Contact' },
+  { id: 'investor_relations', label: 'Investor Relations Contact' },
+];
 
 interface Category {
   id: string;
@@ -52,6 +67,7 @@ interface Category {
 export function AdminAllNewsView() {
   const [pressReleases, setPressReleases] = useState<PressRelease[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [pressContacts, setPressContacts] = useState<PressContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
@@ -64,26 +80,33 @@ export function AdminAllNewsView() {
   const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [editFooterContacts, setEditFooterContacts] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [releasesRes, categoriesRes] = await Promise.all([
+      const [releasesRes, categoriesRes, contactsRes] = await Promise.all([
         supabase
           .from('press_releases')
-          .select('id, title, content, category, image_url, published, published_at, created_at')
+          .select('id, title, content, category, image_url, published, published_at, created_at, footer_contacts')
           .order('created_at', { ascending: false }),
         supabase
           .from('press_release_categories')
           .select('id, name')
-          .order('name')
+          .order('name'),
+        supabase
+          .from('press_release_contacts')
+          .select('*')
+          .order('id')
       ]);
 
       if (releasesRes.error) throw releasesRes.error;
       if (categoriesRes.error) throw categoriesRes.error;
+      if (contactsRes.error) throw contactsRes.error;
       
       setPressReleases(releasesRes.data || []);
       setCategories(categoriesRes.data || []);
+      setPressContacts(contactsRes.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({ title: 'Error', description: 'Failed to load press releases', variant: 'destructive' });
@@ -167,6 +190,7 @@ export function AdminAllNewsView() {
     setEditImageUrl(pr.image_url);
     setEditImagePreview(pr.image_url);
     setEditImageFile(null);
+    setEditFooterContacts(pr.footer_contacts || []);
   };
 
   const closeEditDialog = () => {
@@ -177,6 +201,7 @@ export function AdminAllNewsView() {
     setEditImageUrl(null);
     setEditImagePreview(null);
     setEditImageFile(null);
+    setEditFooterContacts([]);
   };
 
   const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,6 +268,7 @@ export function AdminAllNewsView() {
           content: editContent.trim(),
           category: editCategory,
           image_url: imageUrl,
+          footer_contacts: editFooterContacts,
           updated_at: new Date().toISOString()
         })
         .eq('id', editingRelease.id);
@@ -252,7 +278,7 @@ export function AdminAllNewsView() {
       // Update local state
       setPressReleases(prev => prev.map(pr => 
         pr.id === editingRelease.id 
-          ? { ...pr, title: editTitle.trim(), content: editContent.trim(), category: editCategory, image_url: imageUrl }
+          ? { ...pr, title: editTitle.trim(), content: editContent.trim(), category: editCategory, image_url: imageUrl, footer_contacts: editFooterContacts }
           : pr
       ));
 
@@ -466,6 +492,46 @@ export function AdminAllNewsView() {
                 onChange={setEditContent}
                 placeholder="Write your content..."
               />
+            </div>
+
+            {/* Footer Contacts Selection */}
+            <div className="space-y-2">
+              <Label>Footer Contacts</Label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Select which contact sections to display at the bottom of this press release
+              </p>
+              <div className="space-y-2">
+                {FOOTER_CONTACT_OPTIONS.map((option) => {
+                  const contact = pressContacts.find(c => c.id === option.id);
+                  return (
+                    <label
+                      key={option.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={editFooterContacts.includes(option.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditFooterContacts(prev => [...prev, option.id]);
+                          } else {
+                            setEditFooterContacts(prev => prev.filter(id => id !== option.id));
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-border"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{option.label}</span>
+                        {contact && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {contact.name} • {contact.email}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
