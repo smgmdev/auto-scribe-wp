@@ -139,7 +139,11 @@ export function ComposeView() {
 
   // Scroll to top when component mounts (e.g., when coming from headlines)
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Use setTimeout to ensure scroll happens after render
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 50);
+    return () => clearTimeout(timer);
   }, []);
 
   // Fetch site credits on mount and subscribe to changes
