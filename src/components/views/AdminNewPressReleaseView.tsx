@@ -195,6 +195,17 @@ export function AdminNewPressReleaseView() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size - max 2MB
+      const maxSizeBytes = 2 * 1024 * 1024; // 2MB in bytes
+      if (file.size > maxSizeBytes) {
+        toast({
+          title: "File too large",
+          description: "Image size must be under 2MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {

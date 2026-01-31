@@ -372,6 +372,18 @@ export function ComposeView() {
       });
       return;
     }
+    
+    // Check file size - max 2MB
+    const maxSizeBytes = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSizeBytes) {
+      toast({
+        title: "File too large",
+        description: "Image size must be under 2MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setFeaturedImage({
       ...featuredImage,
       file
