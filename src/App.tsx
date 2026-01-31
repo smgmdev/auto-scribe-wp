@@ -20,6 +20,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DoNotSell from "./pages/DoNotSell";
+import SiteMap from "./pages/SiteMap";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +85,7 @@ const App = () => {
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/do-not-sell" element={<DoNotSell />} />
+              <Route path="/sitemap" element={<SiteMap />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
