@@ -41,23 +41,23 @@ export default function PressNews() {
   const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
   const [isFilterFixed, setIsFilterFixed] = useState(false);
-  const newsroomRef = useRef<HTMLDivElement>(null);
+  const filterSentinelRef = useRef<HTMLDivElement>(null);
 
-  // Use IntersectionObserver to detect when newsroom title scrolls out of view
+  // Use IntersectionObserver to detect when filter bar reaches the header
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // When the newsroom title is not intersecting (scrolled past), fix the filter
+        // When the sentinel (at filter position) passes the header, fix the filter
         setIsFilterFixed(!entry.isIntersecting);
       },
       {
-        rootMargin: '-64px 0px 0px 0px', // Account for fixed header height
+        rootMargin: '-64px 0px 0px 0px', // Trigger when element reaches header bottom (64px)
         threshold: 0,
       }
     );
 
-    if (newsroomRef.current) {
-      observer.observe(newsroomRef.current);
+    if (filterSentinelRef.current) {
+      observer.observe(filterSentinelRef.current);
     }
 
     return () => observer.disconnect();
@@ -187,11 +187,14 @@ export default function PressNews() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - in normal flow, will scroll away */}
-      <div ref={newsroomRef} className="border-b border-border bg-background">
+      <div className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-12 flex items-center">
           <h1 className="text-xl font-semibold text-foreground">Newsroom</h1>
         </div>
       </div>
+
+      {/* Sentinel for filter sticky detection - placed at filter's natural position */}
+      <div ref={filterSentinelRef} className="h-0" />
 
       {/* Spacer when filter is fixed */}
       {isFilterFixed && <div className="h-[56px]" />}
