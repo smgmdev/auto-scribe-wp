@@ -331,8 +331,8 @@ export default function Auth() {
                 {/* Generate 16 dots in a circle pattern like Apple */}
                 {Array.from({ length: 16 }).map((_, i) => {
                   const angle = (i / 16) * 360;
-                  const baseRadius = 55;
-                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 40; // Expand by up to 40px
+                  const baseRadius = 50;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 40;
                   const colors = [
                     '#34C759', // Green
                     '#30D158', // Light green
@@ -351,21 +351,20 @@ export default function Auth() {
                     '#5856D6', // Purple
                     '#AF52DE', // Violet
                   ];
-                  const baseSize = 6 + Math.sin((i / 16) * Math.PI * 2) * 2;
-                  const expandedSize = baseSize + (headerLineWidth / 100) * 3; // Grow slightly
+                  const size = 6; // All same size
                   
                   return (
                     <div
                       key={i}
                       className="absolute rounded-full"
                       style={{
-                        width: `${expandedSize}px`,
-                        height: `${expandedSize}px`,
+                        width: `${size}px`,
+                        height: `${size}px`,
                         backgroundColor: colors[i],
                         left: '50%',
                         top: '50%',
                         transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
-                        opacity: 0.9 - (headerLineWidth / 100) * 0.3, // Fade slightly as it expands
+                        opacity: 0.9 - (headerLineWidth / 100) * 0.3,
                         transition: 'all 0.15s ease-out',
                       }}
                     />
@@ -382,8 +381,8 @@ export default function Auth() {
               >
                 {Array.from({ length: 8 }).map((_, i) => {
                   const angle = (i / 8) * 360 + 22.5;
-                  const baseRadius = 42;
-                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 50; // Expand more
+                  const baseRadius = 50; // Same radius as outer
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 40; // Same expansion
                   const colors = [
                     '#FFCC00', // Yellow
                     '#FF9500', // Orange
@@ -394,21 +393,20 @@ export default function Auth() {
                     '#007AFF', // Blue
                     '#32ADE6', // Light blue
                   ];
-                  const baseSize = 4;
-                  const expandedSize = baseSize + (headerLineWidth / 100) * 4;
+                  const size = 5; // Slightly smaller inner dots
                   
                   return (
                     <div
                       key={i}
                       className="absolute rounded-full"
                       style={{
-                        width: `${expandedSize}px`,
-                        height: `${expandedSize}px`,
+                        width: `${size}px`,
+                        height: `${size}px`,
                         backgroundColor: colors[i],
                         left: '50%',
                         top: '50%',
                         transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
-                        opacity: 0.7 - (headerLineWidth / 100) * 0.4,
+                        opacity: 0.8 - (headerLineWidth / 100) * 0.3,
                         transition: 'all 0.15s ease-out',
                       }}
                     />
