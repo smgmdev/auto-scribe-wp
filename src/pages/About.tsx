@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Check, Hand, Lock, Smartphone } from 'lucide-react';
+import { Search, User, Check, Hand, Lock, Smartphone, ChevronDown } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,34 @@ function AnimatedSection({
       }}
     >
       {children}
+    </div>
+  );
+}
+
+// FAQ Item component with Apple-style accordion
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="py-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between text-left group"
+      >
+        <span className={`text-lg md:text-xl font-medium transition-colors ${isOpen ? 'text-[#06c]' : 'text-[#1d1d1f] group-hover:text-[#06c]'}`}>
+          {question}
+        </span>
+        <ChevronDown 
+          className={`w-6 h-6 transition-all duration-300 ${isOpen ? 'text-[#06c] rotate-180' : 'text-[#86868b] group-hover:text-[#06c]'}`}
+        />
+      </button>
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-out ${isOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
+      >
+        <p className="text-[#86868b] text-base md:text-lg leading-relaxed pr-12">
+          {answer}
+        </p>
+      </div>
     </div>
   );
 }
@@ -458,6 +486,46 @@ export default function About() {
               >
                 Browse Publishers ›
               </button>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Questions Section - Apple style FAQ */}
+      <section className="bg-white py-20 md:py-28 px-4">
+        <div className="max-w-[980px] mx-auto">
+          <AnimatedSection>
+            <h2 className="text-5xl md:text-7xl lg:text-[80px] font-semibold text-[#1d1d1f] tracking-tight leading-[1.05] text-center mb-16 md:mb-20">
+              Questions? Answers.
+            </h2>
+          </AnimatedSection>
+
+          <AnimatedSection delay={100}>
+            <div className="divide-y divide-[#d2d2d7]">
+              <FAQItem 
+                question="How do I use Arcana Mace?"
+                answer="Simply create an account, browse our curated network of 500+ premium publishers, select your target outlet, submit your content, and pay. Your article will be published within 24-48 hours on average."
+              />
+              <FAQItem 
+                question="How secure is Arcana Mace?"
+                answer="We use industry-standard encryption for all transactions and communications. Your payment details are never shared with publishers or stored on our servers. All data is transmitted over secure HTTPS connections."
+              />
+              <FAQItem 
+                question="How do I set up an account?"
+                answer="Click 'Get Started' or 'Sign In' to create your account. You'll need to verify your email address, and then you can immediately start browsing publishers and placing orders."
+              />
+              <FAQItem 
+                question="Which payment methods are supported?"
+                answer="We accept all major credit and debit cards, as well as USDT cryptocurrency. You can also purchase credits in bulk for additional savings on future orders."
+              />
+              <FAQItem 
+                question="Can I track my order status?"
+                answer="Yes! Once you place an order, you can track its status in real-time from your dashboard. You'll also receive email notifications when your article is published."
+              />
+              <FAQItem 
+                question="What if I need to cancel an order?"
+                answer="You can cancel an order before it's accepted by the publisher. Once accepted, cancellations are subject to our refund policy. Contact our support team for assistance with any order issues."
+              />
             </div>
           </AnimatedSection>
         </div>
