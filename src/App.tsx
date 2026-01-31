@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ChatListPanel } from "@/components/ui/ChatListPanel";
 import { GlobalChatDialog } from "@/components/chat/GlobalChatDialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -57,6 +57,21 @@ const usePreventBodyStyleChanges = () => {
   }, []);
 };
 
+// Messaging widget wrapper that hides during loading screens
+function MessagingWidget() {
+  const { loading } = useAuth();
+  
+  // Don't render messaging widget during loading screen
+  if (loading) return null;
+  
+  return (
+    <>
+      <ChatListPanel />
+      <GlobalChatDialog />
+    </>
+  );
+}
+
 const App = () => {
   usePreventBodyStyleChanges();
   
@@ -94,9 +109,8 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
             
-            {/* Global Messaging Widget - available on all pages */}
-            <ChatListPanel />
-            <GlobalChatDialog />
+            {/* Global Messaging Widget - hidden during loading screens */}
+            <MessagingWidget />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
