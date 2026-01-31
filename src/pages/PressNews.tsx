@@ -190,7 +190,7 @@ export default function PressNews() {
 
       {/* Filter Bar - native CSS sticky positioning for smooth behavior */}
       <div 
-        className="sticky top-16 z-40 border-b border-border bg-white"
+        className="sticky top-16 z-40 border-b border-border/50 bg-[#f5f5f7]"
       >
         <div className="container mx-auto px-4 py-3">
           {/* Mobile Filter Button */}
