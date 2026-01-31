@@ -794,6 +794,39 @@ export type Database = {
         }
         Relationships: []
       }
+      press_release_contacts: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          email: string
+          id: string
+          name: string
+          phone?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       press_releases: {
         Row: {
           category: string
