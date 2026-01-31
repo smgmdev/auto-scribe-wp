@@ -410,7 +410,7 @@ export default function Auth() {
         </div>
       </div>
 
-      <Footer />
+      <Footer narrow />
     </div>
   );
 }
