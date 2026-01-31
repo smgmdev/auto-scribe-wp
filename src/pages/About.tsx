@@ -124,10 +124,10 @@ export default function About() {
   }, []);
 
   return (
-    <div ref={scrollContainerRef} className="min-h-screen bg-background overflow-y-auto">
-      {/* Main Header - matches homepage */}
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
+      {/* Main Header - matches Auth page */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -185,7 +185,7 @@ export default function About() {
       <div className="h-16" />
 
       {/* Sub-header - About Arcana Mace - Sticky like Auth page */}
-      <div className={`sticky z-40 bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 bg-white ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center relative">
           <span className="text-xl font-semibold text-foreground">About Arcana Mace</span>
           {/* Bottom line */}
@@ -194,7 +194,7 @@ export default function About() {
       </div>
 
       {/* Hero Section - Apple style with solid blue background */}
-      <section className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden pt-20 pb-32">
+      <section className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden py-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <AnimatedSection>
             <img 
