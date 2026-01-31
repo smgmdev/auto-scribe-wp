@@ -196,8 +196,14 @@ export default function PressNews() {
       {/* Spacer when filter is fixed */}
       {isFilterFixed && <div className="h-[56px]" />}
 
-      {/* Filter Bar - toggles between normal and fixed positioning */}
-      <div className={`bg-background border-b border-border z-40 ${isFilterFixed ? 'fixed top-16 left-0 right-0' : ''}`}>
+      {/* Filter Bar - toggles between normal and fixed positioning with smooth transition */}
+      <div 
+        className={`bg-background border-b border-border z-40 transition-all duration-300 ease-out ${
+          isFilterFixed 
+            ? 'fixed top-16 left-0 right-0 shadow-sm' 
+            : ''
+        }`}
+      >
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-sm text-muted-foreground font-medium">Filter</span>
