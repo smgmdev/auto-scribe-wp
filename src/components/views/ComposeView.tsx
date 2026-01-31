@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins, CheckCircle2, Check } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useAuth } from '@/hooks/useAuth';
@@ -1287,7 +1287,7 @@ export function ComposeView() {
                         key={site.id} 
                         value={site.id}
                         disabled={!canAfford}
-                        className={`${!canAfford ? "opacity-50" : ""} [&>span]:w-full group`}
+                        className={`${!canAfford ? "opacity-50" : ""} pl-2 [&>span:first-child]:hidden group`}
                       >
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
@@ -1297,6 +1297,9 @@ export function ComposeView() {
                               className="h-4 w-4 rounded-sm" 
                             />
                             <span>{site.name}</span>
+                            {selectedSite === site.id && (
+                              <Check className="h-4 w-4 text-foreground" />
+                            )}
                           </div>
                           <div className={`flex items-center gap-1 text-xs ml-auto ${canAfford ? 'text-muted-foreground group-hover:text-white group-data-[highlighted]:text-white' : 'text-destructive'}`}>
                             {!canAfford && <Lock className="h-3 w-3" />}
