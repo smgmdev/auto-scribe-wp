@@ -10,6 +10,12 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -32,6 +38,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
+  const [isDataDialogOpen, setIsDataDialogOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const { user, loading, signIn, signUp } = useAuth();
@@ -451,6 +458,18 @@ export default function Auth() {
               )}
             </div>
 
+            {/* Data Management Notice */}
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Your Arcana Mace Account information is used to allow you to sign in securely and access your Arcana Mace account. Arcana Mace records certain data for security, support and reporting purposes. If you agree, Arcana Mace may also use your Arcana Mace Account information to send you marketing emails and communications, including based on your use of Arcana Mace services.{' '}
+              <button
+                type="button"
+                onClick={() => setIsDataDialogOpen(true)}
+                className="text-[#06c] hover:underline inline"
+              >
+                See how your data is managed
+              </button>
+            </p>
+
             {/* Submit Button */}
             <Button 
               type="submit" 
@@ -495,6 +514,78 @@ export default function Auth() {
       </div>
 
       <Footer narrow />
+
+      {/* Data Management Dialog */}
+      <Dialog open={isDataDialogOpen} onOpenChange={setIsDataDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">How Your Data Is Managed</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <p>
+              At Arcana Mace, we are committed to protecting your privacy and being transparent about the data we collect. Below is a summary of the information we gather and how it is used.
+            </p>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Account Information</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Email address (used for authentication and communication)</li>
+                <li>Password (securely hashed and stored)</li>
+                <li>Username and profile details</li>
+                <li>Account creation date and last update timestamps</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Security & Login Data</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>IP address at login (for security monitoring)</li>
+                <li>Geolocation data derived from IP (city and country)</li>
+                <li>Login attempt timestamps (successful and failed)</li>
+                <li>Device and session information</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Activity & Usage Data</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Articles created, edited, and published</li>
+                <li>Orders and transactions history</li>
+                <li>Service requests and communications</li>
+                <li>Credit balance and transaction records</li>
+                <li>Connected WordPress sites and settings</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Administrative Monitoring</h3>
+              <p>
+                Our administrators may access the following data for security, support, and compliance purposes:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>Account status and verification state</li>
+                <li>Login history with IP addresses and locations</li>
+                <li>All account activity and transactions</li>
+                <li>Communication logs within the platform</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Data Retention</h3>
+              <p>
+                We retain your data for as long as your account is active or as needed to provide you services. You may request deletion of your account and associated data by contacting support.
+              </p>
+            </div>
+
+            <p className="text-xs pt-2 border-t border-border">
+              For more information, please review our{' '}
+              <a href="/privacy" className="text-[#06c] hover:underline">Privacy Policy</a>
+              {' '}and{' '}
+              <a href="/terms" className="text-[#06c] hover:underline">Terms of Service</a>.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
