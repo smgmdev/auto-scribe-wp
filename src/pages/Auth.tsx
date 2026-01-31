@@ -339,12 +339,12 @@ export default function Auth() {
                 100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
               }
               @keyframes orbit-ring-3 {
-                0% { transform: rotateZ(0deg) rotateX(75deg) rotateY(120deg); }
-                100% { transform: rotateZ(360deg) rotateX(75deg) rotateY(120deg); }
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(120deg); }
+                100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(120deg); }
               }
               @keyframes orbit-ring-4 {
-                0% { transform: rotateZ(0deg) rotateX(65deg) rotateY(-80deg); }
-                100% { transform: rotateZ(-360deg) rotateX(65deg) rotateY(-80deg); }
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(-80deg); }
+                100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(-80deg); }
               }
               @keyframes glow-spin-fast {
                 0% { transform: rotate(0deg); }
