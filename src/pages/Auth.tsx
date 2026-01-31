@@ -31,6 +31,7 @@ export default function Auth() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const { user, loading, signIn, signUp } = useAuth();
@@ -62,6 +63,10 @@ export default function Auth() {
     const handleScroll = () => {
       const currentScrollY = scrollContainer.scrollTop;
       const scrollThreshold = 64; // Height of main header
+
+      // Calculate line width based on scroll (0 to 100% over first 100px)
+      const lineProgress = Math.min(currentScrollY / 100, 1);
+      setHeaderLineWidth(lineProgress * 100);
 
       if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
         // Scrolling down past threshold
@@ -250,8 +255,8 @@ export default function Auth() {
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Header - Apple-style centered */}
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+      {/* Header - Apple-style centered with expanding bottom line */}
+      <header className={`fixed top-0 left-0 right-0 z-50 w-full bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button 
             onClick={() => navigate('/')}
@@ -261,15 +266,42 @@ export default function Auth() {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
         </div>
+        {/* Expanding bottom line */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-border">
+          <div 
+            className="h-full bg-border transition-all duration-150 ease-out mx-auto"
+            style={{ width: `${headerLineWidth}%` }}
+          />
+        </div>
       </header>
 
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header - Sticky */}
+      {/* Sub-header - Sticky with navigation links */}
       <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">Arcana Mace Account</h1>
+          <nav className="hidden md:flex items-center gap-6">
+            <button
+              onClick={() => {
+                setMode('signin');
+                setErrors({});
+              }}
+              className={`text-[13px] font-normal transition-colors ${mode === 'signin' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                setMode('signup');
+                setErrors({});
+              }}
+              className={`text-[13px] font-normal transition-colors ${mode === 'signup' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Create Your Arcana Mace Account
+            </button>
+          </nav>
         </div>
       </div>
 
