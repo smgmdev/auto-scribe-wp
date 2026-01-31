@@ -320,17 +320,20 @@ export default function Auth() {
         <div className="w-full max-w-[400px]">
           {/* Logo with orbiting dots animation - Apple style */}
           <div className="flex justify-center mb-8">
-            <div className="relative w-40 h-40 flex items-center justify-center">
-              {/* Ring 1 - Outermost (radius: 60px) */}
+            <div className="relative w-44 h-44 flex items-center justify-center">
+              {/* Ring 1 - Outermost (radius: 58px) */}
               <div 
-                className="absolute inset-0"
+                className="absolute inset-0 flex items-center justify-center"
                 style={{ animation: 'orbit-rotate 20s linear infinite' }}
               >
                 {Array.from({ length: 12 }).map((_, i) => {
                   const angle = (i / 12) * 360;
-                  const baseRadius = 60;
+                  const baseRadius = 58;
                   const expandedRadius = baseRadius + (headerLineWidth / 100) * 30;
                   const colors = ['#34C759', '#30D158', '#32ADE6', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#30D158'];
+                  const radians = (angle * Math.PI) / 180;
+                  const x = Math.cos(radians) * expandedRadius;
+                  const y = Math.sin(radians) * expandedRadius;
                   return (
                     <div
                       key={i}
@@ -339,9 +342,7 @@ export default function Auth() {
                         width: '5px',
                         height: '5px',
                         backgroundColor: colors[i],
-                        left: '50%',
-                        top: '50%',
-                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        transform: `translate(${x}px, ${y}px)`,
                         opacity: 0.9 - (headerLineWidth / 100) * 0.3,
                         transition: 'all 0.15s ease-out',
                       }}
@@ -350,16 +351,19 @@ export default function Auth() {
                 })}
               </div>
               
-              {/* Ring 2 (radius: 48px - 12px gap) */}
+              {/* Ring 2 (radius: 46px - 12px gap) */}
               <div 
-                className="absolute inset-0"
+                className="absolute inset-0 flex items-center justify-center"
                 style={{ animation: 'orbit-rotate-reverse 18s linear infinite' }}
               >
                 {Array.from({ length: 12 }).map((_, i) => {
                   const angle = (i / 12) * 360 + 15;
-                  const baseRadius = 48;
+                  const baseRadius = 46;
                   const expandedRadius = baseRadius + (headerLineWidth / 100) * 30;
                   const colors = ['#FFCC00', '#FF9500', '#FF3B30', '#FF2D55', '#AF52DE', '#5856D6', '#007AFF', '#32ADE6', '#30D158', '#34C759', '#FFCC00', '#FF9500'];
+                  const radians = (angle * Math.PI) / 180;
+                  const x = Math.cos(radians) * expandedRadius;
+                  const y = Math.sin(radians) * expandedRadius;
                   return (
                     <div
                       key={i}
@@ -368,9 +372,7 @@ export default function Auth() {
                         width: '5px',
                         height: '5px',
                         backgroundColor: colors[i],
-                        left: '50%',
-                        top: '50%',
-                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        transform: `translate(${x}px, ${y}px)`,
                         opacity: 0.85 - (headerLineWidth / 100) * 0.25,
                         transition: 'all 0.15s ease-out',
                       }}
@@ -379,16 +381,19 @@ export default function Auth() {
                 })}
               </div>
               
-              {/* Ring 3 (radius: 36px - 12px gap) */}
+              {/* Ring 3 (radius: 34px - 12px gap) */}
               <div 
-                className="absolute inset-0"
+                className="absolute inset-0 flex items-center justify-center"
                 style={{ animation: 'orbit-rotate 15s linear infinite' }}
               >
                 {Array.from({ length: 12 }).map((_, i) => {
                   const angle = (i / 12) * 360 + 30;
-                  const baseRadius = 36;
+                  const baseRadius = 34;
                   const expandedRadius = baseRadius + (headerLineWidth / 100) * 30;
                   const colors = ['#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#32ADE6', '#30D158', '#007AFF', '#5856D6'];
+                  const radians = (angle * Math.PI) / 180;
+                  const x = Math.cos(radians) * expandedRadius;
+                  const y = Math.sin(radians) * expandedRadius;
                   return (
                     <div
                       key={i}
@@ -397,9 +402,7 @@ export default function Auth() {
                         width: '5px',
                         height: '5px',
                         backgroundColor: colors[i],
-                        left: '50%',
-                        top: '50%',
-                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        transform: `translate(${x}px, ${y}px)`,
                         opacity: 0.8 - (headerLineWidth / 100) * 0.2,
                         transition: 'all 0.15s ease-out',
                       }}
