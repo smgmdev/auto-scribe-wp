@@ -91,9 +91,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-2 text-xs">Arcana Mace</h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><button onClick={() => navigate('/press')} className="hover:text-foreground transition-colors text-left">Newsroom</button></li>
               <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-              <li><button onClick={() => navigate('/press')} className="hover:text-foreground transition-colors text-left">Press & News</button></li>
             </ul>
           </div>
         </div>
