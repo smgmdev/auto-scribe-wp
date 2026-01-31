@@ -107,7 +107,7 @@ export function Footer() {
             <button onClick={() => navigate('/terms')} className="hover:text-foreground transition-colors text-left">Terms of Service</button>
             <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors text-left">Privacy Policy</button>
             <button onClick={() => navigate('/do-not-sell')} className="hover:text-foreground transition-colors text-left">Do not sell or share my personal information</button>
-            <a href="#" className="hover:text-foreground transition-colors">Site Map</a>
+            <button onClick={() => navigate('/sitemap')} className="hover:text-foreground transition-colors text-left">Site Map</button>
           </div>
         </div>
       </div>
