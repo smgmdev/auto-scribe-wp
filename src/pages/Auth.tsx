@@ -328,7 +328,7 @@ export default function Auth() {
       <div className="flex-1 flex items-center justify-center px-4 pt-16 sm:pt-20 pb-12">
         <div className="w-full max-w-[400px]">
           {/* Logo with 3D orbital rings animation - Atom style */}
-          <div className="flex justify-center mb-12 sm:mb-16">
+          <div className="flex justify-center mb-6 sm:mb-8">
             <style>{`
               @keyframes orbit-ring-1 {
                 0% { transform: rotateZ(0deg) rotateX(70deg) rotateY(-20deg); }
