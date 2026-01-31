@@ -226,30 +226,100 @@ export default function Auth() {
       {/* Main Content - Centered */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-[400px]">
-          {/* Logo with rotating gradient ring */}
+          {/* Logo with floating bubbles animation */}
           <div className="flex justify-center mb-8">
-            <div className="relative">
-              {/* Rotating gradient ring */}
-              <div className="absolute -inset-3 rounded-full opacity-75">
-                <div 
-                  className="w-full h-full rounded-full animate-spin"
-                  style={{
-                    background: 'conic-gradient(from 0deg, transparent, #3b82f6, #8b5cf6, #ec4899, #f97316, #eab308, #22c55e, #3b82f6, transparent)',
-                    animationDuration: '3s',
-                    animationTimingFunction: 'linear',
-                    animationIterationCount: 'infinite',
-                  }}
-                />
-              </div>
-              {/* Mask to create ring effect */}
-              <div className="absolute -inset-1 rounded-full bg-white" />
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              {/* Floating bubble 1 - Blue */}
+              <div 
+                className="absolute w-8 h-8 rounded-full blur-md opacity-60"
+                style={{
+                  background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
+                  animation: 'float1 6s ease-in-out infinite',
+                }}
+              />
+              {/* Floating bubble 2 - Purple */}
+              <div 
+                className="absolute w-6 h-6 rounded-full blur-md opacity-60"
+                style={{
+                  background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
+                  animation: 'float2 7s ease-in-out infinite',
+                }}
+              />
+              {/* Floating bubble 3 - Pink */}
+              <div 
+                className="absolute w-7 h-7 rounded-full blur-md opacity-60"
+                style={{
+                  background: 'linear-gradient(135deg, #f472b6, #ec4899)',
+                  animation: 'float3 5s ease-in-out infinite',
+                }}
+              />
+              {/* Floating bubble 4 - Orange */}
+              <div 
+                className="absolute w-5 h-5 rounded-full blur-md opacity-60"
+                style={{
+                  background: 'linear-gradient(135deg, #fb923c, #f97316)',
+                  animation: 'float4 8s ease-in-out infinite',
+                }}
+              />
+              {/* Floating bubble 5 - Green */}
+              <div 
+                className="absolute w-6 h-6 rounded-full blur-md opacity-60"
+                style={{
+                  background: 'linear-gradient(135deg, #4ade80, #22c55e)',
+                  animation: 'float5 6.5s ease-in-out infinite',
+                }}
+              />
+              {/* Floating bubble 6 - Cyan */}
+              <div 
+                className="absolute w-4 h-4 rounded-full blur-md opacity-60"
+                style={{
+                  background: 'linear-gradient(135deg, #22d3ee, #06b6d4)',
+                  animation: 'float6 7.5s ease-in-out infinite',
+                }}
+              />
               {/* Logo */}
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="relative h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
+                className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
                 onClick={() => navigate('/')}
               />
+              
+              {/* Keyframe styles */}
+              <style>{`
+                @keyframes float1 {
+                  0%, 100% { transform: translate(-20px, -25px) scale(1); }
+                  25% { transform: translate(25px, -15px) scale(1.1); }
+                  50% { transform: translate(20px, 25px) scale(0.9); }
+                  75% { transform: translate(-25px, 15px) scale(1.05); }
+                }
+                @keyframes float2 {
+                  0%, 100% { transform: translate(25px, -20px) scale(1); }
+                  25% { transform: translate(-15px, -30px) scale(1.15); }
+                  50% { transform: translate(-25px, 20px) scale(0.95); }
+                  75% { transform: translate(20px, 30px) scale(1.1); }
+                }
+                @keyframes float3 {
+                  0%, 100% { transform: translate(-30px, 15px) scale(1); }
+                  33% { transform: translate(30px, -20px) scale(1.1); }
+                  66% { transform: translate(15px, 30px) scale(0.9); }
+                }
+                @keyframes float4 {
+                  0%, 100% { transform: translate(30px, 20px) scale(1); }
+                  25% { transform: translate(-20px, 30px) scale(1.2); }
+                  50% { transform: translate(-30px, -15px) scale(0.85); }
+                  75% { transform: translate(15px, -25px) scale(1.1); }
+                }
+                @keyframes float5 {
+                  0%, 100% { transform: translate(15px, -30px) scale(1); }
+                  33% { transform: translate(-30px, -10px) scale(1.15); }
+                  66% { transform: translate(-10px, 30px) scale(0.9); }
+                }
+                @keyframes float6 {
+                  0%, 100% { transform: translate(-25px, -10px) scale(1); }
+                  50% { transform: translate(25px, 25px) scale(1.2); }
+                }
+              `}</style>
             </div>
           </div>
 
