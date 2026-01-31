@@ -370,11 +370,11 @@ export default function PressNews() {
                         <article 
                           key={release.id}
                           onClick={() => navigate(`/press/${release.id}`)}
-                          className={`group border-t border-border py-8 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 md:-mx-6 px-4 md:px-6 ${isLastItem ? 'border-b' : ''}`}
+                          className={`group border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 md:-mx-6 px-4 md:px-6 ${isLastItem ? 'border-b' : ''}`}
                         >
-                          <div className="flex gap-6 items-start">
+                          <div className="flex gap-8 items-center">
                             {/* Image or Logo placeholder */}
-                            <div className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                            <div className="hidden sm:block w-[200px] h-[134px] flex-shrink-0 rounded-xl overflow-hidden bg-muted">
                               {release.image_url ? (
                                 <img 
                                   src={release.image_url} 
@@ -390,13 +390,13 @@ export default function PressNews() {
                             
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <span className="text-xs font-black text-muted-foreground uppercase tracking-wider">
+                              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
                                 {release.category}
                               </span>
-                              <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1 group-hover:text-[#06c] transition-colors">
+                              <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 group-hover:text-[#06c] transition-colors leading-tight">
                                 {release.title}
                               </h3>
-                              <p className="text-sm font-semibold text-muted-foreground mt-2">
+                              <p className="text-sm text-muted-foreground mt-2">
                                 {format(new Date(release.published_at || release.created_at), 'MMMM d, yyyy')}
                               </p>
                             </div>
