@@ -127,7 +127,7 @@ export default function About() {
     <div ref={scrollContainerRef} className="min-h-screen bg-background overflow-y-auto">
       {/* Main Header - matches homepage */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -184,10 +184,12 @@ export default function About() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header - About Arcana Mace - Apple style sticky */}
-      <div className={`sticky z-40 bg-white/95 backdrop-blur-md border-b border-[#d2d2d7] h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
-          <span className="text-sm font-medium text-[#1d1d1f]">About Arcana Mace</span>
+      {/* Sub-header - About Arcana Mace - Sticky like Auth page */}
+      <div className={`sticky z-40 bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center relative">
+          <span className="text-xl font-semibold text-foreground">About Arcana Mace</span>
+          {/* Bottom line */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
         </div>
       </div>
 
