@@ -988,10 +988,10 @@ export function AdminAllNewsView() {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={closeEditDialog} disabled={isSaving}>
+            <Button variant="outline" onClick={closeEditDialog} disabled={isSaving} className="hover:bg-foreground hover:text-background">
               Cancel
             </Button>
-            <Button onClick={handleSaveEdit} disabled={isSaving || !editTitle.trim()}>
+            <Button onClick={handleSaveEdit} disabled={isSaving || !editTitle.trim()} className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground">
               {isSaving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
