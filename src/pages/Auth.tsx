@@ -359,13 +359,14 @@ export default function Auth() {
                 }}
               >
                 <div 
-                  className="absolute rounded-full border-2 border-[#007AFF]"
+                  className="absolute rounded-full"
                   style={{
                     width: `${100 + (headerLineWidth / 100) * 30}px`,
                     height: `${100 + (headerLineWidth / 100) * 30}px`,
-                    opacity: 0.9,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    boxShadow: '0 0 10px rgba(0, 122, 255, 0.3)',
+                    border: '6px solid transparent',
+                    background: 'linear-gradient(145deg, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0.05)) padding-box, linear-gradient(145deg, #4da6ff 0%, #007AFF 25%, #0055cc 50%, #003d99 75%, #007AFF 100%) border-box',
+                    boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), inset 0 0 10px rgba(0, 122, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   {/* 3D glowing sphere spinning fast around the ring */}
@@ -378,7 +379,7 @@ export default function Auth() {
                       style={{
                         background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #007AFF 30%, #0055cc 70%, #003399 100%)',
                         boxShadow: '0 0 8px 2px rgba(0, 122, 255, 1), 0 0 16px 6px rgba(0, 122, 255, 0.7), 0 0 24px 10px rgba(0, 122, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
-                        top: '-8px',
+                        top: '-10px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         animation: 'sphere-pulse 0.5s ease-in-out infinite',
@@ -397,13 +398,14 @@ export default function Auth() {
                 }}
               >
                 <div 
-                  className="absolute rounded-full border-2 border-[#5856D6]"
+                  className="absolute rounded-full"
                   style={{
                     width: `${100 + (headerLineWidth / 100) * 30}px`,
                     height: `${100 + (headerLineWidth / 100) * 30}px`,
-                    opacity: 0.85,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    boxShadow: '0 0 10px rgba(88, 86, 214, 0.3)',
+                    border: '6px solid transparent',
+                    background: 'linear-gradient(145deg, rgba(88, 86, 214, 0.1), rgba(88, 86, 214, 0.05)) padding-box, linear-gradient(145deg, #8b89e8 0%, #5856D6 25%, #4240a8 50%, #2d2b7a 75%, #5856D6 100%) border-box',
+                    boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), inset 0 0 10px rgba(88, 86, 214, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   {/* 3D glowing sphere spinning fast around the ring */}
@@ -416,7 +418,7 @@ export default function Auth() {
                       style={{
                         background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #5856D6 30%, #4240a8 70%, #2d2b7a 100%)',
                         boxShadow: '0 0 8px 2px rgba(88, 86, 214, 1), 0 0 16px 6px rgba(88, 86, 214, 0.7), 0 0 24px 10px rgba(88, 86, 214, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
-                        top: '-8px',
+                        top: '-10px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         animation: 'sphere-pulse 0.6s ease-in-out infinite',
@@ -435,13 +437,14 @@ export default function Auth() {
                 }}
               >
                 <div 
-                  className="absolute rounded-full border-2 border-[#32ADE6]"
+                  className="absolute rounded-full"
                   style={{
                     width: `${100 + (headerLineWidth / 100) * 30}px`,
                     height: `${100 + (headerLineWidth / 100) * 30}px`,
-                    opacity: 0.8,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    boxShadow: '0 0 10px rgba(50, 173, 230, 0.3)',
+                    border: '6px solid transparent',
+                    background: 'linear-gradient(145deg, rgba(50, 173, 230, 0.1), rgba(50, 173, 230, 0.05)) padding-box, linear-gradient(145deg, #6bc9f0 0%, #32ADE6 25%, #1a8fc4 50%, #0d6a99 75%, #32ADE6 100%) border-box',
+                    boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), inset 0 0 10px rgba(50, 173, 230, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   {/* 3D glowing sphere spinning fast around the ring */}
@@ -454,7 +457,7 @@ export default function Auth() {
                       style={{
                         background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #32ADE6 30%, #1a8fc4 70%, #0d6a99 100%)',
                         boxShadow: '0 0 8px 2px rgba(50, 173, 230, 1), 0 0 16px 6px rgba(50, 173, 230, 0.7), 0 0 24px 10px rgba(50, 173, 230, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
-                        top: '-8px',
+                        top: '-10px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         animation: 'sphere-pulse 0.4s ease-in-out infinite',
