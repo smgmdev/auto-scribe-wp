@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp, Check, MoreHorizontal } from 'lucide-react';
+import { Loader2, Trash2, Eye, EyeOff, Pencil, X, Plus, ChevronDown, ChevronUp, Check, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { Input } from '@/components/ui/input';
@@ -566,12 +566,62 @@ export function AdminAllNewsView() {
                     key={pr.id}
                     className="group relative border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors"
                   >
-                    {/* Status dot indicator */}
-                    <div className="absolute top-4 right-4">
-                      <div className={`w-2.5 h-2.5 rounded-full ${pr.published ? 'bg-green-500' : 'bg-amber-500'}`} />
+                    {/* Actions Dropdown - Top Right */}
+                    <div className="absolute top-4 right-0">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-foreground hover:text-background"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 bg-background">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditDialog(pr);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePublished(pr.id, pr.published);
+                            }}
+                            disabled={toggling === pr.id}
+                            className="cursor-pointer"
+                          >
+                            {toggling === pr.id ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : pr.published ? (
+                              <EyeOff className="h-4 w-4 mr-2" />
+                            ) : (
+                              <Eye className="h-4 w-4 mr-2" />
+                            )}
+                            {pr.published ? 'Unpublish' : 'Publish'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteId(pr.id);
+                            }}
+                            className="cursor-pointer text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     
-                    <div className="flex gap-8 items-center pr-8">
+                    <div className="flex gap-8 items-center pr-12">
                       {/* Image or Logo placeholder - clickable */}
                       <div 
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
@@ -604,61 +654,6 @@ export function AdminAllNewsView() {
                         <p className="text-sm font-bold text-muted-foreground mt-2">
                           {format(new Date(pr.published_at || pr.created_at), 'MMMM d, yyyy')}
                         </p>
-                      </div>
-                      
-                      {/* Actions Dropdown */}
-                      <div className="flex-shrink-0">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="hover:bg-foreground hover:text-background"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40 bg-background">
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openEditDialog(pr);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                togglePublished(pr.id, pr.published);
-                              }}
-                              disabled={toggling === pr.id}
-                              className="cursor-pointer"
-                            >
-                              {toggling === pr.id ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : pr.published ? (
-                                <EyeOff className="h-4 w-4 mr-2" />
-                              ) : (
-                                <Eye className="h-4 w-4 mr-2" />
-                              )}
-                              {pr.published ? 'Unpublish' : 'Publish'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteId(pr.id);
-                              }}
-                              className="cursor-pointer text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </div>
                     </div>
                   </article>
