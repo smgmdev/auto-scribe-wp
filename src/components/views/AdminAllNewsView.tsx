@@ -648,10 +648,10 @@ export function AdminAllNewsView() {
                         <span className="text-[13px] font-bold text-muted-foreground uppercase">
                           {pr.category}
                         </span>
-                        <h3 className="text-xl md:text-2xl font-bold text-foreground mt-1.5 leading-tight">
+                        <h3 className="text-xl md:text-2xl font-bold text-foreground mt-0.5 leading-tight">
                           {pr.title}
                         </h3>
-                        <p className="text-sm font-bold text-muted-foreground mt-2">
+                        <p className="text-sm font-bold text-muted-foreground mt-1">
                           {format(new Date(pr.published_at || pr.created_at), 'MMMM d, yyyy')}
                         </p>
                       </div>
