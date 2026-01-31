@@ -358,7 +358,7 @@ export default function Auth() {
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="absolute z-10 h-14 w-14 object-contain cursor-pointer hover:opacity-70 transition-opacity"
+                className="absolute z-10 h-20 w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity"
                 onClick={() => navigate('/')}
                 style={{ transform: 'translateZ(0px)' }}
               />
