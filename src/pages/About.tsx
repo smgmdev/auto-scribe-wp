@@ -184,21 +184,6 @@ export default function About() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Promo Banner - Apple style - scrolls away */}
-      <div className="bg-[#1d1d1f] py-3">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <span className="text-sm text-white/90">
-            Set up Arcana Mace in seconds.{' '}
-            <button 
-              onClick={() => navigate('/auth')}
-              className="text-[#2997ff] hover:underline"
-            >
-              Learn how ›
-            </button>
-          </span>
-        </div>
-      </div>
-
       {/* Sub-header - About Arcana Mace Marketplace - Sticky like Auth page */}
       <div className={`sticky z-40 bg-white border-b border-border ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
@@ -229,6 +214,21 @@ export default function About() {
               FAQ
             </button>
           </nav>
+        </div>
+      </div>
+
+      {/* Promo Banner - Apple style - scrolls away */}
+      <div className="relative z-30 bg-[#1d1d1f] py-3">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          <span className="text-sm text-white/90">
+            Set up Arcana Mace in seconds.{' '}
+            <button 
+              onClick={() => navigate('/auth')}
+              className="text-[#2997ff] hover:underline"
+            >
+              Learn how ›
+            </button>
+          </span>
         </div>
       </div>
 
