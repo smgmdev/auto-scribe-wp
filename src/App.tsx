@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ChatListPanel } from "@/components/ui/ChatListPanel";
+import { GlobalChatDialog } from "@/components/chat/GlobalChatDialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
@@ -83,6 +85,10 @@ const App = () => {
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            
+            {/* Global Messaging Widget - available on all pages */}
+            <ChatListPanel />
+            <GlobalChatDialog />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

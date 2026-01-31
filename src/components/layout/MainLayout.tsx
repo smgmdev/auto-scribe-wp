@@ -3,8 +3,6 @@ import { Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
-import { ChatListPanel } from '@/components/ui/ChatListPanel';
-import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import amlogo from '@/assets/amlogo.png';
 
 interface MainLayoutProps {
@@ -44,11 +42,5 @@ export function MainLayout({
           {children}
         </div>
       </main>
-
-      {/* Global Chat List Panel */}
-      <ChatListPanel />
-      
-      {/* Global Chat Dialog */}
-      <GlobalChatDialog />
     </div>;
 }
