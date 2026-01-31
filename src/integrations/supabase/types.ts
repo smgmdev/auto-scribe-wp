@@ -800,6 +800,7 @@ export type Database = {
           content: string
           created_at: string
           created_by: string
+          footer_contacts: string[] | null
           id: string
           image_url: string | null
           published: boolean
@@ -812,6 +813,7 @@ export type Database = {
           content: string
           created_at?: string
           created_by: string
+          footer_contacts?: string[] | null
           id?: string
           image_url?: string | null
           published?: boolean
@@ -824,6 +826,7 @@ export type Database = {
           content?: string
           created_at?: string
           created_by?: string
+          footer_contacts?: string[] | null
           id?: string
           image_url?: string | null
           published?: boolean

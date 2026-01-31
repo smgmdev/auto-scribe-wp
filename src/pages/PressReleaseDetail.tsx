@@ -17,7 +17,24 @@ interface PressRelease {
   image_url: string | null;
   published_at: string | null;
   created_at: string;
+  footer_contacts: string[] | null;
 }
+
+// Contact information for footer sections
+const CONTACT_INFO = {
+  press_contact: {
+    title: 'Press Contact',
+    name: 'Press Team',
+    company: 'Arcana Mace',
+    email: 'press@arcanamace.com',
+  },
+  investor_relations: {
+    title: 'Investor Relations Contact',
+    name: 'Investor Relations',
+    company: 'Arcana Mace',
+    email: 'ir@arcanamace.com',
+  },
+};
 
 export default function PressReleaseDetail() {
   const navigate = useNavigate();
@@ -65,7 +82,7 @@ export default function PressReleaseDetail() {
       try {
         const { data, error: fetchError } = await supabase
           .from('press_releases')
-          .select('id, title, content, category, image_url, published_at, created_at')
+          .select('id, title, content, category, image_url, published_at, created_at, footer_contacts')
           .eq('id', id)
           .eq('published', true)
           .single();
@@ -229,12 +246,27 @@ export default function PressReleaseDetail() {
                   dangerouslySetInnerHTML={{ __html: pressRelease.content }}
                 />
 
-                {/* Footer */}
-                <div className="border-t border-border mt-12 pt-8">
-                  <p className="text-sm text-muted-foreground">
-                    Press Contact: <a href="mailto:press@arcanamace.com" className="text-[#06c] hover:underline">press@arcanamace.com</a>
-                  </p>
-                </div>
+                {/* Footer Contacts - Apple Style */}
+                {pressRelease.footer_contacts && pressRelease.footer_contacts.length > 0 && (
+                  <div className="border-t border-border mt-12 pt-8 space-y-8">
+                    {pressRelease.footer_contacts.map((contactId) => {
+                      const contact = CONTACT_INFO[contactId as keyof typeof CONTACT_INFO];
+                      if (!contact) return null;
+                      return (
+                        <div key={contactId}>
+                          <h2 className="text-lg font-semibold text-foreground mb-2">{contact.title}</h2>
+                          <p className="text-[15px] text-foreground">{contact.name}</p>
+                          <p className="text-[15px] text-foreground">{contact.company}</p>
+                          <p className="text-[15px]">
+                            <a href={`mailto:${contact.email}`} className="text-[#06c] hover:underline">
+                              {contact.email}
+                            </a>
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </article>
           </>

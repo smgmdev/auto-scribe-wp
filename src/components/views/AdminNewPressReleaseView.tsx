@@ -28,6 +28,11 @@ interface Category {
   name: string;
 }
 
+const FOOTER_CONTACT_OPTIONS = [
+  { id: 'press_contact', label: 'Press Contact' },
+  { id: 'investor_relations', label: 'Investor Relations Contact' },
+];
+
 export function AdminNewPressReleaseView() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -46,6 +51,7 @@ export function AdminNewPressReleaseView() {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
   const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [footerContacts, setFooterContacts] = useState<string[]>([]);
 
   // Fetch categories from database
   useEffect(() => {
@@ -265,6 +271,7 @@ export function AdminNewPressReleaseView() {
           content: content.trim(),
           category,
           image_url: imageUrl,
+          footer_contacts: footerContacts,
           published: true,
           published_at: new Date().toISOString(),
           created_by: user.id
@@ -580,6 +587,36 @@ export function AdminNewPressReleaseView() {
               onChange={setContent}
               placeholder="Write your press release content..."
             />
+          </div>
+
+          {/* Footer Contacts Selection */}
+          <div className="space-y-2">
+            <Label>Footer Contacts</Label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Select which contact sections to display at the bottom of this press release
+            </p>
+            <div className="space-y-2">
+              {FOOTER_CONTACT_OPTIONS.map((option) => (
+                <label
+                  key={option.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={footerContacts.includes(option.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setFooterContacts(prev => [...prev, option.id]);
+                      } else {
+                        setFooterContacts(prev => prev.filter(id => id !== option.id));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                  <span className="text-sm font-medium">{option.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
 
