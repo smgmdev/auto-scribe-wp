@@ -318,57 +318,101 @@ export default function Auth() {
       {/* Main Content - Centered */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-[400px]">
-          {/* Logo with floating bubbles animation */}
+          {/* Logo with orbiting dots animation - Apple style */}
           <div className="flex justify-center mb-8">
-            <div className="relative w-32 h-32 flex items-center justify-center">
-              {/* Floating bubble 1 - Blue */}
+            <div className="relative w-40 h-40 flex items-center justify-center">
+              {/* Orbiting dots container */}
               <div 
-                className="absolute w-8 h-8 rounded-full blur-md opacity-60"
+                className="absolute inset-0"
                 style={{
-                  background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
-                  animation: 'float1 6s ease-in-out infinite',
+                  animation: 'orbit-rotate 20s linear infinite',
+                  animationPlayState: headerLineWidth > 0 ? 'paused' : 'running',
                 }}
-              />
-              {/* Floating bubble 2 - Purple */}
+              >
+                {/* Generate 16 dots in a circle pattern like Apple */}
+                {Array.from({ length: 16 }).map((_, i) => {
+                  const angle = (i / 16) * 360;
+                  const radius = 55;
+                  const colors = [
+                    '#34C759', // Green
+                    '#30D158', // Light green
+                    '#32ADE6', // Light blue
+                    '#007AFF', // Blue
+                    '#5856D6', // Purple
+                    '#AF52DE', // Violet
+                    '#FF2D55', // Pink
+                    '#FF3B30', // Red
+                    '#FF9500', // Orange
+                    '#FFCC00', // Yellow
+                    '#34C759', // Green
+                    '#30D158', // Light green
+                    '#32ADE6', // Light blue
+                    '#007AFF', // Blue
+                    '#5856D6', // Purple
+                    '#AF52DE', // Violet
+                  ];
+                  const size = 6 + Math.sin((i / 16) * Math.PI * 2) * 2;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        backgroundColor: colors[i],
+                        left: '50%',
+                        top: '50%',
+                        transform: `rotate(${angle}deg) translateY(-${radius}px) translateX(-50%)`,
+                        opacity: 0.9,
+                        transition: 'transform 0.3s ease-out',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Secondary orbit - counter rotation */}
               <div 
-                className="absolute w-6 h-6 rounded-full blur-md opacity-60"
+                className="absolute inset-0"
                 style={{
-                  background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
-                  animation: 'float2 7s ease-in-out infinite',
+                  animation: 'orbit-rotate-reverse 25s linear infinite',
+                  animationPlayState: headerLineWidth > 0 ? 'paused' : 'running',
                 }}
-              />
-              {/* Floating bubble 3 - Pink */}
-              <div 
-                className="absolute w-7 h-7 rounded-full blur-md opacity-60"
-                style={{
-                  background: 'linear-gradient(135deg, #f472b6, #ec4899)',
-                  animation: 'float3 5s ease-in-out infinite',
-                }}
-              />
-              {/* Floating bubble 4 - Orange */}
-              <div 
-                className="absolute w-5 h-5 rounded-full blur-md opacity-60"
-                style={{
-                  background: 'linear-gradient(135deg, #fb923c, #f97316)',
-                  animation: 'float4 8s ease-in-out infinite',
-                }}
-              />
-              {/* Floating bubble 5 - Green */}
-              <div 
-                className="absolute w-6 h-6 rounded-full blur-md opacity-60"
-                style={{
-                  background: 'linear-gradient(135deg, #4ade80, #22c55e)',
-                  animation: 'float5 6.5s ease-in-out infinite',
-                }}
-              />
-              {/* Floating bubble 6 - Cyan */}
-              <div 
-                className="absolute w-4 h-4 rounded-full blur-md opacity-60"
-                style={{
-                  background: 'linear-gradient(135deg, #22d3ee, #06b6d4)',
-                  animation: 'float6 7.5s ease-in-out infinite',
-                }}
-              />
+              >
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const angle = (i / 8) * 360 + 22.5;
+                  const radius = 42;
+                  const colors = [
+                    '#FFCC00', // Yellow
+                    '#FF9500', // Orange
+                    '#FF3B30', // Red
+                    '#FF2D55', // Pink
+                    '#AF52DE', // Violet
+                    '#5856D6', // Purple
+                    '#007AFF', // Blue
+                    '#32ADE6', // Light blue
+                  ];
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        width: '4px',
+                        height: '4px',
+                        backgroundColor: colors[i],
+                        left: '50%',
+                        top: '50%',
+                        transform: `rotate(${angle}deg) translateY(-${radius}px) translateX(-50%)`,
+                        opacity: 0.7,
+                        transition: 'transform 0.3s ease-out',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              
               {/* Logo */}
               <img 
                 src={amblack} 
@@ -379,37 +423,13 @@ export default function Auth() {
               
               {/* Keyframe styles */}
               <style>{`
-                @keyframes float1 {
-                  0%, 100% { transform: translate(-20px, -25px) scale(1); }
-                  25% { transform: translate(25px, -15px) scale(1.1); }
-                  50% { transform: translate(20px, 25px) scale(0.9); }
-                  75% { transform: translate(-25px, 15px) scale(1.05); }
+                @keyframes orbit-rotate {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(360deg); }
                 }
-                @keyframes float2 {
-                  0%, 100% { transform: translate(25px, -20px) scale(1); }
-                  25% { transform: translate(-15px, -30px) scale(1.15); }
-                  50% { transform: translate(-25px, 20px) scale(0.95); }
-                  75% { transform: translate(20px, 30px) scale(1.1); }
-                }
-                @keyframes float3 {
-                  0%, 100% { transform: translate(-30px, 15px) scale(1); }
-                  33% { transform: translate(30px, -20px) scale(1.1); }
-                  66% { transform: translate(15px, 30px) scale(0.9); }
-                }
-                @keyframes float4 {
-                  0%, 100% { transform: translate(30px, 20px) scale(1); }
-                  25% { transform: translate(-20px, 30px) scale(1.2); }
-                  50% { transform: translate(-30px, -15px) scale(0.85); }
-                  75% { transform: translate(15px, -25px) scale(1.1); }
-                }
-                @keyframes float5 {
-                  0%, 100% { transform: translate(15px, -30px) scale(1); }
-                  33% { transform: translate(-30px, -10px) scale(1.15); }
-                  66% { transform: translate(-10px, 30px) scale(0.9); }
-                }
-                @keyframes float6 {
-                  0%, 100% { transform: translate(-25px, -10px) scale(1); }
-                  50% { transform: translate(25px, 25px) scale(1.2); }
+                @keyframes orbit-rotate-reverse {
+                  from { transform: rotate(360deg); }
+                  to { transform: rotate(0deg); }
                 }
               `}</style>
             </div>
