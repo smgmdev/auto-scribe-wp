@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Shield, Globe, Users, TrendingUp, Award } from 'lucide-react';
+import { ArrowLeft, Zap, Shield, Globe, Users, TrendingUp, Award, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 
 // Intersection Observer hook for scroll animations
@@ -86,6 +89,7 @@ function StaggeredText({
 
 export default function About() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -114,22 +118,56 @@ export default function About() {
 
   return (
     <div ref={scrollContainerRef} className="min-h-screen bg-background overflow-y-auto">
-      {/* Main Header */}
+      {/* Main Header - matches homepage */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 h-16 bg-white/95 backdrop-blur-md border-b border-border/50 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-transform duration-300 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
       >
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-full flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center">
-            <img src={amlogo} alt="Arcana Mace" className="h-8 w-8 object-contain" />
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
-          <button 
-            onClick={() => setSearchOpen(true)}
-            className="p-2 hover:bg-accent/10 rounded-full transition-colors"
-          >
-            <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
+          
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setSearchOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
