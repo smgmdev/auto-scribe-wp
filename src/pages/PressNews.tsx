@@ -106,7 +106,7 @@ export default function PressNews() {
   }, [filteredReleases]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Header - same as homepage */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -214,7 +214,7 @@ export default function PressNews() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="min-h-[50vh]">
         <div className="container mx-auto px-4 py-8">
           {loading ? (
             <div className="flex items-center justify-center py-16">
