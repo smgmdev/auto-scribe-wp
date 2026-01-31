@@ -542,7 +542,7 @@ export default function Auth() {
 
           {/* Title */}
           <h1 className="text-[32px] font-semibold text-center text-foreground mb-1">
-            {mode === 'signin' ? 'Sign in' : 'Create Account'}
+            {mode === 'signin' ? 'Arcana Mace Account' : 'Create Account'}
           </h1>
           <p className="text-center text-muted-foreground text-[15px] mb-8">
             {mode === 'signin' 
