@@ -127,7 +127,7 @@ export default function About() {
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Main Header - matches Auth page */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-border ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
