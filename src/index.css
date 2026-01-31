@@ -315,3 +315,19 @@ button:focus-visible,
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* 3D Orbital ring animations for auth page */
+@keyframes orbit-spin-1 {
+  0% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
+  100% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
+}
+
+@keyframes orbit-spin-2 {
+  0% { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
+  100% { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
+}
+
+@keyframes orbit-spin-3 {
+  0% { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
+  100% { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
+}
