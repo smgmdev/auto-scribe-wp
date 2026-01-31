@@ -3,15 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, KeyRound } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
-import amlogo from '@/assets/amlogo.png';
+import amblack from '@/assets/amblack.png';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -30,6 +27,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -223,136 +221,113 @@ export default function Auth() {
     });
   };
 
-  const inputClassName = "bg-black border-white/30 text-white placeholder:text-[#888888] focus:border-[#3872e0] focus:bg-[#1f1f1f] focus:text-white transition-all duration-200 pl-10 text-sm placeholder:text-sm h-9";
-
-  const buttonClassName = "w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200 rounded-sm";
-
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4" style={{ backgroundImage: 'url(/background-tile.svg)', backgroundRepeat: 'repeat' }}>
-      <Card className="w-full max-w-md bg-[#1c1c1c] border-0 rounded-sm">
-        <CardHeader className="text-center">
-          <div className="flex justify-center">
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Main Content - Centered */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-[400px]">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
             <img 
-              src={amlogo} 
-              alt="Logo" 
-              className="h-20 w-20 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+              src={amblack} 
+              alt="Arcana Mace" 
+              className="h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
               onClick={() => navigate('/')}
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-white">Arcana Mace</CardTitle>
-          <CardDescription className="text-white/70">AI-Powered Controlled Media Publishing Platform</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/10">
-              <TabsTrigger value="signin" className="text-white data-[state=active]:bg-[#3872e0] data-[state=active]:text-white transition-all duration-200">Log In</TabsTrigger>
-              <TabsTrigger value="signup" className="text-white data-[state=active]:bg-[#3872e0] data-[state=active]:text-white transition-all duration-200">New Account</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email" className="text-white">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                      className={inputClassName}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-xs text-red-500">{errors.email}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password" className="text-white">Password</Label>
-                  <div className="relative">
-                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                      className={inputClassName}
-                    />
-                  </div>
-                  {errors.password && (
-                    <p className="text-xs text-red-500">{errors.password}</p>
-                  )}
-                </div>
-                <Button type="submit" className={buttonClassName} disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Logging in...
-                    </>
-                  ) : (
-                    'Log In'
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-white">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                      className={inputClassName}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-xs text-red-500">{errors.email}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-white">Password</Label>
-                  <div className="relative">
-                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                      className={inputClassName}
-                    />
-                  </div>
-                  {errors.password && (
-                    <p className="text-xs text-red-500">{errors.password}</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full bg-[#3872e0] text-white hover:bg-[#2b59b4] transition-all duration-200 rounded-sm" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
-                  ) : (
-                    'Create Account'
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+
+          {/* Title */}
+          <h1 className="text-[32px] font-semibold text-center text-foreground mb-1">
+            {mode === 'signin' ? 'Sign in' : 'Create Account'}
+          </h1>
+          <p className="text-center text-muted-foreground text-[15px] mb-8">
+            {mode === 'signin' 
+              ? 'Sign in with your Arcana Mace account' 
+              : 'Create your Arcana Mace account'
+            }
+          </p>
+
+          {/* Form */}
+          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
+            {/* Email Input */}
+            <div>
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                className="h-12 text-[17px] bg-[#f5f5f7] border-0 rounded-xl px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive mt-1.5 ml-1">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Password Input */}
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                className="h-12 text-[17px] bg-[#f5f5f7] border-0 rounded-xl px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
+              />
+              {errors.password && (
+                <p className="text-xs text-destructive mt-1.5 ml-1">{errors.password}</p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-[17px] font-medium bg-foreground text-background rounded-xl hover:bg-foreground/90 transition-all"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
+                </>
+              ) : (
+                mode === 'signin' ? 'Sign In' : 'Create Account'
+              )}
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-8">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-sm text-muted-foreground">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Toggle Mode */}
+          <div className="text-center">
+            <p className="text-[15px] text-muted-foreground">
+              {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === 'signin' ? 'signup' : 'signin');
+                setErrors({});
+              }}
+              className="text-[15px] text-[#06c] hover:underline font-medium mt-1"
+            >
+              {mode === 'signin' ? 'Create one now' : 'Sign in'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="py-6 text-center">
+        <p className="text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Arcana Mace. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }
