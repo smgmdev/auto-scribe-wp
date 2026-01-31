@@ -322,16 +322,25 @@ export default function Auth() {
           <div className="flex justify-center mb-8">
             <style>{`
               @keyframes orbit-ring-1 {
-                from { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
-                to { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
+                0% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg) scale(1); }
+                25% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(90deg) scale(1.15); }
+                50% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(180deg) scale(1); }
+                75% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(270deg) scale(0.85); }
+                100% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg) scale(1); }
               }
               @keyframes orbit-ring-2 {
-                from { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
-                to { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
+                0% { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg) scale(1); }
+                25% { transform: rotateX(70deg) rotateY(40deg) rotateZ(270deg) scale(0.85); }
+                50% { transform: rotateX(70deg) rotateY(40deg) rotateZ(180deg) scale(1); }
+                75% { transform: rotateX(70deg) rotateY(40deg) rotateZ(90deg) scale(1.15); }
+                100% { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg) scale(1); }
               }
               @keyframes orbit-ring-3 {
-                from { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
-                to { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
+                0% { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg) scale(0.9); }
+                25% { transform: rotateX(70deg) rotateY(100deg) rotateZ(90deg) scale(1.1); }
+                50% { transform: rotateX(70deg) rotateY(100deg) rotateZ(180deg) scale(0.9); }
+                75% { transform: rotateX(70deg) rotateY(100deg) rotateZ(270deg) scale(1.1); }
+                100% { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg) scale(0.9); }
               }
             `}</style>
             <div 
