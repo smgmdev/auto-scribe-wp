@@ -343,8 +343,8 @@ export default function Auth() {
                 100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(120deg); }
               }
               @keyframes orbit-ring-4 {
-                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(160deg); }
-                100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(160deg); }
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(-30deg); }
+                100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(-30deg); }
               }
               @keyframes glow-spin-fast {
                 0% { transform: rotate(0deg); }
