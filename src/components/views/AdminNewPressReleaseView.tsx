@@ -631,7 +631,7 @@ export function AdminNewPressReleaseView() {
                 <AlertDialogAction
                   onClick={handleDeleteCategory}
                   disabled={isDeletingCategory}
-                  className="bg-destructive text-destructive-foreground border border-destructive shadow-none hover:bg-transparent hover:text-destructive hover:shadow-none"
+                  className="bg-destructive text-destructive-foreground border border-destructive shadow-none hover:!bg-transparent hover:!text-destructive"
                 >
                   {isDeletingCategory ? (
                     <>
