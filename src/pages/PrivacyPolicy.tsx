@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Plus, Minus } from 'lucide-react';
+import { Search, User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/hooks/useAuth';
@@ -104,10 +104,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">What Is Personal Data at Arcana Mace?</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -128,10 +125,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Your Privacy Rights at Arcana Mace</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -152,10 +146,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Personal Data Arcana Mace Collects from You</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -196,10 +187,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Arcana Mace's Use of Personal Data</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -231,10 +219,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Protection of Personal Data at Arcana Mace</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -252,10 +237,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Cookies and Other Technologies</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -273,10 +255,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Retention of Personal Data</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -291,10 +270,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Children and Personal Data</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
@@ -309,10 +285,7 @@ const PrivacyPolicy = () => {
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Privacy Questions</span>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-foreground/20 group-data-[state=open]:bg-foreground group-data-[state=open]:text-background transition-colors flex-shrink-0">
-                  <Plus className="h-3 w-3 group-data-[state=open]:hidden" />
-                  <Minus className="h-3 w-3 hidden group-data-[state=open]:block" />
-                </span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-45" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
