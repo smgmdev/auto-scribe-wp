@@ -297,7 +297,7 @@ export default function Auth() {
                 setMode('signin');
                 setErrors({});
               }}
-              className={`text-[13px] font-normal transition-colors ${mode === 'signin' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-[13px] font-normal transition-colors ${mode === 'signin' ? 'text-muted-foreground' : 'text-foreground hover:text-foreground'}`}
             >
               Sign In
             </button>
@@ -306,7 +306,7 @@ export default function Auth() {
                 setMode('signup');
                 setErrors({});
               }}
-              className={`text-[13px] font-normal transition-colors ${mode === 'signup' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-[13px] font-normal transition-colors ${mode === 'signup' ? 'text-muted-foreground' : 'text-foreground hover:text-foreground'}`}
             >
               Create Your Arcana Mace Account
             </button>
