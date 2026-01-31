@@ -322,25 +322,16 @@ export default function Auth() {
           <div className="flex justify-center mb-8">
             <style>{`
               @keyframes orbit-ring-1 {
-                0% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg) scale(1); }
-                25% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(90deg) scale(1.15); }
-                50% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(180deg) scale(1); }
-                75% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(270deg) scale(0.85); }
-                100% { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg) scale(1); }
+                0% { transform: rotateZ(0deg) rotateX(70deg) rotateY(-20deg); }
+                100% { transform: rotateZ(360deg) rotateX(70deg) rotateY(-20deg); }
               }
               @keyframes orbit-ring-2 {
-                0% { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg) scale(1); }
-                25% { transform: rotateX(70deg) rotateY(40deg) rotateZ(270deg) scale(0.85); }
-                50% { transform: rotateX(70deg) rotateY(40deg) rotateZ(180deg) scale(1); }
-                75% { transform: rotateX(70deg) rotateY(40deg) rotateZ(90deg) scale(1.15); }
-                100% { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg) scale(1); }
+                0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
               }
               @keyframes orbit-ring-3 {
-                0% { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg) scale(0.9); }
-                25% { transform: rotateX(70deg) rotateY(100deg) rotateZ(90deg) scale(1.1); }
-                50% { transform: rotateX(70deg) rotateY(100deg) rotateZ(180deg) scale(0.9); }
-                75% { transform: rotateX(70deg) rotateY(100deg) rotateZ(270deg) scale(1.1); }
-                100% { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg) scale(0.9); }
+                0% { transform: rotateZ(0deg) rotateX(75deg) rotateY(120deg); }
+                100% { transform: rotateZ(360deg) rotateX(75deg) rotateY(120deg); }
               }
             `}</style>
             <div 
