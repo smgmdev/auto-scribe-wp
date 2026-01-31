@@ -368,16 +368,43 @@ export default function Auth() {
                 0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
                 50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
               }
+              @keyframes rings-entrance {
+                0% { 
+                  opacity: 0; 
+                  transform: scale(0.5) rotateX(90deg);
+                }
+                100% { 
+                  opacity: 1; 
+                  transform: scale(1) rotateX(0deg);
+                }
+              }
+              @keyframes logo-entrance {
+                0% { 
+                  opacity: 0; 
+                  transform: translateZ(0px) scale(0.8);
+                }
+                100% { 
+                  opacity: 1; 
+                  transform: translateZ(0px) scale(1);
+                }
+              }
+              .rings-container {
+                animation: rings-entrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+              }
+              .logo-entrance {
+                animation: logo-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+                opacity: 0;
+              }
             `}</style>
             <div 
-              className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center"
+              className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center rings-container"
               style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
             >
               {/* Logo - centered as the nucleus */}
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="absolute z-10 h-12 w-12 sm:h-20 sm:w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity"
+                className="absolute z-10 h-12 w-12 sm:h-20 sm:w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity logo-entrance"
                 onClick={() => navigate('/')}
                 style={{ transform: 'translateZ(0px)' }}
               />
