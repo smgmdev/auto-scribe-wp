@@ -23,7 +23,7 @@ import DoNotSell from "./pages/DoNotSell";
 import SiteMap from "./pages/SiteMap";
 import PressNews from "./pages/PressNews";
 import PressReleaseDetail from "./pages/PressReleaseDetail";
-
+import About from "./pages/About";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -105,6 +105,7 @@ const App = () => {
               <Route path="/sitemap" element={<SiteMap />} />
               <Route path="/press" element={<PressNews />} />
               <Route path="/press/:id" element={<PressReleaseDetail />} />
+              <Route path="/about" element={<About />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
