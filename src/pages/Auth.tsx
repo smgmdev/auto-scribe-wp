@@ -326,13 +326,13 @@ export default function Auth() {
                 className="absolute inset-0"
                 style={{
                   animation: 'orbit-rotate 20s linear infinite',
-                  animationPlayState: headerLineWidth > 0 ? 'paused' : 'running',
                 }}
               >
                 {/* Generate 16 dots in a circle pattern like Apple */}
                 {Array.from({ length: 16 }).map((_, i) => {
                   const angle = (i / 16) * 360;
-                  const radius = 55;
+                  const baseRadius = 55;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 40; // Expand by up to 40px
                   const colors = [
                     '#34C759', // Green
                     '#30D158', // Light green
@@ -351,21 +351,22 @@ export default function Auth() {
                     '#5856D6', // Purple
                     '#AF52DE', // Violet
                   ];
-                  const size = 6 + Math.sin((i / 16) * Math.PI * 2) * 2;
+                  const baseSize = 6 + Math.sin((i / 16) * Math.PI * 2) * 2;
+                  const expandedSize = baseSize + (headerLineWidth / 100) * 3; // Grow slightly
                   
                   return (
                     <div
                       key={i}
                       className="absolute rounded-full"
                       style={{
-                        width: `${size}px`,
-                        height: `${size}px`,
+                        width: `${expandedSize}px`,
+                        height: `${expandedSize}px`,
                         backgroundColor: colors[i],
                         left: '50%',
                         top: '50%',
-                        transform: `rotate(${angle}deg) translateY(-${radius}px) translateX(-50%)`,
-                        opacity: 0.9,
-                        transition: 'transform 0.3s ease-out',
+                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        opacity: 0.9 - (headerLineWidth / 100) * 0.3, // Fade slightly as it expands
+                        transition: 'all 0.15s ease-out',
                       }}
                     />
                   );
@@ -377,12 +378,12 @@ export default function Auth() {
                 className="absolute inset-0"
                 style={{
                   animation: 'orbit-rotate-reverse 25s linear infinite',
-                  animationPlayState: headerLineWidth > 0 ? 'paused' : 'running',
                 }}
               >
                 {Array.from({ length: 8 }).map((_, i) => {
                   const angle = (i / 8) * 360 + 22.5;
-                  const radius = 42;
+                  const baseRadius = 42;
+                  const expandedRadius = baseRadius + (headerLineWidth / 100) * 50; // Expand more
                   const colors = [
                     '#FFCC00', // Yellow
                     '#FF9500', // Orange
@@ -393,20 +394,22 @@ export default function Auth() {
                     '#007AFF', // Blue
                     '#32ADE6', // Light blue
                   ];
+                  const baseSize = 4;
+                  const expandedSize = baseSize + (headerLineWidth / 100) * 4;
                   
                   return (
                     <div
                       key={i}
                       className="absolute rounded-full"
                       style={{
-                        width: '4px',
-                        height: '4px',
+                        width: `${expandedSize}px`,
+                        height: `${expandedSize}px`,
                         backgroundColor: colors[i],
                         left: '50%',
                         top: '50%',
-                        transform: `rotate(${angle}deg) translateY(-${radius}px) translateX(-50%)`,
-                        opacity: 0.7,
-                        transition: 'transform 0.3s ease-out',
+                        transform: `rotate(${angle}deg) translateY(-${expandedRadius}px) translateX(-50%)`,
+                        opacity: 0.7 - (headerLineWidth / 100) * 0.4,
+                        transition: 'all 0.15s ease-out',
                       }}
                     />
                   );
