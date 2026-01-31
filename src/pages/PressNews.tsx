@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Loader2, SlidersHorizontal, X } from 'lucide-react';
+import { Search, User, Loader2, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -35,6 +35,7 @@ interface PressRelease {
 }
 
 const months = ['All Months', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const ITEMS_PER_PAGE = 20;
 
 export default function PressNews() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function PressNews() {
   const [availableYears, setAvailableYears] = useState<string[]>(['All Years']);
   const [loading, setLoading] = useState(true);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Check if any filters are active
   const hasActiveFilters = selectedTopic !== 'All Topics' || selectedYear !== 'All Years' || selectedMonth !== 'All Months';
@@ -56,7 +58,13 @@ export default function PressNews() {
     setSelectedTopic('All Topics');
     setSelectedYear('All Years');
     setSelectedMonth('All Months');
+    setCurrentPage(1);
   };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedTopic, selectedYear, selectedMonth]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,9 +117,16 @@ export default function PressNews() {
     });
   }, [pressReleases, selectedTopic, selectedYear, selectedMonth]);
 
-  // Group by month/year
+  // Pagination
+  const totalItems = filteredReleases.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+  const paginatedReleases = filteredReleases.slice(startIndex, endIndex);
+
+  // Group by month/year (for paginated results)
   const groupedReleases = useMemo(() => {
-    return filteredReleases.reduce((acc, release) => {
+    return paginatedReleases.reduce((acc, release) => {
       const date = new Date(release.published_at || release.created_at);
       const key = format(date, 'MMMM yyyy');
       if (!acc[key]) {
@@ -120,7 +135,21 @@ export default function PressNews() {
       acc[key].push(release);
       return acc;
     }, {} as Record<string, PressRelease[]>);
-  }, [filteredReleases]);
+  }, [paginatedReleases]);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="h-screen overflow-y-auto bg-white">
@@ -326,51 +355,94 @@ export default function PressNews() {
               <p className="text-muted-foreground">No press releases found matching your filters.</p>
             </div>
           ) : (
-            Object.entries(groupedReleases).map(([monthYear, releases]) => (
-              <div key={monthYear} className="mb-12">
-                <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-8">{monthYear}</h2>
-                
-                <div className="space-y-0">
-                  {releases.map((release) => (
-                    <article 
-                      key={release.id}
-                      onClick={() => navigate(`/press/${release.id}`)}
-                      className="group border-t border-border py-8 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 px-4"
-                    >
-                      <div className="flex gap-6 items-start">
-                        {/* Image or Logo placeholder */}
-                        <div className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted">
-                          {release.image_url ? (
-                            <img 
-                              src={release.image_url} 
-                              alt={release.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-muted">
-                              <img src={amlogo} alt="Arcana Mace" className="h-12 w-auto opacity-50" />
+            <>
+              {Object.entries(groupedReleases).map(([monthYear, releases], groupIndex, groupArray) => (
+                <div key={monthYear} className="mb-12">
+                  <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-8">{monthYear}</h2>
+                  
+                  <div className="space-y-0">
+                    {releases.map((release, releaseIndex) => {
+                      const isLastInGroup = releaseIndex === releases.length - 1;
+                      const isLastGroup = groupIndex === groupArray.length - 1;
+                      const isLastItem = isLastInGroup && isLastGroup;
+                      
+                      return (
+                        <article 
+                          key={release.id}
+                          onClick={() => navigate(`/press/${release.id}`)}
+                          className={`group border-t border-border py-8 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 px-4 ${isLastItem ? 'border-b' : ''}`}
+                        >
+                          <div className="flex gap-6 items-start">
+                            {/* Image or Logo placeholder */}
+                            <div className="hidden sm:block w-[200px] h-[133px] flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                              {release.image_url ? (
+                                <img 
+                                  src={release.image_url} 
+                                  alt={release.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-muted">
+                                  <img src={amlogo} alt="Arcana Mace" className="h-12 w-auto opacity-50" />
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                            {release.category}
-                          </span>
-                          <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1 group-hover:text-[#06c] transition-colors">
-                            {release.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {format(new Date(release.published_at || release.created_at), 'MMMM d, yyyy')}
-                          </p>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
+                            
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {release.category}
+                              </span>
+                              <h3 className="text-lg md:text-xl font-semibold text-foreground mt-1 group-hover:text-[#06c] transition-colors">
+                                {release.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground mt-2">
+                                {format(new Date(release.published_at || release.created_at), 'MMMM d, yyyy')}
+                              </p>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+
+              {/* Apple-style Pagination */}
+              {totalItems > 0 && (
+                <div className="flex items-center justify-center gap-6 py-8 border-t border-border mt-4">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className={`p-2 rounded-full transition-colors ${
+                      currentPage === 1 
+                        ? 'text-muted-foreground/40 cursor-not-allowed' 
+                        : 'text-[#06c] hover:bg-muted'
+                    }`}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  
+                  <span className="text-sm text-muted-foreground">
+                    {startIndex + 1}-{endIndex} of {totalItems} results
+                  </span>
+                  
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage >= totalPages}
+                    className={`p-2 rounded-full transition-colors ${
+                      currentPage >= totalPages 
+                        ? 'text-muted-foreground/40 cursor-not-allowed' 
+                        : 'text-[#06c] hover:bg-muted'
+                    }`}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
