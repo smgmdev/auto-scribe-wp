@@ -459,7 +459,7 @@ export default function Auth() {
             </div>
 
             {/* Data Management Notice */}
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-normal">
               Your Arcana Mace Account information is used to allow you to sign in securely and access your Arcana Mace account. Arcana Mace records certain data for security, support and reporting purposes. If you agree, Arcana Mace may also use your Arcana Mace Account information to send you marketing emails and communications, including based on your use of Arcana Mace services.{' '}
               <button
                 type="button"
