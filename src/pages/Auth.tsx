@@ -613,10 +613,10 @@ export default function Auth() {
                   </span>
                   {/* Long arrow: line + arrowhead */}
                   <span className="absolute right-[calc(50%-70px)] flex items-center opacity-0 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:right-[calc(50%-85px)]">
-                    <span className="w-0 h-[1.5px] bg-current transition-all duration-200 ease-out group-hover:w-8" />
+                    <span className="w-0 h-[1px] bg-current transition-all duration-200 ease-out group-hover:w-8" />
                     <ArrowRight 
                       size={18} 
-                      strokeWidth={1.5}
+                      strokeWidth={2}
                       className="-ml-1"
                     />
                   </span>
