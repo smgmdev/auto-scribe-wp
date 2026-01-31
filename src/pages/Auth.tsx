@@ -324,12 +324,13 @@ export default function Auth() {
               className="relative w-44 h-44 flex items-center justify-center"
               style={{ perspective: '800px' }}
             >
-              {/* Orbit Ring 1 - Tilted forward-left */}
+              {/* Orbit Ring 1 - Tilted forward-left, spins clockwise */}
               <div 
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ 
                   transformStyle: 'preserve-3d',
                   transform: 'rotateX(70deg) rotateY(-20deg)',
+                  animation: 'orbit-axis-1 8s linear infinite',
                 }}
               >
                 <div 
@@ -338,19 +339,19 @@ export default function Auth() {
                     width: `${70 + (headerLineWidth / 100) * 20}px`,
                     height: `${70 + (headerLineWidth / 100) * 20}px`,
                     borderColor: '#007AFF',
-                    animation: 'orbit-spin 8s linear infinite',
                     opacity: 0.9 - (headerLineWidth / 100) * 0.2,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                   }}
                 />
               </div>
               
-              {/* Orbit Ring 2 - Tilted forward-right */}
+              {/* Orbit Ring 2 - Tilted forward-right, spins counter-clockwise */}
               <div 
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ 
                   transformStyle: 'preserve-3d',
                   transform: 'rotateX(70deg) rotateY(40deg)',
+                  animation: 'orbit-axis-2 10s linear infinite reverse',
                 }}
               >
                 <div 
@@ -359,19 +360,19 @@ export default function Auth() {
                     width: `${75 + (headerLineWidth / 100) * 25}px`,
                     height: `${75 + (headerLineWidth / 100) * 25}px`,
                     borderColor: '#5856D6',
-                    animation: 'orbit-spin-reverse 10s linear infinite',
                     opacity: 0.85 - (headerLineWidth / 100) * 0.2,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                   }}
                 />
               </div>
               
-              {/* Orbit Ring 3 - Tilted backward */}
+              {/* Orbit Ring 3 - Tilted backward, spins clockwise */}
               <div 
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ 
                   transformStyle: 'preserve-3d',
                   transform: 'rotateX(70deg) rotateY(100deg)',
+                  animation: 'orbit-axis-3 12s linear infinite',
                 }}
               >
                 <div 
@@ -380,30 +381,25 @@ export default function Auth() {
                     width: `${80 + (headerLineWidth / 100) * 30}px`,
                     height: `${80 + (headerLineWidth / 100) * 30}px`,
                     borderColor: '#32ADE6',
-                    animation: 'orbit-spin 12s linear infinite',
                     opacity: 0.8 - (headerLineWidth / 100) * 0.2,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
                   }}
                 />
               </div>
               
-              {/* Logo */}
-              <img 
-                src={amblack} 
-                alt="Arcana Mace" 
-                className="relative z-10 h-16 w-16 object-contain cursor-pointer hover:opacity-70 transition-opacity" 
-                onClick={() => navigate('/')}
-              />
-              
-              {/* Keyframe styles */}
+              {/* Keyframe styles - each ring rotates along its own tilted axis */}
               <style>{`
-                @keyframes orbit-spin {
-                  from { transform: rotateZ(0deg); }
-                  to { transform: rotateZ(360deg); }
+                @keyframes orbit-axis-1 {
+                  from { transform: rotateX(70deg) rotateY(-20deg) rotateZ(0deg); }
+                  to { transform: rotateX(70deg) rotateY(-20deg) rotateZ(360deg); }
                 }
-                @keyframes orbit-spin-reverse {
-                  from { transform: rotateZ(360deg); }
-                  to { transform: rotateZ(0deg); }
+                @keyframes orbit-axis-2 {
+                  from { transform: rotateX(70deg) rotateY(40deg) rotateZ(0deg); }
+                  to { transform: rotateX(70deg) rotateY(40deg) rotateZ(360deg); }
+                }
+                @keyframes orbit-axis-3 {
+                  from { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
+                  to { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
                 }
               `}</style>
             </div>
