@@ -171,7 +171,7 @@ export default function PressReleaseDetail() {
       <div className="h-16" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className={`sticky z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center relative ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full relative">
           <button 
             onClick={() => navigate('/press')}
@@ -181,7 +181,7 @@ export default function PressReleaseDetail() {
             Newsroom
           </button>
           {/* Default line - spans content width */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-border" style={{ bottom: '-6px' }} />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-border" style={{ bottom: '-18px' }} />
         </div>
         {/* Expanding line overlay - grows from 0 to full viewport */}
         <div 
