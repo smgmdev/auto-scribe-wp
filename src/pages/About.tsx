@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User } from 'lucide-react';
+import { Search, User, Check } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import amblack from '@/assets/amblack.png';
+
+// Blue checkmark icon component matching Apple style
+function BlueCheckIcon({ className = '' }: { className?: string }) {
+  return (
+    <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-[3px] border-[#0071e3] flex items-center justify-center ${className}`}>
+      <Check className="w-8 h-8 md:w-10 md:h-10 text-[#0071e3]" strokeWidth={2.5} />
+    </div>
+  );
+}
 import amlogo from '@/assets/amlogo.png';
 
 // Intersection Observer hook for scroll animations
@@ -180,6 +189,69 @@ export default function About() {
               <span className="text-2xl">›</span>
             </button>
           </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Apple-style Dark Feature Sections with Blue Checkmarks */}
+      <section className="bg-black">
+        {/* Feature 1 */}
+        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
+          <div className="max-w-[980px] mx-auto">
+            <AnimatedSection>
+              <BlueCheckIcon className="mb-8" />
+            </AnimatedSection>
+            <AnimatedSection delay={100}>
+              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+                Faster and easier than<br />
+                traditional media buying.
+              </h2>
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 2 */}
+        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
+          <div className="max-w-[980px] mx-auto">
+            <AnimatedSection>
+              <BlueCheckIcon className="mb-8" />
+            </AnimatedSection>
+            <AnimatedSection delay={100}>
+              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+                No agency fees.<br />
+                No contracts. Just publish.
+              </h2>
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 3 */}
+        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
+          <div className="max-w-[980px] mx-auto">
+            <AnimatedSection>
+              <BlueCheckIcon className="mb-8" />
+            </AnimatedSection>
+            <AnimatedSection delay={100}>
+              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+                Privacy and security<br />
+                built in from the start.
+              </h2>
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 4 */}
+        <div className="min-h-screen flex flex-col justify-center px-4 py-32">
+          <div className="max-w-[980px] mx-auto">
+            <AnimatedSection>
+              <BlueCheckIcon className="mb-8" />
+            </AnimatedSection>
+            <AnimatedSection delay={100}>
+              <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.1]">
+                500+ premium publishers<br />
+                across 50+ countries.
+              </h2>
+            </AnimatedSection>
+          </div>
         </div>
       </section>
 
