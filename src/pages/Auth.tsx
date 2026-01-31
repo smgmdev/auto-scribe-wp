@@ -279,7 +279,7 @@ export default function Auth() {
       <div className="h-16" />
 
       {/* Sub-header - Sticky with navigation links */}
-      <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-12 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 h-14 flex items-center transition-all duration-300 ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">Arcana Mace Account</h1>
           <nav className="hidden md:flex items-center gap-6">
