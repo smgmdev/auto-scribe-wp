@@ -340,7 +340,7 @@ export function AdminNewPressReleaseView() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-foreground">New Press Release</h1>
-        <p className="mt-2 text-muted-foreground">Create and publish a new press release</p>
+        <p className="mt-2 text-muted-foreground">Create and publish a new press release. This press release will be published in Press & News page.</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
