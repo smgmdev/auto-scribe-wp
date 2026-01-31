@@ -63,7 +63,7 @@ export default function PressReleaseDetail() {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-screen overflow-y-auto bg-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -118,26 +118,24 @@ export default function PressReleaseDetail() {
         </div>
       </header>
 
-      {/* Spacer for fixed header + sticky newsroom header */}
-      <div className="h-28" />
+      {/* Spacer for fixed header */}
+      <div className="h-16" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className="sticky top-16 z-40 border-b border-border bg-white">
-        <div className="container mx-auto px-4 h-12 flex items-center">
-          <div className="w-full max-w-[680px] mx-auto">
-            <button 
-              onClick={() => navigate('/press')}
-              className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              Newsroom
-            </button>
-          </div>
+      <div className="sticky top-16 z-40 border-b border-border bg-white h-12 flex items-center">
+        <div className="container mx-auto px-4">
+          <button 
+            onClick={() => navigate('/press')}
+            className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Newsroom
+          </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 -mt-12">
+      <main className="flex-1">
         {loading ? (
           <div className="flex items-center justify-center py-32">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
