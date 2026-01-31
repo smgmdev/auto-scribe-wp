@@ -236,7 +236,7 @@ export default function About() {
       </div>
 
       {/* Hero Section - Apple style with solid blue background */}
-      <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden pt-16 pb-32">
+      <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-[#0071e3] text-white overflow-hidden pt-8 pb-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <AnimatedSection>
             <img 
