@@ -238,19 +238,34 @@ export default function MediaBuying() {
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-16">
           {/* Glow wrapper */}
           <div className="relative mb-4" style={{ width: 128, height: 128 }}>
-            {/* Rotating gradient glow */}
+            {/* Orbiting glow dot */}
             <div 
-              className="absolute inset-0 animate-border-glow"
+              className="absolute animate-border-glow"
               style={{
-                borderRadius: 30,
-                background: 'conic-gradient(from 0deg, #0071e3, #00d4ff, #0071e3, #00d4ff, #0071e3)',
-                filter: 'blur(8px)',
+                width: 128,
+                height: 128,
+                top: 0,
+                left: 0,
               }}
-            />
-            {/* Inner container */}
+            >
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: -8,
+                  left: '50%',
+                  marginLeft: -10,
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  background: '#0071e3',
+                  boxShadow: '0 0 20px 8px rgba(0, 113, 227, 0.8), 0 0 40px 16px rgba(0, 113, 227, 0.4)',
+                }}
+              />
+            </div>
+            {/* Logo container */}
             <div 
-              className="absolute inset-1 flex items-center justify-center shadow-2xl overflow-hidden bg-white"
-              style={{ borderRadius: 26 }}
+              className="absolute inset-0 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-[#0071e3]/30"
+              style={{ borderRadius: 28 }}
             >
               <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
             </div>
