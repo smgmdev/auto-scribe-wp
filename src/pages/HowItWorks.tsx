@@ -375,7 +375,7 @@ const HowItWorks = () => {
       'explore-arcana-mace',
       'media-network', 'instant-publishing', 'b2b-media-buying',
       'credit-management', 'apply-agency-account', 'account-settings',
-      'media-buying', 'global-library', 'agency-engagement', 'submit-request', 'track-orders',
+      'media-buying', 'global-library', 'agency-engagement',
       'self-publishing', 'local-library', 'generate-ai-articles',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
@@ -805,32 +805,6 @@ const HowItWorks = () => {
                       }`}
                     >
                       Agency Engagement
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#submit-request"
-                      onClick={(e) => scrollToSection(e, 'submit-request')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'submit-request' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Submit a Request
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#track-orders"
-                      onClick={(e) => scrollToSection(e, 'track-orders')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'track-orders' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Track Your Orders
                     </a>
                   </li>
 
