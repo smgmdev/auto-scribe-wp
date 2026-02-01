@@ -293,7 +293,7 @@ export default function SelfPublishing() {
                 <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
               </div>
             ) : (
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
                 {/* Top row - 3 media */}
                 <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
                   {mediaSites.slice(0, 3).map((site) => (
