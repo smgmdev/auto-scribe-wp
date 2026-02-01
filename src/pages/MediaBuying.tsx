@@ -282,7 +282,7 @@ export default function MediaBuying() {
         >
           <div 
             className="flex items-center justify-center shadow-xl overflow-hidden"
-            style={{ width: 100, height: 100, borderRadius: 24 }}
+            style={{ width: 140, height: 140, borderRadius: 32 }}
           >
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
