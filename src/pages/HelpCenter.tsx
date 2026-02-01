@@ -194,7 +194,7 @@ export default function HelpCenter() {
         </div>
 
         {/* Sub-header with Help Center title */}
-        <div className="bg-white">
+        <div className="bg-white/90 backdrop-blur-sm">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
             <button 
@@ -213,7 +213,7 @@ export default function HelpCenter() {
 
         {/* Expandable topics menu - inside header with slide animation */}
         <div 
-          className="bg-white overflow-hidden"
+          className="bg-white/90 backdrop-blur-sm overflow-hidden"
           style={{
             display: 'grid',
             gridTemplateRows: isTopicsOpen ? '1fr' : '0fr',
