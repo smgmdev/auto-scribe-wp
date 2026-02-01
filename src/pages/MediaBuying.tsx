@@ -303,7 +303,7 @@ export default function MediaBuying() {
       </section>
 
       {/* Main headline section */}
-      <section className="bg-white py-16 md:py-24">
+      <section className="bg-white pt-0 pb-16 md:pb-24">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-4 leading-tight">
             The reach you need.
