@@ -15,27 +15,31 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions for the hero section - larger sizes, tighter spacing
+// Icon positions for the hero section - varied sizes with center icons
 const iconPositions = [
-  // Row 1 - top edge
-  { top: -10, left: '-2%', size: 72 }, { top: 5, left: '7%', size: 80 }, { top: -5, left: '17%', size: 88 },
-  { top: 10, left: '28%', size: 76 }, { top: -8, left: '38%', size: 72 }, 
-  { top: -5, right: '38%', size: 72 }, { top: 8, right: '28%', size: 80 }, { top: -10, right: '17%', size: 88 },
-  { top: 5, right: '7%', size: 76 }, { top: -5, right: '-2%', size: 72 },
-  // Row 2
-  { top: 70, left: '0%', size: 84 }, { top: 85, left: '12%', size: 92 }, { top: 75, left: '24%', size: 80 },
-  { top: 90, left: '35%', size: 72 }, { top: 80, right: '35%', size: 72 }, { top: 88, right: '24%', size: 80 },
-  { top: 78, right: '12%', size: 88 }, { top: 72, right: '0%', size: 80 },
-  // Row 3
-  { top: 155, left: '-1%', size: 76 }, { top: 170, left: '10%', size: 88 }, { top: 160, left: '22%', size: 80 },
-  { top: 175, left: '33%', size: 72 }, { top: 165, right: '33%', size: 72 }, { top: 172, right: '22%', size: 80 },
-  { top: 162, right: '10%', size: 88 }, { top: 158, right: '-1%', size: 76 },
-  // Row 4
-  { top: 240, left: '3%', size: 80 }, { top: 255, left: '15%', size: 84 }, { top: 248, left: '27%', size: 72 },
-  { top: 252, right: '27%', size: 72 }, { top: 258, right: '15%', size: 84 }, { top: 245, right: '3%', size: 80 },
-  // Row 5 - bottom
-  { top: 320, left: '6%', size: 72 }, { top: 335, left: '18%', size: 76 },
-  { top: 340, right: '18%', size: 76 }, { top: 325, right: '6%', size: 72 },
+  // Row 1 - top edge (mixed sizes)
+  { top: -10, left: '-2%', size: 56 }, { top: 5, left: '7%', size: 80 }, { top: -5, left: '17%', size: 48 },
+  { top: 10, left: '28%', size: 76 }, { top: -8, left: '38%', size: 52 }, 
+  { top: -5, right: '38%', size: 48 }, { top: 8, right: '28%', size: 80 }, { top: -10, right: '17%', size: 56 },
+  { top: 5, right: '7%', size: 76 }, { top: -5, right: '-2%', size: 52 },
+  // Row 2 (mixed sizes)
+  { top: 70, left: '0%', size: 84 }, { top: 85, left: '12%', size: 48 }, { top: 75, left: '24%', size: 80 },
+  { top: 90, left: '35%', size: 56 }, { top: 80, right: '35%', size: 52 }, { top: 88, right: '24%', size: 80 },
+  { top: 78, right: '12%', size: 44 }, { top: 72, right: '0%', size: 80 },
+  // Center icons - new additions near the logo
+  { top: 110, left: '42%', size: 44 }, { top: 130, right: '42%', size: 40 },
+  { top: 180, left: '43%', size: 48 }, { top: 200, right: '43%', size: 44 },
+  { top: 260, left: '44%', size: 40 }, { top: 280, right: '44%', size: 48 },
+  // Row 3 (mixed sizes)
+  { top: 155, left: '-1%', size: 52 }, { top: 170, left: '10%', size: 88 }, { top: 160, left: '22%', size: 44 },
+  { top: 175, left: '33%', size: 72 }, { top: 165, right: '33%', size: 72 }, { top: 172, right: '22%', size: 48 },
+  { top: 162, right: '10%', size: 88 }, { top: 158, right: '-1%', size: 56 },
+  // Row 4 (mixed sizes)
+  { top: 240, left: '3%', size: 80 }, { top: 255, left: '15%', size: 44 }, { top: 248, left: '27%', size: 72 },
+  { top: 252, right: '27%', size: 72 }, { top: 258, right: '15%', size: 48 }, { top: 245, right: '3%', size: 80 },
+  // Row 5 - bottom (mixed sizes)
+  { top: 320, left: '6%', size: 56 }, { top: 335, left: '18%', size: 76 }, { top: 310, left: '30%', size: 40 },
+  { top: 315, right: '30%', size: 44 }, { top: 340, right: '18%', size: 76 }, { top: 325, right: '6%', size: 52 },
 ];
 
 // Shuffle array helper
