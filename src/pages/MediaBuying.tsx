@@ -15,29 +15,26 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a vertical pyramid shape - straight down
+// Icon positions forming a vertical pyramid shape - kept within bounds
 const iconPositions = [
-  // Row 1 - top (widest, 12 icons spread evenly)
-  { top: -5, left: '2%' }, { top: 8, left: '11%' }, { top: -8, left: '20%' },
-  { top: 5, left: '29%' }, { top: -3, left: '38%' }, { top: 10, left: '47%' },
-  { top: -6, right: '47%' }, { top: 8, right: '38%' }, { top: -4, right: '29%' },
-  { top: 5, right: '20%' }, { top: -8, right: '11%' }, { top: 2, right: '2%' },
-  // Row 2 - (10 icons, slightly narrower)
-  { top: 95, left: '7%' }, { top: 105, left: '16%' }, { top: 90, left: '25%' },
-  { top: 100, left: '34%' }, { top: 108, left: '43%' },
-  { top: 98, right: '43%' }, { top: 105, right: '34%' }, { top: 92, right: '25%' },
-  { top: 102, right: '16%' }, { top: 96, right: '7%' },
-  // Row 3 - (8 icons, narrower)
-  { top: 190, left: '12%' }, { top: 200, left: '22%' }, { top: 185, left: '32%' },
-  { top: 195, left: '42%' },
-  { top: 193, right: '42%' }, { top: 203, right: '32%' }, { top: 188, right: '22%' },
-  { top: 198, right: '12%' },
-  // Row 4 - (6 icons, narrower still)
-  { top: 285, left: '18%' }, { top: 298, left: '28%' }, { top: 290, left: '39%' },
-  { top: 292, right: '39%' }, { top: 300, right: '28%' }, { top: 288, right: '18%' },
-  // Row 5 - (4 icons, converging)
-  { top: 380, left: '24%' }, { top: 390, left: '36%' },
-  { top: 385, right: '36%' }, { top: 395, right: '24%' },
+  // Row 1 - top (widest, 10 icons within bounds)
+  { top: 5, left: '8%' }, { top: 15, left: '17%' }, { top: 8, left: '26%' },
+  { top: 12, left: '35%' }, { top: 5, left: '44%' },
+  { top: 8, right: '44%' }, { top: 15, right: '35%' }, { top: 5, right: '26%' },
+  { top: 12, right: '17%' }, { top: 8, right: '8%' },
+  // Row 2 - (8 icons, slightly narrower)
+  { top: 105, left: '12%' }, { top: 115, left: '22%' }, { top: 100, left: '32%' },
+  { top: 110, left: '42%' },
+  { top: 108, right: '42%' }, { top: 118, right: '32%' }, { top: 102, right: '22%' },
+  { top: 112, right: '12%' },
+  // Row 3 - (6 icons, narrower)
+  { top: 200, left: '16%' }, { top: 210, left: '28%' }, { top: 195, left: '40%' },
+  { top: 198, right: '40%' }, { top: 208, right: '28%' }, { top: 202, right: '16%' },
+  // Row 4 - (4 icons, converging)
+  { top: 295, left: '22%' }, { top: 305, left: '36%' },
+  { top: 300, right: '36%' }, { top: 310, right: '22%' },
+  // Row 5 - (2 icons at bottom)
+  { top: 390, left: '30%' }, { top: 395, right: '30%' },
 ];
 
 const ICON_SIZE = 88;
