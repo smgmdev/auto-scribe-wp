@@ -54,13 +54,30 @@ Deno.serve(async (req) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
-    const wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-    });
+    let wpResponse;
+    try {
+      wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+      });
+    } catch (fetchError: unknown) {
+      clearTimeout(timeoutId);
+      const errorMessage = fetchError instanceof Error ? fetchError.message : 'Connection failed';
+      
+      // Handle SSL/TLS certificate errors gracefully
+      if (errorMessage.includes('certificate') || errorMessage.includes('SSL') || errorMessage.includes('TLS')) {
+        console.warn('[wordpress-get-categories] SSL certificate error for site, returning empty categories:', errorMessage);
+        return new Response(
+          JSON.stringify({ categories: [], warning: 'SSL certificate issue with WordPress site' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      throw fetchError;
+    }
 
     clearTimeout(timeoutId);
 
