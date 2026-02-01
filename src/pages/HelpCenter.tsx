@@ -253,16 +253,10 @@ export default function HelpCenter() {
               ))}
             </div>
           </div>
-          {/* Animated border line */}
-          <div 
-            className="h-px bg-border"
-            style={{
-              transform: isTopicsOpen ? 'scaleX(1)' : 'scaleX(0)',
-              transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              transformOrigin: 'left'
-            }}
-          />
         </div>
+
+        {/* Border line - always visible, moves with expanded content */}
+        <div className="h-px bg-border" />
       </header>
 
       {/* Spacer for fixed header */}
