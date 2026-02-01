@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User } from 'lucide-react';
+import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -327,6 +327,109 @@ export default function MediaBuying() {
             Our marketplace connects you with verified outlets, transparent pricing, and guaranteed placements. 
             All designed to help you reach your audience with confidence.
           </p>
+        </div>
+      </section>
+
+      {/* Apple-style Horizontal Slider Section */}
+      <section className="py-16 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-8">
+          <h2 className="text-3xl md:text-4xl">
+            <span className="font-semibold text-[#1d1d1f]">Endless possibilities.</span>{' '}
+            <span className="text-[#1d1d1f]/60">Explore what you can achieve with media buying.</span>
+          </h2>
+        </div>
+        
+        {/* Scrollable Cards Container */}
+        <div className="relative group">
+          <div 
+            className="flex gap-4 overflow-x-auto pb-4 px-4 md:px-[calc((100%-980px)/2+24px)] scrollbar-hide scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {/* Card 1 - Dark */}
+            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-[#1d1d1f] rounded-3xl p-8 flex flex-col min-h-[420px]">
+              <p className="text-xs font-medium text-white/60 tracking-wide uppercase mb-3">Premium Publications</p>
+              <h3 className="text-2xl md:text-3xl font-semibold text-white leading-tight mb-3">
+                Best in class.<br />
+                For brands that lead.
+              </h3>
+              <p className="text-white/60 text-sm mb-6">
+                Access top-tier publications trusted by Fortune 500 companies and industry leaders.
+              </p>
+              <div className="mt-auto flex items-end justify-center">
+                <div className="flex gap-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="w-16 h-16 bg-white/10 rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2 - Light */}
+            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-white rounded-3xl p-8 flex flex-col min-h-[420px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Agency Network</p>
+              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+                Work with experts who deliver.
+              </h3>
+              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+                Our verified agencies handle everything from content creation to publication placement.
+              </p>
+              <div className="mt-auto flex items-end justify-center">
+                <div className="grid grid-cols-2 gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-20 h-14 bg-[#f5f5f7] rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3 - Green tint */}
+            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] rounded-3xl p-8 flex flex-col min-h-[420px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Guaranteed Results</p>
+              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+                100% publication guarantee.
+              </h3>
+              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+                Your article gets published or you get a full refund. No questions asked.
+              </p>
+              <div className="mt-auto flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center">
+                  <CheckCircle className="w-12 h-12 text-green-600/60" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4 - Blue tint */}
+            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-gradient-to-br from-[#e3f2fd] to-[#bbdefb] rounded-3xl p-8 flex flex-col min-h-[420px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Global Reach</p>
+              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+                Reach audiences worldwide.
+              </h3>
+              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+                Publications in 40+ countries. Target by region, language, or industry.
+              </p>
+              <div className="mt-auto flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center">
+                  <Globe className="w-12 h-12 text-blue-600/60" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 5 - Orange tint */}
+            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-gradient-to-br from-[#fff3e0] to-[#ffe0b2] rounded-3xl p-8 flex flex-col min-h-[420px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Fast Turnaround</p>
+              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+                Published in 24-72 hours.
+              </h3>
+              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+                Time-sensitive campaign? Most publications offer express delivery options.
+              </p>
+              <div className="mt-auto flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center">
+                  <Zap className="w-12 h-12 text-orange-500/60" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
