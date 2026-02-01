@@ -1,35 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ExternalLink, RefreshCw } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { supabase } from '@/integrations/supabase/client';
 import amblack from '@/assets/amblack.png';
 
 interface ServiceStatus {
   name: string;
   status: 'available' | 'issue' | 'outage';
+  latency?: number;
   link?: string;
 }
-
-const services: ServiceStatus[] = [
-  { name: 'API Server', status: 'available' },
-  { name: 'Database', status: 'available' },
-  { name: 'Authentication', status: 'available' },
-  { name: 'Edge Functions', status: 'available' },
-  { name: 'File Storage', status: 'available' },
-  { name: 'AI Article Generation', status: 'available' },
-  { name: 'WordPress Publishing', status: 'available' },
-  { name: 'Credit Processing', status: 'available' },
-  { name: 'Payment Gateway (Stripe)', status: 'available' },
-  { name: 'Email Notifications', status: 'available' },
-  { name: 'Real-time Messaging', status: 'available' },
-  { name: 'Media Site Network', status: 'available' },
-  { name: 'Agency Portal', status: 'available' },
-  { name: 'Headlines Scanner', status: 'available' },
-];
-
-// Split into two columns
-const leftColumn = services.slice(0, Math.ceil(services.length / 2));
-const rightColumn = services.slice(Math.ceil(services.length / 2));
 
 const useScrollHeader = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
@@ -76,6 +57,9 @@ const ServiceRow = ({ service }: { service: ServiceStatus }) => {
     <div className="flex items-center gap-3 py-3 border-b border-[#d2d2d7] last:border-b-0">
       <StatusIndicator status={service.status} />
       <span className="text-[#1d1d1f] text-sm flex-1">{service.name}</span>
+      {service.latency !== undefined && service.latency > 0 && (
+        <span className="text-xs text-[#86868b]">{service.latency}ms</span>
+      )}
       {service.link && (
         <a 
           href={service.link} 
@@ -94,7 +78,60 @@ export default function SystemStatus() {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isHeaderHidden = useScrollHeader(scrollContainerRef);
-  const [lastUpdated] = useState(new Date());
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [services, setServices] = useState<ServiceStatus[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchStatus = useCallback(async (showRefresh = false) => {
+    if (showRefresh) setIsRefreshing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('system-health');
+      
+      if (error) throw error;
+      
+      if (data?.services) {
+        setServices(data.services);
+        setLastUpdated(new Date(data.timestamp));
+      }
+    } catch (error) {
+      console.error('Failed to fetch system status:', error);
+      // Show all services as unknown/issue if fetch fails
+      setServices([
+        { name: 'API Server', status: 'issue' },
+        { name: 'Database', status: 'issue' },
+        { name: 'Authentication', status: 'issue' },
+        { name: 'Edge Functions', status: 'issue' },
+        { name: 'File Storage', status: 'issue' },
+        { name: 'AI Article Generation', status: 'issue' },
+        { name: 'WordPress Publishing', status: 'issue' },
+        { name: 'Credit Processing', status: 'issue' },
+        { name: 'Payment Gateway (Stripe)', status: 'issue' },
+        { name: 'Email Notifications', status: 'issue' },
+        { name: 'Real-time Messaging', status: 'issue' },
+        { name: 'Media Site Network', status: 'issue' },
+        { name: 'Agency Portal', status: 'issue' },
+        { name: 'Headlines Scanner', status: 'issue' },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(() => fetchStatus(), 30000);
+    
+    return () => clearInterval(interval);
+  }, [fetchStatus]);
+
+  // Split into two columns
+  const leftColumn = services.slice(0, Math.ceil(services.length / 2));
+  const rightColumn = services.slice(Math.ceil(services.length / 2));
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -127,28 +164,54 @@ export default function SystemStatus() {
             System Status
           </h1>
 
-          {/* Legend */}
-          <div className="flex items-center justify-end gap-2 mb-6">
-            <StatusIndicator status="available" />
-            <span className="text-sm text-[#1d1d1f]">Available</span>
+          {/* Legend and Refresh */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => fetchStatus(true)}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 text-sm text-[#06c] hover:underline disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="available" />
+                <span className="text-sm text-[#1d1d1f]">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="issue" />
+                <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="outage" />
+                <span className="text-sm text-[#1d1d1f]">Outage</span>
+              </div>
+            </div>
           </div>
 
           {/* Services Grid */}
-          <div className="grid md:grid-cols-2 gap-x-8 border-t border-[#d2d2d7]">
-            {/* Left Column */}
-            <div>
-              {leftColumn.map((service) => (
-                <ServiceRow key={service.name} service={service} />
-              ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="w-6 h-6 animate-spin text-[#86868b]" />
             </div>
-            
-            {/* Right Column */}
-            <div className="border-t border-[#d2d2d7] md:border-t-0">
-              {rightColumn.map((service) => (
-                <ServiceRow key={service.name} service={service} />
-              ))}
+          ) : (
+            <div className="grid md:grid-cols-2 gap-x-8 border-t border-[#d2d2d7]">
+              {/* Left Column */}
+              <div>
+                {leftColumn.map((service) => (
+                  <ServiceRow key={service.name} service={service} />
+                ))}
+              </div>
+              
+              {/* Right Column */}
+              <div className="border-t border-[#d2d2d7] md:border-t-0">
+                {rightColumn.map((service) => (
+                  <ServiceRow key={service.name} service={service} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Last Updated */}
           <p className="text-sm text-[#86868b] mt-8">
