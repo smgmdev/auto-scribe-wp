@@ -15,26 +15,29 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a vertical pyramid shape - kept within bounds
+// Icon positions forming a proper pyramid with aligned columns
 const iconPositions = [
-  // Row 1 - top (widest, 10 icons within bounds)
-  { top: 5, left: '8%' }, { top: 15, left: '17%' }, { top: 8, left: '26%' },
-  { top: 12, left: '35%' }, { top: 5, left: '44%' },
-  { top: 8, right: '44%' }, { top: 15, right: '35%' }, { top: 5, right: '26%' },
-  { top: 12, right: '17%' }, { top: 8, right: '8%' },
-  // Row 2 - (8 icons, slightly narrower)
-  { top: 105, left: '12%' }, { top: 115, left: '22%' }, { top: 100, left: '32%' },
-  { top: 110, left: '42%' },
-  { top: 108, right: '42%' }, { top: 118, right: '32%' }, { top: 102, right: '22%' },
-  { top: 112, right: '12%' },
-  // Row 3 - (6 icons, narrower)
-  { top: 200, left: '16%' }, { top: 210, left: '28%' }, { top: 195, left: '40%' },
-  { top: 198, right: '40%' }, { top: 208, right: '28%' }, { top: 202, right: '16%' },
-  // Row 4 - (4 icons, converging)
-  { top: 295, left: '22%' }, { top: 305, left: '36%' },
-  { top: 300, right: '36%' }, { top: 310, right: '22%' },
-  // Row 5 - (2 icons at bottom)
-  { top: 390, left: '30%' }, { top: 395, right: '30%' },
+  // Row 1 - top (11 icons)
+  { top: 5, left: '5%' }, { top: 5, left: '14%' }, { top: 5, left: '23%' },
+  { top: 5, left: '32%' }, { top: 5, left: '41%' }, { top: 5, left: '50%', transform: 'translateX(-50%)' },
+  { top: 5, right: '41%' }, { top: 5, right: '32%' }, { top: 5, right: '23%' },
+  { top: 5, right: '14%' }, { top: 5, right: '5%' },
+  // Row 2 - (9 icons, aligned under row 1)
+  { top: 105, left: '9.5%' }, { top: 105, left: '18.5%' }, { top: 105, left: '27.5%' },
+  { top: 105, left: '36.5%' }, { top: 105, left: '50%', transform: 'translateX(-50%)' },
+  { top: 105, right: '36.5%' }, { top: 105, right: '27.5%' }, { top: 105, right: '18.5%' },
+  { top: 105, right: '9.5%' },
+  // Row 3 - (7 icons)
+  { top: 205, left: '14%' }, { top: 205, left: '23%' }, { top: 205, left: '32%' },
+  { top: 205, left: '50%', transform: 'translateX(-50%)' },
+  { top: 205, right: '32%' }, { top: 205, right: '23%' }, { top: 205, right: '14%' },
+  // Row 4 - (5 icons)
+  { top: 305, left: '18.5%' }, { top: 305, left: '27.5%' },
+  { top: 305, left: '50%', transform: 'translateX(-50%)' },
+  { top: 305, right: '27.5%' }, { top: 305, right: '18.5%' },
+  // Row 5 - (3 icons)
+  { top: 405, left: '23%' }, { top: 405, left: '50%', transform: 'translateX(-50%)' },
+  { top: 405, right: '23%' },
 ];
 
 const ICON_SIZE = 88;
@@ -207,6 +210,7 @@ export default function MediaBuying() {
             animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
             ...(pos.right !== undefined ? { right: pos.right } : {}),
+            ...('transform' in pos ? { transform: pos.transform } : {}),
           };
           
           return (
