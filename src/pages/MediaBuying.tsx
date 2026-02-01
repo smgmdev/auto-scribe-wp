@@ -15,30 +15,41 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a single inverted pyramid/funnel converging to center
+// Icon positions forming a clean pyramid - each row staggered and narrowing
+const ICON_GAP = 100; // Gap between icons
+const ROW_HEIGHT = 100; // Vertical gap between rows
+
 const iconPositions = [
-  // Left side - angling inward (top to bottom)
-  { top: 20, left: '5%' }, { top: 60, left: '8%' }, { top: 120, left: '12%' },
-  { top: 180, left: '16%' }, { top: 240, left: '22%' }, { top: 300, left: '28%' },
-  { top: 360, left: '35%' },
-  // Left-center column
-  { top: 40, left: '18%' }, { top: 100, left: '22%' }, { top: 160, left: '26%' },
-  { top: 220, left: '32%' }, { top: 290, left: '38%' },
-  // Center-left column
-  { top: 30, left: '32%' }, { top: 90, left: '35%' }, { top: 150, left: '38%' },
-  { top: 220, left: '42%' },
-  // Center column
-  { top: 50, left: '45%' }, { top: 120, left: '47%' }, { top: 200, left: '46%' },
-  // Center-right column
-  { top: 30, right: '32%' }, { top: 90, right: '35%' }, { top: 150, right: '38%' },
-  { top: 220, right: '42%' },
-  // Right-center column
-  { top: 40, right: '18%' }, { top: 100, right: '22%' }, { top: 160, right: '26%' },
-  { top: 220, right: '32%' }, { top: 290, right: '38%' },
-  // Right side - angling inward (top to bottom)
-  { top: 20, right: '5%' }, { top: 60, right: '8%' }, { top: 120, right: '12%' },
-  { top: 180, right: '16%' }, { top: 240, right: '22%' }, { top: 300, right: '28%' },
-  { top: 360, right: '35%' },
+  // Row 1 - 9 icons across the top
+  { top: 0, left: 'calc(50% - 400px)' },
+  { top: 0, left: 'calc(50% - 300px)' },
+  { top: 0, left: 'calc(50% - 200px)' },
+  { top: 0, left: 'calc(50% - 100px)' },
+  { top: 0, left: 'calc(50% - 44px)' }, // center
+  { top: 0, left: 'calc(50% + 12px)' },
+  { top: 0, left: 'calc(50% + 112px)' },
+  { top: 0, left: 'calc(50% + 212px)' },
+  { top: 0, left: 'calc(50% + 312px)' },
+  // Row 2 - 7 icons (staggered under row 1)
+  { top: 100, left: 'calc(50% - 350px)' },
+  { top: 100, left: 'calc(50% - 250px)' },
+  { top: 100, left: 'calc(50% - 150px)' },
+  { top: 100, left: 'calc(50% - 44px)' },
+  { top: 100, left: 'calc(50% + 62px)' },
+  { top: 100, left: 'calc(50% + 162px)' },
+  { top: 100, left: 'calc(50% + 262px)' },
+  // Row 3 - 5 icons
+  { top: 200, left: 'calc(50% - 244px)' },
+  { top: 200, left: 'calc(50% - 144px)' },
+  { top: 200, left: 'calc(50% - 44px)' },
+  { top: 200, left: 'calc(50% + 56px)' },
+  { top: 200, left: 'calc(50% + 156px)' },
+  // Row 4 - 3 icons
+  { top: 300, left: 'calc(50% - 144px)' },
+  { top: 300, left: 'calc(50% - 44px)' },
+  { top: 300, left: 'calc(50% + 56px)' },
+  // Row 5 - 1 icon (just above logo)
+  { top: 400, left: 'calc(50% - 44px)' },
 ];
 
 const ICON_SIZE = 88;
@@ -202,11 +213,10 @@ export default function MediaBuying() {
           const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
           const style: React.CSSProperties = {
             top: pos.top,
+            left: pos.left,
             width: ICON_SIZE,
             height: ICON_SIZE,
             borderRadius: 20,
-            ...(pos.left !== undefined ? { left: pos.left } : {}),
-            ...(pos.right !== undefined ? { right: pos.right } : {}),
           };
           
           return (
