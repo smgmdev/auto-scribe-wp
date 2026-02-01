@@ -221,13 +221,13 @@ const ArticleCarousel = ({
   return (
     <div 
       ref={carouselRef}
-      className="overflow-x-auto pb-4 scrollbar-hide"
+      className="overflow-x-auto py-4 scrollbar-hide"
       onWheel={handleWheel}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
-      <div className="flex gap-6 px-4 md:px-8 min-w-max">
+      <div className="flex gap-6 px-4 md:px-8 min-w-max py-2">
         {duplicatedArticles.map((article, index) => {
           const gradient = gradients[index % gradients.length];
           
@@ -268,13 +268,6 @@ const ArticleCarousel = ({
                       {article.title}
                     </p>
                     
-                    {/* Learn more button */}
-                    <div className="inline-flex">
-                      <span className="bg-[#1d1d1f] text-white text-xs font-medium px-4 py-2 rounded-full group-hover:bg-black transition-colors">
-                        Read article
-                      </span>
-                    </div>
-                    
                     {/* Spacer */}
                     <div className="flex-1" />
                     
@@ -286,13 +279,15 @@ const ArticleCarousel = ({
                       </h3>
                     </div>
                     
-                    {/* Spacer */}
-                    <div className="flex-1" />
-                    
-                    {/* Bottom - Published date */}
-                    <div className="mt-auto pt-4">
-                      <p className="text-xs font-semibold text-[#1d1d1f]">Published via</p>
-                      <p className="text-xs text-[#86868b]">Arcana Mace</p>
+                    {/* Bottom row - Published via + Read article */}
+                    <div className="mt-auto pt-4 flex items-end justify-between">
+                      <div>
+                        <p className="text-xs font-semibold text-[#1d1d1f]">Published via</p>
+                        <p className="text-xs text-[#86868b]">Arcana Mace</p>
+                      </div>
+                      <span className="bg-[#1d1d1f] text-white text-xs font-medium px-4 py-2 rounded-full group-hover:bg-black transition-colors">
+                        Read article
+                      </span>
                     </div>
                   </div>
                 </div>
