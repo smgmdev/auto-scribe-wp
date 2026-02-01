@@ -373,7 +373,8 @@ const HowItWorks = () => {
     const sectionIds = [
       'getting-started', 'create-account', 'buy-credits',
       'media-buying', 'browse-outlets', 'submit-request', 'track-orders',
-      'self-publishing', 'connect-wordpress', 'ai-generation', 'publish-directly'
+      'self-publishing', 'local-library',
+      'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
 
     const handleScroll = () => {
@@ -772,10 +773,36 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#connect-wordpress"
-                      onClick={(e) => scrollToSection(e, 'connect-wordpress')}
+                      href="#local-library"
+                      onClick={(e) => scrollToSection(e, 'local-library')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'connect-wordpress' 
+                        activeSection === 'local-library' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      Local Library
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#for-agencies"
+                      onClick={(e) => scrollToSection(e, 'for-agencies')}
+                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'for-agencies' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      For Agencies
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#agency-connect-wordpress"
+                      onClick={(e) => scrollToSection(e, 'agency-connect-wordpress')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'agency-connect-wordpress' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
@@ -785,28 +812,28 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#ai-generation"
-                      onClick={(e) => scrollToSection(e, 'ai-generation')}
+                      href="#upload-media-lists"
+                      onClick={(e) => scrollToSection(e, 'upload-media-lists')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'ai-generation' 
+                        activeSection === 'upload-media-lists' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      AI article generation
+                      Upload Media Lists
                     </a>
                   </li>
                   <li>
                     <a 
-                      href="#publish-directly"
-                      onClick={(e) => scrollToSection(e, 'publish-directly')}
+                      href="#get-paid"
+                      onClick={(e) => scrollToSection(e, 'get-paid')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'publish-directly' 
+                        activeSection === 'get-paid' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Publish directly
+                      Get Paid
                     </a>
                   </li>
                 </ul>
@@ -989,93 +1016,141 @@ const HowItWorks = () => {
                   Self Publishing
                 </h2>
                 <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
-                  Connect your own WordPress sites and publish directly. 
-                  Full editorial control with the power of AI-assisted content creation.
+                  Publish content directly to WordPress sites connected to Arcana Mace. 
+                  Full editorial control with AI-assisted content creation and one-click publishing.
                 </p>
                 
-                <div id="connect-wordpress" className="mb-16 scroll-mt-40">
+                <div id="local-library" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Local Library
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The Local Library is your personal collection of WordPress sites connected to Arcana Mace. 
+                    These are sites where you have direct publishing access—either your own WordPress installations 
+                    or sites shared with you by agencies. Unlike the Global Library where you submit requests to agencies, 
+                    the Local Library lets you publish content instantly with one click.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Connect unlimited WordPress sites with secure application passwords</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Instant one-click publishing—no agency approval needed</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>AI article generation with multiple writing tones and SEO optimization</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Automatic featured image, category, and tag handling</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Support for Yoast SEO, RankMath, and AIOSEO plugins</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              {/* For Agencies Section */}
+              <div id="for-agencies">
+                <div className="w-14 h-14 rounded-full border-2 border-[#f97316] flex items-center justify-center mb-6">
+                  <Building2 className="w-6 h-6 text-[#f97316]" />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
+                  For Agencies
+                </h2>
+                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
+                  Partner with Arcana Mace to monetize your media network. 
+                  Connect your publications, receive client requests, and earn commissions on every placement.
+                </p>
+                
+                <div id="agency-connect-wordpress" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Connect WordPress
                   </h3>
                   <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Link unlimited WordPress sites to your account using secure application passwords. 
-                    Arcana Mace integrates seamlessly with your existing workflow, supporting 
-                    popular SEO plugins like Yoast and RankMath for optimized publishing.
+                    Link your WordPress publications to the Arcana Mace marketplace. 
+                    Once connected, your sites become available in the Global Library where clients can 
+                    discover and request placements. Set your own pricing and maintain full editorial control.
                   </p>
                   <ul className="space-y-3 text-[#1d1d1f]">
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Secure application password authentication—no admin credentials needed</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Secure application password authentication—your admin credentials stay private</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Automatic category and tag syncing from your WordPress site</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Set custom pricing in USD for each publication</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Support for Yoast SEO, RankMath, and other popular plugins</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Sites appear in the Global Library with your agency branding</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Connection health monitoring with automatic status checks</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Connection status monitoring and automatic health checks</span>
                     </li>
                   </ul>
                 </div>
                 
-                <div id="ai-generation" className="mb-16 scroll-mt-40">
+                <div id="upload-media-lists" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    AI article generation
+                    Upload Media Lists
                   </h3>
                   <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Generate professional articles in seconds with our advanced AI engine. 
-                    Choose from multiple writing tones, set your target audience, and let 
-                    intelligent automation create publish-ready content with proper formatting.
+                    Have a large network of publications? Submit your media list via Google Sheets for bulk onboarding. 
+                    Our team reviews each submission and adds approved outlets to the Global Library, 
+                    making them instantly available to thousands of clients.
                   </p>
                   <ul className="space-y-3 text-[#1d1d1f]">
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Multiple writing tones: professional, casual, news, technical, and more</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Bulk upload via Google Sheets with our standardized template</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Generate from headlines, topics, or source URLs for trending news</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Include site details: category, pricing, turnaround time, content guidelines</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Automatic SEO optimization with meta descriptions and focus keywords</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Admin review ensures quality and prevents duplicate listings</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Rich text editor for final tweaks before publishing</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Track submission status and receive approval notifications</span>
                     </li>
                   </ul>
                 </div>
                 
-                <div id="publish-directly" className="mb-16 scroll-mt-40">
+                <div id="get-paid" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Publish directly
+                    Get Paid
                   </h3>
                   <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    One-click publishing sends your article directly to your WordPress site. 
-                    Arcana Mace handles featured images, categories, tags, and SEO metadata automatically. 
-                    Your content goes live instantly, ready to reach your audience.
+                    Earn commissions on every successful placement. Choose between automatic payouts via 
+                    Stripe Connect or custom payouts via bank transfer or USDT. Funds are released 
+                    once clients confirm delivery, ensuring secure transactions for everyone.
                   </p>
                   <ul className="space-y-3 text-[#1d1d1f]">
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>One-click publishing with automatic featured image upload</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Automatic payouts via Stripe Connect with instant KYC verification</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Category and tag selection synced with your WordPress taxonomy</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Custom payouts via bank wire or USDT (TRC-20/ERC-20)</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>SEO metadata automatically populated for maximum search visibility</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Secure escrow system—funds released only after confirmed delivery</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Instant live preview link after successful publication</span>
+                      <CheckCircle2 className="w-5 h-5 text-[#f97316] mt-0.5 flex-shrink-0" />
+                      <span>Full earnings dashboard with transaction history and pending payouts</span>
                     </li>
                   </ul>
                 </div>
