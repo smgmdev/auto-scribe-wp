@@ -815,6 +815,74 @@ const HowItWorks = () => {
         </div>
       </section>
 
+      {/* Go Even Further Section - Apple Style Cards */}
+      <section className="py-24 md:py-32 bg-white">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] text-center mb-16">
+            Go even further with Arcana Mace.
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Card 1 - Self Publishing */}
+            <button
+              onClick={() => navigate('/self-publishing')}
+              className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#1c3a5e] to-[#0d1f33] p-8 text-left min-h-[400px] flex flex-col transition-transform duration-300 hover:scale-[1.02]"
+            >
+              <h3 className="text-2xl md:text-3xl font-semibold text-white leading-tight mb-4">
+                Self Publish to
+                <br />
+                your own sites
+              </h3>
+              <p className="text-white/80 text-sm mb-auto">
+                Learn how ›
+              </p>
+              <div className="mt-auto flex justify-center">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/30 via-purple-500/30 to-pink-500/30 blur-xl" />
+              </div>
+            </button>
+            
+            {/* Card 2 - Media Buying */}
+            <button
+              onClick={() => navigate('/media-buying')}
+              className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#1a3347] to-[#0f1f2e] p-8 text-left min-h-[400px] flex flex-col transition-transform duration-300 hover:scale-[1.02]"
+            >
+              <h3 className="text-2xl md:text-3xl font-semibold text-white leading-tight mb-4">
+                Media Buying
+                <br />
+                Guide
+              </h3>
+              <p className="text-white/80 text-sm mb-6">
+                Learn more about our outlets ›
+              </p>
+              <div className="mt-auto flex justify-center">
+                <div className="w-48 h-32 rounded-2xl bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-700 flex items-center justify-center">
+                  <Globe className="w-12 h-12 text-white/60" />
+                </div>
+              </div>
+            </button>
+            
+            {/* Card 3 - For Agencies */}
+            <button
+              onClick={() => navigate('/agency-portal')}
+              className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#3d2a6b] to-[#1f1535] p-8 text-left min-h-[400px] flex flex-col transition-transform duration-300 hover:scale-[1.02]"
+            >
+              <h3 className="text-2xl md:text-3xl font-semibold text-white leading-tight mb-4">
+                Arcana Mace for
+                <br />
+                agencies
+              </h3>
+              <p className="text-white/80 text-sm mb-auto">
+                Learn more about partnerships ›
+              </p>
+              <div className="mt-auto flex justify-center">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500/40 to-blue-500/40 flex items-center justify-center shadow-2xl">
+                  <Building2 className="w-10 h-10 text-white/80" />
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <Footer narrow showTopBorder />
