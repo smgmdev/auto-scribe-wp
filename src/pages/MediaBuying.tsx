@@ -47,51 +47,37 @@ export default function MediaBuying() {
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header - standardized blur effect */}
+      {/* Main Header - light gray background matching hero */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border transition-all duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-[#f5f5f7] transition-all duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
-        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
-            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+        <div className="max-w-[980px] mx-auto flex h-12 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2">
+            <img src={amblack} alt="Arcana Mace" className="h-5 w-5" />
+            <span className="text-sm font-medium text-[#1d1d1f]">Arcana Mace</span>
           </button>
           
-          {/* Search Trigger - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <button
+          {/* Right side navigation */}
+          <div className="flex items-center gap-4">
+            <button 
               onClick={() => setSearchOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+              className="text-[#1d1d1f]/80 hover:text-[#1d1d1f] transition-colors"
             >
               <Search className="h-4 w-4" />
-              <span>Search media outlets...</span>
             </button>
-          </div>
-          
-          {/* Right side buttons */}
-          <div className="flex items-center gap-2">
-            {/* Mobile Search Icon */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden hover:bg-black hover:text-white"
-              onClick={() => setSearchOpen(true)}
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-            
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+                size="sm"
+                className="bg-[#1d1d1f] text-white hover:bg-[#1d1d1f]/90 rounded-full text-xs px-4 h-7"
               >
-                <User className="h-4 w-4" />
                 Account
               </Button>
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+                size="sm"
+                className="bg-[#1d1d1f] text-white hover:bg-[#1d1d1f]/90 rounded-full text-xs px-4 h-7"
               >
                 Sign In
               </Button>
@@ -104,23 +90,23 @@ export default function MediaBuying() {
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Spacer for fixed header */}
-      <div className="h-16" />
+      <div className="h-12" />
 
-      {/* Sub-header - Sticky */}
-      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="bg-white border-b border-border">
+      {/* Sub-header - Sticky with same gray background */}
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-12'}`}>
+        <div className="bg-[#f5f5f7] border-b border-[#d2d2d7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-            <span className="text-xl font-semibold text-foreground">Media Buying</span>
-            <nav className="flex items-center gap-4">
+            <span className="text-xl font-semibold text-[#1d1d1f]">Media Buying</span>
+            <nav className="flex items-center gap-6">
               <button 
                 onClick={() => navigate('/self-publishing')}
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                className="text-[#1d1d1f]/60 hover:text-[#1d1d1f] text-sm transition-colors"
               >
                 Self Publishing
               </button>
               <button 
                 onClick={handleGetStarted}
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                className="text-[#0066cc] hover:underline text-sm transition-colors"
               >
                 Browse Media
               </button>
@@ -129,34 +115,58 @@ export default function MediaBuying() {
         </div>
       </div>
 
-      {/* Hero Section with scattered media icons */}
-      <section className="relative overflow-hidden">
+      {/* Hero Section with scattered media icons - Apple App Store style */}
+      <section className="bg-[#f5f5f7] relative overflow-hidden">
         {/* Scattered media outlet icons - decorative background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="relative w-full h-[400px] opacity-60">
-            {/* Scattered icons simulation using gradient circles */}
-            <div className="absolute top-20 left-[5%] w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg" />
-            <div className="absolute top-32 left-[15%] w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg" />
-            <div className="absolute top-16 left-[25%] w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl shadow-lg" />
-            <div className="absolute top-40 left-[35%] w-11 h-11 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg" />
-            <div className="absolute top-24 right-[35%] w-13 h-13 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg" />
-            <div className="absolute top-36 right-[25%] w-10 h-10 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl shadow-lg" />
-            <div className="absolute top-20 right-[15%] w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-xl shadow-lg" />
-            <div className="absolute top-44 right-[5%] w-11 h-11 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl shadow-lg" />
-            <div className="absolute top-8 left-[45%] w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl shadow-lg" />
-            <div className="absolute top-52 left-[10%] w-9 h-9 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl shadow-lg" />
-            <div className="absolute top-48 right-[40%] w-12 h-12 bg-gradient-to-br from-rose-400 to-rose-600 rounded-xl shadow-lg" />
-            <div className="absolute top-12 right-[45%] w-11 h-11 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-lg" />
+        <div className="relative w-full min-h-[420px] md:min-h-[480px]">
+          {/* Row 1 - top scattered icons */}
+          <div className="absolute top-4 left-[2%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-8 left-[12%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-2 left-[22%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-12 left-[33%] w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-6 left-[44%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-2 right-[35%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-10 right-[24%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-4 right-[13%] w-13 h-13 md:w-15 md:h-15 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-8 right-[2%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg" />
+          
+          {/* Row 2 */}
+          <div className="absolute top-24 left-[5%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-teal-400 to-teal-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-28 left-[16%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-32 left-[28%] w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-24 left-[40%] w-13 h-13 md:w-15 md:h-15 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-30 right-[38%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-sky-400 to-sky-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-26 right-[27%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-lime-500 to-lime-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-32 right-[16%] w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-fuchsia-400 to-fuchsia-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-24 right-[5%] w-13 h-13 md:w-15 md:h-15 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg" />
+          
+          {/* Row 3 */}
+          <div className="absolute top-44 left-[8%] w-13 h-13 md:w-15 md:h-15 bg-gradient-to-br from-blue-400 to-blue-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-48 left-[20%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-red-400 to-red-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-52 left-[32%] w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-44 right-[32%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-green-400 to-green-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-50 right-[20%] w-13 h-13 md:w-15 md:h-15 bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-46 right-[8%] w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg" />
+          
+          {/* Row 4 - near center */}
+          <div className="absolute top-60 left-[15%] w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-64 left-[26%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl shadow-lg" />
+          <div className="absolute top-68 right-[26%] w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-2xl shadow-lg" />
+          <div className="absolute top-62 right-[14%] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg" />
+
+          {/* Central icon and title */}
+          <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
+            <div className="w-24 h-24 md:w-28 md:h-28 mb-4 bg-gradient-to-br from-[#1d1d1f] to-[#3d3d3f] rounded-[28px] flex items-center justify-center shadow-2xl">
+              <Globe className="w-12 h-12 md:w-14 md:h-14 text-white" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-medium text-[#1d1d1f]">Media Buying</h2>
           </div>
         </div>
+      </section>
 
-        {/* Main hero content */}
-        <div className="relative pt-64 pb-20 text-center">
-          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-[#1d1d1f] to-[#3d3d3f] rounded-[22px] flex items-center justify-center shadow-xl">
-            <Globe className="w-10 h-10 text-white" />
-          </div>
-          <h2 className="text-2xl font-medium text-[#1d1d1f] mb-8">Media Buying</h2>
-          
+      {/* Main headline section */}
+      <section className="bg-white py-16 md:py-24">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-4 leading-tight">
             The reach you need.
           </h1>
