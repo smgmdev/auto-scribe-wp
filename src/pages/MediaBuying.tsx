@@ -704,12 +704,10 @@ export default function MediaBuying() {
               Content must comply with each publication's editorial guidelines and applicable laws. Arcana Mace reserves the right to remove listings or suspend accounts that violate platform policies.
             </p>
           </div>
-          {/* Divider line between disclaimers and footer */}
-          <div className="border-t border-[#d2d2d7] mt-8" />
         </div>
       </section>
 
-      <Footer narrow />
+      <Footer narrow showTopBorder />
 
       {/* Media Site Dialog */}
       <MediaSiteDialog
