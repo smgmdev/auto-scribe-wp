@@ -288,18 +288,20 @@ export default function SelfPublishing() {
             <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
               {mediaSites.map((site) => (
                 <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm border border-[#d2d2d7] flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm border border-[#d2d2d7] overflow-hidden group-hover:scale-105 transition-transform">
                     {site.favicon ? (
                       <img 
                         src={site.favicon} 
                         alt={site.name} 
-                        className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
+                      </div>
                     )}
                   </div>
-                  <span className="text-[11px] md:text-xs text-[#6e6e73] max-w-[80px] truncate text-center">{site.name}</span>
+                  <span className="text-[11px] md:text-xs text-[#6e6e73] text-center">{site.name}</span>
                 </div>
               ))}
             </div>
