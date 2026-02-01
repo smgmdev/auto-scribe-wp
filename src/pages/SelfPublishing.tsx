@@ -369,34 +369,6 @@ export default function SelfPublishing() {
             </div>
           </div>
         </section>
-
-
-        {/* CTA Section */}
-        <section className="py-16 md:py-24 bg-white">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="bg-gradient-to-r from-[#1d1d1f] to-[#424245] rounded-3xl p-8 md:p-16 text-center">
-              <h2 className="text-2xl md:text-4xl font-semibold text-white mb-4">
-                Ready to publish?
-              </h2>
-              <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-                Start writing your first article today and reach audiences across premium media outlets worldwide.
-              </p>
-              <Button 
-                size="lg"
-                onClick={() => {
-                  if (user) {
-                    navigate('/dashboard', { state: { targetView: 'compose' } });
-                  } else {
-                    navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'compose' } });
-                  }
-                }}
-                className="bg-white text-[#1d1d1f] hover:bg-white/90 text-lg px-8 py-3 h-auto rounded-full"
-              >
-                Get Started
-              </Button>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer narrow />
