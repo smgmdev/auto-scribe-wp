@@ -682,7 +682,7 @@ export default function MediaBuying() {
       </section>
 
       {/* Disclaimers Section */}
-      <section className="bg-white border-t border-[#d2d2d7]">
+      <section className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
             <p>
@@ -704,6 +704,8 @@ export default function MediaBuying() {
               Content must comply with each publication's editorial guidelines and applicable laws. Arcana Mace reserves the right to remove listings or suspend accounts that violate platform policies.
             </p>
           </div>
+          {/* Divider line between disclaimers and footer */}
+          <div className="border-t border-[#d2d2d7] mt-8" />
         </div>
       </section>
 
