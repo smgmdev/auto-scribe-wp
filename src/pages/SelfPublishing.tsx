@@ -263,15 +263,15 @@ export default function SelfPublishing() {
                 <div className="flex flex-wrap gap-6">
                   <a 
                     href="/dashboard" 
-                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    Buy credits <span className="text-lg">↗</span>
+                    <span className="group-hover:underline">Buy credits</span> <span>↗</span>
                   </a>
                   <a 
                     href="/help/credits-pricing" 
-                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    View pricing <span className="text-lg">↗</span>
+                    <span className="group-hover:underline">View pricing</span> <span>↗</span>
                   </a>
                 </div>
               </div>
@@ -354,15 +354,15 @@ export default function SelfPublishing() {
                 <div className="flex flex-wrap gap-6">
                   <a 
                     href="/about" 
-                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    Learn more <span className="text-lg">↗</span>
+                    <span className="group-hover:underline">Learn more</span> <span>↗</span>
                   </a>
                   <a 
                     href="/dashboard" 
-                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    Add credits <span className="text-lg">↗</span>
+                    <span className="group-hover:underline">Add credits</span> <span>↗</span>
                   </a>
                 </div>
               </div>
