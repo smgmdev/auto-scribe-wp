@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ExternalLink, RefreshCw } from 'lucide-react';
+import { Search, ExternalLink, RefreshCw, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
 
 interface ServiceStatus {
@@ -133,6 +136,9 @@ export default function SystemStatus() {
   const leftColumn = services.slice(0, Math.ceil(services.length / 2));
   const rightColumn = services.slice(Math.ceil(services.length / 2));
 
+  const { user } = useAuth();
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header - Same as homepage */}
@@ -143,15 +149,54 @@ export default function SystemStatus() {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-[#06c] hover:underline text-sm"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back
-          </button>
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </header>
+
+      {/* Search Modal */}
+      <SearchModal 
+        open={showSearchModal} 
+        onOpenChange={setShowSearchModal} 
+      />
 
       {/* Scrollable Content */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-16">
