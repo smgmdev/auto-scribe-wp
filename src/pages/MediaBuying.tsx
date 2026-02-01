@@ -686,7 +686,7 @@ export default function MediaBuying() {
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
             <p>
-              ◊ All media placements are fulfilled by third-party agencies and publishers. Arcana Mace acts as a marketplace facilitator and does not directly publish content. Publication timelines, editorial standards, and content guidelines vary by outlet.
+              All media placements are fulfilled by third-party agencies and publishers. Arcana Mace acts as a marketplace facilitator and does not directly publish content. Publication timelines, editorial standards, and content guidelines vary by outlet.
             </p>
             <p>
               Pricing displayed is set by partner agencies and may vary based on content type, word count, and publication requirements. All prices are in USD unless otherwise specified. Additional fees may apply for expedited delivery or premium placements.
