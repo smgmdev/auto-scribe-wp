@@ -137,7 +137,7 @@ export default function SystemStatus() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Fixed Header */}
       <header 
-        className={`fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl z-50 transition-all duration-200 ease-out ${
+        className={`fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-sm border-b border-border z-50 transition-all duration-200 ease-out ${
           isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
         }`}
       >
