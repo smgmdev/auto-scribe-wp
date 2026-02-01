@@ -29,12 +29,13 @@ import GettingStarted from "./pages/help/GettingStarted";
 import YourAccount from "./pages/help/YourAccount";
 import CreditsPricing from "./pages/help/CreditsPricing";
 import PublishingArticles from "./pages/help/PublishingArticles";
-import MediaBuying from "./pages/help/MediaBuying";
+import HelpMediaBuying from "./pages/help/MediaBuying";
 import OrdersDelivery from "./pages/help/OrdersDelivery";
 import ForAgencies from "./pages/help/ForAgencies";
 import AIGeneration from "./pages/help/AIGeneration";
 import Troubleshooting from "./pages/help/Troubleshooting";
 import SelfPublishing from "./pages/SelfPublishing";
+import MediaBuying from "./pages/MediaBuying";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -123,12 +124,13 @@ const App = () => {
               <Route path="/help/your-account" element={<YourAccount />} />
               <Route path="/help/credits-pricing" element={<CreditsPricing />} />
               <Route path="/help/publishing-articles" element={<PublishingArticles />} />
-              <Route path="/help/media-buying" element={<MediaBuying />} />
+              <Route path="/help/media-buying" element={<HelpMediaBuying />} />
               <Route path="/help/orders-delivery" element={<OrdersDelivery />} />
               <Route path="/help/for-agencies" element={<ForAgencies />} />
               <Route path="/help/ai-generation" element={<AIGeneration />} />
               <Route path="/help/troubleshooting" element={<Troubleshooting />} />
               <Route path="/self-publishing" element={<SelfPublishing />} />
+              <Route path="/media-buying" element={<MediaBuying />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
