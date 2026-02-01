@@ -261,9 +261,9 @@ export default function SelfPublishing() {
               size="sm"
               onClick={() => {
                 if (user) {
-                  navigate('/dashboard', { state: { targetView: 'compose' } });
+                  navigate('/dashboard', { state: { targetView: 'sites', targetTab: 'local' } });
                 } else {
-                  navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'compose' } });
+                  navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'sites', targetTab: 'local' } });
                 }
               }}
               className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
