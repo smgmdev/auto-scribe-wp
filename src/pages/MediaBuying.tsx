@@ -24,83 +24,88 @@ const ICON_SIZES = {
 
 // Grid-based positions: wider spacing (10% horizontal, 50px vertical) across full width (8%-92%)
 const iconPositions: { top: number; left: number; size: 'small' | 'medium' | 'large' }[] = [
-  // Row 1 (y: 8)
-  { top: 8, left: 8, size: 'small' },
-  { top: 8, left: 18, size: 'medium' },
-  { top: 8, left: 28, size: 'small' },
-  { top: 8, left: 38, size: 'large' },
-  { top: 8, left: 50, size: 'small' },
-  { top: 8, left: 60, size: 'medium' },
-  { top: 8, left: 70, size: 'small' },
-  { top: 8, left: 80, size: 'large' },
-  { top: 8, left: 92, size: 'small' },
-  // Row 2 (y: 58)
-  { top: 58, left: 13, size: 'medium' },
-  { top: 58, left: 23, size: 'small' },
-  { top: 58, left: 33, size: 'large' },
-  { top: 58, left: 45, size: 'small' },
-  { top: 58, left: 55, size: 'medium' },
-  { top: 58, left: 65, size: 'small' },
-  { top: 58, left: 75, size: 'large' },
-  { top: 58, left: 87, size: 'small' },
-  // Row 3 (y: 108)
-  { top: 108, left: 8, size: 'large' },
-  { top: 108, left: 19, size: 'small' },
-  { top: 108, left: 29, size: 'medium' },
-  { top: 108, left: 39, size: 'small' },
-  { top: 108, left: 50, size: 'large' },
-  { top: 108, left: 61, size: 'small' },
-  { top: 108, left: 71, size: 'medium' },
-  { top: 108, left: 81, size: 'small' },
-  { top: 108, left: 92, size: 'medium' },
-  // Row 4 (y: 158)
-  { top: 158, left: 13, size: 'small' },
-  { top: 158, left: 24, size: 'large' },
-  { top: 158, left: 35, size: 'small' },
-  { top: 158, left: 46, size: 'medium' },
-  { top: 158, left: 56, size: 'small' },
-  { top: 158, left: 66, size: 'large' },
-  { top: 158, left: 78, size: 'small' },
-  { top: 158, left: 88, size: 'medium' },
-  // Row 5 (y: 208)
-  { top: 208, left: 8, size: 'medium' },
-  { top: 208, left: 18, size: 'small' },
-  { top: 208, left: 28, size: 'large' },
-  { top: 208, left: 40, size: 'small' },
-  { top: 208, left: 60, size: 'small' },
-  { top: 208, left: 70, size: 'large' },
-  { top: 208, left: 82, size: 'small' },
-  { top: 208, left: 92, size: 'medium' },
-  // Row 6 (y: 258)
-  { top: 258, left: 8, size: 'medium' },
-  { top: 258, left: 18, size: 'large' },
-  { top: 258, left: 30, size: 'small' },
-  { top: 258, left: 40, size: 'medium' },
-  { top: 258, left: 60, size: 'medium' },
-  { top: 258, left: 70, size: 'small' },
-  { top: 258, left: 82, size: 'large' },
-  { top: 258, left: 92, size: 'medium' },
-  // Row 7 (y: 308) - closer to Arcana Mace
-  { top: 308, left: 8, size: 'small' },
-  { top: 308, left: 18, size: 'medium' },
-  { top: 308, left: 29, size: 'large' },
-  { top: 308, left: 40, size: 'small' },
-  { top: 308, left: 60, size: 'small' },
-  { top: 308, left: 71, size: 'large' },
-  { top: 308, left: 82, size: 'medium' },
-  { top: 308, left: 92, size: 'small' },
-  // Row 8 (y: 358) - flanking Arcana Mace
-  { top: 358, left: 8, size: 'medium' },
-  { top: 358, left: 19, size: 'small' },
-  { top: 358, left: 30, size: 'large' },
-  { top: 358, left: 70, size: 'large' },
-  { top: 358, left: 81, size: 'small' },
-  { top: 358, left: 92, size: 'medium' },
-  // Row 9 (y: 408) - bottom corners
-  { top: 408, left: 8, size: 'small' },
-  { top: 408, left: 18, size: 'large' },
-  { top: 408, left: 82, size: 'large' },
-  { top: 408, left: 92, size: 'small' },
+  // Row 1 (y: 5)
+  { top: 5, left: 8, size: 'small' },
+  { top: 5, left: 18, size: 'medium' },
+  { top: 5, left: 28, size: 'small' },
+  { top: 5, left: 38, size: 'large' },
+  { top: 5, left: 50, size: 'small' },
+  { top: 5, left: 60, size: 'medium' },
+  { top: 5, left: 70, size: 'small' },
+  { top: 5, left: 80, size: 'large' },
+  { top: 5, left: 92, size: 'small' },
+  // Row 2 (y: 45)
+  { top: 45, left: 13, size: 'medium' },
+  { top: 45, left: 23, size: 'small' },
+  { top: 45, left: 33, size: 'large' },
+  { top: 45, left: 45, size: 'small' },
+  { top: 45, left: 55, size: 'medium' },
+  { top: 45, left: 65, size: 'small' },
+  { top: 45, left: 75, size: 'large' },
+  { top: 45, left: 87, size: 'small' },
+  // Row 3 (y: 85)
+  { top: 85, left: 8, size: 'large' },
+  { top: 85, left: 19, size: 'small' },
+  { top: 85, left: 29, size: 'medium' },
+  { top: 85, left: 39, size: 'small' },
+  { top: 85, left: 50, size: 'large' },
+  { top: 85, left: 61, size: 'small' },
+  { top: 85, left: 71, size: 'medium' },
+  { top: 85, left: 81, size: 'small' },
+  { top: 85, left: 92, size: 'medium' },
+  // Row 4 (y: 125)
+  { top: 125, left: 13, size: 'small' },
+  { top: 125, left: 24, size: 'large' },
+  { top: 125, left: 35, size: 'small' },
+  { top: 125, left: 46, size: 'medium' },
+  { top: 125, left: 56, size: 'small' },
+  { top: 125, left: 66, size: 'large' },
+  { top: 125, left: 78, size: 'small' },
+  { top: 125, left: 88, size: 'medium' },
+  // Row 5 (y: 165)
+  { top: 165, left: 8, size: 'medium' },
+  { top: 165, left: 18, size: 'small' },
+  { top: 165, left: 28, size: 'large' },
+  { top: 165, left: 40, size: 'small' },
+  { top: 165, left: 60, size: 'small' },
+  { top: 165, left: 70, size: 'large' },
+  { top: 165, left: 82, size: 'small' },
+  { top: 165, left: 92, size: 'medium' },
+  // Row 6 (y: 205)
+  { top: 205, left: 8, size: 'medium' },
+  { top: 205, left: 18, size: 'large' },
+  { top: 205, left: 30, size: 'small' },
+  { top: 205, left: 40, size: 'medium' },
+  { top: 205, left: 60, size: 'medium' },
+  { top: 205, left: 70, size: 'small' },
+  { top: 205, left: 82, size: 'large' },
+  { top: 205, left: 92, size: 'medium' },
+  // Row 7 (y: 245)
+  { top: 245, left: 8, size: 'small' },
+  { top: 245, left: 18, size: 'medium' },
+  { top: 245, left: 29, size: 'large' },
+  { top: 245, left: 40, size: 'small' },
+  { top: 245, left: 60, size: 'small' },
+  { top: 245, left: 71, size: 'large' },
+  { top: 245, left: 82, size: 'medium' },
+  { top: 245, left: 92, size: 'small' },
+  // Row 8 (y: 285)
+  { top: 285, left: 8, size: 'medium' },
+  { top: 285, left: 19, size: 'small' },
+  { top: 285, left: 30, size: 'large' },
+  { top: 285, left: 70, size: 'large' },
+  { top: 285, left: 81, size: 'small' },
+  { top: 285, left: 92, size: 'medium' },
+  // Row 9 (y: 325)
+  { top: 325, left: 8, size: 'small' },
+  { top: 325, left: 18, size: 'large' },
+  { top: 325, left: 82, size: 'large' },
+  { top: 325, left: 92, size: 'small' },
+  // Row 10 (y: 365)
+  { top: 365, left: 8, size: 'medium' },
+  { top: 365, left: 19, size: 'small' },
+  { top: 365, left: 81, size: 'small' },
+  { top: 365, left: 92, size: 'medium' },
 ];
 
 // Shuffle array helper
@@ -294,7 +299,7 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid, centered */}
         <div 
           className="absolute flex flex-col items-center"
-          style={{ top: 330, left: '50%', transform: 'translateX(-50%)' }}
+          style={{ top: 380, left: '50%', transform: 'translateX(-50%)' }}
         >
           <div 
             className="flex items-center justify-center shadow-xl overflow-hidden"
