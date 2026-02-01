@@ -651,20 +651,30 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-[#1d1d1f]">
+      {/* CTA Section - Apple style */}
+      <section className="py-24 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold text-white mb-6">
-            Ready to get published?
+          {/* Icon */}
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 bg-gradient-to-br from-[#0071e3] to-[#00a2ff] rounded-[22px] md:rounded-[28px] flex items-center justify-center shadow-lg">
+            <Globe className="w-10 h-10 md:w-12 md:h-12 text-white" />
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
+            Publications you need.
           </h2>
-          <p className="text-xl text-white/70 mb-10 max-w-2xl mx-auto">
-            Join thousands of brands and professionals who trust Arcana Mace 
-            for their media buying needs.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-8">
+            From a place you can trust.
+          </h2>
+          
+          <p className="text-lg md:text-xl text-[#86868b] leading-relaxed max-w-3xl mx-auto mb-10">
+            The Arcana Mace marketplace has hundreds of publications that bring you premium exposure. 
+            And every one of them meets our standards for quality, authenticity, and reach.
           </p>
+          
           <Button 
             onClick={handleGetStarted}
             size="lg"
-            className="bg-white text-[#1d1d1f] hover:bg-white/90 rounded-full px-8 py-6 text-lg font-medium"
+            className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-10 py-6 text-lg font-medium"
           >
             Browse Publications
           </Button>
