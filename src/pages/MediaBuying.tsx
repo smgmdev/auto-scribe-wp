@@ -15,31 +15,29 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a triangle/pyramid shape - uniform size
+// Icon positions forming a vertical pyramid shape - straight down
 const iconPositions = [
-  // Row 1 - top (widest spread, 12 icons)
-  { top: -5, left: '-3%' }, { top: 8, left: '6%' }, { top: -8, left: '15%' },
-  { top: 5, left: '24%' }, { top: -3, left: '33%' }, { top: 10, left: '42%' },
-  { top: -6, right: '42%' }, { top: 8, right: '33%' }, { top: -4, right: '24%' },
-  { top: 5, right: '15%' }, { top: -8, right: '6%' }, { top: 2, right: '-3%' },
+  // Row 1 - top (widest, 12 icons spread evenly)
+  { top: -5, left: '2%' }, { top: 8, left: '11%' }, { top: -8, left: '20%' },
+  { top: 5, left: '29%' }, { top: -3, left: '38%' }, { top: 10, left: '47%' },
+  { top: -6, right: '47%' }, { top: 8, right: '38%' }, { top: -4, right: '29%' },
+  { top: 5, right: '20%' }, { top: -8, right: '11%' }, { top: 2, right: '2%' },
   // Row 2 - (10 icons, slightly narrower)
-  { top: 75, left: '2%' }, { top: 85, left: '12%' }, { top: 70, left: '22%' },
-  { top: 80, left: '32%' }, { top: 88, left: '41%' },
-  { top: 78, right: '41%' }, { top: 85, right: '32%' }, { top: 72, right: '22%' },
-  { top: 82, right: '12%' }, { top: 76, right: '2%' },
+  { top: 95, left: '7%' }, { top: 105, left: '16%' }, { top: 90, left: '25%' },
+  { top: 100, left: '34%' }, { top: 108, left: '43%' },
+  { top: 98, right: '43%' }, { top: 105, right: '34%' }, { top: 92, right: '25%' },
+  { top: 102, right: '16%' }, { top: 96, right: '7%' },
   // Row 3 - (8 icons, narrower)
-  { top: 155, left: '8%' }, { top: 165, left: '18%' }, { top: 150, left: '29%' },
-  { top: 160, left: '39%' },
-  { top: 158, right: '39%' }, { top: 168, right: '29%' }, { top: 152, right: '18%' },
-  { top: 162, right: '8%' },
+  { top: 190, left: '12%' }, { top: 200, left: '22%' }, { top: 185, left: '32%' },
+  { top: 195, left: '42%' },
+  { top: 193, right: '42%' }, { top: 203, right: '32%' }, { top: 188, right: '22%' },
+  { top: 198, right: '12%' },
   // Row 4 - (6 icons, narrower still)
-  { top: 235, left: '15%' }, { top: 248, left: '26%' }, { top: 240, left: '37%' },
-  { top: 242, right: '37%' }, { top: 250, right: '26%' }, { top: 238, right: '15%' },
+  { top: 285, left: '18%' }, { top: 298, left: '28%' }, { top: 290, left: '39%' },
+  { top: 292, right: '39%' }, { top: 300, right: '28%' }, { top: 288, right: '18%' },
   // Row 5 - (4 icons, converging)
-  { top: 310, left: '22%' }, { top: 320, left: '35%' },
-  { top: 315, right: '35%' }, { top: 325, right: '22%' },
-  // Row 6 - bottom tip (2 icons, closest to center)
-  { top: 375, left: '32%' }, { top: 380, right: '32%' },
+  { top: 380, left: '24%' }, { top: 390, left: '36%' },
+  { top: 385, right: '36%' }, { top: 395, right: '24%' },
 ];
 
 const ICON_SIZE = 88;
