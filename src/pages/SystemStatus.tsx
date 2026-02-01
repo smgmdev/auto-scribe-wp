@@ -230,7 +230,7 @@ export default function SystemStatus() {
           </h1>
 
           {/* Legend and Refresh */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col-reverse md:flex-row items-start md:items-center justify-between gap-4 mb-6">
             <button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
@@ -239,7 +239,7 @@ export default function SystemStatus() {
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
                 <span className="text-sm text-[#1d1d1f]">Available</span>
