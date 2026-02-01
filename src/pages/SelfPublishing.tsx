@@ -183,7 +183,7 @@ export default function SelfPublishing() {
               Start Writing
             </Button>
 
-            <p className="text-lg md:text-xl text-[#6e6e73] mt-8 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-[#1d1d1f] mt-8 max-w-2xl mx-auto leading-relaxed">
               Write, edit, and publish articles directly to premium media outlets. Self publishing puts you in control of your content and your reach.
             </p>
           </div>
