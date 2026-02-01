@@ -1,20 +1,85 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
 import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
+import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
+
+interface MediaSite {
+  id: string;
+  favicon: string | null;
+  name: string;
+}
+
+// Icon positions for the hero section
+const iconPositions = [
+  // Row 1 - top edge
+  { top: -8, left: '-1%', size: 56 }, { top: 12, left: '6%', size: 48 }, { top: -4, left: '14%', size: 64 },
+  { top: 20, left: '24%', size: 52 }, { top: -8, left: '33%', size: 44 }, { top: 8, left: '41%', size: 56 },
+  { top: -4, right: '41%', size: 48 }, { top: 16, right: '33%', size: 44 }, { top: -8, right: '24%', size: 60 },
+  { top: 12, right: '14%', size: 52 }, { top: -4, right: '5%', size: 56 }, { top: 20, right: '-1%', size: 48 },
+  // Row 2
+  { top: 64, left: '1%', size: 52 }, { top: 76, left: '10%', size: 68 }, { top: 88, left: '22%', size: 52 },
+  { top: 68, left: '32%', size: 48 }, { top: 80, left: '42%', size: 40 }, { top: 72, right: '42%', size: 44 },
+  { top: 84, right: '32%', size: 48 }, { top: 92, right: '22%', size: 52 }, { top: 72, right: '11%', size: 64 },
+  { top: 60, right: '1%', size: 48 },
+  // Row 3
+  { top: 132, left: '-1%', size: 48 }, { top: 152, left: '7%', size: 52 }, { top: 144, left: '17%', size: 60 },
+  { top: 160, left: '28%', size: 48 }, { top: 140, left: '38%', size: 44 }, { top: 144, right: '38%', size: 44 },
+  { top: 156, right: '28%', size: 48 }, { top: 148, right: '17%', size: 56 }, { top: 156, right: '7%', size: 52 },
+  { top: 136, right: '-1%', size: 48 },
+  // Row 4
+  { top: 200, left: '2%', size: 48 }, { top: 216, left: '12%', size: 52 }, { top: 204, left: '23%', size: 44 },
+  { top: 220, left: '33%', size: 40 }, { top: 224, right: '33%', size: 40 }, { top: 208, right: '23%', size: 44 },
+  { top: 220, right: '12%', size: 52 }, { top: 204, right: '2%', size: 48 },
+  // Row 5
+  { top: 268, left: '5%', size: 44 }, { top: 280, left: '15%', size: 48 }, { top: 272, left: '26%', size: 40 },
+  { top: 276, right: '26%', size: 40 }, { top: 284, right: '15%', size: 48 }, { top: 272, right: '5%', size: 44 },
+];
+
+// Shuffle array helper
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 export default function MediaBuying() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Fetch media sites on mount (excluding Agencies/People category)
+  useEffect(() => {
+    const fetchMediaSites = async () => {
+      const { data } = await supabase
+        .from('media_sites')
+        .select('id, favicon, name')
+        .neq('category', 'Agencies/People')
+        .not('favicon', 'is', null);
+      
+      if (data) {
+        setMediaSites(shuffleArray(data));
+      }
+    };
+    fetchMediaSites();
+  }, []);
+
+  // Memoize shuffled sites for stable rendering
+  const shuffledSites = useMemo(() => {
+    return mediaSites.length > 0 ? mediaSites : [];
+  }, [mediaSites]);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -130,61 +195,36 @@ export default function MediaBuying() {
 
       {/* Hero Section with scattered media icons - Apple App Store style */}
       <section className="bg-white relative overflow-hidden" style={{ minHeight: '480px' }}>
-        {/* Row 1 - top edge icons */}
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: -8, left: '-1%', width: 56, height: 56, background: 'linear-gradient(135deg, #22c55e, #16a34a)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 12, left: '6%', width: 48, height: 48, background: 'linear-gradient(135deg, #fb923c, #f97316)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: -4, left: '14%', width: 64, height: 64, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 20, left: '24%', width: 52, height: 52, background: 'linear-gradient(135deg, #f472b6, #ec4899)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: -8, left: '33%', width: 44, height: 44, background: 'linear-gradient(135deg, #facc15, #eab308)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 8, left: '41%', width: 56, height: 56, background: 'linear-gradient(135deg, #a855f7, #9333ea)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: -4, right: '41%', width: 48, height: 48, background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 16, right: '33%', width: 44, height: 44, background: 'linear-gradient(135deg, #22d3ee, #06b6d4)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: -8, right: '24%', width: 60, height: 60, background: 'linear-gradient(135deg, #84cc16, #65a30d)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 12, right: '14%', width: 52, height: 52, background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: -4, right: '5%', width: 56, height: 56, background: 'linear-gradient(135deg, #e879f9, #d946ef)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 20, right: '-1%', width: 48, height: 48, background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }} />
-        
-        {/* Row 2 */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 64, left: '1%', width: 52, height: 52, background: 'linear-gradient(135deg, #4ade80, #22c55e)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 76, left: '10%', width: 68, height: 68, background: 'linear-gradient(135deg, #fb7185, #f43f5e)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 88, left: '22%', width: 52, height: 52, background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 68, left: '32%', width: 48, height: 48, background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 80, left: '42%', width: 40, height: 40, background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 72, right: '42%', width: 44, height: 44, background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 84, right: '32%', width: 48, height: 48, background: 'linear-gradient(135deg, #c084fc, #a855f7)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 92, right: '22%', width: 52, height: 52, background: 'linear-gradient(135deg, #34d399, #10b981)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 72, right: '11%', width: 64, height: 64, background: 'linear-gradient(135deg, #f97316, #ea580c)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 60, right: '1%', width: 48, height: 48, background: 'linear-gradient(135deg, #818cf8, #6366f1)' }} />
-        
-        {/* Row 3 */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 132, left: '-1%', width: 48, height: 48, background: 'linear-gradient(135deg, #60a5fa, #3b82f6)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 152, left: '7%', width: 52, height: 52, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 144, left: '17%', width: 60, height: 60, background: 'linear-gradient(135deg, #f87171, #ef4444)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 160, left: '28%', width: 48, height: 48, background: 'linear-gradient(135deg, #fcd34d, #f59e0b)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 140, left: '38%', width: 44, height: 44, background: 'linear-gradient(135deg, #ec4899, #db2777)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 144, right: '38%', width: 44, height: 44, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 156, right: '28%', width: 48, height: 48, background: 'linear-gradient(135deg, #4ade80, #22c55e)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 148, right: '17%', width: 56, height: 56, background: 'linear-gradient(135deg, #fb923c, #f97316)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 156, right: '7%', width: 52, height: 52, background: 'linear-gradient(135deg, #22d3ee, #06b6d4)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 136, right: '-1%', width: 48, height: 48, background: 'linear-gradient(135deg, #84cc16, #65a30d)' }} />
-        
-        {/* Row 4 */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 200, left: '2%', width: 48, height: 48, background: 'linear-gradient(135deg, #f472b6, #ec4899)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 216, left: '12%', width: 52, height: 52, background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 204, left: '23%', width: 44, height: 44, background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 220, left: '33%', width: 40, height: 40, background: 'linear-gradient(135deg, #e879f9, #d946ef)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 224, right: '33%', width: 40, height: 40, background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 208, right: '23%', width: 44, height: 44, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 220, right: '12%', width: 52, height: 52, background: 'linear-gradient(135deg, #fb7185, #f43f5e)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 204, right: '2%', width: 48, height: 48, background: 'linear-gradient(135deg, #facc15, #eab308)' }} />
-        
-        {/* Row 5 - lower sides */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 268, left: '5%', width: 44, height: 44, background: 'linear-gradient(135deg, #22c55e, #16a34a)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 280, left: '15%', width: 48, height: 48, background: 'linear-gradient(135deg, #a855f7, #9333ea)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 272, left: '26%', width: 40, height: 40, background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 276, right: '26%', width: 40, height: 40, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 284, right: '15%', width: 48, height: 48, background: 'linear-gradient(135deg, #c084fc, #a855f7)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 272, right: '5%', width: 44, height: 44, background: 'linear-gradient(135deg, #34d399, #10b981)' }} />
+        {/* Dynamic media logos */}
+        {iconPositions.map((pos, index) => {
+          const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
+          const style: React.CSSProperties = {
+            top: pos.top,
+            width: pos.size,
+            height: pos.size,
+            ...(pos.left !== undefined ? { left: pos.left } : {}),
+            ...(pos.right !== undefined ? { right: pos.right } : {}),
+          };
+          
+          return (
+            <div
+              key={index}
+              className="absolute rounded-2xl shadow-lg overflow-hidden bg-white border border-border/20"
+              style={style}
+            >
+              {site?.favicon ? (
+                <img 
+                  src={site.favicon} 
+                  alt={site.name} 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted" />
+              )}
+            </div>
+          );
+        })}
 
         {/* Central icon and title */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
@@ -198,7 +238,7 @@ export default function MediaBuying() {
           >
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium text-[#1d1d1f]">Arcana Mace</h2>
+          <h2 className="text-2xl md:text-3xl font-medium text-foreground">Arcana Mace</h2>
         </div>
       </section>
 
