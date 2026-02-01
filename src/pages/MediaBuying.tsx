@@ -15,29 +15,30 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a proper pyramid with aligned columns
+// Icon positions forming a single inverted pyramid/funnel converging to center
 const iconPositions = [
-  // Row 1 - top (11 icons)
-  { top: 5, left: '5%' }, { top: 5, left: '14%' }, { top: 5, left: '23%' },
-  { top: 5, left: '32%' }, { top: 5, left: '41%' }, { top: 5, left: '50%', transform: 'translateX(-50%)' },
-  { top: 5, right: '41%' }, { top: 5, right: '32%' }, { top: 5, right: '23%' },
-  { top: 5, right: '14%' }, { top: 5, right: '5%' },
-  // Row 2 - (9 icons, aligned under row 1)
-  { top: 105, left: '9.5%' }, { top: 105, left: '18.5%' }, { top: 105, left: '27.5%' },
-  { top: 105, left: '36.5%' }, { top: 105, left: '50%', transform: 'translateX(-50%)' },
-  { top: 105, right: '36.5%' }, { top: 105, right: '27.5%' }, { top: 105, right: '18.5%' },
-  { top: 105, right: '9.5%' },
-  // Row 3 - (7 icons)
-  { top: 205, left: '14%' }, { top: 205, left: '23%' }, { top: 205, left: '32%' },
-  { top: 205, left: '50%', transform: 'translateX(-50%)' },
-  { top: 205, right: '32%' }, { top: 205, right: '23%' }, { top: 205, right: '14%' },
-  // Row 4 - (5 icons)
-  { top: 305, left: '18.5%' }, { top: 305, left: '27.5%' },
-  { top: 305, left: '50%', transform: 'translateX(-50%)' },
-  { top: 305, right: '27.5%' }, { top: 305, right: '18.5%' },
-  // Row 5 - (3 icons)
-  { top: 405, left: '23%' }, { top: 405, left: '50%', transform: 'translateX(-50%)' },
-  { top: 405, right: '23%' },
+  // Left side - angling inward (top to bottom)
+  { top: 20, left: '5%' }, { top: 60, left: '8%' }, { top: 120, left: '12%' },
+  { top: 180, left: '16%' }, { top: 240, left: '22%' }, { top: 300, left: '28%' },
+  { top: 360, left: '35%' },
+  // Left-center column
+  { top: 40, left: '18%' }, { top: 100, left: '22%' }, { top: 160, left: '26%' },
+  { top: 220, left: '32%' }, { top: 290, left: '38%' },
+  // Center-left column
+  { top: 30, left: '32%' }, { top: 90, left: '35%' }, { top: 150, left: '38%' },
+  { top: 220, left: '42%' },
+  // Center column
+  { top: 50, left: '45%' }, { top: 120, left: '47%' }, { top: 200, left: '46%' },
+  // Center-right column
+  { top: 30, right: '32%' }, { top: 90, right: '35%' }, { top: 150, right: '38%' },
+  { top: 220, right: '42%' },
+  // Right-center column
+  { top: 40, right: '18%' }, { top: 100, right: '22%' }, { top: 160, right: '26%' },
+  { top: 220, right: '32%' }, { top: 290, right: '38%' },
+  // Right side - angling inward (top to bottom)
+  { top: 20, right: '5%' }, { top: 60, right: '8%' }, { top: 120, right: '12%' },
+  { top: 180, right: '16%' }, { top: 240, right: '22%' }, { top: 300, right: '28%' },
+  { top: 360, right: '35%' },
 ];
 
 const ICON_SIZE = 88;
@@ -210,7 +211,6 @@ export default function MediaBuying() {
             animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
             ...(pos.right !== undefined ? { right: pos.right } : {}),
-            ...('transform' in pos ? { transform: pos.transform } : {}),
           };
           
           return (
