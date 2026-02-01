@@ -256,7 +256,7 @@ export default function MediaBuying() {
               onClick={handleGetStarted}
               className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
             >
-              Browse Media
+              Browse Global Media Library
             </Button>
           </nav>
         </div>
@@ -676,7 +676,7 @@ export default function MediaBuying() {
             size="lg"
             className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-10 py-6 text-lg font-medium"
           >
-            Browse Publications
+            Browse Media Network
           </Button>
         </div>
       </section>
