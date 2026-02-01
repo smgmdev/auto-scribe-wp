@@ -101,7 +101,7 @@ export function Footer({ narrow = false }: FooterProps) {
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li><button onClick={() => navigate('/press')} className="hover:text-foreground transition-colors text-left">Newsroom</button></li>
               <li><button onClick={() => navigate('/about')} className="hover:text-foreground transition-colors text-left">About</button></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
+              <li><button onClick={() => navigate('/help')} className="hover:text-foreground transition-colors text-left">Help Center</button></li>
             </ul>
           </div>
         </div>
