@@ -641,8 +641,46 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Dark Section - Publishing Tools */}
+      {/* Dark Section - Platform Features Grid */}
       <section className="py-24 md:py-32 bg-black">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-center mb-6 leading-tight">
+            Everything you need
+            <br />
+            in one platform.
+          </h2>
+          <p className="text-xl text-[#86868b] text-center mb-20 max-w-3xl mx-auto leading-relaxed">
+            A complete suite of publishing tools designed for speed, reliability, and scale. 
+            Built for creators who demand more from their content distribution.
+          </p>
+          
+          {/* Feature Icons Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+            {[
+              { icon: Newspaper, label: 'Article Management' },
+              { icon: Building2, label: 'Agency Network' },
+              { icon: Send, label: 'One-Click Publishing' },
+              { icon: BarChart3, label: 'Performance Analytics' },
+              { icon: Clock, label: 'Fast Turnaround' },
+              { icon: Shield, label: 'Secure Platform' },
+              { icon: CheckCircle2, label: 'Quality Assurance' },
+              { icon: Zap, label: 'AI Automation' },
+            ].map((feature, index) => (
+              <div key={index} className="text-center group">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center border border-gray-700 group-hover:border-gray-600 transition-colors">
+                  <feature.icon className="w-8 h-8 text-white/80 group-hover:text-white transition-colors" />
+                </div>
+                <span className="text-sm text-[#86868b] group-hover:text-white transition-colors">
+                  {feature.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Dark Section - Publishing Tools */}
+      <section className="py-24 md:py-32 bg-black border-t border-gray-800">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-center mb-6 leading-tight">
             Powerful tools for
@@ -694,44 +732,6 @@ const HowItWorks = () => {
                 Learn more <ArrowUpRight className="w-4 h-4" />
               </button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Dark Section - Platform Features Grid */}
-      <section className="py-24 md:py-32 bg-black border-t border-gray-800">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-center mb-6 leading-tight">
-            Everything you need
-            <br />
-            in one platform.
-          </h2>
-          <p className="text-xl text-[#86868b] text-center mb-20 max-w-3xl mx-auto leading-relaxed">
-            A complete suite of publishing tools designed for speed, reliability, and scale. 
-            Built for creators who demand more from their content distribution.
-          </p>
-          
-          {/* Feature Icons Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {[
-              { icon: Newspaper, label: 'Article Management' },
-              { icon: Building2, label: 'Agency Network' },
-              { icon: Send, label: 'One-Click Publishing' },
-              { icon: BarChart3, label: 'Performance Analytics' },
-              { icon: Clock, label: 'Fast Turnaround' },
-              { icon: Shield, label: 'Secure Platform' },
-              { icon: CheckCircle2, label: 'Quality Assurance' },
-              { icon: Zap, label: 'AI Automation' },
-            ].map((feature, index) => (
-              <div key={index} className="text-center group">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center border border-gray-700 group-hover:border-gray-600 transition-colors">
-                  <feature.icon className="w-8 h-8 text-white/80 group-hover:text-white transition-colors" />
-                </div>
-                <span className="text-sm text-[#86868b] group-hover:text-white transition-colors">
-                  {feature.label}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       </section>
