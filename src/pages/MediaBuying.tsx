@@ -655,14 +655,14 @@ export default function MediaBuying() {
       <section className="py-24 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Arcana Mace Icon */}
-          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-[22px] md:rounded-[28px] overflow-hidden shadow-lg">
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-[22px] md:rounded-[28px] overflow-hidden">
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#1d1d1f] leading-[1.1] mb-1">
             Publications you need.
           </h2>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-8">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#1d1d1f] leading-[1.1] mb-8">
             From a place you can trust.
           </h2>
           
