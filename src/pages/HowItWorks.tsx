@@ -366,6 +366,40 @@ const HowItWorks = () => {
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [activeSection, setActiveSection] = useState('getting-started');
+
+  // Intersection observer for sidebar active state
+  useEffect(() => {
+    const sectionIds = [
+      'getting-started', 'create-account', 'buy-credits',
+      'media-buying', 'browse-outlets', 'submit-request', 'track-orders',
+      'self-publishing', 'connect-wordpress', 'ai-generation', 'publish-directly'
+    ];
+
+    const observers: IntersectionObserver[] = [];
+
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              setActiveSection(id);
+            }
+          },
+          {
+            rootMargin: '-20% 0px -60% 0px',
+            threshold: 0
+          }
+        );
+        observer.observe(element);
+        observers.push(observer);
+      }
+    });
+
+    return () => observers.forEach(obs => obs.disconnect());
+  }, []);
+
   useEffect(() => {
     const fetchLatestArticles = async () => {
       const { data, error } = await supabase
@@ -728,59 +762,136 @@ const HowItWorks = () => {
             {/* Sticky Side Navigation */}
             <nav className="md:w-64 flex-shrink-0">
               <div className="md:sticky md:top-32">
-                <ul className="space-y-1 border-l-2 border-gray-200">
+                <ul className="border-l-2 border-gray-200">
                   <li>
-                    <a href="#getting-started" className="block pl-4 py-2 text-sm font-semibold text-[#1d1d1f] border-l-2 border-[#0066cc] -ml-[2px]">
+                    <a 
+                      href="#getting-started" 
+                      className={`block pl-4 py-1.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'getting-started' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Getting started
                     </a>
                   </li>
                   <li>
-                    <a href="#create-account" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#create-account" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'create-account' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Create your account
                     </a>
                   </li>
                   <li>
-                    <a href="#buy-credits" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#buy-credits" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'buy-credits' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Buy credits
                     </a>
                   </li>
                   <li>
-                    <a href="#media-buying" className="block pl-4 py-2 text-sm font-semibold text-[#1d1d1f] mt-4">
+                    <a 
+                      href="#media-buying" 
+                      className={`block pl-4 py-1.5 text-sm font-semibold mt-3 transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'media-buying' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Media Buying
                     </a>
                   </li>
                   <li>
-                    <a href="#browse-outlets" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#browse-outlets" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'browse-outlets' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Browse outlets
                     </a>
                   </li>
                   <li>
-                    <a href="#submit-request" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#submit-request" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'submit-request' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Submit a request
                     </a>
                   </li>
                   <li>
-                    <a href="#track-orders" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#track-orders" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'track-orders' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Track your orders
                     </a>
                   </li>
                   <li>
-                    <a href="#self-publishing" className="block pl-4 py-2 text-sm font-semibold text-[#1d1d1f] mt-4">
+                    <a 
+                      href="#self-publishing" 
+                      className={`block pl-4 py-1.5 text-sm font-semibold mt-3 transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'self-publishing' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Self Publishing
                     </a>
                   </li>
                   <li>
-                    <a href="#connect-wordpress" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#connect-wordpress" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'connect-wordpress' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Connect WordPress
                     </a>
                   </li>
                   <li>
-                    <a href="#ai-generation" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#ai-generation" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'ai-generation' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       AI article generation
                     </a>
                   </li>
                   <li>
-                    <a href="#publish-directly" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                    <a 
+                      href="#publish-directly" 
+                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'publish-directly' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
                       Publish directly
                     </a>
                   </li>
