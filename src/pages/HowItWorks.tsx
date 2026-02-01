@@ -65,31 +65,113 @@ const ScrollHighlightSection = ({
   );
 };
 
+// Floating device mockup component
+const DeviceMockup = ({ 
+  type, 
+  position, 
+  rotation = 0,
+  delay = 0 
+}: { 
+  type: 'laptop' | 'tablet' | 'phone';
+  position: string;
+  rotation?: number;
+  delay?: number;
+}) => {
+  const sizes = {
+    laptop: 'w-72 h-48 md:w-80 md:h-52',
+    tablet: 'w-48 h-64 md:w-56 md:h-72',
+    phone: 'w-28 h-56 md:w-32 md:h-64'
+  };
+  
+  const bgColors = {
+    laptop: 'from-slate-100 to-slate-200',
+    tablet: 'from-amber-50 to-orange-100',
+    phone: 'from-blue-50 to-indigo-100'
+  };
+  
+  return (
+    <div 
+      className={`absolute ${position} ${sizes[type]} hidden lg:block`}
+      style={{ 
+        transform: `rotate(${rotation}deg)`,
+        animation: `float 6s ease-in-out infinite`,
+        animationDelay: `${delay}s`
+      }}
+    >
+      <div className={`w-full h-full rounded-2xl bg-gradient-to-br ${bgColors[type]} shadow-xl border border-white/50 overflow-hidden`}>
+        {type === 'laptop' && (
+          <>
+            <div className="h-4 bg-slate-300 flex items-center px-2 gap-1">
+              <div className="w-2 h-2 rounded-full bg-red-400" />
+              <div className="w-2 h-2 rounded-full bg-yellow-400" />
+              <div className="w-2 h-2 rounded-full bg-green-400" />
+            </div>
+            <div className="p-3 space-y-2">
+              <div className="h-3 bg-slate-300/60 rounded w-3/4" />
+              <div className="h-2 bg-slate-300/40 rounded w-full" />
+              <div className="h-2 bg-slate-300/40 rounded w-5/6" />
+            </div>
+          </>
+        )}
+        {type === 'tablet' && (
+          <div className="p-4 space-y-3">
+            <div className="h-4 bg-orange-200/60 rounded w-2/3" />
+            <div className="h-24 bg-orange-100/80 rounded-lg" />
+            <div className="h-2 bg-orange-200/40 rounded w-full" />
+            <div className="h-2 bg-orange-200/40 rounded w-4/5" />
+          </div>
+        )}
+        {type === 'phone' && (
+          <div className="p-2 space-y-2">
+            <div className="h-2 bg-indigo-200/60 rounded w-1/2 mx-auto" />
+            <div className="h-16 bg-indigo-100/80 rounded-lg" />
+            <div className="h-1.5 bg-indigo-200/40 rounded w-full" />
+            <div className="h-1.5 bg-indigo-200/40 rounded w-3/4" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Hero section with floating images
 const HeroSection = () => {
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-white pt-20">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-[5%] w-64 h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl opacity-40 rotate-12 blur-sm" />
-        <div className="absolute top-40 right-[10%] w-48 h-48 bg-gradient-to-br from-orange-100 to-pink-100 rounded-3xl opacity-40 -rotate-12 blur-sm" />
-        <div className="absolute bottom-20 left-[15%] w-56 h-56 bg-gradient-to-br from-green-100 to-blue-100 rounded-3xl opacity-40 rotate-6 blur-sm" />
-        <div className="absolute bottom-40 right-[5%] w-44 h-44 bg-gradient-to-br from-yellow-100 to-red-100 rounded-3xl opacity-40 -rotate-6 blur-sm" />
-      </div>
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-white pt-24">
+      {/* Floating device mockups */}
+      <DeviceMockup type="laptop" position="top-32 left-[2%]" rotation={-8} delay={0} />
+      <DeviceMockup type="tablet" position="top-24 right-[5%]" rotation={6} delay={0.5} />
+      <DeviceMockup type="phone" position="bottom-32 left-[8%]" rotation={-4} delay={1} />
+      <DeviceMockup type="tablet" position="bottom-24 right-[3%]" rotation={8} delay={1.5} />
+      <DeviceMockup type="laptop" position="top-[55%] left-[0%]" rotation={4} delay={0.8} />
+      <DeviceMockup type="phone" position="top-[40%] right-[2%]" rotation={-6} delay={1.2} />
       
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-6">
-          Designed for <span className="text-[#0071e3]">Publishers.</span>
+      <div className="relative z-10 text-center max-w-5xl mx-auto px-4">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-[#1d1d1f] mb-8 leading-tight">
+          Designed for{' '}
+          <span className="relative inline-block">
+            <span className="relative z-10">Publishers.</span>
+            <span className="absolute inset-0 bg-[#ffcc00] -skew-x-2 rounded-lg -z-10 scale-110" />
+          </span>
           <br />
-          Powered by <span className="relative inline-block">
+          Powered by{' '}
+          <span className="relative inline-block">
             <span className="relative z-10">Results.</span>
-            <span className="absolute bottom-2 left-0 right-0 h-3 bg-[#ffcc00]/50 -z-0" />
+            <span className="absolute -bottom-1 left-0 right-0 h-3 md:h-4" style={{ background: 'linear-gradient(90deg, #ff6b9d, #ff9eb5)' }} />
           </span>
         </h1>
         <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto leading-relaxed">
           A smarter way to publish starts with flexible, powerful tools that connect you to premium media outlets worldwide. Arcana Mace is designed to make publishing effortless, effective, and inspiring.
         </p>
       </div>
+      
+      {/* CSS for floating animation */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(var(--rotation, 0deg)); }
+          50% { transform: translateY(-20px) rotate(var(--rotation, 0deg)); }
+        }
+      `}</style>
     </section>
   );
 };
@@ -201,10 +283,15 @@ const HowItWorks = () => {
       </section>
 
       {/* Essential Tools Section */}
-      <section className="py-20 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
-            Essential tools. <br className="md:hidden" />Incredible possibilities.
+      <section className="py-24 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center mb-20">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f]">
+            Essential tools.
+            <br />
+            <span className="relative inline-block mt-2">
+              <span className="relative z-10">Incredible possibilities.</span>
+              <span className="absolute inset-0 bg-[#30d158] -skew-x-1 rounded-lg -z-10 scale-x-105 scale-y-110" />
+            </span>
           </h2>
         </div>
         
