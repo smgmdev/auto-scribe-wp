@@ -1,28 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, FileText, Globe, Zap, Shield, BarChart3, Clock, ChevronRight } from 'lucide-react';
+import { Search, User, FileText, Globe, Zap, Shield, BarChart3, Clock, ChevronRight, PenTool, Newspaper, BookOpen, Mic, Radio, Tv, Rss, Headphones, Mail, MessageSquare } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import amblack from '@/assets/amblack.png';
 
-const features = [
-  { icon: FileText, label: 'Write Articles' },
-  { icon: Globe, label: 'Global Reach' },
-  { icon: Zap, label: 'Instant Publishing' },
-  { icon: Shield, label: 'Quality Control' },
-  { icon: BarChart3, label: 'SEO Optimization' },
-  { icon: Clock, label: 'Fast Turnaround' },
+// Product-style icons (outline style like Apple devices)
+const products = [
+  { icon: FileText, label: 'Articles' },
+  { icon: Newspaper, label: 'Press Releases' },
+  { icon: BookOpen, label: 'Blog Posts' },
+  { icon: Mic, label: 'Interviews' },
+  { icon: Radio, label: 'Announcements' },
+  { icon: Tv, label: 'Features' },
 ];
 
+// Service-style icons (colorful app icons)
 const services = [
-  { icon: FileText, label: 'Articles' },
-  { icon: Globe, label: 'Press Releases' },
-  { icon: Zap, label: 'Blog Posts' },
-  { icon: Shield, label: 'News Stories' },
-  { icon: BarChart3, label: 'Feature Pieces' },
-  { icon: Clock, label: 'Announcements' },
+  { icon: PenTool, label: 'Editor', gradient: 'from-[#0066CC] to-[#5AC8FA]' },
+  { icon: Globe, label: 'Publish', gradient: 'from-[#34C759] to-[#30D158]' },
+  { icon: Rss, label: 'Distribute', gradient: 'from-[#FF9500] to-[#FFCC00]' },
+  { icon: BarChart3, label: 'Analytics', gradient: 'from-[#5856D6] to-[#AF52DE]' },
+  { icon: Zap, label: 'AI Writer', gradient: 'from-[#FF2D55] to-[#FF6482]' },
+  { icon: Shield, label: 'Quality', gradient: 'from-[#00C7BE] to-[#64D2FF]' },
+  { icon: Headphones, label: 'Support', gradient: 'from-[#FF3B30] to-[#FF6961]' },
+  { icon: Mail, label: 'Alerts', gradient: 'from-[#007AFF] to-[#5AC8FA]' },
+  { icon: MessageSquare, label: 'Chat', gradient: 'from-[#34C759] to-[#63E6BE]' },
+  { icon: BookOpen, label: 'Guides', gradient: 'from-[#FF9500] to-[#FFD60A]' },
 ];
 
 export default function SelfPublishing() {
@@ -253,32 +259,30 @@ export default function SelfPublishing() {
           </div>
         </section>
 
-        {/* Features Icons Grid */}
-        <section className="py-8 border-t border-b border-border">
+        {/* Products Icons Grid - Outline style like Apple devices */}
+        <section className="py-12 md:py-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-              {features.map((feature, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#f5f5f7] flex items-center justify-center">
-                    <feature.icon className="w-6 h-6 md:w-8 md:h-8 text-[#1d1d1f]" />
-                  </div>
-                  <span className="text-xs md:text-sm text-[#1d1d1f] font-medium">{feature.label}</span>
+            <div className="flex flex-wrap justify-center gap-10 md:gap-16 lg:gap-20">
+              {products.map((product, index) => (
+                <div key={index} className="flex flex-col items-center gap-3 group cursor-pointer">
+                  <product.icon className="w-12 h-12 md:w-16 md:h-16 text-[#1d1d1f] stroke-[1.2] group-hover:text-[#0071e3] transition-colors" />
+                  <span className="text-xs md:text-sm text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">{product.label}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Services Icons */}
-        <section className="py-8 border-b border-border bg-white">
+        {/* Services Icons - Colorful app icons like Apple services */}
+        <section className="py-10 md:py-12 border-t border-b border-[#d2d2d7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
               {services.map((service, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-[#0071e3] to-[#00c7be] flex items-center justify-center">
-                    <service.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                <div key={index} className="flex flex-col items-center gap-2 group cursor-pointer">
+                  <div className={`w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-gradient-to-br ${service.gradient} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform`}>
+                    <service.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                   </div>
-                  <span className="text-xs text-[#6e6e73]">{service.label}</span>
+                  <span className="text-[11px] md:text-xs text-[#6e6e73]">{service.label}</span>
                 </div>
               ))}
             </div>
