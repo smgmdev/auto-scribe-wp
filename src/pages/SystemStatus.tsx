@@ -225,12 +225,12 @@ export default function SystemStatus() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-16">
         <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 md:py-16">
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-2">
+          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-2 md:mb-8">
             System Status
           </h1>
           
-          {/* Refresh Button - under title */}
-          <div className="flex justify-center mb-8">
+          {/* Refresh Button - mobile only, under title */}
+          <div className="flex md:hidden justify-center mb-8">
             <button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
@@ -241,19 +241,30 @@ export default function SystemStatus() {
             </button>
           </div>
 
-          {/* Legend */}
-          <div className="flex items-center justify-end gap-4 flex-wrap mb-6">
-            <div className="flex items-center gap-2">
-              <StatusIndicator status="available" />
-              <span className="text-sm text-[#1d1d1f]">Available</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <StatusIndicator status="issue" />
-              <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <StatusIndicator status="outage" />
-              <span className="text-sm text-[#1d1d1f]">Outage</span>
+          {/* Legend and Refresh */}
+          <div className="flex items-center justify-between mb-6">
+            {/* Refresh - desktop only */}
+            <button
+              onClick={() => fetchStatus(true)}
+              disabled={isRefreshing}
+              className="hidden md:flex items-center gap-2 text-sm text-[#06c] hover:underline disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <div className="flex items-center gap-4 flex-wrap ml-auto">
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="available" />
+                <span className="text-sm text-[#1d1d1f]">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="issue" />
+                <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="outage" />
+                <span className="text-sm text-[#1d1d1f]">Outage</span>
+              </div>
             </div>
           </div>
 
