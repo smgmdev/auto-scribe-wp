@@ -17,7 +17,7 @@ export function Footer({ narrow = false, showTopBorder = false }: FooterProps) {
     : "container mx-auto px-4 pb-16";
 
   return (
-    <footer className={`bg-[#f5f5f7] ${narrow ? '' : 'mt-12'}`}>
+    <footer className={`bg-[#fafafa] ${narrow ? '' : 'mt-12'}`}>
       <div className={containerClass}>
         <div className={`${showTopBorder ? 'border-t border-[#d2d2d7]' : ''} pt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8`}>
           {/* Media Buying */}
