@@ -15,36 +15,28 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a clean pyramid - row 1 spans full width
+// Icon positions forming a clean pyramid - kept within container bounds
 const iconPositions = [
-  // Row 1 - full width (9 icons edge to edge)
-  { top: 0, left: '2%' },
-  { top: 0, left: '13%' },
-  { top: 0, left: '24%' },
-  { top: 0, left: '35%' },
-  { top: 0, left: '46%' },
-  { top: 0, left: '57%' },
-  { top: 0, left: '68%' },
-  { top: 0, left: '79%' },
-  { top: 0, left: '90%' },
-  // Row 2 - 7 icons (narrower)
-  { top: 100, left: '13%' },
-  { top: 100, left: '24%' },
-  { top: 100, left: '35%' },
-  { top: 100, left: '46%' },
-  { top: 100, left: '57%' },
-  { top: 100, left: '68%' },
-  { top: 100, left: '79%' },
-  // Row 3 - 5 icons
-  { top: 200, left: '24%' },
-  { top: 200, left: '35%' },
-  { top: 200, left: '46%' },
-  { top: 200, left: '57%' },
-  { top: 200, left: '68%' },
-  // Row 4 - 3 icons
-  { top: 300, left: '35%' },
-  { top: 300, left: '46%' },
-  { top: 300, left: '57%' },
+  // Row 1 - full width (7 icons, properly spaced within bounds)
+  { top: 10, left: '5%' },
+  { top: 10, left: '17%' },
+  { top: 10, left: '29%' },
+  { top: 10, left: '41%' },
+  { top: 10, left: '53%' },
+  { top: 10, left: '65%' },
+  { top: 10, left: '77%' },
+  // Row 2 - 5 icons (narrower)
+  { top: 110, left: '17%' },
+  { top: 110, left: '29%' },
+  { top: 110, left: '41%' },
+  { top: 110, left: '53%' },
+  { top: 110, left: '65%' },
+  // Row 3 - 3 icons
+  { top: 210, left: '29%' },
+  { top: 210, left: '41%' },
+  { top: 210, left: '53%' },
+  // Row 4 - 1 icon (just above logo)
+  { top: 310, left: '41%' },
 ];
 
 const ICON_SIZE = 88;
@@ -237,7 +229,7 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid */}
         <div 
           className="absolute"
-          style={{ top: 400, left: '46%' }}
+          style={{ top: 410, left: '41%' }}
         >
           <div className="relative" style={{ width: 128, height: 128 }}>
             {/* Orbiting glow dot */}
