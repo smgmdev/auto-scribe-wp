@@ -37,6 +37,7 @@ import Troubleshooting from "./pages/help/Troubleshooting";
 import SelfPublishing from "./pages/SelfPublishing";
 import MediaBuying from "./pages/MediaBuying";
 import HowItWorks from "./pages/HowItWorks";
+import SystemStatus from "./pages/SystemStatus";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +134,7 @@ const App = () => {
               <Route path="/self-publishing" element={<SelfPublishing />} />
               <Route path="/media-buying" element={<MediaBuying />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/system-status" element={<SystemStatus />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
