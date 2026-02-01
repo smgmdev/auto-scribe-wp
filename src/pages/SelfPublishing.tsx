@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv } from 'lucide-react';
+import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2 } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -30,12 +30,14 @@ export default function SelfPublishing() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [isLoadingSites, setIsLoadingSites] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
   // Fetch random media sites from local library using RPC
   useEffect(() => {
     const fetchMediaSites = async () => {
+      setIsLoadingSites(true);
       const { data } = await supabase.rpc('get_public_sites');
       
       if (data && data.length > 0) {
@@ -44,6 +46,7 @@ export default function SelfPublishing() {
         const shuffled = [...sitesWithFavicon].sort(() => Math.random() - 0.5);
         setMediaSites(shuffled.slice(0, 10));
       }
+      setIsLoadingSites(false);
     };
     fetchMediaSites();
   }, []);
@@ -285,25 +288,31 @@ export default function SelfPublishing() {
         {/* Media Sites - Dynamic from Local Library */}
         <section className="py-10 md:py-12 border-t border-b border-[#d2d2d7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
-              {mediaSites.map((site) => (
-                <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm border border-[#d2d2d7] overflow-hidden group-hover:scale-105 transition-transform">
-                    {site.favicon ? (
-                      <img 
-                        src={site.favicon} 
-                        alt={site.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-[11px] md:text-xs text-[#6e6e73] text-center">{site.name}</span>
+            <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12 min-h-[80px]">
+              {isLoadingSites ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
                 </div>
-              ))}
+              ) : (
+                mediaSites.map((site) => (
+                  <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm border border-[#d2d2d7] overflow-hidden group-hover:scale-105 transition-transform">
+                      {site.favicon ? (
+                        <img 
+                          src={site.favicon} 
+                          alt={site.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[11px] md:text-xs text-[#6e6e73] text-center">{site.name}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>
