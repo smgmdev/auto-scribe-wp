@@ -621,43 +621,6 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* AI-Powered Section - Apple Intelligence Style */}
-      <section className="py-8 md:py-12 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <div className="bg-[#1d1d1f] rounded-3xl py-16 md:py-24 px-8 md:px-16 text-center">
-            {/* Gradient Icon */}
-            <div className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-8 rounded-[22px] bg-gradient-to-br from-[#2997ff] via-[#a855f7] to-[#ec4899] flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl md:text-3xl font-semibold">AI</span>
-            </div>
-            
-            <p className="text-xl md:text-2xl font-semibold text-white/80 mb-4">
-              AI-Powered Publishing
-            </p>
-            
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-[#2997ff] via-[#a855f7] to-[#ec4899] bg-clip-text text-transparent">All-new</span>
-              <br />
-              <span className="bg-gradient-to-r from-[#ec4899] via-[#f97316] to-[#f97316] bg-clip-text text-transparent">powers.</span>
-            </h2>
-            
-            <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-8 leading-relaxed">
-              With the capabilities provided by advanced AI, 
-              this marks the start of a new era for content creation. Get 
-              articles written effortlessly with built-in intelligence 
-              features that make publishing more powerful every day.
-            </p>
-            
-            <button 
-              onClick={() => navigate('/about')}
-              className="text-[#2997ff] hover:underline inline-flex items-center gap-1 text-lg"
-            >
-              Learn more about AI Publishing ›
-            </button>
-          </div>
-        </div>
-      </section>
-
-
 
       {/* Step-by-Step Guide Section - Apple Developer Style */}
       <section className="py-16 md:py-24 bg-white border-t border-gray-200">
