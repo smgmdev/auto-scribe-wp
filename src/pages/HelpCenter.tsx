@@ -215,7 +215,7 @@ export default function HelpCenter() {
               </PopoverTrigger>
               <PopoverContent 
                 align="end" 
-                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50"
+                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 data-[state=open]:animate-[slideDown_0.3s_ease-out] data-[state=closed]:animate-[slideUp_0.2s_ease-out]"
                 sideOffset={12}
               >
                 <div className="max-w-[980px] mx-auto py-8 px-4 md:px-6">
@@ -239,6 +239,14 @@ export default function HelpCenter() {
           </div>
         </div>
       </div>
+
+      {/* Blur overlay when topics menu is open */}
+      {isTopicsOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 animate-fade-in"
+          onClick={() => setIsTopicsOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <main className="flex-1 pt-8">

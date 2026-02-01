@@ -243,6 +243,26 @@ export default {
 			'orbit-spin-3': {
 				'0%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(0deg)' },
 				'100%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(360deg)' }
+			},
+			'slideDown': {
+				from: {
+					opacity: '0',
+					transform: 'translateY(-100%)'
+				},
+				to: {
+					opacity: '1',
+					transform: 'translateY(0)'
+				}
+			},
+			'slideUp': {
+				from: {
+					opacity: '1',
+					transform: 'translateY(0)'
+				},
+				to: {
+					opacity: '0',
+					transform: 'translateY(-100%)'
+				}
 			}
 		},
 		animation: {
