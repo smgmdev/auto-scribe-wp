@@ -236,15 +236,24 @@ export default function MediaBuying() {
 
         {/* Central icon and title - below the pyramid */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-16">
-          <div 
-            className="mb-4 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-[#0071e3]"
-            style={{ 
-              width: 120, 
-              height: 120, 
-              borderRadius: 28
-            }}
-          >
-            <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
+          {/* Glow wrapper */}
+          <div className="relative mb-4" style={{ width: 128, height: 128 }}>
+            {/* Rotating gradient glow */}
+            <div 
+              className="absolute inset-0 animate-border-glow"
+              style={{
+                borderRadius: 30,
+                background: 'conic-gradient(from 0deg, #0071e3, #00d4ff, #0071e3, #00d4ff, #0071e3)',
+                filter: 'blur(8px)',
+              }}
+            />
+            {/* Inner container */}
+            <div 
+              className="absolute inset-1 flex items-center justify-center shadow-2xl overflow-hidden bg-white"
+              style={{ borderRadius: 26 }}
+            >
+              <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
+            </div>
           </div>
           <h2 className="text-2xl md:text-3xl font-medium text-foreground">Arcana Mace</h2>
         </div>
