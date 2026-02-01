@@ -99,8 +99,37 @@ export default function About() {
   const { user } = useAuth();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Scroll spy effect to track active section
+  useEffect(() => {
+    const sections = ['overview', 'features', 'security', 'faq'];
+    
+    const observerOptions = {
+      root: scrollContainerRef.current,
+      rootMargin: '-20% 0px -60% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach((sectionId) => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -193,25 +222,25 @@ export default function About() {
             <nav className="hidden md:flex items-center gap-6">
               <button 
                 onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm transition-colors ${activeSection === 'overview' ? 'text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Overview
               </button>
               <button 
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm transition-colors ${activeSection === 'features' ? 'text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Features
               </button>
               <button 
                 onClick={() => document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm transition-colors ${activeSection === 'security' ? 'text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Security
               </button>
               <button 
                 onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm transition-colors ${activeSection === 'faq' ? 'text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 FAQ
               </button>
