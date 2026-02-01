@@ -375,86 +375,86 @@ export default function MediaBuying() {
             }}
           >
             {/* Card 1 - Dark */}
-            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-[#1d1d1f] rounded-3xl p-8 flex flex-col min-h-[420px]">
-              <p className="text-xs font-medium text-white/60 tracking-wide uppercase mb-3">Premium Publications</p>
-              <h3 className="text-2xl md:text-3xl font-semibold text-white leading-tight mb-3">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-[#1d1d1f] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
+              <p className="text-xs font-medium text-white/60 tracking-wide uppercase mb-2">Premium Publications</p>
+              <h3 className="text-2xl md:text-[28px] font-semibold text-white leading-tight mb-2">
                 Best in class.<br />
                 For brands that lead.
               </h3>
-              <p className="text-white/60 text-sm mb-6">
+              <p className="text-white/60 text-sm leading-relaxed">
                 Access top-tier publications trusted by Fortune 500 companies and industry leaders.
               </p>
-              <div className="mt-auto flex items-end justify-center">
-                <div className="flex gap-2">
+              <div className="mt-auto pt-8 flex items-end justify-center flex-1">
+                <div className="flex gap-3">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="w-16 h-16 bg-white/10 rounded-xl" />
+                    <div key={i} className="w-20 h-20 md:w-24 md:h-24 bg-white/10 rounded-2xl" />
                   ))}
                 </div>
               </div>
             </div>
 
             {/* Card 2 - Light */}
-            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-white rounded-3xl p-8 flex flex-col min-h-[420px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Agency Network</p>
-              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-white rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Agency Network</p>
+              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
                 Work with experts who deliver.
               </h3>
-              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
                 Our verified agencies handle everything from content creation to publication placement.
               </p>
-              <div className="mt-auto flex items-end justify-center">
+              <div className="mt-auto pt-8 flex items-end justify-center flex-1">
                 <div className="grid grid-cols-2 gap-3">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-20 h-14 bg-[#f5f5f7] rounded-xl" />
+                    <div key={i} className="w-24 h-20 md:w-28 md:h-24 bg-[#f5f5f7] rounded-2xl" />
                   ))}
                 </div>
               </div>
             </div>
 
             {/* Card 3 - Green tint */}
-            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] rounded-3xl p-8 flex flex-col min-h-[420px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Guaranteed Results</p>
-              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Guaranteed Results</p>
+              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
                 100% publication guarantee.
               </h3>
-              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
                 Your article gets published or you get a full refund. No questions asked.
               </p>
-              <div className="mt-auto flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center">
-                  <CheckCircle className="w-12 h-12 text-green-600/60" />
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/60 flex items-center justify-center">
+                  <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-green-600/50" />
                 </div>
               </div>
             </div>
 
             {/* Card 4 - Blue tint */}
-            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-gradient-to-br from-[#e3f2fd] to-[#bbdefb] rounded-3xl p-8 flex flex-col min-h-[420px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Global Reach</p>
-              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-gradient-to-br from-[#e3f2fd] to-[#bbdefb] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Global Reach</p>
+              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
                 Reach audiences worldwide.
               </h3>
-              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
                 Publications in 40+ countries. Target by region, language, or industry.
               </p>
-              <div className="mt-auto flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center">
-                  <Globe className="w-12 h-12 text-blue-600/60" />
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/60 flex items-center justify-center">
+                  <Globe className="w-16 h-16 md:w-20 md:h-20 text-blue-600/50" />
                 </div>
               </div>
             </div>
 
             {/* Card 5 - Orange tint */}
-            <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-gradient-to-br from-[#fff3e0] to-[#ffe0b2] rounded-3xl p-8 flex flex-col min-h-[420px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-3">Fast Turnaround</p>
-              <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight mb-3">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-gradient-to-br from-[#fff3e0] to-[#ffe0b2] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
+              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Fast Turnaround</p>
+              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
                 Published in 24-72 hours.
               </h3>
-              <p className="text-[#1d1d1f]/60 text-sm mb-6">
+              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
                 Time-sensitive campaign? Most publications offer express delivery options.
               </p>
-              <div className="mt-auto flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white/60 flex items-center justify-center">
-                  <Zap className="w-12 h-12 text-orange-500/60" />
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/60 flex items-center justify-center">
+                  <Zap className="w-16 h-16 md:w-20 md:h-20 text-orange-500/50" />
                 </div>
               </div>
             </div>
