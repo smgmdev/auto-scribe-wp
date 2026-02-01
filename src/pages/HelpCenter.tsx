@@ -321,7 +321,7 @@ export default function HelpCenter() {
                       <li key={topicIndex}>
                         <button 
                           onClick={() => navigate(`/help/${category.slug}`)}
-                          className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
+                          className="text-base text-muted-foreground hover:text-foreground transition-colors text-left"
                         >
                           {topic}
                         </button>
@@ -330,7 +330,7 @@ export default function HelpCenter() {
                   </ul>
                   <button 
                     onClick={() => navigate(`/help/${category.slug}`)}
-                    className="text-[#06c] text-sm font-medium hover:underline inline-flex items-center gap-1"
+                    className="text-[#06c] text-base font-medium hover:underline inline-flex items-center gap-1"
                   >
                     Learn more
                     <ChevronRight className="h-4 w-4" />
