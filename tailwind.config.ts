@@ -247,21 +247,25 @@ export default {
 			'slideDown': {
 				'0%': {
 					opacity: '0',
-					transform: 'translateY(-8px)'
+					transform: 'translateY(-100%)',
+					maxHeight: '0'
 				},
 				'100%': {
 					opacity: '1',
-					transform: 'translateY(0)'
+					transform: 'translateY(0)',
+					maxHeight: '500px'
 				}
 			},
 			'slideUp': {
 				'0%': {
 					opacity: '1',
-					transform: 'translateY(0)'
+					transform: 'translateY(0)',
+					maxHeight: '500px'
 				},
 				'100%': {
 					opacity: '0',
-					transform: 'translateY(-8px)'
+					transform: 'translateY(-100%)',
+					maxHeight: '0'
 				}
 			}
 		},
