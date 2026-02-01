@@ -84,14 +84,21 @@ const Index = () => {
   const [isApprovedAgency, setIsApprovedAgency] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Reset to dashboard view on initial login/page load
+  // Reset to dashboard view on initial login/page load, or navigate to view from URL param
   useEffect(() => {
-    // Only reset to dashboard if there's no deep-link navigation state
     const state = location.state as LocationState | null;
-    if (!state?.targetView) {
+    const searchParams = new URLSearchParams(location.search);
+    const viewParam = searchParams.get('view');
+    
+    // Check URL query param first, then location state
+    if (viewParam) {
+      setCurrentView(viewParam as any);
+    } else if (state?.targetView) {
+      // Handle state-based navigation (handled elsewhere)
+    } else {
       setCurrentView('dashboard');
     }
-  }, []);
+  }, [location.search]);
 
   // Scroll to top when view changes
   useEffect(() => {
