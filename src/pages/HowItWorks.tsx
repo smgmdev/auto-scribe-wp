@@ -1,71 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User } from 'lucide-react';
+import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 
-// Scroll-highlighted text section component
-const ScrollHighlightSection = ({ 
-  children, 
-  className = '' 
-}: { 
-  children: React.ReactNode; 
-  className?: string;
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!ref.current) return;
-      
-      const rect = ref.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const elementTop = rect.top;
-      const elementHeight = rect.height;
-      
-      // Start revealing when element enters viewport from bottom
-      // Complete when element is centered
-      const startPoint = windowHeight * 0.8;
-      const endPoint = windowHeight * 0.3;
-      
-      if (elementTop > startPoint) {
-        setProgress(0);
-      } else if (elementTop < endPoint) {
-        setProgress(1);
-      } else {
-        const range = startPoint - endPoint;
-        const currentProgress = (startPoint - elementTop) / range;
-        setProgress(Math.max(0, Math.min(1, currentProgress)));
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <div ref={ref} className={className}>
-      <div 
-        style={{
-          background: `linear-gradient(to right, #1d1d1f ${progress * 100}%, #86868b ${progress * 100}%)`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
-
-// Scroll-reveal row component for Apple Arcade style section
+// Scroll-reveal row component
 const ScrollRevealRow = ({ 
   highlightText, 
   normalText,
@@ -86,8 +28,8 @@ const ScrollRevealRow = ({
         }
       },
       {
-        threshold: 0.5,
-        rootMargin: '-10% 0px -10% 0px'
+        threshold: 0.3,
+        rootMargin: '-5% 0px -5% 0px'
       }
     );
 
@@ -101,19 +43,19 @@ const ScrollRevealRow = ({
   return (
     <div 
       ref={ref}
-      className={`text-center mb-8 md:mb-12 transition-all duration-700 ease-out ${
+      className={`text-center mb-10 md:mb-14 transition-all duration-700 ease-out ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'
       }`}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      style={{ transitionDelay: `${index * 50}ms` }}
     >
       <p className="text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
-        <span className="text-[#ff453a]">{highlightText}</span>
+        <span className="text-[#0071e3]">{highlightText}</span>
         {normalText && (
           <>
-            <br className="md:hidden" />
-            <span className="text-[#1d1d1f]"> {normalText}</span>
+            <br />
+            <span className="text-[#1d1d1f]">{normalText}</span>
           </>
         )}
       </p>
@@ -121,171 +63,52 @@ const ScrollRevealRow = ({
   );
 };
 
-// Feature benefits section with scroll reveal
-const FeatureBenefitsSection = () => {
-  const features = [
-    { highlight: "Publish anywhere.", normal: "All from one platform." },
-    { highlight: "Connect once,", normal: "publish forever." },
-    { highlight: "No hidden fees.", normal: "No surprise costs. No complexity." },
-    { highlight: "AI-powered writing", normal: "to save you hours." },
-    { highlight: "Premium outlets.", normal: "Verified agencies. Real results." },
-  ];
-
-  return (
-    <section className="py-24 md:py-32 bg-white">
-      <div className="max-w-[980px] mx-auto px-4 md:px-6">
-        {features.map((feature, index) => (
-          <ScrollRevealRow
-            key={index}
-            highlightText={feature.highlight}
-            normalText={feature.normal}
-            index={index}
-          />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// Floating device mockup component
-const DeviceMockup = ({ 
-  type, 
-  position, 
-  rotation = 0,
-  delay = 0 
-}: { 
-  type: 'laptop' | 'tablet' | 'phone';
-  position: string;
-  rotation?: number;
-  delay?: number;
-}) => {
-  const sizes = {
-    laptop: 'w-72 h-48 md:w-80 md:h-52',
-    tablet: 'w-48 h-64 md:w-56 md:h-72',
-    phone: 'w-28 h-56 md:w-32 md:h-64'
-  };
-  
-  const bgColors = {
-    laptop: 'from-slate-100 to-slate-200',
-    tablet: 'from-amber-50 to-orange-100',
-    phone: 'from-blue-50 to-indigo-100'
-  };
-  
-  return (
-    <div 
-      className={`absolute ${position} ${sizes[type]} hidden lg:block`}
-      style={{ 
-        transform: `rotate(${rotation}deg)`,
-        animation: `float 6s ease-in-out infinite`,
-        animationDelay: `${delay}s`
-      }}
-    >
-      <div className={`w-full h-full rounded-2xl bg-gradient-to-br ${bgColors[type]} shadow-xl border border-white/50 overflow-hidden`}>
-        {type === 'laptop' && (
-          <>
-            <div className="h-4 bg-slate-300 flex items-center px-2 gap-1">
-              <div className="w-2 h-2 rounded-full bg-red-400" />
-              <div className="w-2 h-2 rounded-full bg-yellow-400" />
-              <div className="w-2 h-2 rounded-full bg-green-400" />
-            </div>
-            <div className="p-3 space-y-2">
-              <div className="h-3 bg-slate-300/60 rounded w-3/4" />
-              <div className="h-2 bg-slate-300/40 rounded w-full" />
-              <div className="h-2 bg-slate-300/40 rounded w-5/6" />
-            </div>
-          </>
-        )}
-        {type === 'tablet' && (
-          <div className="p-4 space-y-3">
-            <div className="h-4 bg-orange-200/60 rounded w-2/3" />
-            <div className="h-24 bg-orange-100/80 rounded-lg" />
-            <div className="h-2 bg-orange-200/40 rounded w-full" />
-            <div className="h-2 bg-orange-200/40 rounded w-4/5" />
-          </div>
-        )}
-        {type === 'phone' && (
-          <div className="p-2 space-y-2">
-            <div className="h-2 bg-indigo-200/60 rounded w-1/2 mx-auto" />
-            <div className="h-16 bg-indigo-100/80 rounded-lg" />
-            <div className="h-1.5 bg-indigo-200/40 rounded w-full" />
-            <div className="h-1.5 bg-indigo-200/40 rounded w-3/4" />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Hero section with floating images
-const HeroSection = () => {
-  return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-white pt-24">
-      {/* Floating device mockups */}
-      <DeviceMockup type="laptop" position="top-32 left-[2%]" rotation={-8} delay={0} />
-      <DeviceMockup type="tablet" position="top-24 right-[5%]" rotation={6} delay={0.5} />
-      <DeviceMockup type="phone" position="bottom-32 left-[8%]" rotation={-4} delay={1} />
-      <DeviceMockup type="tablet" position="bottom-24 right-[3%]" rotation={8} delay={1.5} />
-      <DeviceMockup type="laptop" position="top-[55%] left-[0%]" rotation={4} delay={0.8} />
-      <DeviceMockup type="phone" position="top-[40%] right-[2%]" rotation={-6} delay={1.2} />
-      
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-4">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-[#1d1d1f] mb-8 leading-tight">
-          Designed for{' '}
-          <span className="relative inline-block">
-            <span className="relative z-10">Publishers.</span>
-            <span className="absolute inset-0 bg-[#ffcc00] -skew-x-2 rounded-lg -z-10 scale-110" />
-          </span>
-          <br />
-          Powered by{' '}
-          <span className="relative inline-block">
-            <span className="relative z-10">Results.</span>
-            <span className="absolute -bottom-1 left-0 right-0 h-3 md:h-4" style={{ background: 'linear-gradient(90deg, #ff6b9d, #ff9eb5)' }} />
-          </span>
-        </h1>
-        <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto leading-relaxed">
-          A smarter way to publish starts with flexible, powerful tools that connect you to premium media outlets worldwide. Arcana Mace is designed to make publishing effortless, effective, and inspiring.
-        </p>
-      </div>
-      
-      {/* CSS for floating animation */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(var(--rotation, 0deg)); }
-          50% { transform: translateY(-20px) rotate(var(--rotation, 0deg)); }
-        }
-      `}</style>
-    </section>
-  );
-};
-
-// Feature card with image
+// Feature card component
 const FeatureCard = ({ 
+  icon: Icon, 
   title, 
-  description, 
-  imagePosition = 'right',
-  bgColor = 'bg-[#f5f5f7]'
+  description,
+  delay = 0
 }: { 
+  icon: React.ElementType;
   title: string; 
   description: string;
-  imagePosition?: 'left' | 'right';
-  bgColor?: string;
+  delay?: number;
 }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className={`py-20 ${bgColor}`}>
-      <div className="max-w-[980px] mx-auto px-4 md:px-6">
-        <div className={`flex flex-col ${imagePosition === 'left' ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12`}>
-          <div className="flex-1">
-            <h3 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] mb-4">{title}</h3>
-            <p className="text-lg text-[#86868b] leading-relaxed">{description}</p>
-          </div>
-          <div className="flex-1">
-            <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-              <div className="w-3/4 h-3/4 rounded-xl bg-white shadow-lg" />
-            </div>
-          </div>
-        </div>
+    <div 
+      ref={ref}
+      className={`text-center transition-all duration-700 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-[#0071e3] flex items-center justify-center">
+        <Icon className="w-8 h-8 text-white" />
       </div>
-    </section>
+      <h3 className="text-xl font-semibold text-[#1d1d1f] mb-3">{title}</h3>
+      <p className="text-[#86868b] leading-relaxed">{description}</p>
+    </div>
   );
 };
 
@@ -294,55 +117,49 @@ const HowItWorks = () => {
   const { user } = useAuth();
   const [showSearchModal, setShowSearchModal] = useState(false);
 
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  const features = [
+    { highlight: "Premium media outlets", normal: "in every category imaginable." },
+    { highlight: "Self-publish instantly", normal: "to your own WordPress sites." },
+    { highlight: "AI-powered writing", normal: "to create articles in seconds." },
+    { highlight: "Transparent pricing", normal: "with no hidden fees or surprises." },
+    { highlight: "Global reach", normal: "across all major markets." },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
-        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
+        <div className="max-w-[980px] mx-auto flex h-12 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
-            <span className="text-lg font-semibold text-neutral-900">Arcana Mace</span>
+            <img src={amblack} alt="Arcana Mace" className="h-8 w-8" />
+            <span className="text-sm font-medium text-neutral-900">Arcana Mace</span>
           </div>
           
-          {/* Search Trigger - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-500 hover:bg-neutral-200 transition-colors text-left"
-            >
-              <Search className="h-4 w-4" />
-              <span>Search media outlets...</span>
-            </button>
-          </div>
-          
-          {/* Right side buttons */}
           <div className="flex items-center gap-2">
-            {/* Mobile Search Icon */}
             <Button
               variant="ghost"
-              size="icon"
-              className="md:hidden hover:bg-black hover:text-white"
+              size="sm"
+              className="text-xs"
               onClick={() => setShowSearchModal(true)}
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-4 w-4" />
             </Button>
             
-            {user ? (
-              <Button 
-                onClick={() => navigate('/dashboard')}
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
-              >
-                <User className="h-4 w-4" />
-                Account
-              </Button>
-            ) : (
-              <Button 
-                onClick={() => navigate('/auth')}
-                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
-              >
-                Sign In
-              </Button>
-            )}
+            <Button 
+              onClick={handleGetStarted}
+              size="sm"
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full text-xs px-4"
+            >
+              Get Started
+            </Button>
           </div>
         </div>
       </header>
@@ -351,189 +168,297 @@ const HowItWorks = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Hero Section */}
-      <HeroSection />
-
-      {/* Scroll-Highlighted Text Section */}
-      <section className="py-32 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <ScrollHighlightSection className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight text-center">
-            Arcana Mace connects you to a global network of premium media outlets. 
-            From self-publishing to agency partnerships, we make it simple to share 
-            your story with the world.
-          </ScrollHighlightSection>
-        </div>
-      </section>
-
-      {/* Essential Tools Section */}
-      <section className="py-24 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center mb-20">
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f]">
-            Essential tools.
-            <br />
-            <span className="relative inline-block mt-2">
-              <span className="relative z-10">Incredible possibilities.</span>
-              <span className="absolute inset-0 bg-[#30d158] -skew-x-1 rounded-lg -z-10 scale-x-105 scale-y-110" />
-            </span>
-          </h2>
-        </div>
-        
-        {/* Self Publishing Card */}
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-12">
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="flex-1">
-                <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                  Self Publishing. <em className="not-italic text-[#86868b]">Simple.</em> Powerful. Packed with potential.
-                </h3>
-                <p className="text-lg text-[#86868b] mb-6">
-                  Connect your WordPress site and publish directly to your own platform. With seamless integration and AI-powered tools, your content reaches audiences faster than ever.
-                </p>
-                <Button 
-                  onClick={() => navigate('/self-publishing')}
-                  className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-6"
-                >
-                  Learn more about Self Publishing
-                </Button>
-              </div>
-              <div className="flex-1">
-                <div className="aspect-video rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                  <div className="w-3/4 h-3/4 rounded-xl bg-white shadow-lg border border-gray-100" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Media Buying Card */}
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm">
-            <div className="flex flex-col md:flex-row-reverse items-center gap-8">
-              <div className="flex-1">
-                <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                  Media Buying. <em className="not-italic text-[#86868b]">Global reach.</em> Premium placements.
-                </h3>
-                <p className="text-lg text-[#86868b] mb-6">
-                  Access a curated network of high-authority media outlets. From business publications to crypto news sites, place your content where it matters most.
-                </p>
-                <Button 
-                  onClick={() => navigate('/media-buying')}
-                  className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-6"
-                >
-                  Learn more about Media Buying
-                </Button>
-              </div>
-              <div className="flex-1">
-                <div className="aspect-video rounded-2xl bg-gradient-to-br from-orange-50 to-amber-100 flex items-center justify-center">
-                  <div className="w-3/4 h-3/4 rounded-xl bg-white shadow-lg border border-gray-100" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Benefits Section - Apple Arcade Style */}
-      <FeatureBenefitsSection />
-
-      {/* Another Scroll-Highlighted Section */}
-      <section className="py-32 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <ScrollHighlightSection className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight text-center">
-            Responsibly designed for the future. And for your success.
-          </ScrollHighlightSection>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-20 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-[#0071e3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-[#1d1d1f] mb-3">Secure Transactions</h3>
-              <p className="text-[#86868b]">Your payments and data are protected with enterprise-grade security.</p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-[#1d1d1f] mb-3">Quality Assurance</h3>
-              <p className="text-[#86868b]">Every media outlet is vetted to ensure premium placement for your content.</p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-purple-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-[#1d1d1f] mb-3">Fast Delivery</h3>
-              <p className="text-[#86868b]">Get your content published quickly with our streamlined workflow.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final Scroll Section */}
-      <section className="py-32 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <ScrollHighlightSection className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight text-center">
-            Built-in tools for writing, publishing, and growing your reach.
-          </ScrollHighlightSection>
-        </div>
-      </section>
-
-      {/* AI Generation Section */}
-      <section className="py-20 bg-[#1d1d1f] text-white">
+      <section className="pt-32 pb-16 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold mb-6">
-            AI Article Generation
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-            Transform headlines into compelling articles with our AI-powered writing tools. Save time while maintaining quality and authenticity.
+          {/* Logo */}
+          <div className="w-20 h-20 mx-auto mb-6 rounded-[22px] bg-gradient-to-br from-[#0071e3] to-[#00c7be] flex items-center justify-center shadow-lg">
+            <Globe className="w-10 h-10 text-white" />
+          </div>
+          
+          <p className="text-[#86868b] text-lg mb-4">Arcana Mace</p>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
+            Endless reach.
+            <br />
+            Endlessly effective.
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+            Discover an incredibly diverse network of premium media outlets worldwide. 
+            Publish your content where it matters most, from self-publishing to agency partnerships.
+            And enjoy it all on a platform designed for publishers and creators.
           </p>
+          
           <Button 
-            onClick={() => {
-              if (user) {
-                navigate('/dashboard', { state: { targetView: 'compose' } });
-              } else {
-                navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'compose' } });
-              }
-            }}
-            className="bg-white text-[#1d1d1f] hover:bg-gray-100 rounded-full px-8 py-6 text-lg"
+            onClick={handleGetStarted}
+            className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
           >
-            Start Writing with AI
+            Start Publishing
           </Button>
         </div>
       </section>
 
+      {/* Phone Mockups Section */}
+      <section className="py-8 overflow-hidden bg-[#f5f5f7]">
+        <div className="flex gap-6 animate-scroll-left">
+          {[...Array(8)].map((_, i) => (
+            <div 
+              key={i} 
+              className="flex-shrink-0 w-64 h-[520px] rounded-[40px] bg-white shadow-xl border border-gray-200 overflow-hidden"
+            >
+              <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+                <div className="w-24 h-6 mx-auto mb-4 rounded-full bg-black" />
+                <div className="space-y-3">
+                  <div className="h-32 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100" />
+                  <div className="h-4 rounded bg-gray-200 w-3/4" />
+                  <div className="h-3 rounded bg-gray-200 w-1/2" />
+                  <div className="h-24 rounded-2xl bg-gradient-to-br from-orange-100 to-pink-100" />
+                  <div className="h-4 rounded bg-gray-200 w-2/3" />
+                  <div className="h-3 rounded bg-gray-200 w-1/3" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <style>{`
+          @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-scroll-left {
+            animation: scroll-left 30s linear infinite;
+          }
+        `}</style>
+      </section>
+
+      {/* Feature Bullets Section */}
+      <section className="py-24 md:py-32 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {features.map((feature, index) => (
+            <ScrollRevealRow
+              key={index}
+              highlightText={feature.highlight}
+              normalText={feature.normal}
+              index={index}
+            />
+          ))}
+          
+          <div className="text-center mt-12">
+            <Button 
+              onClick={handleGetStarted}
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
+            >
+              Start Publishing
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Steps */}
+      <section className="py-24 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-4">
+            How it works
+          </h2>
+          <p className="text-xl text-[#86868b] text-center mb-16 max-w-2xl mx-auto">
+            From signup to published article in minutes. Here's everything you need to know.
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-12">
+            <FeatureCard
+              icon={Users}
+              title="Create Your Account"
+              description="Sign up for free and get instant access to our platform. No credit card required to start exploring."
+              delay={0}
+            />
+            <FeatureCard
+              icon={FileText}
+              title="Choose Your Path"
+              description="Self-publish to your own sites, or browse our global network of premium media outlets for placements."
+              delay={100}
+            />
+            <FeatureCard
+              icon={TrendingUp}
+              title="Publish & Grow"
+              description="Submit your content, track your orders, and watch your reach expand across the digital landscape."
+              delay={200}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Self Publishing Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-6">
+                Self Publishing
+              </h2>
+              <p className="text-xl text-[#86868b] mb-6 leading-relaxed">
+                Connect your WordPress sites and publish directly to your own platforms. 
+                With seamless integration, AI-powered writing tools, and one-click publishing, 
+                your content reaches audiences faster than ever.
+              </p>
+              <ul className="space-y-4 mb-8">
+                {['Connect unlimited WordPress sites', 'AI article generation', 'One-click publishing', 'Full editorial control'].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-[#1d1d1f]">
+                    <div className="w-6 h-6 rounded-full bg-[#30d158] flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button 
+                onClick={() => navigate('/self-publishing')}
+                variant="outline"
+                className="rounded-full px-6 border-[#0071e3] text-[#0071e3] hover:bg-[#0071e3] hover:text-white"
+              >
+                Learn more about Self Publishing
+              </Button>
+            </div>
+            <div className="flex-1">
+              <div className="aspect-square rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
+                <div className="w-full h-full rounded-2xl bg-white shadow-2xl border border-gray-100 p-6">
+                  <div className="space-y-4">
+                    <div className="h-4 rounded bg-gray-200 w-1/2" />
+                    <div className="h-32 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200" />
+                    <div className="h-3 rounded bg-gray-200 w-full" />
+                    <div className="h-3 rounded bg-gray-200 w-4/5" />
+                    <div className="h-3 rounded bg-gray-200 w-3/4" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Media Buying Section */}
+      <section className="py-24 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row-reverse items-center gap-12">
+            <div className="flex-1">
+              <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-6">
+                Media Buying
+              </h2>
+              <p className="text-xl text-[#86868b] mb-6 leading-relaxed">
+                Access a curated network of high-authority media outlets. From business 
+                publications to crypto news sites, place your content where it matters most 
+                with verified agencies worldwide.
+              </p>
+              <ul className="space-y-4 mb-8">
+                {['Premium outlet network', 'Verified agency partners', 'Transparent pricing', 'Fast delivery times'].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-[#1d1d1f]">
+                    <div className="w-6 h-6 rounded-full bg-[#0071e3] flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button 
+                onClick={() => navigate('/media-buying')}
+                variant="outline"
+                className="rounded-full px-6 border-[#0071e3] text-[#0071e3] hover:bg-[#0071e3] hover:text-white"
+              >
+                Learn more about Media Buying
+              </Button>
+            </div>
+            <div className="flex-1">
+              <div className="aspect-square rounded-3xl bg-gradient-to-br from-orange-50 to-amber-100 flex items-center justify-center p-8">
+                <div className="w-full h-full rounded-2xl bg-white shadow-2xl border border-gray-100 p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="aspect-square rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <Globe className="w-8 h-8 text-gray-400" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-24 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-4">
+            Everything you need
+          </h2>
+          <p className="text-xl text-[#86868b] text-center mb-16 max-w-2xl mx-auto">
+            A complete platform for content publishing and distribution.
+          </p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard
+              icon={Zap}
+              title="AI Article Generation"
+              description="Transform headlines into compelling articles with our AI-powered writing tools."
+              delay={0}
+            />
+            <FeatureCard
+              icon={Globe}
+              title="Global Network"
+              description="Access premium media outlets across every major market and category."
+              delay={100}
+            />
+            <FeatureCard
+              icon={Shield}
+              title="Secure Payments"
+              description="Enterprise-grade security for all transactions and data protection."
+              delay={200}
+            />
+            <FeatureCard
+              icon={Users}
+              title="Agency Partnerships"
+              description="Work with verified agencies who manage premium media placements."
+              delay={300}
+            />
+            <FeatureCard
+              icon={FileText}
+              title="Content Management"
+              description="Organize, edit, and track all your articles in one central dashboard."
+              delay={400}
+            />
+            <FeatureCard
+              icon={TrendingUp}
+              title="Analytics & Insights"
+              description="Track your publishing performance and optimize your strategy."
+              delay={500}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-[#1d1d1f]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-white mb-6">
             Ready to get started?
           </h2>
-          <p className="text-xl text-[#86868b] max-w-2xl mx-auto mb-8">
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
             Join thousands of publishers who trust Arcana Mace to share their stories with the world.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               onClick={() => navigate('/auth')}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
+              className="bg-white text-[#1d1d1f] hover:bg-gray-100 rounded-full px-8 py-6 text-lg"
             >
               Create Free Account
             </Button>
             <Button 
               onClick={() => navigate('/help')}
               variant="outline"
-              className="rounded-full px-8 py-6 text-lg border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white"
+              className="rounded-full px-8 py-6 text-lg border-white text-white hover:bg-white hover:text-[#1d1d1f]"
             >
               Learn More
             </Button>
