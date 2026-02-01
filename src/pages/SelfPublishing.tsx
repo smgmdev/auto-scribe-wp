@@ -164,22 +164,85 @@ export default function SelfPublishing() {
               Start Writing
             </Button>
 
-            {/* Hero Image Placeholder */}
-            <div className="relative max-w-4xl mx-auto">
-              <div className="bg-gradient-to-b from-[#f5f5f7] to-white rounded-3xl p-8 md:p-12">
-                <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-8 items-end justify-center">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div 
-                      key={i}
-                      className={`bg-white rounded-xl shadow-lg p-4 md:p-6 transform ${
-                        i === 3 ? 'scale-110 z-10' : i === 2 || i === 4 ? 'scale-100' : 'scale-90 hidden md:block'
-                      }`}
-                    >
-                      <div className="w-full aspect-[3/4] bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg flex items-center justify-center">
-                        <FileText className="w-8 h-8 md:w-12 md:h-12 text-[#0071e3]" />
-                      </div>
-                    </div>
-                  ))}
+            {/* Hero Cards - Apple Gift Card Style */}
+            <div className="relative max-w-4xl mx-auto h-[280px] md:h-[400px]">
+              <div className="absolute inset-0 flex items-end justify-center">
+                {/* Card 1 - Far Left */}
+                <div 
+                  className="absolute w-[120px] md:w-[180px] aspect-[3/4] bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center p-4"
+                  style={{
+                    left: '5%',
+                    bottom: '10%',
+                    transform: 'rotate(-12deg)',
+                    zIndex: 1
+                  }}
+                >
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-pink-400 via-orange-400 to-red-500 flex items-center justify-center mb-2">
+                    <FileText className="w-8 h-8 md:w-12 md:h-12 text-white" />
+                  </div>
+                </div>
+
+                {/* Card 2 - Left */}
+                <div 
+                  className="absolute w-[130px] md:w-[200px] aspect-[3/4] bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center p-4"
+                  style={{
+                    left: '18%',
+                    bottom: '15%',
+                    transform: 'rotate(-6deg)',
+                    zIndex: 2
+                  }}
+                >
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-blue-400 via-cyan-500 to-teal-500 flex items-center justify-center mb-2">
+                    <Globe className="w-8 h-8 md:w-12 md:h-12 text-white" />
+                  </div>
+                </div>
+
+                {/* Card 3 - Center (Main) */}
+                <div 
+                  className="absolute w-[150px] md:w-[240px] aspect-[3/4] bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center p-6"
+                  style={{
+                    left: '50%',
+                    bottom: '20%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 5
+                  }}
+                >
+                  <p className="text-sm md:text-lg font-semibold text-[#1d1d1f] text-center mb-4">
+                    Your content<br />everywhere
+                  </p>
+                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-500 flex items-center justify-center">
+                    <Zap className="w-10 h-10 md:w-14 md:h-14 text-white" />
+                  </div>
+                </div>
+
+                {/* Card 4 - Right */}
+                <div 
+                  className="absolute w-[130px] md:w-[200px] aspect-[3/4] bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center p-4"
+                  style={{
+                    right: '18%',
+                    bottom: '15%',
+                    transform: 'rotate(6deg)',
+                    zIndex: 2
+                  }}
+                >
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 flex items-center justify-center mb-2">
+                    <BarChart3 className="w-8 h-8 md:w-12 md:h-12 text-white" />
+                  </div>
+                </div>
+
+                {/* Card 5 - Far Right */}
+                <div 
+                  className="absolute w-[120px] md:w-[180px] aspect-[3/4] bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center p-4"
+                  style={{
+                    right: '5%',
+                    bottom: '10%',
+                    transform: 'rotate(12deg)',
+                    zIndex: 1
+                  }}
+                >
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center mb-2">
+                    <Shield className="w-8 h-8 md:w-12 md:h-12 text-white" />
+                  </div>
                 </div>
               </div>
             </div>
