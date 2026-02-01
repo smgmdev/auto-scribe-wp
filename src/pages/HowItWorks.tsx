@@ -721,6 +721,209 @@ const HowItWorks = () => {
       </section>
 
 
+      {/* Step-by-Step Guide Section - Apple Developer Style */}
+      <section className="py-16 md:py-24 bg-white border-t border-gray-200">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-16">
+            {/* Sticky Side Navigation */}
+            <nav className="md:w-64 flex-shrink-0">
+              <div className="md:sticky md:top-32">
+                <ul className="space-y-1 border-l-2 border-gray-200">
+                  <li>
+                    <a href="#getting-started" className="block pl-4 py-2 text-sm font-semibold text-[#1d1d1f] border-l-2 border-[#0066cc] -ml-[2px]">
+                      Getting started
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#create-account" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Create your account
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#buy-credits" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Buy credits
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#media-buying" className="block pl-4 py-2 text-sm font-semibold text-[#1d1d1f] mt-4">
+                      Media Buying
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#browse-outlets" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Browse outlets
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#submit-request" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Submit a request
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#track-orders" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Track your orders
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#self-publishing" className="block pl-4 py-2 text-sm font-semibold text-[#1d1d1f] mt-4">
+                      Self Publishing
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#connect-wordpress" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Connect WordPress
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#ai-generation" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      AI article generation
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#publish-directly" className="block pl-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors">
+                      Publish directly
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+            
+            {/* Main Content */}
+            <div className="flex-1 space-y-20">
+              {/* Getting Started Section */}
+              <div id="getting-started">
+                <div className="w-14 h-14 rounded-full border-2 border-[#0066cc] flex items-center justify-center mb-6">
+                  <Users className="w-6 h-6 text-[#0066cc]" />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
+                  Getting started
+                </h2>
+                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
+                  Join thousands of publishers who use Arcana Mace to distribute their content globally. 
+                  Getting started takes just a few minutes.
+                </p>
+                
+                <div id="create-account" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Create your account
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Sign up for free with just your email address. No credit card required to explore the platform. 
+                    Your account gives you access to the full dashboard where you can manage articles, 
+                    connect WordPress sites, and browse our media network.
+                  </p>
+                </div>
+                
+                <div id="buy-credits" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Buy credits
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Credits are the currency of Arcana Mace. Purchase credit packs to unlock premium features 
+                    like AI article generation and media placements. Credits never expire and can be used 
+                    for any service on the platform.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Media Buying Section */}
+              <div id="media-buying">
+                <div className="w-14 h-14 rounded-full border-2 border-[#0066cc] flex items-center justify-center mb-6">
+                  <Globe className="w-6 h-6 text-[#0066cc]" />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
+                  Media Buying
+                </h2>
+                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
+                  Access premium publications through our verified agency network. 
+                  From business news to crypto outlets, place your content where it matters most.
+                </p>
+                
+                <div id="browse-outlets" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Browse outlets
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Explore our curated network of high-authority media outlets. Filter by category, 
+                    price, and publication format. Each listing shows detailed information including 
+                    turnaround time, content requirements, and agency details.
+                  </p>
+                </div>
+                
+                <div id="submit-request" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Submit a request
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Found the perfect outlet? Submit your content request with a brief description of your article. 
+                    Our secure escrow system holds your payment until delivery is confirmed, 
+                    protecting both publishers and agencies.
+                  </p>
+                </div>
+                
+                <div id="track-orders" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Track your orders
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Monitor every order from submission to publication. Communicate directly with agencies 
+                    through our built-in messaging system. Receive notifications when your article goes live 
+                    and access the published link directly from your dashboard.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Self Publishing Section */}
+              <div id="self-publishing">
+                <div className="w-14 h-14 rounded-full border-2 border-[#0066cc] flex items-center justify-center mb-6">
+                  <FileText className="w-6 h-6 text-[#0066cc]" />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
+                  Self Publishing
+                </h2>
+                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
+                  Connect your own WordPress sites and publish directly. 
+                  Full editorial control with the power of AI-assisted content creation.
+                </p>
+                
+                <div id="connect-wordpress" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Connect WordPress
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Link unlimited WordPress sites to your account using secure application passwords. 
+                    Arcana Mace integrates seamlessly with your existing workflow, supporting 
+                    popular SEO plugins like Yoast and RankMath for optimized publishing.
+                  </p>
+                </div>
+                
+                <div id="ai-generation" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    AI article generation
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    Generate professional articles in seconds with our advanced AI engine. 
+                    Choose from multiple writing tones, set your target audience, and let 
+                    intelligent automation create publish-ready content with proper formatting.
+                  </p>
+                </div>
+                
+                <div id="publish-directly" className="mb-12">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Publish directly
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    One-click publishing sends your article directly to your WordPress site. 
+                    Arcana Mace handles featured images, categories, tags, and SEO metadata automatically. 
+                    Your content goes live instantly, ready to reach your audience.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* New Possibilities Section - Apple Intelligence Style */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
