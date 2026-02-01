@@ -108,6 +108,56 @@ const ScrollRevealRow = ({
   );
 };
 
+// Gradient scroll reveal component - Apple Siri style
+const GradientScrollReveal = ({ 
+  text, 
+  gradient,
+  index 
+}: { 
+  text: React.ReactNode; 
+  gradient: string;
+  index: number;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      {
+        threshold: 0.4,
+        rootMargin: '-10% 0px -10% 0px'
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div 
+      ref={ref}
+      className={`transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0 blur-0' 
+          : 'opacity-0 translate-y-12 blur-sm'
+      }`}
+      style={{ transitionDelay: `${index * 150}ms` }}
+    >
+      <p className={`text-3xl md:text-4xl lg:text-[56px] font-semibold italic leading-[1.1] bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
+        {text}
+      </p>
+    </div>
+  );
+};
+
 // Feature card component
 const FeatureCard = ({ 
   icon: Icon, 
@@ -487,31 +537,31 @@ const HowItWorks = () => {
       </section>
 
       {/* Gradient Text Statements Section - Apple Siri Style */}
-      <section className="py-20 md:py-28 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center space-y-8 md:space-y-10">
-          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent">
-            Publish your content
-            <br />
-            to premium outlets worldwide.
-          </p>
+      <section className="py-24 md:py-32 bg-[#fbfbfd]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center space-y-10 md:space-y-14">
+          <GradientScrollReveal
+            index={0}
+            gradient="from-[#e84393] via-[#d63384] to-[#a855f7]"
+            text={<>Publish your content<br />to premium outlets worldwide.</>}
+          />
           
-          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-purple-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
-            Just write once and distribute
-            <br />
-            to hundreds of publications.
-          </p>
+          <GradientScrollReveal
+            index={1}
+            gradient="from-[#a855f7] via-[#8b5cf6] to-[#3b82f6]"
+            text={<>Just write once and distribute<br />to hundreds of publications.</>}
+          />
           
-          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 bg-clip-text text-transparent">
-            Built for creators, publishers,
-            <br />
-            and enterprise teams alike.
-          </p>
+          <GradientScrollReveal
+            index={2}
+            gradient="from-[#3b82f6] via-[#06b6d4] to-[#22d3d4]"
+            text={<>Built for creators, publishers,<br />and enterprise teams alike.</>}
+          />
           
-          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Powered by the fastest AI
-            <br />
-            for content creation.
-          </p>
+          <GradientScrollReveal
+            index={3}
+            gradient="from-[#14b8a6] via-[#06b6d4] to-[#0ea5e9]"
+            text={<>Powered by the fastest AI<br />for content creation.</>}
+          />
         </div>
       </section>
 
