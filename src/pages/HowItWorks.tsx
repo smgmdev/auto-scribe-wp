@@ -999,6 +999,166 @@ const HowItWorks = () => {
                 </div>
               </div>
               
+              {/* Explore Arcana Mace Section */}
+              <div id="explore-arcana-mace" className="scroll-mt-40">
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
+                  Explore Arcana Mace
+                </h2>
+                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
+                  Discover all the powerful features available in your dashboard. From media networks to instant publishing, 
+                  everything you need to amplify your content is just a click away.
+                </p>
+                
+                <div id="media-network" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Media Network
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The Media Network is your gateway to premium publications worldwide. Browse through verified outlets, 
+                    compare pricing, and discover new opportunities to place your content on high-authority sites. 
+                    Access both your personal WordPress sites (Local Library) and agency-managed publications (Global Library).
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Local Library: Your connected WordPress sites for instant, direct publishing</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Global Library: Hundreds of premium publications managed by verified agencies</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Advanced filters by category, country, price, and publication format</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="instant-publishing" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Instant Publishing
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Create and publish content directly to your WordPress sites with AI-powered assistance. 
+                    Generate articles from trending headlines, customize with your preferred tone, and publish 
+                    instantly—all without leaving your dashboard.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>New Article: Compose or generate AI articles with customizable tones and styles</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Sources: Browse curated headlines from top news outlets for content inspiration</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>My Articles: Manage drafts, published content, and track performance</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="b2b-media-buying" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    B2B Media Buying
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Access premium media placements through our verified agency network. Submit content briefs, 
+                    track order progress in real-time, and communicate directly with publishing agencies—all 
+                    protected by our secure escrow system.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>My Engagements: View and manage all your active content placement requests</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>My Orders: Track delivery status, view published links, and access invoices</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Secure escrow: Your credits are protected until article delivery is confirmed</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="credit-management" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Credit Management
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Purchase, track, and manage your Arcana Mace credits. Credits are the universal currency 
+                    for all platform services—from AI article generation to premium media placements. 
+                    View your complete transaction history and balance at any time.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff9f0a] mt-0.5 flex-shrink-0" />
+                      <span>Flexible credit packs: Choose from starter to enterprise bundles</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff9f0a] mt-0.5 flex-shrink-0" />
+                      <span>Instant delivery: Credits appear in your account immediately after purchase</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff9f0a] mt-0.5 flex-shrink-0" />
+                      <span>Full transparency: Detailed history of all credit transactions and usage</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="apply-agency-account" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Apply For Agency Account
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Own a media outlet or represent multiple publications? Apply to become a verified agency 
+                    and start earning by listing your publications on the Global Library. Our verification 
+                    process ensures quality and trust across the network.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#bf5af2] mt-0.5 flex-shrink-0" />
+                      <span>Simple application: Submit your company details and media portfolio</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#bf5af2] mt-0.5 flex-shrink-0" />
+                      <span>Fast verification: Our team reviews applications within 48 hours</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#bf5af2] mt-0.5 flex-shrink-0" />
+                      <span>Set your prices: Full control over your publication pricing and terms</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="account-settings" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Account Settings
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Customize your Arcana Mace experience. Update your profile, manage security settings, 
+                    configure AI publishing preferences, and control notification settings—all in one place.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#86868b] mt-0.5 flex-shrink-0" />
+                      <span>Profile management: Update your display name, email, and contact info</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#86868b] mt-0.5 flex-shrink-0" />
+                      <span>Security settings: Enable PIN protection and manage login preferences</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#86868b] mt-0.5 flex-shrink-0" />
+                      <span>AI settings: Configure default tones, sources, and auto-publish options</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
               {/* Media Buying Section */}
               <div id="media-buying">
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
