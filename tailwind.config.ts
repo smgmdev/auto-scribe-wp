@@ -244,24 +244,28 @@ export default {
 				'0%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(0deg)' },
 				'100%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(360deg)' }
 			},
-			'slideDown': {
+			'expandDown': {
 				'0%': {
-					clipPath: 'inset(0 0 100% 0)',
-					opacity: '0'
+					opacity: '0',
+					transform: 'scaleY(0)',
+					transformOrigin: 'top'
 				},
 				'100%': {
-					clipPath: 'inset(0 0 0 0)',
-					opacity: '1'
+					opacity: '1',
+					transform: 'scaleY(1)',
+					transformOrigin: 'top'
 				}
 			},
-			'slideUp': {
+			'collapseUp': {
 				'0%': {
-					clipPath: 'inset(0 0 0 0)',
-					opacity: '1'
+					opacity: '1',
+					transform: 'scaleY(1)',
+					transformOrigin: 'top'
 				},
 				'100%': {
-					clipPath: 'inset(0 0 100% 0)',
-					opacity: '0'
+					opacity: '0',
+					transform: 'scaleY(0)',
+					transformOrigin: 'top'
 				}
 			}
 		},

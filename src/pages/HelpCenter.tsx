@@ -215,7 +215,7 @@ export default function HelpCenter() {
               </PopoverTrigger>
               <PopoverContent 
                 align="end" 
-                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 data-[state=open]:animate-[slideDown_0.4s_ease-out_forwards] data-[state=closed]:animate-[slideUp_0.3s_ease-out_forwards]"
+                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 origin-top data-[state=open]:animate-[expandDown_0.3s_cubic-bezier(0.4,0,0.2,1)_forwards] data-[state=closed]:animate-[collapseUp_0.2s_cubic-bezier(0.4,0,0.2,1)_forwards]"
                 sideOffset={12}
               >
                 {/* Mobile layout - single column */}
