@@ -431,6 +431,16 @@ const HowItWorks = () => {
     }
   };
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Update URL hash without jumping
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+  };
+
   const features = [
     { highlight: "Premium media outlets", normal: "in every category imaginable." },
     { highlight: "Self-publish instantly", normal: "to your own WordPress sites." },
@@ -633,7 +643,8 @@ const HowItWorks = () => {
                 <ul className="border-l-2 border-gray-200">
                   <li>
                     <a 
-                      href="#getting-started" 
+                      href="#getting-started"
+                      onClick={(e) => scrollToSection(e, 'getting-started')}
                       className={`block pl-4 py-0.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'getting-started' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -645,7 +656,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#create-account" 
+                      href="#create-account"
+                      onClick={(e) => scrollToSection(e, 'create-account')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'create-account' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -657,7 +669,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#buy-credits" 
+                      href="#buy-credits"
+                      onClick={(e) => scrollToSection(e, 'buy-credits')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'buy-credits' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -669,7 +682,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#media-buying" 
+                      href="#media-buying"
+                      onClick={(e) => scrollToSection(e, 'media-buying')}
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'media-buying' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -681,7 +695,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#browse-outlets" 
+                      href="#browse-outlets"
+                      onClick={(e) => scrollToSection(e, 'browse-outlets')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'browse-outlets' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -693,7 +708,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#submit-request" 
+                      href="#submit-request"
+                      onClick={(e) => scrollToSection(e, 'submit-request')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'submit-request' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -705,7 +721,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#track-orders" 
+                      href="#track-orders"
+                      onClick={(e) => scrollToSection(e, 'track-orders')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'track-orders' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -717,7 +734,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#self-publishing" 
+                      href="#self-publishing"
+                      onClick={(e) => scrollToSection(e, 'self-publishing')}
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'self-publishing' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -729,7 +747,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#connect-wordpress" 
+                      href="#connect-wordpress"
+                      onClick={(e) => scrollToSection(e, 'connect-wordpress')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'connect-wordpress' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -741,7 +760,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#ai-generation" 
+                      href="#ai-generation"
+                      onClick={(e) => scrollToSection(e, 'ai-generation')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'ai-generation' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
@@ -753,7 +773,8 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#publish-directly" 
+                      href="#publish-directly"
+                      onClick={(e) => scrollToSection(e, 'publish-directly')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'publish-directly' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
