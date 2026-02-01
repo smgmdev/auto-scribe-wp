@@ -74,11 +74,11 @@ const ServiceRow = ({ service, onNavigate }: { service: ServiceStatus; onNavigat
     >
       <StatusIndicator status={service.status} />
       <span className={`text-[#1d1d1f] text-sm flex-1 ${hasLink ? 'hover:text-[#06c]' : ''}`}>{service.name}</span>
-      {service.latency !== undefined && service.latency > 0 && (
-        <span className="text-xs text-[#86868b]">{service.latency}ms</span>
-      )}
       {hasLink && (
         <ExternalLink className="w-4 h-4 text-[#06c]" />
+      )}
+      {service.latency !== undefined && service.latency > 0 && (
+        <span className="text-xs text-[#86868b]">{service.latency}ms</span>
       )}
     </div>
   );
