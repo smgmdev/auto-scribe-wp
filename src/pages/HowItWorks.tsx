@@ -1205,64 +1205,6 @@ const HowItWorks = () => {
                     </li>
                   </ul>
                 </div>
-                
-                <div id="submit-request" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Submit a request
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Found the perfect outlet? Submit your content request with a brief description of your article. 
-                    Our secure escrow system holds your payment until delivery is confirmed, 
-                    protecting both publishers and agencies.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Simple request form with article brief, headlines, and special instructions</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Secure credit escrow protects your payment until article is delivered</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Direct messaging with agency representatives for clarifications</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Automatic notifications at every stage of the process</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div id="track-orders" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Track your orders
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Monitor every order from submission to publication. Communicate directly with agencies 
-                    through our built-in messaging system. Receive notifications when your article goes live 
-                    and access the published link directly from your dashboard.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Real-time status updates: pending, accepted, in progress, delivered</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Built-in chat for direct communication with agency teams</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Delivery confirmation with live article link and publication proof</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Order history with downloadable invoices and transaction records</span>
-                    </li>
-                  </ul>
-                </div>
               </div>
               
               {/* Browse Media Network Section */}
