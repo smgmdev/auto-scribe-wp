@@ -463,7 +463,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Phone Carousel - Recently Published Articles */}
-      <section className="py-20 md:py-28 bg-[#f5f5f7]">
+      <section className="bg-[#f5f5f7]">
         {loadingArticles ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
