@@ -535,7 +535,52 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      {/* Feature Section - Apple Games style */}
+      {/* Even More Section - Apple Apps Grid style */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-16">
+            <span className="font-semibold">Even more.</span>{' '}
+            <span className="text-[#86868b]">Great outlets available on our platform.</span>
+          </h2>
+          
+          {/* Media Sites Grid */}
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-x-6 gap-y-8 md:gap-x-8 md:gap-y-10">
+            {shuffledSites.slice(0, 42).map((site, index) => (
+              <div key={site.id || index} className="flex flex-col items-center text-center group cursor-pointer">
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-[14px] md:rounded-[18px] overflow-hidden shadow-md bg-white border border-[#e5e5e5] group-hover:shadow-lg transition-shadow mb-2">
+                  {site.favicon ? (
+                    <img 
+                      src={site.favicon} 
+                      alt={site.name} 
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#f5f5f7] to-[#e5e5e5] flex items-center justify-center">
+                      <Globe className="w-6 h-6 text-[#86868b]" />
+                    </div>
+                  )}
+                </div>
+                <span className="text-[11px] md:text-xs text-[#1d1d1f] leading-tight line-clamp-2 max-w-[80px] md:max-w-[100px]">
+                  {site.name}
+                </span>
+              </div>
+            ))}
+          </div>
+          
+          {/* See All Link */}
+          <div className="mt-12 text-center">
+            <Button 
+              variant="link" 
+              onClick={handleGetStarted}
+              className="text-[#0066cc] hover:text-[#0066cc]/80 text-base font-normal p-0 h-auto"
+            >
+              See all publications ›
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <section className="py-24 bg-gradient-to-b from-[#1d1d1f] to-[#0d0d0f]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Icon */}
