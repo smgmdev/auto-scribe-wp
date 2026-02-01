@@ -215,42 +215,59 @@ export default function HelpCenter() {
         <div 
           className="bg-white overflow-hidden"
           style={{
-            maxHeight: isTopicsOpen ? '400px' : '0px',
-            transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+            display: 'grid',
+            gridTemplateRows: isTopicsOpen ? '1fr' : '0fr',
+            transition: 'grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
-          {/* Mobile layout - single column */}
-          <div className="md:hidden py-8 px-4">
-            <div className="flex flex-col gap-4">
-              {helpCategories.map((category, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setIsTopicsOpen(false);
-                    navigate(`/help/${category.slug}`);
-                  }}
-                  className="text-left text-lg font-semibold text-foreground hover:text-[#06c] transition-colors duration-200"
-                >
-                  {category.title}
-                </button>
-              ))}
+          <div className="overflow-hidden">
+            {/* Mobile layout - single column */}
+            <div 
+              className="md:hidden py-8 px-4"
+              style={{
+                opacity: isTopicsOpen ? 1 : 0,
+                transform: isTopicsOpen ? 'translateY(0)' : 'translateY(-10px)',
+                transition: 'opacity 0.3s ease-out 0.1s, transform 0.3s ease-out 0.1s'
+              }}
+            >
+              <div className="flex flex-col gap-4">
+                {helpCategories.map((category, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setIsTopicsOpen(false);
+                      navigate(`/help/${category.slug}`);
+                    }}
+                    className="text-left text-lg font-semibold text-foreground hover:text-[#06c] transition-colors duration-200"
+                  >
+                    {category.title}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          {/* Desktop layout - 3 columns */}
-          <div className="hidden md:block max-w-[980px] mx-auto py-8 px-4 md:px-6">
-            <div className="grid grid-cols-3 gap-x-12 gap-y-3">
-              {helpCategories.map((category, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setIsTopicsOpen(false);
-                    navigate(`/help/${category.slug}`);
-                  }}
-                  className="text-left text-sm text-foreground hover:text-[#06c] transition-colors duration-200"
-                >
-                  {category.title}
-                </button>
-              ))}
+            {/* Desktop layout - 3 columns */}
+            <div 
+              className="hidden md:block max-w-[980px] mx-auto py-8 px-4 md:px-6"
+              style={{
+                opacity: isTopicsOpen ? 1 : 0,
+                transform: isTopicsOpen ? 'translateY(0)' : 'translateY(-10px)',
+                transition: 'opacity 0.3s ease-out 0.1s, transform 0.3s ease-out 0.1s'
+              }}
+            >
+              <div className="grid grid-cols-3 gap-x-12 gap-y-3">
+                {helpCategories.map((category, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setIsTopicsOpen(false);
+                      navigate(`/help/${category.slug}`);
+                    }}
+                    className="text-left text-sm text-foreground hover:text-[#06c] transition-colors duration-200"
+                  >
+                    {category.title}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
