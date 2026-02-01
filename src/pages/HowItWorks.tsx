@@ -464,15 +464,6 @@ const HowItWorks = () => {
 
       {/* Phone Carousel - Recently Published Articles */}
       <section className="py-20 md:py-28 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-12">
-          <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] text-center">
-            Recently Published
-          </h2>
-          <p className="text-lg text-[#86868b] text-center mt-4">
-            See what publishers are creating on Arcana Mace
-          </p>
-        </div>
-        
         {loadingArticles ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
