@@ -375,7 +375,7 @@ const HowItWorks = () => {
       'explore-arcana-mace',
       'media-network', 'instant-publishing', 'b2b-media-buying',
       'credit-management', 'apply-agency-account', 'account-settings',
-      'media-buying', 'global-library', 'browse-outlets', 'submit-request', 'track-orders',
+      'media-buying', 'global-library', 'agency-engagement', 'submit-request', 'track-orders',
       'self-publishing', 'local-library', 'generate-ai-articles',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
@@ -796,15 +796,15 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#browse-outlets"
-                      onClick={(e) => scrollToSection(e, 'browse-outlets')}
+                      href="#agency-engagement"
+                      onClick={(e) => scrollToSection(e, 'agency-engagement')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'browse-outlets' 
+                        activeSection === 'agency-engagement' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
-                      Browse Outlets
+                      Agency Engagement
                     </a>
                   </li>
                   <li>
@@ -1199,27 +1199,35 @@ const HowItWorks = () => {
                   </ul>
                 </div>
                 
-                <div id="browse-outlets" className="mb-16 scroll-mt-40">
+                <div id="agency-engagement" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Browse outlets
+                    Agency Engagement
                   </h3>
                   <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Explore our curated network of high-authority media outlets. Filter by category, 
-                    price, and publication format. Each listing shows detailed information including 
-                    turnaround time, content requirements, and agency details.
+                    The engagement process ensures clear communication and mutual agreement between you and the agency. 
+                    Start by submitting a request with your content brief. The agency reviews your submission and 
+                    confirms they can fulfill it. Once confirmed, either party can initiate an order with agreed terms.
                   </p>
                   <ul className="space-y-3 text-[#1d1d1f]">
                     <li className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Advanced search with filters for category, country, price range, and more</span>
+                      <span>Submit your request: Provide your article brief for agency review</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Detailed outlet profiles with sample articles and editorial guidelines</span>
+                      <span>Agency review: The agency evaluates your brief and confirms availability</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Real-time availability and turnaround time indicators</span>
+                      <span>Order submission: You submit an order, or the agency sends you an offer</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Delivery agreement: Both parties agree on delivery time before work begins</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff453a] mt-0.5 flex-shrink-0" />
+                      <span>Dispute protection: If the agency fails to deliver as agreed, you can open a dispute and request a refund</span>
                     </li>
                   </ul>
                 </div>
