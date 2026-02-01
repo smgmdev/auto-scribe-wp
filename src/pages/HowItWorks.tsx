@@ -1036,7 +1036,7 @@ const HowItWorks = () => {
       </section>
 
       {/* New Possibilities Section - Apple Intelligence Style */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-8 md:py-12 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <div className="bg-[#f5f5f7] rounded-3xl py-16 md:py-24 px-8 md:px-16 text-center">
             {/* Gradient Icon */}
