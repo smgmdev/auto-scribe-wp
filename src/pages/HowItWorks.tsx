@@ -536,6 +536,35 @@ const HowItWorks = () => {
         ) : null}
       </section>
 
+      {/* AI-Powered Section - Apple Intelligence Style */}
+      <section className="py-24 md:py-32 bg-black">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <p className="text-2xl md:text-3xl font-semibold text-white mb-8">
+            AI-Powered Publishing
+          </p>
+          
+          <h2 className="text-6xl md:text-8xl lg:text-[140px] font-semibold leading-[0.95] tracking-tight mb-12">
+            <span className="bg-gradient-to-r from-[#2997ff] via-[#a855f7] to-[#ec4899] bg-clip-text text-transparent">All-new</span>
+            <br />
+            <span className="bg-gradient-to-r from-[#ec4899] via-[#f97316] to-[#f97316] bg-clip-text text-transparent">powers.</span>
+          </h2>
+          
+          <p className="text-lg md:text-xl text-[#86868b] max-w-2xl mb-6 leading-relaxed">
+            With the capabilities provided by advanced AI, 
+            this marks the start of a new era for content creation. Get 
+            articles written effortlessly with built-in intelligence 
+            features that make publishing more powerful every day.
+          </p>
+          
+          <button 
+            onClick={() => navigate('/about')}
+            className="text-[#2997ff] hover:underline inline-flex items-center gap-1 text-lg"
+          >
+            Learn more about AI Publishing <span className="text-sm">›</span>
+          </button>
+        </div>
+      </section>
+
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {features.map((feature, index) => (
