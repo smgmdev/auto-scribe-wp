@@ -296,7 +296,7 @@ export default function SelfPublishing() {
               ) : (
                 mediaSites.map((site) => (
                   <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm border border-[#d2d2d7] overflow-hidden group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
                       {site.favicon ? (
                         <img 
                           src={site.favicon} 
@@ -309,7 +309,7 @@ export default function SelfPublishing() {
                         </div>
                       )}
                     </div>
-                    <span className="text-[11px] md:text-xs text-[#6e6e73] text-center">{site.name}</span>
+                    <span className="text-[11px] md:text-xs text-[#1d1d1f] font-semibold text-center">{site.name}</span>
                   </div>
                 ))
               )}
