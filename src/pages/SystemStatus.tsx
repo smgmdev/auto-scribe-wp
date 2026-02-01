@@ -12,7 +12,8 @@ interface ServiceStatus {
   name: string;
   status: 'available' | 'issue' | 'outage';
   latency?: number;
-  link?: string;
+  link?: string; // external link
+  internalLink?: string; // internal app route
 }
 
 const useScrollHeader = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
@@ -55,23 +56,29 @@ const StatusIndicator = ({ status }: { status: 'available' | 'issue' | 'outage' 
   );
 };
 
-const ServiceRow = ({ service }: { service: ServiceStatus }) => {
+const ServiceRow = ({ service, onNavigate }: { service: ServiceStatus; onNavigate: (path: string) => void }) => {
+  const hasLink = service.link || service.internalLink;
+  
+  const handleClick = () => {
+    if (service.internalLink) {
+      onNavigate(service.internalLink);
+    } else if (service.link) {
+      window.open(service.link, '_blank', 'noopener,noreferrer');
+    }
+  };
+  
   return (
-    <div className="flex items-center gap-3 py-3 border-b border-[#d2d2d7] last:border-b-0">
+    <div 
+      className={`flex items-center gap-3 py-3 border-b border-[#d2d2d7] last:border-b-0 ${hasLink ? 'cursor-pointer hover:bg-muted/50 transition-colors -mx-2 px-2 rounded' : ''}`}
+      onClick={hasLink ? handleClick : undefined}
+    >
       <StatusIndicator status={service.status} />
-      <span className="text-[#1d1d1f] text-sm flex-1">{service.name}</span>
+      <span className={`text-[#1d1d1f] text-sm flex-1 ${hasLink ? 'hover:text-[#06c]' : ''}`}>{service.name}</span>
       {service.latency !== undefined && service.latency > 0 && (
         <span className="text-xs text-[#86868b]">{service.latency}ms</span>
       )}
-      {service.link && (
-        <a 
-          href={service.link} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-[#06c] hover:underline"
-        >
-          <ExternalLink className="w-4 h-4" />
-        </a>
+      {hasLink && (
+        <ExternalLink className="w-4 h-4 text-[#06c]" />
       )}
     </div>
   );
@@ -104,18 +111,18 @@ export default function SystemStatus() {
       setServices([
         { name: 'API Server', status: 'issue' },
         { name: 'Database', status: 'issue' },
-        { name: 'Authentication', status: 'issue' },
+        { name: 'Authentication', status: 'issue', internalLink: '/auth' },
         { name: 'Edge Functions', status: 'issue' },
         { name: 'File Storage', status: 'issue' },
-        { name: 'AI Article Generation', status: 'issue' },
-        { name: 'WordPress Publishing', status: 'issue' },
-        { name: 'Credit Processing', status: 'issue' },
-        { name: 'Payment Gateway (Stripe)', status: 'issue' },
+        { name: 'AI Article Generation', status: 'issue', internalLink: '/dashboard?view=compose' },
+        { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
+        { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credits' },
+        { name: 'Payment Gateway (Stripe)', status: 'issue', link: 'https://stripe.com' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
-        { name: 'Media Site Network', status: 'issue' },
-        { name: 'Agency Portal', status: 'issue' },
-        { name: 'Headlines Scanner', status: 'issue' },
+        { name: 'Media Site Network', status: 'issue', internalLink: '/media-buying' },
+        { name: 'Agency Portal', status: 'issue', internalLink: '/agency' },
+        { name: 'Headlines Scanner', status: 'issue', internalLink: '/dashboard?view=headlines' },
       ]);
     } finally {
       setIsLoading(false);
@@ -242,14 +249,14 @@ export default function SystemStatus() {
               {/* Left Column */}
               <div>
                 {leftColumn.map((service) => (
-                  <ServiceRow key={service.name} service={service} />
+                  <ServiceRow key={service.name} service={service} onNavigate={navigate} />
                 ))}
               </div>
               
               {/* Right Column */}
               <div className="border-t border-[#d2d2d7] md:border-t-0">
                 {rightColumn.map((service) => (
-                  <ServiceRow key={service.name} service={service} />
+                  <ServiceRow key={service.name} service={service} onNavigate={navigate} />
                 ))}
               </div>
             </div>
