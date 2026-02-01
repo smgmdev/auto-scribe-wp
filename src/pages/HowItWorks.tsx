@@ -435,9 +435,11 @@ const HowItWorks = () => {
       <section className="pt-28 md:pt-36 pb-16 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
-          <div className="w-20 h-20 mx-auto mb-6 rounded-[22px] bg-gradient-to-br from-[#0071e3] to-[#00c7be] flex items-center justify-center shadow-lg">
-            <Globe className="w-10 h-10 text-white" />
-          </div>
+          <img 
+            src={amblack} 
+            alt="Arcana Mace" 
+            className="w-20 h-20 mx-auto mb-6"
+          />
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
             Endless reach.
