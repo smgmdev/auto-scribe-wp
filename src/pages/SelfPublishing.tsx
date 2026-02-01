@@ -286,7 +286,7 @@ export default function SelfPublishing() {
         </section>
 
         {/* Media Sites - Dynamic from Local Library */}
-        <section className="py-10 md:py-12 border-t border-b border-[#d2d2d7]">
+        <section className="py-10 md:py-12 border-t border-[#d2d2d7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12 min-h-[80px]">
               {isLoadingSites ? (
