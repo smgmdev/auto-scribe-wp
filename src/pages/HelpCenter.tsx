@@ -199,7 +199,7 @@ export default function HelpCenter() {
 
       {/* Sub-header - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="bg-white border-b border-border">
+        <div className="bg-white border-b border-border relative">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
             <button 
@@ -216,12 +216,12 @@ export default function HelpCenter() {
           </div>
         </div>
         
-        {/* Expandable menu */}
+        {/* Expandable menu - positioned absolute to overlay content */}
         <div 
-          className={`bg-white border-b border-border overflow-hidden transition-[max-height,opacity] duration-500 ${
+          className={`absolute left-0 right-0 bg-white border-b border-border overflow-hidden transition-[max-height,opacity] duration-500 ${
             isTopicsOpen 
-              ? 'max-h-[600px] opacity-100 ease-[cubic-bezier(0.4,0,0.2,1)]' 
-              : 'max-h-0 opacity-0 ease-[cubic-bezier(0.4,0,1,1)]'
+              ? 'max-h-[600px] opacity-100' 
+              : 'max-h-0 opacity-0 pointer-events-none'
           }`}
           style={{
             transitionTimingFunction: isTopicsOpen 
