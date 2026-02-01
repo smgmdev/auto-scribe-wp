@@ -341,9 +341,32 @@ export default function MediaBuying() {
         
         {/* Scrollable Cards Container */}
         <div className="relative group">
+          {/* Left Arrow */}
+          <button
+            onClick={() => {
+              const container = document.getElementById('slider-container');
+              if (container) container.scrollBy({ left: -400, behavior: 'smooth' });
+            }}
+            className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-[#1d1d1f]" />
+          </button>
+          
+          {/* Right Arrow */}
+          <button
+            onClick={() => {
+              const container = document.getElementById('slider-container');
+              if (container) container.scrollBy({ left: 400, behavior: 'smooth' });
+            }}
+            className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-[#1d1d1f]" />
+          </button>
+          
           <div 
-            className="flex gap-4 overflow-x-auto pb-4 px-4 md:px-[calc((100%-980px)/2+24px)] scrollbar-hide scroll-smooth"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            id="slider-container"
+            className="flex gap-4 overflow-x-auto pb-4 px-4 md:px-[calc((100%-980px)/2+24px)] scroll-smooth cursor-grab active:cursor-grabbing"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
           >
             {/* Card 1 - Dark */}
             <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-[#1d1d1f] rounded-3xl p-8 flex flex-col min-h-[420px]">
