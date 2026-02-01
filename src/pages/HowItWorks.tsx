@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -153,6 +153,154 @@ const FeatureCard = ({
       </div>
       <h3 className="text-xl font-semibold text-[#1d1d1f] mb-3">{title}</h3>
       <p className="text-[#86868b] leading-relaxed">{description}</p>
+    </div>
+  );
+};
+
+// Article Carousel with auto-scroll and vertical scroll pass-through
+const ArticleCarousel = ({ 
+  articles, 
+  scrollContainerRef 
+}: { 
+  articles: PublishedArticle[];
+  scrollContainerRef: React.RefObject<HTMLDivElement>;
+}) => {
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  
+  // Auto-scroll animation
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel || isPaused) return;
+    
+    let animationId: number;
+    let scrollSpeed = 0.5; // pixels per frame
+    
+    const animate = () => {
+      if (carousel && !isPaused) {
+        carousel.scrollLeft += scrollSpeed;
+        
+        // Reset to start when reaching end (for infinite loop effect)
+        if (carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth) {
+          carousel.scrollLeft = 0;
+        }
+      }
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    return () => cancelAnimationFrame(animationId);
+  }, [isPaused]);
+  
+  // Handle wheel events - pass vertical scroll to parent
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    const isVerticalScroll = Math.abs(e.deltaY) > Math.abs(e.deltaX);
+    
+    if (isVerticalScroll && scrollContainerRef.current) {
+      // Forward vertical scroll to the main scroll container
+      scrollContainerRef.current.scrollTop += e.deltaY;
+    } else if (carouselRef.current) {
+      // Horizontal scroll - control carousel manually
+      carouselRef.current.scrollLeft += e.deltaX;
+    }
+  }, [scrollContainerRef]);
+  
+  const gradients = [
+    'from-pink-200 via-blue-200 to-purple-200',
+    'from-orange-200 via-pink-200 to-purple-200',
+    'from-blue-200 via-purple-200 to-pink-200',
+    'from-green-200 via-blue-200 to-purple-200',
+    'from-yellow-200 via-orange-200 to-pink-200',
+    'from-purple-200 via-pink-200 to-orange-200',
+  ];
+  
+  // Duplicate articles for seamless loop
+  const duplicatedArticles = [...articles, ...articles];
+  
+  return (
+    <div 
+      ref={carouselRef}
+      className="overflow-x-auto pb-4 scrollbar-hide"
+      onWheel={handleWheel}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+    >
+      <div className="flex gap-6 px-4 md:px-8 min-w-max">
+        {duplicatedArticles.map((article, index) => {
+          const gradient = gradients[index % gradients.length];
+          
+          return (
+            <a
+              key={`${article.id}-${index}`}
+              href={article.wp_link || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 w-[280px] md:w-[320px] group"
+            >
+              {/* Apple-style card with gradient border */}
+              <div className={`relative rounded-[32px] p-[2px] bg-gradient-to-br ${gradient} shadow-xl transition-transform duration-300 group-hover:scale-[1.02]`}>
+                <div className="bg-gradient-to-b from-white via-white to-gray-50/80 rounded-[30px] h-[420px] md:h-[480px] flex flex-col overflow-hidden relative">
+                  {/* Gradient overlay at bottom */}
+                  <div className={`absolute inset-0 bg-gradient-to-t ${gradient} opacity-30 pointer-events-none`} />
+                  
+                  {/* Content */}
+                  <div className="relative z-10 p-6 flex flex-col h-full">
+                    {/* Top - Media logo and name */}
+                    <div className="flex items-center gap-3 mb-4">
+                      {article.published_to_favicon ? (
+                        <img
+                          src={article.published_to_favicon}
+                          alt=""
+                          className="h-10 w-10 rounded-xl object-cover shadow-sm"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300" />
+                      )}
+                      <span className="text-lg font-semibold text-[#1d1d1f]">
+                        {article.published_to_name || 'Published'}
+                      </span>
+                    </div>
+                    
+                    {/* Description / Title excerpt */}
+                    <p className="text-[#1d1d1f] text-sm leading-relaxed line-clamp-3 mb-4">
+                      {article.title}
+                    </p>
+                    
+                    {/* Learn more button */}
+                    <div className="inline-flex">
+                      <span className="bg-[#1d1d1f] text-white text-xs font-medium px-4 py-2 rounded-full group-hover:bg-black transition-colors">
+                        Read article
+                      </span>
+                    </div>
+                    
+                    {/* Spacer */}
+                    <div className="flex-1" />
+                    
+                    {/* Center content - Featured headline */}
+                    <div className="text-center my-auto py-8">
+                      <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight line-clamp-4">
+                        {article.title.split(' ').slice(0, 8).join(' ')}
+                        {article.title.split(' ').length > 8 ? '...' : ''}
+                      </h3>
+                    </div>
+                    
+                    {/* Spacer */}
+                    <div className="flex-1" />
+                    
+                    {/* Bottom - Published date */}
+                    <div className="mt-auto pt-4">
+                      <p className="text-xs font-semibold text-[#1d1d1f]">Published via</p>
+                      <p className="text-xs text-[#86868b]">Arcana Mace</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -335,91 +483,7 @@ const HowItWorks = () => {
             <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
           </div>
         ) : articles.length > 0 ? (
-          <div className="overflow-x-auto pb-4">
-            <div className="flex gap-6 px-4 md:px-8 min-w-max mx-auto justify-center">
-              {articles.map((article, index) => {
-                // Different gradient for each card
-                const gradients = [
-                  'from-pink-200 via-blue-200 to-purple-200',
-                  'from-orange-200 via-pink-200 to-purple-200',
-                  'from-blue-200 via-purple-200 to-pink-200',
-                  'from-green-200 via-blue-200 to-purple-200',
-                  'from-yellow-200 via-orange-200 to-pink-200',
-                  'from-purple-200 via-pink-200 to-orange-200',
-                ];
-                const gradient = gradients[index % gradients.length];
-                
-                return (
-                  <a
-                    key={article.id}
-                    href={article.wp_link || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-shrink-0 w-[280px] md:w-[320px] group"
-                  >
-                    {/* Apple-style card with gradient border */}
-                    <div className={`relative rounded-[32px] p-[2px] bg-gradient-to-br ${gradient} shadow-xl transition-transform duration-300 group-hover:scale-[1.02]`}>
-                      <div className="bg-gradient-to-b from-white via-white to-gray-50/80 rounded-[30px] h-[420px] md:h-[480px] flex flex-col overflow-hidden relative">
-                        {/* Gradient overlay at bottom */}
-                        <div className={`absolute inset-0 bg-gradient-to-t ${gradient} opacity-30 pointer-events-none`} />
-                        
-                        {/* Content */}
-                        <div className="relative z-10 p-6 flex flex-col h-full">
-                          {/* Top - Media logo and name */}
-                          <div className="flex items-center gap-3 mb-4">
-                            {article.published_to_favicon ? (
-                              <img
-                                src={article.published_to_favicon}
-                                alt=""
-                                className="h-10 w-10 rounded-xl object-cover shadow-sm"
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300" />
-                            )}
-                            <span className="text-lg font-semibold text-[#1d1d1f]">
-                              {article.published_to_name || 'Published'}
-                            </span>
-                          </div>
-                          
-                          {/* Description / Title excerpt */}
-                          <p className="text-[#1d1d1f] text-sm leading-relaxed line-clamp-3 mb-4">
-                            {article.title}
-                          </p>
-                          
-                          {/* Learn more button */}
-                          <div className="inline-flex">
-                            <span className="bg-[#1d1d1f] text-white text-xs font-medium px-4 py-2 rounded-full group-hover:bg-black transition-colors">
-                              Read article
-                            </span>
-                          </div>
-                          
-                          {/* Spacer */}
-                          <div className="flex-1" />
-                          
-                          {/* Center content - Featured headline */}
-                          <div className="text-center my-auto py-8">
-                            <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight line-clamp-4">
-                              {article.title.split(' ').slice(0, 8).join(' ')}
-                              {article.title.split(' ').length > 8 ? '...' : ''}
-                            </h3>
-                          </div>
-                          
-                          {/* Spacer */}
-                          <div className="flex-1" />
-                          
-                          {/* Bottom - Published date */}
-                          <div className="mt-auto pt-4">
-                            <p className="text-xs font-semibold text-[#1d1d1f]">Published via</p>
-                            <p className="text-xs text-[#86868b]">Arcana Mace</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
+          <ArticleCarousel articles={articles} scrollContainerRef={scrollContainerRef} />
         ) : null}
       </section>
 
