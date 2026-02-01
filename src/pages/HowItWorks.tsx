@@ -640,7 +640,7 @@ const HowItWorks = () => {
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Getting started
+                      Getting Started
                     </a>
                   </li>
                   <li>
@@ -653,7 +653,7 @@ const HowItWorks = () => {
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Create your account
+                      Create Your Account
                     </a>
                   </li>
                   <li>
@@ -666,7 +666,7 @@ const HowItWorks = () => {
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Buy credits
+                      Buy Credits
                     </a>
                   </li>
                   <li>
@@ -692,7 +692,7 @@ const HowItWorks = () => {
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Browse outlets
+                      Browse Outlets
                     </a>
                   </li>
                   <li>
@@ -705,7 +705,7 @@ const HowItWorks = () => {
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Submit a request
+                      Submit a Request
                     </a>
                   </li>
                   <li>
@@ -718,7 +718,7 @@ const HowItWorks = () => {
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
-                      Track your orders
+                      Track Your Orders
                     </a>
                   </li>
                   <li>
