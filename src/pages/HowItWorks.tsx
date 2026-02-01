@@ -439,8 +439,6 @@ const HowItWorks = () => {
             <Globe className="w-10 h-10 text-white" />
           </div>
           
-          <p className="text-[#86868b] text-lg mb-4">Arcana Mace</p>
-          
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
             Endless reach.
             <br />
