@@ -216,17 +216,16 @@ export default function HelpCenter() {
           </div>
         </div>
         
-        {/* Expandable menu - positioned absolute to overlay content */}
+        {/* Expandable menu - slides down from top */}
         <div 
-          className={`absolute left-0 right-0 bg-white border-b border-border overflow-hidden transition-[max-height,opacity] duration-500 ${
+          className={`absolute left-0 right-0 bg-white border-b border-border transition-transform duration-400 ease-out ${
             isTopicsOpen 
-              ? 'max-h-[600px] opacity-100' 
-              : 'max-h-0 opacity-0 pointer-events-none'
+              ? 'translate-y-0' 
+              : '-translate-y-full'
           }`}
           style={{
-            transitionTimingFunction: isTopicsOpen 
-              ? 'cubic-bezier(0.16, 1, 0.3, 1)' 
-              : 'cubic-bezier(0.4, 0, 1, 1)'
+            transitionDuration: '400ms',
+            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
           {/* Mobile layout - single column */}
