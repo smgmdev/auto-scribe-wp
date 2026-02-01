@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Search, User } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -114,6 +114,7 @@ export default function HelpCenter() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isTopicsOpen, setIsTopicsOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const lastScrollY = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -201,28 +202,37 @@ export default function HelpCenter() {
         <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
-            <Popover>
+            <Popover open={isTopicsOpen} onOpenChange={setIsTopicsOpen}>
               <PopoverTrigger asChild>
                 <button className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-0.5">
                   View all topics
-                  <ChevronDown className="h-3 w-3" />
+                  {isTopicsOpen ? (
+                    <ChevronUp className="h-3 w-3" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3" />
+                  )}
                 </button>
               </PopoverTrigger>
               <PopoverContent 
                 align="end" 
-                className="w-56 p-0 bg-white border border-border shadow-lg z-50"
-                sideOffset={8}
+                className="w-[700px] p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50"
+                sideOffset={0}
               >
-                <div className="py-2">
-                  {helpCategories.map((category, index) => (
-                    <button
-                      key={index}
-                      onClick={() => navigate(`/help/${category.slug}`)}
-                      className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                    >
-                      {category.title}
-                    </button>
-                  ))}
+                <div className="py-8 px-6">
+                  <div className="grid grid-cols-3 gap-x-12 gap-y-3">
+                    {helpCategories.map((category, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setIsTopicsOpen(false);
+                          navigate(`/help/${category.slug}`);
+                        }}
+                        className="text-left text-sm text-foreground hover:text-[#06c] transition-colors"
+                      >
+                        {category.title}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </PopoverContent>
             </Popover>
