@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -327,138 +327,6 @@ export default function MediaBuying() {
             Our marketplace connects you with verified outlets, transparent pricing, and guaranteed placements. 
             All designed to help you reach your audience with confidence.
           </p>
-        </div>
-      </section>
-
-      {/* Apple-style Horizontal Slider Section */}
-      <section className="py-16 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-8">
-          <h2 className="text-3xl md:text-4xl">
-            <span className="font-semibold text-[#1d1d1f]">Endless possibilities.</span>{' '}
-            <span className="text-[#1d1d1f]/60">Explore what you can achieve with media buying.</span>
-          </h2>
-        </div>
-        
-        {/* Scrollable Cards Container */}
-        <div className="relative group">
-          {/* Left Arrow */}
-          <button
-            onClick={() => {
-              const container = document.getElementById('slider-container');
-              if (container) container.scrollBy({ left: -400, behavior: 'smooth' });
-            }}
-            className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-[#1d1d1f]" />
-          </button>
-          
-          {/* Right Arrow */}
-          <button
-            onClick={() => {
-              const container = document.getElementById('slider-container');
-              if (container) container.scrollBy({ left: 400, behavior: 'smooth' });
-            }}
-            className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-[#1d1d1f]" />
-          </button>
-          
-          <div 
-            id="slider-container"
-            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 px-4 md:px-[calc((100%-980px)/2+24px)] scroll-smooth cursor-grab active:cursor-grabbing overscroll-x-contain"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            onWheel={(e) => {
-              // Allow vertical scrolling to pass through - only handle horizontal if shift is held or it's a horizontal scroll
-              if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
-                return; // Let the event bubble up for vertical scroll
-              }
-            }}
-          >
-            {/* Card 1 - Dark */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-[#1d1d1f] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
-              <p className="text-xs font-medium text-white/60 tracking-wide uppercase mb-2">Premium Publications</p>
-              <h3 className="text-2xl md:text-[28px] font-semibold text-white leading-tight mb-2">
-                Best in class.<br />
-                For brands that lead.
-              </h3>
-              <p className="text-white/60 text-sm leading-relaxed">
-                Access top-tier publications trusted by Fortune 500 companies and industry leaders.
-              </p>
-              <div className="mt-auto pt-8 flex items-end justify-center flex-1">
-                <div className="flex gap-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="w-20 h-20 md:w-24 md:h-24 bg-white/10 rounded-2xl" />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2 - Light */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-white rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Agency Network</p>
-              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
-                Work with experts who deliver.
-              </h3>
-              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
-                Our verified agencies handle everything from content creation to publication placement.
-              </p>
-              <div className="mt-auto pt-8 flex items-end justify-center flex-1">
-                <div className="grid grid-cols-2 gap-3">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-24 h-20 md:w-28 md:h-24 bg-[#f5f5f7] rounded-2xl" />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3 - Green tint */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Guaranteed Results</p>
-              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
-                100% publication guarantee.
-              </h3>
-              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
-                Your article gets published or you get a full refund. No questions asked.
-              </p>
-              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/60 flex items-center justify-center">
-                  <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-green-600/50" />
-                </div>
-              </div>
-            </div>
-
-            {/* Card 4 - Blue tint */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-gradient-to-br from-[#e3f2fd] to-[#bbdefb] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Global Reach</p>
-              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
-                Reach audiences worldwide.
-              </h3>
-              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
-                Publications in 40+ countries. Target by region, language, or industry.
-              </p>
-              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/60 flex items-center justify-center">
-                  <Globe className="w-16 h-16 md:w-20 md:h-20 text-blue-600/50" />
-                </div>
-              </div>
-            </div>
-
-            {/* Card 5 - Orange tint */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] bg-gradient-to-br from-[#fff3e0] to-[#ffe0b2] rounded-3xl p-6 md:p-8 flex flex-col min-h-[520px] md:min-h-[580px]">
-              <p className="text-xs font-medium text-[#1d1d1f]/50 tracking-wide uppercase mb-2">Fast Turnaround</p>
-              <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] leading-tight mb-2">
-                Published in 24-72 hours.
-              </h3>
-              <p className="text-[#1d1d1f]/60 text-sm leading-relaxed">
-                Time-sensitive campaign? Most publications offer express delivery options.
-              </p>
-              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/60 flex items-center justify-center">
-                  <Zap className="w-16 h-16 md:w-20 md:h-20 text-orange-500/50" />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
