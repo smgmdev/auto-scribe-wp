@@ -245,23 +245,23 @@ export default {
 				'100%': { transform: 'rotateX(70deg) rotateY(100deg) rotateZ(360deg)' }
 			},
 			'slideDown': {
-				from: {
+				'0%': {
 					opacity: '0',
-					transform: 'translateY(-100%)'
+					transform: 'translateY(-8px)'
 				},
-				to: {
+				'100%': {
 					opacity: '1',
 					transform: 'translateY(0)'
 				}
 			},
 			'slideUp': {
-				from: {
+				'0%': {
 					opacity: '1',
 					transform: 'translateY(0)'
 				},
-				to: {
+				'100%': {
 					opacity: '0',
-					transform: 'translateY(-100%)'
+					transform: 'translateY(-8px)'
 				}
 			}
 		},
