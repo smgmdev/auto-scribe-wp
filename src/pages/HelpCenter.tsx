@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import amblack from '@/assets/amblack.png';
@@ -200,23 +201,31 @@ export default function HelpCenter() {
         <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
-            <button 
-              onClick={() => {
-                const categoriesSection = document.getElementById('help-categories');
-                if (categoriesSection && scrollContainerRef.current) {
-                  const headerOffset = 140;
-                  const elementPosition = categoriesSection.offsetTop;
-                  scrollContainerRef.current.scrollTo({
-                    top: elementPosition - headerOffset,
-                    behavior: 'smooth'
-                  });
-                }
-              }}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-            >
-              View all topics
-              <ChevronDown className="h-4 w-4" />
-            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-0.5">
+                  View all topics
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent 
+                align="end" 
+                className="w-56 p-0 bg-white border border-border shadow-lg z-50"
+                sideOffset={8}
+              >
+                <div className="py-2">
+                  {helpCategories.map((category, index) => (
+                    <button
+                      key={index}
+                      onClick={() => navigate(`/help/${category.slug}`)}
+                      className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                    >
+                      {category.title}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
