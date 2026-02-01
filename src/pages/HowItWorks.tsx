@@ -372,7 +372,8 @@ const HowItWorks = () => {
   useEffect(() => {
     const sectionIds = [
       'getting-started', 'create-account', 'buy-credits',
-      'media-buying', 'browse-outlets', 'submit-request', 'track-orders',
+      'media-buying', 'global-library', 'browse-outlets', 'submit-request', 'track-orders',
+      'browse-media-network', 'bmn-local-library', 'bmn-global-library',
       'self-publishing', 'local-library', 'generate-ai-articles',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
@@ -684,6 +685,19 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
+                      href="#global-library"
+                      onClick={(e) => scrollToSection(e, 'global-library')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'global-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      Global Library
+                    </a>
+                  </li>
+                  <li>
+                    <a 
                       href="#browse-outlets"
                       onClick={(e) => scrollToSection(e, 'browse-outlets')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -719,6 +733,45 @@ const HowItWorks = () => {
                       }`}
                     >
                       Track Your Orders
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#browse-media-network"
+                      onClick={(e) => scrollToSection(e, 'browse-media-network')}
+                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'browse-media-network' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      Browse Media Network
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#bmn-local-library"
+                      onClick={(e) => scrollToSection(e, 'bmn-local-library')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'bmn-local-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      Local Library
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#bmn-global-library"
+                      onClick={(e) => scrollToSection(e, 'bmn-global-library')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'bmn-global-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      Global Library
                     </a>
                   </li>
                   <li>
@@ -893,6 +946,36 @@ const HowItWorks = () => {
                   From business news to crypto outlets, place your content where it matters most.
                 </p>
                 
+                <div id="global-library" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Global Library
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The Global Library is Arcana Mace's marketplace of premium media outlets managed by verified agencies worldwide. 
+                    These are high-authority publications where you can request article placements through our escrow-protected system. 
+                    Unlike your Local Library where you publish directly, the Global Library connects you with professional agencies 
+                    who handle the publishing process on your behalf.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Access to hundreds of verified publications across all industries and regions</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Transparent pricing with credit-based payments and secure escrow</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Professional agency handling—submit your brief and let experts manage the rest</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Guaranteed publication with delivery confirmation and live links</span>
+                    </li>
+                  </ul>
+                </div>
+                
                 <div id="browse-outlets" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Browse outlets
@@ -972,6 +1055,67 @@ const HowItWorks = () => {
                     <li className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
                       <span>Order history with downloadable invoices and transaction records</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Browse Media Network Section */}
+              <div id="browse-media-network">
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
+                  Browse Media Network
+                </h2>
+                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
+                  Explore all available media outlets in one unified interface. 
+                  The Media Network is organized into two libraries tailored to different publishing needs.
+                </p>
+                
+                <div id="bmn-local-library" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Local Library
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Your personal collection of WordPress sites where you have direct publishing access. 
+                    Connect your own sites or receive access from agencies. Publish content instantly with AI-powered 
+                    article generation and one-click deployment—no approval process required.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Direct publishing to your connected WordPress sites</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>AI article generation with multiple writing tones</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Instant one-click publishing without agency approval</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="bmn-global-library" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Global Library
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The marketplace of premium publications managed by verified agencies. 
+                    Browse high-authority outlets, submit placement requests, and let professional agencies 
+                    handle the publishing on your behalf through our secure escrow system.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Hundreds of verified publications across all industries</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Secure credit escrow protects your payment</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Professional agency handling from submission to publication</span>
                     </li>
                   </ul>
                 </div>
