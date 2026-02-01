@@ -194,7 +194,7 @@ export default function HelpCenter() {
         </div>
 
         {/* Sub-header with Help Center title */}
-        <div className="bg-white border-b border-border">
+        <div className="bg-white">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
             <button 
@@ -203,19 +203,21 @@ export default function HelpCenter() {
             >
               <span className="hidden md:inline">View all topics</span>
               {isTopicsOpen ? (
-                <ChevronUp className="h-5 w-5 md:h-3 md:w-3" />
+                <ChevronUp className="h-5 w-5 md:h-3 md:w-3 transition-transform duration-300" />
               ) : (
-                <ChevronDown className="h-5 w-5 md:h-3 md:w-3" />
+                <ChevronDown className="h-5 w-5 md:h-3 md:w-3 transition-transform duration-300" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Expandable topics menu - inside header */}
+        {/* Expandable topics menu - inside header with slide animation */}
         <div 
-          className={`bg-white border-b border-border overflow-hidden transition-all duration-300 ease-out ${
-            isTopicsOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0 border-b-0'
-          }`}
+          className="bg-white overflow-hidden"
+          style={{
+            maxHeight: isTopicsOpen ? '400px' : '0px',
+            transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
         >
           {/* Mobile layout - single column */}
           <div className="md:hidden py-8 px-4">
@@ -251,20 +253,36 @@ export default function HelpCenter() {
               ))}
             </div>
           </div>
+          {/* Animated border line */}
+          <div 
+            className="h-px bg-border"
+            style={{
+              transform: isTopicsOpen ? 'scaleX(1)' : 'scaleX(0)',
+              transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+              transformOrigin: 'left'
+            }}
+          />
         </div>
       </header>
 
       {/* Spacer for fixed header */}
-      <div className={`transition-all duration-300 ${isTopicsOpen ? 'h-[calc(112px+200px)]' : 'h-[112px]'}`} />
+      <div 
+        style={{
+          height: isTopicsOpen ? 'calc(112px + 200px)' : '112px',
+          transition: 'height 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      />
 
       {/* Blur overlay when topics menu is open */}
-      {isTopicsOpen && (
-        <div 
-          className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 transition-all duration-300"
-          style={{ top: isTopicsOpen ? '312px' : '112px' }}
-          onClick={() => setIsTopicsOpen(false)}
-        />
-      )}
+      <div 
+        className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 pointer-events-none"
+        style={{ 
+          opacity: isTopicsOpen ? 1 : 0,
+          transition: 'opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: isTopicsOpen ? 'auto' : 'none'
+        }}
+        onClick={() => setIsTopicsOpen(false)}
+      />
 
       {/* Main Content */}
       <main className="flex-1 pt-8">
