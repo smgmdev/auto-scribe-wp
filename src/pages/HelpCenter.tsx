@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
-import amlogo from '@/assets/amlogo.png';
+import amblack from '@/assets/amblack.png';
 
 const helpCategories = [
   {
@@ -109,6 +111,7 @@ const helpCategories = [
 
 export default function HelpCenter() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const lastScrollY = useRef(0);
@@ -136,31 +139,83 @@ export default function HelpCenter() {
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header */}
+      {/* Main Header - matches About page */}
       <header 
         className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border transition-[opacity,transform] duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <img src={amlogo} alt="Arcana Mace" className="h-6 w-auto" />
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
-          <button 
-            onClick={() => setIsSearchOpen(true)}
-            className="p-2 hover:bg-muted rounded-full transition-colors"
-          >
-            <Search className="h-5 w-5 text-muted-foreground" />
-          </button>
+          
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header */}
+      {/* Sub-header with banner - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        {/* Sub-header - Help Center */}
         <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
+          </div>
+        </div>
+
+        {/* Promo Banner - Apple style - Part of sticky header group */}
+        <div className="bg-[#1d1d1f] py-3">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+            <span className="text-sm text-white/90">
+              Publish articles with Arcana Mace in seconds.{' '}
+              <button 
+                onClick={() => navigate('/auth')}
+                className="text-[#2997ff] hover:underline"
+              >
+                Learn how ›
+              </button>
+            </span>
           </div>
         </div>
       </div>
