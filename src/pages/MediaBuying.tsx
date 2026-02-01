@@ -15,31 +15,73 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a clean pyramid - centered with transform
-const iconPositions = [
-  // Row 1 - 7 icons centered
-  { top: 10, left: '20%' },
-  { top: 10, left: '30%' },
-  { top: 10, left: '40%' },
-  { top: 10, left: '50%' },
-  { top: 10, left: '60%' },
-  { top: 10, left: '70%' },
-  { top: 10, left: '80%' },
-  // Row 2 - 5 icons (narrower)
-  { top: 110, left: '30%' },
-  { top: 110, left: '40%' },
-  { top: 110, left: '50%' },
-  { top: 110, left: '60%' },
-  { top: 110, left: '70%' },
-  // Row 3 - 3 icons
-  { top: 210, left: '40%' },
-  { top: 210, left: '50%' },
-  { top: 210, left: '60%' },
-  // Row 4 - 1 icon (just above logo)
-  { top: 310, left: '50%' },
-];
+// Icon sizes - small, medium, large
+const ICON_SIZES = {
+  small: 48,
+  medium: 64,
+  large: 88,
+};
 
-const ICON_SIZE = 88;
+// Generate 50 non-overlapping icon positions within central area (15%-85% width, 10px-380px height)
+// Pre-calculated positions to ensure no overlap
+const iconPositions: { top: number; left: number; size: 'small' | 'medium' | 'large' }[] = [
+  // Row 1 (top)
+  { top: 8, left: 15, size: 'medium' },
+  { top: 12, left: 24, size: 'small' },
+  { top: 5, left: 32, size: 'large' },
+  { top: 15, left: 44, size: 'small' },
+  { top: 8, left: 52, size: 'medium' },
+  { top: 10, left: 63, size: 'small' },
+  { top: 5, left: 72, size: 'large' },
+  { top: 12, left: 83, size: 'small' },
+  // Row 2
+  { top: 65, left: 17, size: 'small' },
+  { top: 58, left: 26, size: 'medium' },
+  { top: 70, left: 38, size: 'small' },
+  { top: 60, left: 48, size: 'large' },
+  { top: 68, left: 60, size: 'small' },
+  { top: 55, left: 69, size: 'medium' },
+  { top: 62, left: 80, size: 'small' },
+  // Row 3
+  { top: 115, left: 15, size: 'large' },
+  { top: 120, left: 28, size: 'small' },
+  { top: 110, left: 36, size: 'medium' },
+  { top: 118, left: 50, size: 'small' },
+  { top: 108, left: 58, size: 'large' },
+  { top: 115, left: 72, size: 'small' },
+  { top: 112, left: 82, size: 'medium' },
+  // Row 4
+  { top: 165, left: 18, size: 'small' },
+  { top: 158, left: 27, size: 'medium' },
+  { top: 170, left: 40, size: 'small' },
+  { top: 160, left: 52, size: 'medium' },
+  { top: 168, left: 64, size: 'small' },
+  { top: 155, left: 74, size: 'large' },
+  { top: 165, left: 85, size: 'small' },
+  // Row 5
+  { top: 210, left: 15, size: 'medium' },
+  { top: 215, left: 26, size: 'small' },
+  { top: 205, left: 35, size: 'large' },
+  { top: 218, left: 48, size: 'small' },
+  { top: 208, left: 56, size: 'medium' },
+  { top: 212, left: 68, size: 'small' },
+  { top: 205, left: 78, size: 'large' },
+  // Row 6
+  { top: 260, left: 17, size: 'small' },
+  { top: 255, left: 28, size: 'medium' },
+  { top: 265, left: 42, size: 'small' },
+  { top: 258, left: 54, size: 'large' },
+  { top: 262, left: 67, size: 'small' },
+  { top: 255, left: 76, size: 'medium' },
+  { top: 268, left: 85, size: 'small' },
+  // Row 7
+  { top: 308, left: 15, size: 'large' },
+  { top: 315, left: 30, size: 'small' },
+  { top: 305, left: 40, size: 'medium' },
+  { top: 312, left: 62, size: 'medium' },
+  { top: 308, left: 75, size: 'small' },
+  { top: 310, left: 84, size: 'large' },
+];
 
 // Shuffle array helper
 function shuffleArray<T>(array: T[]): T[] {
@@ -195,16 +237,18 @@ export default function MediaBuying() {
 
       {/* Hero Section with scattered media icons - Apple App Store style */}
       <section className="bg-white relative overflow-hidden" style={{ minHeight: '680px' }}>
-        {/* Dynamic media logos */}
+        {/* Dynamic media logos - 50 scattered icons with varying sizes */}
         {iconPositions.map((pos, index) => {
           const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
+          const iconSize = ICON_SIZES[pos.size];
+          const borderRadius = pos.size === 'small' ? 12 : pos.size === 'medium' ? 16 : 20;
           const style: React.CSSProperties = {
             top: pos.top,
-            left: pos.left,
+            left: `${pos.left}%`,
             transform: 'translateX(-50%)',
-            width: ICON_SIZE,
-            height: ICON_SIZE,
-            borderRadius: 20,
+            width: iconSize,
+            height: iconSize,
+            borderRadius,
           };
           
           return (
