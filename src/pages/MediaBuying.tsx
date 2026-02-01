@@ -130,48 +130,61 @@ export default function MediaBuying() {
 
       {/* Hero Section with scattered media icons - Apple App Store style */}
       <section className="bg-white relative overflow-hidden" style={{ minHeight: '480px' }}>
-        {/* Row 1 - top scattered icons */}
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 0, left: '0%', width: 56, height: 56, background: 'linear-gradient(135deg, #fb923c, #f97316)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 20, left: '8%', width: 44, height: 44, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 8, left: '16%', width: 64, height: 64, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 32, left: '26%', width: 48, height: 48, background: 'linear-gradient(135deg, #f472b6, #ec4899)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 4, left: '35%', width: 56, height: 56, background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 24, left: '45%', width: 40, height: 40, background: 'linear-gradient(135deg, #facc15, #eab308)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 0, right: '40%', width: 52, height: 52, background: 'linear-gradient(135deg, #a855f7, #9333ea)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 28, right: '32%', width: 44, height: 44, background: 'linear-gradient(135deg, #22d3ee, #06b6d4)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 8, right: '22%', width: 60, height: 60, background: 'linear-gradient(135deg, #22c55e, #16a34a)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 36, right: '13%', width: 48, height: 48, background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 4, right: '4%', width: 56, height: 56, background: 'linear-gradient(135deg, #e879f9, #d946ef)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 20, right: '0%', width: 44, height: 44, background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }} />
+        {/* Row 1 - top edge icons */}
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: -8, left: '-1%', width: 56, height: 56, background: 'linear-gradient(135deg, #22c55e, #16a34a)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 12, left: '6%', width: 48, height: 48, background: 'linear-gradient(135deg, #fb923c, #f97316)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: -4, left: '14%', width: 64, height: 64, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 20, left: '24%', width: 52, height: 52, background: 'linear-gradient(135deg, #f472b6, #ec4899)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: -8, left: '33%', width: 44, height: 44, background: 'linear-gradient(135deg, #facc15, #eab308)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: 8, left: '41%', width: 56, height: 56, background: 'linear-gradient(135deg, #a855f7, #9333ea)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: -4, right: '41%', width: 48, height: 48, background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 16, right: '33%', width: 44, height: 44, background: 'linear-gradient(135deg, #22d3ee, #06b6d4)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: -8, right: '24%', width: 60, height: 60, background: 'linear-gradient(135deg, #84cc16, #65a30d)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 12, right: '14%', width: 52, height: 52, background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: -4, right: '5%', width: 56, height: 56, background: 'linear-gradient(135deg, #e879f9, #d946ef)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 20, right: '-1%', width: 48, height: 48, background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }} />
         
         {/* Row 2 */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 72, left: '2%', width: 48, height: 48, background: 'linear-gradient(135deg, #4ade80, #22c55e)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 88, left: '12%', width: 68, height: 68, background: 'linear-gradient(135deg, #fb7185, #f43f5e)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 96, left: '24%', width: 52, height: 52, background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 76, left: '34%', width: 44, height: 44, background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 84, right: '34%', width: 40, height: 40, background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 100, right: '26%', width: 48, height: 48, background: 'linear-gradient(135deg, #84cc16, #65a30d)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 80, right: '15%', width: 64, height: 64, background: 'linear-gradient(135deg, #c084fc, #a855f7)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 92, right: '5%', width: 52, height: 52, background: 'linear-gradient(135deg, #34d399, #10b981)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 68, right: '0%', width: 44, height: 44, background: 'linear-gradient(135deg, #f97316, #ea580c)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 64, left: '1%', width: 52, height: 52, background: 'linear-gradient(135deg, #4ade80, #22c55e)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: 76, left: '10%', width: 68, height: 68, background: 'linear-gradient(135deg, #fb7185, #f43f5e)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 88, left: '22%', width: 52, height: 52, background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 68, left: '32%', width: 48, height: 48, background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 80, left: '42%', width: 40, height: 40, background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 72, right: '42%', width: 44, height: 44, background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 84, right: '32%', width: 48, height: 48, background: 'linear-gradient(135deg, #c084fc, #a855f7)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 92, right: '22%', width: 52, height: 52, background: 'linear-gradient(135deg, #34d399, #10b981)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: 72, right: '11%', width: 64, height: 64, background: 'linear-gradient(135deg, #f97316, #ea580c)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 60, right: '1%', width: 48, height: 48, background: 'linear-gradient(135deg, #818cf8, #6366f1)' }} />
         
         {/* Row 3 */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 148, left: '0%', width: 52, height: 52, background: 'linear-gradient(135deg, #60a5fa, #3b82f6)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 168, left: '9%', width: 44, height: 44, background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 160, left: '18%', width: 56, height: 56, background: 'linear-gradient(135deg, #f87171, #ef4444)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 176, left: '29%', width: 48, height: 48, background: 'linear-gradient(135deg, #fcd34d, #f59e0b)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 156, right: '29%', width: 44, height: 44, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)' }} />
-        <div className="absolute rounded-2xl shadow-lg" style={{ top: 164, right: '18%', width: 56, height: 56, background: 'linear-gradient(135deg, #4ade80, #22c55e)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 172, right: '9%', width: 48, height: 48, background: 'linear-gradient(135deg, #fb923c, #f97316)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 152, right: '0%', width: 44, height: 44, background: 'linear-gradient(135deg, #818cf8, #6366f1)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 132, left: '-1%', width: 48, height: 48, background: 'linear-gradient(135deg, #60a5fa, #3b82f6)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 152, left: '7%', width: 52, height: 52, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: 144, left: '17%', width: 60, height: 60, background: 'linear-gradient(135deg, #f87171, #ef4444)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 160, left: '28%', width: 48, height: 48, background: 'linear-gradient(135deg, #fcd34d, #f59e0b)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 140, left: '38%', width: 44, height: 44, background: 'linear-gradient(135deg, #ec4899, #db2777)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 144, right: '38%', width: 44, height: 44, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 156, right: '28%', width: 48, height: 48, background: 'linear-gradient(135deg, #4ade80, #22c55e)' }} />
+        <div className="absolute rounded-2xl shadow-lg" style={{ top: 148, right: '17%', width: 56, height: 56, background: 'linear-gradient(135deg, #fb923c, #f97316)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 156, right: '7%', width: 52, height: 52, background: 'linear-gradient(135deg, #22d3ee, #06b6d4)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 136, right: '-1%', width: 48, height: 48, background: 'linear-gradient(135deg, #84cc16, #65a30d)' }} />
         
-        {/* Row 4 - closer to center */}
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 224, left: '4%', width: 48, height: 48, background: 'linear-gradient(135deg, #f472b6, #ec4899)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 240, left: '14%', width: 52, height: 52, background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 228, left: '25%', width: 44, height: 44, background: 'linear-gradient(135deg, #ec4899, #db2777)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 244, right: '25%', width: 44, height: 44, background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 232, right: '14%', width: 52, height: 52, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)' }} />
-        <div className="absolute rounded-xl shadow-lg" style={{ top: 220, right: '4%', width: 48, height: 48, background: 'linear-gradient(135deg, #e879f9, #d946ef)' }} />
+        {/* Row 4 */}
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 200, left: '2%', width: 48, height: 48, background: 'linear-gradient(135deg, #f472b6, #ec4899)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 216, left: '12%', width: 52, height: 52, background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 204, left: '23%', width: 44, height: 44, background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 220, left: '33%', width: 40, height: 40, background: 'linear-gradient(135deg, #e879f9, #d946ef)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 224, right: '33%', width: 40, height: 40, background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 208, right: '23%', width: 44, height: 44, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 220, right: '12%', width: 52, height: 52, background: 'linear-gradient(135deg, #fb7185, #f43f5e)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 204, right: '2%', width: 48, height: 48, background: 'linear-gradient(135deg, #facc15, #eab308)' }} />
+        
+        {/* Row 5 - lower sides */}
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 268, left: '5%', width: 44, height: 44, background: 'linear-gradient(135deg, #22c55e, #16a34a)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 280, left: '15%', width: 48, height: 48, background: 'linear-gradient(135deg, #a855f7, #9333ea)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 272, left: '26%', width: 40, height: 40, background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 276, right: '26%', width: 40, height: 40, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 284, right: '15%', width: 48, height: 48, background: 'linear-gradient(135deg, #c084fc, #a855f7)' }} />
+        <div className="absolute rounded-xl shadow-lg" style={{ top: 272, right: '5%', width: 44, height: 44, background: 'linear-gradient(135deg, #34d399, #10b981)' }} />
 
         {/* Central icon and title */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
