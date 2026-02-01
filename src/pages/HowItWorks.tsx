@@ -219,15 +219,21 @@ const ArticleCarousel = ({
   const duplicatedArticles = [...articles, ...articles];
   
   return (
-    <div 
-      ref={carouselRef}
-      className="overflow-x-auto py-4 scrollbar-hide"
-      onWheel={handleWheel}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-    >
-      <div className="flex gap-6 px-4 md:px-8 min-w-max py-2">
+    <div className="relative">
+      {/* Left fade overlay */}
+      <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+      {/* Right fade overlay */}
+      <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+      
+      <div 
+        ref={carouselRef}
+        className="overflow-x-auto py-4 scrollbar-hide"
+        onWheel={handleWheel}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <div className="flex gap-6 px-16 md:px-24 min-w-max py-2">
         {duplicatedArticles.map((article, index) => {
           const gradient = gradients[index % gradients.length];
           
@@ -295,6 +301,7 @@ const ArticleCarousel = ({
             </a>
           );
         })}
+        </div>
       </div>
     </div>
   );
