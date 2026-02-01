@@ -196,9 +196,9 @@ export default function SelfPublishing() {
                 <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
               </div>
             ) : (
-              <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
+              <div className="flex flex-col gap-4 md:gap-6 lg:gap-8">
                 {/* Top row - 3 media */}
-                <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
+                <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8">
                   {mediaSites.slice(0, 3).map((site) => (
                     <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
@@ -219,7 +219,7 @@ export default function SelfPublishing() {
                   ))}
                 </div>
                 {/* Bottom rows - remaining 10 media */}
-                <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
+                <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8">
                   {mediaSites.slice(3).map((site) => (
                     <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
