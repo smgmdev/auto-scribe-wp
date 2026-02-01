@@ -290,7 +290,7 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid, centered */}
         <div 
           className="absolute flex flex-col items-center"
-          style={{ top: 380, left: '50%', transform: 'translateX(-50%)' }}
+          style={{ top: 340, left: '50%', transform: 'translateX(-50%)' }}
         >
           <div 
             className="flex items-center justify-center shadow-xl overflow-hidden"
