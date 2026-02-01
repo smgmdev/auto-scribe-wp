@@ -636,7 +636,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'getting-started')}
                       className={`block pl-4 py-0.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'getting-started' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -649,7 +649,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'create-account')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'create-account' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -662,7 +662,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'buy-credits')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'buy-credits' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -675,7 +675,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'media-buying')}
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'media-buying' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -688,7 +688,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'browse-outlets')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'browse-outlets' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -701,7 +701,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'submit-request')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'submit-request' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -714,7 +714,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'track-orders')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'track-orders' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -727,7 +727,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'self-publishing')}
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'self-publishing' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -740,7 +740,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'local-library')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'local-library' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -753,7 +753,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'generate-ai-articles')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'generate-ai-articles' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -766,7 +766,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'for-agencies')}
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'for-agencies' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -779,7 +779,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'agency-connect-wordpress')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'agency-connect-wordpress' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -792,7 +792,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'upload-media-lists')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'upload-media-lists' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
@@ -805,7 +805,7 @@ const HowItWorks = () => {
                       onClick={(e) => scrollToSection(e, 'get-paid')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'get-paid' 
-                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
                       }`}
                     >
