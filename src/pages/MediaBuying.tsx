@@ -15,70 +15,68 @@ interface MediaSite {
   name: string;
 }
 
-// Icon sizes - small, medium, large with proper spacing
+// Icon sizes - small, medium, large
 const ICON_SIZES = {
-  small: 40,
-  medium: 56,
-  large: 72,
+  small: 36,
+  medium: 48,
+  large: 60,
 };
 
-// Generate 50 non-overlapping icon positions within central area (18%-82% width, 10px-360px height)
-// Carefully spaced to prevent any overlap - minimum gap of 8px between icons
+// Grid-based positions: 7 columns (20%-80% at ~10% intervals), 7 rows (50px apart)
+// Each icon has enough space to never touch another
 const iconPositions: { top: number; left: number; size: 'small' | 'medium' | 'large' }[] = [
-  // Row 1 (y: 5-45)
-  { top: 8, left: 18, size: 'small' },
-  { top: 12, left: 26, size: 'medium' },
-  { top: 5, left: 36, size: 'small' },
-  { top: 15, left: 44, size: 'large' },
-  { top: 8, left: 56, size: 'small' },
-  { top: 10, left: 64, size: 'medium' },
-  { top: 5, left: 74, size: 'small' },
-  { top: 12, left: 82, size: 'small' },
-  // Row 2 (y: 55-95)
-  { top: 60, left: 20, size: 'medium' },
-  { top: 65, left: 30, size: 'small' },
-  { top: 58, left: 40, size: 'small' },
-  { top: 62, left: 50, size: 'medium' },
-  { top: 68, left: 60, size: 'small' },
-  { top: 55, left: 70, size: 'large' },
-  { top: 62, left: 82, size: 'small' },
-  // Row 3 (y: 105-145)
-  { top: 110, left: 18, size: 'small' },
-  { top: 115, left: 28, size: 'large' },
-  { top: 108, left: 42, size: 'small' },
-  { top: 112, left: 52, size: 'medium' },
-  { top: 118, left: 64, size: 'small' },
-  { top: 105, left: 74, size: 'medium' },
-  { top: 110, left: 84, size: 'small' },
-  // Row 4 (y: 155-195)
-  { top: 160, left: 20, size: 'medium' },
-  { top: 165, left: 32, size: 'small' },
-  { top: 158, left: 42, size: 'large' },
-  { top: 162, left: 56, size: 'small' },
-  { top: 168, left: 66, size: 'medium' },
-  { top: 155, left: 78, size: 'small' },
-  // Row 5 (y: 205-245)
-  { top: 210, left: 18, size: 'small' },
-  { top: 215, left: 28, size: 'medium' },
-  { top: 205, left: 40, size: 'small' },
-  { top: 212, left: 50, size: 'large' },
-  { top: 218, left: 64, size: 'small' },
-  { top: 208, left: 74, size: 'medium' },
-  { top: 212, left: 84, size: 'small' },
-  // Row 6 (y: 255-295)
-  { top: 260, left: 20, size: 'medium' },
-  { top: 265, left: 32, size: 'small' },
-  { top: 258, left: 44, size: 'small' },
-  { top: 262, left: 54, size: 'medium' },
-  { top: 268, left: 66, size: 'small' },
-  { top: 255, left: 76, size: 'large' },
-  // Row 7 (y: 305-345)
-  { top: 310, left: 18, size: 'small' },
-  { top: 315, left: 28, size: 'medium' },
-  { top: 305, left: 40, size: 'small' },
-  { top: 312, left: 62, size: 'medium' },
-  { top: 308, left: 74, size: 'small' },
-  { top: 315, left: 84, size: 'small' },
+  // Row 1 (y: 10)
+  { top: 10, left: 20, size: 'small' },
+  { top: 10, left: 30, size: 'medium' },
+  { top: 10, left: 40, size: 'small' },
+  { top: 10, left: 50, size: 'large' },
+  { top: 10, left: 60, size: 'small' },
+  { top: 10, left: 70, size: 'medium' },
+  { top: 10, left: 80, size: 'small' },
+  // Row 2 (y: 60)
+  { top: 60, left: 25, size: 'medium' },
+  { top: 60, left: 35, size: 'small' },
+  { top: 60, left: 45, size: 'large' },
+  { top: 60, left: 55, size: 'small' },
+  { top: 60, left: 65, size: 'medium' },
+  { top: 60, left: 75, size: 'small' },
+  // Row 3 (y: 110)
+  { top: 110, left: 20, size: 'large' },
+  { top: 110, left: 30, size: 'small' },
+  { top: 110, left: 40, size: 'medium' },
+  { top: 110, left: 50, size: 'small' },
+  { top: 110, left: 60, size: 'large' },
+  { top: 110, left: 70, size: 'small' },
+  { top: 110, left: 80, size: 'medium' },
+  // Row 4 (y: 160)
+  { top: 160, left: 25, size: 'small' },
+  { top: 160, left: 35, size: 'large' },
+  { top: 160, left: 45, size: 'small' },
+  { top: 160, left: 55, size: 'medium' },
+  { top: 160, left: 65, size: 'small' },
+  { top: 160, left: 75, size: 'large' },
+  // Row 5 (y: 210)
+  { top: 210, left: 20, size: 'medium' },
+  { top: 210, left: 30, size: 'small' },
+  { top: 210, left: 40, size: 'large' },
+  { top: 210, left: 50, size: 'small' },
+  { top: 210, left: 60, size: 'medium' },
+  { top: 210, left: 70, size: 'small' },
+  { top: 210, left: 80, size: 'large' },
+  // Row 6 (y: 260)
+  { top: 260, left: 25, size: 'large' },
+  { top: 260, left: 35, size: 'small' },
+  { top: 260, left: 45, size: 'medium' },
+  { top: 260, left: 55, size: 'small' },
+  { top: 260, left: 65, size: 'large' },
+  { top: 260, left: 75, size: 'small' },
+  // Row 7 (y: 310)
+  { top: 310, left: 20, size: 'small' },
+  { top: 310, left: 30, size: 'medium' },
+  { top: 310, left: 40, size: 'small' },
+  { top: 310, left: 60, size: 'small' },
+  { top: 310, left: 70, size: 'medium' },
+  { top: 310, left: 80, size: 'small' },
 ];
 
 // Shuffle array helper
