@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
+import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
@@ -13,6 +14,13 @@ interface MediaSite {
   id: string;
   favicon: string | null;
   name: string;
+  link: string;
+  price: number;
+  publication_format: string;
+  category: string;
+  subcategory: string | null;
+  agency: string | null;
+  about: string | null;
 }
 
 // Icon sizes - desktop: small, medium, large | mobile: smaller sizes
@@ -108,6 +116,7 @@ export default function MediaBuying() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [selectedSite, setSelectedSite] = useState<MediaSite | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -125,7 +134,7 @@ export default function MediaBuying() {
     const fetchMediaSites = async () => {
       const { data } = await supabase
         .from('media_sites')
-        .select('id, favicon, name')
+        .select('id, favicon, name, link, price, publication_format, category, subcategory, agency, about')
         .neq('category', 'Agencies/People')
         .not('favicon', 'is', null);
       
@@ -550,8 +559,12 @@ export default function MediaBuying() {
           {/* Media Sites Grid */}
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-x-6 gap-y-8 md:gap-x-8 md:gap-y-10">
             {shuffledSites.slice(0, 42).map((site, index) => (
-              <div key={site.id || index} className="flex flex-col items-center text-center group cursor-pointer">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-[14px] md:rounded-[18px] overflow-hidden shadow-md bg-white border border-[#e5e5e5] group-hover:shadow-lg transition-shadow mb-2">
+              <div 
+                key={site.id || index} 
+                className="flex flex-col items-center text-center group cursor-pointer"
+                onClick={() => setSelectedSite(site)}
+              >
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-[14px] md:rounded-[18px] overflow-hidden shadow-md bg-white border border-[#e5e5e5] group-hover:shadow-lg group-hover:border-[#1d1d1f] transition-all mb-2">
                   {site.favicon ? (
                     <img 
                       src={site.favicon} 
@@ -565,7 +578,7 @@ export default function MediaBuying() {
                     </div>
                   )}
                 </div>
-                <span className="text-[11px] md:text-xs text-[#1d1d1f] leading-tight line-clamp-2 max-w-[80px] md:max-w-[100px]">
+                <span className="text-[11px] md:text-xs text-[#1d1d1f] leading-tight line-clamp-2 max-w-[80px] md:max-w-[100px] group-hover:text-[#0066cc] transition-colors">
                   {site.name}
                 </span>
               </div>
@@ -692,6 +705,13 @@ export default function MediaBuying() {
       </section>
 
       <Footer narrow showTopBorder />
+
+      {/* Media Site Dialog */}
+      <MediaSiteDialog
+        open={!!selectedSite}
+        onOpenChange={(open) => !open && setSelectedSite(null)}
+        mediaSite={selectedSite}
+      />
     </div>
   );
 }
