@@ -15,28 +15,38 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a clean pyramid - proper spacing (icon = 88px, gap = 12px = 100px step)
+// Icon positions forming a clean pyramid - row 1 spans full width
 const iconPositions = [
-  // Row 1 - 7 icons across the top (centered)
-  { top: 0, left: 'calc(50% - 344px)' },
-  { top: 0, left: 'calc(50% - 244px)' },
-  { top: 0, left: 'calc(50% - 144px)' },
-  { top: 0, left: 'calc(50% - 44px)' }, // center
-  { top: 0, left: 'calc(50% + 56px)' },
-  { top: 0, left: 'calc(50% + 156px)' },
-  { top: 0, left: 'calc(50% + 256px)' },
-  // Row 2 - 5 icons (staggered, narrower)
-  { top: 100, left: 'calc(50% - 244px)' },
-  { top: 100, left: 'calc(50% - 144px)' },
-  { top: 100, left: 'calc(50% - 44px)' },
-  { top: 100, left: 'calc(50% + 56px)' },
-  { top: 100, left: 'calc(50% + 156px)' },
-  // Row 3 - 3 icons
-  { top: 200, left: 'calc(50% - 144px)' },
-  { top: 200, left: 'calc(50% - 44px)' },
-  { top: 200, left: 'calc(50% + 56px)' },
-  // Row 4 - 1 icon (just above logo)
-  { top: 300, left: 'calc(50% - 44px)' },
+  // Row 1 - full width (9 icons edge to edge)
+  { top: 0, left: '2%' },
+  { top: 0, left: '13%' },
+  { top: 0, left: '24%' },
+  { top: 0, left: '35%' },
+  { top: 0, left: '46%' },
+  { top: 0, left: '57%' },
+  { top: 0, left: '68%' },
+  { top: 0, left: '79%' },
+  { top: 0, left: '90%' },
+  // Row 2 - 7 icons (narrower)
+  { top: 100, left: '13%' },
+  { top: 100, left: '24%' },
+  { top: 100, left: '35%' },
+  { top: 100, left: '46%' },
+  { top: 100, left: '57%' },
+  { top: 100, left: '68%' },
+  { top: 100, left: '79%' },
+  // Row 3 - 5 icons
+  { top: 200, left: '24%' },
+  { top: 200, left: '35%' },
+  { top: 200, left: '46%' },
+  { top: 200, left: '57%' },
+  { top: 200, left: '68%' },
+  // Row 4 - 3 icons
+  { top: 300, left: '35%' },
+  { top: 300, left: '46%' },
+  { top: 300, left: '57%' },
+  // Row 5 - 1 icon (just above logo)
+  { top: 400, left: '46%' },
 ];
 
 const ICON_SIZE = 88;
