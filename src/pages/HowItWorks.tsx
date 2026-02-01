@@ -536,6 +536,28 @@ const HowItWorks = () => {
         ) : null}
       </section>
 
+      <section className="py-24 md:py-32 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {features.map((feature, index) => (
+            <ScrollRevealRow
+              key={index}
+              highlightText={feature.highlight}
+              normalText={feature.normal}
+              index={index}
+            />
+          ))}
+          
+          <div className="text-center mt-12">
+            <Button 
+              onClick={handleGetStarted}
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
+            >
+              Create Arcana Mace Account
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* AI-Powered Section - Apple Intelligence Style */}
       <section className="py-24 md:py-32 bg-black">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
@@ -562,28 +584,6 @@ const HowItWorks = () => {
           >
             Learn more about AI Publishing <span className="text-sm">›</span>
           </button>
-        </div>
-      </section>
-
-      <section className="py-24 md:py-32 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          {features.map((feature, index) => (
-            <ScrollRevealRow
-              key={index}
-              highlightText={feature.highlight}
-              normalText={feature.normal}
-              index={index}
-            />
-          ))}
-          
-          <div className="text-center mt-12">
-            <Button 
-              onClick={handleGetStarted}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
-            >
-              Create Arcana Mace Account
-            </Button>
-          </div>
         </div>
       </section>
 
