@@ -285,7 +285,7 @@ export default function MediaBuying() {
           >
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center mt-3 whitespace-nowrap">Arcana Mace</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-3 whitespace-nowrap">Arcana Mace</h2>
         </div>
       </section>
 
