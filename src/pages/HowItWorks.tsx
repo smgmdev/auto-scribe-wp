@@ -374,8 +374,8 @@ const HowItWorks = () => {
       'getting-started', 'create-account', 'buy-credits',
       'explore-arcana-mace',
       'media-network', 'instant-publishing', 'b2b-media-buying',
-      'apply-agency-account', 'account-settings',
-      'media-buying', 'buy-credits', 'local-library', 'generate-ai-articles', 'global-library', 'agency-engagement',
+      'credit-management', 'apply-agency-account', 'account-settings',
+      'media-buying', 'local-library', 'generate-ai-articles', 'global-library', 'agency-engagement',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
 
@@ -728,6 +728,19 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
+                      href="#credit-management"
+                      onClick={(e) => scrollToSection(e, 'credit-management')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'credit-management' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Credit Management
+                    </a>
+                  </li>
+                  <li>
+                    <a 
                       href="#apply-agency-account"
                       onClick={(e) => scrollToSection(e, 'apply-agency-account')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -765,19 +778,6 @@ const HowItWorks = () => {
                       }`}
                     >
                       Media Buying
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#buy-credits"
-                      onClick={(e) => scrollToSection(e, 'buy-credits')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'buy-credits' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Buy Credits
                     </a>
                   </li>
                   <li>
@@ -1042,6 +1042,31 @@ const HowItWorks = () => {
                   </ul>
                 </div>
                 
+                <div id="credit-management" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Credit Management
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Purchase, track, and manage your Arcana Mace credits. Credits are the universal currency 
+                    for all platform services—from AI article generation to premium media placements. 
+                    View your complete transaction history and balance at any time.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff9f0a] mt-0.5 flex-shrink-0" />
+                      <span>Flexible credit packs: Choose from starter to enterprise bundles</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff9f0a] mt-0.5 flex-shrink-0" />
+                      <span>Instant delivery: Credits appear in your account immediately after purchase</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff9f0a] mt-0.5 flex-shrink-0" />
+                      <span>Full transparency: Detailed history of all credit transactions and usage</span>
+                    </li>
+                  </ul>
+                </div>
+                
                 <div id="apply-agency-account" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Apply For Agency Account
@@ -1101,35 +1126,6 @@ const HowItWorks = () => {
                   Access premium publications through our verified agency network. 
                   From business news to crypto outlets, place your content where it matters most.
                 </p>
-                
-                <div id="buy-credits" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Buy Credits
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Credits are the universal currency on Arcana Mace. Use them to publish articles to the Global Library, 
-                    access premium agency services, and unlock advanced features. Purchase credit packs that fit your 
-                    publishing needs—from starter bundles to enterprise volumes.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#34c759] mt-0.5 flex-shrink-0" />
-                      <span>Flexible credit packs to match your publishing volume</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#34c759] mt-0.5 flex-shrink-0" />
-                      <span>Secure payment processing via Stripe</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#34c759] mt-0.5 flex-shrink-0" />
-                      <span>Credits never expire—use them whenever you're ready</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#34c759] mt-0.5 flex-shrink-0" />
-                      <span>Transparent pricing with no hidden fees</span>
-                    </li>
-                  </ul>
-                </div>
                 
                 <div id="local-library" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
