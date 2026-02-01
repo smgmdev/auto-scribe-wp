@@ -242,7 +242,7 @@ export default function SystemStatus() {
           </div>
 
           {/* Legend and Refresh */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-center md:justify-between mb-6">
             {/* Refresh - desktop only */}
             <button
               onClick={() => fetchStatus(true)}
@@ -252,7 +252,7 @@ export default function SystemStatus() {
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <div className="flex items-center gap-4 flex-wrap ml-auto">
+            <div className="flex items-center gap-4 flex-wrap justify-center md:justify-end">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
                 <span className="text-sm text-[#1d1d1f]">Available</span>
