@@ -199,7 +199,7 @@ export default function HelpCenter() {
 
       {/* Sub-header - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="bg-white border-b border-border relative">
+        <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
             <button 
@@ -215,19 +215,21 @@ export default function HelpCenter() {
             </button>
           </div>
         </div>
-        
-        {/* Expandable menu - slides down from top */}
-        <div 
-          className={`absolute left-0 right-0 bg-white border-b border-border transition-transform duration-400 ease-out ${
-            isTopicsOpen 
-              ? 'translate-y-0' 
-              : '-translate-y-full'
-          }`}
-          style={{
-            transitionDuration: '400ms',
-            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-        >
+      </div>
+
+      {/* Expandable menu - slides down from sub-header */}
+      <div 
+        className={`fixed left-0 right-0 bg-white border-b border-border z-30 transition-all duration-400 ${
+          isTopicsOpen 
+            ? 'opacity-100 visible' 
+            : 'opacity-0 invisible -translate-y-4'
+        }`}
+        style={{
+          top: isHeaderHidden ? '48px' : '112px',
+          transitionDuration: '350ms',
+          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
           {/* Mobile layout - single column */}
           <div className="md:hidden py-8 px-4">
             <div className="flex flex-col gap-4">
@@ -263,12 +265,11 @@ export default function HelpCenter() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Blur overlay when topics menu is open */}
       {isTopicsOpen && (
         <div 
-          className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-30 transition-all duration-300"
+          className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-20 transition-all duration-300"
           onClick={() => setIsTopicsOpen(false)}
         />
       )}
