@@ -72,19 +72,35 @@ const iconPositions: { top: number; left: number; size: 'small' | 'medium' | 'la
   { top: 208, left: 82, size: 'small' },
   { top: 208, left: 92, size: 'medium' },
   // Row 6 (y: 258)
-  { top: 258, left: 13, size: 'large' },
-  { top: 258, left: 25, size: 'small' },
-  { top: 258, left: 35, size: 'medium' },
-  { top: 258, left: 65, size: 'medium' },
-  { top: 258, left: 76, size: 'small' },
-  { top: 258, left: 88, size: 'large' },
-  // Row 7 (y: 308)
+  { top: 258, left: 8, size: 'medium' },
+  { top: 258, left: 18, size: 'large' },
+  { top: 258, left: 30, size: 'small' },
+  { top: 258, left: 40, size: 'medium' },
+  { top: 258, left: 60, size: 'medium' },
+  { top: 258, left: 70, size: 'small' },
+  { top: 258, left: 82, size: 'large' },
+  { top: 258, left: 92, size: 'medium' },
+  // Row 7 (y: 308) - closer to Arcana Mace
   { top: 308, left: 8, size: 'small' },
   { top: 308, left: 18, size: 'medium' },
-  { top: 308, left: 29, size: 'small' },
-  { top: 308, left: 71, size: 'small' },
+  { top: 308, left: 29, size: 'large' },
+  { top: 308, left: 40, size: 'small' },
+  { top: 308, left: 60, size: 'small' },
+  { top: 308, left: 71, size: 'large' },
   { top: 308, left: 82, size: 'medium' },
   { top: 308, left: 92, size: 'small' },
+  // Row 8 (y: 358) - flanking Arcana Mace
+  { top: 358, left: 8, size: 'medium' },
+  { top: 358, left: 19, size: 'small' },
+  { top: 358, left: 30, size: 'large' },
+  { top: 358, left: 70, size: 'large' },
+  { top: 358, left: 81, size: 'small' },
+  { top: 358, left: 92, size: 'medium' },
+  // Row 9 (y: 408) - bottom corners
+  { top: 408, left: 8, size: 'small' },
+  { top: 408, left: 18, size: 'large' },
+  { top: 408, left: 82, size: 'large' },
+  { top: 408, left: 92, size: 'small' },
 ];
 
 // Shuffle array helper
