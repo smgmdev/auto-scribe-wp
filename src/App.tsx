@@ -25,6 +25,16 @@ import PressNews from "./pages/PressNews";
 import PressReleaseDetail from "./pages/PressReleaseDetail";
 import About from "./pages/About";
 import HelpCenter from "./pages/HelpCenter";
+import GettingStarted from "./pages/help/GettingStarted";
+import YourAccount from "./pages/help/YourAccount";
+import CreditsPricing from "./pages/help/CreditsPricing";
+import PublishingArticles from "./pages/help/PublishingArticles";
+import MediaBuying from "./pages/help/MediaBuying";
+import OrdersDelivery from "./pages/help/OrdersDelivery";
+import ForAgencies from "./pages/help/ForAgencies";
+import AIGeneration from "./pages/help/AIGeneration";
+import Troubleshooting from "./pages/help/Troubleshooting";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -108,6 +118,15 @@ const App = () => {
               <Route path="/press/:id" element={<PressReleaseDetail />} />
               <Route path="/about" element={<About />} />
               <Route path="/help" element={<HelpCenter />} />
+              <Route path="/help/getting-started" element={<GettingStarted />} />
+              <Route path="/help/your-account" element={<YourAccount />} />
+              <Route path="/help/credits-pricing" element={<CreditsPricing />} />
+              <Route path="/help/publishing-articles" element={<PublishingArticles />} />
+              <Route path="/help/media-buying" element={<MediaBuying />} />
+              <Route path="/help/orders-delivery" element={<OrdersDelivery />} />
+              <Route path="/help/for-agencies" element={<ForAgencies />} />
+              <Route path="/help/ai-generation" element={<AIGeneration />} />
+              <Route path="/help/troubleshooting" element={<Troubleshooting />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
