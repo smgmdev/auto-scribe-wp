@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Search, User } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -198,8 +198,25 @@ export default function HelpCenter() {
       {/* Sub-header - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="bg-white border-b border-border">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
+            <button 
+              onClick={() => {
+                const categoriesSection = document.getElementById('help-categories');
+                if (categoriesSection && scrollContainerRef.current) {
+                  const headerOffset = 140;
+                  const elementPosition = categoriesSection.offsetTop;
+                  scrollContainerRef.current.scrollTo({
+                    top: elementPosition - headerOffset,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+            >
+              View all topics
+              <ChevronDown className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -238,7 +255,7 @@ export default function HelpCenter() {
         </section>
 
         {/* Help Categories Grid */}
-        <section className="py-16">
+        <section id="help-categories" className="py-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {helpCategories.map((category, index) => (
