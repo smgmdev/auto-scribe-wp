@@ -310,34 +310,39 @@ export default function HelpCenter() {
         {/* Help Categories Grid */}
         <section id="help-categories" className="py-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-              {helpCategories.map((category, index) => (
-                <div key={index} className="border-t border-border pt-6">
-                  <h3 className="text-xl font-semibold text-foreground mb-4">
-                    {category.title}
-                  </h3>
-                  <ul className="space-y-2 mb-4">
-                    {category.topics.map((topic, topicIndex) => (
-                      <li key={topicIndex}>
-                        <button 
-                          onClick={() => navigate(`/help/${category.slug}`)}
-                          className="text-base text-muted-foreground hover:text-foreground transition-colors text-left"
-                        >
-                          {topic}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <button 
-                    onClick={() => navigate(`/help/${category.slug}`)}
-                    className="text-[#06c] text-base font-medium hover:underline inline-flex items-center gap-1"
-                  >
-                    Learn more
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+            {/* Group categories into rows of 3 */}
+            {Array.from({ length: Math.ceil(helpCategories.length / 3) }, (_, rowIndex) => (
+              <div key={rowIndex} className="border-t border-border pt-8 mb-12 last:mb-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8">
+                  {helpCategories.slice(rowIndex * 3, rowIndex * 3 + 3).map((category, index) => (
+                    <div key={index}>
+                      <h3 className="text-xl font-semibold text-foreground mb-4">
+                        {category.title}
+                      </h3>
+                      <ul className="space-y-2 mb-4">
+                        {category.topics.map((topic, topicIndex) => (
+                          <li key={topicIndex}>
+                            <button 
+                              onClick={() => navigate(`/help/${category.slug}`)}
+                              className="text-base text-muted-foreground hover:text-foreground transition-colors text-left"
+                            >
+                              {topic}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      <button 
+                        onClick={() => navigate(`/help/${category.slug}`)}
+                        className="text-[#06c] text-base font-medium hover:underline inline-flex items-center gap-1"
+                      >
+                        Learn more
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </section>
       </main>
