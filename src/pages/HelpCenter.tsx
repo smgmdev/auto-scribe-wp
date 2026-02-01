@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, ChevronRight, Search, User } from 'lucide-react
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import amblack from '@/assets/amblack.png';
@@ -202,58 +202,59 @@ export default function HelpCenter() {
         <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
-            <Popover open={isTopicsOpen} onOpenChange={setIsTopicsOpen}>
-              <PopoverTrigger asChild>
-                <button className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-0.5">
-                  <span className="hidden md:inline">View all topics</span>
-                  {isTopicsOpen ? (
-                    <ChevronUp className="h-5 w-5 md:h-3 md:w-3" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 md:h-3 md:w-3" />
-                  )}
+            <button 
+              onClick={() => setIsTopicsOpen(!isTopicsOpen)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-0.5"
+            >
+              <span className="hidden md:inline">View all topics</span>
+              {isTopicsOpen ? (
+                <ChevronUp className="h-5 w-5 md:h-3 md:w-3" />
+              ) : (
+                <ChevronDown className="h-5 w-5 md:h-3 md:w-3" />
+              )}
+            </button>
+          </div>
+        </div>
+        
+        {/* Expandable menu */}
+        <div 
+          className={`bg-white border-b border-border overflow-hidden transition-all duration-300 ease-out ${
+            isTopicsOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          {/* Mobile layout - single column */}
+          <div className="md:hidden py-8 px-4">
+            <div className="flex flex-col gap-4">
+              {helpCategories.map((category, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setIsTopicsOpen(false);
+                    navigate(`/help/${category.slug}`);
+                  }}
+                  className="text-left text-lg font-semibold text-foreground hover:text-[#06c] transition-colors duration-200"
+                >
+                  {category.title}
                 </button>
-              </PopoverTrigger>
-              <PopoverContent 
-                align="end" 
-                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 origin-top data-[state=open]:animate-[expandDown_0.3s_cubic-bezier(0.4,0,0.2,1)_forwards] data-[state=closed]:animate-[collapseUp_0.2s_cubic-bezier(0.4,0,0.2,1)_forwards]"
-                sideOffset={12}
-              >
-                {/* Mobile layout - single column */}
-                <div className="md:hidden py-8 px-4">
-                  <div className="flex flex-col gap-4">
-                    {helpCategories.map((category, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setIsTopicsOpen(false);
-                          navigate(`/help/${category.slug}`);
-                        }}
-                        className="text-left text-lg font-semibold text-foreground hover:text-[#06c] transition-colors duration-200"
-                      >
-                        {category.title}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {/* Desktop layout - 3 columns */}
-                <div className="hidden md:block max-w-[980px] mx-auto py-8 px-4 md:px-6">
-                  <div className="grid grid-cols-3 gap-x-12 gap-y-3">
-                    {helpCategories.map((category, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setIsTopicsOpen(false);
-                          navigate(`/help/${category.slug}`);
-                        }}
-                        className="text-left text-sm text-foreground hover:text-[#06c] transition-colors duration-200"
-                      >
-                        {category.title}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+              ))}
+            </div>
+          </div>
+          {/* Desktop layout - 3 columns */}
+          <div className="hidden md:block max-w-[980px] mx-auto py-8 px-4 md:px-6">
+            <div className="grid grid-cols-3 gap-x-12 gap-y-3">
+              {helpCategories.map((category, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setIsTopicsOpen(false);
+                    navigate(`/help/${category.slug}`);
+                  }}
+                  className="text-left text-sm text-foreground hover:text-[#06c] transition-colors duration-200"
+                >
+                  {category.title}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
