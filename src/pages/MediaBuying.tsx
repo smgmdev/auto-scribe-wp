@@ -290,7 +290,7 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid, centered */}
         <div 
           className="absolute flex flex-col items-center"
-          style={{ top: 340, left: '50%', transform: 'translateX(-50%)' }}
+          style={{ top: 360, left: '50%', transform: 'translateX(-50%)' }}
         >
           <div 
             className="flex items-center justify-center shadow-xl overflow-hidden"
@@ -298,7 +298,7 @@ export default function MediaBuying() {
           >
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center whitespace-nowrap">Arcana Mace</h2>
+          <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center mt-3 whitespace-nowrap">Arcana Mace</h2>
         </div>
       </section>
 
