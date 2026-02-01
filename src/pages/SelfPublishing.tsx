@@ -268,7 +268,7 @@ export default function SelfPublishing() {
               }}
               className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
             >
-              Start Writing
+              Browse Local Media Library
             </Button>
           </nav>
         </div>
