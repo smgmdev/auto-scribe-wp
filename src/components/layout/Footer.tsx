@@ -5,9 +5,10 @@ const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaig
 
 interface FooterProps {
   narrow?: boolean;
+  showTopBorder?: boolean;
 }
 
-export function Footer({ narrow = false }: FooterProps) {
+export function Footer({ narrow = false, showTopBorder = false }: FooterProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -18,7 +19,7 @@ export function Footer({ narrow = false }: FooterProps) {
   return (
     <footer className={`bg-[#f5f5f7] ${narrow ? '' : 'mt-12'}`}>
       <div className={containerClass}>
-        <div className="border-t border-[#d2d2d7] pt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
+        <div className={`${showTopBorder ? 'border-t border-[#d2d2d7]' : ''} pt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8`}>
           {/* Media Buying */}
           <div>
             <h4 className="font-semibold text-foreground mb-2 text-xs">Media Buying Categories</h4>
