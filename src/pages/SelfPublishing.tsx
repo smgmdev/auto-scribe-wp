@@ -367,7 +367,7 @@ export default function SelfPublishing() {
             )}
             
             {/* Info text - Apple style */}
-            <div className="text-center mt-10 md:mt-12 max-w-3xl mx-auto">
+            <div className="text-center mt-16 md:mt-24 max-w-3xl mx-auto">
               <p className="text-sm text-[#1d1d1f] leading-relaxed mb-4">
                 Arcana Mace credits can be used only to publish articles on our partner media outlets. If someone asks you to share your account credentials or use credits outside our platform, you might be the target of a scam.
               </p>
