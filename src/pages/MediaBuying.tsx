@@ -15,28 +15,28 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a clean pyramid - kept within container bounds
+// Icon positions forming a clean pyramid - contained within center area (15%-85%)
 const iconPositions = [
-  // Row 1 - full width (7 icons, properly spaced within bounds)
-  { top: 10, left: '5%' },
-  { top: 10, left: '17%' },
-  { top: 10, left: '29%' },
-  { top: 10, left: '41%' },
-  { top: 10, left: '53%' },
+  // Row 1 - 7 icons within center bounds
+  { top: 10, left: '15%' },
+  { top: 10, left: '25%' },
+  { top: 10, left: '35%' },
+  { top: 10, left: '45%' },
+  { top: 10, left: '55%' },
   { top: 10, left: '65%' },
-  { top: 10, left: '77%' },
+  { top: 10, left: '75%' },
   // Row 2 - 5 icons (narrower)
-  { top: 110, left: '17%' },
-  { top: 110, left: '29%' },
-  { top: 110, left: '41%' },
-  { top: 110, left: '53%' },
+  { top: 110, left: '25%' },
+  { top: 110, left: '35%' },
+  { top: 110, left: '45%' },
+  { top: 110, left: '55%' },
   { top: 110, left: '65%' },
   // Row 3 - 3 icons
-  { top: 210, left: '29%' },
-  { top: 210, left: '41%' },
-  { top: 210, left: '53%' },
+  { top: 210, left: '35%' },
+  { top: 210, left: '45%' },
+  { top: 210, left: '55%' },
   // Row 4 - 1 icon (just above logo)
-  { top: 310, left: '41%' },
+  { top: 310, left: '45%' },
 ];
 
 const ICON_SIZE = 88;
@@ -229,7 +229,7 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid */}
         <div 
           className="absolute"
-          style={{ top: 410, left: '41%' }}
+          style={{ top: 410, left: '45%' }}
         >
           <div className="relative" style={{ width: 128, height: 128 }}>
             {/* Orbiting glow dot */}
