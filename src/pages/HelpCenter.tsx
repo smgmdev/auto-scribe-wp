@@ -195,27 +195,11 @@ export default function HelpCenter() {
       {/* Spacer for fixed header */}
       <div className="h-16" />
 
-      {/* Sub-header with banner - Sticky container */}
+      {/* Sub-header - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        {/* Sub-header - Help Center */}
         <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
-          </div>
-        </div>
-
-        {/* Promo Banner - Apple style - Part of sticky header group */}
-        <div className="bg-[#1d1d1f] py-3">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-            <span className="text-sm text-white/90">
-              Publish articles with Arcana Mace in seconds.{' '}
-              <button 
-                onClick={() => navigate('/auth')}
-                className="text-[#2997ff] hover:underline"
-              >
-                Learn how ›
-              </button>
-            </span>
           </div>
         </div>
       </div>
