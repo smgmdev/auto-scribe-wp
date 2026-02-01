@@ -96,7 +96,7 @@ export default function SystemStatus() {
   // Link mapping for services
   const serviceLinks: Record<string, { link?: string; internalLink?: string }> = {
     'Authentication': { internalLink: '/auth' },
-    'WordPress Publishing': { internalLink: '/self-publishing' },
+    'WordPress Publishing': { internalLink: '/dashboard?view=compose' },
     'Credit Processing': { internalLink: '/dashboard?view=credit-history' },
     'Media Site Network': { internalLink: '/media-buying' },
     'Headlines Scanner': { internalLink: '/self-publishing' },
@@ -137,7 +137,7 @@ export default function SystemStatus() {
         { name: 'Edge Functions', status: 'issue' },
         { name: 'File Storage', status: 'issue' },
         { name: 'AI Article Generation', status: 'issue' },
-        { name: 'WordPress Publishing', status: 'issue', internalLink: '/self-publishing' },
+        { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
         { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credit-history' },
         { name: 'Payment Gateway (Stripe)', status: 'issue' },
         { name: 'Email Notifications', status: 'issue' },
