@@ -15,30 +15,27 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions for the hero section
+// Icon positions for the hero section - larger sizes, tighter spacing
 const iconPositions = [
   // Row 1 - top edge
-  { top: -8, left: '-1%', size: 56 }, { top: 12, left: '6%', size: 48 }, { top: -4, left: '14%', size: 64 },
-  { top: 20, left: '24%', size: 52 }, { top: -8, left: '33%', size: 44 }, { top: 8, left: '41%', size: 56 },
-  { top: -4, right: '41%', size: 48 }, { top: 16, right: '33%', size: 44 }, { top: -8, right: '24%', size: 60 },
-  { top: 12, right: '14%', size: 52 }, { top: -4, right: '5%', size: 56 }, { top: 20, right: '-1%', size: 48 },
+  { top: -10, left: '-2%', size: 72 }, { top: 5, left: '7%', size: 80 }, { top: -5, left: '17%', size: 88 },
+  { top: 10, left: '28%', size: 76 }, { top: -8, left: '38%', size: 72 }, 
+  { top: -5, right: '38%', size: 72 }, { top: 8, right: '28%', size: 80 }, { top: -10, right: '17%', size: 88 },
+  { top: 5, right: '7%', size: 76 }, { top: -5, right: '-2%', size: 72 },
   // Row 2
-  { top: 64, left: '1%', size: 52 }, { top: 76, left: '10%', size: 68 }, { top: 88, left: '22%', size: 52 },
-  { top: 68, left: '32%', size: 48 }, { top: 80, left: '42%', size: 40 }, { top: 72, right: '42%', size: 44 },
-  { top: 84, right: '32%', size: 48 }, { top: 92, right: '22%', size: 52 }, { top: 72, right: '11%', size: 64 },
-  { top: 60, right: '1%', size: 48 },
+  { top: 70, left: '0%', size: 84 }, { top: 85, left: '12%', size: 92 }, { top: 75, left: '24%', size: 80 },
+  { top: 90, left: '35%', size: 72 }, { top: 80, right: '35%', size: 72 }, { top: 88, right: '24%', size: 80 },
+  { top: 78, right: '12%', size: 88 }, { top: 72, right: '0%', size: 80 },
   // Row 3
-  { top: 132, left: '-1%', size: 48 }, { top: 152, left: '7%', size: 52 }, { top: 144, left: '17%', size: 60 },
-  { top: 160, left: '28%', size: 48 }, { top: 140, left: '38%', size: 44 }, { top: 144, right: '38%', size: 44 },
-  { top: 156, right: '28%', size: 48 }, { top: 148, right: '17%', size: 56 }, { top: 156, right: '7%', size: 52 },
-  { top: 136, right: '-1%', size: 48 },
+  { top: 155, left: '-1%', size: 76 }, { top: 170, left: '10%', size: 88 }, { top: 160, left: '22%', size: 80 },
+  { top: 175, left: '33%', size: 72 }, { top: 165, right: '33%', size: 72 }, { top: 172, right: '22%', size: 80 },
+  { top: 162, right: '10%', size: 88 }, { top: 158, right: '-1%', size: 76 },
   // Row 4
-  { top: 200, left: '2%', size: 48 }, { top: 216, left: '12%', size: 52 }, { top: 204, left: '23%', size: 44 },
-  { top: 220, left: '33%', size: 40 }, { top: 224, right: '33%', size: 40 }, { top: 208, right: '23%', size: 44 },
-  { top: 220, right: '12%', size: 52 }, { top: 204, right: '2%', size: 48 },
-  // Row 5
-  { top: 268, left: '5%', size: 44 }, { top: 280, left: '15%', size: 48 }, { top: 272, left: '26%', size: 40 },
-  { top: 276, right: '26%', size: 40 }, { top: 284, right: '15%', size: 48 }, { top: 272, right: '5%', size: 44 },
+  { top: 240, left: '3%', size: 80 }, { top: 255, left: '15%', size: 84 }, { top: 248, left: '27%', size: 72 },
+  { top: 252, right: '27%', size: 72 }, { top: 258, right: '15%', size: 84 }, { top: 245, right: '3%', size: 80 },
+  // Row 5 - bottom
+  { top: 320, left: '6%', size: 72 }, { top: 335, left: '18%', size: 76 },
+  { top: 340, right: '18%', size: 76 }, { top: 325, right: '6%', size: 72 },
 ];
 
 // Shuffle array helper
