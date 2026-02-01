@@ -96,13 +96,16 @@ export default function SystemStatus() {
   // Link mapping for services
   const serviceLinks: Record<string, { link?: string; internalLink?: string }> = {
     'Authentication': { internalLink: '/auth' },
-    'AI Article Generation': { internalLink: '/dashboard?view=compose' },
-    'WordPress Publishing': { internalLink: '/dashboard?view=compose' },
-    'Credit Processing': { internalLink: '/dashboard?view=credits' },
-    'Payment Gateway (Stripe)': { link: 'https://stripe.com/status' },
+    'WordPress Publishing': { internalLink: '/self-publishing' },
+    'Credit Management': { internalLink: '/dashboard?view=credits' },
     'Media Site Network': { internalLink: '/media-buying' },
-    'Agency Portal': { internalLink: '/agency' },
-    'Headlines Scanner': { internalLink: '/dashboard?view=headlines' },
+    'Headlines Scanner': { internalLink: '/self-publishing' },
+  };
+
+  // Name mapping for services (API name -> Display name)
+  const serviceNameMap: Record<string, string> = {
+    'Credit Processing': 'Credit Management',
+    'Agency Portal': 'Agency System & Features',
   };
 
   const fetchStatus = useCallback(async (showRefresh = false) => {
@@ -114,11 +117,15 @@ export default function SystemStatus() {
       if (error) throw error;
       
       if (data?.services) {
-        // Merge links into services
-        const servicesWithLinks = data.services.map((service: ServiceStatus) => ({
-          ...service,
-          ...serviceLinks[service.name],
-        }));
+        // Merge links into services and apply name mappings
+        const servicesWithLinks = data.services.map((service: ServiceStatus) => {
+          const displayName = serviceNameMap[service.name] || service.name;
+          return {
+            ...service,
+            name: displayName,
+            ...serviceLinks[displayName],
+          };
+        });
         setServices(servicesWithLinks);
         setLastUpdated(new Date(data.timestamp));
       }
@@ -130,15 +137,15 @@ export default function SystemStatus() {
         { name: 'Authentication', status: 'issue', internalLink: '/auth' },
         { name: 'Edge Functions', status: 'issue' },
         { name: 'File Storage', status: 'issue' },
-        { name: 'AI Article Generation', status: 'issue', internalLink: '/dashboard?view=compose' },
-        { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
-        { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credits' },
-        { name: 'Payment Gateway (Stripe)', status: 'issue', link: 'https://stripe.com/status' },
+        { name: 'AI Article Generation', status: 'issue' },
+        { name: 'WordPress Publishing', status: 'issue', internalLink: '/self-publishing' },
+        { name: 'Credit Management', status: 'issue', internalLink: '/dashboard?view=credits' },
+        { name: 'Payment Gateway (Stripe)', status: 'issue' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
         { name: 'Media Site Network', status: 'issue', internalLink: '/media-buying' },
-        { name: 'Agency Portal', status: 'issue', internalLink: '/agency' },
-        { name: 'Headlines Scanner', status: 'issue', internalLink: '/dashboard?view=headlines' },
+        { name: 'Agency System & Features', status: 'issue' },
+        { name: 'Headlines Scanner', status: 'issue', internalLink: '/self-publishing' },
       ]);
     } finally {
       setIsLoading(false);
