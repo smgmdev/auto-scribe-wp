@@ -47,30 +47,43 @@ export default function MediaBuying() {
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header - dark background */}
+      {/* Header - same as Self Publishing */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full bg-[#3d3d3d] transition-all duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <img src={amlogo} alt="Arcana Mace" className="h-10 w-10" />
-            <span className="text-lg font-semibold text-white">Arcana Mace</span>
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           
-          {/* Right side navigation */}
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
           <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-white hover:text-[#3d3d3d]"
+              className="md:hidden hover:bg-black hover:text-white"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
             </Button>
+            
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
-                className="bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />
                 Account
@@ -78,7 +91,7 @@ export default function MediaBuying() {
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white border border-white transition-all duration-300"
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
               >
                 Sign In
               </Button>
@@ -90,29 +103,28 @@ export default function MediaBuying() {
       {/* Search Modal */}
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
-      {/* Spacer for fixed header */}
+      {/* Spacer */}
       <div className="h-16" />
 
-      {/* Sub-header - Sticky with dark background */}
-      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="bg-[#3d3d3d] border-b border-[#4d4d4d]">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-            <span className="text-xl font-semibold text-white">Media Buying</span>
-            <nav className="flex items-center gap-6">
-              <button 
-                onClick={() => navigate('/self-publishing')}
-                className="text-white/60 hover:text-white text-sm transition-colors"
-              >
-                Self Publishing
-              </button>
-              <button 
-                onClick={handleGetStarted}
-                className="text-[#2997ff] hover:underline text-sm transition-colors"
-              >
-                Browse Media
-              </button>
-            </nav>
-          </div>
+      {/* Sub-header - Sticky */}
+      <div className={`sticky z-40 bg-white/90 backdrop-blur-sm border-b border-border transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+          <span className="text-xl font-semibold text-foreground">Media Buying</span>
+          <nav className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={() => navigate('/self-publishing')}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Self Publishing
+            </button>
+            <Button
+              size="sm"
+              onClick={handleGetStarted}
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
+            >
+              Browse Media
+            </Button>
+          </nav>
         </div>
       </div>
 
