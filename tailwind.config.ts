@@ -267,6 +267,18 @@ export default {
 					transform: 'scaleY(0)',
 					transformOrigin: 'top'
 				}
+			},
+			'float-1': {
+				'0%, 100%': { transform: 'translateY(0px)' },
+				'50%': { transform: 'translateY(-8px)' }
+			},
+			'float-2': {
+				'0%, 100%': { transform: 'translateY(0px)' },
+				'50%': { transform: 'translateY(-12px)' }
+			},
+			'float-3': {
+				'0%, 100%': { transform: 'translateY(-6px)' },
+				'50%': { transform: 'translateY(6px)' }
 			}
 		},
 		animation: {
@@ -285,7 +297,10 @@ export default {
 			'overlay-out': 'overlay-out 0.15s ease-out forwards',
 			'orbit-spin-1': 'orbit-spin-1 8s linear infinite',
 			'orbit-spin-2': 'orbit-spin-2 10s linear infinite reverse',
-			'orbit-spin-3': 'orbit-spin-3 12s linear infinite'
+			'orbit-spin-3': 'orbit-spin-3 12s linear infinite',
+			'float-1': 'float-1 4s ease-in-out infinite',
+			'float-2': 'float-2 5s ease-in-out infinite',
+			'float-3': 'float-3 6s ease-in-out infinite'
 		}
   	}
   },

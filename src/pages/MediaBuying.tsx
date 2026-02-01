@@ -195,10 +195,14 @@ export default function MediaBuying() {
         {/* Dynamic media logos */}
         {iconPositions.map((pos, index) => {
           const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
+          // Cycle through 3 different float animations with varied delays
+          const floatClass = index % 3 === 0 ? 'animate-float-1' : index % 3 === 1 ? 'animate-float-2' : 'animate-float-3';
+          const animationDelay = `${(index * 0.3) % 3}s`;
           const style: React.CSSProperties = {
             top: pos.top,
             width: pos.size,
             height: pos.size,
+            animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
             ...(pos.right !== undefined ? { right: pos.right } : {}),
           };
@@ -206,7 +210,7 @@ export default function MediaBuying() {
           return (
             <div
               key={index}
-              className="absolute rounded-2xl shadow-lg overflow-hidden bg-white"
+              className={`absolute rounded-2xl shadow-lg overflow-hidden bg-white ${floatClass}`}
               style={style}
             >
               {site?.favicon ? (
