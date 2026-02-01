@@ -337,82 +337,87 @@ const HowItWorks = () => {
         ) : articles.length > 0 ? (
           <div className="overflow-x-auto pb-4">
             <div className="flex gap-6 px-4 md:px-8 min-w-max mx-auto justify-center">
-              {articles.map((article) => (
-                <a
-                  key={article.id}
-                  href={article.wp_link || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 w-[200px] md:w-[220px] group"
-                >
-                  {/* iPhone 17 Frame - Ultra-thin bezels */}
-                  <div className="relative bg-gradient-to-b from-[#2a2a2c] to-[#1a1a1c] rounded-[44px] p-[3px] shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]">
-                    {/* Titanium edge highlight */}
-                    <div className="absolute inset-0 rounded-[44px] bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
-                    
-                    {/* Screen bezel (ultra thin) */}
-                    <div className="bg-black rounded-[42px] p-[2px]">
-                      <div className="bg-white rounded-[40px] overflow-hidden relative">
-                        {/* Dynamic Island - Centered pill */}
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
-                          <div className="w-[72px] h-[22px] rounded-full bg-black flex items-center justify-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#1a1a1a]" />
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#2a2a2a]" />
-                          </div>
-                        </div>
+              {articles.map((article, index) => {
+                // Different gradient for each card
+                const gradients = [
+                  'from-pink-200 via-blue-200 to-purple-200',
+                  'from-orange-200 via-pink-200 to-purple-200',
+                  'from-blue-200 via-purple-200 to-pink-200',
+                  'from-green-200 via-blue-200 to-purple-200',
+                  'from-yellow-200 via-orange-200 to-pink-200',
+                  'from-purple-200 via-pink-200 to-orange-200',
+                ];
+                const gradient = gradients[index % gradients.length];
+                
+                return (
+                  <a
+                    key={article.id}
+                    href={article.wp_link || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0 w-[280px] md:w-[320px] group"
+                  >
+                    {/* Apple-style card with gradient border */}
+                    <div className={`relative rounded-[32px] p-[2px] bg-gradient-to-br ${gradient} shadow-xl transition-transform duration-300 group-hover:scale-[1.02]`}>
+                      <div className="bg-gradient-to-b from-white via-white to-gray-50/80 rounded-[30px] h-[420px] md:h-[480px] flex flex-col overflow-hidden relative">
+                        {/* Gradient overlay at bottom */}
+                        <div className={`absolute inset-0 bg-gradient-to-t ${gradient} opacity-30 pointer-events-none`} />
                         
-                        {/* Content area */}
-                        <div className="pt-8 px-3 pb-4">
-                          {/* Featured Image */}
-                          {article.featured_image?.url ? (
-                            <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden mb-3 bg-gray-100">
-                              <img
-                                src={article.featured_image.url}
-                                alt={article.featured_image.alt || article.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="aspect-[4/3] w-full rounded-2xl mb-3 bg-gradient-to-br from-blue-100 to-purple-100" />
-                          )}
-                          
-                          {/* Site info */}
-                          <div className="flex items-center gap-1.5 mb-2">
-                            {article.published_to_favicon && (
+                        {/* Content */}
+                        <div className="relative z-10 p-6 flex flex-col h-full">
+                          {/* Top - Media logo and name */}
+                          <div className="flex items-center gap-3 mb-4">
+                            {article.published_to_favicon ? (
                               <img
                                 src={article.published_to_favicon}
                                 alt=""
-                                className="h-3.5 w-3.5 rounded object-cover"
+                                className="h-10 w-10 rounded-xl object-cover shadow-sm"
                               />
+                            ) : (
+                              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300" />
                             )}
-                            {article.published_to_name && (
-                              <span className="text-[10px] text-[#86868b] font-medium truncate">
-                                {article.published_to_name}
-                              </span>
-                            )}
+                            <span className="text-lg font-semibold text-[#1d1d1f]">
+                              {article.published_to_name || 'Published'}
+                            </span>
                           </div>
                           
-                          {/* Title */}
-                          <h3 className="font-semibold text-[#1d1d1f] text-xs leading-snug line-clamp-2 mb-2">
+                          {/* Description / Title excerpt */}
+                          <p className="text-[#1d1d1f] text-sm leading-relaxed line-clamp-3 mb-4">
                             {article.title}
-                          </h3>
+                          </p>
                           
-                          {/* Link indicator */}
-                          <div className="flex items-center gap-1 text-[#0071e3]">
-                            <span className="text-[10px] font-medium">Read article</span>
-                            <ExternalLink className="h-2.5 w-2.5" />
+                          {/* Learn more button */}
+                          <div className="inline-flex">
+                            <span className="bg-[#1d1d1f] text-white text-xs font-medium px-4 py-2 rounded-full group-hover:bg-black transition-colors">
+                              Read article
+                            </span>
                           </div>
-                        </div>
-                        
-                        {/* Home indicator */}
-                        <div className="h-5 flex items-center justify-center pb-1">
-                          <div className="w-24 h-1 rounded-full bg-black/80" />
+                          
+                          {/* Spacer */}
+                          <div className="flex-1" />
+                          
+                          {/* Center content - Featured headline */}
+                          <div className="text-center my-auto py-8">
+                            <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight line-clamp-4">
+                              {article.title.split(' ').slice(0, 8).join(' ')}
+                              {article.title.split(' ').length > 8 ? '...' : ''}
+                            </h3>
+                          </div>
+                          
+                          {/* Spacer */}
+                          <div className="flex-1" />
+                          
+                          {/* Bottom - Published date */}
+                          <div className="mt-auto pt-4">
+                            <p className="text-xs font-semibold text-[#1d1d1f]">Published via</p>
+                            <p className="text-xs text-[#86868b]">Arcana Mace</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </a>
-              ))}
+                  </a>
+                );
+              })}
             </div>
           </div>
         ) : null}
