@@ -42,7 +42,7 @@ const iconPositions = [
   { top: 375, left: '32%' }, { top: 380, right: '32%' },
 ];
 
-const ICON_SIZE = 64;
+const ICON_SIZE = 88;
 
 // Shuffle array helper
 function shuffleArray<T>(array: T[]): T[] {
@@ -208,7 +208,7 @@ export default function MediaBuying() {
             top: pos.top,
             width: ICON_SIZE,
             height: ICON_SIZE,
-            borderRadius: 16,
+            borderRadius: 20,
             animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
             ...(pos.right !== undefined ? { right: pos.right } : {}),
@@ -234,8 +234,8 @@ export default function MediaBuying() {
           );
         })}
 
-        {/* Central icon and title */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
+        {/* Central icon and title - centered in pyramid */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ paddingTop: 80 }}>
           <div 
             className="mb-4 flex items-center justify-center shadow-2xl overflow-hidden"
             style={{ 
