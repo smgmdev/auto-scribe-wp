@@ -301,7 +301,7 @@ export default function SystemStatus() {
           </p>
         </main>
 
-        <Footer narrow showTopBorder />
+        <Footer narrow />
       </div>
     </div>
   );
