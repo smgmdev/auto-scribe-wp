@@ -34,6 +34,7 @@ import OrdersDelivery from "./pages/help/OrdersDelivery";
 import ForAgencies from "./pages/help/ForAgencies";
 import AIGeneration from "./pages/help/AIGeneration";
 import Troubleshooting from "./pages/help/Troubleshooting";
+import SelfPublishing from "./pages/SelfPublishing";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +128,7 @@ const App = () => {
               <Route path="/help/for-agencies" element={<ForAgencies />} />
               <Route path="/help/ai-generation" element={<AIGeneration />} />
               <Route path="/help/troubleshooting" element={<Troubleshooting />} />
+              <Route path="/self-publishing" element={<SelfPublishing />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
