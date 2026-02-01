@@ -376,28 +376,38 @@ const HowItWorks = () => {
       'self-publishing', 'connect-wordpress', 'ai-generation', 'publish-directly'
     ];
 
-    const observers: IntersectionObserver[] = [];
+    const handleScroll = () => {
+      const scrollContainer = scrollContainerRef.current;
+      if (!scrollContainer) return;
 
-    sectionIds.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        const observer = new IntersectionObserver(
-          ([entry]) => {
-            if (entry.isIntersecting) {
-              setActiveSection(id);
-            }
-          },
-          {
-            rootMargin: '-20% 0px -60% 0px',
-            threshold: 0
+      const headerOffset = 200; // Account for sticky headers
+      let currentSection = 'getting-started';
+
+      for (const id of sectionIds) {
+        const element = document.getElementById(id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // Check if element top is above the detection line (headerOffset from top)
+          if (rect.top <= headerOffset) {
+            currentSection = id;
           }
-        );
-        observer.observe(element);
-        observers.push(observer);
+        }
       }
-    });
 
-    return () => observers.forEach(obs => obs.disconnect());
+      setActiveSection(currentSection);
+    };
+
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll(); // Initial check
+    }
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, []);
 
   useEffect(() => {
