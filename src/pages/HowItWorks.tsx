@@ -375,7 +375,7 @@ const HowItWorks = () => {
       'explore-arcana-mace',
       'media-network', 'instant-publishing', 'b2b-media-buying',
       'credit-management', 'apply-agency-account', 'account-settings',
-      'media-buying', 'local-library', 'global-library', 'generate-ai-articles', 'agency-engagement',
+      'media-buying', 'local-library', 'generate-ai-articles', 'global-library', 'agency-engagement',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
 
@@ -795,19 +795,6 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#global-library"
-                      onClick={(e) => scrollToSection(e, 'global-library')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'global-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Global Library
-                    </a>
-                  </li>
-                  <li>
-                    <a 
                       href="#generate-ai-articles"
                       onClick={(e) => scrollToSection(e, 'generate-ai-articles')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -817,6 +804,19 @@ const HowItWorks = () => {
                       }`}
                     >
                       Generate AI Articles
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#global-library"
+                      onClick={(e) => scrollToSection(e, 'global-library')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'global-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Global Library
                     </a>
                   </li>
                   <li>
