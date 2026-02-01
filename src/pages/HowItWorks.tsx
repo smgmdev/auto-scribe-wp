@@ -1207,67 +1207,6 @@ const HowItWorks = () => {
                 </div>
               </div>
               
-              {/* Browse Media Network Section */}
-              <div id="browse-media-network">
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
-                  Browse Media Network
-                </h2>
-                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
-                  Explore all available media outlets in one unified interface. 
-                  The Media Network is organized into two libraries tailored to different publishing needs.
-                </p>
-                
-                <div id="bmn-local-library" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Local Library
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    Your personal collection of WordPress sites where you have direct publishing access. 
-                    Connect your own sites or receive access from agencies. Publish content instantly with AI-powered 
-                    article generation and one-click deployment—no approval process required.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Direct publishing to your connected WordPress sites</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>AI article generation with multiple writing tones</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
-                      <span>Instant one-click publishing without agency approval</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div id="bmn-global-library" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Global Library
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    The marketplace of premium publications managed by verified agencies. 
-                    Browse high-authority outlets, submit placement requests, and let professional agencies 
-                    handle the publishing on your behalf through our secure escrow system.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Hundreds of verified publications across all industries</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Secure credit escrow protects your payment</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Professional agency handling from submission to publication</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              
               {/* Self Publishing Section */}
               <div id="self-publishing">
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
