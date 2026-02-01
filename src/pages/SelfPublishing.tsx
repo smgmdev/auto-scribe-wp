@@ -271,22 +271,8 @@ export default function SelfPublishing() {
           </div>
         </section>
 
-        {/* Products Icons Grid - Outline style like Apple devices */}
-        <section className="py-12 md:py-16">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="flex flex-wrap justify-center gap-10 md:gap-16 lg:gap-20">
-              {products.map((product, index) => (
-                <div key={index} className="flex flex-col items-center gap-3 group cursor-pointer">
-                  <product.icon className="w-12 h-12 md:w-16 md:h-16 text-[#1d1d1f] stroke-[1.2] group-hover:text-[#0071e3] transition-colors" />
-                  <span className="text-xs md:text-sm text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">{product.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Media Sites - Dynamic from Local Library */}
-        <section className="py-10 md:py-12 border-t border-[#d2d2d7]">
+        <section className="py-10 md:py-12">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             {isLoadingSites ? (
               <div className="flex items-center justify-center py-4 min-h-[80px]">
