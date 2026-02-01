@@ -239,7 +239,7 @@ export default function MediaBuying() {
       </div>
 
       {/* Hero Section with scattered media icons - Apple App Store style */}
-      <section className="bg-white relative overflow-hidden" style={{ minHeight: '540px' }}>
+      <section className="bg-white relative overflow-hidden" style={{ minHeight: '620px' }}>
         {/* Dynamic media logos - 50 scattered icons with varying sizes */}
         {iconPositions.map((pos, index) => {
           const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
