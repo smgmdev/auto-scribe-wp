@@ -17,7 +17,7 @@ const helpCategories = [
       'Understanding Credits',
       'First Article Submission',
     ],
-    link: '#getting-started',
+    slug: 'getting-started',
   },
   {
     title: 'Your Account',
@@ -28,7 +28,7 @@ const helpCategories = [
       'Security Settings',
       'Privacy Policy',
     ],
-    link: '#account',
+    slug: 'your-account',
   },
   {
     title: 'Credits & Pricing',
@@ -39,7 +39,7 @@ const helpCategories = [
       'Refund Policy',
       'Promotions & Discounts',
     ],
-    link: '#pricing',
+    slug: 'credits-pricing',
   },
   {
     title: 'Publishing Articles',
@@ -50,7 +50,7 @@ const helpCategories = [
       'Tracking Publication Status',
       'Editing & Revisions',
     ],
-    link: '#publishing',
+    slug: 'publishing-articles',
   },
   {
     title: 'Media Buying',
@@ -61,7 +61,7 @@ const helpCategories = [
       'Quality Guarantees',
       'Order Management',
     ],
-    link: '#media-buying',
+    slug: 'media-buying',
   },
   {
     title: 'Orders & Delivery',
@@ -72,7 +72,7 @@ const helpCategories = [
       'Cancel an Order',
       'View Order History',
     ],
-    link: '#orders',
+    slug: 'orders-delivery',
   },
   {
     title: 'For Agencies',
@@ -83,7 +83,7 @@ const helpCategories = [
       'Managing Media Sites',
       'Agency Dashboard',
     ],
-    link: '#agencies',
+    slug: 'for-agencies',
   },
   {
     title: 'AI Article Generation',
@@ -94,7 +94,7 @@ const helpCategories = [
       'Editing AI Content',
       'Publishing AI Articles',
     ],
-    link: '#ai-generation',
+    slug: 'ai-generation',
   },
   {
     title: 'Troubleshooting',
@@ -105,7 +105,7 @@ const helpCategories = [
       'Technical Support',
       'Contact Us',
     ],
-    link: '#troubleshooting',
+    slug: 'troubleshooting',
   },
 ];
 
@@ -249,13 +249,17 @@ export default function HelpCenter() {
                   <ul className="space-y-2 mb-4">
                     {category.topics.map((topic, topicIndex) => (
                       <li key={topicIndex}>
-                        <button className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left">
+                        <button 
+                          onClick={() => navigate(`/help/${category.slug}`)}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
+                        >
                           {topic}
                         </button>
                       </li>
                     ))}
                   </ul>
                   <button 
+                    onClick={() => navigate(`/help/${category.slug}`)}
                     className="text-[#06c] text-sm font-medium hover:underline inline-flex items-center gap-1"
                   >
                     Learn more
