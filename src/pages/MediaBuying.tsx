@@ -1,13 +1,41 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award } from 'lucide-react';
+import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SearchModal } from '@/components/search/SearchModal';
 import amlogo from '@/assets/amlogo.png';
+import amblack from '@/assets/amblack.png';
 
 export default function MediaBuying() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const currentScrollY = scrollContainer.scrollTop;
+      const scrollThreshold = 64;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
+        setIsHeaderHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsHeaderHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleGetStarted = () => {
     if (user) {
@@ -18,36 +46,91 @@ export default function MediaBuying() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-[#1d1d1f]/95 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-          <button 
-            onClick={() => navigate('/')} 
-            className="flex items-center gap-2"
-          >
-            <img src={amlogo} alt="Arcana Mace" className="h-5 w-5" />
-            <span className="text-white/90 text-sm font-medium">Arcana Mace</span>
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
+      {/* Main Header - standardized blur effect */}
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border transition-all duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+      >
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/self-publishing')}
-              className="text-white/80 hover:text-white text-xs transition-colors"
+          
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
             >
-              Self Publishing
-            </button>
-            <button 
-              onClick={handleGetStarted}
-              className="text-white/80 hover:text-white text-xs transition-colors"
-            >
-              Browse Media
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
             </button>
           </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setSearchOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
-      </nav>
+      </header>
+
+      {/* Search Modal */}
+      <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
+
+      {/* Spacer for fixed header */}
+      <div className="h-16" />
+
+      {/* Sub-header - Sticky */}
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        <div className="bg-white border-b border-border">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+            <span className="text-xl font-semibold text-foreground">Media Buying</span>
+            <nav className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate('/self-publishing')}
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+              >
+                Self Publishing
+              </button>
+              <button 
+                onClick={handleGetStarted}
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+              >
+                Browse Media
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
 
       {/* Hero Section with scattered media icons */}
-      <section className="pt-12 relative overflow-hidden">
+      <section className="relative overflow-hidden">
         {/* Scattered media outlet icons - decorative background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="relative w-full h-[400px] opacity-60">
@@ -68,7 +151,7 @@ export default function MediaBuying() {
         </div>
 
         {/* Main hero content */}
-        <div className="relative pt-72 pb-20 text-center">
+        <div className="relative pt-64 pb-20 text-center">
           <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-[#1d1d1f] to-[#3d3d3f] rounded-[22px] flex items-center justify-center shadow-xl">
             <Globe className="w-10 h-10 text-white" />
           </div>
