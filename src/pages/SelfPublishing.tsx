@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, FileText, Globe, Zap, Shield, BarChart3, Clock, ChevronRight, PenTool, Newspaper, BookOpen, Mic, Radio, Tv, Rss, Headphones, Mail, MessageSquare } from 'lucide-react';
+import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import amblack from '@/assets/amblack.png';
 
 // Product-style icons (outline style like Apple devices)
@@ -17,27 +18,38 @@ const products = [
   { icon: Tv, label: 'Features' },
 ];
 
-// Service-style icons (colorful app icons)
-const services = [
-  { icon: PenTool, label: 'Editor', gradient: 'from-[#0066CC] to-[#5AC8FA]' },
-  { icon: Globe, label: 'Publish', gradient: 'from-[#34C759] to-[#30D158]' },
-  { icon: Rss, label: 'Distribute', gradient: 'from-[#FF9500] to-[#FFCC00]' },
-  { icon: BarChart3, label: 'Analytics', gradient: 'from-[#5856D6] to-[#AF52DE]' },
-  { icon: Zap, label: 'AI Writer', gradient: 'from-[#FF2D55] to-[#FF6482]' },
-  { icon: Shield, label: 'Quality', gradient: 'from-[#00C7BE] to-[#64D2FF]' },
-  { icon: Headphones, label: 'Support', gradient: 'from-[#FF3B30] to-[#FF6961]' },
-  { icon: Mail, label: 'Alerts', gradient: 'from-[#007AFF] to-[#5AC8FA]' },
-  { icon: MessageSquare, label: 'Chat', gradient: 'from-[#34C759] to-[#63E6BE]' },
-  { icon: BookOpen, label: 'Guides', gradient: 'from-[#FF9500] to-[#FFD60A]' },
-];
+interface MediaSite {
+  id: string;
+  name: string;
+  favicon: string | null;
+}
 
 export default function SelfPublishing() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Fetch random media sites from local library
+  useEffect(() => {
+    const fetchMediaSites = async () => {
+      const { data } = await supabase
+        .from('wordpress_sites')
+        .select('id, name, favicon')
+        .not('favicon', 'is', null)
+        .limit(50);
+      
+      if (data && data.length > 0) {
+        // Shuffle and take 10 random sites
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        setMediaSites(shuffled.slice(0, 10));
+      }
+    };
+    fetchMediaSites();
+  }, []);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -273,16 +285,24 @@ export default function SelfPublishing() {
           </div>
         </section>
 
-        {/* Services Icons - Colorful app icons like Apple services */}
+        {/* Media Sites - Dynamic from Local Library */}
         <section className="py-10 md:py-12 border-t border-b border-[#d2d2d7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-12">
-              {services.map((service, index) => (
-                <div key={index} className="flex flex-col items-center gap-2 group cursor-pointer">
-                  <div className={`w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-gradient-to-br ${service.gradient} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform`}>
-                    <service.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+              {mediaSites.map((site) => (
+                <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm border border-[#d2d2d7] flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+                    {site.favicon ? (
+                      <img 
+                        src={site.favicon} 
+                        alt={site.name} 
+                        className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                      />
+                    ) : (
+                      <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
+                    )}
                   </div>
-                  <span className="text-[11px] md:text-xs text-[#6e6e73]">{service.label}</span>
+                  <span className="text-[11px] md:text-xs text-[#6e6e73] max-w-[80px] truncate text-center">{site.name}</span>
                 </div>
               ))}
             </div>
