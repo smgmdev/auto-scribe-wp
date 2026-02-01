@@ -62,18 +62,14 @@ Deno.serve(async (req) => {
   // Check Edge Functions (this function itself is proof it works)
   services.push({ name: 'Edge Functions', status: 'available', latency: 0 })
 
-  // Check File Storage
+  // Check File Storage using Supabase client
   try {
     const start = Date.now()
-    const response = await fetch(`${supabaseUrl}/storage/v1/bucket`, {
-      headers: { 
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseServiceKey}`
-      }
-    })
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { error } = await supabase.storage.listBuckets()
     const latency = Date.now() - start
     
-    if (!response.ok) {
+    if (error) {
       services.push({ name: 'File Storage', status: 'outage', latency })
     } else if (latency > 2000) {
       services.push({ name: 'File Storage', status: 'issue', latency })
@@ -103,15 +99,14 @@ Deno.serve(async (req) => {
     services.push({ name: 'Real-time Messaging', status: 'available' })
   }
 
-  // Check API Server (REST API)
+  // Check API Server (REST API) using Supabase client
   try {
     const start = Date.now()
-    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
-      headers: { apikey: supabaseAnonKey }
-    })
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { error } = await supabase.from('user_roles').select('id').limit(1)
     const latency = Date.now() - start
     
-    if (!response.ok && response.status !== 404) {
+    if (error) {
       services.push({ name: 'API Server', status: 'outage', latency })
     } else if (latency > 2000) {
       services.push({ name: 'API Server', status: 'issue', latency })
