@@ -244,16 +244,128 @@ export default function SelfPublishing() {
           </div>
         </section>
 
-        {/* Info Section */}
-        <section className="py-8 bg-white">
+        {/* Credits Balance Section - Dark */}
+        <section className="bg-black">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-sm text-[#6e6e73] mb-4">
-                Self publishing on Arcana Mace gives you direct access to our network of premium WordPress sites. Write your content, choose your target publications, and publish with a single click.
-              </p>
-              <p className="text-sm text-[#6e6e73]">
-                <a href="/help" className="text-[#0071e3] hover:underline">Learn more</a> about how self publishing works.
-              </p>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-white text-center pt-16 md:pt-24 pb-12 md:pb-16">
+              Publish with your<br />Arcana Mace credits.
+            </h2>
+            
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center pb-16 md:pb-24">
+              {/* Left Content */}
+              <div className="order-2 md:order-1">
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-6">
+                  Your credits. Your wallet.
+                </h3>
+                <p className="text-base md:text-lg text-[#86868b] mb-8 leading-relaxed">
+                  When you purchase credits on Arcana Mace, they're instantly added to your account balance — so you can quickly publish articles, track your spending, and manage your content budget whether you're publishing one article or a hundred.
+                </p>
+                <div className="flex flex-wrap gap-6">
+                  <a 
+                    href="/dashboard" 
+                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                  >
+                    Buy credits <span className="text-lg">↗</span>
+                  </a>
+                  <a 
+                    href="/help/credits-pricing" 
+                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                  >
+                    View pricing <span className="text-lg">↗</span>
+                  </a>
+                </div>
+              </div>
+              
+              {/* Right - Phone Mockup */}
+              <div className="order-1 md:order-2 flex justify-center md:justify-end">
+                <div className="relative">
+                  {/* Phone Frame */}
+                  <div className="w-[220px] md:w-[280px] bg-[#1d1d1f] rounded-[40px] p-3 shadow-2xl">
+                    <div className="bg-white rounded-[32px] overflow-hidden">
+                      {/* Status Bar */}
+                      <div className="h-8 bg-[#f5f5f7] flex items-center justify-center">
+                        <div className="w-20 h-5 bg-black rounded-full" />
+                      </div>
+                      {/* Content */}
+                      <div className="p-6 text-center">
+                        <p className="text-xs text-[#6e6e73] mb-2">Account Balance</p>
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#0071e3] to-[#00c7be] flex items-center justify-center">
+                          <Zap className="w-8 h-8 text-white" />
+                        </div>
+                        <p className="text-3xl font-semibold text-[#1d1d1f] mb-1">500</p>
+                        <p className="text-sm text-[#6e6e73]">Credits</p>
+                        <button className="mt-4 px-4 py-2 bg-[#1d1d1f] text-white text-sm rounded-full">
+                          Add Credits
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Need More Section - Dark */}
+        <section className="bg-black border-t border-[#424245]">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+              {/* Left - Phone Mockup */}
+              <div className="flex justify-center md:justify-start">
+                <div className="relative">
+                  {/* Phone Frame */}
+                  <div className="w-[220px] md:w-[280px] bg-[#1d1d1f] rounded-[40px] p-3 shadow-2xl">
+                    <div className="bg-white rounded-[32px] overflow-hidden">
+                      {/* Status Bar */}
+                      <div className="h-8 bg-[#f5f5f7] flex items-center justify-center">
+                        <div className="w-20 h-5 bg-black rounded-full" />
+                      </div>
+                      {/* Content */}
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-xs text-[#6e6e73]">Add Credits</span>
+                          <div className="w-6 h-6 rounded-full bg-[#0071e3] flex items-center justify-center">
+                            <span className="text-white text-xs">✓</span>
+                          </div>
+                        </div>
+                        <div className="text-center mb-4">
+                          <p className="text-4xl font-light text-[#1d1d1f]">100</p>
+                          <p className="text-sm text-[#6e6e73]">New Balance: 600</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                          <div className="py-2 text-center text-sm border border-[#d2d2d7] rounded-lg">25</div>
+                          <div className="py-2 text-center text-sm border border-[#d2d2d7] rounded-lg">50</div>
+                          <div className="py-2 text-center text-sm border border-[#0071e3] bg-[#0071e3]/10 rounded-lg text-[#0071e3]">100</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Content */}
+              <div>
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-6">
+                  Need more? Add more.
+                </h3>
+                <p className="text-base md:text-lg text-[#86868b] mb-8 leading-relaxed">
+                  Add credits to your Arcana Mace account anytime. It's fast, secure and easy to do directly from your dashboard using your credit or debit card.
+                </p>
+                <div className="flex flex-wrap gap-6">
+                  <a 
+                    href="/about" 
+                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                  >
+                    Learn more <span className="text-lg">↗</span>
+                  </a>
+                  <a 
+                    href="/dashboard" 
+                    className="text-[#2997ff] hover:underline inline-flex items-center gap-1"
+                  >
+                    Add credits <span className="text-lg">↗</span>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
