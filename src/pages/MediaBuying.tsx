@@ -15,41 +15,28 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a clean pyramid - each row staggered and narrowing
-const ICON_GAP = 100; // Gap between icons
-const ROW_HEIGHT = 100; // Vertical gap between rows
-
+// Icon positions forming a clean pyramid - proper spacing (icon = 88px, gap = 12px = 100px step)
 const iconPositions = [
-  // Row 1 - 9 icons across the top
-  { top: 0, left: 'calc(50% - 400px)' },
-  { top: 0, left: 'calc(50% - 300px)' },
-  { top: 0, left: 'calc(50% - 200px)' },
-  { top: 0, left: 'calc(50% - 100px)' },
+  // Row 1 - 7 icons across the top (centered)
+  { top: 0, left: 'calc(50% - 344px)' },
+  { top: 0, left: 'calc(50% - 244px)' },
+  { top: 0, left: 'calc(50% - 144px)' },
   { top: 0, left: 'calc(50% - 44px)' }, // center
-  { top: 0, left: 'calc(50% + 12px)' },
-  { top: 0, left: 'calc(50% + 112px)' },
-  { top: 0, left: 'calc(50% + 212px)' },
-  { top: 0, left: 'calc(50% + 312px)' },
-  // Row 2 - 7 icons (staggered under row 1)
-  { top: 100, left: 'calc(50% - 350px)' },
-  { top: 100, left: 'calc(50% - 250px)' },
-  { top: 100, left: 'calc(50% - 150px)' },
+  { top: 0, left: 'calc(50% + 56px)' },
+  { top: 0, left: 'calc(50% + 156px)' },
+  { top: 0, left: 'calc(50% + 256px)' },
+  // Row 2 - 5 icons (staggered, narrower)
+  { top: 100, left: 'calc(50% - 244px)' },
+  { top: 100, left: 'calc(50% - 144px)' },
   { top: 100, left: 'calc(50% - 44px)' },
-  { top: 100, left: 'calc(50% + 62px)' },
-  { top: 100, left: 'calc(50% + 162px)' },
-  { top: 100, left: 'calc(50% + 262px)' },
-  // Row 3 - 5 icons
-  { top: 200, left: 'calc(50% - 244px)' },
+  { top: 100, left: 'calc(50% + 56px)' },
+  { top: 100, left: 'calc(50% + 156px)' },
+  // Row 3 - 3 icons
   { top: 200, left: 'calc(50% - 144px)' },
   { top: 200, left: 'calc(50% - 44px)' },
   { top: 200, left: 'calc(50% + 56px)' },
-  { top: 200, left: 'calc(50% + 156px)' },
-  // Row 4 - 3 icons
-  { top: 300, left: 'calc(50% - 144px)' },
+  // Row 4 - 1 icon (just above logo)
   { top: 300, left: 'calc(50% - 44px)' },
-  { top: 300, left: 'calc(50% + 56px)' },
-  // Row 5 - 1 icon (just above logo)
-  { top: 400, left: 'calc(50% - 44px)' },
 ];
 
 const ICON_SIZE = 88;
