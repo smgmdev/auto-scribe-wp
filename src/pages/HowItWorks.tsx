@@ -373,7 +373,7 @@ const HowItWorks = () => {
     const sectionIds = [
       'getting-started', 'create-account', 'buy-credits',
       'media-buying', 'browse-outlets', 'submit-request', 'track-orders',
-      'self-publishing', 'local-library',
+      'self-publishing', 'local-library', 'generate-ai-articles',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
 
@@ -786,6 +786,19 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
+                      href="#generate-ai-articles"
+                      onClick={(e) => scrollToSection(e, 'generate-ai-articles')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'generate-ai-articles' 
+                          ? 'text-[#1d1d1f] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                      }`}
+                    >
+                      Generate AI Articles
+                    </a>
+                  </li>
+                  <li>
+                    <a 
                       href="#for-agencies"
                       onClick={(e) => scrollToSection(e, 'for-agencies')}
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
@@ -1043,6 +1056,49 @@ const HowItWorks = () => {
                       <span>Support for Yoast SEO, RankMath, and AIOSEO plugins</span>
                     </li>
                   </ul>
+                </div>
+                
+                <div id="generate-ai-articles" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Generate AI Articles
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Create professional, human-like articles in seconds with Arcana Mace's AI writing engine. 
+                    Our advanced AI produces approximately 700-word articles written in a natural, professional format—
+                    no robotic patterns, excessive subheadings, or clichéd AI phrasing. Every article reads like it was 
+                    crafted by a skilled human author.
+                  </p>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    Choose from multiple writing tones to match your brand voice and target audience:
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f] mb-6">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span><strong>Neutral</strong> — Balanced, objective reporting suitable for news and general content</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span><strong>Professional</strong> — Formal business writing for corporate communications and B2B content</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span><strong>Casual</strong> — Friendly, conversational style for blogs and lifestyle content</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span><strong>Enthusiastic</strong> — Energetic, engaging copy for product launches and announcements</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span><strong>Informative</strong> — Educational, detailed writing for guides and explainers</span>
+                    </li>
+                  </ul>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                    When creating a new article, simply select a headline from the Headlines section or enter your own topic, 
+                    choose your preferred tone, and let the AI generate a complete article with an optimized title. 
+                    Headlines are automatically rewritten to be curious and engaging while preserving important names 
+                    of people, companies, and organizations.
+                  </p>
                 </div>
               </div>
               
