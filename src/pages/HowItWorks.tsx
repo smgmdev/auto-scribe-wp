@@ -373,12 +373,8 @@ const HowItWorks = () => {
     const sectionIds = [
       'getting-started', 'create-account', 'buy-credits',
       'explore-arcana-mace',
-      'browse-media-network', 'bmn-local-library', 'bmn-global-library',
-      'instant-publishing', 'ip-new-article', 'ip-sources', 'ip-my-articles',
-      'b2b-media-buying', 'b2b-my-engagements', 'b2b-my-orders',
-      'credit-management',
-      'apply-agency-account',
-      'account-settings',
+      'media-network', 'instant-publishing', 'b2b-media-buying',
+      'credit-management', 'apply-agency-account', 'account-settings',
       'media-buying', 'global-library', 'browse-outlets', 'submit-request', 'track-orders',
       'self-publishing', 'local-library', 'generate-ai-articles',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
@@ -692,49 +688,19 @@ const HowItWorks = () => {
                       Explore Arcana Mace
                     </a>
                   </li>
-
-                  {/* Browse Media Network */}
                   <li>
                     <a 
-                      href="#browse-media-network"
-                      onClick={(e) => scrollToSection(e, 'browse-media-network')}
+                      href="#media-network"
+                      onClick={(e) => scrollToSection(e, 'media-network')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'browse-media-network' 
+                        activeSection === 'media-network' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
-                      Browse Media Network
+                      Media Network
                     </a>
                   </li>
-                  <li>
-                    <a 
-                      href="#bmn-local-library"
-                      onClick={(e) => scrollToSection(e, 'bmn-local-library')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'bmn-local-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Local Library
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#bmn-global-library"
-                      onClick={(e) => scrollToSection(e, 'bmn-global-library')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'bmn-global-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Global Library
-                    </a>
-                  </li>
-
-                  {/* Instant Publishing */}
                   <li>
                     <a 
                       href="#instant-publishing"
@@ -750,47 +716,6 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#ip-new-article"
-                      onClick={(e) => scrollToSection(e, 'ip-new-article')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'ip-new-article' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      New Article
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#ip-sources"
-                      onClick={(e) => scrollToSection(e, 'ip-sources')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'ip-sources' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Sources
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#ip-my-articles"
-                      onClick={(e) => scrollToSection(e, 'ip-my-articles')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'ip-my-articles' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      My Articles
-                    </a>
-                  </li>
-
-                  {/* B2B Media Buying */}
-                  <li>
-                    <a 
                       href="#b2b-media-buying"
                       onClick={(e) => scrollToSection(e, 'b2b-media-buying')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -804,34 +729,6 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#b2b-my-engagements"
-                      onClick={(e) => scrollToSection(e, 'b2b-my-engagements')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'b2b-my-engagements' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      My Engagements
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#b2b-my-orders"
-                      onClick={(e) => scrollToSection(e, 'b2b-my-orders')}
-                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'b2b-my-orders' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      My Orders
-                    </a>
-                  </li>
-
-                  {/* Credit Management */}
-                  <li>
-                    <a 
                       href="#credit-management"
                       onClick={(e) => scrollToSection(e, 'credit-management')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -843,8 +740,6 @@ const HowItWorks = () => {
                       Credit Management
                     </a>
                   </li>
-
-                  {/* Apply For Agency Account */}
                   <li>
                     <a 
                       href="#apply-agency-account"
@@ -858,8 +753,6 @@ const HowItWorks = () => {
                       Apply For Agency Account
                     </a>
                   </li>
-
-                  {/* Account Settings */}
                   <li>
                     <a 
                       href="#account-settings"
