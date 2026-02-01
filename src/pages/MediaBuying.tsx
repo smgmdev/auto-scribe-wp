@@ -15,11 +15,17 @@ interface MediaSite {
   name: string;
 }
 
-// Icon sizes - small, medium, large (increased)
+// Icon sizes - desktop: small, medium, large | mobile: smaller sizes
 const ICON_SIZES = {
   small: 64,
   medium: 80,
   large: 96,
+};
+
+const ICON_SIZES_MOBILE = {
+  small: 40,
+  medium: 52,
+  large: 64,
 };
 
 // Grid-based positions: wider spacing (10% horizontal, 50px vertical) across full width (8%-92%)
@@ -102,8 +108,17 @@ export default function MediaBuying() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch media sites on mount (excluding Agencies/People category)
   useEffect(() => {
@@ -239,14 +254,16 @@ export default function MediaBuying() {
       </div>
 
       {/* Hero Section with scattered media icons - Apple App Store style */}
-      <section className="bg-white relative overflow-hidden" style={{ minHeight: '620px' }}>
+      <section className="bg-white relative overflow-hidden" style={{ minHeight: isMobile ? '420px' : '620px' }}>
         {/* Dynamic media logos - 50 scattered icons with varying sizes */}
         {iconPositions.map((pos, index) => {
           const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
-          const iconSize = ICON_SIZES[pos.size];
-          const borderRadius = pos.size === 'small' ? 12 : pos.size === 'medium' ? 16 : 20;
+          const sizes = isMobile ? ICON_SIZES_MOBILE : ICON_SIZES;
+          const iconSize = sizes[pos.size];
+          const borderRadius = pos.size === 'small' ? (isMobile ? 8 : 12) : pos.size === 'medium' ? (isMobile ? 10 : 16) : (isMobile ? 14 : 20);
+          const topPos = isMobile ? pos.top * 0.7 : pos.top;
           const style: React.CSSProperties = {
-            top: pos.top,
+            top: topPos,
             left: `${pos.left}%`,
             transform: 'translateX(-50%)',
             width: iconSize,
@@ -277,15 +294,15 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid, centered */}
         <div 
           className="absolute flex flex-col items-center"
-          style={{ top: 380, left: '50%', transform: 'translateX(-50%)' }}
+          style={{ top: isMobile ? 260 : 380, left: '50%', transform: 'translateX(-50%)' }}
         >
           <div 
             className="flex items-center justify-center shadow-xl overflow-hidden"
-            style={{ width: 140, height: 140, borderRadius: 32 }}
+            style={{ width: isMobile ? 100 : 140, height: isMobile ? 100 : 140, borderRadius: isMobile ? 24 : 32 }}
           >
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-3 whitespace-nowrap">Arcana Mace</h2>
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground text-center mt-2 md:mt-3 whitespace-nowrap">Arcana Mace</h2>
         </div>
       </section>
 
