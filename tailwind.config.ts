@@ -279,6 +279,10 @@ export default {
 			'float-3': {
 				'0%, 100%': { transform: 'translateY(-6px)' },
 				'50%': { transform: 'translateY(6px)' }
+			},
+			'border-glow': {
+				'0%': { transform: 'rotate(0deg)' },
+				'100%': { transform: 'rotate(360deg)' }
 			}
 		},
 		animation: {
@@ -300,7 +304,8 @@ export default {
 			'orbit-spin-3': 'orbit-spin-3 12s linear infinite',
 			'float-1': 'float-1 4s ease-in-out infinite',
 			'float-2': 'float-2 5s ease-in-out infinite',
-			'float-3': 'float-3 6s ease-in-out infinite'
+			'float-3': 'float-3 6s ease-in-out infinite',
+			'border-glow': 'border-glow 3s linear infinite'
 		}
   	}
   },
