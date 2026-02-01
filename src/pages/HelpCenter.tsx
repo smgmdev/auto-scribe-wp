@@ -216,7 +216,7 @@ export default function HelpCenter() {
               <PopoverContent 
                 align="end" 
                 className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50"
-                sideOffset={0}
+                sideOffset={12}
               >
                 <div className="max-w-[980px] mx-auto py-8 px-4 md:px-6">
                   <div className="grid grid-cols-3 gap-x-12 gap-y-3">
