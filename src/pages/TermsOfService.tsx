@@ -13,7 +13,7 @@ const TermsOfService = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
