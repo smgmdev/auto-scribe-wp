@@ -103,6 +103,7 @@ export function Footer({ narrow = false, showTopBorder = false }: FooterProps) {
               <li><button onClick={() => navigate('/press')} className="hover:text-foreground transition-colors text-left">Newsroom</button></li>
               <li><button onClick={() => navigate('/about')} className="hover:text-foreground transition-colors text-left">About</button></li>
               <li><button onClick={() => navigate('/help')} className="hover:text-foreground transition-colors text-left">Help Center</button></li>
+              <li><button onClick={() => navigate('/system-status')} className="hover:text-foreground transition-colors text-left">System Status</button></li>
             </ul>
           </div>
         </div>
