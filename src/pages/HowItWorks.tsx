@@ -1,11 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp } from 'lucide-react';
+import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
+import { supabase } from '@/integrations/supabase/client';
 import amblack from '@/assets/amblack.png';
+
+interface FeaturedImage {
+  url?: string;
+  alt?: string;
+}
+
+interface PublishedArticle {
+  id: string;
+  title: string;
+  created_at: string;
+  wp_link: string | null;
+  published_to_name: string | null;
+  published_to_favicon: string | null;
+  featured_image: FeaturedImage | null;
+}
 
 // Scroll container ref for header hide/show
 const useScrollHeader = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
@@ -147,6 +163,31 @@ const HowItWorks = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isHeaderHidden = useScrollHeader(scrollContainerRef);
+  const [articles, setArticles] = useState<PublishedArticle[]>([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
+
+  useEffect(() => {
+    const fetchLatestArticles = async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('id, title, created_at, wp_link, published_to_name, published_to_favicon, featured_image')
+        .eq('status', 'published')
+        .not('published_to', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (!error && data) {
+        const mapped = data.map(item => ({
+          ...item,
+          featured_image: item.featured_image as FeaturedImage | null,
+        }));
+        setArticles(mapped);
+      }
+      setLoadingArticles(false);
+    };
+
+    fetchLatestArticles();
+  }, []);
 
   const handleGetStarted = () => {
     if (user) {
@@ -278,7 +319,94 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Feature Bullets Section */}
+      {/* Phone Carousel - Recently Published Articles */}
+      <section className="py-16 bg-[#f5f5f7] overflow-hidden">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-8">
+          <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] text-center">
+            Recently Published
+          </h2>
+          <p className="text-lg text-[#86868b] text-center mt-4">
+            See what publishers are creating on Arcana Mace
+          </p>
+        </div>
+        
+        {loadingArticles ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
+          </div>
+        ) : articles.length > 0 ? (
+          <div className="flex gap-6 justify-center flex-wrap px-4">
+            {articles.map((article) => (
+              <a
+                key={article.id}
+                href={article.wp_link || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 w-[200px] md:w-[220px] group"
+              >
+                {/* Phone Frame */}
+                <div className="bg-[#1d1d1f] rounded-[36px] p-2 shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]">
+                  <div className="bg-white rounded-[28px] overflow-hidden">
+                    {/* Dynamic Island */}
+                    <div className="h-8 bg-white flex items-center justify-center">
+                      <div className="w-20 h-5 rounded-full bg-black" />
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="px-3 pb-4">
+                      {/* Featured Image */}
+                      {article.featured_image?.url ? (
+                        <div className="aspect-video w-full rounded-lg overflow-hidden mb-3 bg-gray-100">
+                          <img
+                            src={article.featured_image.url}
+                            alt={article.featured_image.alt || article.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-video w-full rounded-lg mb-3 bg-gradient-to-br from-blue-100 to-purple-100" />
+                      )}
+                      
+                      {/* Site info */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        {article.published_to_favicon && (
+                          <img
+                            src={article.published_to_favicon}
+                            alt=""
+                            className="h-3.5 w-3.5 rounded-sm object-cover"
+                          />
+                        )}
+                        {article.published_to_name && (
+                          <span className="text-[10px] text-[#86868b] font-medium truncate">
+                            {article.published_to_name}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className="font-semibold text-[#1d1d1f] text-xs leading-tight line-clamp-3 mb-2">
+                        {article.title}
+                      </h3>
+                      
+                      {/* Link indicator */}
+                      <div className="flex items-center gap-1 text-[#0071e3]">
+                        <span className="text-[10px] font-medium">Read article</span>
+                        <ExternalLink className="h-2.5 w-2.5" />
+                      </div>
+                    </div>
+                    
+                    {/* Home indicator */}
+                    <div className="h-6 flex items-center justify-center">
+                      <div className="w-24 h-1 rounded-full bg-black" />
+                    </div>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {features.map((feature, index) => (
