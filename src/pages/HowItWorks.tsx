@@ -1161,36 +1161,6 @@ const HowItWorks = () => {
                   </ul>
                 </div>
                 
-                <div id="global-library" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Global Library
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    The Global Library is Arcana Mace's marketplace of premium media outlets managed by verified agencies worldwide. 
-                    These are high-authority publications where you can request article placements through our escrow-protected system. 
-                    Unlike your Local Library where you publish directly, the Global Library connects you with professional agencies 
-                    who handle the publishing process on your behalf.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Access to hundreds of verified publications across all industries and regions</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Transparent pricing with credit-based payments and secure escrow</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Professional agency handling—submit your brief and let experts manage the rest</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Guaranteed publication with delivery confirmation and live links</span>
-                    </li>
-                  </ul>
-                </div>
-                
                 <div id="generate-ai-articles" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Generate AI Articles
@@ -1262,6 +1232,36 @@ const HowItWorks = () => {
                       Learn more about AI Publishing ›
                     </button>
                   </div>
+                </div>
+                
+                <div id="global-library" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Global Library
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The Global Library is Arcana Mace's marketplace of premium media outlets managed by verified agencies worldwide. 
+                    These are high-authority publications where you can request article placements through our escrow-protected system. 
+                    Unlike your Local Library where you publish directly, the Global Library connects you with professional agencies 
+                    who handle the publishing process on your behalf.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Access to hundreds of verified publications across all industries and regions</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Transparent pricing with credit-based payments and secure escrow</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Professional agency handling—submit your brief and let experts manage the rest</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Guaranteed publication with delivery confirmation and live links</span>
+                    </li>
+                  </ul>
                 </div>
                 
                 <div id="agency-engagement" className="mb-16 scroll-mt-40">
