@@ -262,7 +262,10 @@ export function DashboardView() {
             <CardTitle className="text-xl">B2B Media Buying</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => {
+              setTargetTab('custom');
+              setCurrentView('sites');
+            }}>
               <Library className="mr-2 h-4 w-4" />
               Global Library
             </Button>
