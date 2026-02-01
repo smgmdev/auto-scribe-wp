@@ -47,37 +47,38 @@ export default function MediaBuying() {
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header - light gray background matching hero */}
+      {/* Main Header - same as homepage */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full bg-[#f5f5f7] transition-all duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-200 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
-        <div className="max-w-[980px] mx-auto flex h-12 items-center justify-between px-4 md:px-6">
-          <button onClick={() => navigate('/')} className="flex items-center gap-2">
-            <img src={amblack} alt="Arcana Mace" className="h-5 w-5" />
-            <span className="text-sm font-medium text-[#1d1d1f]">Arcana Mace</span>
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           
           {/* Right side navigation */}
-          <div className="flex items-center gap-4">
-            <button 
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-black hover:text-white"
               onClick={() => setSearchOpen(true)}
-              className="text-[#1d1d1f]/80 hover:text-[#1d1d1f] transition-colors"
             >
-              <Search className="h-4 w-4" />
-            </button>
+              <Search className="h-5 w-5" />
+            </Button>
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
-                size="sm"
-                className="bg-[#1d1d1f] text-white hover:bg-[#1d1d1f]/90 rounded-full text-xs px-4 h-7"
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
+                <User className="h-4 w-4" />
                 Account
               </Button>
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                size="sm"
-                className="bg-[#1d1d1f] text-white hover:bg-[#1d1d1f]/90 rounded-full text-xs px-4 h-7"
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
               >
                 Sign In
               </Button>
@@ -90,10 +91,10 @@ export default function MediaBuying() {
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Spacer for fixed header */}
-      <div className="h-12" />
+      <div className="h-16" />
 
-      {/* Sub-header - Sticky with same gray background */}
-      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-12'}`}>
+      {/* Sub-header - Sticky with gray background */}
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="bg-[#f5f5f7] border-b border-[#d2d2d7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-[#1d1d1f]">Media Buying</span>
