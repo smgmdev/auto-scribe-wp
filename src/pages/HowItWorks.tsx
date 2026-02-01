@@ -372,8 +372,14 @@ const HowItWorks = () => {
   useEffect(() => {
     const sectionIds = [
       'getting-started', 'create-account', 'buy-credits',
-      'media-buying', 'global-library', 'browse-outlets', 'submit-request', 'track-orders',
+      'explore-arcana-mace',
       'browse-media-network', 'bmn-local-library', 'bmn-global-library',
+      'instant-publishing', 'ip-new-article', 'ip-sources', 'ip-my-articles',
+      'b2b-media-buying', 'b2b-my-engagements', 'b2b-my-orders',
+      'credit-management',
+      'apply-agency-account',
+      'account-settings',
+      'media-buying', 'global-library', 'browse-outlets', 'submit-request', 'track-orders',
       'self-publishing', 'local-library', 'generate-ai-articles',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
@@ -631,6 +637,7 @@ const HowItWorks = () => {
             <nav className="md:w-64 flex-shrink-0">
               <div className="md:sticky md:top-32">
                 <ul className="border-l-2 border-gray-200">
+                  {/* Getting Started */}
                   <li>
                     <a 
                       href="#getting-started"
@@ -670,6 +677,204 @@ const HowItWorks = () => {
                       Buy Credits
                     </a>
                   </li>
+
+                  {/* Explore Arcana Mace */}
+                  <li>
+                    <a 
+                      href="#explore-arcana-mace"
+                      onClick={(e) => scrollToSection(e, 'explore-arcana-mace')}
+                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'explore-arcana-mace' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Explore Arcana Mace
+                    </a>
+                  </li>
+
+                  {/* Browse Media Network */}
+                  <li>
+                    <a 
+                      href="#browse-media-network"
+                      onClick={(e) => scrollToSection(e, 'browse-media-network')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'browse-media-network' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Browse Media Network
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#bmn-local-library"
+                      onClick={(e) => scrollToSection(e, 'bmn-local-library')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'bmn-local-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Local Library
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#bmn-global-library"
+                      onClick={(e) => scrollToSection(e, 'bmn-global-library')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'bmn-global-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Global Library
+                    </a>
+                  </li>
+
+                  {/* Instant Publishing */}
+                  <li>
+                    <a 
+                      href="#instant-publishing"
+                      onClick={(e) => scrollToSection(e, 'instant-publishing')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'instant-publishing' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Instant Publishing
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#ip-new-article"
+                      onClick={(e) => scrollToSection(e, 'ip-new-article')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'ip-new-article' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      New Article
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#ip-sources"
+                      onClick={(e) => scrollToSection(e, 'ip-sources')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'ip-sources' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Sources
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#ip-my-articles"
+                      onClick={(e) => scrollToSection(e, 'ip-my-articles')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'ip-my-articles' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      My Articles
+                    </a>
+                  </li>
+
+                  {/* B2B Media Buying */}
+                  <li>
+                    <a 
+                      href="#b2b-media-buying"
+                      onClick={(e) => scrollToSection(e, 'b2b-media-buying')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'b2b-media-buying' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      B2B Media Buying
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#b2b-my-engagements"
+                      onClick={(e) => scrollToSection(e, 'b2b-my-engagements')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'b2b-my-engagements' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      My Engagements
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#b2b-my-orders"
+                      onClick={(e) => scrollToSection(e, 'b2b-my-orders')}
+                      className={`block pl-8 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'b2b-my-orders' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      My Orders
+                    </a>
+                  </li>
+
+                  {/* Credit Management */}
+                  <li>
+                    <a 
+                      href="#credit-management"
+                      onClick={(e) => scrollToSection(e, 'credit-management')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'credit-management' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Credit Management
+                    </a>
+                  </li>
+
+                  {/* Apply For Agency Account */}
+                  <li>
+                    <a 
+                      href="#apply-agency-account"
+                      onClick={(e) => scrollToSection(e, 'apply-agency-account')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'apply-agency-account' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Apply For Agency Account
+                    </a>
+                  </li>
+
+                  {/* Account Settings */}
+                  <li>
+                    <a 
+                      href="#account-settings"
+                      onClick={(e) => scrollToSection(e, 'account-settings')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'account-settings' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Account Settings
+                    </a>
+                  </li>
+
+                  {/* Media Buying */}
                   <li>
                     <a 
                       href="#media-buying"
@@ -735,45 +940,8 @@ const HowItWorks = () => {
                       Track Your Orders
                     </a>
                   </li>
-                  <li>
-                    <a 
-                      href="#browse-media-network"
-                      onClick={(e) => scrollToSection(e, 'browse-media-network')}
-                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'browse-media-network' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Browse Media Network
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#bmn-local-library"
-                      onClick={(e) => scrollToSection(e, 'bmn-local-library')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'bmn-local-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Local Library
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#bmn-global-library"
-                      onClick={(e) => scrollToSection(e, 'bmn-global-library')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'bmn-global-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Global Library
-                    </a>
-                  </li>
+
+                  {/* Self Publishing */}
                   <li>
                     <a 
                       href="#self-publishing"
@@ -813,6 +981,8 @@ const HowItWorks = () => {
                       Generate AI Articles
                     </a>
                   </li>
+
+                  {/* For Agencies */}
                   <li>
                     <a 
                       href="#for-agencies"
