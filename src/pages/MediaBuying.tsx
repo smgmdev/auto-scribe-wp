@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User } from 'lucide-react';
+import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -327,6 +327,211 @@ export default function MediaBuying() {
             Our marketplace connects you with verified outlets, transparent pricing, and guaranteed placements. 
             All designed to help you reach your audience with confidence.
           </p>
+        </div>
+      </section>
+
+      {/* Features Slider Section - Apple style */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-2">
+            <span className="font-semibold">Features.</span>{' '}
+            <span className="text-[#86868b]">Built in, seamless, and easy to use.</span>
+          </h2>
+        </div>
+        
+        <div className="mt-12 relative">
+          {/* Slider Container */}
+          <div 
+            id="features-slider"
+            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 snap-x snap-mandatory overflow-y-hidden overscroll-x-contain"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onWheel={(e) => {
+              // Allow vertical scrolling to pass through when not scrolling horizontally
+              if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
+                return;
+              }
+            }}
+          >
+            {/* Card 1 - Verified Publishers (Light gradient) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-[#1d1d1f]">Verified Publishers</span>
+              </div>
+              <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
+                Every publication in our network is vetted for authenticity, audience reach, and editorial standards. No bots. No spam sites.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                Learn more
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                  <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-[#ff6b6b]" />
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
+                <p className="text-xs text-[#1d1d1f]/60 font-medium">Compatibility</p>
+                <p className="text-xs text-[#1d1d1f]/80">All industries, All regions</p>
+              </div>
+            </div>
+
+            {/* Card 2 - Instant Quotes (Blue) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#0071e3]">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-white">Instant Quotes</span>
+              </div>
+              <p className="text-[15px] text-white/80 leading-relaxed mb-4">
+                See transparent pricing instantly. No back-and-forth negotiations. No hidden fees. Just clear, upfront costs for every placement.
+              </p>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" className="rounded-full px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#0071e3] bg-transparent">
+                  Browse Sites
+                </Button>
+                <button className="text-white text-sm hover:underline">
+                  Learn more ›
+                </button>
+              </div>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 flex items-center justify-center">
+                      <TrendingUp className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute bottom-8 right-6 w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center">
+                  <span className="text-xl font-bold text-[#0071e3]">$</span>
+                </div>
+                <div className="absolute bottom-16 left-6 w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-white/20">
+                <p className="text-xs text-white/60 font-medium">Compatibility</p>
+                <p className="text-xs text-white/80">Business, Tech, Lifestyle, News</p>
+              </div>
+            </div>
+
+            {/* Card 3 - Real-time Tracking (Dark) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#1d1d1f]">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#30d158] to-[#28a745] flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-white">Real-time Tracking</span>
+              </div>
+              <p className="text-[15px] text-white/70 leading-relaxed mb-4">
+                Monitor every order from submission to publication. Get instant notifications when your content goes live.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-white/40 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent">
+                Learn more
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="relative w-full max-w-[200px] aspect-[4/3] bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a] rounded-2xl border border-white/10 p-4 shadow-2xl">
+                  <div className="absolute top-3 left-3 flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-[#ff5f56]" />
+                    <div className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
+                    <div className="w-2 h-2 rounded-full bg-[#27ca40]" />
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="h-2 bg-white/20 rounded-full w-3/4" />
+                    <div className="h-2 bg-[#30d158] rounded-full w-1/2" />
+                    <div className="h-2 bg-white/10 rounded-full w-2/3" />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <p className="text-xs text-white/40 font-medium">Compatibility</p>
+                <p className="text-xs text-white/60">Dashboard, Mobile, Email</p>
+              </div>
+            </div>
+
+            {/* Card 4 - Global Network (Gradient purple/blue) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-white">Global Network</span>
+              </div>
+              <p className="text-[15px] text-white/80 leading-relaxed mb-4">
+                Access publications across continents. From local news to international outlets, reach your audience wherever they are.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#667eea] bg-transparent">
+                Learn more
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="grid grid-cols-3 gap-3">
+                  {[Users, Star, Award, FileText, TrendingUp, Shield].map((Icon, i) => (
+                    <div key={i} className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                      <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-white/20">
+                <p className="text-xs text-white/60 font-medium">Compatibility</p>
+                <p className="text-xs text-white/80">50+ Countries, 1000+ Sites</p>
+              </div>
+            </div>
+
+            {/* Card 5 - Publication Guarantee (Light cyan) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00acc1] to-[#0097a7] flex items-center justify-center shadow-lg">
+                  <Award className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-[#1d1d1f]">Publication Guarantee</span>
+              </div>
+              <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
+                100% money-back guarantee if your article isn't published. We stand behind every placement in our network.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                Learn more
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="relative">
+                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-white shadow-xl flex items-center justify-center">
+                    <CheckCircle className="w-14 h-14 md:w-18 md:h-18 text-[#00acc1]" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#00acc1] flex items-center justify-center shadow-lg">
+                    <span className="text-white text-xs font-bold">✓</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
+                <p className="text-xs text-[#1d1d1f]/60 font-medium">Compatibility</p>
+                <p className="text-xs text-[#1d1d1f]/80">All orders, Full refund</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Navigation arrows */}
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 mt-6 flex justify-end gap-3">
+            <button 
+              onClick={() => {
+                const slider = document.getElementById('features-slider');
+                if (slider) slider.scrollBy({ left: -360, behavior: 'smooth' });
+              }}
+              className="w-10 h-10 rounded-full border border-[#d2d2d7] flex items-center justify-center hover:bg-[#f5f5f7] transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-[#86868b]" />
+            </button>
+            <button 
+              onClick={() => {
+                const slider = document.getElementById('features-slider');
+                if (slider) slider.scrollBy({ left: 360, behavior: 'smooth' });
+              }}
+              className="w-10 h-10 rounded-full border border-[#d2d2d7] flex items-center justify-center hover:bg-[#f5f5f7] transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-[#86868b]" />
+            </button>
+          </div>
         </div>
       </section>
 
