@@ -33,18 +33,15 @@ export default function SelfPublishing() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
-  // Fetch random media sites from local library
+  // Fetch random media sites from local library using RPC
   useEffect(() => {
     const fetchMediaSites = async () => {
-      const { data } = await supabase
-        .from('wordpress_sites')
-        .select('id, name, favicon')
-        .not('favicon', 'is', null)
-        .limit(50);
+      const { data } = await supabase.rpc('get_public_sites');
       
       if (data && data.length > 0) {
-        // Shuffle and take 10 random sites
-        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        // Filter sites with favicon and shuffle to get 10 random
+        const sitesWithFavicon = data.filter((site: { favicon: string | null }) => site.favicon);
+        const shuffled = [...sitesWithFavicon].sort(() => Math.random() - 0.5);
         setMediaSites(shuffled.slice(0, 10));
       }
     };
