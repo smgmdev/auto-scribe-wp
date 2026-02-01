@@ -227,13 +227,13 @@ const ArticleCarousel = ({
       
       <div 
         ref={carouselRef}
-        className="overflow-x-auto py-4 scrollbar-hide"
+        className="overflow-x-auto pt-4 pb-8 scrollbar-hide"
         onWheel={handleWheel}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        <div className="flex gap-6 px-16 md:px-24 min-w-max py-2">
+        <div className="flex gap-6 px-16 md:px-24 min-w-max pt-2 pb-4">
         {duplicatedArticles.map((article, index) => {
           const gradient = gradients[index % gradients.length];
           
