@@ -131,7 +131,7 @@ export function ArticlesView() {
               {article.title}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-              {article.content.substring(0, 200)}...
+              {article.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
             </p>
             <div className="mt-4 flex flex-col md:flex-row md:flex-wrap md:items-center gap-2 md:gap-4 text-xs text-muted-foreground">
               <div className="flex items-center justify-between w-full md:w-auto md:justify-start md:gap-4">
