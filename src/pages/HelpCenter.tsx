@@ -205,7 +205,7 @@ export default function HelpCenter() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 pt-8">
         {/* Hero Section */}
         <section className="bg-[#f5f5f7] py-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
