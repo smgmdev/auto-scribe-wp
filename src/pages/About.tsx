@@ -223,7 +223,7 @@ export default function About() {
         <div className="bg-[#1d1d1f] py-3">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <span className="text-sm text-white/90">
-              Not a client yet? Set up Arcana Mace in seconds.{' '}
+              Publish articles with Arcana Mace in seconds.{' '}
               <button 
                 onClick={() => navigate('/auth')}
                 className="text-[#2997ff] hover:underline"
