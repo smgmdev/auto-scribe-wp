@@ -24,6 +24,7 @@ import SiteMap from "./pages/SiteMap";
 import PressNews from "./pages/PressNews";
 import PressReleaseDetail from "./pages/PressReleaseDetail";
 import About from "./pages/About";
+import HelpCenter from "./pages/HelpCenter";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -106,6 +107,7 @@ const App = () => {
               <Route path="/press" element={<PressNews />} />
               <Route path="/press/:id" element={<PressReleaseDetail />} />
               <Route path="/about" element={<About />} />
+              <Route path="/help" element={<HelpCenter />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
