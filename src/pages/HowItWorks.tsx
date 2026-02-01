@@ -279,7 +279,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Phone Mockups Section */}
-      <section className="py-8 overflow-hidden bg-[#f5f5f7]">
+      <section className="py-12 bg-[#f5f5f7] overflow-hidden">
         <div className="flex gap-6 animate-scroll-left">
           {[...Array(8)].map((_, i) => (
             <div 
