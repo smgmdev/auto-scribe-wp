@@ -279,7 +279,7 @@ export default function SelfPublishing() {
         {/* Hero Section */}
         <section className="pt-28 md:pt-36 pb-16 md:pb-24 text-center">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <h1 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-6">
+            <h1 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-10">
               Publish your story.<br />
               Reach the world.
             </h1>
@@ -293,12 +293,12 @@ export default function SelfPublishing() {
                   navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'compose' } });
                 }
               }}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg px-8 py-3 h-auto rounded-full mb-12"
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg px-8 py-3 h-auto rounded-full"
             >
               Start Writing
             </Button>
 
-            <p className="text-lg md:text-xl text-[#1d1d1f] mt-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-[#1d1d1f] mt-16 max-w-2xl mx-auto leading-relaxed">
               Write, edit, and publish articles directly to premium media outlets. Self publishing puts you in control of your content and your reach.
             </p>
           </div>
