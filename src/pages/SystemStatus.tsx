@@ -97,14 +97,13 @@ export default function SystemStatus() {
   const serviceLinks: Record<string, { link?: string; internalLink?: string }> = {
     'Authentication': { internalLink: '/auth' },
     'WordPress Publishing': { internalLink: '/self-publishing' },
-    'Credit Management': { internalLink: '/dashboard?view=credits' },
+    'Credit Processing': { internalLink: '/dashboard?view=credits' },
     'Media Site Network': { internalLink: '/media-buying' },
     'Headlines Scanner': { internalLink: '/self-publishing' },
   };
 
   // Name mapping for services (API name -> Display name)
   const serviceNameMap: Record<string, string> = {
-    'Credit Processing': 'Credit Management',
     'Agency Portal': 'Agency System & Features',
   };
 
@@ -139,7 +138,7 @@ export default function SystemStatus() {
         { name: 'File Storage', status: 'issue' },
         { name: 'AI Article Generation', status: 'issue' },
         { name: 'WordPress Publishing', status: 'issue', internalLink: '/self-publishing' },
-        { name: 'Credit Management', status: 'issue', internalLink: '/dashboard?view=credits' },
+        { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credits' },
         { name: 'Payment Gateway (Stripe)', status: 'issue' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
