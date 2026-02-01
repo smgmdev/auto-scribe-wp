@@ -279,12 +279,12 @@ const HowItWorks = () => {
       </section>
 
       {/* Phone Mockups Section */}
-      <section className="py-12 bg-[#f5f5f7] overflow-hidden">
-        <div className="flex gap-6 animate-scroll-left">
+      <section className="py-16 bg-[#f5f5f7] overflow-hidden">
+        <div className="flex gap-6 animate-scroll-left h-[520px]">
           {[...Array(8)].map((_, i) => (
             <div 
               key={i} 
-              className="flex-shrink-0 w-64 h-[520px] rounded-[40px] bg-white shadow-xl border border-gray-200 overflow-hidden"
+              className="flex-shrink-0 w-64 h-full rounded-[40px] bg-white shadow-xl border border-gray-200 overflow-hidden"
             >
               <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 p-4">
                 <div className="w-24 h-6 mx-auto mb-4 rounded-full bg-black" />
