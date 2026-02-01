@@ -135,7 +135,7 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
 
       {/* Sub-header - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="bg-white border-b border-border">
+        <div className="bg-[#f5f5f7] border-b border-border/50">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
             <button 
               onClick={() => navigate('/help')}
