@@ -343,12 +343,16 @@ export default function MediaBuying() {
           {/* Slider Container */}
           <div 
             id="features-slider"
-            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 snap-x snap-mandatory overflow-y-hidden overscroll-x-contain"
+            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onWheel={(e) => {
-              // Allow vertical scrolling to pass through when not scrolling horizontally
-              if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
-                return;
+              const slider = e.currentTarget;
+              const isHorizontalScroll = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+              
+              // For vertical scrolling, manually scroll the parent container
+              if (!isHorizontalScroll) {
+                e.stopPropagation();
+                scrollContainerRef.current?.scrollBy({ top: e.deltaY, behavior: 'auto' });
               }
             }}
           >
