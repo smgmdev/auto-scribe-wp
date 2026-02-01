@@ -200,15 +200,11 @@ export default function MediaBuying() {
         {/* Dynamic media logos */}
         {iconPositions.map((pos, index) => {
           const site = shuffledSites[index % Math.max(shuffledSites.length, 1)];
-          // Cycle through 3 different float animations with varied delays
-          const floatClass = index % 3 === 0 ? 'animate-float-1' : index % 3 === 1 ? 'animate-float-2' : 'animate-float-3';
-          const animationDelay = `${(index * 0.3) % 3}s`;
           const style: React.CSSProperties = {
             top: pos.top,
             width: ICON_SIZE,
             height: ICON_SIZE,
             borderRadius: 20,
-            animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
             ...(pos.right !== undefined ? { right: pos.right } : {}),
           };
@@ -216,7 +212,7 @@ export default function MediaBuying() {
           return (
             <div
               key={index}
-              className={`absolute shadow-lg overflow-hidden bg-white ${floatClass}`}
+              className="absolute shadow-lg overflow-hidden bg-white"
               style={style}
             >
               {site?.favicon ? (
@@ -234,7 +230,7 @@ export default function MediaBuying() {
         })}
 
         {/* Central icon and title - below the pyramid */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-16">
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-4">
           {/* Glow wrapper */}
           <div className="relative mb-4" style={{ width: 128, height: 128 }}>
             {/* Orbiting glow dot */}
