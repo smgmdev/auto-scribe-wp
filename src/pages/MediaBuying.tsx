@@ -365,8 +365,14 @@ export default function MediaBuying() {
           
           <div 
             id="slider-container"
-            className="flex gap-4 overflow-x-auto pb-4 px-4 md:px-[calc((100%-980px)/2+24px)] scroll-smooth cursor-grab active:cursor-grabbing"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 px-4 md:px-[calc((100%-980px)/2+24px)] scroll-smooth cursor-grab active:cursor-grabbing overscroll-x-contain"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onWheel={(e) => {
+              // Allow vertical scrolling to pass through - only handle horizontal if shift is held or it's a horizontal scroll
+              if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
+                return; // Let the event bubble up for vertical scroll
+              }
+            }}
           >
             {/* Card 1 - Dark */}
             <div className="flex-shrink-0 w-[320px] md:w-[380px] bg-[#1d1d1f] rounded-3xl p-8 flex flex-col min-h-[420px]">
