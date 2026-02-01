@@ -320,8 +320,8 @@ const HowItWorks = () => {
       </section>
 
       {/* Phone Carousel - Recently Published Articles */}
-      <section className="py-16 bg-[#f5f5f7] overflow-hidden">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-8">
+      <section className="py-20 md:py-28 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-12">
           <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] text-center">
             Recently Published
           </h2>
@@ -331,78 +331,80 @@ const HowItWorks = () => {
         </div>
         
         {loadingArticles ? (
-          <div className="flex justify-center py-16">
+          <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
           </div>
         ) : articles.length > 0 ? (
-          <div className="flex gap-6 justify-center flex-wrap px-4">
-            {articles.map((article) => (
-              <a
-                key={article.id}
-                href={article.wp_link || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 w-[200px] md:w-[220px] group"
-              >
-                {/* Phone Frame */}
-                <div className="bg-[#1d1d1f] rounded-[36px] p-2 shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]">
-                  <div className="bg-white rounded-[28px] overflow-hidden">
-                    {/* Dynamic Island */}
-                    <div className="h-8 bg-white flex items-center justify-center">
-                      <div className="w-20 h-5 rounded-full bg-black" />
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="px-3 pb-4">
-                      {/* Featured Image */}
-                      {article.featured_image?.url ? (
-                        <div className="aspect-video w-full rounded-lg overflow-hidden mb-3 bg-gray-100">
-                          <img
-                            src={article.featured_image.url}
-                            alt={article.featured_image.alt || article.title}
-                            className="w-full h-full object-cover"
-                          />
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-6 px-4 md:px-8 min-w-max mx-auto justify-center">
+              {articles.map((article) => (
+                <a
+                  key={article.id}
+                  href={article.wp_link || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 w-[220px] md:w-[240px] group"
+                >
+                  {/* Phone Frame */}
+                  <div className="bg-[#1d1d1f] rounded-[40px] p-2.5 shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]">
+                    <div className="bg-white rounded-[32px] overflow-hidden">
+                      {/* Dynamic Island */}
+                      <div className="h-10 bg-white flex items-center justify-center">
+                        <div className="w-24 h-6 rounded-full bg-black" />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="px-4 pb-5">
+                        {/* Featured Image */}
+                        {article.featured_image?.url ? (
+                          <div className="aspect-video w-full rounded-xl overflow-hidden mb-4 bg-gray-100">
+                            <img
+                              src={article.featured_image.url}
+                              alt={article.featured_image.alt || article.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="aspect-video w-full rounded-xl mb-4 bg-gradient-to-br from-blue-100 to-purple-100" />
+                        )}
+                        
+                        {/* Site info */}
+                        <div className="flex items-center gap-2 mb-3">
+                          {article.published_to_favicon && (
+                            <img
+                              src={article.published_to_favicon}
+                              alt=""
+                              className="h-4 w-4 rounded-sm object-cover"
+                            />
+                          )}
+                          {article.published_to_name && (
+                            <span className="text-xs text-[#86868b] font-medium truncate">
+                              {article.published_to_name}
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        <div className="aspect-video w-full rounded-lg mb-3 bg-gradient-to-br from-blue-100 to-purple-100" />
-                      )}
-                      
-                      {/* Site info */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        {article.published_to_favicon && (
-                          <img
-                            src={article.published_to_favicon}
-                            alt=""
-                            className="h-3.5 w-3.5 rounded-sm object-cover"
-                          />
-                        )}
-                        {article.published_to_name && (
-                          <span className="text-[10px] text-[#86868b] font-medium truncate">
-                            {article.published_to_name}
-                          </span>
-                        )}
+                        
+                        {/* Title */}
+                        <h3 className="font-semibold text-[#1d1d1f] text-sm leading-snug line-clamp-3 mb-3">
+                          {article.title}
+                        </h3>
+                        
+                        {/* Link indicator */}
+                        <div className="flex items-center gap-1 text-[#0071e3]">
+                          <span className="text-xs font-medium">Read article</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </div>
                       </div>
                       
-                      {/* Title */}
-                      <h3 className="font-semibold text-[#1d1d1f] text-xs leading-tight line-clamp-3 mb-2">
-                        {article.title}
-                      </h3>
-                      
-                      {/* Link indicator */}
-                      <div className="flex items-center gap-1 text-[#0071e3]">
-                        <span className="text-[10px] font-medium">Read article</span>
-                        <ExternalLink className="h-2.5 w-2.5" />
+                      {/* Home indicator */}
+                      <div className="h-8 flex items-center justify-center">
+                        <div className="w-28 h-1.5 rounded-full bg-black" />
                       </div>
-                    </div>
-                    
-                    {/* Home indicator */}
-                    <div className="h-6 flex items-center justify-center">
-                      <div className="w-24 h-1 rounded-full bg-black" />
                     </div>
                   </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
         ) : null}
       </section>
