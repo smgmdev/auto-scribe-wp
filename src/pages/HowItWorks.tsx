@@ -65,6 +65,88 @@ const ScrollHighlightSection = ({
   );
 };
 
+// Scroll-reveal row component for Apple Arcade style section
+const ScrollRevealRow = ({ 
+  highlightText, 
+  normalText,
+  index 
+}: { 
+  highlightText: string; 
+  normalText: string;
+  index: number;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      {
+        threshold: 0.5,
+        rootMargin: '-10% 0px -10% 0px'
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div 
+      ref={ref}
+      className={`text-center mb-8 md:mb-12 transition-all duration-700 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      <p className="text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
+        <span className="text-[#ff453a]">{highlightText}</span>
+        {normalText && (
+          <>
+            <br className="md:hidden" />
+            <span className="text-[#1d1d1f]"> {normalText}</span>
+          </>
+        )}
+      </p>
+    </div>
+  );
+};
+
+// Feature benefits section with scroll reveal
+const FeatureBenefitsSection = () => {
+  const features = [
+    { highlight: "Publish anywhere.", normal: "All from one platform." },
+    { highlight: "Connect once,", normal: "publish forever." },
+    { highlight: "No hidden fees.", normal: "No surprise costs. No complexity." },
+    { highlight: "AI-powered writing", normal: "to save you hours." },
+    { highlight: "Premium outlets.", normal: "Verified agencies. Real results." },
+  ];
+
+  return (
+    <section className="py-24 md:py-32 bg-white">
+      <div className="max-w-[980px] mx-auto px-4 md:px-6">
+        {features.map((feature, index) => (
+          <ScrollRevealRow
+            key={index}
+            highlightText={feature.highlight}
+            normalText={feature.normal}
+            index={index}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+
 // Floating device mockup component
 const DeviceMockup = ({ 
   type, 
@@ -350,8 +432,11 @@ const HowItWorks = () => {
         </div>
       </section>
 
+      {/* Feature Benefits Section - Apple Arcade Style */}
+      <FeatureBenefitsSection />
+
       {/* Another Scroll-Highlighted Section */}
-      <section className="py-32 bg-white">
+      <section className="py-32 bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <ScrollHighlightSection className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight text-center">
             Responsibly designed for the future. And for your success.
