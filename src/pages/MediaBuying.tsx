@@ -45,8 +45,6 @@ const iconPositions = [
   { top: 300, left: '35%' },
   { top: 300, left: '46%' },
   { top: 300, left: '57%' },
-  // Row 5 - 1 icon (just above logo)
-  { top: 400, left: '46%' },
 ];
 
 const ICON_SIZE = 88;
@@ -236,10 +234,12 @@ export default function MediaBuying() {
           );
         })}
 
-        {/* Central icon and title - below the pyramid */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-4">
-          {/* Glow wrapper */}
-          <div className="relative mb-4" style={{ width: 128, height: 128 }}>
+        {/* Arcana Mace logo - positioned as bottom of pyramid */}
+        <div 
+          className="absolute"
+          style={{ top: 400, left: '46%' }}
+        >
+          <div className="relative" style={{ width: 128, height: 128 }}>
             {/* Orbiting glow dot */}
             <div 
               className="absolute animate-border-glow"
@@ -272,7 +272,7 @@ export default function MediaBuying() {
               <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
             </div>
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium text-foreground">Arcana Mace</h2>
+          <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center mt-4">Arcana Mace</h2>
         </div>
       </section>
 
