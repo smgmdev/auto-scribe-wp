@@ -15,32 +15,34 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a triangle/pyramid shape - wide at top, narrow at bottom
+// Icon positions forming a triangle/pyramid shape - uniform size
 const iconPositions = [
   // Row 1 - top (widest spread, 12 icons)
-  { top: -5, left: '-3%', size: 64 }, { top: 8, left: '6%', size: 72 }, { top: -8, left: '15%', size: 56 },
-  { top: 5, left: '24%', size: 80 }, { top: -3, left: '33%', size: 52 }, { top: 10, left: '42%', size: 68 },
-  { top: -6, right: '42%', size: 60 }, { top: 8, right: '33%', size: 76 }, { top: -4, right: '24%', size: 48 },
-  { top: 5, right: '15%', size: 72 }, { top: -8, right: '6%', size: 56 }, { top: 2, right: '-3%', size: 64 },
+  { top: -5, left: '-3%' }, { top: 8, left: '6%' }, { top: -8, left: '15%' },
+  { top: 5, left: '24%' }, { top: -3, left: '33%' }, { top: 10, left: '42%' },
+  { top: -6, right: '42%' }, { top: 8, right: '33%' }, { top: -4, right: '24%' },
+  { top: 5, right: '15%' }, { top: -8, right: '6%' }, { top: 2, right: '-3%' },
   // Row 2 - (10 icons, slightly narrower)
-  { top: 75, left: '2%', size: 72 }, { top: 85, left: '12%', size: 48 }, { top: 70, left: '22%', size: 84 },
-  { top: 80, left: '32%', size: 56 }, { top: 88, left: '41%', size: 44 },
-  { top: 78, right: '41%', size: 48 }, { top: 85, right: '32%', size: 60 }, { top: 72, right: '22%', size: 80 },
-  { top: 82, right: '12%', size: 52 }, { top: 76, right: '2%', size: 68 },
+  { top: 75, left: '2%' }, { top: 85, left: '12%' }, { top: 70, left: '22%' },
+  { top: 80, left: '32%' }, { top: 88, left: '41%' },
+  { top: 78, right: '41%' }, { top: 85, right: '32%' }, { top: 72, right: '22%' },
+  { top: 82, right: '12%' }, { top: 76, right: '2%' },
   // Row 3 - (8 icons, narrower)
-  { top: 155, left: '8%', size: 56 }, { top: 165, left: '18%', size: 76 }, { top: 150, left: '29%', size: 48 },
-  { top: 160, left: '39%', size: 64 },
-  { top: 158, right: '39%', size: 52 }, { top: 168, right: '29%', size: 72 }, { top: 152, right: '18%', size: 44 },
-  { top: 162, right: '8%', size: 68 },
+  { top: 155, left: '8%' }, { top: 165, left: '18%' }, { top: 150, left: '29%' },
+  { top: 160, left: '39%' },
+  { top: 158, right: '39%' }, { top: 168, right: '29%' }, { top: 152, right: '18%' },
+  { top: 162, right: '8%' },
   // Row 4 - (6 icons, narrower still)
-  { top: 235, left: '15%', size: 64 }, { top: 248, left: '26%', size: 48 }, { top: 240, left: '37%', size: 56 },
-  { top: 242, right: '37%', size: 52 }, { top: 250, right: '26%', size: 44 }, { top: 238, right: '15%', size: 60 },
+  { top: 235, left: '15%' }, { top: 248, left: '26%' }, { top: 240, left: '37%' },
+  { top: 242, right: '37%' }, { top: 250, right: '26%' }, { top: 238, right: '15%' },
   // Row 5 - (4 icons, converging)
-  { top: 310, left: '22%', size: 52 }, { top: 320, left: '35%', size: 44 },
-  { top: 315, right: '35%', size: 48 }, { top: 325, right: '22%', size: 56 },
+  { top: 310, left: '22%' }, { top: 320, left: '35%' },
+  { top: 315, right: '35%' }, { top: 325, right: '22%' },
   // Row 6 - bottom tip (2 icons, closest to center)
-  { top: 375, left: '32%', size: 40 }, { top: 380, right: '32%', size: 44 },
+  { top: 375, left: '32%' }, { top: 380, right: '32%' },
 ];
+
+const ICON_SIZE = 64;
 
 // Shuffle array helper
 function shuffleArray<T>(array: T[]): T[] {
@@ -204,8 +206,8 @@ export default function MediaBuying() {
           const animationDelay = `${(index * 0.3) % 3}s`;
           const style: React.CSSProperties = {
             top: pos.top,
-            width: pos.size,
-            height: pos.size,
+            width: ICON_SIZE,
+            height: ICON_SIZE,
             borderRadius: 16,
             animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
