@@ -403,7 +403,7 @@ export default function SelfPublishing() {
       </main>
 
       {/* Disclaimer Section */}
-      <div className="bg-[#f5f5f7] pt-8 md:pt-12">
+      <div className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-6">
           <p className="text-xs font-semibold text-[#1d1d1f] mb-3">
             Beware of publishing scams. Do not share your account credentials.
