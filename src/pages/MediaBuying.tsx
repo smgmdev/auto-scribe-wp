@@ -17,66 +17,86 @@ interface MediaSite {
 
 // Icon sizes - small, medium, large
 const ICON_SIZES = {
-  small: 36,
-  medium: 48,
-  large: 60,
+  small: 52,
+  medium: 64,
+  large: 76,
 };
 
-// Grid-based positions: 7 columns (20%-80% at ~10% intervals), 7 rows (50px apart)
-// Each icon has enough space to never touch another
+// Grid-based positions: tighter spacing (8% horizontal, 42px vertical)
 const iconPositions: { top: number; left: number; size: 'small' | 'medium' | 'large' }[] = [
-  // Row 1 (y: 10)
-  { top: 10, left: 20, size: 'small' },
-  { top: 10, left: 30, size: 'medium' },
-  { top: 10, left: 40, size: 'small' },
-  { top: 10, left: 50, size: 'large' },
-  { top: 10, left: 60, size: 'small' },
-  { top: 10, left: 70, size: 'medium' },
-  { top: 10, left: 80, size: 'small' },
-  // Row 2 (y: 60)
-  { top: 60, left: 25, size: 'medium' },
-  { top: 60, left: 35, size: 'small' },
-  { top: 60, left: 45, size: 'large' },
-  { top: 60, left: 55, size: 'small' },
-  { top: 60, left: 65, size: 'medium' },
-  { top: 60, left: 75, size: 'small' },
-  // Row 3 (y: 110)
-  { top: 110, left: 20, size: 'large' },
-  { top: 110, left: 30, size: 'small' },
-  { top: 110, left: 40, size: 'medium' },
-  { top: 110, left: 50, size: 'small' },
-  { top: 110, left: 60, size: 'large' },
-  { top: 110, left: 70, size: 'small' },
-  { top: 110, left: 80, size: 'medium' },
-  // Row 4 (y: 160)
-  { top: 160, left: 25, size: 'small' },
-  { top: 160, left: 35, size: 'large' },
-  { top: 160, left: 45, size: 'small' },
-  { top: 160, left: 55, size: 'medium' },
-  { top: 160, left: 65, size: 'small' },
-  { top: 160, left: 75, size: 'large' },
-  // Row 5 (y: 210)
-  { top: 210, left: 20, size: 'medium' },
-  { top: 210, left: 30, size: 'small' },
-  { top: 210, left: 40, size: 'large' },
-  { top: 210, left: 50, size: 'small' },
-  { top: 210, left: 60, size: 'medium' },
-  { top: 210, left: 70, size: 'small' },
-  { top: 210, left: 80, size: 'large' },
-  // Row 6 (y: 260)
-  { top: 260, left: 25, size: 'large' },
-  { top: 260, left: 35, size: 'small' },
-  { top: 260, left: 45, size: 'medium' },
-  { top: 260, left: 55, size: 'small' },
-  { top: 260, left: 65, size: 'large' },
-  { top: 260, left: 75, size: 'small' },
-  // Row 7 (y: 310)
-  { top: 310, left: 20, size: 'small' },
-  { top: 310, left: 30, size: 'medium' },
-  { top: 310, left: 40, size: 'small' },
-  { top: 310, left: 60, size: 'small' },
-  { top: 310, left: 70, size: 'medium' },
-  { top: 310, left: 80, size: 'small' },
+  // Row 1 (y: 8)
+  { top: 8, left: 18, size: 'small' },
+  { top: 8, left: 26, size: 'medium' },
+  { top: 8, left: 34, size: 'small' },
+  { top: 8, left: 42, size: 'large' },
+  { top: 8, left: 51, size: 'small' },
+  { top: 8, left: 59, size: 'medium' },
+  { top: 8, left: 67, size: 'small' },
+  { top: 8, left: 75, size: 'large' },
+  { top: 8, left: 84, size: 'small' },
+  // Row 2 (y: 50)
+  { top: 50, left: 22, size: 'medium' },
+  { top: 50, left: 30, size: 'small' },
+  { top: 50, left: 38, size: 'large' },
+  { top: 50, left: 47, size: 'small' },
+  { top: 50, left: 55, size: 'medium' },
+  { top: 50, left: 63, size: 'small' },
+  { top: 50, left: 71, size: 'large' },
+  { top: 50, left: 80, size: 'small' },
+  // Row 3 (y: 92)
+  { top: 92, left: 18, size: 'large' },
+  { top: 92, left: 27, size: 'small' },
+  { top: 92, left: 35, size: 'medium' },
+  { top: 92, left: 43, size: 'small' },
+  { top: 92, left: 51, size: 'large' },
+  { top: 92, left: 60, size: 'small' },
+  { top: 92, left: 68, size: 'medium' },
+  { top: 92, left: 76, size: 'small' },
+  { top: 92, left: 84, size: 'medium' },
+  // Row 4 (y: 134)
+  { top: 134, left: 22, size: 'small' },
+  { top: 134, left: 30, size: 'large' },
+  { top: 134, left: 39, size: 'small' },
+  { top: 134, left: 47, size: 'medium' },
+  { top: 134, left: 55, size: 'small' },
+  { top: 134, left: 63, size: 'large' },
+  { top: 134, left: 72, size: 'small' },
+  { top: 134, left: 80, size: 'medium' },
+  // Row 5 (y: 176)
+  { top: 176, left: 18, size: 'medium' },
+  { top: 176, left: 26, size: 'small' },
+  { top: 176, left: 34, size: 'large' },
+  { top: 176, left: 43, size: 'small' },
+  { top: 176, left: 51, size: 'medium' },
+  { top: 176, left: 59, size: 'small' },
+  { top: 176, left: 67, size: 'large' },
+  { top: 176, left: 76, size: 'small' },
+  { top: 176, left: 84, size: 'medium' },
+  // Row 6 (y: 218)
+  { top: 218, left: 22, size: 'large' },
+  { top: 218, left: 31, size: 'small' },
+  { top: 218, left: 39, size: 'medium' },
+  { top: 218, left: 47, size: 'small' },
+  { top: 218, left: 55, size: 'large' },
+  { top: 218, left: 64, size: 'small' },
+  { top: 218, left: 72, size: 'medium' },
+  { top: 218, left: 80, size: 'small' },
+  // Row 7 (y: 260)
+  { top: 260, left: 18, size: 'small' },
+  { top: 260, left: 26, size: 'medium' },
+  { top: 260, left: 34, size: 'small' },
+  { top: 260, left: 42, size: 'large' },
+  { top: 260, left: 59, size: 'large' },
+  { top: 260, left: 68, size: 'small' },
+  { top: 260, left: 76, size: 'medium' },
+  { top: 260, left: 84, size: 'small' },
+  // Row 8 (y: 302)
+  { top: 302, left: 22, size: 'medium' },
+  { top: 302, left: 30, size: 'small' },
+  { top: 302, left: 38, size: 'large' },
+  { top: 302, left: 63, size: 'large' },
+  { top: 302, left: 72, size: 'small' },
+  { top: 302, left: 80, size: 'medium' },
 ];
 
 // Shuffle array helper
