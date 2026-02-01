@@ -315,7 +315,7 @@ const HowItWorks = () => {
   const isHeaderHidden = useScrollHeader(scrollContainerRef);
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
-
+  const [logoLoaded, setLogoLoaded] = useState(false);
   useEffect(() => {
     const fetchLatestArticles = async () => {
       const { data, error } = await supabase
@@ -442,11 +442,17 @@ const HowItWorks = () => {
       <section className="pt-28 md:pt-36 pb-16 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
-          <img 
-            src={amblack} 
-            alt="Arcana Mace" 
-            className="w-20 h-20 mx-auto mb-6"
-          />
+          <div className="w-20 h-20 mx-auto mb-6 relative flex items-center justify-center">
+            {!logoLoaded && (
+              <Loader2 className="h-8 w-8 animate-spin text-[#86868b] absolute" />
+            )}
+            <img 
+              src={amblack} 
+              alt="Arcana Mace" 
+              className={`w-20 h-20 transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setLogoLoaded(true)}
+            />
+          </div>
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
             Endless reach.
