@@ -15,28 +15,28 @@ interface MediaSite {
   name: string;
 }
 
-// Icon positions forming a clean pyramid - contained within center area (15%-85%)
+// Icon positions forming a clean pyramid - centered with transform
 const iconPositions = [
-  // Row 1 - 7 icons within center bounds
-  { top: 10, left: '15%' },
-  { top: 10, left: '25%' },
-  { top: 10, left: '35%' },
-  { top: 10, left: '45%' },
-  { top: 10, left: '55%' },
-  { top: 10, left: '65%' },
-  { top: 10, left: '75%' },
+  // Row 1 - 7 icons centered
+  { top: 10, left: '20%' },
+  { top: 10, left: '30%' },
+  { top: 10, left: '40%' },
+  { top: 10, left: '50%' },
+  { top: 10, left: '60%' },
+  { top: 10, left: '70%' },
+  { top: 10, left: '80%' },
   // Row 2 - 5 icons (narrower)
-  { top: 110, left: '25%' },
-  { top: 110, left: '35%' },
-  { top: 110, left: '45%' },
-  { top: 110, left: '55%' },
-  { top: 110, left: '65%' },
+  { top: 110, left: '30%' },
+  { top: 110, left: '40%' },
+  { top: 110, left: '50%' },
+  { top: 110, left: '60%' },
+  { top: 110, left: '70%' },
   // Row 3 - 3 icons
-  { top: 210, left: '35%' },
-  { top: 210, left: '45%' },
-  { top: 210, left: '55%' },
+  { top: 210, left: '40%' },
+  { top: 210, left: '50%' },
+  { top: 210, left: '60%' },
   // Row 4 - 1 icon (just above logo)
-  { top: 310, left: '45%' },
+  { top: 310, left: '50%' },
 ];
 
 const ICON_SIZE = 88;
@@ -201,6 +201,7 @@ export default function MediaBuying() {
           const style: React.CSSProperties = {
             top: pos.top,
             left: pos.left,
+            transform: 'translateX(-50%)',
             width: ICON_SIZE,
             height: ICON_SIZE,
             borderRadius: 20,
@@ -226,10 +227,10 @@ export default function MediaBuying() {
           );
         })}
 
-        {/* Arcana Mace logo - positioned as bottom of pyramid */}
+        {/* Arcana Mace logo - positioned as bottom of pyramid, centered */}
         <div 
-          className="absolute"
-          style={{ top: 410, left: '45%' }}
+          className="absolute flex flex-col items-center"
+          style={{ top: 410, left: '50%', transform: 'translateX(-50%)' }}
         >
           <div className="relative" style={{ width: 128, height: 128 }}>
             {/* Orbiting glow dot */}
@@ -264,7 +265,7 @@ export default function MediaBuying() {
               <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
             </div>
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center mt-4">Arcana Mace</h2>
+          <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center mt-4 whitespace-nowrap">Arcana Mace</h2>
         </div>
       </section>
 
