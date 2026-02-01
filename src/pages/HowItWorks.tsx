@@ -844,9 +844,6 @@ const HowItWorks = () => {
             <div className="flex-1 space-y-20">
               {/* Getting Started Section */}
               <div id="getting-started">
-                <div className="w-14 h-14 rounded-full border-2 border-[#0066cc] flex items-center justify-center mb-6">
-                  <Users className="w-6 h-6 text-[#0066cc]" />
-                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   Getting started
                 </h2>
@@ -912,9 +909,6 @@ const HowItWorks = () => {
               
               {/* Media Buying Section */}
               <div id="media-buying">
-                <div className="w-14 h-14 rounded-full border-2 border-[#0066cc] flex items-center justify-center mb-6">
-                  <Globe className="w-6 h-6 text-[#0066cc]" />
-                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   Media Buying
                 </h2>
@@ -1009,9 +1003,6 @@ const HowItWorks = () => {
               
               {/* Self Publishing Section */}
               <div id="self-publishing">
-                <div className="w-14 h-14 rounded-full border-2 border-[#0066cc] flex items-center justify-center mb-6">
-                  <FileText className="w-6 h-6 text-[#0066cc]" />
-                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   Self Publishing
                 </h2>
@@ -1057,9 +1048,6 @@ const HowItWorks = () => {
               
               {/* For Agencies Section */}
               <div id="for-agencies">
-                <div className="w-14 h-14 rounded-full border-2 border-[#f97316] flex items-center justify-center mb-6">
-                  <Building2 className="w-6 h-6 text-[#f97316]" />
-                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   For Agencies
                 </h2>
