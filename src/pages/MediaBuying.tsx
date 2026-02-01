@@ -15,72 +15,70 @@ interface MediaSite {
   name: string;
 }
 
-// Icon sizes - small, medium, large
+// Icon sizes - small, medium, large with proper spacing
 const ICON_SIZES = {
-  small: 48,
-  medium: 64,
-  large: 88,
+  small: 40,
+  medium: 56,
+  large: 72,
 };
 
-// Generate 50 non-overlapping icon positions within central area (15%-85% width, 10px-380px height)
-// Pre-calculated positions to ensure no overlap
+// Generate 50 non-overlapping icon positions within central area (18%-82% width, 10px-360px height)
+// Carefully spaced to prevent any overlap - minimum gap of 8px between icons
 const iconPositions: { top: number; left: number; size: 'small' | 'medium' | 'large' }[] = [
-  // Row 1 (top)
-  { top: 8, left: 15, size: 'medium' },
-  { top: 12, left: 24, size: 'small' },
-  { top: 5, left: 32, size: 'large' },
-  { top: 15, left: 44, size: 'small' },
-  { top: 8, left: 52, size: 'medium' },
-  { top: 10, left: 63, size: 'small' },
-  { top: 5, left: 72, size: 'large' },
-  { top: 12, left: 83, size: 'small' },
-  // Row 2
-  { top: 65, left: 17, size: 'small' },
-  { top: 58, left: 26, size: 'medium' },
-  { top: 70, left: 38, size: 'small' },
-  { top: 60, left: 48, size: 'large' },
+  // Row 1 (y: 5-45)
+  { top: 8, left: 18, size: 'small' },
+  { top: 12, left: 26, size: 'medium' },
+  { top: 5, left: 36, size: 'small' },
+  { top: 15, left: 44, size: 'large' },
+  { top: 8, left: 56, size: 'small' },
+  { top: 10, left: 64, size: 'medium' },
+  { top: 5, left: 74, size: 'small' },
+  { top: 12, left: 82, size: 'small' },
+  // Row 2 (y: 55-95)
+  { top: 60, left: 20, size: 'medium' },
+  { top: 65, left: 30, size: 'small' },
+  { top: 58, left: 40, size: 'small' },
+  { top: 62, left: 50, size: 'medium' },
   { top: 68, left: 60, size: 'small' },
-  { top: 55, left: 69, size: 'medium' },
-  { top: 62, left: 80, size: 'small' },
-  // Row 3
-  { top: 115, left: 15, size: 'large' },
-  { top: 120, left: 28, size: 'small' },
-  { top: 110, left: 36, size: 'medium' },
-  { top: 118, left: 50, size: 'small' },
-  { top: 108, left: 58, size: 'large' },
-  { top: 115, left: 72, size: 'small' },
-  { top: 112, left: 82, size: 'medium' },
-  // Row 4
-  { top: 165, left: 18, size: 'small' },
-  { top: 158, left: 27, size: 'medium' },
-  { top: 170, left: 40, size: 'small' },
-  { top: 160, left: 52, size: 'medium' },
-  { top: 168, left: 64, size: 'small' },
-  { top: 155, left: 74, size: 'large' },
-  { top: 165, left: 85, size: 'small' },
-  // Row 5
-  { top: 210, left: 15, size: 'medium' },
-  { top: 215, left: 26, size: 'small' },
-  { top: 205, left: 35, size: 'large' },
-  { top: 218, left: 48, size: 'small' },
-  { top: 208, left: 56, size: 'medium' },
-  { top: 212, left: 68, size: 'small' },
-  { top: 205, left: 78, size: 'large' },
-  // Row 6
-  { top: 260, left: 17, size: 'small' },
-  { top: 255, left: 28, size: 'medium' },
-  { top: 265, left: 42, size: 'small' },
-  { top: 258, left: 54, size: 'large' },
-  { top: 262, left: 67, size: 'small' },
-  { top: 255, left: 76, size: 'medium' },
-  { top: 268, left: 85, size: 'small' },
-  // Row 7
-  { top: 308, left: 15, size: 'large' },
-  { top: 315, left: 30, size: 'small' },
-  { top: 305, left: 40, size: 'medium' },
+  { top: 55, left: 70, size: 'large' },
+  { top: 62, left: 82, size: 'small' },
+  // Row 3 (y: 105-145)
+  { top: 110, left: 18, size: 'small' },
+  { top: 115, left: 28, size: 'large' },
+  { top: 108, left: 42, size: 'small' },
+  { top: 112, left: 52, size: 'medium' },
+  { top: 118, left: 64, size: 'small' },
+  { top: 105, left: 74, size: 'medium' },
+  { top: 110, left: 84, size: 'small' },
+  // Row 4 (y: 155-195)
+  { top: 160, left: 20, size: 'medium' },
+  { top: 165, left: 32, size: 'small' },
+  { top: 158, left: 42, size: 'large' },
+  { top: 162, left: 56, size: 'small' },
+  { top: 168, left: 66, size: 'medium' },
+  { top: 155, left: 78, size: 'small' },
+  // Row 5 (y: 205-245)
+  { top: 210, left: 18, size: 'small' },
+  { top: 215, left: 28, size: 'medium' },
+  { top: 205, left: 40, size: 'small' },
+  { top: 212, left: 50, size: 'large' },
+  { top: 218, left: 64, size: 'small' },
+  { top: 208, left: 74, size: 'medium' },
+  { top: 212, left: 84, size: 'small' },
+  // Row 6 (y: 255-295)
+  { top: 260, left: 20, size: 'medium' },
+  { top: 265, left: 32, size: 'small' },
+  { top: 258, left: 44, size: 'small' },
+  { top: 262, left: 54, size: 'medium' },
+  { top: 268, left: 66, size: 'small' },
+  { top: 255, left: 76, size: 'large' },
+  // Row 7 (y: 305-345)
+  { top: 310, left: 18, size: 'small' },
+  { top: 315, left: 28, size: 'medium' },
+  { top: 305, left: 40, size: 'small' },
   { top: 312, left: 62, size: 'medium' },
-  { top: 308, left: 75, size: 'small' },
-  { top: 310, left: 84, size: 'large' },
+  { top: 308, left: 74, size: 'small' },
+  { top: 315, left: 84, size: 'small' },
 ];
 
 // Shuffle array helper
@@ -274,40 +272,13 @@ export default function MediaBuying() {
         {/* Arcana Mace logo - positioned as bottom of pyramid, centered */}
         <div 
           className="absolute flex flex-col items-center"
-          style={{ top: 410, left: '50%', transform: 'translateX(-50%)' }}
+          style={{ top: 380, left: '50%', transform: 'translateX(-50%)' }}
         >
-          <div className="relative" style={{ width: 128, height: 128 }}>
-            {/* Orbiting glow dot */}
-            <div 
-              className="absolute animate-border-glow"
-              style={{
-                width: 128,
-                height: 128,
-                top: 0,
-                left: 0,
-              }}
-            >
-              <div 
-                style={{
-                  position: 'absolute',
-                  top: -8,
-                  left: '50%',
-                  marginLeft: -10,
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: '#0071e3',
-                  boxShadow: '0 0 20px 8px rgba(0, 113, 227, 0.8), 0 0 40px 16px rgba(0, 113, 227, 0.4)',
-                }}
-              />
-            </div>
-            {/* Logo container */}
-            <div 
-              className="absolute inset-0 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-[#0071e3]/30"
-              style={{ borderRadius: 28 }}
-            >
-              <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
-            </div>
+          <div 
+            className="flex items-center justify-center shadow-xl overflow-hidden"
+            style={{ width: 100, height: 100, borderRadius: 24 }}
+          >
+            <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-2xl md:text-3xl font-medium text-foreground text-center mt-4 whitespace-nowrap">Arcana Mace</h2>
         </div>
