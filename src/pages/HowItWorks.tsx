@@ -7,6 +7,35 @@ import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 
+// Scroll container ref for header hide/show
+const useScrollHeader = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const currentScrollY = scrollContainer.scrollTop;
+      const scrollThreshold = 64;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
+        setIsHeaderHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsHeaderHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [scrollContainerRef]);
+
+  return isHeaderHidden;
+};
+
 // Scroll-reveal row component
 const ScrollRevealRow = ({ 
   highlightText, 
@@ -116,6 +145,8 @@ const HowItWorks = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isHeaderHidden = useScrollHeader(scrollContainerRef);
 
   const handleGetStarted = () => {
     if (user) {
@@ -134,41 +165,90 @@ const HowItWorks = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
-        <div className="max-w-[980px] mx-auto flex h-12 items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src={amblack} alt="Arcana Mace" className="h-8 w-8" />
-            <span className="text-sm font-medium text-neutral-900">Arcana Mace</span>
-          </div>
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+      >
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+          </button>
           
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs"
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
               onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
             >
               <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <Search className="h-5 w-5" />
             </Button>
             
-            <Button 
-              onClick={handleGetStarted}
-              size="sm"
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full text-xs px-4"
-            >
-              Get Started
-            </Button>
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>
+
+      {/* Spacer */}
+      <div className="h-16" />
+
+      {/* Sub-header - Sticky */}
+      <div className={`sticky z-40 bg-white/90 backdrop-blur-sm border-b border-border transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+          <span className="text-xl font-semibold text-foreground">How It Works</span>
+          <nav className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={() => navigate('/about')}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Learn More
+            </button>
+            <Button
+              size="sm"
+              onClick={handleGetStarted}
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
+            >
+              Get Started
+            </Button>
+          </nav>
+        </div>
+      </div>
 
       {/* Search Modal */}
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-white">
+      <section className="pt-28 md:pt-36 pb-16 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6 rounded-[22px] bg-gradient-to-br from-[#0071e3] to-[#00c7be] flex items-center justify-center shadow-lg">
