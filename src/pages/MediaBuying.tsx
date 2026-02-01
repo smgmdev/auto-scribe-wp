@@ -598,39 +598,6 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      <section className="py-24 bg-gradient-to-b from-[#1d1d1f] to-[#0d0d0f]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          {/* Icon */}
-          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 bg-gradient-to-br from-[#0071e3] to-[#00c7ff] rounded-[22px] md:rounded-[28px] flex items-center justify-center shadow-2xl">
-            <Globe className="w-10 h-10 md:w-12 md:h-12 text-white" />
-          </div>
-          <p className="text-white/80 text-lg mb-8">Media Buying</p>
-          
-          {/* Headline */}
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-8">
-            Your new destination<br />
-            for premium placements.
-          </h2>
-          
-          {/* Description */}
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto mb-10">
-            The Arcana Mace marketplace puts all your media buying options in one place. 
-            Get personalized recommendations based on your industry and goals. 
-            Work directly with verified agencies or browse publications independently. 
-            Track orders in real-time and see transparent pricing. 
-            And you can always count on our publication guarantee for peace of mind.
-          </p>
-          
-          {/* Button */}
-          <Button 
-            onClick={handleGetStarted}
-            className="bg-white text-[#1d1d1f] hover:bg-white/90 rounded-full px-8 py-3 text-base font-medium"
-          >
-            Learn more
-          </Button>
-        </div>
-      </section>
-
 
       {/* FAQ Section - Apple style */}
       <section className="py-20 bg-[#1d1d1f]">
