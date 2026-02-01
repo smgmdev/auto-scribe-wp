@@ -98,8 +98,8 @@ export default function SystemStatus() {
     'Authentication': { internalLink: '/auth' },
     'WordPress Publishing': { internalLink: '/dashboard?view=compose' },
     'Credit Processing': { internalLink: '/dashboard?view=credit-history' },
-    'Media Site Network': { internalLink: '/media-buying' },
-    'Headlines Scanner': { internalLink: '/self-publishing' },
+    'Media Site Network': { internalLink: '/dashboard?view=sites' },
+    'Headlines Scanner': { internalLink: '/dashboard?view=headlines' },
   };
 
   // Name mapping for services (API name -> Display name)
@@ -142,9 +142,9 @@ export default function SystemStatus() {
         { name: 'Payment Gateway (Stripe)', status: 'issue' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
-        { name: 'Media Site Network', status: 'issue', internalLink: '/media-buying' },
+        { name: 'Media Site Network', status: 'issue', internalLink: '/dashboard?view=sites' },
         { name: 'Agency System & Features', status: 'issue' },
-        { name: 'Headlines Scanner', status: 'issue', internalLink: '/self-publishing' },
+        { name: 'Headlines Scanner', status: 'issue', internalLink: '/dashboard?view=headlines' },
       ]);
     } finally {
       setIsLoading(false);
