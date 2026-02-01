@@ -638,7 +638,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'getting-started' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Getting Started
@@ -651,7 +651,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'create-account' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Create Your Account
@@ -664,7 +664,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'buy-credits' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Buy Credits
@@ -677,7 +677,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'media-buying' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Media Buying
@@ -690,7 +690,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'global-library' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Global Library
@@ -703,7 +703,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'browse-outlets' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Browse Outlets
@@ -716,7 +716,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'submit-request' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Submit a Request
@@ -729,7 +729,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'track-orders' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Track Your Orders
@@ -742,7 +742,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'browse-media-network' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Browse Media Network
@@ -755,7 +755,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'bmn-local-library' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Local Library
@@ -768,7 +768,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'bmn-global-library' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Global Library
@@ -781,7 +781,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'self-publishing' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Self Publishing
@@ -794,7 +794,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'local-library' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Local Library
@@ -807,7 +807,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'generate-ai-articles' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Generate AI Articles
@@ -820,7 +820,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'for-agencies' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       For Agencies
@@ -833,7 +833,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'agency-connect-wordpress' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Connect WordPress
@@ -846,7 +846,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'upload-media-lists' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Upload Media Lists
@@ -859,7 +859,7 @@ const HowItWorks = () => {
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'get-paid' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Get Paid
