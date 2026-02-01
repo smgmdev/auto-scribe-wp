@@ -372,7 +372,7 @@ export default function SelfPublishing() {
         </section>
 
         {/* Business Section - Contained Image */}
-        <section className="py-4 md:py-6 bg-white">
+        <section className="pt-4 md:pt-6 pb-0 bg-white">
           <div className="max-w-[1400px] mx-auto px-4 md:px-12">
             <div 
               className="relative min-h-[450px] md:min-h-[550px] bg-cover bg-center overflow-hidden"
