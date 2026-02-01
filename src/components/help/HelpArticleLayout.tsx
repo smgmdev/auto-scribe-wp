@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Search, User } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -137,7 +137,13 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
         <div className="bg-white border-b border-border">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
-            <span className="text-xl font-semibold text-foreground">Help Center</span>
+            <button 
+              onClick={() => navigate('/help')}
+              className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Help Center
+            </button>
           </div>
         </div>
       </div>
