@@ -536,35 +536,6 @@ const HowItWorks = () => {
         ) : null}
       </section>
 
-      {/* Gradient Text Statements Section - Apple Siri Style */}
-      <section className="py-24 md:py-32 bg-[#fbfbfd]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center space-y-10 md:space-y-14">
-          <GradientScrollReveal
-            index={0}
-            gradient="from-[#e84393] via-[#d63384] to-[#a855f7]"
-            text={<>Publish your content<br />to premium outlets worldwide.</>}
-          />
-          
-          <GradientScrollReveal
-            index={1}
-            gradient="from-[#a855f7] via-[#8b5cf6] to-[#3b82f6]"
-            text={<>Just write once and distribute<br />to hundreds of publications.</>}
-          />
-          
-          <GradientScrollReveal
-            index={2}
-            gradient="from-[#3b82f6] via-[#06b6d4] to-[#22d3d4]"
-            text={<>Built for creators, publishers,<br />and enterprise teams alike.</>}
-          />
-          
-          <GradientScrollReveal
-            index={3}
-            gradient="from-[#14b8a6] via-[#06b6d4] to-[#0ea5e9]"
-            text={<>Powered by the fastest AI<br />for content creation.</>}
-          />
-        </div>
-      </section>
-
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {features.map((feature, index) => (
