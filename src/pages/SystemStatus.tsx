@@ -93,6 +93,18 @@ export default function SystemStatus() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Link mapping for services
+  const serviceLinks: Record<string, { link?: string; internalLink?: string }> = {
+    'Authentication': { internalLink: '/auth' },
+    'AI Article Generation': { internalLink: '/dashboard?view=compose' },
+    'WordPress Publishing': { internalLink: '/dashboard?view=compose' },
+    'Credit Processing': { internalLink: '/dashboard?view=credits' },
+    'Payment Gateway (Stripe)': { link: 'https://stripe.com/status' },
+    'Media Site Network': { internalLink: '/media-buying' },
+    'Agency Portal': { internalLink: '/agency' },
+    'Headlines Scanner': { internalLink: '/dashboard?view=headlines' },
+  };
+
   const fetchStatus = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
     
@@ -102,12 +114,16 @@ export default function SystemStatus() {
       if (error) throw error;
       
       if (data?.services) {
-        setServices(data.services);
+        // Merge links into services
+        const servicesWithLinks = data.services.map((service: ServiceStatus) => ({
+          ...service,
+          ...serviceLinks[service.name],
+        }));
+        setServices(servicesWithLinks);
         setLastUpdated(new Date(data.timestamp));
       }
     } catch (error) {
       console.error('Failed to fetch system status:', error);
-      // Show all services as unknown/issue if fetch fails
       setServices([
         { name: 'API Server', status: 'issue' },
         { name: 'Database', status: 'issue' },
@@ -117,7 +133,7 @@ export default function SystemStatus() {
         { name: 'AI Article Generation', status: 'issue', internalLink: '/dashboard?view=compose' },
         { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
         { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credits' },
-        { name: 'Payment Gateway (Stripe)', status: 'issue', link: 'https://stripe.com' },
+        { name: 'Payment Gateway (Stripe)', status: 'issue', link: 'https://stripe.com/status' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
         { name: 'Media Site Network', status: 'issue', internalLink: '/media-buying' },
