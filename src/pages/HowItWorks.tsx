@@ -721,6 +721,38 @@ const HowItWorks = () => {
       </section>
 
 
+      {/* New Possibilities Section - Apple Intelligence Style */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <div className="bg-[#f5f5f7] rounded-3xl py-16 md:py-24 px-8 md:px-16 text-center">
+            {/* Gradient Icon */}
+            <div className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-8 rounded-[22px] bg-gradient-to-br from-[#5fc3e4] via-[#a855f7] via-[#ec4899] to-[#f97316] flex items-center justify-center shadow-lg">
+              <span className="text-white text-2xl md:text-3xl font-semibold">API</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] mb-6 leading-tight">
+              New possibilities for your
+              <br />
+              publishing workflow.
+            </h2>
+            
+            <p className="text-lg md:text-xl text-[#1d1d1f] max-w-2xl mx-auto mb-8 leading-relaxed">
+              The Arcana Mace platform, along with AI writing tools, agency integrations, 
+              and publishing APIs, are built with efficiency at the center. Any publisher can tap into 
+              the powerful features that make content creation seamless. And it's all at 
+              transparent, predictable pricing.
+            </p>
+            
+            <button 
+              onClick={() => navigate('/about')}
+              className="text-[#0066cc] hover:underline inline-flex items-center gap-1 text-lg"
+            >
+              Learn more about our platform ›
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Go Even Further Section - Apple Style Cards */}
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6">
