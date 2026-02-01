@@ -206,6 +206,7 @@ export default function MediaBuying() {
             top: pos.top,
             width: pos.size,
             height: pos.size,
+            borderRadius: 16,
             animationDelay,
             ...(pos.left !== undefined ? { left: pos.left } : {}),
             ...(pos.right !== undefined ? { right: pos.right } : {}),
@@ -214,7 +215,7 @@ export default function MediaBuying() {
           return (
             <div
               key={index}
-              className={`absolute rounded-2xl shadow-lg overflow-hidden bg-white ${floatClass}`}
+              className={`absolute shadow-lg overflow-hidden bg-white ${floatClass}`}
               style={style}
             >
               {site?.favicon ? (
