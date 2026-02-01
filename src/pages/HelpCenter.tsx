@@ -218,9 +218,16 @@ export default function HelpCenter() {
         
         {/* Expandable menu */}
         <div 
-          className={`bg-white border-b border-border overflow-hidden transition-all duration-300 ease-out ${
-            isTopicsOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          className={`bg-white border-b border-border overflow-hidden transition-[max-height,opacity] duration-500 ${
+            isTopicsOpen 
+              ? 'max-h-[600px] opacity-100 ease-[cubic-bezier(0.4,0,0.2,1)]' 
+              : 'max-h-0 opacity-0 ease-[cubic-bezier(0.4,0,1,1)]'
           }`}
+          style={{
+            transitionTimingFunction: isTopicsOpen 
+              ? 'cubic-bezier(0.16, 1, 0.3, 1)' 
+              : 'cubic-bezier(0.4, 0, 1, 1)'
+          }}
         >
           {/* Mobile layout - single column */}
           <div className="md:hidden py-8 px-4">
