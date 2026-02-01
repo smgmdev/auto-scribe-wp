@@ -189,17 +189,16 @@ export default function MediaBuying() {
         {/* Central icon and title */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
           <div 
-            className="mb-4 flex items-center justify-center shadow-2xl"
+            className="mb-4 flex items-center justify-center shadow-2xl overflow-hidden"
             style={{ 
               width: 120, 
               height: 120, 
-              borderRadius: 28,
-              background: 'linear-gradient(135deg, #1d1d1f, #3d3d3f)'
+              borderRadius: 28
             }}
           >
-            <Globe className="w-14 h-14 text-white" />
+            <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium text-[#1d1d1f]">Media Buying</h2>
+          <h2 className="text-2xl md:text-3xl font-medium text-[#1d1d1f]">Arcana Mace</h2>
         </div>
       </section>
 
