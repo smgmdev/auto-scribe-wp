@@ -1093,12 +1093,42 @@ const HowItWorks = () => {
                       <span><strong>Informative</strong> — Educational, detailed writing for guides and explainers</span>
                     </li>
                   </ul>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-8">
                     When creating a new article, simply select a headline from the Headlines section or enter your own topic, 
                     choose your preferred tone, and let the AI generate a complete article with an optimized title. 
                     Headlines are automatically rewritten to be curious and engaging while preserving important names 
                     of people, companies, and organizations.
                   </p>
+                  
+                  {/* AI-Powered Publishing Card */}
+                  <div className="bg-[#1d1d1f] rounded-3xl py-12 md:py-16 px-6 md:px-12 text-center">
+                    {/* Gradient Icon */}
+                    <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 rounded-[18px] bg-gradient-to-br from-[#2997ff] via-[#a855f7] to-[#ec4899] flex items-center justify-center shadow-lg">
+                      <span className="text-white text-xl md:text-2xl font-semibold">AI</span>
+                    </div>
+                    
+                    <p className="text-lg md:text-xl font-semibold text-white/80 mb-3">
+                      AI-Powered Publishing
+                    </p>
+                    
+                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 leading-tight">
+                      <span className="bg-gradient-to-r from-[#2997ff] via-[#a855f7] to-[#ec4899] bg-clip-text text-transparent">All-new</span>
+                      <br />
+                      <span className="bg-gradient-to-r from-[#ec4899] via-[#f97316] to-[#f97316] bg-clip-text text-transparent">powers.</span>
+                    </h3>
+                    
+                    <p className="text-base md:text-lg text-white/70 max-w-xl mx-auto mb-6 leading-relaxed">
+                      With the capabilities provided by advanced AI, 
+                      this marks the start of a new era for content creation.
+                    </p>
+                    
+                    <button 
+                      onClick={() => navigate('/about')}
+                      className="text-[#2997ff] hover:underline inline-flex items-center gap-1 text-base"
+                    >
+                      Learn more about AI Publishing ›
+                    </button>
+                  </div>
                 </div>
               </div>
               
