@@ -420,7 +420,7 @@ export default function SelfPublishing() {
         </div>
       </div>
 
-      <Footer narrow />
+      <Footer narrow showTopBorder />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </div>
   );
