@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2 } from 'lucide-react';
+import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2, ExternalLink, ArrowRight, Building2, Info } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 import { supabase } from '@/integrations/supabase/client';
+import { getFaviconUrl } from '@/lib/favicon';
 import amblack from '@/assets/amblack.png';
 import businessHero from '@/assets/business-hero.jpg';
 
@@ -22,28 +26,139 @@ const products = [
 interface MediaSite {
   id: string;
   name: string;
+  url: string;
   favicon: string | null;
+  credits_required: number;
+  agency: string | null;
 }
 
 export default function SelfPublishing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setPreselectedSiteId, setCurrentView } = useAppStore();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [isLoadingSites, setIsLoadingSites] = useState(true);
+  const [selectedSite, setSelectedSite] = useState<MediaSite | null>(null);
+  const [navigating, setNavigating] = useState(false);
+  const [loadingAgency, setLoadingAgency] = useState(false);
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetails, setAgencyDetails] = useState<{
+    agency_name: string;
+    email: string | null;
+    onboarding_complete: boolean;
+    created_at: string;
+    logo_url: string | null;
+  } | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  const extractDomain = (url: string) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return url;
+    }
+  };
+
+  const handlePublishNewArticle = (siteId: string) => {
+    setNavigating(true);
+    setPreselectedSiteId(siteId);
+    if (user) {
+      setCurrentView('compose');
+      navigate('/dashboard', { 
+        state: { 
+          targetView: 'compose',
+          preselectedSiteId: siteId
+        } 
+      });
+    } else {
+      navigate('/auth', { 
+        state: { 
+          redirectTo: '/dashboard',
+          targetView: 'compose',
+          preselectedSiteId: siteId
+        } 
+      });
+    }
+    setSelectedSite(null);
+  };
+
+  // Fetch agency details
+  const fetchAgencyDetails = async (agencyName: string) => {
+    setLoadingAgency(true);
+    setLogoLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('agency_payouts')
+        .select('agency_name, email, onboarding_complete, created_at')
+        .eq('agency_name', agencyName)
+        .single();
+      
+      if (error) throw error;
+      
+      // Try to get logo from agency_applications
+      let logoUrl: string | null = null;
+      const { data: appData } = await supabase
+        .from('agency_applications')
+        .select('logo_url')
+        .eq('agency_name', agencyName)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      if (appData?.logo_url) {
+        const { data: signed } = await supabase.storage
+          .from('agency-documents')
+          .createSignedUrl(appData.logo_url, 3600);
+        if (signed?.signedUrl) {
+          logoUrl = signed.signedUrl;
+        }
+      }
+      
+      setAgencyDetails({
+        ...data,
+        logo_url: logoUrl
+      });
+      setAgencyDetailsOpen(true);
+    } catch (error) {
+      console.error('Error fetching agency details:', error);
+      setAgencyDetails(null);
+    } finally {
+      setLoadingAgency(false);
+    }
+  };
 
   // Fetch random media sites from local library using RPC
   useEffect(() => {
     const fetchMediaSites = async () => {
       setIsLoadingSites(true);
-      const { data } = await supabase.rpc('get_public_sites');
+      const { data: sitesData } = await supabase.rpc('get_public_sites');
       
-      if (data && data.length > 0) {
-        // Filter sites with favicon and shuffle to get 13 random
-        const sitesWithFavicon = data.filter((site: { favicon: string | null }) => site.favicon);
+      if (sitesData && sitesData.length > 0) {
+        // Fetch credits for all sites
+        const { data: creditsData } = await supabase
+          .from('site_credits')
+          .select('site_id, credits_required');
+
+        const creditsMap: Record<string, number> = {};
+        creditsData?.forEach(credit => {
+          creditsMap[credit.site_id] = credit.credits_required;
+        });
+
+        // Filter sites with favicon and add credits, shuffle to get 13 random
+        const sitesWithFavicon = sitesData
+          .filter((site: { favicon: string | null }) => site.favicon)
+          .map((site: any) => ({
+            id: site.id,
+            name: site.name,
+            url: site.url,
+            favicon: site.favicon,
+            credits_required: creditsMap[site.id] || 25,
+            agency: site.agency || null
+          }));
         const shuffled = [...sitesWithFavicon].sort(() => Math.random() - 0.5);
         setMediaSites(shuffled.slice(0, 13));
       }
@@ -201,7 +316,11 @@ export default function SelfPublishing() {
                 {/* Top row - 3 media */}
                 <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8">
                   {mediaSites.slice(0, 3).map((site) => (
-                    <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
+                    <div 
+                      key={site.id} 
+                      className="flex flex-col items-center gap-2 group cursor-pointer"
+                      onClick={() => setSelectedSite(site)}
+                    >
                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
                         {site.favicon ? (
                           <img 
@@ -222,7 +341,11 @@ export default function SelfPublishing() {
                 {/* Bottom rows - remaining 10 media */}
                 <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8">
                   {mediaSites.slice(3).map((site) => (
-                    <div key={site.id} className="flex flex-col items-center gap-2 group cursor-pointer">
+                    <div 
+                      key={site.id} 
+                      className="flex flex-col items-center gap-2 group cursor-pointer"
+                      onClick={() => setSelectedSite(site)}
+                    >
                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
                         {site.favicon ? (
                           <img 
@@ -435,6 +558,170 @@ export default function SelfPublishing() {
 
       <Footer narrow showTopBorder />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
+
+      {/* Media Site Detail Dialog */}
+      <Dialog open={!!selectedSite} onOpenChange={(open) => !open && setSelectedSite(null)}>
+        <DialogContent className="sm:max-w-lg z-[200]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <img
+                src={selectedSite?.favicon || (selectedSite ? getFaviconUrl(selectedSite.url) : '')}
+                alt={selectedSite?.name || ''}
+                className="h-12 w-12 rounded-xl object-cover"
+              />
+              <span>{selectedSite?.name}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedSite && (
+            <div className="space-y-4 mt-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Website</p>
+                <div className="flex items-center gap-2">
+                  <a 
+                    href={selectedSite.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline flex items-center gap-1"
+                  >
+                    {extractDomain(selectedSite.url)}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Publication Type</p>
+                <p className="text-foreground">Article</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="text-foreground font-medium">{selectedSite.credits_required} USD</p>
+              </div>
+              {selectedSite.agency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Agency</p>
+                  <p 
+                    className={`text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1 ${loadingAgency ? 'pointer-events-none opacity-70' : ''}`}
+                    onClick={() => fetchAgencyDetails(selectedSite.agency!)}
+                  >
+                    {selectedSite.agency}
+                    {loadingAgency ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Info className="h-3 w-3" />
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 mt-4">
+            <Button 
+              variant="outline"
+              onClick={() => setSelectedSite(null)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
+            {selectedSite && (
+              <Button 
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-fit px-3 border border-transparent hover:border-black"
+                onClick={() => handlePublishNewArticle(selectedSite.id)}
+                disabled={navigating}
+              >
+                {navigating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
+                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                      <ArrowRight className="h-4 w-4 shrink-0" />
+                    </span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agency Details Dialog */}
+      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
+        <DialogContent className="sm:max-w-md z-[250]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {agencyDetails?.logo_url ? (
+                <div className="relative h-12 w-12">
+                  {logoLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  <img 
+                    src={agencyDetails.logo_url} 
+                    alt={agencyDetails.agency_name}
+                    className={`h-12 w-12 rounded-xl object-cover ${logoLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
+                    onLoad={() => setLogoLoading(false)}
+                    onError={() => setLogoLoading(false)}
+                  />
+                </div>
+              ) : (
+                <Building2 className="h-12 w-12 text-muted-foreground" />
+              )}
+              <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingAgency ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : agencyDetails ? (
+            <div className="space-y-4 mt-4">
+              {agencyDetails.email && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-foreground">{agencyDetails.email}</p>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Member Since</p>
+                <p className="text-foreground">
+                  {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Status</p>
+                <Badge variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}>
+                  {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
+                </Badge>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Agency not found</p>
+          )}
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="outline"
+              onClick={() => setAgencyDetailsOpen(false)}
+              className="hover:bg-black hover:text-white transition-colors"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
