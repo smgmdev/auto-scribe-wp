@@ -375,7 +375,7 @@ export default function SelfPublishing() {
         <section className="py-8 md:py-12 bg-white">
           <div className="max-w-[1400px] mx-auto px-4 md:px-12">
             <div 
-              className="relative min-h-[450px] md:min-h-[550px] bg-cover bg-center rounded-2xl overflow-hidden"
+              className="relative min-h-[450px] md:min-h-[550px] bg-cover bg-center overflow-hidden"
               style={{ backgroundImage: `url(${businessHero})` }}
             >
               {/* Dark overlay for text readability */}
