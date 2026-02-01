@@ -12,11 +12,11 @@ export function Footer({ narrow = false }: FooterProps) {
   const { user } = useAuth();
 
   const containerClass = narrow 
-    ? "max-w-[980px] mx-auto px-4 md:px-6 pt-10 pb-16"
-    : "container mx-auto px-4 pt-10 pb-16";
+    ? "max-w-[980px] mx-auto px-4 md:px-6 pt-10 pb-16 border-t border-[#d2d2d7]"
+    : "container mx-auto px-4 pt-10 pb-16 border-t border-[#d2d2d7]";
 
   return (
-    <footer className={`border-t border-[#d2d2d7] bg-[#f5f5f7] ${narrow ? '' : 'mt-12'}`}>
+    <footer className={`bg-[#f5f5f7] ${narrow ? '' : 'mt-12'}`}>
       <div className={containerClass}>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
           {/* Media Buying */}
