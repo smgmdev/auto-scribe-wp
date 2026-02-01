@@ -235,7 +235,7 @@ export default function MediaBuying() {
         })}
 
         {/* Central icon and title - below the pyramid */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-6">
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-16">
           <div 
             className="mb-4 flex items-center justify-center shadow-2xl overflow-hidden"
             style={{ 
