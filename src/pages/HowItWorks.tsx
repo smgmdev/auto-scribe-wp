@@ -439,7 +439,7 @@ const HowItWorks = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Hero Section */}
-      <section className="pt-28 md:pt-36 pb-16 bg-white">
+      <section className="pt-16 md:pt-20 pb-16 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6 relative flex items-center justify-center">
