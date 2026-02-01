@@ -205,11 +205,11 @@ export default function HelpCenter() {
             <Popover open={isTopicsOpen} onOpenChange={setIsTopicsOpen}>
               <PopoverTrigger asChild>
                 <button className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-0.5">
-                  View all topics
+                  <span className="hidden md:inline">View all topics</span>
                   {isTopicsOpen ? (
-                    <ChevronUp className="h-3 w-3" />
+                    <ChevronUp className="h-5 w-5 md:h-3 md:w-3" />
                   ) : (
-                    <ChevronDown className="h-3 w-3" />
+                    <ChevronDown className="h-5 w-5 md:h-3 md:w-3" />
                   )}
                 </button>
               </PopoverTrigger>
