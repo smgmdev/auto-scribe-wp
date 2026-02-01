@@ -20,8 +20,8 @@ const SITEMAP_SECTIONS = [
   {
     title: 'For Clients',
     links: [
-      { label: 'How Arcana Mace Works', href: '#' },
-      { label: 'Self Publishing', href: '#' },
+      { label: 'How Arcana Mace Works', href: '/how-it-works' },
+      { label: 'Self Publishing', href: '/self-publishing' },
       { label: 'Media Buying', href: '#' },
       { label: 'AI Article Generation', href: '#' },
     ],
