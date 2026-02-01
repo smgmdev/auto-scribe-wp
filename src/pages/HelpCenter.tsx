@@ -229,7 +229,7 @@ export default function HelpCenter() {
                   onClick={() => navigate('/dashboard')}
                   className="text-[#06c] text-sm font-medium hover:underline inline-flex items-center gap-1"
                 >
-                  Go to your dashboard
+                  Manage your account
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
