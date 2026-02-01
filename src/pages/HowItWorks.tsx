@@ -819,7 +819,7 @@ const HowItWorks = () => {
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] text-center mb-16">
-            Go even further with Arcana Mace.
+            What you can do with Arcana Mace.
           </h2>
           
           <div className="grid md:grid-cols-3 gap-6">
