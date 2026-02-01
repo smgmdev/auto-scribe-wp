@@ -278,40 +278,6 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Phone Mockups Section */}
-      <section className="py-16 bg-[#f5f5f7] overflow-hidden">
-        <div className="flex gap-6 animate-scroll-left h-[520px]">
-          {[...Array(8)].map((_, i) => (
-            <div 
-              key={i} 
-              className="flex-shrink-0 w-64 h-full rounded-[40px] bg-white shadow-xl border border-gray-200 overflow-hidden"
-            >
-              <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-                <div className="w-24 h-6 mx-auto mb-4 rounded-full bg-black" />
-                <div className="space-y-3">
-                  <div className="h-32 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100" />
-                  <div className="h-4 rounded bg-gray-200 w-3/4" />
-                  <div className="h-3 rounded bg-gray-200 w-1/2" />
-                  <div className="h-24 rounded-2xl bg-gradient-to-br from-orange-100 to-pink-100" />
-                  <div className="h-4 rounded bg-gray-200 w-2/3" />
-                  <div className="h-3 rounded bg-gray-200 w-1/3" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <style>{`
-          @keyframes scroll-left {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .animate-scroll-left {
-            animation: scroll-left 30s linear infinite;
-          }
-        `}</style>
-      </section>
-
       {/* Feature Bullets Section */}
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
