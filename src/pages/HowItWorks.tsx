@@ -634,7 +634,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#getting-started" 
-                      className={`block pl-4 py-1.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'getting-started' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -646,7 +646,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#create-account" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'create-account' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -658,7 +658,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#buy-credits" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'buy-credits' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -670,7 +670,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#media-buying" 
-                      className={`block pl-4 py-1.5 text-sm font-semibold mt-3 transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'media-buying' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -682,7 +682,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#browse-outlets" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'browse-outlets' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -694,7 +694,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#submit-request" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'submit-request' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -706,7 +706,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#track-orders" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'track-orders' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -718,7 +718,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#self-publishing" 
-                      className={`block pl-4 py-1.5 text-sm font-semibold mt-3 transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'self-publishing' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -730,7 +730,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#connect-wordpress" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'connect-wordpress' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -742,7 +742,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#ai-generation" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'ai-generation' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
@@ -754,7 +754,7 @@ const HowItWorks = () => {
                   <li>
                     <a 
                       href="#publish-directly" 
-                      className={`block pl-4 py-1.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
                         activeSection === 'publish-directly' 
                           ? 'text-[#1d1d1f] border-[#0066cc]' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#1d1d1f]'
