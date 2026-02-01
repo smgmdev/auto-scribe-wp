@@ -561,7 +561,7 @@ export default function SelfPublishing() {
 
       {/* Media Site Detail Dialog */}
       <Dialog open={!!selectedSite} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-lg z-[200]">
+        <DialogContent className="sm:max-w-md z-[200]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <img
