@@ -318,7 +318,7 @@ export default function SelfPublishing() {
         </section>
 
         {/* Info Section */}
-        <section className="py-16 bg-white">
+        <section className="py-8 bg-white">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-sm text-[#6e6e73] mb-4">
