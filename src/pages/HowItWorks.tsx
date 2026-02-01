@@ -486,6 +486,35 @@ const HowItWorks = () => {
         ) : null}
       </section>
 
+      {/* Gradient Text Statements Section - Apple Siri Style */}
+      <section className="py-20 md:py-28 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center space-y-8 md:space-y-10">
+          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent">
+            Publish your content
+            <br />
+            to premium outlets worldwide.
+          </p>
+          
+          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-purple-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
+            Just write once and distribute
+            <br />
+            to hundreds of publications.
+          </p>
+          
+          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 bg-clip-text text-transparent">
+            Built for creators, publishers,
+            <br />
+            and enterprise teams alike.
+          </p>
+          
+          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold italic leading-tight bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            Powered by the fastest AI
+            <br />
+            for content creation.
+          </p>
+        </div>
+      </section>
+
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {features.map((feature, index) => (
