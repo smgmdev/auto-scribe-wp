@@ -218,7 +218,25 @@ export default function HelpCenter() {
                 className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 origin-top data-[state=open]:animate-[slideDown_0.4s_cubic-bezier(0.4,0,0.2,1)] data-[state=closed]:animate-[slideUp_0.3s_cubic-bezier(0.4,0,0.2,1)]"
                 sideOffset={12}
               >
-                <div className="max-w-[980px] mx-auto py-8 px-4 md:px-6">
+                {/* Mobile layout - single column */}
+                <div className="md:hidden py-8 px-4">
+                  <div className="flex flex-col gap-4">
+                    {helpCategories.map((category, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setIsTopicsOpen(false);
+                          navigate(`/help/${category.slug}`);
+                        }}
+                        className="text-left text-lg font-semibold text-foreground hover:text-[#06c] transition-colors duration-200"
+                      >
+                        {category.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Desktop layout - 3 columns */}
+                <div className="hidden md:block max-w-[980px] mx-auto py-8 px-4 md:px-6">
                   <div className="grid grid-cols-3 gap-x-12 gap-y-3">
                     {helpCategories.map((category, index) => (
                       <button
@@ -227,7 +245,7 @@ export default function HelpCenter() {
                           setIsTopicsOpen(false);
                           navigate(`/help/${category.slug}`);
                         }}
-                        className="text-left text-sm text-foreground hover:text-[#06c] transition-colors"
+                        className="text-left text-sm text-foreground hover:text-[#06c] transition-colors duration-200"
                       >
                         {category.title}
                       </button>
