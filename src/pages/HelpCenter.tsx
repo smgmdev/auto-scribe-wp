@@ -215,7 +215,7 @@ export default function HelpCenter() {
               </PopoverTrigger>
               <PopoverContent 
                 align="end" 
-                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 origin-top data-[state=open]:animate-[slideDown_0.35s_cubic-bezier(0.25,0.1,0.25,1)] data-[state=closed]:animate-[slideUp_0.25s_cubic-bezier(0.25,0.1,0.25,1)]"
+                className="w-screen p-0 bg-white border-0 border-b border-border shadow-none rounded-none z-50 origin-top data-[state=open]:animate-[slideDown_0.4s_cubic-bezier(0.4,0,0.2,1)] data-[state=closed]:animate-[slideUp_0.3s_cubic-bezier(0.4,0,0.2,1)]"
                 sideOffset={12}
               >
                 <div className="max-w-[980px] mx-auto py-8 px-4 md:px-6">
