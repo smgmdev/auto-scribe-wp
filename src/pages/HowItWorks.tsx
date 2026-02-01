@@ -434,8 +434,16 @@ const HowItWorks = () => {
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
     const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (element && scrollContainerRef.current) {
+      const headerOffset = 150; // Account for sticky header + subheader
+      const elementPosition = element.getBoundingClientRect().top;
+      const containerScrollTop = scrollContainerRef.current.scrollTop;
+      const offsetPosition = containerScrollTop + elementPosition - headerOffset;
+      
+      scrollContainerRef.current.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
       // Update URL hash without jumping
       window.history.pushState(null, '', `#${sectionId}`);
     }
@@ -803,26 +811,58 @@ const HowItWorks = () => {
                   Getting started takes just a few minutes.
                 </p>
                 
-                <div id="create-account" className="mb-12">
+                <div id="create-account" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Create your account
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Sign up for free with just your email address. No credit card required to explore the platform. 
                     Your account gives you access to the full dashboard where you can manage articles, 
                     connect WordPress sites, and browse our media network.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Email verification ensures account security and prevents spam</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Optional PIN protection adds an extra layer of security for sensitive actions</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Personalized dashboard with quick access to all features</span>
+                    </li>
+                  </ul>
                 </div>
                 
-                <div id="buy-credits" className="mb-12">
+                <div id="buy-credits" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Buy credits
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Credits are the currency of Arcana Mace. Purchase credit packs to unlock premium features 
                     like AI article generation and media placements. Credits never expire and can be used 
                     for any service on the platform.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Flexible credit packs ranging from starter to enterprise volumes</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Secure payment processing via Stripe with instant credit delivery</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Transparent pricing with no hidden fees or recurring charges</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#30d158] mt-0.5 flex-shrink-0" />
+                      <span>Full transaction history and usage tracking in your dashboard</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
               
@@ -839,37 +879,87 @@ const HowItWorks = () => {
                   From business news to crypto outlets, place your content where it matters most.
                 </p>
                 
-                <div id="browse-outlets" className="mb-12">
+                <div id="browse-outlets" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Browse outlets
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Explore our curated network of high-authority media outlets. Filter by category, 
                     price, and publication format. Each listing shows detailed information including 
                     turnaround time, content requirements, and agency details.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Advanced search with filters for category, country, price range, and more</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Detailed outlet profiles with sample articles and editorial guidelines</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Real-time availability and turnaround time indicators</span>
+                    </li>
+                  </ul>
                 </div>
                 
-                <div id="submit-request" className="mb-12">
+                <div id="submit-request" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Submit a request
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Found the perfect outlet? Submit your content request with a brief description of your article. 
                     Our secure escrow system holds your payment until delivery is confirmed, 
                     protecting both publishers and agencies.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Simple request form with article brief, headlines, and special instructions</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Secure credit escrow protects your payment until article is delivered</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Direct messaging with agency representatives for clarifications</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Automatic notifications at every stage of the process</span>
+                    </li>
+                  </ul>
                 </div>
                 
-                <div id="track-orders" className="mb-12">
+                <div id="track-orders" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Track your orders
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Monitor every order from submission to publication. Communicate directly with agencies 
                     through our built-in messaging system. Receive notifications when your article goes live 
                     and access the published link directly from your dashboard.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Real-time status updates: pending, accepted, in progress, delivered</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Built-in chat for direct communication with agency teams</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Delivery confirmation with live article link and publication proof</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Order history with downloadable invoices and transaction records</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
               
@@ -886,37 +976,91 @@ const HowItWorks = () => {
                   Full editorial control with the power of AI-assisted content creation.
                 </p>
                 
-                <div id="connect-wordpress" className="mb-12">
+                <div id="connect-wordpress" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Connect WordPress
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Link unlimited WordPress sites to your account using secure application passwords. 
                     Arcana Mace integrates seamlessly with your existing workflow, supporting 
                     popular SEO plugins like Yoast and RankMath for optimized publishing.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Secure application password authentication—no admin credentials needed</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Automatic category and tag syncing from your WordPress site</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Support for Yoast SEO, RankMath, and other popular plugins</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Connection health monitoring with automatic status checks</span>
+                    </li>
+                  </ul>
                 </div>
                 
-                <div id="ai-generation" className="mb-12">
+                <div id="ai-generation" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     AI article generation
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     Generate professional articles in seconds with our advanced AI engine. 
                     Choose from multiple writing tones, set your target audience, and let 
                     intelligent automation create publish-ready content with proper formatting.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Multiple writing tones: professional, casual, news, technical, and more</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Generate from headlines, topics, or source URLs for trending news</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Automatic SEO optimization with meta descriptions and focus keywords</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Rich text editor for final tweaks before publishing</span>
+                    </li>
+                  </ul>
                 </div>
                 
-                <div id="publish-directly" className="mb-12">
+                <div id="publish-directly" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Publish directly
                   </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
                     One-click publishing sends your article directly to your WordPress site. 
                     Arcana Mace handles featured images, categories, tags, and SEO metadata automatically. 
                     Your content goes live instantly, ready to reach your audience.
                   </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>One-click publishing with automatic featured image upload</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Category and tag selection synced with your WordPress taxonomy</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>SEO metadata automatically populated for maximum search visibility</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
+                      <span>Instant live preview link after successful publication</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
