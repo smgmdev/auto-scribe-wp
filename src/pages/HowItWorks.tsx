@@ -1068,7 +1068,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Go Even Further Section - Apple Style Cards */}
-      <section className="py-24 md:py-32 bg-white">
+      <section className="py-12 md:py-16 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] text-center mb-16">
             What you can do with Arcana Mace.
