@@ -375,8 +375,7 @@ const HowItWorks = () => {
       'explore-arcana-mace',
       'media-network', 'instant-publishing', 'b2b-media-buying',
       'credit-management', 'apply-agency-account', 'account-settings',
-      'media-buying', 'global-library', 'agency-engagement',
-      'self-publishing', 'local-library', 'generate-ai-articles',
+      'media-buying', 'local-library', 'global-library', 'generate-ai-articles', 'agency-engagement',
       'for-agencies', 'agency-connect-wordpress', 'upload-media-lists', 'get-paid'
     ];
 
@@ -783,47 +782,6 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
-                      href="#global-library"
-                      onClick={(e) => scrollToSection(e, 'global-library')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'global-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Global Library
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="#agency-engagement"
-                      onClick={(e) => scrollToSection(e, 'agency-engagement')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'agency-engagement' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Agency Engagement
-                    </a>
-                  </li>
-
-                  {/* Self Publishing */}
-                  <li>
-                    <a 
-                      href="#self-publishing"
-                      onClick={(e) => scrollToSection(e, 'self-publishing')}
-                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
-                        activeSection === 'self-publishing' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
-                      }`}
-                    >
-                      Self Publishing
-                    </a>
-                  </li>
-                  <li>
-                    <a 
                       href="#local-library"
                       onClick={(e) => scrollToSection(e, 'local-library')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -837,6 +795,19 @@ const HowItWorks = () => {
                   </li>
                   <li>
                     <a 
+                      href="#global-library"
+                      onClick={(e) => scrollToSection(e, 'global-library')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'global-library' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Global Library
+                    </a>
+                  </li>
+                  <li>
+                    <a 
                       href="#generate-ai-articles"
                       onClick={(e) => scrollToSection(e, 'generate-ai-articles')}
                       className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
@@ -846,6 +817,19 @@ const HowItWorks = () => {
                       }`}
                     >
                       Generate AI Articles
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="#agency-engagement"
+                      onClick={(e) => scrollToSection(e, 'agency-engagement')}
+                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                        activeSection === 'agency-engagement' 
+                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                      }`}
+                    >
+                      Agency Engagement
                     </a>
                   </li>
 
@@ -1143,80 +1127,6 @@ const HowItWorks = () => {
                   From business news to crypto outlets, place your content where it matters most.
                 </p>
                 
-                <div id="global-library" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Global Library
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    The Global Library is Arcana Mace's marketplace of premium media outlets managed by verified agencies worldwide. 
-                    These are high-authority publications where you can request article placements through our escrow-protected system. 
-                    Unlike your Local Library where you publish directly, the Global Library connects you with professional agencies 
-                    who handle the publishing process on your behalf.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Access to hundreds of verified publications across all industries and regions</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Transparent pricing with credit-based payments and secure escrow</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Professional agency handling—submit your brief and let experts manage the rest</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Guaranteed publication with delivery confirmation and live links</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div id="agency-engagement" className="mb-16 scroll-mt-40">
-                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
-                    Agency Engagement
-                  </h3>
-                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
-                    The engagement process ensures clear communication and mutual agreement between you and the agency. 
-                    Start by submitting a request with your content brief. The agency reviews your submission and 
-                    confirms they can fulfill it. Once confirmed, either party can initiate an order with agreed terms.
-                  </p>
-                  <ul className="space-y-3 text-[#1d1d1f]">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Submit your request: Provide your article brief for agency review</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Agency review: The agency evaluates your brief and confirms availability</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Order submission: You submit an order, or the agency sends you an offer</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
-                      <span>Delivery agreement: Both parties agree on delivery time before work begins</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-[#ff453a] mt-0.5 flex-shrink-0" />
-                      <span>Dispute protection: If the agency fails to deliver as agreed, you can open a dispute and request a refund</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              
-              {/* Self Publishing Section */}
-              <div id="self-publishing">
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
-                  Self Publishing
-                </h2>
-                <p className="text-xl text-[#6e6e73] mb-12 max-w-2xl">
-                  Publish content directly to WordPress sites connected to Arcana Mace. 
-                  Full editorial control with AI-assisted content creation and one-click publishing.
-                </p>
-                
                 <div id="local-library" className="mb-16 scroll-mt-40">
                   <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
                     Local Library
@@ -1247,6 +1157,36 @@ const HowItWorks = () => {
                     <li className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-[#a855f7] mt-0.5 flex-shrink-0" />
                       <span>Support for Yoast SEO, RankMath, and AIOSEO plugins</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div id="global-library" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Global Library
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The Global Library is Arcana Mace's marketplace of premium media outlets managed by verified agencies worldwide. 
+                    These are high-authority publications where you can request article placements through our escrow-protected system. 
+                    Unlike your Local Library where you publish directly, the Global Library connects you with professional agencies 
+                    who handle the publishing process on your behalf.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Access to hundreds of verified publications across all industries and regions</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Transparent pricing with credit-based payments and secure escrow</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Professional agency handling—submit your brief and let experts manage the rest</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Guaranteed publication with delivery confirmation and live links</span>
                     </li>
                   </ul>
                 </div>
@@ -1322,6 +1262,39 @@ const HowItWorks = () => {
                       Learn more about AI Publishing ›
                     </button>
                   </div>
+                </div>
+                
+                <div id="agency-engagement" className="mb-16 scroll-mt-40">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] mb-4">
+                    Agency Engagement
+                  </h3>
+                  <p className="text-lg text-[#6e6e73] leading-relaxed max-w-2xl mb-6">
+                    The engagement process ensures clear communication and mutual agreement between you and the agency. 
+                    Start by submitting a request with your content brief. The agency reviews your submission and 
+                    confirms they can fulfill it. Once confirmed, either party can initiate an order with agreed terms.
+                  </p>
+                  <ul className="space-y-3 text-[#1d1d1f]">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Submit your request: Provide your article brief for agency review</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Agency review: The agency evaluates your brief and confirms availability</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Order submission: You submit an order, or the agency sends you an offer</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
+                      <span>Delivery agreement: Both parties agree on delivery time before work begins</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#ff453a] mt-0.5 flex-shrink-0" />
+                      <span>Dispute protection: If the agency fails to deliver as agreed, you can open a dispute and request a refund</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
               
