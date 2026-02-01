@@ -277,7 +277,7 @@ export default function SelfPublishing() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="pt-20 md:pt-28 pb-16 md:pb-24 text-center">
+        <section className="pt-28 md:pt-36 pb-16 md:pb-24 text-center">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <h1 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-6">
               Publish your story.<br />
