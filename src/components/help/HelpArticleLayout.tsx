@@ -178,10 +178,10 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
                     <button
                       key={section.id}
                       onClick={() => scrollToSection(section.id)}
-                      className={`block w-full text-left text-sm py-2 px-3 rounded-md transition-colors border-l-2 ${
+                      className={`block w-full text-left text-sm py-2 px-3 rounded-md transition-colors ${
                         activeSection === section.id
-                          ? 'border-l-foreground text-foreground bg-muted/50 font-medium'
-                          : 'border-l-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                          ? 'text-foreground bg-muted/50 font-medium'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
                       }`}
                     >
                       {section.title}
