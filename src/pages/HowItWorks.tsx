@@ -251,19 +251,19 @@ const ScrollColorSection = ({
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <div 
           ref={coralCardRef}
-          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 min-h-[500px] flex flex-col justify-center mb-8"
+          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
-            You should also know
-          </h2>
-          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
-            There are 2 type media libraries.
-          </p>
-        </div>
+          <div className="min-h-[300px] flex flex-col justify-center">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
+              You should also know
+            </h2>
+            <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
+              There are 2 type media libraries.
+            </p>
+          </div>
 
-        {/* Two feature cards with vertical divider - same coral as above */}
-        <div className="bg-[#f87171] rounded-[40px] mt-0 relative -mt-8 pt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 relative">
+          {/* Two feature cards with vertical divider - inside same coral container */}
+          <div className="grid grid-cols-1 md:grid-cols-2 relative mt-8">
             {/* Vertical Divider - darker coral */}
             <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-2/3 bg-[#dc2626] rounded-full" />
             
@@ -302,7 +302,6 @@ const ScrollColorSection = ({
             </div>
           </div>
         </div>
-
         {/* Local Media Library Section */}
         <div ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
           {/* Icon - Arcana Mace Logo White */}
