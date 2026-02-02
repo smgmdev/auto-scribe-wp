@@ -277,14 +277,37 @@ export default function MediaBuying() {
             into incredible opportunities.
           </p>
           
-          {/* Media site favicons row */}
-          <div className="flex items-center justify-center gap-3 md:gap-4 flex-wrap max-w-4xl mx-auto">
-            {shuffledSites.slice(0, 14).map((site, index) => (
+          {/* Media site favicons row - 6 icons, Arcana Mace logo, 6 icons */}
+          <div className="flex items-center justify-center gap-2 md:gap-3">
+            {/* First 6 icons */}
+            {shuffledSites.slice(0, 6).map((site) => (
               <div
                 key={site.id}
-                className={`flex-shrink-0 overflow-hidden bg-white shadow-lg ${
-                  index === 7 ? 'w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[22px]' : 'w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl'
-                }`}
+                className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl"
+              >
+                {site.favicon ? (
+                  <img 
+                    src={site.favicon} 
+                    alt={site.name} 
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted" />
+                )}
+              </div>
+            ))}
+            
+            {/* Arcana Mace logo - centered and largest */}
+            <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden shadow-xl rounded-2xl md:rounded-[22px]">
+              <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
+            </div>
+            
+            {/* Last 6 icons */}
+            {shuffledSites.slice(6, 12).map((site) => (
+              <div
+                key={site.id}
+                className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl"
               >
                 {site.favicon ? (
                   <img 
