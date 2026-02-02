@@ -390,32 +390,6 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
-      {/* Resources Section - Apple style */}
-      <section className="py-20 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-8">
-            Resources
-          </h2>
-          
-          <div className="bg-white rounded-3xl p-8 md:p-10">
-            <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-b from-[#FF6B6B] to-[#FF8E53] flex items-center justify-center">
-              <FileText className="w-8 h-8 text-white" />
-            </div>
-            
-            <p className="text-lg md:text-xl text-[#1d1d1f] leading-relaxed mb-6">
-              Access our help center for guides on AI article generation, tone customization, 
-              and publishing workflows.
-            </p>
-            
-            <Link to="/help/ai-generation">
-              <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-6 py-2 text-sm font-medium">
-                View guides
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Disclaimers Section */}
       <section className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
