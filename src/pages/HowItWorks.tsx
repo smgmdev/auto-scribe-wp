@@ -229,7 +229,7 @@ const ScrollColorSection = ({
         {/* Two feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card 1 - Local Media Library */}
-          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between border border-gray-200">
+          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[500px] flex flex-col justify-between border border-gray-200">
             <div>
               <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
                 Local Media Library
@@ -246,7 +246,7 @@ const ScrollColorSection = ({
           </div>
 
           {/* Card 2 - Global Media Library */}
-          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between border border-gray-200">
+          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[500px] flex flex-col justify-between border border-gray-200">
             <div>
               <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
                 Global Media Library
