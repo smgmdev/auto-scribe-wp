@@ -156,8 +156,57 @@ const GradientScrollReveal = ({
   );
 };
 
+// Scroll-triggered background color section - Apple Wallet style
+const ScrollColorSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [bgColor, setBgColor] = useState('#22c55e'); // Start with green
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+          setBgColor('#ef4444'); // Change to red when scrolled into view
+        } else {
+          setBgColor('#22c55e'); // Back to green when scrolling out
+        }
+      },
+      {
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        rootMargin: '-10% 0px -10% 0px'
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section 
+      className="py-24 md:py-32 transition-colors duration-700 ease-out"
+      style={{ backgroundColor: bgColor }}
+    >
+      <div className="max-w-[980px] mx-auto px-4 md:px-6">
+        <div 
+          ref={sectionRef}
+          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 min-h-[500px] flex flex-col justify-center"
+        >
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
+            Media Buying
+          </h2>
+          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
+            Now with more reach.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // Feature card component
-const FeatureCard = ({ 
+const FeatureCard = ({
   icon: Icon, 
   title, 
   description,
@@ -666,6 +715,8 @@ const HowItWorks = () => {
         </div>
       </section>
 
+      {/* Scroll-triggered Background Color Section */}
+      <ScrollColorSection />
 
       <section className="py-16 md:py-24 bg-white border-t border-gray-200">
         <div className="max-w-[1100px] mx-auto px-4 md:px-6">
