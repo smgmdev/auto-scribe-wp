@@ -157,25 +157,27 @@ const GradientScrollReveal = ({
 };
 
 // Scroll-triggered background color section - Apple Wallet style
-const ScrollColorSection = () => {
-  const sectionRef = useRef<HTMLElement>(null);
+const ScrollColorSection = ({ 
+  scrollContainerRef 
+}: { 
+  scrollContainerRef: React.RefObject<HTMLDivElement>; 
+}) => {
   const coralCardRef = useRef<HTMLDivElement>(null);
   const localLibraryRef = useRef<HTMLDivElement>(null);
   const globalLibraryRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
 
   useEffect(() => {
-    const section = sectionRef.current;
-    const coralCard = coralCardRef.current;
-    const localLibrary = localLibraryRef.current;
-    const globalLibrary = globalLibraryRef.current;
-    
-    if (!section || !coralCard || !localLibrary || !globalLibrary) {
-      console.log('[ScrollColorSection] Missing refs:', { section: !!section, coralCard: !!coralCard, localLibrary: !!localLibrary, globalLibrary: !!globalLibrary });
-      return;
-    }
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
     const handleScroll = () => {
+      const coralCard = coralCardRef.current;
+      const localLibrary = localLibraryRef.current;
+      const globalLibrary = globalLibraryRef.current;
+      
+      if (!coralCard || !localLibrary || !globalLibrary) return;
+
       const viewportHeight = window.innerHeight;
       const triggerPoint = viewportHeight * 0.4; // 40% from top of viewport
       
@@ -185,7 +187,7 @@ const ScrollColorSection = () => {
       
       let newColor = '#ffffff';
       
-      // Determine which section occupies the trigger point
+      // Determine which section occupies the trigger point - check from bottom to top
       if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
         newColor = '#6cc24a'; // Green for Global Media Library
       } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
@@ -197,27 +199,17 @@ const ScrollColorSection = () => {
       setBgColor(newColor);
     };
 
-    // Use requestAnimationFrame for smoother updates
-    let ticking = false;
-    const onScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
+    // Initial call
+    handleScroll();
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    handleScroll(); // Initial check
+    // Add scroll listener to the scroll container, not window
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
 
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [scrollContainerRef]);
 
   return (
     <section 
-      ref={sectionRef}
       className="py-24 md:py-32 transition-colors duration-700 ease-out"
       style={{ backgroundColor: bgColor }}
     >
@@ -861,7 +853,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Scroll-triggered Background Color Section */}
-      <ScrollColorSection />
+      <ScrollColorSection scrollContainerRef={scrollContainerRef} />
 
 
 
