@@ -299,7 +299,7 @@ export default function MediaBuying() {
             ))}
             
             {/* Arcana Mace logo - centered and largest */}
-            <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden shadow-xl rounded-xl md:rounded-2xl">
+            <div className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 overflow-hidden shadow-xl rounded-xl md:rounded-2xl">
               <img src={amlogo} alt="Arcana Mace" className="w-full h-full object-cover" />
             </div>
             
