@@ -419,62 +419,45 @@ const ScrollColorSection = ({
             </a>
           </div>
           
-          {/* Media Site Logos Row */}
-          <div className="relative mt-12">
-            {/* Left fade overlay */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-28 bg-gradient-to-r from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
-            {/* Right fade overlay */}
-            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-28 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
-            
-            <div className="flex justify-center items-center gap-3 md:gap-4">
-              {mediaSites.length > 0 ? (
-                mediaSites.map((site, index) => {
-                  const isCenter = index === 2;
-                  const isEdge = index === 0 || index === 4;
-                  const isNearCenter = index === 1 || index === 3;
-                  
-                  return (
-                    <div 
-                      key={site.id}
-                      className={`
-                        ${isCenter ? 'w-28 h-28 md:w-36 md:h-36 shadow-2xl z-10' : ''}
-                        ${isNearCenter ? 'w-24 h-24 md:w-32 md:h-32 shadow-xl opacity-90' : ''}
-                        ${isEdge ? 'w-20 h-20 md:w-28 md:h-28 shadow-lg opacity-50' : ''}
-                        rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300 flex-shrink-0
-                      `}
-                    >
-                      {site.favicon ? (
-                        <img 
-                          src={site.favicon} 
-                          alt={site.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Building2 className={`${isCenter ? 'w-16 h-16 md:w-20 md:h-20' : 'w-12 h-12 md:w-16 md:h-16'} text-[#bf5af2]`} />
-                      )}
-                    </div>
-                  );
-                })
-              ) : (
-                <>
-                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
-                    <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
+          {/* Circular Media Site Icons - Apple Style */}
+          <div className="flex justify-center items-end gap-6 md:gap-10 mt-16">
+            {mediaSites.slice(0, 3).length > 0 ? (
+              mediaSites.slice(0, 3).map((site, index) => {
+                const isCenter = index === 1;
+                
+                return (
+                  <div 
+                    key={site.id}
+                    className={`
+                      ${isCenter ? 'w-28 h-28 md:w-36 md:h-36' : 'w-20 h-20 md:w-28 md:h-28'}
+                      rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-2xl flex-shrink-0
+                    `}
+                  >
+                    {site.favicon ? (
+                      <img 
+                        src={site.favicon} 
+                        alt={site.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Building2 className={`${isCenter ? 'w-14 h-14 md:w-18 md:h-18' : 'w-10 h-10 md:w-14 md:h-14'} text-[#bf5af2]`} />
+                    )}
                   </div>
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
-                    <TrendingUp className="w-12 h-12 md:w-16 md:h-16 text-[#30d158]" />
-                  </div>
-                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10 flex-shrink-0">
-                    <Building2 className="w-16 h-16 md:w-20 md:h-20 text-[#bf5af2]" />
-                  </div>
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
-                    <Users className="w-12 h-12 md:w-16 md:h-16 text-[#ff9f0a]" />
-                  </div>
-                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
-                    <Globe className="w-10 h-10 md:w-14 md:h-14 text-[#ff6b6b]" />
-                  </div>
-                </>
-              )}
-            </div>
+                );
+              })
+            ) : (
+              <>
+                <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl flex-shrink-0">
+                  <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
+                </div>
+                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl flex-shrink-0">
+                  <Building2 className="w-14 h-14 md:w-18 md:h-18 text-[#bf5af2]" />
+                </div>
+                <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl flex-shrink-0">
+                  <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
