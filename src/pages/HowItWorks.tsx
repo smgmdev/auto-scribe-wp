@@ -422,13 +422,13 @@ const ScrollColorSection = ({
           {/* Circular Media Site Icons - Apple Floating Style */}
           <div className="relative h-56 md:h-72 mt-12 max-w-2xl mx-auto">
             {/* Purple glow effect behind center icon */}
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-t from-[#bf5af2]/40 via-[#bf5af2]/20 to-transparent blur-3xl" />
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-8 md:bottom-12 w-40 h-40 md:w-52 md:h-52 rounded-full bg-[#bf5af2]/30 blur-2xl" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-t from-[#bf5af2]/40 via-[#bf5af2]/20 to-transparent blur-3xl" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 md:w-52 md:h-52 rounded-full bg-[#bf5af2]/30 blur-2xl" />
             
             {mediaSites.slice(0, 3).length > 0 ? (
               <>
-                {/* Left icon - positioned closer to center */}
-                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse animate-float-1">
+                {/* Left icon */}
+                <div className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse animate-float-1">
                   {mediaSites[0]?.favicon ? (
                     <img src={mediaSites[0].favicon} alt={mediaSites[0].name} className="w-full h-full object-cover" />
                   ) : (
@@ -438,7 +438,7 @@ const ScrollColorSection = ({
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
                 </div>
                 {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse-intense animate-float-subtle z-10">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse-intense animate-float-subtle z-10">
                   {mediaSites[2]?.favicon ? (
                     <img src={mediaSites[2].favicon} alt={mediaSites[2].name} className="w-full h-full object-cover" />
                   ) : (
@@ -447,8 +447,8 @@ const ScrollColorSection = ({
                   {/* Inner glow overlay */}
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.4)]" />
                 </div>
-                {/* Right icon - positioned higher */}
-                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse animate-float-3">
+                {/* Right icon */}
+                <div className="absolute right-4 md:right-8 top-1/4 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse animate-float-3">
                   {mediaSites[1]?.favicon ? (
                     <img src={mediaSites[1].favicon} alt={mediaSites[1].name} className="w-full h-full object-cover" />
                   ) : (
@@ -460,20 +460,20 @@ const ScrollColorSection = ({
               </>
             ) : (
               <>
-                {/* Left icon - positioned closer to center */}
-                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse animate-float-1">
+                {/* Left icon */}
+                <div className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse animate-float-1">
                   <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
                   {/* Inner glow overlay */}
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
                 </div>
                 {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center animate-purple-glow-pulse-intense animate-float-subtle z-10">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center animate-purple-glow-pulse-intense animate-float-subtle z-10">
                   <Building2 className="w-20 h-20 md:w-28 md:h-28 text-[#bf5af2]" />
                   {/* Inner glow overlay */}
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.4)]" />
                 </div>
-                {/* Right icon - positioned higher */}
-                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse animate-float-3">
+                {/* Right icon */}
+                <div className="absolute right-4 md:right-8 top-1/4 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse animate-float-3">
                   <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
                   {/* Inner glow overlay */}
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
