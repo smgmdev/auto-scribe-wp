@@ -171,21 +171,22 @@ const ScrollColorSection = () => {
     if (!coralCard || !localLibrary || !globalLibrary) return;
 
     const handleScroll = () => {
-      const viewportCenter = window.innerHeight / 2;
+      const viewportHeight = window.innerHeight;
+      const triggerPoint = viewportHeight * 0.4; // 40% from top of viewport
       
       const coralRect = coralCard.getBoundingClientRect();
       const localRect = localLibrary.getBoundingClientRect();
       const globalRect = globalLibrary.getBoundingClientRect();
       
-      // Check which section is most in view (closest to center)
-      if (globalRect.top < viewportCenter && globalRect.bottom > viewportCenter * 0.5) {
+      // Determine which section occupies the trigger point
+      if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
         setBgColor('#6cc24a'); // Green for Global Media Library
-      } else if (localRect.top < viewportCenter && localRect.bottom > viewportCenter * 0.5) {
+      } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
         setBgColor('#d5d5d7'); // Light grey for Local Media Library
-      } else if (coralRect.top < viewportCenter && coralRect.bottom > viewportCenter * 0.3) {
+      } else if (coralRect.top <= triggerPoint && coralRect.bottom > 0) {
         setBgColor('#f87171'); // Coral for main card
-      } else if (coralRect.top > viewportCenter) {
-        setBgColor('#ffffff'); // White when scrolled above
+      } else {
+        setBgColor('#ffffff'); // White when nothing is at trigger point
       }
     };
 
