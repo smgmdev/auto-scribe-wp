@@ -251,13 +251,13 @@ const ScrollColorSection = ({
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <div 
           ref={coralCardRef}
-          className="bg-[#34c759] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
+          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
         >
           <div className="min-h-[200px] flex flex-col justify-center">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
               You should also know
             </h2>
-            <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#166534]">
+            <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
               There are 2 types of media libraries.
             </p>
           </div>
@@ -270,7 +270,7 @@ const ScrollColorSection = ({
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Local Media<br />Library
                 </h3>
-                <a href="/self-publishing" className="text-[#166534] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
                   Learn how <span className="text-xl">›</span>
                 </a>
               </div>
@@ -285,7 +285,7 @@ const ScrollColorSection = ({
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Global Media<br />Library
                 </h3>
-                <a href="/media-buying" className="text-[#166534] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
                   Learn more about the Agency Portal <span className="text-xl">›</span>
                 </a>
               </div>
