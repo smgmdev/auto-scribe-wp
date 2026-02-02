@@ -390,6 +390,93 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
+      {/* Leverage AI Power Section - Dark Blue */}
+      <section className="bg-[#1d3557] py-20 md:py-28">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {/* Icons */}
+          <div className="flex gap-6 mb-10">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-[#4a9eff] to-[#0071e3] flex items-center justify-center shadow-lg">
+              <Sparkles className="w-10 h-10 text-white" />
+            </div>
+            <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-[#d2d2d7]">
+              <FileText className="w-10 h-10 text-[#0071e3]" />
+            </div>
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-[#4a9eff] to-[#0071e3] flex items-center justify-center shadow-lg">
+              <Zap className="w-10 h-10 text-white" />
+            </div>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-6">
+            Leverage Arcana Mace's powerful<br />AI infrastructure.
+          </h2>
+          
+          <p className="text-lg md:text-xl text-[#a1c4e8] leading-relaxed mb-16 max-w-[800px]">
+            We provide a powerful range of cutting-edge AI tools and configurations, so you can focus on creating 
+            impactful content that reaches global audiences. Our AI services are always available, powered by 
+            enterprise-grade models with 99.9% uptime and lightning-fast generation speeds.
+          </p>
+          
+          <h3 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-8">
+            Content creation made easy, fast, and reliable.
+          </h3>
+          
+          <ul className="space-y-6 text-lg text-[#a1c4e8]">
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Unlimited article generation with no daily caps — create as much content as you need.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Arcana Mace handles all AI processing. Generate articles in seconds with advanced language models optimized for news and marketing content.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Seamlessly publish to any connected WordPress site with automatic SEO optimization and meta tag generation.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Five distinct writing tones to match your brand voice — from professional news to casual blog posts.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+      
+      {/* Built-in Business Section - Darker Blue */}
+      <section className="bg-[#152238] py-20 md:py-28">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-10">
+            Built-in business and marketing<br />opportunities.
+          </h2>
+          
+          <ul className="space-y-6 text-lg text-[#a1c4e8]">
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Choose from multiple content strategies: news coverage, thought leadership, product announcements, press releases, and brand storytelling. Arcana Mace adapts to your marketing goals.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Generate SEO-optimized headlines, meta descriptions, and focus keywords automatically with every article.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Distribute content across premium media sites through our Media Buying marketplace.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Track your published articles and monitor engagement across all your connected platforms.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Bundle AI generation with media placement for comprehensive content marketing campaigns.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-white">•</span>
+              <span>Reach global audiences with content optimized for different regions and industries.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       {/* Disclaimers Section */}
       <section className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
