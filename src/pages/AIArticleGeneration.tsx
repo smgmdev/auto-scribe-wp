@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Pause, Play } from 'lucide-react';
+import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
@@ -131,19 +131,17 @@ export default function AIArticleGeneration() {
   const [isMobile, setIsMobile] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState<PublishedArticle[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
-  // Auto-play slider
+  // Auto-play slider - always running
   useEffect(() => {
-    if (!isAutoPlaying) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featureSlides.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, []);
 
   // Scroll to current slide
   useEffect(() => {
@@ -493,8 +491,6 @@ export default function AIArticleGeneration() {
           <div 
             ref={sliderRef}
             className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
-            onMouseEnter={() => setIsAutoPlaying(false)}
-            onMouseLeave={() => setIsAutoPlaying(true)}
           >
             {featureSlides.map((slide, index) => (
               <Link
@@ -519,33 +515,20 @@ export default function AIArticleGeneration() {
             ))}
           </div>
 
-          {/* Pagination Dots and Controls */}
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <div className="flex items-center gap-2">
-              {featureSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`transition-all duration-300 rounded-full ${
-                    currentSlide === index 
-                      ? 'w-6 h-2 bg-[#1d1d1f]' 
-                      : 'w-2 h-2 bg-[#86868b] hover:bg-[#1d1d1f]'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-              className="w-8 h-8 rounded-full bg-[#e8e8ed] hover:bg-[#d2d2d7] flex items-center justify-center transition-colors"
-              aria-label={isAutoPlaying ? 'Pause autoplay' : 'Resume autoplay'}
-            >
-              {isAutoPlaying ? (
-                <Pause className="w-3 h-3 text-[#1d1d1f]" />
-              ) : (
-                <Play className="w-3 h-3 text-[#1d1d1f] ml-0.5" />
-              )}
-            </button>
+          {/* Pagination Dots */}
+          <div className="flex items-center justify-center gap-2 mt-6">
+            {featureSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  currentSlide === index 
+                    ? 'w-6 h-2 bg-[#1d1d1f]' 
+                    : 'w-2 h-2 bg-[#86868b] hover:bg-[#1d1d1f]'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>
