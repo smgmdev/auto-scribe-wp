@@ -270,8 +270,8 @@ const ScrollColorSection = ({
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Local Media<br />Library
                 </h3>
-                <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-                  Learn how <span className="text-xl">›</span>
+                <a href="#local-media-library" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                  Learn more <span className="text-xl">›</span>
                 </a>
               </div>
             </div>
@@ -285,15 +285,15 @@ const ScrollColorSection = ({
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Global Media<br />Library
                 </h3>
-                <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-                  Learn more about the Agency Portal <span className="text-xl">›</span>
+                <a href="#global-media-library" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                  Learn more <span className="text-xl">›</span>
                 </a>
               </div>
             </div>
           </div>
         </div>
         {/* Local Media Library Section */}
-        <div ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
+        <div id="local-media-library" ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -383,7 +383,7 @@ const ScrollColorSection = ({
         </div>
 
         {/* Global Media Library Section */}
-        <div ref={globalLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div id="global-media-library" ref={globalLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
