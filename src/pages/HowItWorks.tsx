@@ -191,14 +191,11 @@ const ScrollColorSection = () => {
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <div 
           ref={sectionRef}
-          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 min-h-[500px] flex flex-col justify-center mb-8"
+          className="bg-[#f87171] rounded-[40px] px-12 md:px-16 py-8 md:py-10 flex flex-col justify-center mb-8"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
-            Media Buying
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-center">
+            You should also know that..
           </h2>
-          <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
-            Now with more reach.
-          </p>
         </div>
 
         {/* Two dark feature cards */}
