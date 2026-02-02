@@ -84,7 +84,7 @@ export function Footer({ narrow = false, showTopBorder = false }: FooterProps) {
               <li><button onClick={() => navigate('/how-it-works')} className="hover:text-foreground transition-colors text-left">How Arcana Mace Works</button></li>
               <li><button onClick={() => navigate('/self-publishing')} className="hover:text-foreground transition-colors text-left">Self Publishing</button></li>
               <li><button onClick={() => navigate('/media-buying')} className="hover:text-foreground transition-colors text-left">Media Buying</button></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">AI Article Generation</a></li>
+              <li><button onClick={() => navigate('/ai-article-generation')} className="hover:text-foreground transition-colors text-left">AI Article Generation</button></li>
             </ul>
           </div>
           
