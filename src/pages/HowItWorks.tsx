@@ -263,28 +263,32 @@ const ScrollColorSection = ({
           </div>
 
           {/* Two feature cards with vertical divider - inside same coral container */}
-          <div className="flex flex-col md:flex-row mt-4 md:items-stretch">
+          <div className="flex flex-col md:flex-row mt-4">
             {/* Card 1 - Local Media Library */}
-            <div className="flex-1 p-8 md:p-10 lg:p-12 md:pr-12 flex flex-col items-center text-center md:items-end md:text-left">
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                Local Media<br />Library
-              </h3>
-              <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-                Learn how <span className="text-xl">›</span>
-              </a>
+            <div className="flex-1 flex justify-center md:justify-end p-8 md:py-10 lg:py-12">
+              <div className="md:mr-16 text-center md:text-right">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+                  Local Media<br />Library
+                </h3>
+                <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                  Learn how <span className="text-xl">›</span>
+                </a>
+              </div>
             </div>
 
             {/* Vertical Divider - white */}
             <div className="hidden md:block w-[3px] bg-white/70 rounded-full my-8 flex-shrink-0" />
 
             {/* Card 2 - Global Media Library */}
-            <div className="flex-1 p-8 md:p-10 lg:p-12 md:pl-12 flex flex-col items-center text-center md:items-start md:text-left">
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                Global Media<br />Library
-              </h3>
-              <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-                Learn more about the Agency Portal <span className="text-xl">›</span>
-              </a>
+            <div className="flex-1 flex justify-center md:justify-start p-8 md:py-10 lg:py-12">
+              <div className="md:ml-16 text-center md:text-left">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+                  Global Media<br />Library
+                </h3>
+                <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                  Learn more about the Agency Portal <span className="text-xl">›</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
