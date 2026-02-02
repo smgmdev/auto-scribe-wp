@@ -188,7 +188,7 @@ export default function AIArticleGeneration() {
       </section>
 
       {/* Featured Capabilities Section - Apple Open Source style */}
-      <section className="py-20 bg-[#f5f5f7]">
+      <section className="py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {/* Header with title and button */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
