@@ -444,7 +444,7 @@ const ScrollColorSection = ({
                   )}
                 </div>
                 {/* Right icon - positioned higher */}
-                <div className="absolute right-4 md:right-8 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3)]">
+                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   {mediaSites[1]?.favicon ? (
                     <img src={mediaSites[1].favicon} alt={mediaSites[1].name} className="w-full h-full object-cover" />
                   ) : (
@@ -463,7 +463,7 @@ const ScrollColorSection = ({
                   <Building2 className="w-20 h-20 md:w-28 md:h-28 text-[#bf5af2]" />
                 </div>
                 {/* Right icon - positioned higher */}
-                <div className="absolute right-4 md:right-8 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3)]">
+                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
                 </div>
               </>
