@@ -325,8 +325,234 @@ export default function MediaBuying() {
         </div>
       </section>
 
+      {/* Main headline section */}
+      <section className="bg-white pt-16 pb-16 md:pb-24">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-4 leading-tight">
+            The reach you need.
+          </h1>
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] leading-tight">
+            From outlets you can trust.
+          </h1>
+        </div>
+      </section>
 
-      {/* FAQ Section - Apple style */}
+      {/* Intro paragraph */}
+      <section className="pb-20">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed text-center max-w-4xl mx-auto">
+            For years, media buying meant navigating complex relationships and opaque pricing. 
+            Arcana Mace changes that — providing direct access to premium publications worldwide. 
+            Our marketplace connects you with verified outlets, transparent pricing, and guaranteed placements. 
+            All designed to help you reach your audience with confidence.
+          </p>
+        </div>
+      </section>
+
+      {/* Features Slider Section - Apple style */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-2">
+            <span className="font-semibold">Features.</span>{' '}
+            <span className="text-[#86868b]">Built in, seamless, and easy to use.</span>
+          </h2>
+        </div>
+        
+        <div className="mt-12 relative">
+          {/* Slider Container */}
+          <div 
+            id="features-slider"
+            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onWheel={(e) => {
+              const isHorizontalScroll = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+              
+              if (!isHorizontalScroll) {
+                e.stopPropagation();
+                scrollContainerRef.current?.scrollBy({ top: e.deltaY, behavior: 'auto' });
+              }
+            }}
+          >
+            {/* Card 1 - Verified Publishers (Light gradient) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-[#1d1d1f]">Verified Publishers</span>
+              </div>
+              <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
+                Every publication in our network is vetted for authenticity, audience reach, and editorial standards. No bots. No spam sites.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                Learn more
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                  <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-[#ff6b6b]" />
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
+                <p className="text-xs text-[#1d1d1f]/60 font-medium">Compatibility</p>
+                <p className="text-xs text-[#1d1d1f]/80">All industries, All regions</p>
+              </div>
+            </div>
+
+            {/* Card 2 - Instant Quotes (Blue) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#0071e3]">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-white">Instant Quotes</span>
+              </div>
+              <p className="text-[15px] text-white/80 leading-relaxed mb-4">
+                See transparent pricing instantly. No back-and-forth negotiations. No hidden fees. Just clear, upfront costs for every placement.
+              </p>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" className="rounded-full px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#0071e3] bg-transparent">
+                  Browse Sites
+                </Button>
+                <button className="text-white text-sm hover:underline">
+                  Learn more ›
+                </button>
+              </div>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center">
+                    <div className="text-4xl md:text-5xl font-bold text-white">$</div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-white/20">
+                <p className="text-xs text-white/60 font-medium">Transparency</p>
+                <p className="text-xs text-white/80">Real-time pricing, No hidden costs</p>
+              </div>
+            </div>
+
+            {/* Card 3 - Global Reach (Dark) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#1d1d1f]">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-white">Global Reach</span>
+              </div>
+              <p className="text-[15px] text-white/70 leading-relaxed mb-4">
+                Access publications across 50+ countries and every major language. Expand your brand presence worldwide with local expertise.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-white/30 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent">
+                Explore regions
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-[#2997ff]/30 to-[#5856d6]/30 flex items-center justify-center">
+                  <Globe className="w-16 h-16 md:w-20 md:h-20 text-[#2997ff]" />
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <p className="text-xs text-white/50 font-medium">Coverage</p>
+                <p className="text-xs text-white/70">50+ countries, 20+ languages</p>
+              </div>
+            </div>
+
+            {/* Card 4 - Fast Turnaround (Green gradient) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f0fff0 0%, #d4edda 50%, #a8e6cf 100%)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34c759] to-[#30d158] flex items-center justify-center shadow-lg">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-[#1d1d1f]">Fast Turnaround</span>
+              </div>
+              <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
+                Most publications deliver within 24-72 hours. Track your order in real-time and get notified the moment your article goes live.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                View timelines
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                  <Clock className="w-16 h-16 md:w-20 md:h-20 text-[#34c759]" />
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
+                <p className="text-xs text-[#1d1d1f]/60 font-medium">Speed</p>
+                <p className="text-xs text-[#1d1d1f]/80">24-72 hour delivery</p>
+              </div>
+            </div>
+
+            {/* Card 5 - Trusted Agencies (Purple gradient) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f8f0ff 0%, #e8d5f9 50%, #d4a5ff 100%)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#af52de] to-[#5856d6] flex items-center justify-center shadow-lg">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-semibold text-[#1d1d1f]">Trusted Agencies</span>
+              </div>
+              <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
+                Work with vetted media agencies who understand editorial standards. Every agency is reviewed and monitored for quality.
+              </p>
+              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                Meet agencies
+              </Button>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                  <Users className="w-16 h-16 md:w-20 md:h-20 text-[#af52de]" />
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
+                <p className="text-xs text-[#1d1d1f]/60 font-medium">Partners</p>
+                <p className="text-xs text-[#1d1d1f]/80">Verified, Monitored, Reliable</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Even more section - Grid of media site favicons */}
+      <section className="py-20 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-2">
+            <span className="font-semibold">Even more.</span>{' '}
+            <span className="text-[#86868b]">Explore our network.</span>
+          </h2>
+          <p className="text-lg text-[#86868b] mb-12">
+            Click any publication to learn more about placement options.
+          </p>
+          
+          {/* Grid of favicons */}
+          <div className="grid grid-cols-6 md:grid-cols-7 gap-3 md:gap-4">
+            {shuffledSites.slice(0, 42).map((site) => (
+              <button
+                key={site.id}
+                onClick={() => setSelectedSite(site)}
+                className="aspect-square rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 border border-[#d2d2d7]"
+              >
+                {site.favicon ? (
+                  <img 
+                    src={site.favicon} 
+                    alt={site.name} 
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <Globe className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Media Site Dialog */}
+      <MediaSiteDialog
+        mediaSite={selectedSite}
+        open={!!selectedSite}
+        onOpenChange={(open) => !open && setSelectedSite(null)}
+      />
+
+
       <section className="py-20 bg-[#1d1d1f]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-semibold text-white text-center mb-16">
