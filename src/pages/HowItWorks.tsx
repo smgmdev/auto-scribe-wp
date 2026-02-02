@@ -311,6 +311,74 @@ const ScrollColorSection = () => {
             </div>
           </div>
         </div>
+
+        {/* Global Media Library Section */}
+        <div className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
+          {/* Icon */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-[#2d2d2d] border border-[#3d3d3d] flex items-center justify-center">
+              <Globe className="w-8 h-8 text-[#bf5af2]" />
+            </div>
+          </div>
+          
+          {/* Title */}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
+            Global Media Library
+          </h2>
+          
+          {/* Description */}
+          <p className="text-lg md:text-xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+            Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
+          </p>
+          
+          {/* Link */}
+          <div className="flex items-center justify-center">
+            <a href="/media-buying" className="text-[#86868b] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+              Learn more <span className="text-xl">›</span>
+            </a>
+          </div>
+          
+          {/* Decorative Visual Elements */}
+          <div className="relative mt-12 h-64 md:h-80">
+            {/* Central Glowing Orb */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-[#ff6bef] via-[#c44cff] to-[#ff6bef] opacity-40 blur-2xl" />
+            
+            {/* Central Icon */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-[#3a3a3c] to-[#2d2d2d] border border-[#4d4d4d] flex items-center justify-center shadow-2xl">
+              <Building2 className="w-16 h-16 md:w-20 md:h-20 text-[#bf5af2]" />
+            </div>
+            
+            {/* Floating Bubble 1 - Left */}
+            <div className="absolute left-8 md:left-16 top-1/2 -translate-y-1/2">
+              <div className="relative">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-[#2997ff] to-[#0071e3] opacity-80 flex items-center justify-center">
+                  <Newspaper className="w-10 h-10 md:w-12 md:h-12 text-white" />
+                </div>
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-[#86868b] whitespace-nowrap">News Sites</span>
+              </div>
+            </div>
+            
+            {/* Floating Bubble 2 - Right */}
+            <div className="absolute right-8 md:right-16 top-1/3">
+              <div className="relative">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#30d158] to-[#28a745] opacity-80 flex items-center justify-center">
+                  <TrendingUp className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                </div>
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-[#86868b] whitespace-nowrap">PR Agencies</span>
+              </div>
+            </div>
+            
+            {/* Floating Bubble 3 - Bottom Right */}
+            <div className="absolute right-16 md:right-24 bottom-4">
+              <div className="relative">
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#ff9f0a] to-[#ff6b00] opacity-80 flex items-center justify-center">
+                  <Users className="w-7 h-7 md:w-8 md:h-8 text-white" />
+                </div>
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-[#86868b] whitespace-nowrap">Global Reach</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
