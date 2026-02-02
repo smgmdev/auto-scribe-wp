@@ -1,12 +1,56 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode } from 'lucide-react';
+import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Pause, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
+
+// Apple-style feature cards for the slider
+const featureSlides = [
+  {
+    id: 1,
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    title: 'AI Generation',
+    subtitle: 'Create articles in seconds',
+    buttonText: 'Start writing',
+    link: '/dashboard',
+  },
+  {
+    id: 2,
+    gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+    title: 'Media Buying',
+    subtitle: 'Publish to premium sites',
+    buttonText: 'Browse sites',
+    link: '/media-buying',
+  },
+  {
+    id: 3,
+    gradient: 'linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)',
+    title: 'WordPress',
+    subtitle: 'One-click publishing',
+    buttonText: 'Connect sites',
+    link: '/dashboard',
+  },
+  {
+    id: 4,
+    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    title: 'SEO Tools',
+    subtitle: 'Optimize automatically',
+    buttonText: 'Learn more',
+    link: '/help/publishing-articles',
+  },
+  {
+    id: 5,
+    gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    title: 'Headlines',
+    subtitle: 'Trending topics daily',
+    buttonText: 'Explore',
+    link: '/dashboard',
+  },
+];
 
 interface PublishedArticle {
   id: string;
@@ -86,8 +130,31 @@ export default function AIArticleGeneration() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState<PublishedArticle[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Auto-play slider
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % featureSlides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
+
+  // Scroll to current slide
+  useEffect(() => {
+    if (sliderRef.current) {
+      const slideWidth = sliderRef.current.scrollWidth / featureSlides.length;
+      sliderRef.current.scrollTo({
+        left: currentSlide * slideWidth,
+        behavior: 'smooth',
+      });
+    }
+  }, [currentSlide]);
 
   // Shuffle array helper
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -416,6 +483,70 @@ export default function AIArticleGeneration() {
           >
             Start Writing with AI
           </Button>
+        </div>
+      </section>
+
+      {/* Apple-style Feature Slider */}
+      <section className="py-12 bg-[#f5f5f7]">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+          {/* Slider Container */}
+          <div 
+            ref={sliderRef}
+            className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+            onMouseEnter={() => setIsAutoPlaying(false)}
+            onMouseLeave={() => setIsAutoPlaying(true)}
+          >
+            {featureSlides.map((slide, index) => (
+              <Link
+                key={slide.id}
+                to={slide.link}
+                className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] rounded-2xl overflow-hidden relative group transition-transform duration-300 hover:scale-[1.02]"
+                style={{ background: slide.gradient }}
+              >
+                {/* Content */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                  <div>
+                    <p className="text-white/80 text-sm font-medium mb-1">{slide.subtitle}</p>
+                    <h3 className="text-white text-2xl md:text-3xl font-semibold">{slide.title}</h3>
+                  </div>
+                  <div className="flex justify-end">
+                    <span className="bg-white text-[#1d1d1f] px-5 py-2 rounded-full text-sm font-medium hover:bg-white/90 transition-colors">
+                      {slide.buttonText}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Pagination Dots and Controls */}
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <div className="flex items-center gap-2">
+              {featureSlides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`transition-all duration-300 rounded-full ${
+                    currentSlide === index 
+                      ? 'w-6 h-2 bg-[#1d1d1f]' 
+                      : 'w-2 h-2 bg-[#86868b] hover:bg-[#1d1d1f]'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+              className="w-8 h-8 rounded-full bg-[#e8e8ed] hover:bg-[#d2d2d7] flex items-center justify-center transition-colors"
+              aria-label={isAutoPlaying ? 'Pause autoplay' : 'Resume autoplay'}
+            >
+              {isAutoPlaying ? (
+                <Pause className="w-3 h-3 text-[#1d1d1f]" />
+              ) : (
+                <Play className="w-3 h-3 text-[#1d1d1f] ml-0.5" />
+              )}
+            </button>
+          </div>
         </div>
       </section>
 
