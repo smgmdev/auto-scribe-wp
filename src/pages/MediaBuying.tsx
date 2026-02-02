@@ -283,7 +283,7 @@ export default function MediaBuying() {
             {shuffledSites.slice(0, 6).map((site) => (
               <div
                 key={site.id}
-                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-white/20"
+                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#424245]"
               >
                 {site.favicon ? (
                   <img 
@@ -299,7 +299,7 @@ export default function MediaBuying() {
             ))}
             
             {/* Arcana Mace logo - centered and largest */}
-            <div className="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden shadow-xl rounded-xl md:rounded-2xl border border-white/20">
+            <div className="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden shadow-xl rounded-xl md:rounded-2xl border border-[#424245]">
               <img src={amlogo} alt="Arcana Mace" className="w-full h-full object-cover" />
             </div>
             
@@ -307,7 +307,7 @@ export default function MediaBuying() {
             {shuffledSites.slice(6, 12).map((site) => (
               <div
                 key={site.id}
-                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-white/20"
+                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#424245]"
               >
                 {site.favicon ? (
                   <img 
