@@ -275,7 +275,7 @@ export default function AIArticleGeneration() {
       </section>
 
       {/* Resources Section - Apple style */}
-      <section className="py-20 bg-[#f5f5f7]">
+      <section className="py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-8">
             Resources
