@@ -351,7 +351,100 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      {/* Features Slider Section - Apple style */}
+      {/* Take your brand to the next level section - Apple style */}
+      <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #f5f5f7 0%, #e8f4fc 50%, #d6e8f5 100%)' }}>
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {/* Icon grid - 3 rows x 5 columns */}
+          <div className="flex flex-col items-center gap-4 md:gap-6 mb-16">
+            {/* Row 1 */}
+            <div className="flex items-center justify-center gap-4 md:gap-6">
+              {shuffledSites.slice(0, 5).map((site) => (
+                <div
+                  key={site.id}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg"
+                  style={{ transform: 'perspective(500px) rotateX(5deg)' }}
+                >
+                  {site.favicon ? (
+                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200" />
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* Row 2 */}
+            <div className="flex items-center justify-center gap-4 md:gap-6">
+              {shuffledSites.slice(5, 10).map((site) => (
+                <div
+                  key={site.id}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg"
+                  style={{ transform: 'perspective(500px) rotateX(5deg)' }}
+                >
+                  {site.favicon ? (
+                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200" />
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* Row 3 */}
+            <div className="flex items-center justify-center gap-4 md:gap-6">
+              {shuffledSites.slice(10, 15).map((site) => (
+                <div
+                  key={site.id}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg"
+                  style={{ transform: 'perspective(500px) rotateX(5deg)' }}
+                >
+                  {site.favicon ? (
+                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Headline */}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
+            Take your brand to the next level.
+          </h2>
+          
+          {/* Description */}
+          <p className="text-lg md:text-xl text-[#1d1d1f]/80 leading-relaxed mb-12 max-w-4xl">
+            Reach your audience with a comprehensive network of publications and services that let you 
+            deliver your message to the right people. Access each outlet's unique audience so 
+            you can seamlessly integrate your content with the optimal reach for each market. 
+            And with industry-leading verification and quality protections built in, you're 
+            free to focus on your story.
+          </p>
+          
+          {/* Features list - 3 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-3">
+            <ul className="space-y-3">
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Business News</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Technology</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Finance</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Crypto & Blockchain</li>
+            </ul>
+            <ul className="space-y-3">
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Lifestyle</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Entertainment</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Health & Wellness</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Travel</li>
+            </ul>
+            <ul className="space-y-3">
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Regional News</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• International</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Industry Specific</li>
+              <li className="text-[#0066cc] hover:underline cursor-pointer">• Premium Outlets</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
       <section className="py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-2">
