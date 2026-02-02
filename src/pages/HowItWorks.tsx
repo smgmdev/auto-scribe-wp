@@ -226,41 +226,38 @@ const ScrollColorSection = ({
           </p>
         </div>
 
-        {/* Two dark feature cards */}
+        {/* Two feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1 - Media Buying */}
-          <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
+          {/* Card 1 - Local Media Library */}
+          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between border border-gray-200">
             <div>
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
                 Local Media Library
               </h3>
-              <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+              <a href="/self-publishing" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
                 Learn how <span className="text-xl">›</span>
               </a>
             </div>
             <div className="flex justify-center mt-8">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#2997ff] to-[#0071e3] opacity-80" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2997ff] to-[#0071e3] flex items-center justify-center">
+                <FileText className="w-10 h-10 text-white" />
+              </div>
             </div>
           </div>
 
-          {/* Card 2 - Agency Portal */}
-          <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
+          {/* Card 2 - Global Media Library */}
+          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between border border-gray-200">
             <div>
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
                 Global Media Library
               </h3>
-              <a href="/agency" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+              <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
                 Learn more about the Agency Portal <span className="text-xl">›</span>
               </a>
             </div>
             <div className="flex justify-center mt-8">
-              <div className="w-48 h-32 rounded-2xl bg-[#2d2d2d] border border-[#3d3d3d] flex items-center justify-center">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600" />
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600" />
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600" />
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600" />
-                </div>
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#bf5af2] to-[#8944c6] flex items-center justify-center">
+                <Globe className="w-10 h-10 text-white" />
               </div>
             </div>
           </div>
