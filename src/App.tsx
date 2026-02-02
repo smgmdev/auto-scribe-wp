@@ -38,6 +38,7 @@ import SelfPublishing from "./pages/SelfPublishing";
 import MediaBuying from "./pages/MediaBuying";
 import HowItWorks from "./pages/HowItWorks";
 import SystemStatus from "./pages/SystemStatus";
+import AIArticleGeneration from "./pages/AIArticleGeneration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -135,6 +136,7 @@ const App = () => {
               <Route path="/media-buying" element={<MediaBuying />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/system-status" element={<SystemStatus />} />
+              <Route path="/ai-article-generation" element={<AIArticleGeneration />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
