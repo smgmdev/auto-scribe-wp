@@ -158,17 +158,22 @@ const GradientScrollReveal = ({
 
 // Scroll-triggered background color section - Apple Wallet style
 const ScrollColorSection = () => {
+  const sectionRef = useRef<HTMLElement>(null);
   const coralCardRef = useRef<HTMLDivElement>(null);
   const localLibraryRef = useRef<HTMLDivElement>(null);
   const globalLibraryRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
 
   useEffect(() => {
+    const section = sectionRef.current;
     const coralCard = coralCardRef.current;
     const localLibrary = localLibraryRef.current;
     const globalLibrary = globalLibraryRef.current;
     
-    if (!coralCard || !localLibrary || !globalLibrary) return;
+    if (!section || !coralCard || !localLibrary || !globalLibrary) {
+      console.log('[ScrollColorSection] Missing refs:', { section: !!section, coralCard: !!coralCard, localLibrary: !!localLibrary, globalLibrary: !!globalLibrary });
+      return;
+    }
 
     const handleScroll = () => {
       const viewportHeight = window.innerHeight;
@@ -178,26 +183,41 @@ const ScrollColorSection = () => {
       const localRect = localLibrary.getBoundingClientRect();
       const globalRect = globalLibrary.getBoundingClientRect();
       
+      let newColor = '#ffffff';
+      
       // Determine which section occupies the trigger point
       if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
-        setBgColor('#6cc24a'); // Green for Global Media Library
+        newColor = '#6cc24a'; // Green for Global Media Library
       } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
-        setBgColor('#d5d5d7'); // Light grey for Local Media Library
+        newColor = '#d5d5d7'; // Light grey for Local Media Library
       } else if (coralRect.top <= triggerPoint && coralRect.bottom > 0) {
-        setBgColor('#f87171'); // Coral for main card
-      } else {
-        setBgColor('#ffffff'); // White when nothing is at trigger point
+        newColor = '#f87171'; // Coral for main card
+      }
+      
+      setBgColor(newColor);
+    };
+
+    // Use requestAnimationFrame for smoother updates
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     handleScroll(); // Initial check
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
     <section 
+      ref={sectionRef}
       className="py-24 md:py-32 transition-colors duration-700 ease-out"
       style={{ backgroundColor: bgColor }}
     >
