@@ -420,35 +420,47 @@ const ScrollColorSection = ({
           </div>
           
           {/* Circular Media Site Icons - Apple Floating Style */}
-          <div className="relative h-48 md:h-64 mt-12 max-w-2xl mx-auto">
-            {mediaSites.slice(0, 2).length > 0 ? (
+          <div className="relative h-56 md:h-72 mt-12 max-w-2xl mx-auto">
+            {mediaSites.slice(0, 3).length > 0 ? (
               <>
                 {/* Left icon - positioned lower */}
-                <div className="absolute left-4 md:left-12 bottom-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-2xl">
+                <div className="absolute left-4 md:left-8 bottom-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-2xl">
                   {mediaSites[0]?.favicon ? (
                     <img src={mediaSites[0].favicon} alt={mediaSites[0].name} className="w-full h-full object-cover" />
                   ) : (
-                    <Newspaper className="w-12 h-12 md:w-16 md:h-16 text-[#2997ff]" />
+                    <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
+                  )}
+                </div>
+                {/* Center icon - biggest */}
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-6 w-32 h-32 md:w-44 md:h-44 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-2xl z-10">
+                  {mediaSites[2]?.favicon ? (
+                    <img src={mediaSites[2].favicon} alt={mediaSites[2].name} className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 className="w-16 h-16 md:w-20 md:h-20 text-[#bf5af2]" />
                   )}
                 </div>
                 {/* Right icon - positioned higher */}
-                <div className="absolute right-4 md:right-12 top-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-2xl">
+                <div className="absolute right-4 md:right-8 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-2xl">
                   {mediaSites[1]?.favicon ? (
                     <img src={mediaSites[1].favicon} alt={mediaSites[1].name} className="w-full h-full object-cover" />
                   ) : (
-                    <TrendingUp className="w-12 h-12 md:w-16 md:h-16 text-[#30d158]" />
+                    <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
                   )}
                 </div>
               </>
             ) : (
               <>
                 {/* Left icon - positioned lower */}
-                <div className="absolute left-4 md:left-12 bottom-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl">
-                  <Newspaper className="w-12 h-12 md:w-16 md:h-16 text-[#2997ff]" />
+                <div className="absolute left-4 md:left-8 bottom-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl">
+                  <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
+                </div>
+                {/* Center icon - biggest */}
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-6 w-32 h-32 md:w-44 md:h-44 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl z-10">
+                  <Building2 className="w-16 h-16 md:w-20 md:h-20 text-[#bf5af2]" />
                 </div>
                 {/* Right icon - positioned higher */}
-                <div className="absolute right-4 md:right-12 top-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl">
-                  <TrendingUp className="w-12 h-12 md:w-16 md:h-16 text-[#30d158]" />
+                <div className="absolute right-4 md:right-8 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-2xl">
+                  <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
                 </div>
               </>
             )}
