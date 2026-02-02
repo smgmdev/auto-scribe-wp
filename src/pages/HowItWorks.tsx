@@ -258,7 +258,7 @@ const ScrollColorSection = ({
               You should also know
             </h2>
             <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
-              Arcana Mace has 2 types of media libraries.
+              Arcana Mace has 2 media libraries.
             </p>
           </div>
 
