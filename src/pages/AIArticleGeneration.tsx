@@ -489,7 +489,7 @@ export default function AIArticleGeneration() {
             {/* Slider Container */}
             <div 
               ref={sliderRef}
-              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
               onWheel={(e) => {
                 // Forward vertical scroll to parent container
                 if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
