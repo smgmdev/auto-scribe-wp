@@ -263,7 +263,7 @@ export default function MediaBuying() {
       </div>
 
       {/* Built for growth and scale - Dark section */}
-      <section className="bg-black py-20 md:py-28 overflow-hidden">
+      <section className="bg-black py-20 md:py-28">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-8">
             Built for growth and scale
@@ -279,7 +279,8 @@ export default function MediaBuying() {
         </div>
         
         {/* Media site favicons row - full width, clipped at edges */}
-        <div className="flex items-center justify-center gap-1 md:gap-2 mt-16">
+        <div className="overflow-hidden">
+          <div className="flex items-center justify-center gap-1 md:gap-2 mt-16">
           {/* First 6 icons */}
           {(shuffledSites.length > 0 ? shuffledSites.slice(0, 6) : Array(6).fill(null)).map((site, index) => (
             <div
@@ -322,6 +323,7 @@ export default function MediaBuying() {
               )}
             </div>
           ))}
+          </div>
         </div>
       </section>
 
