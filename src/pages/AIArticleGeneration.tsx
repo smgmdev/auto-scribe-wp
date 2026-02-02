@@ -500,7 +500,7 @@ export default function AIArticleGeneration() {
               <Link
                 key={slide.id}
                 to={slide.link}
-                className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] rounded-2xl overflow-hidden relative group transition-transform duration-300 hover:scale-[1.02]"
+                className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] overflow-hidden relative group"
                 style={{ background: slide.gradient }}
               >
                 {/* Content */}
