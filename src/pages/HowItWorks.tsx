@@ -570,10 +570,15 @@ const HowItWorks = () => {
           </p>
           
           <Button 
-            onClick={handleGetStarted}
+            onClick={() => {
+              const section = document.getElementById('first-to-know');
+              if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
             className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
           >
-            First thing you need to know...
+            Get Started
           </Button>
         </div>
       </section>
@@ -589,9 +594,9 @@ const HowItWorks = () => {
         ) : null}
       </section>
 
-      <section className="py-24 md:py-32 bg-white">
+      <section id="first-to-know" className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-2xl md:text-3xl font-medium text-[#86868b] text-center mb-16">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight text-center mb-16">
             First, you should know that...
           </h2>
           {features.map((feature, index) => (
