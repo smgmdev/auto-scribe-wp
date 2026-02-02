@@ -427,8 +427,8 @@ const ScrollColorSection = ({
             
             {mediaSites.slice(0, 3).length > 0 ? (
               <>
-                {/* Left icon - positioned higher and closer to center */}
-                <div className="absolute left-16 md:left-24 top-8 md:top-6 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3)]">
+                {/* Left icon - positioned closer to center */}
+                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   {mediaSites[0]?.favicon ? (
                     <img src={mediaSites[0].favicon} alt={mediaSites[0].name} className="w-full h-full object-cover" />
                   ) : (
@@ -454,8 +454,8 @@ const ScrollColorSection = ({
               </>
             ) : (
               <>
-                {/* Left icon - positioned higher and closer to center */}
-                <div className="absolute left-16 md:left-24 top-8 md:top-6 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3)]">
+                {/* Left icon - positioned closer to center */}
+                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
                 </div>
                 {/* Center icon - biggest */}
