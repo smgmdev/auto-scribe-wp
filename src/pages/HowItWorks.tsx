@@ -261,19 +261,19 @@ const ScrollColorSection = ({
           </p>
         </div>
 
-        {/* Two feature cards with vertical divider */}
-        <div className="bg-white rounded-[20px] mt-8 relative">
+        {/* Two feature cards with vertical divider - same coral as above */}
+        <div className="bg-[#f87171] rounded-[40px] mt-0 relative -mt-8 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 relative">
-            {/* Vertical Divider - coral color */}
-            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-2/3 bg-[#f87171] rounded-full" />
+            {/* Vertical Divider - darker coral */}
+            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-2/3 bg-[#dc2626] rounded-full" />
             
             {/* Card 1 - Local Media Library */}
             <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between">
               <div>
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Local Media<br />Library
                 </h3>
-                <a href="/self-publishing" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+                <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
                   Learn how <span className="text-xl">›</span>
                 </a>
               </div>
@@ -285,12 +285,12 @@ const ScrollColorSection = ({
             </div>
 
             {/* Card 2 - Global Media Library */}
-            <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between border-t md:border-t-0 border-gray-100">
+            <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between">
               <div>
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Global Media<br />Library
                 </h3>
-                <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+                <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
                   Learn more about the Agency Portal <span className="text-xl">›</span>
                 </a>
               </div>
