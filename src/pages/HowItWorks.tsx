@@ -256,15 +256,6 @@ const ArticleCarousel = ({
     }
   }, [scrollContainerRef]);
   
-  const gradients = [
-    'from-pink-200 via-blue-200 to-purple-200',
-    'from-orange-200 via-pink-200 to-purple-200',
-    'from-blue-200 via-purple-200 to-pink-200',
-    'from-green-200 via-blue-200 to-purple-200',
-    'from-yellow-200 via-orange-200 to-pink-200',
-    'from-purple-200 via-pink-200 to-orange-200',
-  ];
-  
   // Duplicate articles for seamless loop
   const duplicatedArticles = [...articles, ...articles];
   
@@ -285,7 +276,12 @@ const ArticleCarousel = ({
       >
         <div className="flex gap-6 px-16 md:px-24 min-w-max pt-2 pb-4">
         {duplicatedArticles.map((article, index) => {
-          const gradient = gradients[index % gradients.length];
+          const articleDate = new Date(article.created_at);
+          const formattedDate = articleDate.toLocaleDateString('en-US', { 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+          });
           
           return (
             <a
@@ -293,58 +289,53 @@ const ArticleCarousel = ({
               href={article.wp_link || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 w-[280px] md:w-[320px] group"
+              className="flex-shrink-0 w-[320px] md:w-[380px] group"
             >
-              {/* Apple-style card with gradient border */}
-              <div className={`relative rounded-[32px] p-[2px] bg-gradient-to-br ${gradient} shadow-xl transition-transform duration-300 group-hover:scale-[1.02]`}>
-                <div className="bg-gradient-to-b from-white via-white to-gray-50/80 rounded-[30px] h-[420px] md:h-[480px] flex flex-col overflow-hidden relative">
-                  {/* Gradient overlay at bottom */}
-                  <div className={`absolute inset-0 bg-gradient-to-t ${gradient} opacity-30 pointer-events-none`} />
+              {/* Apple Newsroom-style card */}
+              <div className="bg-[#f5f5f7] rounded-[20px] overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
+                {/* Featured Image */}
+                {article.featured_image?.url ? (
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={article.featured_image.url}
+                      alt={article.featured_image.alt || article.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-[4/3] bg-gradient-to-br from-gray-200 to-gray-300" />
+                )}
+                
+                {/* Content */}
+                <div className="p-6">
+                  {/* Avatar and site name */}
+                  <div className="flex items-center gap-3 mb-4">
+                    {article.published_to_favicon ? (
+                      <img
+                        src={article.published_to_favicon}
+                        alt=""
+                        className="h-10 w-10 rounded-full object-cover shadow-sm"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-400" />
+                    )}
+                    <span className="text-[17px] font-medium text-[#1d1d1f]">
+                      {article.published_to_name || 'Published'}
+                    </span>
+                  </div>
                   
-                  {/* Content */}
-                  <div className="relative z-10 p-6 flex flex-col h-full">
-                    {/* Top - Media logo and name */}
-                    <div className="flex items-center gap-3 mb-4">
-                      {article.published_to_favicon ? (
-                        <img
-                          src={article.published_to_favicon}
-                          alt=""
-                          className="h-10 w-10 rounded-xl object-cover shadow-sm"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300" />
-                      )}
-                      <span className="text-lg font-semibold text-[#1d1d1f]">
-                        {article.published_to_name || 'Published'}
-                      </span>
-                    </div>
-                    
-                    {/* Description / Title excerpt */}
-                    <p className="text-[#1d1d1f] text-sm leading-relaxed line-clamp-3 mb-4">
-                      {article.title}
-                    </p>
-                    
-                    {/* Spacer */}
-                    <div className="flex-1" />
-                    
-                    {/* Center content - Featured headline */}
-                    <div className="text-center my-auto py-8">
-                      <h3 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] leading-tight line-clamp-4">
-                        {article.title.split(' ').slice(0, 8).join(' ')}
-                        {article.title.split(' ').length > 8 ? '...' : ''}
-                      </h3>
-                    </div>
-                    
-                    {/* Bottom row - Published via + Read article */}
-                    <div className="mt-auto pt-4 flex items-end justify-between">
-                      <div>
-                        <p className="text-xs font-semibold text-[#1d1d1f]">Published via</p>
-                        <p className="text-xs text-[#86868b]">Arcana Mace</p>
-                      </div>
-                      <span className="bg-[#1d1d1f] text-white text-xs font-medium px-4 py-2 rounded-full group-hover:bg-black transition-colors">
-                        Read article
-                      </span>
-                    </div>
+                  {/* Article title as description */}
+                  <p className="text-[#1d1d1f] text-[17px] font-semibold leading-snug line-clamp-4 min-h-[88px]">
+                    {article.title}
+                  </p>
+                  
+                  {/* Date and icon */}
+                  <div className="flex items-center gap-2 mt-6 pt-4">
+                    <span className="text-[15px] text-[#86868b]">
+                      {formattedDate}
+                    </span>
+                    <span className="text-[#86868b]">•</span>
+                    <ExternalLink className="h-4 w-4 text-[#86868b]" />
                   </div>
                 </div>
               </div>
