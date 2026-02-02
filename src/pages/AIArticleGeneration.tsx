@@ -390,90 +390,97 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
-      {/* Leverage AI Power Section - Dark Blue */}
-      <section className="bg-[#1d3557] py-20 md:py-28">
+      {/* Leverage AI Power Section - Apple Features Style */}
+      <section className="py-16 md:py-20 bg-white border-t border-[#d2d2d7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          {/* Icons */}
-          <div className="flex gap-6 mb-10">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-[#4a9eff] to-[#0071e3] flex items-center justify-center shadow-lg">
-              <Sparkles className="w-10 h-10 text-white" />
-            </div>
-            <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-[#d2d2d7]">
-              <FileText className="w-10 h-10 text-[#0071e3]" />
-            </div>
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-[#4a9eff] to-[#0071e3] flex items-center justify-center shadow-lg">
-              <Zap className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-6">
-            Leverage Arcana Mace's powerful<br />AI infrastructure.
+          <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+            AI Infrastructure
           </h2>
           
-          <p className="text-lg md:text-xl text-[#a1c4e8] leading-relaxed mb-16 max-w-[800px]">
-            We provide a powerful range of cutting-edge AI tools and configurations, so you can focus on creating 
-            impactful content that reaches global audiences. Our AI services are always available, powered by 
-            enterprise-grade models with 99.9% uptime and lightning-fast generation speeds.
+          <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8 max-w-[800px]">
+            Arcana Mace provides a powerful range of cutting-edge AI tools and configurations, so you can focus on creating impactful content that reaches global audiences. Our AI services are powered by enterprise-grade models with 99.9% uptime.
           </p>
           
-          <h3 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-8">
-            Content creation made easy, fast, and reliable.
-          </h3>
-          
-          <ul className="space-y-6 text-lg text-[#a1c4e8]">
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Unlimited article generation with no daily caps — create as much content as you need.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Arcana Mace handles all AI processing. Generate articles in seconds with advanced language models optimized for news and marketing content.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Seamlessly publish to any connected WordPress site with automatic SEO optimization and meta tag generation.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Five distinct writing tones to match your brand voice — from professional news to casual blog posts.</span>
-            </li>
-          </ul>
+          <div className="space-y-0 border-t border-[#d2d2d7]">
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">Unlimited Generation</h3>
+                <p className="text-[15px] text-[#86868b]">Create as much content as you need with no daily caps.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+            
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">Lightning-Fast Processing</h3>
+                <p className="text-[15px] text-[#86868b]">Generate articles in seconds with advanced language models optimized for news and marketing.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+            
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">WordPress Integration</h3>
+                <p className="text-[15px] text-[#86868b]">Seamlessly publish to any connected WordPress site with automatic SEO optimization.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+            
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">Five Writing Tones</h3>
+                <p className="text-[15px] text-[#86868b]">Match your brand voice from professional news to casual blog posts.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+          </div>
         </div>
       </section>
       
-      {/* Built-in Business Section - Darker Blue */}
-      <section className="bg-[#152238] py-20 md:py-28">
+      {/* Business Section - Apple Features Style */}
+      <section className="py-16 md:py-20 bg-white border-t border-[#d2d2d7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-10">
-            Built-in business and marketing<br />opportunities.
+          <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+            Business & Marketing
           </h2>
           
-          <ul className="space-y-6 text-lg text-[#a1c4e8]">
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Choose from multiple content strategies: news coverage, thought leadership, product announcements, press releases, and brand storytelling. Arcana Mace adapts to your marketing goals.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Generate SEO-optimized headlines, meta descriptions, and focus keywords automatically with every article.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Distribute content across premium media sites through our Media Buying marketplace.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Track your published articles and monitor engagement across all your connected platforms.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Bundle AI generation with media placement for comprehensive content marketing campaigns.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Reach global audiences with content optimized for different regions and industries.</span>
-            </li>
-          </ul>
+          <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8 max-w-[800px]">
+            Comprehensive tools designed to amplify your content marketing strategy and reach global audiences with professionally crafted articles.
+          </p>
+          
+          <div className="space-y-0 border-t border-[#d2d2d7]">
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">Content Strategies</h3>
+                <p className="text-[15px] text-[#86868b]">News coverage, thought leadership, product announcements, press releases, and brand storytelling.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+            
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">SEO Optimization</h3>
+                <p className="text-[15px] text-[#86868b]">Auto-generate headlines, meta descriptions, and focus keywords with every article.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+            
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">Media Buying Marketplace</h3>
+                <p className="text-[15px] text-[#86868b]">Distribute content across premium media sites through our marketplace.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+            
+            <a href="#" className="flex items-center justify-between py-4 border-b border-[#d2d2d7] group hover:opacity-70 transition-opacity">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f]">Global Reach</h3>
+                <p className="text-[15px] text-[#86868b]">Content optimized for different regions and industries.</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#86868b] group-hover:text-[#1d1d1f] transition-colors" />
+            </a>
+          </div>
         </div>
       </section>
 
