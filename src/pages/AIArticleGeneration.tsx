@@ -281,8 +281,8 @@ export default function AIArticleGeneration() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 - Article Generator */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col min-h-[380px]">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center mb-6">
+            <div className="bg-white rounded-xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center mb-6">
                 <Wand2 className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Generator</h3>
@@ -301,8 +301,8 @@ export default function AIArticleGeneration() {
             </div>
             
             {/* Card 2 - Tone Engine */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col min-h-[380px]">
-              <div className="w-14 h-14 rounded-2xl border border-[#d2d2d7] flex items-center justify-center mb-6">
+            <div className="bg-white rounded-xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-xl border border-[#d2d2d7] flex items-center justify-center mb-6">
                 <span className="text-xl font-bold text-[#1d1d1f]">T<span className="text-[#86868b]">x</span></span>
               </div>
               <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Tone</h3>
@@ -321,8 +321,8 @@ export default function AIArticleGeneration() {
             </div>
             
             {/* Card 3 - Editor */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col min-h-[380px]">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#9ca3af] to-[#6b7280] flex items-center justify-center mb-6">
+            <div className="bg-white rounded-xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-b from-[#9ca3af] to-[#6b7280] flex items-center justify-center mb-6">
                 <PenTool className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Editor</h3>
@@ -336,6 +336,66 @@ export default function AIArticleGeneration() {
                 </Button>
                 <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
                   Open
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 4 - Headlines */}
+            <div className="bg-white rounded-xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
+                <Sparkles className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Headlines</h3>
+              <p className="text-sm text-[#86868b] mb-4">Trending, News</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Discover trending headlines from multiple news sources. Let current events spark your next article idea.
+              </p>
+              <div className="flex gap-3 mt-auto">
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Details
+                </Button>
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Browse
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 5 - Publisher */}
+            <div className="bg-white rounded-xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mb-6">
+                <Globe className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Publisher</h3>
+              <p className="text-sm text-[#86868b] mb-4">WordPress, Sites</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                One-click publish to your connected WordPress sites or submit to premium media outlets.
+              </p>
+              <div className="flex gap-3 mt-auto">
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Details
+                </Button>
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Connect
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 6 - SEO */}
+            <div className="bg-white rounded-xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6">
+                <Target className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">SEO</h3>
+              <p className="text-sm text-[#86868b] mb-4">Keywords, Meta</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                AI-optimized meta descriptions and focus keywords. Boost your content's search visibility.
+              </p>
+              <div className="flex gap-3 mt-auto">
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Details
+                </Button>
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Optimize
                 </Button>
               </div>
             </div>
