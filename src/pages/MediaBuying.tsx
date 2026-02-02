@@ -278,7 +278,7 @@ export default function MediaBuying() {
           </p>
           
           {/* Media site favicons row - 6 icons, Arcana Mace logo, 6 icons */}
-          <div className="flex items-center justify-center gap-2 md:gap-3">
+          <div className="flex items-center justify-center gap-1 md:gap-2">
             {/* First 6 icons */}
             {shuffledSites.slice(0, 6).map((site) => (
               <div
