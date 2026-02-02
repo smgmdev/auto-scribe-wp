@@ -159,37 +159,24 @@ const GradientScrollReveal = ({
 // Scroll-triggered background color section - Apple Wallet style
 const ScrollColorSection = () => {
   const coralCardRef = useRef<HTMLDivElement>(null);
-  const darkCardsRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
 
   useEffect(() => {
     const coralCard = coralCardRef.current;
-    const darkCards = darkCardsRef.current;
     
-    if (!coralCard || !darkCards) return;
+    if (!coralCard) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target === darkCards && entry.isIntersecting && entry.intersectionRatio > 0.3) {
-            setBgColor('#1d1d1f'); // Black when dark cards are visible
-          } else if (entry.target === coralCard && entry.isIntersecting && entry.intersectionRatio > 0.3) {
-            // Only set coral if dark cards aren't already dominating
-            const darkCardsRect = darkCards.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const darkCardsVisible = darkCardsRect.top < viewportHeight * 0.5;
-            
-            if (!darkCardsVisible) {
-              setBgColor('#f87171'); // Coral when coral card is visible
-            }
-          } else if (!entry.isIntersecting && entry.target === coralCard) {
-            // Check if we should go back to white
-            const coralRect = coralCard.getBoundingClientRect();
-            if (coralRect.top > window.innerHeight * 0.5) {
-              setBgColor('#ffffff'); // Back to white when scrolling out at top
-            }
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+          setBgColor('#f87171'); // Coral when coral card is visible
+        } else {
+          // Check if we should go back to white
+          const coralRect = coralCard.getBoundingClientRect();
+          if (coralRect.top > window.innerHeight * 0.5) {
+            setBgColor('#ffffff'); // Back to white when scrolling out at top
           }
-        });
+        }
       },
       {
         threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
@@ -198,7 +185,6 @@ const ScrollColorSection = () => {
     );
 
     observer.observe(coralCard);
-    observer.observe(darkCards);
 
     return () => observer.disconnect();
   }, []);
@@ -222,7 +208,7 @@ const ScrollColorSection = () => {
         </div>
 
         {/* Two dark feature cards */}
-        <div ref={darkCardsRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card 1 - Media Buying */}
           <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
             <div>
