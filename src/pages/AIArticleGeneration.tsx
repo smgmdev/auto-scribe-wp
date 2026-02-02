@@ -491,6 +491,18 @@ export default function AIArticleGeneration() {
           <div 
             ref={sliderRef}
             className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+            onWheel={(e) => {
+              // Forward vertical scroll to parent container
+              if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                e.currentTarget.style.pointerEvents = 'none';
+                scrollContainerRef.current?.scrollBy({ top: e.deltaY });
+                setTimeout(() => {
+                  if (sliderRef.current) {
+                    sliderRef.current.style.pointerEvents = 'auto';
+                  }
+                }, 0);
+              }
+            }}
           >
             {featureSlides.map((slide, index) => (
               <Link
