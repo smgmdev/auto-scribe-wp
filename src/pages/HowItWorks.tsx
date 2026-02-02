@@ -194,10 +194,10 @@ const ScrollColorSection = () => {
           className="bg-[#f87171] rounded-[40px] p-12 md:p-16 min-h-[500px] flex flex-col justify-center mb-8"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
-            Media Buying
+            You should also know
           </h2>
           <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
-            Now with more reach.
+            There are 2 type media libraries.
           </p>
         </div>
 
