@@ -554,8 +554,77 @@ const HowItWorks = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
 
+      {/* Hero Section */}
+      <section className="pt-20 md:pt-24 pb-16 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          {/* Logo */}
+          <div className="w-20 h-20 mx-auto mb-6 relative flex items-center justify-center">
+            {!logoLoaded && (
+              <Loader2 className="h-8 w-8 animate-spin text-[#86868b] absolute" />
+            )}
+            <img 
+              src={amblack} 
+              alt="Arcana Mace" 
+              className={`w-20 h-20 transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setLogoLoaded(true)}
+            />
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
+            Endless reach.
+            <br />
+            Endlessly effective.
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+            Discover an incredibly diverse network of premium media outlets worldwide. 
+            Publish your content where it matters most, from self-publishing to agency partnerships.
+            And enjoy it all on a platform designed for publishers and creators.
+          </p>
+          
+          <Button 
+            onClick={handleGetStarted}
+            className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
+          >
+            Create Arcana Mace Account
+          </Button>
+        </div>
+      </section>
 
-      {/* Step-by-Step Guide Section - Apple Developer Style */}
+      {/* Phone Carousel - Recently Published Articles */}
+      <section className="bg-white">
+        {loadingArticles ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
+          </div>
+        ) : articles.length > 0 ? (
+          <ArticleCarousel articles={articles} scrollContainerRef={scrollContainerRef} />
+        ) : null}
+      </section>
+
+      <section className="py-24 md:py-32 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {features.map((feature, index) => (
+            <ScrollRevealRow
+              key={index}
+              highlightText={feature.highlight}
+              normalText={feature.normal}
+              index={index}
+            />
+          ))}
+          
+          <div className="text-center mt-12">
+            <Button 
+              onClick={handleGetStarted}
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
+            >
+              Create Arcana Mace Account
+            </Button>
+          </div>
+        </div>
+      </section>
+
+
       <section className="py-16 md:py-24 bg-white border-t border-gray-200">
         <div className="max-w-[1100px] mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row gap-8 md:gap-10">
