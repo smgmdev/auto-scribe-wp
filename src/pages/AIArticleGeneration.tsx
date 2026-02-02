@@ -486,7 +486,7 @@ export default function AIArticleGeneration() {
       {sliderArticles.length > 0 && (
         <section className="pt-12 pb-6 bg-white">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-            {/* Slider Container */}
+            <p className="text-xs text-[#86868b] mb-4">*These articles have been composed with AI</p>
             <div 
               ref={sliderRef}
               className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
