@@ -191,7 +191,7 @@ const ScrollColorSection = () => {
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <div 
           ref={sectionRef}
-          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 min-h-[500px] flex flex-col justify-center"
+          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 min-h-[500px] flex flex-col justify-center mb-8"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
             Media Buying
@@ -199,6 +199,46 @@ const ScrollColorSection = () => {
           <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
             Now with more reach.
           </p>
+        </div>
+
+        {/* Two dark feature cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1 - Media Buying */}
+          <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
+            <div>
+              <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
+                Buy media placements<br />worldwide
+              </h3>
+              <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+                Learn how <span className="text-xl">›</span>
+              </a>
+            </div>
+            <div className="flex justify-center mt-8">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#2997ff] to-[#0071e3] opacity-80" />
+            </div>
+          </div>
+
+          {/* Card 2 - Agency Portal */}
+          <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
+            <div>
+              <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
+                Agency<br />Portal
+              </h3>
+              <a href="/agency" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+                Learn more about the Agency Portal <span className="text-xl">›</span>
+              </a>
+            </div>
+            <div className="flex justify-center mt-8">
+              <div className="w-48 h-32 rounded-2xl bg-[#2d2d2d] border border-[#3d3d3d] flex items-center justify-center">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -671,52 +711,6 @@ const HowItWorks = () => {
       {/* Scroll-triggered Background Color Section */}
       <ScrollColorSection />
 
-      {/* Apple-style Feature Cards */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight text-center mb-16">
-            You should also know that..
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Card 1 - Media Buying */}
-            <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
-              <div>
-                <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
-                  Buy media placements<br />worldwide
-                </h3>
-                <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
-                  Learn how <span className="text-xl">›</span>
-                </a>
-              </div>
-              <div className="flex justify-center mt-8">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#2997ff] to-[#0071e3] opacity-80" />
-              </div>
-            </div>
-
-            {/* Card 2 - Agency Portal */}
-            <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
-              <div>
-                <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
-                  Agency<br />Portal
-                </h3>
-                <a href="/agency" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
-                  Learn more about the Agency Portal <span className="text-xl">›</span>
-                </a>
-              </div>
-              <div className="flex justify-center mt-8">
-                <div className="w-48 h-32 rounded-2xl bg-[#2d2d2d] border border-[#3d3d3d] flex items-center justify-center">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600" />
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600" />
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600" />
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
       <section className="py-16 md:py-24 bg-white border-t border-gray-200">
