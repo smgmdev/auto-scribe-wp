@@ -159,15 +159,15 @@ const GradientScrollReveal = ({
 // Scroll-triggered background color section - Apple Wallet style
 const ScrollColorSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [bgColor, setBgColor] = useState('#22c55e'); // Start with green
+  const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-          setBgColor('#ef4444'); // Change to red when scrolled into view
+          setBgColor('#f87171'); // Change to coral/red (same as card) when scrolled into view
         } else {
-          setBgColor('#22c55e'); // Back to green when scrolling out
+          setBgColor('#ffffff'); // Back to white when scrolling out
         }
       },
       {
