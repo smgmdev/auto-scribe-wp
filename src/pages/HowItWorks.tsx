@@ -953,6 +953,12 @@ const HowItWorks = () => {
             <div className="flex-1 space-y-20">
               {/* Getting Started Section */}
               <div id="getting-started">
+                {/* Icon */}
+                <div className="mb-6">
+                  <svg className="w-14 h-14 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                  </svg>
+                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   Getting started
                 </h2>
@@ -985,10 +991,19 @@ const HowItWorks = () => {
                     </li>
                   </ul>
                 </div>
+                
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-16" />
               </div>
               
               {/* Explore Arcana Mace Section */}
               <div id="explore-arcana-mace" className="scroll-mt-40">
+                {/* Icon */}
+                <div className="mb-6">
+                  <svg className="w-14 h-14 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   Explore Arcana Mace
                 </h2>
@@ -1145,10 +1160,19 @@ const HowItWorks = () => {
                     </li>
                   </ul>
                 </div>
+                
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-16" />
               </div>
               
               {/* Media Buying Section */}
               <div id="media-buying">
+                {/* Icon */}
+                <div className="mb-6">
+                  <svg className="w-14 h-14 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                  </svg>
+                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   Media Buying
                 </h2>
@@ -1355,10 +1379,18 @@ const HowItWorks = () => {
                     </li>
                   </ul>
                 </div>
+                
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-16" />
               </div>
-              
               {/* For Agencies Section */}
               <div id="for-agencies">
+                {/* Icon */}
+                <div className="mb-6">
+                  <svg className="w-14 h-14 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+                  </svg>
+                </div>
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">
                   For Agencies
                 </h2>
