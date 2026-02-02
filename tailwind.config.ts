@@ -280,10 +280,6 @@ export default {
 				'0%, 100%': { transform: 'translateY(-6px)' },
 				'50%': { transform: 'translateY(6px)' }
 			},
-			'float-subtle': {
-				'0%, 100%': { transform: 'translateY(0px)' },
-				'50%': { transform: 'translateY(-4px)' }
-			},
 			'border-glow': {
 				'0%': { transform: 'rotate(0deg)' },
 				'100%': { transform: 'rotate(360deg)' }
@@ -325,7 +321,6 @@ export default {
 			'float-1': 'float-1 4s ease-in-out infinite',
 			'float-2': 'float-2 5s ease-in-out infinite',
 			'float-3': 'float-3 6s ease-in-out infinite',
-			'float-subtle': 'float-subtle 5s ease-in-out infinite',
 			'border-glow': 'border-glow 3s linear infinite',
 			'purple-glow-pulse': 'purple-glow-pulse 3s ease-in-out infinite',
 			'purple-glow-pulse-intense': 'purple-glow-pulse-intense 3s ease-in-out infinite'
