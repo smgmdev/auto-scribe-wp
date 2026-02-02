@@ -261,38 +261,43 @@ const ScrollColorSection = ({
           </p>
         </div>
 
-        {/* Two feature cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1 - Local Media Library */}
-          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[500px] flex flex-col justify-between border border-gray-200">
-            <div>
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
-                Local Media Library
-              </h3>
-              <a href="/self-publishing" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
-                Learn how <span className="text-xl">›</span>
-              </a>
-            </div>
-            <div className="flex justify-center mt-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2997ff] to-[#0071e3] flex items-center justify-center">
-                <FileText className="w-10 h-10 text-white" />
+        {/* Two feature cards with vertical divider */}
+        <div className="bg-white rounded-[20px] mt-8 relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 relative">
+            {/* Vertical Divider - coral color */}
+            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-2/3 bg-[#f87171] rounded-full" />
+            
+            {/* Card 1 - Local Media Library */}
+            <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between">
+              <div>
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
+                  Local Media<br />Library
+                </h3>
+                <a href="/self-publishing" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+                  Learn how <span className="text-xl">›</span>
+                </a>
+              </div>
+              <div className="flex justify-center mt-8">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2997ff] to-[#0071e3] flex items-center justify-center shadow-lg">
+                  <FileText className="w-10 h-10 text-white" />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Card 2 - Global Media Library */}
-          <div className="bg-white rounded-[20px] p-8 md:p-10 min-h-[500px] flex flex-col justify-between border border-gray-200">
-            <div>
-              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
-                Global Media Library
-              </h3>
-              <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
-                Learn more about the Agency Portal <span className="text-xl">›</span>
-              </a>
-            </div>
-            <div className="flex justify-center mt-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#bf5af2] to-[#8944c6] flex items-center justify-center">
-                <Globe className="w-10 h-10 text-white" />
+            {/* Card 2 - Global Media Library */}
+            <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between border-t md:border-t-0 border-gray-100">
+              <div>
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-4">
+                  Global Media<br />Library
+                </h3>
+                <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+                  Learn more about the Agency Portal <span className="text-xl">›</span>
+                </a>
+              </div>
+              <div className="flex justify-center mt-8">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#bf5af2] to-[#8944c6] flex items-center justify-center shadow-lg">
+                  <Globe className="w-10 h-10 text-white" />
+                </div>
               </div>
             </div>
           </div>
