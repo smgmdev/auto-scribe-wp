@@ -253,7 +253,7 @@ const ScrollColorSection = ({
           ref={coralCardRef}
           className="bg-[#f87171] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
         >
-          <div className="min-h-[200px] flex flex-col justify-center">
+          <div className="min-h-[200px] flex flex-col justify-center items-center text-center">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
               You should also know
             </h2>
