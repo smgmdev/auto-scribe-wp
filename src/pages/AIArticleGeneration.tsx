@@ -174,6 +174,19 @@ export default function AIArticleGeneration() {
         </div>
       </div>
 
+      {/* Hero Text Section - Apple Open Source style */}
+      <section className="bg-[#1d1d1f] py-20 md:py-28">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
+            AI Article Generation.
+          </h1>
+          <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto">
+            Artificial intelligence is at the heart of modern content creation. Arcana Mace works with 
+            advanced language models to help you create, refine, and publish professional articles in seconds.
+          </p>
+        </div>
+      </section>
+
       {/* Hero Section with floating AI icons */}
       <section className="bg-white relative overflow-hidden" style={{ minHeight: isMobile ? '420px' : '520px' }}>
         {/* Dynamic AI icons */}
