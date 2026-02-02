@@ -157,12 +157,6 @@ export default function AIArticleGeneration() {
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
           <span className="text-xl font-semibold text-white">AI Article Generation</span>
           <nav className="hidden md:flex items-center gap-6">
-            <button 
-              onClick={() => navigate('/self-publishing')}
-              className="text-xs text-white/60 hover:text-white transition-colors"
-            >
-              Self Publishing
-            </button>
             <Button
               size="sm"
               onClick={handleGetStarted}
@@ -267,6 +261,81 @@ export default function AIArticleGeneration() {
                 </Button>
                 <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
                   Browse
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Tools Section - Apple Projects style */}
+      <section className="py-20 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
+            Our AI Tools
+          </h2>
+          <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed mb-12 max-w-4xl">
+            AI-powered content creation is at the heart of Arcana Mace. We've built the following tools 
+            to help you write, refine, and publish faster.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 - Article Generator */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center mb-6">
+                <Wand2 className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Generator</h3>
+              <p className="text-sm text-[#86868b] mb-4">AI, Headlines</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Generate complete articles from trending headlines or custom topics. Human-quality writing in seconds.
+              </p>
+              <div className="flex gap-3 mt-auto">
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Details
+                </Button>
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Try it
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 2 - Tone Engine */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-2xl border border-[#d2d2d7] flex items-center justify-center mb-6">
+                <span className="text-xl font-bold text-[#1d1d1f]">T<span className="text-[#86868b]">x</span></span>
+              </div>
+              <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Tone</h3>
+              <p className="text-sm text-[#86868b] mb-4">5 Voices, Style</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Match your brand voice with five distinct tones. Professional, Casual, Enthusiastic, and more.
+              </p>
+              <div className="flex gap-3 mt-auto">
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Details
+                </Button>
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Customize
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 3 - Editor */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col min-h-[380px]">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#9ca3af] to-[#6b7280] flex items-center justify-center mb-6">
+                <PenTool className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-3xl font-semibold text-[#1d1d1f] mb-2">Editor</h3>
+              <p className="text-sm text-[#86868b] mb-4">Rich Text</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Refine AI content with our built-in rich text editor. Add your insights and make it uniquely yours.
+              </p>
+              <div className="flex gap-3 mt-auto">
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Details
+                </Button>
+                <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm">
+                  Open
                 </Button>
               </div>
             </div>
