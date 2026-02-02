@@ -668,6 +668,9 @@ const HowItWorks = () => {
         </div>
       </section>
 
+      {/* Scroll-triggered Background Color Section */}
+      <ScrollColorSection />
+
       {/* Apple-style Feature Cards */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
@@ -715,8 +718,6 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Scroll-triggered Background Color Section */}
-      <ScrollColorSection />
 
       <section className="py-16 md:py-24 bg-white border-t border-gray-200">
         <div className="max-w-[1100px] mx-auto px-4 md:px-6">
