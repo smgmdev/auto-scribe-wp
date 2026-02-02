@@ -226,7 +226,7 @@ const ScrollColorSection = () => {
           {/* Card 1 - Media Buying */}
           <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
             <div>
-              <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                 Local Media Library
               </h3>
               <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
@@ -241,7 +241,7 @@ const ScrollColorSection = () => {
           {/* Card 2 - Agency Portal */}
           <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
             <div>
-              <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                 Global Media Library
               </h3>
               <a href="/agency" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
