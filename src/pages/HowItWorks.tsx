@@ -428,43 +428,55 @@ const ScrollColorSection = ({
             {mediaSites.slice(0, 3).length > 0 ? (
               <>
                 {/* Left icon - positioned closer to center */}
-                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3),inset_0_0_25px_rgba(191,90,242,0.6),inset_0_0_50px_rgba(191,90,242,0.3)]">
+                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   {mediaSites[0]?.favicon ? (
                     <img src={mediaSites[0].favicon} alt={mediaSites[0].name} className="w-full h-full object-cover" />
                   ) : (
                     <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
                   )}
+                  {/* Inner glow overlay */}
+                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.7),inset_0_0_50px_rgba(191,90,242,0.4)]" />
                 </div>
                 {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden shadow-[0_0_60px_rgba(191,90,242,0.5),inset_0_0_50px_rgba(191,90,242,0.7),inset_0_0_80px_rgba(191,90,242,0.4)] z-10">
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden shadow-[0_0_60px_rgba(191,90,242,0.5)] z-10">
                   {mediaSites[2]?.favicon ? (
                     <img src={mediaSites[2].favicon} alt={mediaSites[2].name} className="w-full h-full object-cover" />
                   ) : (
                     <Building2 className="w-20 h-20 md:w-28 md:h-28 text-[#bf5af2]" />
                   )}
+                  {/* Inner glow overlay */}
+                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_50px_rgba(191,90,242,0.8),inset_0_0_80px_rgba(191,90,242,0.5)]" />
                 </div>
                 {/* Right icon - positioned higher */}
-                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3),inset_0_0_25px_rgba(191,90,242,0.6),inset_0_0_50px_rgba(191,90,242,0.3)]">
+                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   {mediaSites[1]?.favicon ? (
                     <img src={mediaSites[1].favicon} alt={mediaSites[1].name} className="w-full h-full object-cover" />
                   ) : (
                     <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
                   )}
+                  {/* Inner glow overlay */}
+                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.7),inset_0_0_50px_rgba(191,90,242,0.4)]" />
                 </div>
               </>
             ) : (
               <>
                 {/* Left icon - positioned closer to center */}
-                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3),inset_0_0_25px_rgba(191,90,242,0.6),inset_0_0_50px_rgba(191,90,242,0.3)]">
+                <div className="absolute left-16 md:left-24 top-16 md:top-14 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
+                  {/* Inner glow overlay */}
+                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.7),inset_0_0_50px_rgba(191,90,242,0.4)]" />
                 </div>
                 {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center shadow-[0_0_60px_rgba(191,90,242,0.5),inset_0_0_50px_rgba(191,90,242,0.7),inset_0_0_80px_rgba(191,90,242,0.4)] z-10">
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center shadow-[0_0_60px_rgba(191,90,242,0.5)] z-10">
                   <Building2 className="w-20 h-20 md:w-28 md:h-28 text-[#bf5af2]" />
+                  {/* Inner glow overlay */}
+                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_50px_rgba(191,90,242,0.8),inset_0_0_80px_rgba(191,90,242,0.5)]" />
                 </div>
                 {/* Right icon - positioned higher */}
-                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3),inset_0_0_25px_rgba(191,90,242,0.6),inset_0_0_50px_rgba(191,90,242,0.3)]">
+                <div className="absolute right-16 md:right-24 top-0 w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center shadow-[0_0_30px_rgba(191,90,242,0.3)]">
                   <TrendingUp className="w-10 h-10 md:w-14 md:h-14 text-[#30d158]" />
+                  {/* Inner glow overlay */}
+                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.7),inset_0_0_50px_rgba(191,90,242,0.4)]" />
                 </div>
               </>
             )}
