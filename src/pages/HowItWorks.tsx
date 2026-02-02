@@ -575,7 +575,7 @@ const HowItWorks = () => {
             onClick={handleGetStarted}
             className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
           >
-            Get Started
+            First thing you need to know...
           </Button>
         </div>
       </section>
