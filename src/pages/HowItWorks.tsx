@@ -191,7 +191,7 @@ const ScrollColorSection = ({
       if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
         newColor = '#6cc24a'; // Green for Global Media Library
       } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
-        newColor = '#d5d5d7'; // Light grey for Local Media Library
+        newColor = '#1d1d1f'; // Black for Local Media Library
       } else if (coralRect.top <= triggerPoint && coralRect.bottom > 0) {
         newColor = '#f87171'; // Coral for main card
       }
@@ -264,7 +264,7 @@ const ScrollColorSection = ({
         </div>
 
         {/* Local Media Library Section */}
-        <div ref={localLibraryRef} className="mt-16 bg-[#d5d5d7] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
+        <div ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] via-[#c44cff] to-[#ffeb3b] flex items-center justify-center">
@@ -275,21 +275,21 @@ const ScrollColorSection = ({
           </div>
           
           {/* Title */}
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] mb-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
             Local Media Library
           </h2>
           
           {/* Description */}
-          <p className="text-lg md:text-xl text-[#6e6e73] max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
             Connect your own WordPress sites directly to Arcana Mace. Publish articles instantly to your blogs with full SEO optimization. Manage multiple sites from one dashboard and maintain complete control over your content.
           </p>
           
           {/* Links */}
           <div className="flex items-center justify-center gap-6">
-            <a href="/auth" className="text-[#6e6e73] text-lg hover:text-[#1d1d1f] transition-colors inline-flex items-center gap-1">
+            <a href="/auth" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Get started <span className="text-xl">↗</span>
             </a>
-            <a href="#self-publishing" className="text-[#6e6e73] text-lg hover:text-[#1d1d1f] transition-colors inline-flex items-center gap-1">
+            <a href="#self-publishing" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Learn more <span className="text-xl">›</span>
             </a>
           </div>
