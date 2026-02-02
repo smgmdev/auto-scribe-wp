@@ -484,26 +484,6 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
-      {/* Disclaimers Section */}
-      <section className="bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
-          <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
-            <p>
-              AI-generated content is provided as a starting point for your articles. We recommend reviewing and editing all generated content before publication to ensure accuracy and alignment with your brand voice.
-            </p>
-            <p>
-              Article length is approximately 700 words. Actual output may vary based on topic complexity and generation parameters. Multiple regenerations may be needed to achieve desired results.
-            </p>
-            <p>
-              Generated content is original but should be verified for factual accuracy, especially for news-related topics. Arcana Mace is not responsible for errors in AI-generated content.
-            </p>
-            <p>
-              AI features are subject to fair usage policies. Heavy automated usage or abuse may result in temporary rate limiting. Standard publishing credits apply for article submission.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Apple-style Feature Slider */}
       <section className="py-12 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6">
@@ -561,6 +541,26 @@ export default function AIArticleGeneration() {
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Disclaimers Section */}
+      <section className="bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
+          <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
+            <p>
+              AI-generated content is provided as a starting point for your articles. We recommend reviewing and editing all generated content before publication to ensure accuracy and alignment with your brand voice.
+            </p>
+            <p>
+              Article length is approximately 700 words. Actual output may vary based on topic complexity and generation parameters. Multiple regenerations may be needed to achieve desired results.
+            </p>
+            <p>
+              Generated content is original but should be verified for factual accuracy, especially for news-related topics. Arcana Mace is not responsible for errors in AI-generated content.
+            </p>
+            <p>
+              AI features are subject to fair usage policies. Heavy automated usage or abuse may result in temporary rate limiting. Standard publishing credits apply for article submission.
+            </p>
           </div>
         </div>
       </section>
