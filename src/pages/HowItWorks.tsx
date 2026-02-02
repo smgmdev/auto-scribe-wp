@@ -260,6 +260,57 @@ const ScrollColorSection = () => {
             </div>
           </div>
         </div>
+
+        {/* Local Media Library Section */}
+        <div className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
+          {/* Icon */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] via-[#c44cff] to-[#ffeb3b] flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+          </div>
+          
+          {/* Title */}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
+            Local Media Library
+          </h2>
+          
+          {/* Description */}
+          <p className="text-lg md:text-xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+            Connect your own WordPress sites directly to Arcana Mace. Publish articles instantly to your blogs with full SEO optimization. Manage multiple sites from one dashboard and maintain complete control over your content.
+          </p>
+          
+          {/* Links */}
+          <div className="flex items-center justify-center gap-6">
+            <a href="/auth" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+              Get started <span className="text-xl">↗</span>
+            </a>
+            <a href="#self-publishing" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+              Learn more <span className="text-xl">›</span>
+            </a>
+          </div>
+          
+          {/* App Icons Row */}
+          <div className="flex justify-center items-end gap-4 md:gap-6 mt-12">
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+              <FileText className="w-10 h-10 md:w-12 md:h-12 text-[#64d2ff]" />
+            </div>
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+              <Globe className="w-10 h-10 md:w-12 md:h-12 text-[#bf5af2]" />
+            </div>
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl -mb-2">
+              <Zap className="w-12 h-12 md:w-14 md:h-14 text-[#ff6b6b]" />
+            </div>
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+              <BarChart3 className="w-10 h-10 md:w-12 md:h-12 text-[#30d158]" />
+            </div>
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+              <PenTool className="w-10 h-10 md:w-12 md:h-12 text-[#ffd60a]" />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
