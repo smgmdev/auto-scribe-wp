@@ -222,258 +222,160 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
-      {/* Featured Capabilities Section - Apple Open Source style */}
-      <section className="py-20 bg-white">
+      {/* Main Content - Apple Developer ID Style */}
+      <section className="py-16 md:py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          {/* Header with title and button */}
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
-            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight">
-              Featured AI capabilities
+          {/* Smart Generation Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              Smart Generation
             </h2>
+            <p className="text-lg text-[#1d1d1f] leading-relaxed mb-6 max-w-[800px]">
+              Advanced AI creates human-quality articles in seconds. No robotic phrases, no clichés — just natural, engaging content that sounds like it was written by a professional journalist.
+            </p>
+            <ul className="space-y-3 text-[17px] text-[#1d1d1f] max-w-[800px]">
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Generate approximately 700-word articles optimized for news and marketing content.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Create completely original content with less than 50% similarity to source material.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Headlines are automatically rewritten to be 12-18 words, focusing on curiosity while preserving key names.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Tone Control Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              Tone Control
+            </h2>
+            <p className="text-lg text-[#1d1d1f] leading-relaxed mb-6 max-w-[800px]">
+              Match your brand voice with five distinct writing tones. Each tone is carefully calibrated to produce content that resonates with your target audience.
+            </p>
+            <ul className="space-y-3 text-[17px] text-[#1d1d1f] max-w-[800px]">
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span><strong>Neutral:</strong> Balanced reporting with objective, unbiased language.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span><strong>Professional:</strong> Formal and authoritative tone for business communications.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span><strong>Casual:</strong> Friendly and conversational style for blog posts and social content.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span><strong>Enthusiastic:</strong> High-energy and exciting language for product launches and announcements.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span><strong>Informative:</strong> Deeply educational content with comprehensive explanations.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Headline Sources Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              Headline Sources
+            </h2>
+            <p className="text-lg text-[#1d1d1f] leading-relaxed mb-6 max-w-[800px]">
+              Discover trending headlines from multiple news sources across different industries. Let current events spark your next article idea, or input your own custom topics.
+            </p>
+            <ul className="space-y-3 text-[17px] text-[#1d1d1f] max-w-[800px]">
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Browse headlines from Political, Business, Financial, Crypto, and Real Estate categories.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Generate articles from any URL — paste a link and let AI create original content.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Write from scratch with custom topics and AI-assisted title generation.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* WordPress Integration Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              WordPress Integration
+            </h2>
+            <p className="text-lg text-[#1d1d1f] leading-relaxed mb-6 max-w-[800px]">
+              Seamlessly publish to any connected WordPress site with automatic SEO optimization. Your articles are ready to go live with properly formatted content and meta tags.
+            </p>
+            <ul className="space-y-3 text-[17px] text-[#1d1d1f] max-w-[800px]">
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Connect unlimited WordPress sites using secure application passwords.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Automatic SEO optimization with meta descriptions and focus keywords.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Support for Yoast SEO, Rank Math, and All in One SEO plugins.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Upload featured images and assign categories and tags during publishing.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Business & Marketing Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              Business & Marketing
+            </h2>
+            <p className="text-lg text-[#1d1d1f] leading-relaxed mb-6 max-w-[800px]">
+              Comprehensive tools designed to amplify your content marketing strategy and reach global audiences with professionally crafted articles.
+            </p>
+            <ul className="space-y-3 text-[17px] text-[#1d1d1f] max-w-[800px]">
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Choose from multiple content strategies: news coverage, thought leadership, product announcements, and brand storytelling.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Distribute content across premium media sites through our Media Buying marketplace.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Bundle AI generation with media placement for comprehensive content marketing campaigns.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-[#86868b]">•</span>
+                <span>Track your published articles and monitor engagement across all your connected platforms.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Getting Started Section */}
+          <div className="pt-8 border-t border-[#d2d2d7]">
+            <h2 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
+              Get Started
+            </h2>
+            <p className="text-lg text-[#1d1d1f] leading-relaxed mb-6 max-w-[800px]">
+              Start creating AI-powered articles today. Sign up for free and connect your WordPress sites to begin publishing professional content in seconds.
+            </p>
             <Button
               onClick={handleGetStarted}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-6 py-2 text-base font-medium w-fit"
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-3 text-base font-medium"
             >
-              Start writing
+              Start Writing with AI
             </Button>
           </div>
-          
-          {/* Description */}
-          <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed mb-12 max-w-3xl">
-            Many content creators and businesses rely on AI-powered writing tools.
-            Explore some of the capabilities we've built to help you create better content.
-          </p>
-          
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1 - Smart Generation */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 shadow-lg">
-                <Wand2 className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Smart Generation</h3>
-              <p className="text-sm text-[#86868b] mb-4">AI, Natural Language</p>
-              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
-                Advanced AI creates human-quality articles in seconds. No robotic phrases, no clichés — just natural, engaging content.
-              </p>
-              <div className="flex gap-3">
-                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
-                  Details
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
-                  Try it
-                </Button>
-              </div>
-            </div>
-            
-            {/* Card 2 - Tone Control */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6 shadow-lg">
-                <Settings className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Tone Control</h3>
-              <p className="text-sm text-[#86868b] mb-4">5 Voice Options</p>
-              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
-                Match your brand voice with five distinct tones: Neutral, Professional, Casual, Enthusiastic, or Informative.
-              </p>
-              <div className="flex gap-3">
-                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
-                  Details
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
-                  Customize
-                </Button>
-              </div>
-            </div>
-            
-            {/* Card 3 - Headline Sources */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 shadow-lg">
-                <BookOpen className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Headline Sources</h3>
-              <p className="text-sm text-[#86868b] mb-4">News, Industry, Custom</p>
-              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
-                Discover trending headlines from multiple news sources. Let current events spark your next article idea.
-              </p>
-              <div className="flex gap-3">
-                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
-                  Details
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
-                  Browse
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Published Articles Section - Apple Projects style */}
-      <section className="py-20 bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
-            Published Articles
-          </h2>
-          <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed mb-12 max-w-4xl">
-            See what others have created with Arcana Mace. These articles were generated by AI 
-            and published to WordPress sites across the web.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {publishedArticles.length > 0 ? (
-              publishedArticles.map((article) => {
-                // Strip HTML tags for preview
-                const plainContent = article.content.replace(/<[^>]*>/g, '');
-                const truncatedContent = plainContent.length > 120 
-                  ? plainContent.substring(0, 120) + '...' 
-                  : plainContent;
-                
-                return (
-                  <div key={article.id} className="bg-white rounded-xl p-6 flex flex-col min-h-[320px]">
-                    {/* Site favicon */}
-                    <div className="w-14 h-14 rounded-xl overflow-hidden mb-6 bg-[#f5f5f7] flex items-center justify-center">
-                      {article.published_to_favicon ? (
-                        <img 
-                          src={article.published_to_favicon} 
-                          alt={article.published_to_name || 'Site'} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Globe className="w-7 h-7 text-[#86868b]" />
-                      )}
-                    </div>
-                    
-                    {/* Article title */}
-                    <h3 className="text-xl font-semibold text-[#1d1d1f] mb-2 line-clamp-2">
-                      {article.title}
-                    </h3>
-                    
-                    {/* Site name */}
-                    <p className="text-sm text-[#86868b] mb-4">
-                      {article.published_to_name || 'WordPress'}
-                    </p>
-                    
-                    {/* Content preview */}
-                    <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1 text-sm line-clamp-3">
-                      {truncatedContent}
-                    </p>
-                    
-                    {/* Buttons */}
-                    <div className="flex gap-3 mt-auto">
-                      {article.wp_link && (
-                        <a href={article.wp_link} target="_blank" rel="noopener noreferrer">
-                          <Button className="bg-[#1d1d1f] hover:bg-black text-white rounded-full px-5 py-2 text-sm flex items-center gap-2">
-                            Read Article
-                            <ExternalLink className="w-3 h-3" />
-                          </Button>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              // Placeholder cards when no articles
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-xl p-6 flex flex-col min-h-[320px] animate-pulse">
-                  <div className="w-14 h-14 rounded-xl bg-[#e5e5e5] mb-6" />
-                  <div className="h-6 bg-[#e5e5e5] rounded w-3/4 mb-2" />
-                  <div className="h-4 bg-[#e5e5e5] rounded w-1/3 mb-4" />
-                  <div className="h-4 bg-[#e5e5e5] rounded w-full mb-2" />
-                  <div className="h-4 bg-[#e5e5e5] rounded w-5/6 mb-2" />
-                  <div className="h-4 bg-[#e5e5e5] rounded w-4/6" />
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Leverage AI Power Section - Apple Dark Blue Style */}
-      <section className="bg-[#1d3557] py-20 md:py-28">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          {/* Icons */}
-          <div className="flex justify-center gap-6 mb-10">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-[#4a9eff] to-[#0071e3] flex items-center justify-center shadow-lg">
-              <Sparkles className="w-10 h-10 text-white" />
-            </div>
-            <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-[#d2d2d7]">
-              <FileText className="w-10 h-10 text-[#0071e3]" />
-            </div>
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-[#4a9eff] to-[#0071e3] flex items-center justify-center shadow-lg">
-              <Zap className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-6">
-            Leverage Arcana Mace's powerful<br />AI infrastructure.
-          </h2>
-          
-          <p className="text-lg md:text-xl text-[#a1c4e8] leading-relaxed mb-16 max-w-[800px]">
-            We provide a powerful range of cutting-edge AI tools and configurations, so you can focus on creating 
-            impactful content that reaches global audiences. Our AI services are always available, powered by 
-            enterprise-grade models with 99.9% uptime and lightning-fast generation speeds.
-          </p>
-          
-          <h3 className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-8">
-            Content creation made easy, fast, and reliable.
-          </h3>
-          
-          <ul className="space-y-6 text-lg text-[#a1c4e8] max-w-[800px]">
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Unlimited article generation with no daily caps — create as much content as you need.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Arcana Mace handles all AI processing. Generate articles in seconds with advanced language models optimized for news and marketing content.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Seamlessly publish to any connected WordPress site with automatic SEO optimization and meta tag generation.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Five distinct writing tones to match your brand voice — from professional news to casual blog posts.</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-      
-      {/* Business Section - Apple Dark Blue Style */}
-      <section className="bg-[#152238] py-20 md:py-28">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-10">
-            Built-in business and marketing<br />opportunities.
-          </h2>
-          
-          <ul className="space-y-6 text-lg text-[#a1c4e8] max-w-[800px]">
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Choose from multiple content strategies: news coverage, thought leadership, product announcements, press releases, and brand storytelling. Arcana Mace adapts to your marketing goals.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Generate SEO-optimized headlines, meta descriptions, and focus keywords automatically with every article.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Distribute content across premium media sites through our Media Buying marketplace.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Track your published articles and monitor engagement across all your connected platforms.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Bundle AI generation with media placement for comprehensive content marketing campaigns.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-white">•</span>
-              <span>Reach global audiences with content optimized for different regions and industries.</span>
-            </li>
-          </ul>
         </div>
       </section>
 
