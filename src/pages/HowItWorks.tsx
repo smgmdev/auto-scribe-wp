@@ -452,8 +452,8 @@ const HowItWorks = () => {
   };
 
   const features = [
-    { highlight: "Premium media outlets", normal: "in every category imaginable." },
-    { highlight: "Self-publish instantly", normal: "to your own WordPress sites." },
+    { highlight: "Arcana Mace is a media buying marketplace", normal: "" },
+    { highlight: "You can publish articles and press releases", normal: "into online media and magazines worldwide" },
     { highlight: "AI-powered writing", normal: "to create articles in seconds." },
     { highlight: "Transparent pricing", normal: "with no hidden fees or surprises." },
     { highlight: "Global reach", normal: "across all major markets." },
