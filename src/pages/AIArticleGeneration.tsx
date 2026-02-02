@@ -187,6 +187,93 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
+      {/* Featured Capabilities Section - Apple Open Source style */}
+      <section className="py-20 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          {/* Header with title and button */}
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
+            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight">
+              Featured AI capabilities
+            </h2>
+            <Button
+              onClick={handleGetStarted}
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-6 py-2 text-base font-medium w-fit"
+            >
+              Start writing
+            </Button>
+          </div>
+          
+          {/* Description */}
+          <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed mb-12 max-w-3xl">
+            Many content creators and businesses rely on AI-powered writing tools.
+            Explore some of the capabilities we've built to help you create better content.
+          </p>
+          
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 - Smart Generation */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 shadow-lg">
+                <Wand2 className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Smart Generation</h3>
+              <p className="text-sm text-[#86868b] mb-4">AI, Natural Language</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Advanced AI creates human-quality articles in seconds. No robotic phrases, no clichés — just natural, engaging content.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                  Details
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                  Try it
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 2 - Tone Control */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6 shadow-lg">
+                <Settings className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Tone Control</h3>
+              <p className="text-sm text-[#86868b] mb-4">5 Voice Options</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Match your brand voice with five distinct tones: Neutral, Professional, Casual, Enthusiastic, or Informative.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                  Details
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                  Customize
+                </Button>
+              </div>
+            </div>
+            
+            {/* Card 3 - Headline Sources */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 shadow-lg">
+                <BookOpen className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Headline Sources</h3>
+              <p className="text-sm text-[#86868b] mb-4">News, Industry, Custom</p>
+              <p className="text-[#1d1d1f] leading-relaxed mb-6 flex-1">
+                Discover trending headlines from multiple news sources. Let current events spark your next article idea.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                  Details
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full px-4 border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+                  Browse
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Slider Section - Apple style */}
       <section className="py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
