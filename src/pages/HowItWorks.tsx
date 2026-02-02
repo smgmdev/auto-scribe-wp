@@ -227,7 +227,7 @@ const ScrollColorSection = () => {
           <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
             <div>
               <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
-                Buy media placements<br />worldwide
+                Local Media Library
               </h3>
               <a href="/media-buying" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
                 Learn how <span className="text-xl">›</span>
@@ -242,7 +242,7 @@ const ScrollColorSection = () => {
           <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
             <div>
               <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-4">
-                Agency<br />Portal
+                Global Media Library
               </h3>
               <a href="/agency" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
                 Learn more about the Agency Portal <span className="text-xl">›</span>
