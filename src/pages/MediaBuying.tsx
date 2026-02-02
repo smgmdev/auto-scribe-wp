@@ -262,6 +262,46 @@ export default function MediaBuying() {
         </div>
       </div>
 
+      {/* Built for growth and scale - Dark section */}
+      <section className="bg-[#1d1d1f] py-20 md:py-28">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-8">
+            Built for growth and scale
+          </h2>
+          <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-4xl mx-auto mb-16">
+            We built Arcana Mace to make it easy for everyone — from individuals to large 
+            teams — to publish content across premium media outlets and successfully run and 
+            grow a global brand. Arcana Mace empowers you to scale your media distribution 
+            worldwide using a variety of publication formats. And with access to 
+            extensive media management tools and analytics, you can turn your content 
+            into incredible opportunities.
+          </p>
+          
+          {/* Media site favicons row */}
+          <div className="flex items-center justify-center gap-3 md:gap-4 flex-wrap max-w-4xl mx-auto">
+            {shuffledSites.slice(0, 14).map((site, index) => (
+              <div
+                key={site.id}
+                className={`flex-shrink-0 overflow-hidden bg-white shadow-lg ${
+                  index === 7 ? 'w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[22px]' : 'w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl'
+                }`}
+              >
+                {site.favicon ? (
+                  <img 
+                    src={site.favicon} 
+                    alt={site.name} 
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section with scattered media icons - Apple App Store style */}
       <section className="bg-white relative overflow-hidden" style={{ minHeight: isMobile ? '420px' : '620px' }}>
         {/* Dynamic media logos - 50 scattered icons with varying sizes */}
