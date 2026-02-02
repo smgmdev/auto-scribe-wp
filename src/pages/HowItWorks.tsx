@@ -553,8 +553,92 @@ const HowItWorks = () => {
       {/* Search Modal */}
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
+      {/* Get Started Cards Section - Apple Developer Style */}
+      <section className="pt-16 pb-12 bg-white">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">Get started.</h2>
+          <p className="text-xl text-[#86868b] mb-12 max-w-2xl">
+            Everything you need to start publishing to premium media outlets worldwide.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Card 1 - Account */}
+            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Account</h3>
+              <p className="text-[#86868b] mb-6 flex-1">
+                Create your free Arcana Mace account to access premium media outlets, AI writing tools, and publishing features.
+              </p>
+              <Button 
+                onClick={handleGetStarted}
+                variant="link"
+                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
+              >
+                Create account <ArrowUpRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+
+            {/* Card 2 - Media Network */}
+            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6">
+                <Globe className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Media Network</h3>
+              <p className="text-[#86868b] mb-6 flex-1">
+                Browse hundreds of premium media outlets across every category. Find the perfect platforms for your content.
+              </p>
+              <Button 
+                onClick={() => navigate('/media-buying')}
+                variant="link"
+                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
+              >
+                Explore network <ArrowUpRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+
+            {/* Card 3 - AI Writing */}
+            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-6">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">AI Writing</h3>
+              <p className="text-[#86868b] mb-6 flex-1">
+                Generate professional articles in seconds with our AI-powered writing engine. Multiple tones and styles available.
+              </p>
+              <Button 
+                onClick={() => navigate('/ai-article-generation')}
+                variant="link"
+                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
+              >
+                Learn about AI <ArrowUpRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+
+            {/* Card 4 - Self Publishing */}
+            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-6">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Self Publishing</h3>
+              <p className="text-[#86868b] mb-6 flex-1">
+                Connect your WordPress sites and publish directly with one click. Full SEO optimization included.
+              </p>
+              <Button 
+                onClick={() => navigate('/self-publishing')}
+                variant="link"
+                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
+              >
+                Start publishing <ArrowUpRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section */}
-      <section className="pt-20 md:pt-24 pb-16 bg-white">
+      <section className="pt-20 md:pt-24 pb-16 bg-white border-t border-gray-100">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6 relative flex items-center justify-center">
