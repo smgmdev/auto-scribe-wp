@@ -591,6 +591,9 @@ const HowItWorks = () => {
 
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-2xl md:text-3xl font-medium text-[#86868b] text-center mb-16">
+            First, you should know that...
+          </h2>
           {features.map((feature, index) => (
             <ScrollRevealRow
               key={index}
