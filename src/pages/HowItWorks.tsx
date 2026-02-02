@@ -562,9 +562,7 @@ const HowItWorks = () => {
           </div>
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
-            Endless reach.
-            <br />
-            Endlessly effective.
+            How to use Arcana Mace?
           </h1>
           
           <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
