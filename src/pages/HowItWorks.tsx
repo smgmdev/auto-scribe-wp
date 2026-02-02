@@ -438,7 +438,7 @@ const ScrollColorSection = ({
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
                 </div>
                 {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse-intense z-10">
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse-intense animate-float-subtle z-10">
                   {mediaSites[2]?.favicon ? (
                     <img src={mediaSites[2].favicon} alt={mediaSites[2].name} className="w-full h-full object-cover" />
                   ) : (
@@ -467,7 +467,7 @@ const ScrollColorSection = ({
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
                 </div>
                 {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center animate-purple-glow-pulse-intense z-10">
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center animate-purple-glow-pulse-intense animate-float-subtle z-10">
                   <Building2 className="w-20 h-20 md:w-28 md:h-28 text-[#bf5af2]" />
                   {/* Inner glow overlay */}
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.4)]" />
