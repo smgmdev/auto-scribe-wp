@@ -280,13 +280,13 @@ const ScrollColorSection = ({
 
         {/* Local Media Library Section */}
         <div ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
-          {/* Icon */}
+          {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] via-[#c44cff] to-[#ffeb3b] flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
+            <img 
+              src={amblack} 
+              alt="Arcana Mace" 
+              className="w-16 h-16 object-contain brightness-0 invert"
+            />
           </div>
           
           {/* Title */}
