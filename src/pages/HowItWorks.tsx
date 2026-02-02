@@ -253,7 +253,7 @@ const ScrollColorSection = ({
           ref={coralCardRef}
           className="bg-[#f87171] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
         >
-          <div className="min-h-[300px] flex flex-col justify-center">
+          <div className="min-h-[200px] flex flex-col justify-center">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
               You should also know
             </h2>
@@ -263,42 +263,28 @@ const ScrollColorSection = ({
           </div>
 
           {/* Two feature cards with vertical divider - inside same coral container */}
-          <div className="grid grid-cols-1 md:grid-cols-2 relative mt-8">
-            {/* Vertical Divider - darker coral */}
-            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-2/3 bg-[#dc2626] rounded-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 relative mt-4">
+            {/* Vertical Divider - white */}
+            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-2/3 bg-white/50 rounded-full" />
             
             {/* Card 1 - Local Media Library */}
-            <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between">
-              <div>
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Local Media<br />Library
-                </h3>
-                <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-                  Learn how <span className="text-xl">›</span>
-                </a>
-              </div>
-              <div className="flex justify-center mt-8">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2997ff] to-[#0071e3] flex items-center justify-center shadow-lg">
-                  <FileText className="w-10 h-10 text-white" />
-                </div>
-              </div>
+            <div className="p-8 md:p-10 lg:p-12">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+                Local Media<br />Library
+              </h3>
+              <a href="/self-publishing" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                Learn how <span className="text-xl">›</span>
+              </a>
             </div>
 
             {/* Card 2 - Global Media Library */}
-            <div className="p-10 md:p-12 lg:p-16 min-h-[500px] flex flex-col justify-between">
-              <div>
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Global Media<br />Library
-                </h3>
-                <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-                  Learn more about the Agency Portal <span className="text-xl">›</span>
-                </a>
-              </div>
-              <div className="flex justify-center mt-8">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#bf5af2] to-[#8944c6] flex items-center justify-center shadow-lg">
-                  <Globe className="w-10 h-10 text-white" />
-                </div>
-              </div>
+            <div className="p-8 md:p-10 lg:p-12">
+              <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+                Global Media<br />Library
+              </h3>
+              <a href="/media-buying" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                Learn more about the Agency Portal <span className="text-xl">›</span>
+              </a>
             </div>
           </div>
         </div>
