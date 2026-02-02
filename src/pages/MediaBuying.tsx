@@ -283,7 +283,7 @@ export default function MediaBuying() {
             {shuffledSites.slice(0, 6).map((site) => (
               <div
                 key={site.id}
-                className="flex-shrink-0 w-14 h-14 md:w-16 md:h-16 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl"
+                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl"
               >
                 {site.favicon ? (
                   <img 
@@ -307,7 +307,7 @@ export default function MediaBuying() {
             {shuffledSites.slice(6, 12).map((site) => (
               <div
                 key={site.id}
-                className="flex-shrink-0 w-14 h-14 md:w-16 md:h-16 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl"
+                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl"
               >
                 {site.favicon ? (
                   <img 
