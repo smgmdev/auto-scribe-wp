@@ -270,9 +270,12 @@ const ScrollColorSection = ({
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Local Media<br />Library
                 </h3>
-                <a href="#local-media-library" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                <button 
+                  onClick={() => document.getElementById('local-media-library')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
+                >
                   Learn more <span className="text-xl">›</span>
-                </a>
+                </button>
               </div>
             </div>
 
@@ -285,9 +288,12 @@ const ScrollColorSection = ({
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                   Global Media<br />Library
                 </h3>
-                <a href="#global-media-library" className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+                <button 
+                  onClick={() => document.getElementById('global-media-library')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
+                >
                   Learn more <span className="text-xl">›</span>
-                </a>
+                </button>
               </div>
             </div>
           </div>
