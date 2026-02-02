@@ -166,6 +166,21 @@ const ScrollColorSection = ({
   const localLibraryRef = useRef<HTMLDivElement>(null);
   const globalLibraryRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
+  const [wpSites, setWpSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
+
+  // Fetch WordPress sites with favicons
+  useEffect(() => {
+    const fetchSites = async () => {
+      const { data } = await supabase.rpc('get_public_sites');
+      if (data) {
+        const sitesWithFavicons = data
+          .filter((site: any) => site.favicon && site.connected)
+          .slice(0, 5);
+        setWpSites(sitesWithFavicons);
+      }
+    };
+    fetchSites();
+  }, []);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -280,7 +295,7 @@ const ScrollColorSection = ({
           </h2>
           
           {/* Description */}
-          <p className="text-lg md:text-xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl text-white max-w-3xl mx-auto mb-8 leading-tight">
             Connect your own WordPress sites directly to Arcana Mace. Publish articles instantly to your blogs with full SEO optimization. Manage multiple sites from one dashboard and maintain complete control over your content.
           </p>
           
@@ -294,23 +309,44 @@ const ScrollColorSection = ({
             </a>
           </div>
           
-          {/* App Icons Row */}
+          {/* WordPress Site Logos Row */}
           <div className="flex justify-center items-end gap-4 md:gap-6 mt-12">
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-              <FileText className="w-10 h-10 md:w-12 md:h-12 text-[#64d2ff]" />
-            </div>
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-              <Globe className="w-10 h-10 md:w-12 md:h-12 text-[#bf5af2]" />
-            </div>
-            <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl -mb-2">
-              <Zap className="w-12 h-12 md:w-14 md:h-14 text-[#ff6b6b]" />
-            </div>
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-              <BarChart3 className="w-10 h-10 md:w-12 md:h-12 text-[#30d158]" />
-            </div>
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-              <PenTool className="w-10 h-10 md:w-12 md:h-12 text-[#ffd60a]" />
-            </div>
+            {wpSites.length > 0 ? (
+              wpSites.map((site, index) => (
+                <div 
+                  key={site.id}
+                  className={`${index === 2 ? 'w-24 h-24 md:w-28 md:h-28 shadow-xl -mb-2' : 'w-20 h-20 md:w-24 md:h-24 shadow-lg'} rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden`}
+                >
+                  {site.favicon ? (
+                    <img 
+                      src={site.favicon} 
+                      alt={site.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Globe className={`${index === 2 ? 'w-12 h-12 md:w-14 md:h-14' : 'w-10 h-10 md:w-12 md:h-12'} text-[#bf5af2]`} />
+                  )}
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+                  <FileText className="w-10 h-10 md:w-12 md:h-12 text-[#64d2ff]" />
+                </div>
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+                  <Globe className="w-10 h-10 md:w-12 md:h-12 text-[#bf5af2]" />
+                </div>
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl -mb-2">
+                  <Zap className="w-12 h-12 md:w-14 md:h-14 text-[#ff6b6b]" />
+                </div>
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+                  <BarChart3 className="w-10 h-10 md:w-12 md:h-12 text-[#30d158]" />
+                </div>
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
+                  <PenTool className="w-10 h-10 md:w-12 md:h-12 text-[#ffd60a]" />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
