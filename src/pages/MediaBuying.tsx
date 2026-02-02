@@ -268,7 +268,7 @@ export default function MediaBuying() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-8">
             Built for growth and scale
           </h2>
-          <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-4xl mx-auto mb-16">
+          <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-4xl mx-auto">
             We built Arcana Mace to make it easy for everyone — from individuals to large 
             teams — to publish content across premium media outlets and successfully run and 
             grow a global brand. Arcana Mace empowers you to scale your media distribution 
@@ -276,52 +276,52 @@ export default function MediaBuying() {
             extensive media management tools and analytics, you can turn your content 
             into incredible opportunities.
           </p>
-          
-          {/* Media site favicons row - 6 icons, Arcana Mace logo, 6 icons */}
-          <div className="flex items-center justify-center gap-1 md:gap-2">
-            {/* First 6 icons */}
-            {shuffledSites.slice(0, 6).map((site) => (
-              <div
-                key={site.id}
-                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
-              >
-                {site.favicon ? (
-                  <img 
-                    src={site.favicon} 
-                    alt={site.name} 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-muted" />
-                )}
-              </div>
-            ))}
-            
-            {/* Arcana Mace logo - centered and largest */}
-            <div className="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden shadow-xl rounded-xl md:rounded-2xl border border-[#2d2d2d]">
-              <img src={amlogo} alt="Arcana Mace" className="w-full h-full object-cover" />
+        </div>
+        
+        {/* Media site favicons row - full width, clipped at edges */}
+        <div className="flex items-center justify-center gap-1 md:gap-2 mt-16">
+          {/* First 6 icons */}
+          {shuffledSites.slice(0, 6).map((site) => (
+            <div
+              key={site.id}
+              className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
+            >
+              {site.favicon ? (
+                <img 
+                  src={site.favicon} 
+                  alt={site.name} 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted" />
+              )}
             </div>
-            
-            {/* Last 6 icons */}
-            {shuffledSites.slice(6, 12).map((site) => (
-              <div
-                key={site.id}
-                className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
-              >
-                {site.favicon ? (
-                  <img 
-                    src={site.favicon} 
-                    alt={site.name} 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-muted" />
-                )}
-              </div>
-            ))}
+          ))}
+          
+          {/* Arcana Mace logo - centered and largest */}
+          <div className="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden shadow-xl rounded-xl md:rounded-2xl border border-[#2d2d2d]">
+            <img src={amlogo} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
+          
+          {/* Last 6 icons */}
+          {shuffledSites.slice(6, 12).map((site) => (
+            <div
+              key={site.id}
+              className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
+            >
+              {site.favicon ? (
+                <img 
+                  src={site.favicon} 
+                  alt={site.name} 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted" />
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
