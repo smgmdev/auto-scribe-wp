@@ -685,21 +685,21 @@ const HowItWorks = () => {
 
       {/* Step-by-Step Guide Section - Apple Developer Style */}
       <section className="py-16 md:py-24 bg-white border-t border-gray-200">
-        <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row gap-8 md:gap-16">
-            {/* Sticky Side Navigation */}
-            <nav className="md:w-64 flex-shrink-0">
+        <div className="max-w-[1100px] mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-10">
+            {/* Sticky Side Navigation - Apple Style */}
+            <nav className="md:w-56 flex-shrink-0">
               <div className="md:sticky md:top-32">
-                <ul className="border-l-2 border-gray-200">
+                <ul className="border-l-[3px] border-gray-200">
                   {/* Getting Started */}
                   <li>
                     <a 
                       href="#getting-started"
                       onClick={(e) => scrollToSection(e, 'getting-started')}
-                      className={`block pl-4 py-0.5 text-sm font-semibold transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] font-semibold transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'getting-started' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                          : 'text-[#1d1d1f] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Getting Started
@@ -709,9 +709,9 @@ const HowItWorks = () => {
                     <a 
                       href="#create-account"
                       onClick={(e) => scrollToSection(e, 'create-account')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'create-account' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -720,14 +720,14 @@ const HowItWorks = () => {
                   </li>
 
                   {/* Explore Arcana Mace */}
-                  <li>
+                  <li className="mt-4">
                     <a 
                       href="#explore-arcana-mace"
                       onClick={(e) => scrollToSection(e, 'explore-arcana-mace')}
-                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] font-semibold transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'explore-arcana-mace' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                          : 'text-[#1d1d1f] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Explore Arcana Mace
@@ -737,9 +737,9 @@ const HowItWorks = () => {
                     <a 
                       href="#media-network"
                       onClick={(e) => scrollToSection(e, 'media-network')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'media-network' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -750,9 +750,9 @@ const HowItWorks = () => {
                     <a 
                       href="#instant-publishing"
                       onClick={(e) => scrollToSection(e, 'instant-publishing')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'instant-publishing' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -763,9 +763,9 @@ const HowItWorks = () => {
                     <a 
                       href="#b2b-media-buying"
                       onClick={(e) => scrollToSection(e, 'b2b-media-buying')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'b2b-media-buying' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -776,9 +776,9 @@ const HowItWorks = () => {
                     <a 
                       href="#credit-management"
                       onClick={(e) => scrollToSection(e, 'credit-management')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'credit-management' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -789,9 +789,9 @@ const HowItWorks = () => {
                     <a 
                       href="#apply-agency-account"
                       onClick={(e) => scrollToSection(e, 'apply-agency-account')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'apply-agency-account' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -802,9 +802,9 @@ const HowItWorks = () => {
                     <a 
                       href="#account-settings"
                       onClick={(e) => scrollToSection(e, 'account-settings')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'account-settings' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -813,14 +813,14 @@ const HowItWorks = () => {
                   </li>
 
                   {/* Media Buying */}
-                  <li>
+                  <li className="mt-4">
                     <a 
                       href="#media-buying"
                       onClick={(e) => scrollToSection(e, 'media-buying')}
-                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] font-semibold transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'media-buying' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                          : 'text-[#1d1d1f] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       Media Buying
@@ -830,9 +830,9 @@ const HowItWorks = () => {
                     <a 
                       href="#buy-credits"
                       onClick={(e) => scrollToSection(e, 'buy-credits')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'buy-credits' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -843,9 +843,9 @@ const HowItWorks = () => {
                     <a 
                       href="#local-library"
                       onClick={(e) => scrollToSection(e, 'local-library')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'local-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -856,9 +856,9 @@ const HowItWorks = () => {
                     <a 
                       href="#generate-ai-articles"
                       onClick={(e) => scrollToSection(e, 'generate-ai-articles')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'generate-ai-articles' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -869,9 +869,9 @@ const HowItWorks = () => {
                     <a 
                       href="#global-library"
                       onClick={(e) => scrollToSection(e, 'global-library')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'global-library' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -882,9 +882,9 @@ const HowItWorks = () => {
                     <a 
                       href="#agency-engagement"
                       onClick={(e) => scrollToSection(e, 'agency-engagement')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'agency-engagement' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -893,14 +893,14 @@ const HowItWorks = () => {
                   </li>
 
                   {/* For Agencies */}
-                  <li>
+                  <li className="mt-4">
                     <a 
                       href="#for-agencies"
                       onClick={(e) => scrollToSection(e, 'for-agencies')}
-                      className={`block pl-4 py-0.5 text-sm font-semibold mt-2 transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] font-semibold transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'for-agencies' 
                           ? 'text-[#0066cc] border-[#0066cc]' 
-                          : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
+                          : 'text-[#1d1d1f] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
                       For Agencies
@@ -910,9 +910,9 @@ const HowItWorks = () => {
                     <a 
                       href="#agency-connect-wordpress"
                       onClick={(e) => scrollToSection(e, 'agency-connect-wordpress')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'agency-connect-wordpress' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -923,9 +923,9 @@ const HowItWorks = () => {
                     <a 
                       href="#upload-media-lists"
                       onClick={(e) => scrollToSection(e, 'upload-media-lists')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'upload-media-lists' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
@@ -936,9 +936,9 @@ const HowItWorks = () => {
                     <a 
                       href="#get-paid"
                       onClick={(e) => scrollToSection(e, 'get-paid')}
-                      className={`block pl-4 py-0.5 text-sm transition-colors -ml-[2px] border-l-2 ${
+                      className={`block pl-4 py-1 text-[15px] transition-colors -ml-[3px] border-l-[3px] ${
                         activeSection === 'get-paid' 
-                          ? 'text-[#0066cc] border-[#0066cc]' 
+                          ? 'text-[#0066cc] border-[#0066cc] font-medium' 
                           : 'text-[#6e6e73] border-transparent hover:text-[#0066cc]'
                       }`}
                     >
