@@ -484,7 +484,7 @@ export default function AIArticleGeneration() {
 
       {/* Apple-style Feature Slider */}
       {sliderArticles.length > 0 && (
-        <section className="py-12 bg-white">
+        <section className="pt-12 pb-6 bg-white">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             {/* Slider Container */}
             <div 
