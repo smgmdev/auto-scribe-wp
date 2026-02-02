@@ -264,11 +264,11 @@ const ScrollColorSection = ({
 
           {/* Two feature cards with vertical divider - inside same coral container */}
           <div className="grid grid-cols-1 md:grid-cols-2 relative mt-4">
-            {/* Vertical Divider - white */}
-            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-2/3 bg-white/50 rounded-full" />
+            {/* Vertical Divider - white, centered with gap */}
+            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-[3px] my-8 bg-white/70 rounded-full" />
             
             {/* Card 1 - Local Media Library */}
-            <div className="p-8 md:p-10 lg:p-12">
+            <div className="p-8 md:p-10 lg:p-12 md:pr-16">
               <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                 Local Media<br />Library
               </h3>
@@ -278,7 +278,7 @@ const ScrollColorSection = ({
             </div>
 
             {/* Card 2 - Global Media Library */}
-            <div className="p-8 md:p-10 lg:p-12">
+            <div className="p-8 md:p-10 lg:p-12 md:pl-16">
               <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
                 Global Media<br />Library
               </h3>
