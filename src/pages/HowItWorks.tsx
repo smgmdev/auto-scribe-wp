@@ -553,85 +553,60 @@ const HowItWorks = () => {
       {/* Search Modal */}
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
-      {/* Get Started Cards Section - Apple Developer Style */}
-      <section className="pt-16 pb-12 bg-white">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-4">Get started.</h2>
-          <p className="text-xl text-[#86868b] mb-12 max-w-2xl">
-            Everything you need to start publishing to premium media outlets worldwide.
+      {/* Pathway Hero Section - Apple Developer Style */}
+      <section className="pt-20 pb-16 bg-gradient-to-b from-[#d6e6f5] to-[#e8f1f8]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] mb-6">
+            Arcana Mace Pathway
+          </h2>
+          <p className="text-lg md:text-xl text-[#1d1d1f]/80 max-w-3xl mx-auto mb-12">
+            Get started with this easy-to-navigate collection of guides, 
+            documentation, and tools to publish great content.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Card 1 - Account */}
-            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6">
-                <User className="w-6 h-6 text-white" />
+          {/* Icon Row */}
+          <div className="flex items-center justify-center gap-8 md:gap-12">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
+                <svg className="w-10 h-10 md:w-12 md:h-12 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                </svg>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Account</h3>
-              <p className="text-[#86868b] mb-6 flex-1">
-                Create your free Arcana Mace account to access premium media outlets, AI writing tools, and publishing features.
-              </p>
-              <Button 
-                onClick={handleGetStarted}
-                variant="link"
-                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
-              >
-                Create account <ArrowUpRight className="w-4 h-4 ml-1" />
-              </Button>
             </div>
-
-            {/* Card 2 - Media Network */}
-            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6">
-                <Globe className="w-6 h-6 text-white" />
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
+                <svg className="w-10 h-10 md:w-12 md:h-12 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Media Network</h3>
-              <p className="text-[#86868b] mb-6 flex-1">
-                Browse hundreds of premium media outlets across every category. Find the perfect platforms for your content.
-              </p>
-              <Button 
-                onClick={() => navigate('/media-buying')}
-                variant="link"
-                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
-              >
-                Explore network <ArrowUpRight className="w-4 h-4 ml-1" />
-              </Button>
             </div>
-
-            {/* Card 3 - AI Writing */}
-            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-white" />
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
+                <svg className="w-10 h-10 md:w-12 md:h-12 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                </svg>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">AI Writing</h3>
-              <p className="text-[#86868b] mb-6 flex-1">
-                Generate professional articles in seconds with our AI-powered writing engine. Multiple tones and styles available.
-              </p>
-              <Button 
-                onClick={() => navigate('/ai-article-generation')}
-                variant="link"
-                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
-              >
-                Learn about AI <ArrowUpRight className="w-4 h-4 ml-1" />
-              </Button>
             </div>
-
-            {/* Card 4 - Self Publishing */}
-            <div className="bg-[#f5f5f7] rounded-2xl p-8 flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-6">
-                <FileText className="w-6 h-6 text-white" />
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
+                <svg className="w-10 h-10 md:w-12 md:h-12 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+                </svg>
               </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">Self Publishing</h3>
-              <p className="text-[#86868b] mb-6 flex-1">
-                Connect your WordPress sites and publish directly with one click. Full SEO optimization included.
-              </p>
-              <Button 
-                onClick={() => navigate('/self-publishing')}
-                variant="link"
-                className="text-[#0066cc] hover:text-[#0077ed] p-0 h-auto justify-start font-normal text-base"
-              >
-                Start publishing <ArrowUpRight className="w-4 h-4 ml-1" />
-              </Button>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
+                <svg className="w-10 h-10 md:w-12 md:h-12 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
+                <svg className="w-10 h-10 md:w-12 md:h-12 text-[#1d1d1f]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
