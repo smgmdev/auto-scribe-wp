@@ -622,6 +622,9 @@ const HowItWorks = () => {
       {/* Apple-style Feature Cards */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight text-center mb-16">
+            You should also know that..
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1 - Media Buying */}
             <div className="bg-[#1d1d1f] rounded-[20px] p-8 md:p-10 min-h-[400px] flex flex-col justify-between">
