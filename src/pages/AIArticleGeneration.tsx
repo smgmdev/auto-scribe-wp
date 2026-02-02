@@ -8,48 +8,14 @@ import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
 
-// Apple-style feature cards for the slider
-const featureSlides = [
-  {
-    id: 1,
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    title: 'AI Generation',
-    subtitle: 'Create articles in seconds',
-    buttonText: 'Start writing',
-    link: '/dashboard',
-  },
-  {
-    id: 2,
-    gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-    title: 'Media Buying',
-    subtitle: 'Publish to premium sites',
-    buttonText: 'Browse sites',
-    link: '/media-buying',
-  },
-  {
-    id: 3,
-    gradient: 'linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)',
-    title: 'WordPress',
-    subtitle: 'One-click publishing',
-    buttonText: 'Connect sites',
-    link: '/dashboard',
-  },
-  {
-    id: 4,
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    title: 'SEO Tools',
-    subtitle: 'Optimize automatically',
-    buttonText: 'Learn more',
-    link: '/help/publishing-articles',
-  },
-  {
-    id: 5,
-    gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    title: 'Headlines',
-    subtitle: 'Trending topics daily',
-    buttonText: 'Explore',
-    link: '/dashboard',
-  },
+// Fallback gradients for articles without featured images
+const fallbackGradients = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+  'linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
 ];
 
 interface PublishedArticle {
@@ -59,6 +25,16 @@ interface PublishedArticle {
   published_to_name: string | null;
   published_to_favicon: string | null;
   wp_link: string | null;
+  featured_image: { url?: string } | null;
+}
+
+interface SliderArticle {
+  id: string;
+  title: string;
+  published_to_name: string | null;
+  published_to_favicon: string | null;
+  wp_link: string | null;
+  featured_image: { url?: string } | null;
 }
 
 // Icon sizes - desktop: small, medium, large | mobile: smaller sizes
@@ -130,6 +106,7 @@ export default function AIArticleGeneration() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState<PublishedArticle[]>([]);
+  const [sliderArticles, setSliderArticles] = useState<SliderArticle[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -137,22 +114,23 @@ export default function AIArticleGeneration() {
 
   // Auto-play slider - always running
   useEffect(() => {
+    if (sliderArticles.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featureSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % sliderArticles.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [sliderArticles.length]);
 
   // Scroll to current slide
   useEffect(() => {
-    if (sliderRef.current) {
-      const slideWidth = sliderRef.current.scrollWidth / featureSlides.length;
+    if (sliderRef.current && sliderArticles.length > 0) {
+      const slideWidth = sliderRef.current.scrollWidth / sliderArticles.length;
       sliderRef.current.scrollTo({
         left: currentSlide * slideWidth,
         behavior: 'smooth',
       });
     }
-  }, [currentSlide]);
+  }, [currentSlide, sliderArticles.length]);
 
   // Shuffle array helper
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -164,24 +142,44 @@ export default function AIArticleGeneration() {
     return shuffled;
   };
 
-  // Fetch published articles
+  // Fetch published articles for the grid
   useEffect(() => {
     const fetchPublishedArticles = async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select('id, title, content, published_to_name, published_to_favicon, wp_link')
+        .select('id, title, content, published_to_name, published_to_favicon, wp_link, featured_image')
         .eq('status', 'published')
         .not('wp_link', 'is', null)
         .limit(50);
       
       if (!error && data) {
         // Shuffle and take first 6
-        const shuffled = shuffleArray(data);
+        const shuffled = shuffleArray(data as PublishedArticle[]);
         setPublishedArticles(shuffled.slice(0, 6));
       }
     };
     
     fetchPublishedArticles();
+  }, []);
+
+  // Fetch articles for the slider (with featured images)
+  useEffect(() => {
+    const fetchSliderArticles = async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('id, title, published_to_name, published_to_favicon, wp_link, featured_image')
+        .eq('status', 'published')
+        .not('wp_link', 'is', null)
+        .limit(50);
+      
+      if (!error && data) {
+        // Shuffle for random order
+        const shuffled = shuffleArray(data as SliderArticle[]);
+        setSliderArticles(shuffled.slice(0, 8)); // Take 8 for the slider
+      }
+    };
+    
+    fetchSliderArticles();
   }, []);
 
   // Check if mobile
@@ -485,65 +483,98 @@ export default function AIArticleGeneration() {
       </section>
 
       {/* Apple-style Feature Slider */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-          {/* Slider Container */}
-          <div 
-            ref={sliderRef}
-            className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
-            onWheel={(e) => {
-              // Forward vertical scroll to parent container
-              if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                e.currentTarget.style.pointerEvents = 'none';
-                scrollContainerRef.current?.scrollBy({ top: e.deltaY });
-                setTimeout(() => {
-                  if (sliderRef.current) {
-                    sliderRef.current.style.pointerEvents = 'auto';
-                  }
-                }, 0);
-              }
-            }}
-          >
-            {featureSlides.map((slide, index) => (
-              <Link
-                key={slide.id}
-                to={slide.link}
-                className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] overflow-hidden relative group"
-                style={{ background: slide.gradient }}
-              >
-                {/* Content */}
-                <div className="absolute inset-0 p-6 flex flex-col justify-between">
-                  <div>
-                    <p className="text-white/80 text-sm font-medium mb-1">{slide.subtitle}</p>
-                    <h3 className="text-white text-2xl md:text-3xl font-semibold">{slide.title}</h3>
-                  </div>
-                  <div className="flex justify-end">
-                    <span className="bg-white text-[#1d1d1f] px-5 py-2 rounded-full text-sm font-medium hover:bg-white/90 transition-colors">
-                      {slide.buttonText}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+      {sliderArticles.length > 0 && (
+        <section className="py-12 bg-white">
+          <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+            {/* Slider Container */}
+            <div 
+              ref={sliderRef}
+              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+              onWheel={(e) => {
+                // Forward vertical scroll to parent container
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                  e.currentTarget.style.pointerEvents = 'none';
+                  scrollContainerRef.current?.scrollBy({ top: e.deltaY });
+                  setTimeout(() => {
+                    if (sliderRef.current) {
+                      sliderRef.current.style.pointerEvents = 'auto';
+                    }
+                  }, 0);
+                }
+              }}
+            >
+              {sliderArticles.map((article, index) => {
+                const featuredImageUrl = article.featured_image?.url;
+                const fallbackGradient = fallbackGradients[index % fallbackGradients.length];
+                
+                return (
+                  <a
+                    key={article.id}
+                    href={article.wp_link || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] overflow-hidden relative group rounded-xl"
+                    style={{ 
+                      background: featuredImageUrl ? undefined : fallbackGradient,
+                    }}
+                  >
+                    {/* Background Image */}
+                    {featuredImageUrl && (
+                      <img 
+                        src={featuredImageUrl} 
+                        alt={article.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+                    {/* Content */}
+                    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                      <div>
+                        {article.published_to_name && (
+                          <div className="flex items-center gap-2 mb-2">
+                            {article.published_to_favicon && (
+                              <img 
+                                src={article.published_to_favicon} 
+                                alt="" 
+                                className="w-4 h-4 rounded-sm"
+                              />
+                            )}
+                            <p className="text-white/80 text-sm font-medium">{article.published_to_name}</p>
+                          </div>
+                        )}
+                        <h3 className="text-white text-lg md:text-xl font-semibold line-clamp-3">{article.title}</h3>
+                      </div>
+                      <div className="flex justify-end">
+                        <span className="bg-white text-[#1d1d1f] px-5 py-2 rounded-full text-sm font-medium hover:bg-white/90 transition-colors flex items-center gap-1">
+                          Read article
+                          <ExternalLink className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
 
-          {/* Pagination Dots */}
-          <div className="flex items-center justify-center gap-2 mt-6">
-            {featureSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`transition-all duration-300 rounded-full ${
-                  currentSlide === index 
-                    ? 'w-6 h-2 bg-[#1d1d1f]' 
-                    : 'w-2 h-2 bg-[#86868b] hover:bg-[#1d1d1f]'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
+            {/* Pagination Dots */}
+            <div className="flex items-center justify-center gap-2 mt-6">
+              {sliderArticles.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`transition-all duration-300 rounded-full ${
+                    currentSlide === index 
+                      ? 'w-6 h-2 bg-[#1d1d1f]' 
+                      : 'w-2 h-2 bg-[#86868b] hover:bg-[#1d1d1f]'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Disclaimers Section */}
       <section className="bg-[#f5f5f7]">
