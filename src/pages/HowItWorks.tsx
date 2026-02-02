@@ -313,7 +313,7 @@ const ScrollColorSection = () => {
         </div>
 
         {/* Global Media Library Section */}
-        <div className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div className="mt-16 bg-[#6cc24a] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-[#2d2d2d] border border-[#3d3d3d] flex items-center justify-center">
@@ -327,13 +327,13 @@ const ScrollColorSection = () => {
           </h2>
           
           {/* Description */}
-          <p className="text-lg md:text-xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl text-[#1a4d1a] max-w-3xl mx-auto mb-8 leading-relaxed">
             Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
           </p>
           
           {/* Link */}
           <div className="flex items-center justify-center">
-            <a href="/media-buying" className="text-[#86868b] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+            <a href="/media-buying" className="text-[#1a4d1a] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Learn more <span className="text-xl">›</span>
             </a>
           </div>
