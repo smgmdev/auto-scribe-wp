@@ -310,40 +310,51 @@ const ScrollColorSection = ({
           </div>
           
           {/* WordPress Site Logos Row */}
-          <div className="flex justify-center items-end gap-4 md:gap-6 mt-12">
+          <div className="flex justify-center items-center gap-6 md:gap-8 mt-12">
             {wpSites.length > 0 ? (
-              wpSites.map((site, index) => (
-                <div 
-                  key={site.id}
-                  className={`${index === 2 ? 'w-24 h-24 md:w-28 md:h-28 shadow-xl -mb-2' : 'w-20 h-20 md:w-24 md:h-24 shadow-lg'} rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden`}
-                >
-                  {site.favicon ? (
-                    <img 
-                      src={site.favicon} 
-                      alt={site.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Globe className={`${index === 2 ? 'w-12 h-12 md:w-14 md:h-14' : 'w-10 h-10 md:w-12 md:h-12'} text-[#bf5af2]`} />
-                  )}
-                </div>
-              ))
+              wpSites.map((site, index) => {
+                const isCenter = index === 2;
+                const isEdge = index === 0 || index === 4;
+                const isNearCenter = index === 1 || index === 3;
+                
+                return (
+                  <div 
+                    key={site.id}
+                    className={`
+                      ${isCenter ? 'w-28 h-28 md:w-36 md:h-36 shadow-2xl z-10' : ''}
+                      ${isNearCenter ? 'w-24 h-24 md:w-32 md:h-32 shadow-xl opacity-90' : ''}
+                      ${isEdge ? 'w-20 h-20 md:w-28 md:h-28 shadow-lg opacity-60' : ''}
+                      rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300
+                    `}
+                  >
+                    {site.favicon ? (
+                      <img 
+                        src={site.favicon} 
+                        alt={site.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Globe className={`${isCenter ? 'w-16 h-16 md:w-20 md:h-20' : 'w-12 h-12 md:w-16 md:h-16'} text-[#bf5af2]`} />
+                    )}
+                  </div>
+                );
+              })
             ) : (
               <>
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-                  <FileText className="w-10 h-10 md:w-12 md:h-12 text-[#64d2ff]" />
+                <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-60">
+                  <FileText className="w-10 h-10 md:w-14 md:h-14 text-[#64d2ff]" />
                 </div>
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-                  <Globe className="w-10 h-10 md:w-12 md:h-12 text-[#bf5af2]" />
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90">
+                  <Globe className="w-12 h-12 md:w-16 md:h-16 text-[#bf5af2]" />
                 </div>
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl -mb-2">
-                  <Zap className="w-12 h-12 md:w-14 md:h-14 text-[#ff6b6b]" />
+                <div className="w-28 h-28 md:w-36 md:h-36 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10">
+                  <Zap className="w-16 h-16 md:w-20 md:h-20 text-[#ff6b6b]" />
                 </div>
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-                  <BarChart3 className="w-10 h-10 md:w-12 md:h-12 text-[#30d158]" />
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90">
+                  <BarChart3 className="w-12 h-12 md:w-16 md:h-16 text-[#30d158]" />
                 </div>
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg">
-                  <PenTool className="w-10 h-10 md:w-12 md:h-12 text-[#ffd60a]" />
+                <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-60">
+                  <PenTool className="w-10 h-10 md:w-14 md:h-14 text-[#ffd60a]" />
                 </div>
               </>
             )}
