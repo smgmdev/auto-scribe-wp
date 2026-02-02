@@ -159,34 +159,40 @@ const GradientScrollReveal = ({
 // Scroll-triggered background color section - Apple Wallet style
 const ScrollColorSection = () => {
   const coralCardRef = useRef<HTMLDivElement>(null);
+  const localLibraryRef = useRef<HTMLDivElement>(null);
+  const globalLibraryRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
 
   useEffect(() => {
     const coralCard = coralCardRef.current;
+    const localLibrary = localLibraryRef.current;
+    const globalLibrary = globalLibraryRef.current;
     
-    if (!coralCard) return;
+    if (!coralCard || !localLibrary || !globalLibrary) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-          setBgColor('#f87171'); // Coral when coral card is visible
-        } else {
-          // Check if we should go back to white
-          const coralRect = coralCard.getBoundingClientRect();
-          if (coralRect.top > window.innerHeight * 0.5) {
-            setBgColor('#ffffff'); // Back to white when scrolling out at top
-          }
-        }
-      },
-      {
-        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-        rootMargin: '-10% 0px -10% 0px'
+    const handleScroll = () => {
+      const viewportCenter = window.innerHeight / 2;
+      
+      const coralRect = coralCard.getBoundingClientRect();
+      const localRect = localLibrary.getBoundingClientRect();
+      const globalRect = globalLibrary.getBoundingClientRect();
+      
+      // Check which section is most in view (closest to center)
+      if (globalRect.top < viewportCenter && globalRect.bottom > viewportCenter * 0.5) {
+        setBgColor('#6cc24a'); // Green for Global Media Library
+      } else if (localRect.top < viewportCenter && localRect.bottom > viewportCenter * 0.5) {
+        setBgColor('#d5d5d7'); // Light grey for Local Media Library
+      } else if (coralRect.top < viewportCenter && coralRect.bottom > viewportCenter * 0.3) {
+        setBgColor('#f87171'); // Coral for main card
+      } else if (coralRect.top > viewportCenter) {
+        setBgColor('#ffffff'); // White when scrolled above
       }
-    );
+    };
 
-    observer.observe(coralCard);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
 
-    return () => observer.disconnect();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
@@ -248,7 +254,7 @@ const ScrollColorSection = () => {
         </div>
 
         {/* Local Media Library Section */}
-        <div className="mt-16 bg-[#d5d5d7] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
+        <div ref={localLibraryRef} className="mt-16 bg-[#d5d5d7] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] via-[#c44cff] to-[#ffeb3b] flex items-center justify-center">
@@ -299,7 +305,7 @@ const ScrollColorSection = () => {
         </div>
 
         {/* Global Media Library Section */}
-        <div className="mt-16 bg-[#6cc24a] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div ref={globalLibraryRef} className="mt-16 bg-[#6cc24a] rounded-[40px] p-12 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-[#2d2d2d] border border-[#3d3d3d] flex items-center justify-center">
