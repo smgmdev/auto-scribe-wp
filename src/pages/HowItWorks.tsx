@@ -284,10 +284,10 @@ const ScrollColorSection = () => {
           
           {/* Links */}
           <div className="flex items-center justify-center gap-6">
-            <a href="/auth" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+            <a href="/auth" className="text-[#86868b] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Get started <span className="text-xl">↗</span>
             </a>
-            <a href="#self-publishing" className="text-[#2997ff] text-lg hover:underline inline-flex items-center gap-1">
+            <a href="#self-publishing" className="text-[#86868b] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Learn more <span className="text-xl">›</span>
             </a>
           </div>
