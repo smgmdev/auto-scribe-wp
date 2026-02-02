@@ -167,6 +167,7 @@ const ScrollColorSection = ({
   const globalLibraryRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
   const [wpSites, setWpSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
+  const [mediaSites, setMediaSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
 
   // Fetch WordPress sites with favicons
   useEffect(() => {
@@ -180,6 +181,25 @@ const ScrollColorSection = ({
       }
     };
     fetchSites();
+  }, []);
+
+  // Fetch media sites from Business category
+  useEffect(() => {
+    const fetchMediaSites = async () => {
+      const { data } = await supabase
+        .from('media_sites')
+        .select('id, name, favicon')
+        .eq('subcategory', 'Business and Finance')
+        .not('favicon', 'is', null)
+        .limit(20);
+      
+      if (data && data.length > 0) {
+        // Shuffle and take 5 random sites
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        setMediaSites(shuffled.slice(0, 5));
+      }
+    };
+    fetchMediaSites();
   }, []);
 
   useEffect(() => {
@@ -399,44 +419,61 @@ const ScrollColorSection = ({
             </a>
           </div>
           
-          {/* Decorative Visual Elements */}
-          <div className="relative mt-12 h-64 md:h-80">
-            {/* Central Glowing Orb */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-[#ff6bef] via-[#c44cff] to-[#ff6bef] opacity-40 blur-2xl" />
+          {/* Media Site Logos Row */}
+          <div className="relative mt-12">
+            {/* Left fade overlay */}
+            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-28 bg-gradient-to-r from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
+            {/* Right fade overlay */}
+            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-28 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
             
-            {/* Central Icon */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-[#3a3a3c] to-[#2d2d2d] border border-[#4d4d4d] flex items-center justify-center shadow-2xl">
-              <Building2 className="w-16 h-16 md:w-20 md:h-20 text-[#bf5af2]" />
-            </div>
-            
-            {/* Floating Bubble 1 - Left */}
-            <div className="absolute left-8 md:left-16 top-1/2 -translate-y-1/2">
-              <div className="relative">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-[#2997ff] to-[#0071e3] opacity-80 flex items-center justify-center">
-                  <Newspaper className="w-10 h-10 md:w-12 md:h-12 text-white" />
-                </div>
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-[#86868b] whitespace-nowrap">News Sites</span>
-              </div>
-            </div>
-            
-            {/* Floating Bubble 2 - Right */}
-            <div className="absolute right-8 md:right-16 top-1/3">
-              <div className="relative">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#30d158] to-[#28a745] opacity-80 flex items-center justify-center">
-                  <TrendingUp className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                </div>
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-[#86868b] whitespace-nowrap">PR Agencies</span>
-              </div>
-            </div>
-            
-            {/* Floating Bubble 3 - Bottom Right */}
-            <div className="absolute right-16 md:right-24 bottom-4">
-              <div className="relative">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#ff9f0a] to-[#ff6b00] opacity-80 flex items-center justify-center">
-                  <Users className="w-7 h-7 md:w-8 md:h-8 text-white" />
-                </div>
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-[#86868b] whitespace-nowrap">Global Reach</span>
-              </div>
+            <div className="flex justify-center items-center gap-3 md:gap-4">
+              {mediaSites.length > 0 ? (
+                mediaSites.map((site, index) => {
+                  const isCenter = index === 2;
+                  const isEdge = index === 0 || index === 4;
+                  const isNearCenter = index === 1 || index === 3;
+                  
+                  return (
+                    <div 
+                      key={site.id}
+                      className={`
+                        ${isCenter ? 'w-28 h-28 md:w-36 md:h-36 shadow-2xl z-10' : ''}
+                        ${isNearCenter ? 'w-24 h-24 md:w-32 md:h-32 shadow-xl opacity-90' : ''}
+                        ${isEdge ? 'w-20 h-20 md:w-28 md:h-28 shadow-lg opacity-50' : ''}
+                        rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300 flex-shrink-0
+                      `}
+                    >
+                      {site.favicon ? (
+                        <img 
+                          src={site.favicon} 
+                          alt={site.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Building2 className={`${isCenter ? 'w-16 h-16 md:w-20 md:h-20' : 'w-12 h-12 md:w-16 md:h-16'} text-[#bf5af2]`} />
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <>
+                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
+                    <Newspaper className="w-10 h-10 md:w-14 md:h-14 text-[#2997ff]" />
+                  </div>
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
+                    <TrendingUp className="w-12 h-12 md:w-16 md:h-16 text-[#30d158]" />
+                  </div>
+                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10 flex-shrink-0">
+                    <Building2 className="w-16 h-16 md:w-20 md:h-20 text-[#bf5af2]" />
+                  </div>
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
+                    <Users className="w-12 h-12 md:w-16 md:h-16 text-[#ff9f0a]" />
+                  </div>
+                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
+                    <Globe className="w-10 h-10 md:w-14 md:h-14 text-[#ff6b6b]" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
