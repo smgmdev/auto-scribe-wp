@@ -281,12 +281,12 @@ export default function MediaBuying() {
         {/* Media site favicons row - full width, clipped at edges */}
         <div className="flex items-center justify-center gap-1 md:gap-2 mt-16">
           {/* First 6 icons */}
-          {shuffledSites.slice(0, 6).map((site) => (
+          {(shuffledSites.length > 0 ? shuffledSites.slice(0, 6) : Array(6).fill(null)).map((site, index) => (
             <div
-              key={site.id}
+              key={site?.id || `placeholder-left-${index}`}
               className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
             >
-              {site.favicon ? (
+              {site?.favicon ? (
                 <img 
                   src={site.favicon} 
                   alt={site.name} 
@@ -294,7 +294,7 @@ export default function MediaBuying() {
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full bg-muted" />
+                <div className="w-full h-full bg-gray-200 animate-pulse" />
               )}
             </div>
           ))}
@@ -305,12 +305,12 @@ export default function MediaBuying() {
           </div>
           
           {/* Last 6 icons */}
-          {shuffledSites.slice(6, 12).map((site) => (
+          {(shuffledSites.length > 0 ? shuffledSites.slice(6, 12) : Array(6).fill(null)).map((site, index) => (
             <div
-              key={site.id}
+              key={site?.id || `placeholder-right-${index}`}
               className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
             >
-              {site.favicon ? (
+              {site?.favicon ? (
                 <img 
                   src={site.favicon} 
                   alt={site.name} 
@@ -318,7 +318,7 @@ export default function MediaBuying() {
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full bg-muted" />
+                <div className="w-full h-full bg-gray-200 animate-pulse" />
               )}
             </div>
           ))}
