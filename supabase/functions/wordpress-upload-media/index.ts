@@ -144,8 +144,25 @@ Deno.serve(async (req) => {
     if (!wpResponse.ok) {
       const errorData = await wpResponse.json().catch(() => ({}));
       console.error('[wordpress-upload-media] WP API error:', wpResponse.status, errorData);
+      
+      // Check for specific WordPress permission errors and provide clearer messages
+      let userFriendlyError = errorData.message || 'Failed to upload media';
+      
+      if (errorData.message?.includes('Unable to create directory') || 
+          errorData.message?.includes('parent directory writable')) {
+        userFriendlyError = 'WordPress server permission error: The uploads folder is not writable. Please contact your WordPress hosting provider to fix folder permissions for wp-content/uploads/.';
+      } else if (errorData.code === 'rest_upload_no_space') {
+        userFriendlyError = 'WordPress server has run out of disk space. Please contact your hosting provider.';
+      } else if (errorData.code === 'rest_upload_file_too_big') {
+        userFriendlyError = 'The image file is too large for this WordPress site. Try using a smaller image.';
+      }
+      
       return new Response(
-        JSON.stringify({ error: errorData.message || 'Failed to upload media' }),
+        JSON.stringify({ 
+          error: userFriendlyError,
+          wordpress_error: errorData.message,
+          code: errorData.code
+        }),
         { status: wpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
