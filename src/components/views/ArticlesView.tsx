@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus } from 'lucide-react';
+import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
@@ -44,6 +44,8 @@ export function ArticlesView() {
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingTitle, setDeletingTitle] = useState<string>('');
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
   const getSiteInfo = (article: Article) => {
     // Use stored name/favicon if available, otherwise try to look up from sites
@@ -69,17 +71,33 @@ export function ArticlesView() {
   const handleDeleteConfirm = async () => {
     if (!articleToDelete) return;
     
+    const titleToDelete = articleToDelete.title;
+    const articleId = articleToDelete.id;
+    
+    // Close dialog immediately and show loading overlay
+    setDeletingTitle(titleToDelete);
+    setArticleToDelete(null);
     setIsDeleting(true);
-    const success = await deleteArticle(articleToDelete.id);
+    
+    const success = await deleteArticle(articleId);
+    
     setIsDeleting(false);
     
     if (success) {
+      // Show success overlay
+      setShowDeleteSuccess(true);
+      setTimeout(() => {
+        setShowDeleteSuccess(false);
+        setDeletingTitle('');
+      }, 2000);
+    } else {
+      setDeletingTitle('');
       toast({
-        title: "Article deleted",
-        description: `"${articleToDelete.title}" has been removed`,
+        title: "Delete failed",
+        description: "Could not delete the article. Please try again.",
+        variant: "destructive"
       });
     }
-    setArticleToDelete(null);
   };
 
   const publishedArticles = articles.filter(a => a.status === 'published');
@@ -228,7 +246,36 @@ export function ArticlesView() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in relative">
+      {/* Deleting Overlay */}
+      {isDeleting && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+            <Loader2 className="h-10 w-10 animate-spin text-destructive" />
+            <div className="text-center">
+              <p className="text-lg font-medium text-foreground">Deleting Article...</p>
+              <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being removed</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Success Overlay */}
+      {showDeleteSuccess && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+            <div className="relative">
+              <div className="h-16 w-16 rounded-full bg-success/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
+                <CheckCircle2 className="h-10 w-10 text-success" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-semibold text-foreground">Article Deleted!</p>
+              <p className="text-sm text-muted-foreground mt-2">"{deletingTitle}" has been removed</p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -330,13 +377,12 @@ export function ArticlesView() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting} className="hover:bg-black hover:text-white">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="hover:bg-black hover:text-white">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
-              disabled={isDeleting}
               className="bg-destructive text-destructive-foreground border border-transparent transition-all duration-300 hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
             >
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
