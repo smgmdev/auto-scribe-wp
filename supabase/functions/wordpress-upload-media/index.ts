@@ -125,12 +125,14 @@ Deno.serve(async (req) => {
     const finalFilename = `${sanitizedName}-${Date.now()}.${extension}`;
 
     // Create FormData for WordPress
+    // IMPORTANT: Always send caption field (even if empty) to prevent WordPress
+    // from using embedded image EXIF/IPTC metadata as the caption
     const wpFormData = new FormData();
     wpFormData.append('file', file, finalFilename);
-    if (title) wpFormData.append('title', title);
-    if (altText) wpFormData.append('alt_text', altText);
-    if (caption) wpFormData.append('caption', caption);
-    if (description) wpFormData.append('description', description);
+    wpFormData.append('title', title || '');
+    wpFormData.append('alt_text', altText || '');
+    wpFormData.append('caption', caption); // Always send, even if empty string
+    wpFormData.append('description', description || '');
 
     // Upload to WordPress with retry logic
     const wpResponse = await uploadWithRetry(
