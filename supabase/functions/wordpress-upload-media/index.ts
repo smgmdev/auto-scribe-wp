@@ -169,13 +169,51 @@ Deno.serve(async (req) => {
       );
     }
 
-    const data = await wpResponse.json();
-    console.log('[wordpress-upload-media] Media uploaded successfully:', data.id);
+    const uploadData = await wpResponse.json();
+    console.log('[wordpress-upload-media] Media uploaded successfully:', uploadData.id);
+
+    // IMPORTANT: WordPress extracts EXIF/IPTC metadata from the image during upload.
+    // To ensure our values (or empty values) take precedence, we must make a PATCH
+    // request to explicitly set the metadata fields AFTER the upload completes.
+    // This will override any auto-extracted metadata from the image file.
+    console.log('[wordpress-upload-media] Overriding metadata to clear auto-extracted values...');
+    
+    const metadataPayload = {
+      title: title || '', // Empty string to clear
+      alt_text: altText || '', // Empty string to clear
+      caption: caption || '', // Empty string to clear (this was the main issue)
+      description: description || '', // Empty string to clear
+    };
+
+    try {
+      const patchResponse = await fetch(
+        `${baseUrl}/wp-json/wp/v2/media/${uploadData.id}`,
+        {
+          method: 'POST', // WordPress REST API uses POST with _method or just POST for updates
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(metadataPayload),
+        }
+      );
+
+      if (patchResponse.ok) {
+        console.log('[wordpress-upload-media] Metadata override successful');
+      } else {
+        const patchError = await patchResponse.json().catch(() => ({}));
+        console.warn('[wordpress-upload-media] Metadata override failed (non-critical):', patchError);
+        // Don't fail the whole upload, just log the warning
+      }
+    } catch (patchErr) {
+      console.warn('[wordpress-upload-media] Metadata override request failed (non-critical):', patchErr);
+      // Don't fail the whole upload for metadata override failure
+    }
 
     return new Response(
       JSON.stringify({
-        id: data.id,
-        source_url: data.source_url,
+        id: uploadData.id,
+        source_url: uploadData.source_url,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
