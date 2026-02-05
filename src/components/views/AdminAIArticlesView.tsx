@@ -670,13 +670,13 @@ export function AdminAIArticlesView() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel className="hover:bg-black hover:text-white">Cancel</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => {
                                 setDeletingArticleId(article.id);
                                 deleteMutation.mutate(article);
                               }}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              className="bg-destructive text-destructive-foreground hover:!bg-transparent hover:!text-destructive hover:!border-destructive border border-transparent"
                             >
                               Delete
                             </AlertDialogAction>
