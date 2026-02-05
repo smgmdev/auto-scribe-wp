@@ -1,5 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -13,7 +11,7 @@ Deno.serve(async (req) => {
   try {
     const { siteId } = await req.json();
     
-    console.log('[wordpress-get-categories] Request received for site:', siteId);
+    console.log('[wordpress-get-categories] Request for site:', siteId);
 
     if (!siteId) {
       return new Response(
@@ -24,27 +22,29 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Fetch WordPress site credentials directly via REST API
+    const siteRes = await fetch(`${supabaseUrl}/rest/v1/wordpress_sites?id=eq.${siteId}&connected=eq.true&select=id,url,username,app_password,name`, {
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'apikey': supabaseServiceKey,
+      },
+    });
+    
+    const sites = await siteRes.json();
+    const site = sites?.[0];
 
-    const { data: site, error: siteError } = await supabase
-      .from('wordpress_sites')
-      .select('id, url, username, app_password, name')
-      .eq('id', siteId)
-      .eq('connected', true)
-      .maybeSingle();
-
-    if (siteError || !site) {
-      console.error('[wordpress-get-categories] Site not found:', siteError);
+    if (!site) {
+      console.error('[wordpress-get-categories] Site not found');
       return new Response(
         JSON.stringify({ categories: [], error: 'WordPress site not found or not connected' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('[wordpress-get-categories] Fetching categories for:', site.name);
+    console.log('[wordpress-get-categories] Fetching for:', site.name);
 
     const credentials = btoa(`${site.username}:${site.app_password}`);
-    const authHeader = `Basic ${credentials}`;
     const baseUrl = site.url.replace(/\/+$/, '');
 
     const controller = new AbortController();
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     try {
       wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
         headers: {
-          'Authorization': authHeader,
+          'Authorization': `Basic ${credentials}`,
           'Content-Type': 'application/json',
         },
         signal: controller.signal,
