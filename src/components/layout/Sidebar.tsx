@@ -105,7 +105,15 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
             { id: 'admin-all-news', label: 'All', icon: null }
           ]
         },
-        { id: 'admin-ai-publishing', label: 'AI Publishing', icon: null }
+        { 
+          id: 'admin-ai-publishing', 
+          label: 'AI Publishing', 
+          icon: null,
+          submenu: [
+            { id: 'admin-ai-sources', label: 'AI Sources', icon: null },
+            { id: 'admin-ai-settings', label: 'Settings', icon: null }
+          ]
+        }
       ]
     }];
   }
@@ -209,8 +217,9 @@ export function Sidebar({
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     const adminAgenciesIds = ['admin-agencies', 'admin-media-management'];
-    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-publishing'];
+    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-sources', 'admin-ai-settings'];
     const pressReleasesIds = ['admin-new-press-release', 'admin-all-news'];
+    const aiPublishingIds = ['admin-ai-sources', 'admin-ai-settings'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
@@ -229,6 +238,9 @@ export function Sidebar({
     }
     if (pressReleasesIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'admin-press-releases': true }));
+    }
+    if (aiPublishingIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'admin-ai-publishing': true }));
     }
   }, [currentView, hasUserNavigated]);
 
