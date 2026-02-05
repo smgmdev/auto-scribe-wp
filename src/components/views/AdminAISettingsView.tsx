@@ -118,6 +118,7 @@ export function AdminAISettingsView() {
   // Categories for existing settings (per setting id)
   const [settingCategories, setSettingCategories] = useState<Record<string, WPCategory[]>>({});
   const [loadingCategories, setLoadingCategories] = useState<Record<string, boolean>>({});
+  const [updatingSettingId, setUpdatingSettingId] = useState<string | null>(null);
 
   // Fetch settings
   const { data: settings, isLoading: settingsLoading } = useQuery({
@@ -194,11 +195,12 @@ export function AdminAISettingsView() {
   useEffect(() => {
     if (settings) {
       settings.forEach(setting => {
-        if (setting.target_site_id && !settingCategories[setting.id]) {
+        if (setting.target_site_id && !settingCategories[setting.id] && !loadingCategories[setting.id]) {
           fetchCategoriesForSetting(setting.id, setting.target_site_id);
         }
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
   // Add new setting mutation
@@ -249,6 +251,7 @@ export function AdminAISettingsView() {
   // Update setting mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<AIPublishingSetting> }) => {
+      setUpdatingSettingId(id);
       const { error } = await supabase
         .from('ai_publishing_settings')
         .update(updates)
@@ -256,10 +259,12 @@ export function AdminAISettingsView() {
       if (error) throw error;
     },
     onSuccess: () => {
+      setUpdatingSettingId(null);
       queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
       toast({ title: "Settings updated" });
     },
     onError: (error) => {
+      setUpdatingSettingId(null);
       toast({
         title: "Update failed",
         description: error instanceof Error ? error.message : "Unknown error",
@@ -769,7 +774,7 @@ export function AdminAISettingsView() {
                       <Switch
                         checked={setting.enabled}
                         onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
-                        disabled={updateMutation.isPending}
+                        disabled={updatingSettingId === setting.id}
                       />
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-lg border">
@@ -777,7 +782,7 @@ export function AdminAISettingsView() {
                       <Switch
                         checked={setting.auto_publish}
                         onCheckedChange={(checked) => handleToggle(setting.id, 'auto_publish', checked)}
-                        disabled={updateMutation.isPending}
+                        disabled={updatingSettingId === setting.id}
                       />
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-lg border">
@@ -785,7 +790,7 @@ export function AdminAISettingsView() {
                       <Switch
                         checked={setting.rewrite_enabled}
                         onCheckedChange={(checked) => handleToggle(setting.id, 'rewrite_enabled', checked)}
-                        disabled={updateMutation.isPending}
+                        disabled={updatingSettingId === setting.id}
                       />
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-lg border">
@@ -793,7 +798,7 @@ export function AdminAISettingsView() {
                       <Switch
                         checked={setting.fetch_images}
                         onCheckedChange={(checked) => handleToggle(setting.id, 'fetch_images', checked)}
-                        disabled={updateMutation.isPending}
+                        disabled={updatingSettingId === setting.id}
                       />
                     </div>
                   </div>
