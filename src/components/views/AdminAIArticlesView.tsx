@@ -486,16 +486,14 @@ export function AdminAIArticlesView() {
             <p className="text-muted-foreground">View and manage auto-published articles</p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
+        <Button 
           onClick={() => {
             queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
             setOffset(0);
             setHasMore(true);
           }}
           disabled={isLoading}
-          className="hover:bg-black hover:text-white hover:border-black"
+          variant="outline"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh
