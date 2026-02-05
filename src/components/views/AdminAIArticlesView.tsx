@@ -173,6 +173,13 @@ export function AdminAIArticlesView() {
     },
   });
 
+  // Reset pagination when filters change
+  useEffect(() => {
+    setDisplayedArticles([]);
+    setOffset(0);
+    setHasMore(true);
+  }, [selectedSource, selectedSite]);
+
   // Update displayed articles and pagination state when articles are fetched
   useEffect(() => {
     if (articlesSuccess && articles) {
@@ -214,11 +221,18 @@ export function AdminAIArticlesView() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const newDisplayed = [...displayedArticles, ...data as PublishedSource[]];
-        setDisplayedArticles(newDisplayed);
-        setOffset(newDisplayed.length);
+        // Filter out any duplicates by ID before adding
+        const existingIds = new Set(displayedArticles.map(a => a.id));
+        const newArticles = (data as PublishedSource[]).filter(a => !existingIds.has(a.id));
+        
+        if (newArticles.length > 0) {
+          const newDisplayed = [...displayedArticles, ...newArticles];
+          setDisplayedArticles(newDisplayed);
+          setOffset(newDisplayed.length);
+        }
+        
         // If we got less than a full page, no more articles
-        setHasMore(data.length === ARTICLES_PER_PAGE && newDisplayed.length < (totalCount || 0));
+        setHasMore(data.length === ARTICLES_PER_PAGE && (displayedArticles.length + newArticles.length) < (totalCount || 0));
       } else {
         setHasMore(false);
       }
