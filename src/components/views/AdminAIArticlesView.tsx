@@ -52,6 +52,32 @@ export function AdminAIArticlesView() {
   const [editMetaDescription, setEditMetaDescription] = useState('');
   const [editTags, setEditTags] = useState('');
   const [editImageCaption, setEditImageCaption] = useState('');
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+
+  // Function to generate AI description
+  const generateDescription = async (title: string) => {
+    setIsGeneratingDescription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-description', {
+        body: { title }
+      });
+      
+      if (error) throw error;
+      if (data?.description) {
+        setEditMetaDescription(data.description);
+      }
+    } catch (error) {
+      console.error('Failed to generate description:', error);
+      toast({
+        title: "Generation failed",
+        description: "Could not generate description. Please enter manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   // Fetch all AI publishing settings for filter dropdown
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['ai-publishing-settings-filter'],
@@ -295,9 +321,16 @@ export function AdminAIArticlesView() {
     setEditingArticle(article);
     setEditTitle(article.ai_title || article.source_title);
     setEditFocusKeyword(article.focus_keyword || '');
-    setEditMetaDescription(article.meta_description || '');
     setEditTags(article.tags?.join(', ') || '');
     setEditImageCaption(article.image_caption || '');
+    
+    // Auto-generate description if empty
+    if (!article.meta_description) {
+      setEditMetaDescription('');
+      generateDescription(article.ai_title || article.source_title);
+    } else {
+      setEditMetaDescription(article.meta_description);
+    }
   };
 
   const handleSaveEdit = () => {
@@ -549,18 +582,42 @@ export function AdminAIArticlesView() {
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="metaDescription">Description</Label>
-              <Textarea
-                id="metaDescription"
-                value={editMetaDescription}
-                onChange={(e) => setEditMetaDescription(e.target.value)}
-                placeholder={editingArticle?.meta_description || "SEO meta description (150-160 characters)"}
-                className="min-h-[80px] resize-none"
-                rows={3}
-              />
-              {editingArticle?.meta_description && !editMetaDescription && (
-                <p className="text-xs text-muted-foreground">Current: {editingArticle.meta_description}</p>
-              )}
+              <div className="flex items-center justify-between">
+                <Label htmlFor="metaDescription">Description</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => generateDescription(editTitle)}
+                  disabled={isGeneratingDescription}
+                  className="h-7 text-xs"
+                >
+                  {isGeneratingDescription ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Regenerate'
+                  )}
+                </Button>
+              </div>
+              <div className="relative">
+                <Textarea
+                  id="metaDescription"
+                  value={editMetaDescription}
+                  onChange={(e) => setEditMetaDescription(e.target.value)}
+                  placeholder={isGeneratingDescription ? "Generating description..." : "SEO meta description (150-160 characters)"}
+                  className="min-h-[80px] resize-none"
+                  rows={3}
+                  disabled={isGeneratingDescription}
+                />
+                {isGeneratingDescription && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-md">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {editMetaDescription.length}/160 characters
               </p>
