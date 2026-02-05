@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Plus, Trash2, Power, PowerOff, Save, Loader2 } from 'lucide-react';
+import { Settings, Plus, Trash2, Power, PowerOff, Save, Loader2, Eye, FlaskConical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +22,8 @@ interface AIPublishingSetting {
   enabled: boolean;
   auto_publish: boolean;
   target_site_id: string | null;
+  target_category_id: number | null;
+  target_category_name: string | null;
   rewrite_enabled: boolean;
   fetch_images: boolean;
   publish_interval_minutes: number;
@@ -38,6 +41,36 @@ interface WordPressSite {
   connected: boolean;
 }
 
+interface WPCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface SourceData {
+  title: string;
+  description: string;
+  link: string;
+  pubDate: string;
+  thumbnail?: string;
+  imageSource?: string;
+}
+
+interface GeneratedData {
+  title: string;
+  content: string;
+  focusKeyword: string;
+  metaDescription: string;
+  tag: string;
+  imageUrl?: string;
+  imageCaption?: string;
+}
+
+interface TestPreviewResult {
+  sourceData: SourceData;
+  generatedData: GeneratedData;
+}
+
 const TONE_OPTIONS = [
   { value: 'neutral', label: 'Neutral' },
   { value: 'professional', label: 'Professional' },
@@ -47,6 +80,7 @@ const TONE_OPTIONS = [
 ];
 
 const INTERVAL_OPTIONS = [
+  { value: 5, label: 'Every 5 minutes' },
   { value: 15, label: 'Every 15 minutes' },
   { value: 30, label: 'Every 30 minutes' },
   { value: 60, label: 'Every hour' },
@@ -66,11 +100,24 @@ export function AdminAISettingsView() {
     enabled: false,
     auto_publish: false,
     target_site_id: '',
+    target_category_id: null as number | null,
+    target_category_name: null as string | null,
     rewrite_enabled: true,
     fetch_images: true,
-    publish_interval_minutes: 60,
+    publish_interval_minutes: 5,
     tone: 'professional',
   });
+  const [newSourceCategories, setNewSourceCategories] = useState<WPCategory[]>([]);
+  const [loadingNewCategories, setLoadingNewCategories] = useState(false);
+  
+  // Test preview state
+  const [testPreviewResult, setTestPreviewResult] = useState<TestPreviewResult | null>(null);
+  const [testPreviewLoading, setTestPreviewLoading] = useState(false);
+  const [showTestPreview, setShowTestPreview] = useState(false);
+
+  // Categories for existing settings (per setting id)
+  const [settingCategories, setSettingCategories] = useState<Record<string, WPCategory[]>>({});
+  const [loadingCategories, setLoadingCategories] = useState<Record<string, boolean>>({});
 
   // Fetch settings
   const { data: settings, isLoading: settingsLoading } = useQuery({
@@ -95,6 +142,65 @@ export function AdminAISettingsView() {
     },
   });
 
+  // Fetch categories for new source when site changes
+  useEffect(() => {
+    if (!newSource.target_site_id) {
+      setNewSourceCategories([]);
+      return;
+    }
+    
+    const fetchCategories = async () => {
+      setLoadingNewCategories(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('wordpress-get-categories', {
+          body: { siteId: newSource.target_site_id },
+        });
+        if (error) throw error;
+        setNewSourceCategories(data.categories || []);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setNewSourceCategories([]);
+      } finally {
+        setLoadingNewCategories(false);
+      }
+    };
+    
+    fetchCategories();
+  }, [newSource.target_site_id]);
+
+  // Fetch categories for existing settings when site changes
+  const fetchCategoriesForSetting = async (settingId: string, siteId: string) => {
+    if (!siteId) {
+      setSettingCategories(prev => ({ ...prev, [settingId]: [] }));
+      return;
+    }
+    
+    setLoadingCategories(prev => ({ ...prev, [settingId]: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke('wordpress-get-categories', {
+        body: { siteId },
+      });
+      if (error) throw error;
+      setSettingCategories(prev => ({ ...prev, [settingId]: data.categories || [] }));
+    } catch (err) {
+      console.error('Failed to fetch categories:', err);
+      setSettingCategories(prev => ({ ...prev, [settingId]: [] }));
+    } finally {
+      setLoadingCategories(prev => ({ ...prev, [settingId]: false }));
+    }
+  };
+
+  // Load categories for existing settings on mount
+  useEffect(() => {
+    if (settings) {
+      settings.forEach(setting => {
+        if (setting.target_site_id && !settingCategories[setting.id]) {
+          fetchCategoriesForSetting(setting.id, setting.target_site_id);
+        }
+      });
+    }
+  }, [settings]);
+
   // Add new setting mutation
   const addMutation = useMutation({
     mutationFn: async (setting: typeof newSource) => {
@@ -103,6 +209,8 @@ export function AdminAISettingsView() {
         .insert({
           ...setting,
           target_site_id: setting.target_site_id || null,
+          target_category_id: setting.target_category_id,
+          target_category_name: setting.target_category_name,
           created_by: user?.id,
         })
         .select()
@@ -119,11 +227,14 @@ export function AdminAISettingsView() {
         enabled: false,
         auto_publish: false,
         target_site_id: '',
+        target_category_id: null,
+        target_category_name: null,
         rewrite_enabled: true,
         fetch_images: true,
-        publish_interval_minutes: 60,
+        publish_interval_minutes: 5,
         tone: 'professional',
       });
+      setNewSourceCategories([]);
       toast({ title: "Source added", description: "AI publishing source has been configured." });
     },
     onError: (error) => {
@@ -187,6 +298,61 @@ export function AdminAISettingsView() {
     updateMutation.mutate({ id, updates: { [field]: value } });
   };
 
+  const handleSiteChange = (settingId: string, siteId: string) => {
+    // Update the site and reset category
+    updateMutation.mutate({ 
+      id: settingId, 
+      updates: { 
+        target_site_id: siteId,
+        target_category_id: null,
+        target_category_name: null,
+      } 
+    });
+    // Fetch new categories
+    fetchCategoriesForSetting(settingId, siteId);
+  };
+
+  const handleCategoryChange = (settingId: string, categoryId: number, categoryName: string) => {
+    updateMutation.mutate({ 
+      id: settingId, 
+      updates: { 
+        target_category_id: categoryId,
+        target_category_name: categoryName,
+      } 
+    });
+  };
+
+  // Test preview function
+  const runTestPreview = async () => {
+    setTestPreviewLoading(true);
+    setTestPreviewResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-test-preview', {
+        body: {
+          sourceUrl: newSource.source_url,
+          tone: newSource.tone,
+          fetchImages: newSource.fetch_images,
+        },
+      });
+      
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+      
+      setTestPreviewResult(data);
+      setShowTestPreview(true);
+      toast({ title: "Test preview generated" });
+    } catch (err) {
+      console.error('Test preview failed:', err);
+      toast({
+        title: "Test preview failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setTestPreviewLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -240,7 +406,12 @@ export function AdminAISettingsView() {
                 <Label>Target WordPress Site</Label>
                 <Select
                   value={newSource.target_site_id}
-                  onValueChange={(value) => setNewSource(s => ({ ...s, target_site_id: value }))}
+                  onValueChange={(value) => setNewSource(s => ({ 
+                    ...s, 
+                    target_site_id: value,
+                    target_category_id: null,
+                    target_category_name: null,
+                  }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a site" />
@@ -259,6 +430,36 @@ export function AdminAISettingsView() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              <div className="space-y-2">
+                <Label>Target Category</Label>
+                <Select
+                  value={newSource.target_category_id?.toString() || ''}
+                  onValueChange={(value) => {
+                    const cat = newSourceCategories.find(c => c.id === parseInt(value));
+                    setNewSource(s => ({ 
+                      ...s, 
+                      target_category_id: parseInt(value),
+                      target_category_name: cat?.name || null,
+                    }));
+                  }}
+                  disabled={!newSource.target_site_id || loadingNewCategories}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingNewCategories ? "Loading categories..." : "Select a category"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {newSourceCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id.toString()}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Writing Tone</Label>
                 <Select
@@ -277,25 +478,24 @@ export function AdminAISettingsView() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Publish Interval</Label>
-              <Select
-                value={String(newSource.publish_interval_minutes)}
-                onValueChange={(value) => setNewSource(s => ({ ...s, publish_interval_minutes: parseInt(value) }))}
-              >
-                <SelectTrigger className="w-full md:w-64">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {INTERVAL_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={String(option.value)}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label>Publish Interval</Label>
+                <Select
+                  value={String(newSource.publish_interval_minutes)}
+                  onValueChange={(value) => setNewSource(s => ({ ...s, publish_interval_minutes: parseInt(value) }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INTERVAL_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={String(option.value)}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Separator />
@@ -331,6 +531,12 @@ export function AdminAISettingsView() {
               </div>
             </div>
 
+            {newSource.fetch_images && (
+              <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+                <strong>Note:</strong> When images are fetched, the AI will automatically add the source attribution (e.g., "Source: finance.yahoo.com") in the image caption.
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button
                 onClick={() => addMutation.mutate(newSource)}
@@ -340,8 +546,118 @@ export function AdminAISettingsView() {
                 <Save className="h-4 w-4 mr-2" />
                 Save Configuration
               </Button>
-              <Button variant="outline" onClick={() => setIsAdding(false)}>
+              <Button
+                variant="outline"
+                onClick={runTestPreview}
+                disabled={testPreviewLoading}
+              >
+                {testPreviewLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FlaskConical className="h-4 w-4 mr-2" />
+                )}
+                Test Preview
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setIsAdding(false);
+                setShowTestPreview(false);
+                setTestPreviewResult(null);
+              }}>
                 Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Test Preview Results */}
+      {showTestPreview && testPreviewResult && (
+        <Card className="border-blue-500/30">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-500" />
+              <CardTitle>Test Preview Results</CardTitle>
+            </div>
+            <CardDescription>Side-by-side comparison of source data vs AI generated content</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Source Data */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Badge variant="outline">Source Data</Badge>
+                </h3>
+                <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Original Title</Label>
+                    <p className="font-medium">{testPreviewResult.sourceData.title}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Description</Label>
+                    <p className="text-sm">{testPreviewResult.sourceData.description}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Source Link</Label>
+                    <p className="text-sm text-blue-500 truncate">{testPreviewResult.sourceData.link}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Published</Label>
+                    <p className="text-sm">{testPreviewResult.sourceData.pubDate}</p>
+                  </div>
+                  {testPreviewResult.sourceData.thumbnail && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Thumbnail</Label>
+                      <img 
+                        src={testPreviewResult.sourceData.thumbnail} 
+                        alt="Source thumbnail" 
+                        className="mt-1 rounded-lg max-h-40 object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Generated Data */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Badge className="bg-green-500/10 text-green-500 border-green-500/30">AI Generated</Badge>
+                </h3>
+                <div className="space-y-3 p-4 rounded-lg border bg-green-500/5">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Rewritten Title</Label>
+                    <p className="font-medium">{testPreviewResult.generatedData.title}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Focus Keyword (SEO)</Label>
+                    <Badge variant="secondary">{testPreviewResult.generatedData.focusKeyword}</Badge>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Meta Description (SEO)</Label>
+                    <p className="text-sm">{testPreviewResult.generatedData.metaDescription}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Tag (same as focus keyword)</Label>
+                    <Badge>{testPreviewResult.generatedData.tag}</Badge>
+                  </div>
+                  {testPreviewResult.generatedData.imageCaption && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Image Caption</Label>
+                      <p className="text-sm italic">{testPreviewResult.generatedData.imageCaption}</p>
+                    </div>
+                  )}
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Article Content Preview</Label>
+                    <ScrollArea className="h-32 mt-1">
+                      <p className="text-sm whitespace-pre-wrap">{testPreviewResult.generatedData.content.slice(0, 500)}...</p>
+                    </ScrollArea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setShowTestPreview(false)}>
+                Close Preview
               </Button>
             </div>
           </CardContent>
@@ -384,6 +700,8 @@ export function AdminAISettingsView() {
         ) : (
           settings?.map((setting) => {
             const targetSite = sites?.find(s => s.id === setting.target_site_id);
+            const categories = settingCategories[setting.id] || [];
+            const isLoadingCats = loadingCategories[setting.id];
             
             return (
               <Card key={setting.id} className={setting.enabled ? 'border-green-500/30' : ''}>
@@ -415,6 +733,9 @@ export function AdminAISettingsView() {
                             <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded" />
                           )}
                           <span className="font-medium">{targetSite.name}</span>
+                          {setting.target_category_name && (
+                            <span className="text-xs">→ {setting.target_category_name}</span>
+                          )}
                         </p>
                       )}
                     </div>
@@ -466,12 +787,12 @@ export function AdminAISettingsView() {
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Target Site</Label>
                       <Select
                         value={setting.target_site_id || ''}
-                        onValueChange={(value) => handleSelectChange(setting.id, 'target_site_id', value)}
+                        onValueChange={(value) => handleSiteChange(setting.id, value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a site" />
@@ -485,6 +806,30 @@ export function AdminAISettingsView() {
                                 )}
                                 {site.name}
                               </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Target Category</Label>
+                      <Select
+                        value={setting.target_category_id?.toString() || ''}
+                        onValueChange={(value) => {
+                          const cat = categories.find(c => c.id === parseInt(value));
+                          if (cat) {
+                            handleCategoryChange(setting.id, cat.id, cat.name);
+                          }
+                        }}
+                        disabled={!setting.target_site_id || isLoadingCats}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingCats ? "Loading..." : "Select category"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
