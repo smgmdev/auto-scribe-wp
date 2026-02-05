@@ -185,6 +185,15 @@ export function AdminAISourcesView() {
                 />
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Description (optional)</Label>
+              <Textarea
+                value={newSource.description}
+                onChange={(e) => setNewSource(s => ({ ...s, description: e.target.value }))}
+                placeholder="Brief description of this source..."
+                rows={2}
+              />
+            </div>
             <div className="flex gap-2 justify-end">
               <Button
                 variant="outline"
