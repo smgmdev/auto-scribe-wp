@@ -602,7 +602,7 @@ export function AdminAISettingsView() {
                 className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
               >
                 {testPreviewLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Test Preview
+                Test Config
               </Button>
               <Button 
                 variant="outline" 
@@ -656,22 +656,6 @@ export function AdminAISettingsView() {
                   <Label className="text-xs text-muted-foreground">Published</Label>
                   <p className="text-sm">{testPreviewResult.sourceData.pubDate}</p>
                 </div>
-                {testPreviewResult.sourceData.thumbnail && (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Thumbnail</Label>
-                    <img 
-                      src={testPreviewResult.sourceData.thumbnail} 
-                      alt="Source thumbnail" 
-                      className="mt-1 rounded-lg max-h-48 object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <Label className="text-xs text-muted-foreground">Original Description / Content</Label>
-                  <div className="mt-1 p-3 bg-background rounded border">
-                    <p className="text-sm whitespace-pre-wrap">{testPreviewResult.sourceData.description}</p>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -699,12 +683,6 @@ export function AdminAISettingsView() {
                   <Label className="text-xs text-muted-foreground">Meta Description (SEO)</Label>
                   <p className="text-sm mt-1 p-2 bg-background rounded border">{testPreviewResult.generatedData.metaDescription}</p>
                 </div>
-                {testPreviewResult.generatedData.imageCaption && (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Image Caption</Label>
-                    <p className="text-sm italic mt-1">{testPreviewResult.generatedData.imageCaption}</p>
-                  </div>
-                )}
                 <div>
                   <Label className="text-xs text-muted-foreground">Full Article Content</Label>
                   <ScrollArea className="h-80 mt-1 p-3 bg-background rounded border">
