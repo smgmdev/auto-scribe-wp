@@ -584,7 +584,7 @@ export function AdminAIArticlesView() {
               {displayedArticles.map((article) => (
                   <div
                     key={article.id}
-                    className="relative flex items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                    className="relative flex flex-col md:flex-row md:items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                   >
                     {/* Deleting overlay */}
                     {deletingArticleId === article.id && (
@@ -618,7 +618,7 @@ export function AdminAIArticlesView() {
                         className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
                       >
                         <span>Source:</span>
-                        <span className="truncate max-w-[350px]">{article.source_url}</span>
+                        <span className="truncate max-w-[200px] md:max-w-[350px]">{article.source_url}</span>
                         <ExternalLink className="h-3 w-3 shrink-0" />
                       </a>
 
@@ -629,7 +629,7 @@ export function AdminAIArticlesView() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
                       {article.wordpress_post_link && (
                         <Button
                           variant="outline"
