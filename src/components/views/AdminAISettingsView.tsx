@@ -572,20 +572,7 @@ export function AdminAISettingsView() {
                   onCheckedChange={(checked) => setNewSource(s => ({ ...s, rewrite_enabled: checked }))}
                 />
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border">
-                <Label className="text-sm">Fetch Images</Label>
-                <Switch
-                  checked={newSource.fetch_images}
-                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, fetch_images: checked }))}
-                />
-              </div>
             </div>
-
-            {newSource.fetch_images && (
-              <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-                <strong>Note:</strong> When images are fetched, the AI will automatically add the source attribution (e.g., "Source: finance.yahoo.com") in the image caption.
-              </div>
-            )}
 
             <div className="flex flex-col md:flex-row gap-2">
               <Button
@@ -843,14 +830,6 @@ export function AdminAISettingsView() {
                       <Switch
                         checked={setting.rewrite_enabled}
                         onCheckedChange={(checked) => handleToggle(setting.id, 'rewrite_enabled', checked)}
-                        disabled={updatingSettingId === setting.id}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border">
-                      <Label className="text-sm">Fetch Images</Label>
-                      <Switch
-                        checked={setting.fetch_images}
-                        onCheckedChange={(checked) => handleToggle(setting.id, 'fetch_images', checked)}
                         disabled={updatingSettingId === setting.id}
                       />
                     </div>

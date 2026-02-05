@@ -24,8 +24,6 @@ interface PublishedSource {
   focus_keyword: string | null;
   meta_description: string | null;
   tags: string[] | null;
-  image_url: string | null;
-  image_caption: string | null;
   wordpress_post_id: number | null;
   wordpress_post_link: string | null;
   word_count: number | null;
@@ -56,7 +54,6 @@ export function AdminAIArticlesView() {
   const [editFocusKeyword, setEditFocusKeyword] = useState('');
   const [editMetaDescription, setEditMetaDescription] = useState('');
   const [editTags, setEditTags] = useState('');
-  const [editImageCaption, setEditImageCaption] = useState('');
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
@@ -331,7 +328,6 @@ export function AdminAIArticlesView() {
       focusKeyword,
       metaDescription,
       tags, 
-      imageCaption,
       wpPostId,
       targetSiteId,
     }: { 
@@ -340,7 +336,6 @@ export function AdminAIArticlesView() {
       focusKeyword: string;
       metaDescription: string;
       tags: string[];
-      imageCaption: string;
       wpPostId: number | null;
       targetSiteId: string | null;
     }) => {
@@ -352,7 +347,6 @@ export function AdminAIArticlesView() {
           focus_keyword: focusKeyword || null,
           meta_description: metaDescription || null,
           tags: tags.length > 0 ? tags : null,
-          image_caption: imageCaption || null,
         })
         .eq('id', id);
       if (error) throw error;
@@ -468,7 +462,6 @@ export function AdminAIArticlesView() {
     setEditTitle(article.ai_title || article.source_title);
     setEditFocusKeyword(article.focus_keyword || '');
     setEditTags(article.tags?.join(', ') || '');
-    setEditImageCaption(article.image_caption || '');
     
     // Auto-generate description if empty
     if (!article.meta_description) {
@@ -488,7 +481,6 @@ export function AdminAIArticlesView() {
         focusKeyword: editFocusKeyword.trim(),
         metaDescription: editMetaDescription.trim(),
         tags: tagsArray,
-        imageCaption: editImageCaption.trim(),
         wpPostId: editingArticle.wordpress_post_id,
         targetSiteId: editingArticle.setting?.target_site_id || null,
       });
@@ -729,33 +721,6 @@ export function AdminAIArticlesView() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            {/* Image Preview */}
-            {editingArticle?.image_url && (
-              <div className="space-y-2">
-                <Label>Featured Image</Label>
-                <div className="relative rounded-lg overflow-hidden border">
-                  <img 
-                    src={editingArticle.image_url} 
-                    alt="Featured" 
-                    className="w-full h-40 object-cover"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Image Caption */}
-            <div className="space-y-2">
-              <Label htmlFor="imageCaption">Image Caption</Label>
-              <Input
-                id="imageCaption"
-                value={editImageCaption}
-                onChange={(e) => setEditImageCaption(e.target.value)}
-                placeholder={editingArticle?.image_caption || "Image caption or credit"}
-              />
-              {editingArticle?.image_caption && !editImageCaption && (
-                <p className="text-xs text-muted-foreground">Current: {editingArticle.image_caption}</p>
-              )}
-            </div>
 
             {/* Title */}
             <div className="space-y-2">
