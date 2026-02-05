@@ -768,22 +768,24 @@ export function AdminAISettingsView() {
                 <CardContent className="pt-6">
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 min-w-0">
                         <h3 className="font-semibold text-lg">{setting.source_name}</h3>
-                        {setting.enabled ? (
-                          <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
-                            <Power className="h-3 w-3 mr-1" />
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            <PowerOff className="h-3 w-3 mr-1" />
-                            Inactive
-                          </Badge>
-                        )}
-                        {setting.auto_publish && (
-                          <Badge variant="outline">Auto-Publish</Badge>
-                        )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {setting.enabled ? (
+                            <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
+                              <Power className="h-3 w-3 mr-1" />
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              <PowerOff className="h-3 w-3 mr-1" />
+                              Inactive
+                            </Badge>
+                          )}
+                          {setting.auto_publish && (
+                            <Badge variant="outline">Auto-Publish</Badge>
+                          )}
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
