@@ -768,7 +768,23 @@ export function AdminAISettingsView() {
                 <CardContent className="pt-6">
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-lg">{setting.source_name}</h3>
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <h3 className="font-semibold text-lg">{setting.source_name}</h3>
+                        {setting.enabled ? (
+                          <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
+                            <Power className="h-3 w-3 mr-1" />
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <PowerOff className="h-3 w-3 mr-1" />
+                            Inactive
+                          </Badge>
+                        )}
+                        {setting.auto_publish && (
+                          <Badge variant="outline">Auto-Publish</Badge>
+                        )}
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -778,22 +794,6 @@ export function AdminAISettingsView() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {setting.enabled ? (
-                        <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
-                          <Power className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          <PowerOff className="h-3 w-3 mr-1" />
-                          Inactive
-                        </Badge>
-                      )}
-                      {setting.auto_publish && (
-                        <Badge variant="outline">Auto-Publish</Badge>
-                      )}
                     </div>
                     <p className="text-sm text-muted-foreground break-all">
                       Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
