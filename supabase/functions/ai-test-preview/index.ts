@@ -13,9 +13,19 @@ Deno.serve(async (req) => {
 
     console.log('[ai-test-preview] Testing with:', { sourceUrl, tone });
 
-    // Use Google News Finance RSS for more recent articles
-    const rssUrl = `https://news.google.com/rss/search?q=finance+OR+stocks+OR+market&hl=en-US&gl=US&ceid=US:en&_t=${Date.now()}`;
-    const rssResponse = await fetch(rssUrl, {
+    // Use the actual source URL provided
+    let fetchUrl = sourceUrl;
+    
+    // For Google News URLs, add cache-busting
+    if (sourceUrl.includes('news.google.com')) {
+      fetchUrl = sourceUrl.includes('?') 
+        ? `${sourceUrl}&_t=${Date.now()}` 
+        : `${sourceUrl}?_t=${Date.now()}`;
+    }
+    
+    console.log('[ai-test-preview] Fetching RSS from:', fetchUrl);
+    
+    const rssResponse = await fetch(fetchUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
