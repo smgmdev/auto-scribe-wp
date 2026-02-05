@@ -285,53 +285,51 @@ export function AdminAISourcesView() {
         ) : sources && sources.length > 0 ? (
           sources.map((source) => (
             <Card key={source.id} className={`transition-colors ${source.enabled ? 'border-green-500/30' : 'border-muted'}`}>
-              <CardContent className="pt-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold">{source.name}</h3>
-                      <Badge variant={source.enabled ? "default" : "secondary"}>
-                        {source.enabled ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">{source.url}</p>
-                    {source.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{source.description}</p>
+              <CardContent className="py-3 px-4 relative">
+                <div className="absolute top-3 right-4 flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleToggleEnabled(source)}
+                    className="h-8 w-8 hover:bg-primary hover:text-primary-foreground"
+                  >
+                    {source.enabled ? (
+                      <Power className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <PowerOff className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Added {format(new Date(source.created_at), 'MMM d, yyyy')}
-                    </p>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditingSource(source)}
+                    className="h-8 w-8 hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteMutation.mutate(source.id)}
+                    className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="pr-32">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="font-semibold">{source.name}</h3>
+                    <Badge variant={source.enabled ? "default" : "secondary"}>
+                      {source.enabled ? 'Active' : 'Inactive'}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleToggleEnabled(source)}
-                      className="hover:bg-primary hover:text-primary-foreground"
-                    >
-                      {source.enabled ? (
-                        <Power className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <PowerOff className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingSource(source)}
-                      className="hover:bg-primary hover:text-primary-foreground"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteMutation.mutate(source.id)}
-                      className="hover:bg-destructive hover:text-destructive-foreground"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <p className="text-sm text-muted-foreground truncate">{source.url}</p>
+                  {source.description && (
+                    <p className="text-sm text-muted-foreground mt-1">{source.description}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Added {format(new Date(source.created_at), 'MMM d, yyyy')}
+                  </p>
                 </div>
               </CardContent>
             </Card>
