@@ -744,9 +744,11 @@ export function AdminAISettingsView() {
               <p className="text-muted-foreground mb-4">
                 Add an AI source to start automatic publishing
               </p>
-              <Button onClick={() => setIsAdding(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Source
+              <Button 
+                onClick={() => setIsAdding(true)}
+                className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+              >
+                New Config
               </Button>
             </CardContent>
           </Card>
