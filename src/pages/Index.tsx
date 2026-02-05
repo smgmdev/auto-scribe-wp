@@ -27,6 +27,7 @@ import { AdminNewPressReleaseView } from '@/components/views/AdminNewPressReleas
 import { AdminAllNewsView } from '@/components/views/AdminAllNewsView';
 import { AdminAISourcesView } from '@/components/views/AdminAISourcesView';
 import { AdminAISettingsView } from '@/components/views/AdminAISettingsView';
+import { AdminAIArticlesView } from '@/components/views/AdminAIArticlesView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,6 +80,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-all-news': AdminAllNewsView,
   'admin-ai-sources': AdminAISourcesView,
   'admin-ai-settings': AdminAISettingsView,
+  'admin-ai-articles': AdminAIArticlesView,
 };
 
 const Index = () => {
