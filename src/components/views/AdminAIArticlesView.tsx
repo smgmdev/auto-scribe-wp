@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil } from 'lucide-react';
+import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -222,11 +222,22 @@ export function AdminAIArticlesView() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(article.source_url, '_blank')}
+                        title="View original source"
+                      >
+                        <Link className="h-4 w-4 mr-1" />
+                        Source
+                      </Button>
+                      
                       {article.wordpress_post_link && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => window.open(article.wordpress_post_link!, '_blank')}
+                          title="View published article"
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
                           View
