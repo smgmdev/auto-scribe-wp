@@ -762,7 +762,7 @@ export function AdminAIArticlesView() {
                   size="sm"
                   onClick={() => generateDescription(editTitle)}
                   disabled={isGeneratingDescription}
-                  className="h-7 text-xs"
+                  className="h-7 text-xs hover:bg-black hover:text-white"
                 >
                   {isGeneratingDescription ? (
                     <>
@@ -819,10 +819,18 @@ export function AdminAIArticlesView() {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingArticle(null)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditingArticle(null)}
+              className="hover:bg-black hover:text-white hover:border-black"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
+            <Button 
+              onClick={handleSaveEdit} 
+              disabled={updateMutation.isPending}
+              className="border border-transparent hover:bg-transparent hover:text-black hover:border-black"
+            >
               {updateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
