@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Newspaper, RefreshCw, Plus, Trash2, Power, PowerOff, Pencil } from 'lucide-react';
+import { Newspaper, RefreshCw, Trash2, Power, PowerOff, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,7 @@ export function AdminAISourcesView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [editingSource, setEditingSource] = useState<AISource | null>(null);
   const [newSource, setNewSource] = useState({
     name: '',
@@ -135,23 +136,26 @@ export function AdminAISourcesView() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button 
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
           {!isAdding && (
             <Button 
               onClick={() => setIsAdding(true)}
               className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
             >
-              <Plus className="h-4 w-4 mr-2" />
               Add Source
             </Button>
           )}
+          <Button 
+            onClick={async () => {
+              setIsRefreshing(true);
+              await refetch();
+              setIsRefreshing(false);
+            }}
+            disabled={isLoading || isRefreshing}
+            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
       </div>
 
@@ -350,7 +354,6 @@ export function AdminAISourcesView() {
                 Add sources that can be used in AI publishing configs
               </p>
               <Button onClick={() => setIsAdding(true)}>
-                <Plus className="h-4 w-4 mr-2" />
                 Add First Source
               </Button>
             </CardContent>
