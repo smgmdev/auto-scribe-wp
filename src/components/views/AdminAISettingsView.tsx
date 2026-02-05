@@ -428,11 +428,11 @@ export function AdminAISettingsView() {
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50">
                   {aiSources?.map((source) => (
-                    <SelectItem key={source.id} value={source.id} className="text-left">
+                    <SelectItem key={source.id} value={source.id} className="text-left group">
                       <div className="flex flex-col items-start text-left">
                         <span>{source.name}</span>
                         {source.description && (
-                          <span className="text-xs text-muted-foreground">{source.description}</span>
+                          <span className="text-xs text-muted-foreground group-hover:text-white group-focus:text-white">{source.description}</span>
                         )}
                       </div>
                     </SelectItem>
