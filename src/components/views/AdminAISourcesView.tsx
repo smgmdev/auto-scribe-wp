@@ -63,7 +63,7 @@ export function AdminAISourcesView() {
         <Button 
           onClick={handleRefresh} 
           disabled={isRefreshing || isLoading}
-          variant="outline"
+          className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
           Refresh
