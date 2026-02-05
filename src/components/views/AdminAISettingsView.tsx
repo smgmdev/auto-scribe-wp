@@ -484,7 +484,7 @@ export function AdminAISettingsView() {
               <div className="space-y-2">
                 <Label>Target Category</Label>
                 <Select
-                  value={newSource.target_category_id?.toString() || ''}
+                  value={newSource.target_category_id ? newSource.target_category_id.toString() : undefined}
                   onValueChange={(value) => {
                     const cat = newSourceCategories.find(c => c.id === parseInt(value));
                     setNewSource(s => ({ 
@@ -499,11 +499,17 @@ export function AdminAISettingsView() {
                     <SelectValue placeholder={loadingNewCategories ? "Loading categories..." : "Select a category"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {newSourceCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id.toString()}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
+                    {newSourceCategories.length > 0 ? (
+                      newSourceCategories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                        {loadingNewCategories ? "Loading..." : "No categories available"}
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -839,7 +845,7 @@ export function AdminAISettingsView() {
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Target Site</Label>
                       <Select
-                        value={setting.target_site_id || ''}
+                        value={setting.target_site_id || undefined}
                         onValueChange={(value) => handleSiteChange(setting.id, value)}
                         disabled={setting.enabled}
                       >
@@ -863,7 +869,7 @@ export function AdminAISettingsView() {
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Target Category</Label>
                       <Select
-                        value={setting.target_category_id?.toString() || ''}
+                        value={setting.target_category_id ? setting.target_category_id.toString() : undefined}
                         onValueChange={(value) => {
                           const cat = categories.find(c => c.id === parseInt(value));
                           if (cat) {
@@ -878,11 +884,17 @@ export function AdminAISettingsView() {
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
+                          {categories.length > 0 ? (
+                            categories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id.toString()}>
+                                {cat.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                              {isLoadingCats ? "Loading..." : "No categories available"}
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
