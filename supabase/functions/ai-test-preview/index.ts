@@ -69,34 +69,59 @@ Deno.serve(async (req) => {
         if (articleResponse.ok) {
           const articleHtml = await articleResponse.text();
           
-          // Look for common image credit patterns
-          // Pattern 1: "Image source: Getty Images" or similar
-          const imageSourceMatch = articleHtml.match(/Image source:\s*([^<.]+)/i);
-          if (imageSourceMatch) {
-            extractedImageCaption = `Image source: ${imageSourceMatch[1].trim()}`;
+          // Known stock photo agencies to look for
+          const agencies = ['Getty Images', 'Getty', 'Reuters', 'Associated Press', 'AP Photo', 'AFP', 'Bloomberg', 'Shutterstock', 'iStock', 'Alamy', 'EPA', 'Zuma Press', 'NurPhoto', 'SOPA Images', 'Anadolu Agency'];
+          const agencyPattern = agencies.join('|');
+          
+          // Pattern 1: Yahoo Finance specific - small text caption under image
+          // Look for spans/divs with image credit classes or containing agency names
+          const yahooPatterns = [
+            // caas-img-caption class used by Yahoo
+            /<[^>]*class="[^"]*caas-(?:img-)?caption[^"]*"[^>]*>([^<]+)</i,
+            // caas-credit class
+            /<[^>]*class="[^"]*caas-credit[^"]*"[^>]*>([^<]+)</i,
+            // Any element with "caption" in class containing agency name
+            new RegExp(`<[^>]*class="[^"]*caption[^"]*"[^>]*>([^<]*(?:${agencyPattern})[^<]*)<`, 'i'),
+          ];
+          
+          for (const pattern of yahooPatterns) {
+            const match = articleHtml.match(pattern);
+            if (match && match[1]?.trim()) {
+              extractedImageCaption = match[1].trim();
+              break;
+            }
           }
           
-          // Pattern 2: figcaption with credit
+          // Pattern 2: "Image source: X" or "Photo: X" explicit labels
           if (!extractedImageCaption) {
-            const figcaptionMatch = articleHtml.match(/<figcaption[^>]*>([^<]*(?:Getty|Reuters|AP|AFP|Bloomberg|Shutterstock|iStock)[^<]*)<\/figcaption>/i);
+            const labeledMatch = articleHtml.match(/(?:Image source|Photo|Credit|Source):\s*([^<.]{3,60})/i);
+            if (labeledMatch) {
+              extractedImageCaption = labeledMatch[0].trim();
+            }
+          }
+          
+          // Pattern 3: figcaption containing agency name
+          if (!extractedImageCaption) {
+            const figcaptionMatch = articleHtml.match(new RegExp(`<figcaption[^>]*>([^<]*(?:${agencyPattern})[^<]*)</figcaption>`, 'i'));
             if (figcaptionMatch) {
               extractedImageCaption = figcaptionMatch[1].trim();
             }
           }
           
-          // Pattern 3: Photo credit span or div
+          // Pattern 4: Small text right after image - look for short text with agency name
           if (!extractedImageCaption) {
-            const creditMatch = articleHtml.match(/(?:photo|image)\s*(?:credit|source|by|courtesy)[:\s]*([^<]{3,50}(?:Getty|Reuters|AP|AFP|Bloomberg|Shutterstock|iStock)[^<]{0,30})/i);
-            if (creditMatch) {
-              extractedImageCaption = creditMatch[0].trim();
+            // Match any element content that's short and contains agency name
+            const shortCaptionMatch = articleHtml.match(new RegExp(`>\\s*([^<]{0,30}(?:${agencyPattern})[^<]{0,30})\\s*<`, 'i'));
+            if (shortCaptionMatch && shortCaptionMatch[1]?.trim().length > 3 && shortCaptionMatch[1]?.trim().length < 80) {
+              extractedImageCaption = shortCaptionMatch[1].trim();
             }
           }
           
-          // Pattern 4: Look for standalone credit mentions near images
+          // Pattern 5: Look for "via X" or "courtesy of X" patterns  
           if (!extractedImageCaption) {
-            const standaloneMatch = articleHtml.match(/>([^<]*(?:Getty Images|Reuters|Associated Press|AFP|Bloomberg)[^<]*)</i);
-            if (standaloneMatch && standaloneMatch[1].length < 100) {
-              extractedImageCaption = standaloneMatch[1].trim();
+            const viaMatch = articleHtml.match(new RegExp(`(?:via|courtesy of|provided by)\\s+(${agencyPattern})`, 'i'));
+            if (viaMatch) {
+              extractedImageCaption = viaMatch[0].trim();
             }
           }
           
