@@ -734,7 +734,9 @@ export function AdminAISettingsView() {
                           <Badge variant="outline">Auto-Publish</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{setting.source_url}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
+                      </p>
                       {targetSite && (
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           Publishing to: 
@@ -751,7 +753,7 @@ export function AdminAISettingsView() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:bg-black hover:text-white"
                       onClick={() => deleteMutation.mutate(setting.id)}
                       disabled={deleteMutation.isPending}
                     >
@@ -802,6 +804,7 @@ export function AdminAISettingsView() {
                       <Select
                         value={setting.target_site_id || ''}
                         onValueChange={(value) => handleSiteChange(setting.id, value)}
+                        disabled={setting.enabled}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a site" />
@@ -851,6 +854,7 @@ export function AdminAISettingsView() {
                       <Select
                         value={setting.tone}
                         onValueChange={(value) => handleSelectChange(setting.id, 'tone', value)}
+                        disabled={setting.enabled}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -869,6 +873,7 @@ export function AdminAISettingsView() {
                       <Select
                         value={String(setting.publish_interval_minutes)}
                         onValueChange={(value) => handleSelectChange(setting.id, 'publish_interval_minutes', parseInt(value))}
+                        disabled={setting.enabled}
                       >
                         <SelectTrigger>
                           <SelectValue />
