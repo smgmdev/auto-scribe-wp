@@ -461,9 +461,26 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
     }
 
     if (site.seo_plugin === 'aioseo') {
-      postBody.meta = { _aioseo_description: content.metaDescription, _aioseo_keywords: content.focusKeyword };
+      postBody.meta = { 
+        _aioseo_description: content.metaDescription || '', 
+        _aioseo_keywords: content.focusKeyword || '',
+      };
+      postBody.aioseo_meta_data = {
+        description: content.metaDescription || '',
+        keyphrases: {
+          focus: {
+            keyphrase: content.focusKeyword || '',
+            score: 0,
+            analysis: {}
+          },
+          additional: []
+        },
+      };
     } else if (site.seo_plugin === 'rankmath') {
-      postBody.meta = { rank_math_focus_keyword: content.focusKeyword, rank_math_description: content.metaDescription };
+      postBody.meta = { 
+        rank_math_focus_keyword: content.focusKeyword || '', 
+        rank_math_description: content.metaDescription || '',
+      };
     }
 
     const postRes = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, { method: 'POST', headers, body: JSON.stringify(postBody) });

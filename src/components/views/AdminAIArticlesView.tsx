@@ -394,6 +394,17 @@ export function AdminAIArticlesView() {
               _aioseo_keywords: focusKeyword || '',
               _aioseo_description: metaDescription || '',
             };
+            postBody.aioseo_meta_data = {
+              description: metaDescription || '',
+              keyphrases: {
+                focus: {
+                  keyphrase: focusKeyword || '',
+                  score: 0,
+                  analysis: {}
+                },
+                additional: []
+              },
+            };
           } else if (site.seo_plugin === 'rankmath') {
             postBody.meta = {
               rank_math_focus_keyword: focusKeyword || '',
