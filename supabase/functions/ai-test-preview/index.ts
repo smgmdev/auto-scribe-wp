@@ -94,7 +94,8 @@ You must respond with a JSON object containing:
 - content: The full article content
 - focusKeyword: A 2-4 word SEO focus keyword for this article
 - metaDescription: An SEO meta description (max 155 characters)
-- tag: A single tag that matches the focus keyword`;
+- tag: A single tag that matches the focus keyword
+- originalImageCaption: If the source mentions any image credit, caption, photographer name, or attribution, extract and return it exactly. If none found, return null.`;
 
     const userPrompt = `Source Headline: ${sourceData.title}
 
@@ -139,13 +140,16 @@ Generate the article now.`;
       throw new Error('Failed to parse AI response');
     }
 
-    // Add image data with source attribution if fetch_images is enabled
+    // Add image data with caption - use AI-extracted caption or fallback to default
     if (fetchImages && sourceData.thumbnail) {
+      const fallbackCaption = `Source: Image via ${imageSource || 'finance.yahoo.com'}`;
       generatedData = {
         ...generatedData,
         imageUrl: sourceData.thumbnail,
-        imageCaption: `Source: ${imageSource}`,
+        imageCaption: generatedData.originalImageCaption || fallbackCaption,
       };
+      // Remove the originalImageCaption field as we've processed it
+      delete generatedData.originalImageCaption;
     }
 
     console.log('[ai-test-preview] Generated data:', {
