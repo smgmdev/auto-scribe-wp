@@ -73,13 +73,20 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Fetch image from original article if enabled
+        let imageData: ImageData | null = null;
+        if (setting.fetch_images) {
+          imageData = await fetchArticleImage(newItem.link);
+          console.log('[auto-publish] Image fetched:', imageData ? 'yes' : 'no');
+        }
+
         const content = await generateContent(newItem.title, setting.tone);
         if (!content) {
           results.push({ id: setting.id, status: 'gen_failed' });
           continue;
         }
 
-        const postResult = await publishToWP(site, content, setting);
+        const postResult = await publishToWP(site, content, setting, imageData);
         if (!postResult) {
           results.push({ id: setting.id, status: 'publish_failed' });
           continue;
@@ -134,6 +141,81 @@ async function fetchRss(url: string): Promise<RssItem[]> {
     }
     return items;
   } catch { return []; }
+}
+
+interface ImageData {
+  url: string;
+  caption: string;
+}
+
+async function fetchArticleImage(articleUrl: string): Promise<ImageData | null> {
+  try {
+    const res = await fetch(articleUrl, { 
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      redirect: 'follow',
+    });
+    if (!res.ok) return null;
+    
+    const html = await res.text();
+    
+    // Try Open Graph image first (most reliable for articles)
+    const ogImage = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)?.[1] 
+      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i)?.[1];
+    
+    if (ogImage) {
+      const caption = extractImageCaption(html, articleUrl);
+      return { url: ogImage, caption };
+    }
+    
+    // Fallback to Twitter card image
+    const twitterImage = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)?.[1]
+      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i)?.[1];
+    
+    if (twitterImage) {
+      const caption = extractImageCaption(html, articleUrl);
+      return { url: twitterImage, caption };
+    }
+    
+    return null;
+  } catch (e) {
+    console.error('[auto-publish] Error fetching image:', e);
+    return null;
+  }
+}
+
+function extractImageCaption(html: string, articleUrl: string): string {
+  // Try to find image credit/caption from common patterns
+  const creditPatterns = [
+    // Yahoo Finance specific
+    /class=["'][^"']*caas-img-caption[^"']*["'][^>]*>([^<]+)/i,
+    // Getty Images
+    /Getty\s*Images/i,
+    // Reuters
+    /Reuters/i,
+    // AP
+    /Associated\s*Press|AP\s*Photo/i,
+    // General photo credit patterns
+    /Photo\s*(?:by|credit|courtesy):\s*([^<\n]+)/i,
+    /Image\s*(?:by|credit|courtesy):\s*([^<\n]+)/i,
+  ];
+  
+  for (const pattern of creditPatterns) {
+    const match = html.match(pattern);
+    if (match) {
+      if (pattern.source.includes('Getty')) return 'Image via Getty Images';
+      if (pattern.source.includes('Reuters')) return 'Image via Reuters';
+      if (pattern.source.includes('Associated') || pattern.source.includes('AP')) return 'Image via AP';
+      if (match[1]) return match[1].trim();
+    }
+  }
+  
+  // Fallback: extract hostname for attribution
+  try {
+    const hostname = new URL(articleUrl).hostname.replace('www.', '');
+    return `Image via ${hostname}`;
+  } catch {
+    return 'Source: External';
+  }
 }
 
 interface GeneratedContent {
@@ -198,11 +280,87 @@ interface PostResult {
   link: string;
 }
 
-async function publishToWP(site: WpSite, content: GeneratedContent, setting: Setting): Promise<PostResult | null> {
+async function uploadImageToWP(site: WpSite, imageData: ImageData): Promise<number | null> {
+  try {
+    console.log('[auto-publish] Downloading image from:', imageData.url);
+    
+    // Download the image
+    const imageRes = await fetch(imageData.url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    });
+    
+    if (!imageRes.ok) {
+      console.error('[auto-publish] Failed to download image:', imageRes.status);
+      return null;
+    }
+    
+    const imageBlob = await imageRes.blob();
+    const contentType = imageRes.headers.get('content-type') || 'image/jpeg';
+    
+    // Determine file extension
+    let ext = 'jpg';
+    if (contentType.includes('png')) ext = 'png';
+    else if (contentType.includes('webp')) ext = 'webp';
+    else if (contentType.includes('gif')) ext = 'gif';
+    
+    const filename = `ai-article-${Date.now()}.${ext}`;
+    
+    const creds = btoa(`${site.username}:${site.app_password}`);
+    const baseUrl = site.url.replace(/\/+$/, '');
+    
+    // Upload to WordPress media library
+    const uploadRes = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${creds}`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Type': contentType,
+      },
+      body: imageBlob,
+    });
+    
+    if (!uploadRes.ok) {
+      console.error('[auto-publish] Failed to upload to WP:', uploadRes.status, await uploadRes.text());
+      return null;
+    }
+    
+    const mediaData = await uploadRes.json();
+    const mediaId = mediaData.id;
+    
+    // Update media with caption/alt text
+    if (imageData.caption) {
+      await fetch(`${baseUrl}/wp-json/wp/v2/media/${mediaId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${creds}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          alt_text: imageData.caption,
+          caption: imageData.caption,
+        }),
+      });
+    }
+    
+    console.log('[auto-publish] Image uploaded, media ID:', mediaId);
+    return mediaId;
+  } catch (e) {
+    console.error('[auto-publish] Error uploading image:', e);
+    return null;
+  }
+}
+
+async function publishToWP(site: WpSite, content: GeneratedContent, setting: Setting, imageData: ImageData | null): Promise<PostResult | null> {
   try {
     const creds = btoa(`${site.username}:${site.app_password}`);
     const baseUrl = site.url.replace(/\/+$/, '');
     const headers = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
+
+    // Upload featured image if available
+    let featuredMediaId: number | null = null;
+    if (imageData) {
+      featuredMediaId = await uploadImageToWP(site, imageData);
+    }
 
     let tagIds: number[] = [];
     if (content.tag) {
@@ -223,6 +381,11 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
       categories: setting.target_category_id ? [setting.target_category_id] : [],
       tags: tagIds,
     };
+
+    // Add featured image if uploaded
+    if (featuredMediaId) {
+      postBody.featured_media = featuredMediaId;
+    }
 
     if (site.seo_plugin === 'aioseo') {
       postBody.meta = { _aioseo_description: content.metaDescription, _aioseo_keywords: content.focusKeyword };
