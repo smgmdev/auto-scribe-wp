@@ -830,7 +830,7 @@ export function AdminAISettingsView() {
                             handleCategoryChange(setting.id, cat.id, cat.name);
                           }
                         }}
-                        disabled={!setting.target_site_id || isLoadingCats}
+                        disabled={!setting.target_site_id || isLoadingCats || setting.enabled}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={isLoadingCats ? "Loading..." : "Select category"}>
