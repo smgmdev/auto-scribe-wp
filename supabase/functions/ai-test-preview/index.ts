@@ -13,11 +13,13 @@ Deno.serve(async (req) => {
 
     console.log('[ai-test-preview] Testing with:', { sourceUrl, tone });
 
-    // Fetch sample data from Yahoo Finance RSS
-    const rssUrl = 'https://finance.yahoo.com/news/rssindex';
+    // Fetch sample data from Yahoo Finance RSS with cache-busting
+    const rssUrl = `https://finance.yahoo.com/news/rssindex?_t=${Date.now()}`;
     const rssResponse = await fetch(rssUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
       },
     });
 
@@ -27,24 +29,44 @@ Deno.serve(async (req) => {
 
     const rssText = await rssResponse.text();
     
-    // Parse the first item from RSS
-    const itemMatch = rssText.match(/<item>([\s\S]*?)<\/item>/);
-    if (!itemMatch) {
-      throw new Error('No items found in RSS feed');
-    }
-
-    const itemXml = itemMatch[1];
+    // Parse all items from RSS to find the most recent one
+    const itemMatches = rssText.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    const items: Array<{ title: string; description: string; link: string; pubDate: string; timestamp: number }> = [];
     
     const extractTag = (xml: string, tag: string): string => {
       const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`));
       return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
     };
 
+    for (const match of itemMatches) {
+      const itemXml = match[1];
+      const pubDateStr = extractTag(itemXml, 'pubDate');
+      const timestamp = pubDateStr ? new Date(pubDateStr).getTime() : 0;
+      
+      items.push({
+        title: extractTag(itemXml, 'title'),
+        description: extractTag(itemXml, 'description'),
+        link: extractTag(itemXml, 'link'),
+        pubDate: pubDateStr,
+        timestamp,
+      });
+    }
+
+    if (items.length === 0) {
+      throw new Error('No items found in RSS feed');
+    }
+
+    // Sort by timestamp descending and get the most recent
+    items.sort((a, b) => b.timestamp - a.timestamp);
+    const mostRecent = items[0];
+
+    console.log('[ai-test-preview] Found', items.length, 'items, most recent from:', mostRecent.pubDate);
+
     const sourceData = {
-      title: extractTag(itemXml, 'title'),
-      description: extractTag(itemXml, 'description'),
-      link: extractTag(itemXml, 'link'),
-      pubDate: extractTag(itemXml, 'pubDate'),
+      title: mostRecent.title,
+      description: mostRecent.description,
+      link: mostRecent.link,
+      pubDate: mostRecent.pubDate,
     };
 
     console.log('[ai-test-preview] Source data:', sourceData);
