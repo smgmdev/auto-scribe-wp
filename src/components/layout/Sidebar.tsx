@@ -92,7 +92,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       label: 'Users',
       icon: Users
     }, {
-      id: 'admin-more',
+    id: 'admin-more',
       label: 'More',
       icon: MoreHorizontal,
       submenu: [
@@ -104,7 +104,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
             { id: 'admin-new-press-release', label: 'New', icon: null },
             { id: 'admin-all-news', label: 'All', icon: null }
           ]
-        }
+        },
+        { id: 'admin-ai-publishing', label: 'AI Publishing', icon: null }
       ]
     }];
   }
@@ -208,7 +209,7 @@ export function Sidebar({
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     const adminAgenciesIds = ['admin-agencies', 'admin-media-management'];
-    const adminMoreIds = ['admin-new-press-release', 'admin-all-news'];
+    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-publishing'];
     const pressReleasesIds = ['admin-new-press-release', 'admin-all-news'];
     
     if (instantPublishingIds.includes(currentView)) {
