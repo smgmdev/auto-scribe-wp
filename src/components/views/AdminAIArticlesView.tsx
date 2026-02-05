@@ -471,16 +471,16 @@ export function AdminAIArticlesView() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {article.source_url && (
+                      {article.wordpress_post_link && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(article.source_url, '_blank')}
-                          title="View source article"
+                          onClick={() => window.open(article.wordpress_post_link!, '_blank')}
+                          title="View published article"
                           className="hover:bg-black hover:text-white hover:border-black"
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
-                          Source
+                          View
                         </Button>
                       )}
                       
