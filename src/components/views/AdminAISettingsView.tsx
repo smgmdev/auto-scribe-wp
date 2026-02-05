@@ -789,14 +789,19 @@ export function AdminAISettingsView() {
                         Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
                       </p>
                       {targetSite && (
-                        <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-1">
-                          <span>Publishing to:</span>
-                          {targetSite.favicon && (
-                            <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
-                          )}
-                          <span className="font-medium">{targetSite.name}</span>
+                        <div className="text-sm text-muted-foreground space-y-0.5">
+                          <div className="flex items-center gap-1">
+                            <span>Publishing to:</span>
+                            {targetSite.favicon && (
+                              <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
+                            )}
+                            <span className="font-medium">{targetSite.name}</span>
+                          </div>
                           {setting.target_category_name && (
-                            <span className="text-xs">→ {setting.target_category_name}</span>
+                            <div>
+                              <span>Category:</span>{' '}
+                              <span className="font-medium">{setting.target_category_name}</span>
+                            </div>
                           )}
                         </div>
                       )}
