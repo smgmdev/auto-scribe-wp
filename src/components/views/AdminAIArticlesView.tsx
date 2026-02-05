@@ -615,10 +615,10 @@ export function AdminAIArticlesView() {
                         href={article.source_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors max-w-full"
                       >
-                        <span>Source:</span>
-                        <span className="truncate max-w-[200px] md:max-w-[350px]">{article.source_url}</span>
+                        <span className="shrink-0">Source:</span>
+                        <span className="truncate max-w-[120px] md:max-w-[350px]">{article.source_url}</span>
                         <ExternalLink className="h-3 w-3 shrink-0" />
                       </a>
 
