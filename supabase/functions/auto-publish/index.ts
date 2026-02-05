@@ -100,6 +100,9 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Calculate word count from the content
+        const wordCount = content.content ? content.content.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
+
         await supabase.from('ai_published_sources').insert({
           setting_id: setting.id,
           source_url: newItem.link,
@@ -112,6 +115,7 @@ Deno.serve(async (req) => {
           image_caption: imageData?.caption || null,
           wordpress_post_id: postResult.id,
           wordpress_post_link: postResult.link,
+          word_count: wordCount,
         });
 
         await supabase
