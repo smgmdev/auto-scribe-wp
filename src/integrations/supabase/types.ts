@@ -314,7 +314,7 @@ export type Database = {
           image_url: string | null
           meta_description: string | null
           published_at: string
-          setting_id: string
+          setting_id: string | null
           source_title: string
           source_url: string
           tags: string[] | null
@@ -331,7 +331,7 @@ export type Database = {
           image_url?: string | null
           meta_description?: string | null
           published_at?: string
-          setting_id: string
+          setting_id?: string | null
           source_title: string
           source_url: string
           tags?: string[] | null
@@ -348,7 +348,7 @@ export type Database = {
           image_url?: string | null
           meta_description?: string | null
           published_at?: string
-          setting_id?: string
+          setting_id?: string | null
           source_title?: string
           source_url?: string
           tags?: string[] | null
