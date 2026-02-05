@@ -436,6 +436,13 @@ export function AdminAIArticlesView() {
 
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
+                        {article.setting?.target_site?.favicon && (
+                          <img 
+                            src={article.setting.target_site.favicon} 
+                            alt="" 
+                            className="w-5 h-5 rounded shrink-0" 
+                          />
+                        )}
                         <Badge variant="secondary" className="text-xs">
                           {article.setting?.source_name || 'Unknown Source'}
                         </Badge>
