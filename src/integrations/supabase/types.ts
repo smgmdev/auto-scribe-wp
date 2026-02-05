@@ -323,6 +323,7 @@ export type Database = {
           wordpress_post_id: number | null
           wordpress_post_link: string | null
           wordpress_site_favicon: string | null
+          wordpress_site_id: string | null
           wordpress_site_name: string | null
         }
         Insert: {
@@ -343,6 +344,7 @@ export type Database = {
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
           wordpress_site_favicon?: string | null
+          wordpress_site_id?: string | null
           wordpress_site_name?: string | null
         }
         Update: {
@@ -363,6 +365,7 @@ export type Database = {
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
           wordpress_site_favicon?: string | null
+          wordpress_site_id?: string | null
           wordpress_site_name?: string | null
         }
         Relationships: [
