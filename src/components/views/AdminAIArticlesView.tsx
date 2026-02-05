@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Trash2, ExternalLink, Loader2, Filter } from 'lucide-react';
+import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,6 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -35,7 +38,8 @@ interface AIPublishingSetting {
 export function AdminAIArticlesView() {
   const queryClient = useQueryClient();
   const [selectedSource, setSelectedSource] = useState<string>('all');
-
+  const [editingArticle, setEditingArticle] = useState<PublishedSource | null>(null);
+  const [editTitle, setEditTitle] = useState('');
   // Fetch all AI publishing settings for filter dropdown
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['ai-publishing-settings-filter'],
@@ -92,6 +96,40 @@ export function AdminAIArticlesView() {
       });
     },
   });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, title }: { id: string; title: string }) => {
+      const { error } = await supabase
+        .from('ai_published_sources')
+        .update({ source_title: title })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
+      toast({ title: "Article updated" });
+      setEditingArticle(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (article: PublishedSource) => {
+    setEditingArticle(article);
+    setEditTitle(article.source_title);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingArticle && editTitle.trim()) {
+      updateMutation.mutate({ id: editingArticle.id, title: editTitle.trim() });
+    }
+  };
 
   const isLoading = settingsLoading || articlesLoading;
 
@@ -195,6 +233,14 @@ export function AdminAIArticlesView() {
                         </Button>
                       )}
                       
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(article)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -236,6 +282,46 @@ export function AdminAIArticlesView() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingArticle} onOpenChange={(open) => !open && setEditingArticle(null)}>
+        <DialogContent className="bg-background">
+          <DialogHeader>
+            <DialogTitle>Edit Article</DialogTitle>
+            <DialogDescription>
+              Update the article title. This only updates the local record.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Article title"
+              />
+            </div>
+            {editingArticle?.source_url && (
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Source URL</Label>
+                <p className="text-sm text-muted-foreground truncate">{editingArticle.source_url}</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingArticle(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
