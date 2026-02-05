@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Plus, Trash2, Power, PowerOff, Save, Loader2, Eye, FlaskConical } from 'lucide-react';
+import { Settings, Plus, Trash2, Power, PowerOff, Loader2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -45,6 +44,14 @@ interface WPCategory {
   id: number;
   name: string;
   slug: string;
+}
+
+interface AISource {
+  id: string;
+  name: string;
+  url: string;
+  description: string | null;
+  enabled: boolean;
 }
 
 interface SourceData {
@@ -95,8 +102,9 @@ export function AdminAISettingsView() {
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [newSource, setNewSource] = useState({
-    source_name: 'Yahoo Finance',
-    source_url: 'https://finance.yahoo.com/',
+    source_id: '', // ID of the selected AI source
+    source_name: '',
+    source_url: '',
     enabled: false,
     auto_publish: false,
     target_site_id: '',
@@ -140,6 +148,20 @@ export function AdminAISettingsView() {
       const { data, error } = await supabase.rpc('get_public_sites');
       if (error) throw error;
       return data as WordPressSite[];
+    },
+  });
+
+  // Fetch AI sources for dropdown
+  const { data: aiSources } = useQuery({
+    queryKey: ['ai-sources-dropdown'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_sources')
+        .select('*')
+        .eq('enabled', true)
+        .order('name', { ascending: true });
+      if (error) throw error;
+      return data as AISource[];
     },
   });
 
@@ -224,8 +246,9 @@ export function AdminAISettingsView() {
       queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
       setIsAdding(false);
       setNewSource({
-        source_name: 'Yahoo Finance',
-        source_url: 'https://finance.yahoo.com/',
+        source_id: '',
+        source_name: '',
+        source_url: '',
         enabled: false,
         auto_publish: false,
         target_site_id: '',
@@ -237,7 +260,7 @@ export function AdminAISettingsView() {
         tone: 'professional',
       });
       setNewSourceCategories([]);
-      toast({ title: "Source added", description: "AI publishing source has been configured." });
+      toast({ title: "Config added", description: "AI publishing config has been created." });
     },
     onError: (error) => {
       toast({
@@ -387,23 +410,46 @@ export function AdminAISettingsView() {
             <CardDescription>Configure a new source for automatic AI publishing</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Source Name</Label>
-                <Input
-                  value={newSource.source_name}
-                  onChange={(e) => setNewSource(s => ({ ...s, source_name: e.target.value }))}
-                  placeholder="e.g., Yahoo Finance"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Source URL</Label>
-                <Input
-                  value={newSource.source_url}
-                  onChange={(e) => setNewSource(s => ({ ...s, source_url: e.target.value }))}
-                  placeholder="https://finance.yahoo.com/"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Select Source</Label>
+              <Select
+                value={newSource.source_id}
+                onValueChange={(value) => {
+                  const selectedSource = aiSources?.find(s => s.id === value);
+                  if (selectedSource) {
+                    setNewSource(s => ({
+                      ...s,
+                      source_id: value,
+                      source_name: selectedSource.name,
+                      source_url: selectedSource.url,
+                    }));
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a source" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  {aiSources?.map((source) => (
+                    <SelectItem key={source.id} value={source.id}>
+                      <div className="flex flex-col">
+                        <span>{source.name}</span>
+                        {source.description && (
+                          <span className="text-xs text-muted-foreground">{source.description}</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                  {(!aiSources || aiSources.length === 0) && (
+                    <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                      No sources available. Add sources in AI Sources section first.
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              {newSource.source_url && (
+                <p className="text-xs text-muted-foreground">{newSource.source_url}</p>
+              )}
             </div>
 
             <Separator />
@@ -547,7 +593,7 @@ export function AdminAISettingsView() {
             <div className="flex gap-2">
               <Button
                 onClick={() => addMutation.mutate(newSource)}
-                disabled={addMutation.isPending || !newSource.source_name}
+                disabled={addMutation.isPending || !newSource.source_id}
                 className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
               >
                 {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
