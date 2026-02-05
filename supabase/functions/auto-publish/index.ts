@@ -152,23 +152,112 @@ interface RssItem {
 
 async function fetchRss(url: string): Promise<RssItem[]> {
   try {
-    const rssUrl = url.includes('yahoo') ? 'https://finance.yahoo.com/news/rssindex' : url;
-    const res = await fetch(rssUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    if (!res.ok) return [];
+    console.log(`[auto-publish] Fetching RSS from: ${url}`);
+    
+    // Check if it's a Google News URL - use alternative approach
+    if (url.includes('news.google.com')) {
+      return await fetchGoogleNewsFinance();
+    }
+    
+    const res = await fetch(url, { 
+      headers: { 
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      } 
+    });
+    
+    console.log(`[auto-publish] RSS fetch status: ${res.status}`);
+    
+    if (!res.ok) {
+      console.log(`[auto-publish] RSS fetch failed with status ${res.status}`);
+      return [];
+    }
     
     const text = await res.text();
-    const items: RssItem[] = [];
-    
-    for (const match of text.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
-      const xml = match[1];
-      const title = xml.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, '').trim() || '';
-      const link = xml.match(/<link[^>]*>([\s\S]*?)<\/link>/)?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, '').trim() || '';
+    return parseRssText(text);
+  } catch (e) { 
+    console.log(`[auto-publish] RSS fetch error: ${e}`);
+    return []; 
+  }
+}
+
+// Fetch Google News Finance by scraping Bloomberg RSS feeds (more reliable)
+async function fetchGoogleNewsFinance(): Promise<RssItem[]> {
+  console.log('[auto-publish] Using Bloomberg RSS as fallback for Google News Finance');
+  
+  const feeds = [
+    'https://feeds.bloomberg.com/markets/news.rss',
+    'https://feeds.bloomberg.com/technology/news.rss',
+    'https://feeds.bloomberg.com/politics/news.rss',
+  ];
+  
+  const items: RssItem[] = [];
+  const seen = new Set<string>();
+  
+  for (const feedUrl of feeds) {
+    try {
+      const res = await fetch(feedUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        }
+      });
       
+      if (!res.ok) {
+        console.log(`[auto-publish] Feed ${feedUrl} returned ${res.status}`);
+        continue;
+      }
       
-      if (title && link) items.push({ title, link });
+      const text = await res.text();
+      const feedItems = parseRssText(text);
+      
+      for (const item of feedItems) {
+        if (!seen.has(item.link) && items.length < 50) {
+          seen.add(item.link);
+          items.push(item);
+        }
+      }
+    } catch (e) {
+      console.log(`[auto-publish] Error fetching ${feedUrl}: ${e}`);
     }
-    return items;
-  } catch { return []; }
+  }
+  
+  console.log(`[auto-publish] Found ${items.length} items from Bloomberg RSS feeds`);
+  return items;
+}
+
+function parseRssText(text: string): RssItem[] {
+  const items: RssItem[] = [];
+  
+  // Handle <item> (RSS 2.0) format
+  for (const match of text.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+    const xml = match[1];
+    const title = xml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() || '';
+    const link = xml.match(/<link[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/)?.[1]?.trim() || '';
+    
+    if (title && link && title.length >= 20) {
+      items.push({ title, link });
+    }
+  }
+  
+  // Handle <entry> (Atom) format
+  for (const match of text.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
+    const xml = match[1];
+    const title = xml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() || '';
+    const link = xml.match(/<link[^>]*href=["']([^"']+)["']/)?.[1] || '';
+    
+    if (title && link && title.length >= 20) {
+      items.push({ title, link });
+    }
+  }
+  
+  console.log(`[auto-publish] Parsed ${items.length} RSS items`);
+  if (items.length > 0) {
+    console.log(`[auto-publish] First item: ${items[0].title.substring(0, 60)}...`);
+  }
+  
+  return items;
 }
 
 interface GeneratedContent {
