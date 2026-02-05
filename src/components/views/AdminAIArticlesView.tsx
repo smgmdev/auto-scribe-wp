@@ -105,15 +105,26 @@ export function AdminAIArticlesView() {
     },
   });
 
-  // Update mutation
+  // Update mutation - updates both local DB and WordPress
   const updateMutation = useMutation({
-    mutationFn: async ({ id, title, focusKeyword, tags, imageCaption }: { 
+    mutationFn: async ({ 
+      id, 
+      title, 
+      focusKeyword, 
+      tags, 
+      imageCaption,
+      wpPostId,
+      targetSiteId,
+    }: { 
       id: string; 
       title: string; 
       focusKeyword: string;
       tags: string[];
       imageCaption: string;
+      wpPostId: number | null;
+      targetSiteId: string | null;
     }) => {
+      // Update local database record
       const { error } = await supabase
         .from('ai_published_sources')
         .update({ 
@@ -124,10 +135,89 @@ export function AdminAIArticlesView() {
         })
         .eq('id', id);
       if (error) throw error;
+
+      // If we have a WordPress post, update it too
+      if (wpPostId && targetSiteId) {
+        // First get the site credentials
+        const { data: site } = await supabase
+          .from('wordpress_sites')
+          .select('url, username, app_password, seo_plugin')
+          .eq('id', targetSiteId)
+          .eq('connected', true)
+          .single();
+
+        if (site) {
+          const creds = btoa(`${site.username}:${site.app_password}`);
+          const baseUrl = site.url.replace(/\/+$/, '');
+          
+          // Create or get tag IDs
+          const tagIds: number[] = [];
+          for (const tagName of tags) {
+            try {
+              const tagRes = await fetch(`${baseUrl}/wp-json/wp/v2/tags`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Basic ${creds}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: tagName }),
+              });
+              if (tagRes.ok) {
+                const tagData = await tagRes.json();
+                tagIds.push(tagData.id);
+              } else if (tagRes.status === 400) {
+                // Tag might already exist, try to find it
+                const searchRes = await fetch(`${baseUrl}/wp-json/wp/v2/tags?search=${encodeURIComponent(tagName)}`, {
+                  headers: { 'Authorization': `Basic ${creds}` },
+                });
+                if (searchRes.ok) {
+                  const existingTags = await searchRes.json();
+                  const exactMatch = existingTags.find((t: { name: string }) => 
+                    t.name.toLowerCase() === tagName.toLowerCase()
+                  );
+                  if (exactMatch) tagIds.push(exactMatch.id);
+                }
+              }
+            } catch (e) {
+              console.error('Failed to create/find tag:', tagName, e);
+            }
+          }
+
+          // Update the WordPress post
+          const postBody: Record<string, unknown> = {
+            title: title,
+            tags: tagIds,
+          };
+
+          // Add SEO meta based on plugin
+          if (site.seo_plugin === 'aioseo') {
+            postBody.meta = {
+              _aioseo_keywords: focusKeyword || '',
+            };
+          } else if (site.seo_plugin === 'rankmath') {
+            postBody.meta = {
+              rank_math_focus_keyword: focusKeyword || '',
+            };
+          }
+
+          const wpRes = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${creds}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postBody),
+          });
+
+          if (!wpRes.ok) {
+            console.error('Failed to update WordPress post:', await wpRes.text());
+          }
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
-      toast({ title: "Article updated" });
+      toast({ title: "Article updated", description: "Local record and WordPress post have been updated" });
       setEditingArticle(null);
     },
     onError: (error) => {
@@ -156,6 +246,8 @@ export function AdminAIArticlesView() {
         focusKeyword: editFocusKeyword.trim(),
         tags: tagsArray,
         imageCaption: editImageCaption.trim(),
+        wpPostId: editingArticle.wordpress_post_id,
+        targetSiteId: editingArticle.setting?.target_site_id || null,
       });
     }
   };
