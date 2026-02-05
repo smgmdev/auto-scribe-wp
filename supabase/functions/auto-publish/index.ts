@@ -105,6 +105,10 @@ Deno.serve(async (req) => {
           source_url: newItem.link,
           source_title: newItem.title,
           ai_title: content.title,
+          focus_keyword: content.focusKeyword || null,
+          tags: content.tag ? [content.tag] : null,
+          image_url: imageData?.url || null,
+          image_caption: imageData?.caption || null,
           wordpress_post_id: postResult.id,
           wordpress_post_link: postResult.link,
         });

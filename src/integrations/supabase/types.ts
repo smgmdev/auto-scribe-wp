@@ -308,33 +308,45 @@ export type Database = {
         Row: {
           ai_title: string | null
           created_at: string
+          focus_keyword: string | null
           id: string
+          image_caption: string | null
+          image_url: string | null
           published_at: string
           setting_id: string
           source_title: string
           source_url: string
+          tags: string[] | null
           wordpress_post_id: number | null
           wordpress_post_link: string | null
         }
         Insert: {
           ai_title?: string | null
           created_at?: string
+          focus_keyword?: string | null
           id?: string
+          image_caption?: string | null
+          image_url?: string | null
           published_at?: string
           setting_id: string
           source_title: string
           source_url: string
+          tags?: string[] | null
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
         }
         Update: {
           ai_title?: string | null
           created_at?: string
+          focus_keyword?: string | null
           id?: string
+          image_caption?: string | null
+          image_url?: string | null
           published_at?: string
           setting_id?: string
           source_title?: string
           source_url?: string
+          tags?: string[] | null
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
         }
