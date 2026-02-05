@@ -416,7 +416,7 @@ export function AdminAISettingsView() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select a site" />
                   </SelectTrigger>
-                  <SelectContent position="popper" side="bottom">
+                  <SelectContent position="popper" side="bottom" align="start" avoidCollisions={false}>
                     {sites?.filter(s => s.connected).map((site) => (
                       <SelectItem key={site.id} value={site.id}>
                         <div className="flex items-center gap-2">
