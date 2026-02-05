@@ -111,7 +111,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
           icon: null,
           submenu: [
             { id: 'admin-ai-sources', label: 'AI Sources', icon: null },
-            { id: 'admin-ai-settings', label: 'Settings', icon: null },
+            { id: 'admin-ai-settings', label: 'AI Settings', icon: null },
             { id: 'admin-ai-articles', label: 'AI Articles', icon: null }
           ]
         }
