@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -58,6 +57,13 @@ export function AdminAIArticlesView() {
   const [editTags, setEditTags] = useState('');
   const [editImageCaption, setEditImageCaption] = useState('');
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  
+  // Pagination state
+  const [displayedArticles, setDisplayedArticles] = useState<PublishedSource[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const ARTICLES_PER_PAGE = 15;
 
   // Function to generate AI description
   const generateDescription = async (title: string) => {
@@ -96,7 +102,25 @@ export function AdminAIArticlesView() {
     },
   });
 
-  // Fetch published sources with optional filter
+  // Fetch total count for pagination
+  const { data: totalCount } = useQuery({
+    queryKey: ['ai-published-sources-count', selectedSource],
+    queryFn: async () => {
+      let query = supabase
+        .from('ai_published_sources')
+        .select('*', { count: 'exact', head: true });
+
+      if (selectedSource !== 'all') {
+        query = query.eq('setting_id', selectedSource);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  // Fetch published sources with pagination
   const { data: articles, isLoading: articlesLoading } = useQuery({
     queryKey: ['ai-published-sources', selectedSource],
     queryFn: async () => {
@@ -110,7 +134,8 @@ export function AdminAIArticlesView() {
             target_site:wordpress_sites(name, favicon)
           )
         `)
-        .order('published_at', { ascending: false });
+        .order('published_at', { ascending: false })
+        .range(0, ARTICLES_PER_PAGE - 1);
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
@@ -118,9 +143,60 @@ export function AdminAIArticlesView() {
 
       const { data, error } = await query;
       if (error) throw error;
+      
+      // Reset pagination state on fresh fetch
+      setOffset(data?.length || 0);
+      setHasMore((data?.length || 0) < (totalCount || 0));
+      setDisplayedArticles(data as PublishedSource[]);
+      
       return data as PublishedSource[];
     },
   });
+
+  // Load more function
+  const loadMoreArticles = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    try {
+      let query = supabase
+        .from('ai_published_sources')
+        .select(`
+          *,
+          setting:ai_publishing_settings(
+            source_name, 
+            target_site_id,
+            target_site:wordpress_sites(name, favicon)
+          )
+        `)
+        .order('published_at', { ascending: false })
+        .range(offset, offset + ARTICLES_PER_PAGE - 1);
+
+      if (selectedSource !== 'all') {
+        query = query.eq('setting_id', selectedSource);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setDisplayedArticles(prev => [...prev, ...data as PublishedSource[]]);
+        setOffset(prev => prev + data.length);
+        setHasMore(offset + data.length < (totalCount || 0));
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error loading more articles:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load more articles",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [offset, hasMore, loadingMore, selectedSource, totalCount]);
 
   // Delete mutation - deletes from both local DB and WordPress
   const deleteMutation = useMutation({
@@ -413,16 +489,15 @@ export function AdminAIArticlesView() {
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
-          ) : articles?.length === 0 ? (
+          ) : displayedArticles.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No articles published yet</p>
               <p className="text-sm">Articles will appear here once auto-publishing runs</p>
             </div>
           ) : (
-            <ScrollArea className="h-[600px] pr-4">
-              <div className="space-y-4">
-                {articles?.map((article) => (
+            <div className="space-y-4">
+              {displayedArticles.map((article) => (
                   <div
                     key={article.id}
                     className="relative flex items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
@@ -527,8 +602,21 @@ export function AdminAIArticlesView() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </ScrollArea>
+              {hasMore && (
+                <div className="flex justify-center pt-6">
+                  <Button variant="outline" onClick={loadMoreArticles} disabled={loadingMore}>
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      `Load More (${(totalCount || 0) - displayedArticles.length} remaining)`
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
