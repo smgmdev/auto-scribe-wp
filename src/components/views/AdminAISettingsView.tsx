@@ -374,7 +374,7 @@ export function AdminAISettingsView() {
             onClick={() => setIsAdding(true)}
             className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
           >
-            Add Source
+            New Config
           </Button>
         )}
       </div>
