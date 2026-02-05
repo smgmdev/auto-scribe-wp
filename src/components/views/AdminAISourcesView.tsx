@@ -70,6 +70,7 @@ export function AdminAISourcesView() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
+      queryClient.invalidateQueries({ queryKey: ['ai-sources-dropdown'] });
       setIsAdding(false);
       setNewSource({ name: '', url: '', description: '' });
       toast({ title: "Source added", description: "New AI source has been created." });
@@ -93,6 +94,7 @@ export function AdminAISourcesView() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
+      queryClient.invalidateQueries({ queryKey: ['ai-sources-dropdown'] });
       setEditingSource(null);
       toast({ title: "Source updated" });
     },
@@ -126,6 +128,7 @@ export function AdminAISourcesView() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
+      queryClient.invalidateQueries({ queryKey: ['ai-sources-dropdown'] });
       queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
       toast({ title: "Source deleted", description: "Any configs using this source have been disabled." });
     },
