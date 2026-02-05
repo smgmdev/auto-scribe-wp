@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -142,7 +142,7 @@ export function AdminAIArticlesView() {
   });
 
   // Fetch published sources with pagination
-  const { data: articles, isLoading: articlesLoading } = useQuery({
+  const { data: articles, isLoading: articlesLoading, isSuccess: articlesSuccess } = useQuery({
     queryKey: ['ai-published-sources', selectedSource, selectedSite],
     queryFn: async () => {
       let query = supabase
@@ -169,14 +169,19 @@ export function AdminAIArticlesView() {
       const { data, error } = await query;
       if (error) throw error;
       
-      // Reset pagination state on fresh fetch
-      setOffset(data?.length || 0);
-      setHasMore((data?.length || 0) < (totalCount || 0));
-      setDisplayedArticles(data as PublishedSource[]);
-      
       return data as PublishedSource[];
     },
   });
+
+  // Update displayed articles and pagination state when articles are fetched
+  useEffect(() => {
+    if (articlesSuccess && articles) {
+      setDisplayedArticles(articles);
+      setOffset(articles.length);
+      // Check if we got a full page of results - if less, there's no more
+      setHasMore(articles.length === ARTICLES_PER_PAGE && articles.length < (totalCount || 0));
+    }
+  }, [articles, articlesSuccess, totalCount]);
 
   // Load more function
   const loadMoreArticles = useCallback(async () => {
@@ -209,9 +214,11 @@ export function AdminAIArticlesView() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setDisplayedArticles(prev => [...prev, ...data as PublishedSource[]]);
-        setOffset(prev => prev + data.length);
-        setHasMore(offset + data.length < (totalCount || 0));
+        const newDisplayed = [...displayedArticles, ...data as PublishedSource[]];
+        setDisplayedArticles(newDisplayed);
+        setOffset(newDisplayed.length);
+        // If we got less than a full page, no more articles
+        setHasMore(data.length === ARTICLES_PER_PAGE && newDisplayed.length < (totalCount || 0));
       } else {
         setHasMore(false);
       }
@@ -225,7 +232,7 @@ export function AdminAIArticlesView() {
     } finally {
       setLoadingMore(false);
     }
-  }, [offset, hasMore, loadingMore, selectedSource, selectedSite, totalCount]);
+  }, [offset, hasMore, loadingMore, selectedSource, selectedSite, totalCount, displayedArticles]);
 
   // Delete mutation - deletes from both local DB and WordPress
   const deleteMutation = useMutation({
@@ -682,7 +689,7 @@ export function AdminAIArticlesView() {
                     </div>
                   </div>
                 ))}
-              {hasMore && (
+              {hasMore && totalCount !== undefined && totalCount > displayedArticles.length && (
                 <div className="flex justify-center pt-6">
                   <Button variant="outline" onClick={loadMoreArticles} disabled={loadingMore}>
                     {loadingMore ? (
@@ -691,7 +698,7 @@ export function AdminAIArticlesView() {
                         Loading...
                       </>
                     ) : (
-                      `Load More (${(totalCount || 0) - displayedArticles.length} remaining)`
+                      `Load More (${Math.max(0, totalCount - displayedArticles.length)} remaining)`
                     )}
                   </Button>
                 </div>
