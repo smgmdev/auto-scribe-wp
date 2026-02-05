@@ -23,6 +23,7 @@ interface PublishedSource {
   source_title: string;
   ai_title: string | null;
   focus_keyword: string | null;
+  meta_description: string | null;
   tags: string[] | null;
   image_url: string | null;
   image_caption: string | null;
@@ -48,6 +49,7 @@ export function AdminAIArticlesView() {
   const [editingArticle, setEditingArticle] = useState<PublishedSource | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editFocusKeyword, setEditFocusKeyword] = useState('');
+  const [editMetaDescription, setEditMetaDescription] = useState('');
   const [editTags, setEditTags] = useState('');
   const [editImageCaption, setEditImageCaption] = useState('');
   // Fetch all AI publishing settings for filter dropdown
@@ -165,7 +167,8 @@ export function AdminAIArticlesView() {
     mutationFn: async ({ 
       id, 
       title, 
-      focusKeyword, 
+      focusKeyword,
+      metaDescription,
       tags, 
       imageCaption,
       wpPostId,
@@ -174,6 +177,7 @@ export function AdminAIArticlesView() {
       id: string; 
       title: string; 
       focusKeyword: string;
+      metaDescription: string;
       tags: string[];
       imageCaption: string;
       wpPostId: number | null;
@@ -185,6 +189,7 @@ export function AdminAIArticlesView() {
         .update({ 
           ai_title: title,
           focus_keyword: focusKeyword || null,
+          meta_description: metaDescription || null,
           tags: tags.length > 0 ? tags : null,
           image_caption: imageCaption || null,
         })
@@ -248,10 +253,12 @@ export function AdminAIArticlesView() {
           if (site.seo_plugin === 'aioseo') {
             postBody.meta = {
               _aioseo_keywords: focusKeyword || '',
+              _aioseo_description: metaDescription || '',
             };
           } else if (site.seo_plugin === 'rankmath') {
             postBody.meta = {
               rank_math_focus_keyword: focusKeyword || '',
+              rank_math_description: metaDescription || '',
             };
           }
 
@@ -288,6 +295,7 @@ export function AdminAIArticlesView() {
     setEditingArticle(article);
     setEditTitle(article.ai_title || article.source_title);
     setEditFocusKeyword(article.focus_keyword || '');
+    setEditMetaDescription(article.meta_description || '');
     setEditTags(article.tags?.join(', ') || '');
     setEditImageCaption(article.image_caption || '');
   };
@@ -299,6 +307,7 @@ export function AdminAIArticlesView() {
         id: editingArticle.id, 
         title: editTitle.trim(),
         focusKeyword: editFocusKeyword.trim(),
+        metaDescription: editMetaDescription.trim(),
         tags: tagsArray,
         imageCaption: editImageCaption.trim(),
         wpPostId: editingArticle.wordpress_post_id,
@@ -536,6 +545,25 @@ export function AdminAIArticlesView() {
               {editingArticle?.focus_keyword && !editFocusKeyword && (
                 <p className="text-xs text-muted-foreground">Current: {editingArticle.focus_keyword}</p>
               )}
+            </div>
+
+            {/* Meta Description */}
+            <div className="space-y-2">
+              <Label htmlFor="metaDescription">Description</Label>
+              <Textarea
+                id="metaDescription"
+                value={editMetaDescription}
+                onChange={(e) => setEditMetaDescription(e.target.value)}
+                placeholder={editingArticle?.meta_description || "SEO meta description (150-160 characters)"}
+                className="min-h-[80px] resize-none"
+                rows={3}
+              />
+              {editingArticle?.meta_description && !editMetaDescription && (
+                <p className="text-xs text-muted-foreground">Current: {editingArticle.meta_description}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {editMetaDescription.length}/160 characters
+              </p>
             </div>
 
             {/* Tags */}

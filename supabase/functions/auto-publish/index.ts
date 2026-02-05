@@ -106,6 +106,7 @@ Deno.serve(async (req) => {
           source_title: newItem.title,
           ai_title: content.title,
           focus_keyword: content.focusKeyword || null,
+          meta_description: content.metaDescription || null,
           tags: content.tag ? [content.tag] : null,
           image_url: imageData?.url || null,
           image_caption: imageData?.caption || null,
