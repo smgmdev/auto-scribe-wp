@@ -459,8 +459,9 @@ export function AdminAIArticlesView() {
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="Article title"
-                className="min-h-[60px] resize-none"
-                rows={2}
+                className="min-h-[40px] max-h-[80px] resize-none overflow-hidden"
+                rows={1}
+                style={{ height: editTitle.length > 60 ? '80px' : '40px' }}
               />
             </div>
 
