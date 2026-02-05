@@ -234,6 +234,7 @@ export function AdminAIArticlesView() {
                           size="sm"
                           onClick={() => window.open(article.wordpress_post_link!, '_blank')}
                           title="View published article"
+                          className="hover:bg-black hover:text-white hover:border-black"
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
                           View
@@ -244,6 +245,7 @@ export function AdminAIArticlesView() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(article)}
+                        className="hover:bg-black hover:text-white hover:border-black"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -253,7 +255,7 @@ export function AdminAIArticlesView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-destructive hover:text-destructive"
+                            className="text-destructive hover:bg-black hover:text-white hover:border-black"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
