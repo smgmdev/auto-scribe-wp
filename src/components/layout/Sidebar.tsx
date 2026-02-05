@@ -111,7 +111,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
           icon: null,
           submenu: [
             { id: 'admin-ai-sources', label: 'AI Sources', icon: null },
-            { id: 'admin-ai-settings', label: 'Settings', icon: null }
+            { id: 'admin-ai-settings', label: 'Settings', icon: null },
+            { id: 'admin-ai-articles', label: 'AI Articles', icon: null }
           ]
         }
       ]
@@ -217,9 +218,9 @@ export function Sidebar({
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     const adminAgenciesIds = ['admin-agencies', 'admin-media-management'];
-    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-sources', 'admin-ai-settings'];
+    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles'];
     const pressReleasesIds = ['admin-new-press-release', 'admin-all-news'];
-    const aiPublishingIds = ['admin-ai-sources', 'admin-ai-settings'];
+    const aiPublishingIds = ['admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
