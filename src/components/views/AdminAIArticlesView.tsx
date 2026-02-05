@@ -49,6 +49,7 @@ interface AIPublishingSetting {
 export function AdminAIArticlesView() {
   const queryClient = useQueryClient();
   const [selectedSource, setSelectedSource] = useState<string>('all');
+  const [selectedSite, setSelectedSite] = useState<string>('all');
   const [deletingArticleId, setDeletingArticleId] = useState<string | null>(null);
   const [editingArticle, setEditingArticle] = useState<PublishedSource | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -102,16 +103,35 @@ export function AdminAIArticlesView() {
     },
   });
 
+  // Fetch WordPress sites for filter dropdown
+  const { data: wpSites } = useQuery({
+    queryKey: ['wordpress-sites-filter'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('wordpress_sites')
+        .select('id, name, favicon')
+        .eq('connected', true)
+        .order('name', { ascending: true });
+      if (error) throw error;
+      return data as { id: string; name: string; favicon: string | null }[];
+    },
+  });
+
   // Fetch total count for pagination
   const { data: totalCount } = useQuery({
-    queryKey: ['ai-published-sources-count', selectedSource],
+    queryKey: ['ai-published-sources-count', selectedSource, selectedSite],
     queryFn: async () => {
+      // Need to join through ai_publishing_settings to filter by site
       let query = supabase
         .from('ai_published_sources')
-        .select('*', { count: 'exact', head: true });
+        .select('*, setting:ai_publishing_settings!inner(target_site_id)', { count: 'exact', head: true });
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
+      }
+      
+      if (selectedSite !== 'all') {
+        query = query.eq('setting.target_site_id', selectedSite);
       }
 
       const { count, error } = await query;
@@ -122,13 +142,13 @@ export function AdminAIArticlesView() {
 
   // Fetch published sources with pagination
   const { data: articles, isLoading: articlesLoading } = useQuery({
-    queryKey: ['ai-published-sources', selectedSource],
+    queryKey: ['ai-published-sources', selectedSource, selectedSite],
     queryFn: async () => {
       let query = supabase
         .from('ai_published_sources')
         .select(`
           *,
-          setting:ai_publishing_settings(
+          setting:ai_publishing_settings!inner(
             source_name, 
             target_site_id,
             target_site:wordpress_sites(name, favicon)
@@ -139,6 +159,10 @@ export function AdminAIArticlesView() {
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
+      }
+      
+      if (selectedSite !== 'all') {
+        query = query.eq('setting.target_site_id', selectedSite);
       }
 
       const { data, error } = await query;
@@ -163,7 +187,7 @@ export function AdminAIArticlesView() {
         .from('ai_published_sources')
         .select(`
           *,
-          setting:ai_publishing_settings(
+          setting:ai_publishing_settings!inner(
             source_name, 
             target_site_id,
             target_site:wordpress_sites(name, favicon)
@@ -174,6 +198,10 @@ export function AdminAIArticlesView() {
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
+      }
+      
+      if (selectedSite !== 'all') {
+        query = query.eq('setting.target_site_id', selectedSite);
       }
 
       const { data, error } = await query;
@@ -196,7 +224,7 @@ export function AdminAIArticlesView() {
     } finally {
       setLoadingMore(false);
     }
-  }, [offset, hasMore, loadingMore, selectedSource, totalCount]);
+  }, [offset, hasMore, loadingMore, selectedSource, selectedSite, totalCount]);
 
   // Delete mutation - deletes from both local DB and WordPress
   const deleteMutation = useMutation({
@@ -454,23 +482,49 @@ export function AdminAIArticlesView() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-lg">Filter by Source</CardTitle>
+            <CardTitle className="text-lg">Filters</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <Select value={selectedSource} onValueChange={setSelectedSource}>
-            <SelectTrigger className="w-full md:w-[300px]">
-              <SelectValue placeholder="Select a source" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border z-50">
-              <SelectItem value="all">All Sources</SelectItem>
-              {settings?.map((setting) => (
-                <SelectItem key={setting.id} value={setting.id}>
-                  {setting.source_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">Source</label>
+              <Select value={selectedSource} onValueChange={setSelectedSource}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a source" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  <SelectItem value="all">All Sources</SelectItem>
+                  {settings?.map((setting) => (
+                    <SelectItem key={setting.id} value={setting.id}>
+                      {setting.source_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">Media Site</label>
+              <Select value={selectedSite} onValueChange={setSelectedSite}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a site" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  <SelectItem value="all">All Sites</SelectItem>
+                  {wpSites?.map((site) => (
+                    <SelectItem key={site.id} value={site.id}>
+                      <div className="flex items-center gap-2">
+                        {site.favicon && (
+                          <img src={site.favicon} alt="" className="w-4 h-4 rounded" />
+                        )}
+                        <span>{site.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
