@@ -32,6 +32,7 @@ interface PublishedSource {
   // Preserved fields for when source is deleted
   wordpress_site_name: string | null;
   wordpress_site_favicon: string | null;
+  wordpress_site_id: string | null;
   source_config_name: string | null;
   setting?: {
     source_name: string;
@@ -251,56 +252,38 @@ export function AdminAIArticlesView() {
     }
   }, [offset, hasMore, loadingMore, selectedSource, selectedSite, totalCount, displayedArticles]);
 
-  // Delete mutation - deletes from both local DB and WordPress
+  // Delete mutation - deletes from both local DB and WordPress via edge function
   const deleteMutation = useMutation({
     mutationFn: async (article: PublishedSource) => {
-      // First, try to delete from WordPress if we have the post ID and site info
-      if (article.wordpress_post_id && article.setting?.target_site_id) {
-        const { data: site } = await supabase
-          .from('wordpress_sites')
-          .select('url, username, app_password')
-          .eq('id', article.setting.target_site_id)
-          .eq('connected', true)
-          .single();
+      // Get the site ID - use preserved value if setting was deleted
+      const siteId = article.setting?.target_site_id || article.wordpress_site_id;
+      
+      // Try to delete from WordPress if we have the post ID and site info
+      if (article.wordpress_post_id && siteId) {
+        try {
+          console.log('[delete] Calling delete-wordpress-post edge function', {
+            siteId,
+            wpPostId: article.wordpress_post_id,
+          });
+          
+          const { data, error } = await supabase.functions.invoke('delete-wordpress-post', {
+            body: {
+              siteId,
+              wpPostId: article.wordpress_post_id,
+            },
+          });
 
-        if (site) {
-          const creds = btoa(`${site.username}:${site.app_password}`);
-          const baseUrl = site.url.replace(/\/+$/, '');
-          const headers = {
-            'Authorization': `Basic ${creds}`,
-            'Content-Type': 'application/json',
-          };
-
-          // First, get the post to find the featured media ID
-          try {
-            const postRes = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${article.wordpress_post_id}`, {
-              headers: { 'Authorization': `Basic ${creds}` },
-            });
-            
-            if (postRes.ok) {
-              const postData = await postRes.json();
-              const featuredMediaId = postData.featured_media;
-
-              // Delete the featured image if it exists
-              if (featuredMediaId && featuredMediaId > 0) {
-                await fetch(`${baseUrl}/wp-json/wp/v2/media/${featuredMediaId}?force=true`, {
-                  method: 'DELETE',
-                  headers,
-                });
-                console.log('[delete] Featured image deleted:', featuredMediaId);
-              }
-
-              // Delete the post (move to trash first, then force delete)
-              await fetch(`${baseUrl}/wp-json/wp/v2/posts/${article.wordpress_post_id}?force=true`, {
-                method: 'DELETE',
-                headers,
-              });
-              console.log('[delete] WordPress post deleted:', article.wordpress_post_id);
-            }
-          } catch (wpError) {
-            console.error('[delete] WordPress deletion error:', wpError);
+          if (error) {
+            console.error('[delete] Edge function error:', error);
             // Continue with local deletion even if WP fails
+          } else if (data?.deleted) {
+            console.log('[delete] WordPress post deleted successfully');
+          } else {
+            console.warn('[delete] WordPress deletion returned:', data);
           }
+        } catch (wpError) {
+          console.error('[delete] WordPress deletion error:', wpError);
+          // Continue with local deletion even if WP fails
         }
       }
 
@@ -314,6 +297,7 @@ export function AdminAIArticlesView() {
     onSuccess: () => {
       setDeletingArticleId(null);
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
+      queryClient.invalidateQueries({ queryKey: ['ai-published-sources-count'] });
       toast({ title: "Article deleted", description: "Removed from database and WordPress" });
     },
     onError: (error) => {

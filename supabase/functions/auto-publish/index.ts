@@ -127,6 +127,7 @@ Deno.serve(async (req) => {
           // Preserve site and source info for when config is deleted
           wordpress_site_name: site.name,
           wordpress_site_favicon: site.favicon || null,
+          wordpress_site_id: site.id,
           source_config_name: setting.source_name,
         });
 
