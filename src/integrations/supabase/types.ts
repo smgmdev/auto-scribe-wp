@@ -306,6 +306,7 @@ export type Database = {
       }
       ai_published_sources: {
         Row: {
+          ai_title: string | null
           created_at: string
           id: string
           published_at: string
@@ -316,6 +317,7 @@ export type Database = {
           wordpress_post_link: string | null
         }
         Insert: {
+          ai_title?: string | null
           created_at?: string
           id?: string
           published_at?: string
@@ -326,6 +328,7 @@ export type Database = {
           wordpress_post_link?: string | null
         }
         Update: {
+          ai_title?: string | null
           created_at?: string
           id?: string
           published_at?: string

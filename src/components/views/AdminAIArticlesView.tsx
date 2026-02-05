@@ -20,6 +20,7 @@ interface PublishedSource {
   setting_id: string;
   source_url: string;
   source_title: string;
+  ai_title: string | null;
   wordpress_post_id: number | null;
   wordpress_post_link: string | null;
   published_at: string;
@@ -211,16 +212,17 @@ export function AdminAIArticlesView() {
                       </div>
                       
                       <h3 className="font-medium text-sm leading-snug line-clamp-2">
-                        {article.source_title}
+                        {article.ai_title || article.source_title}
                       </h3>
                       
                       <a 
                         href={article.source_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors truncate max-w-[400px]"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
                       >
-                        <span className="truncate">{article.source_url}</span>
+                        <span>Source:</span>
+                        <span className="truncate max-w-[350px]">{article.source_url}</span>
                         <ExternalLink className="h-3 w-3 shrink-0" />
                       </a>
                     </div>
