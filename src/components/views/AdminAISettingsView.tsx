@@ -626,7 +626,7 @@ export function AdminAISettingsView() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-blue-500" />
-              <CardTitle>Test Preview Results</CardTitle>
+              <CardTitle>Test Config Results</CardTitle>
             </div>
             <CardDescription>Side-by-side comparison of source data vs AI generated content</CardDescription>
           </CardHeader>
