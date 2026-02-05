@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Newspaper, RefreshCw, Trash2, Power, PowerOff, Pencil } from 'lucide-react';
+import { Newspaper, RefreshCw, Trash2, Power, PowerOff, Pencil, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -295,41 +301,68 @@ export function AdminAISourcesView() {
           sources.map((source) => (
             <Card key={source.id} className={`transition-colors ${source.enabled ? 'border-green-500/30' : 'border-muted'}`}>
               <CardContent className="py-3 px-4">
-                {/* Mobile: icons on top */}
-                <div className="flex justify-end gap-1 mb-2 md:hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleToggleEnabled(source)}
-                    className="h-8 w-8 hover:bg-primary hover:text-primary-foreground"
-                  >
-                    {source.enabled ? (
-                      <Power className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <PowerOff className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0 md:pr-32">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-semibold">{source.name}</h3>
+                      <Badge variant={source.enabled ? "default" : "secondary"}>
+                        {source.enabled ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{source.url}</p>
+                    {source.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{source.description}</p>
                     )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setEditingSource(source)}
-                    className="h-8 w-8 hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteMutation.mutate(source.id)}
-                    className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="relative">
-                  {/* Desktop: icons in top right */}
-                  <div className="absolute top-0 right-0 hidden md:flex items-center gap-1">
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Added {format(new Date(source.created_at), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                  
+                  {/* Mobile: Action dropdown */}
+                  <div className="md:hidden">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background">
+                        <DropdownMenuItem 
+                          onClick={() => handleToggleEnabled(source)}
+                          className="hover:bg-black hover:text-white focus:bg-black focus:text-white"
+                        >
+                          {source.enabled ? (
+                            <>
+                              <PowerOff className="h-4 w-4 mr-2" />
+                              Disable
+                            </>
+                          ) : (
+                            <>
+                              <Power className="h-4 w-4 mr-2" />
+                              Enable
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => setEditingSource(source)}
+                          className="hover:bg-black hover:text-white focus:bg-black focus:text-white"
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => deleteMutation.mutate(source.id)}
+                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  {/* Desktop: icons in row */}
+                  <div className="hidden md:flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -358,22 +391,6 @@ export function AdminAISourcesView() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div>
-                  
-                  <div className="md:pr-32">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold">{source.name}</h3>
-                      <Badge variant={source.enabled ? "default" : "secondary"}>
-                        {source.enabled ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">{source.url}</p>
-                    {source.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{source.description}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Added {format(new Date(source.created_at), 'MMM d, yyyy')}
-                    </p>
                   </div>
                 </div>
               </CardContent>
