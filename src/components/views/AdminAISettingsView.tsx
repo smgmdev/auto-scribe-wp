@@ -231,10 +231,16 @@ export function AdminAISettingsView() {
       const { data, error } = await supabase
         .from('ai_publishing_settings')
         .insert({
-          ...setting,
+          source_name: setting.source_name,
+          source_url: setting.source_url,
+          enabled: setting.enabled,
+          auto_publish: true, // Always true
           target_site_id: setting.target_site_id || null,
           target_category_id: setting.target_category_id,
           target_category_name: setting.target_category_name,
+          rewrite_enabled: true, // Always true
+          publish_interval_minutes: setting.publish_interval_minutes,
+          tone: setting.tone,
           created_by: user?.id,
         })
         .select()
@@ -250,11 +256,11 @@ export function AdminAISettingsView() {
         source_name: '',
         source_url: '',
         enabled: false,
-        auto_publish: false,
+        auto_publish: true, // Always true
         target_site_id: '',
         target_category_id: null,
         target_category_name: null,
-        rewrite_enabled: true,
+        rewrite_enabled: true, // Always true
         fetch_images: true,
         publish_interval_minutes: 5,
         tone: 'professional',
