@@ -29,6 +29,7 @@ interface PublishedSource {
   image_caption: string | null;
   wordpress_post_id: number | null;
   wordpress_post_link: string | null;
+  word_count: number | null;
   published_at: string;
   created_at: string;
   setting?: {
@@ -458,19 +459,17 @@ export function AdminAIArticlesView() {
                       <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                         <span>{format(new Date(article.published_at), 'MMM d, yyyy h:mm a')}</span>
                         <span>•</span>
-                        <span>~700 words</span>
-                        {article.setting?.target_site && (
-                          <>
-                            <span>•</span>
-                            <span className="flex items-center gap-1">
-                              Published on:
-                              {article.setting.target_site.favicon && (
-                                <img src={article.setting.target_site.favicon} alt="" className="w-4 h-4 rounded" />
-                              )}
-                              <span className="font-medium text-foreground">{article.setting.target_site.name}</span>
-                            </span>
-                          </>
-                        )}
+                        <span>{article.word_count || '~700'} words</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          Published on:
+                          {article.setting?.target_site?.favicon && (
+                            <img src={article.setting.target_site.favicon} alt="" className="w-4 h-4 rounded" />
+                          )}
+                          <span className="font-medium text-foreground">
+                            {article.setting?.target_site?.name || 'Unknown'}
+                          </span>
+                        </span>
                       </div>
                     </div>
 

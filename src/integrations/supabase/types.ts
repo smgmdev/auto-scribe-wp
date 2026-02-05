@@ -318,6 +318,7 @@ export type Database = {
           source_title: string
           source_url: string
           tags: string[] | null
+          word_count: number | null
           wordpress_post_id: number | null
           wordpress_post_link: string | null
         }
@@ -334,6 +335,7 @@ export type Database = {
           source_title: string
           source_url: string
           tags?: string[] | null
+          word_count?: number | null
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
         }
@@ -350,6 +352,7 @@ export type Database = {
           source_title?: string
           source_url?: string
           tags?: string[] | null
+          word_count?: number | null
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
         }
