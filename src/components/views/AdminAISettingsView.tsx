@@ -365,13 +365,15 @@ export function AdminAISettingsView() {
         <div className="flex items-center gap-3">
           <Settings className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-3xl font-bold">AI Publishing Settings</h1>
+            <h1 className="text-3xl font-bold">AI Settings & Config</h1>
             <p className="text-muted-foreground">Configure automatic AI-based publishing</p>
           </div>
         </div>
         {!isAdding && (
-          <Button onClick={() => setIsAdding(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={() => setIsAdding(true)}
+            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+          >
             Add Source
           </Button>
         )}
