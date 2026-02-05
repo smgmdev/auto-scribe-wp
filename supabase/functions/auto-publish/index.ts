@@ -48,18 +48,21 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Check globally across ALL settings to prevent any duplicate sources
         const { data: published } = await supabase
           .from('ai_published_sources')
-          .select('source_url')
-          .eq('setting_id', setting.id);
+          .select('source_url');
 
         const publishedUrls = new Set((published || []).map((s: { source_url: string }) => s.source_url));
         const newItem = rssItems.find((item) => !publishedUrls.has(item.link));
 
         if (!newItem) {
-          results.push({ id: setting.id, status: 'all_published' });
+          console.log(`[auto-publish] Setting ${setting.id}: No new sources found, skipping until next interval`);
+          results.push({ id: setting.id, status: 'all_published', message: 'Waiting for new sources' });
           continue;
         }
+
+        console.log(`[auto-publish] Setting ${setting.id}: Found new source - ${newItem.title}`);
 
         const { data: site } = await supabase
           .from('wordpress_sites')
