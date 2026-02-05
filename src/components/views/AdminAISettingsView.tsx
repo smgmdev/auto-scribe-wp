@@ -742,7 +742,7 @@ export function AdminAISettingsView() {
               <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="font-semibold mb-2">No sources configured</h3>
               <p className="text-muted-foreground mb-4">
-                Add an AI source to start automatic publishing
+                Create a new AI config to start automatic publishing
               </p>
               <Button 
                 onClick={() => setIsAdding(true)}
