@@ -833,7 +833,9 @@ export function AdminAISettingsView() {
                         disabled={!setting.target_site_id || isLoadingCats}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={isLoadingCats ? "Loading..." : "Select category"} />
+                          <SelectValue placeholder={isLoadingCats ? "Loading..." : "Select category"}>
+                            {setting.target_category_name || (isLoadingCats ? "Loading..." : "Select category")}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
