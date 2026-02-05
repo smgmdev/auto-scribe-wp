@@ -383,7 +383,7 @@ export function AdminAISettingsView() {
       {isAdding && (
         <Card className="border-primary/30">
           <CardHeader>
-            <CardTitle>Add New AI Source</CardTitle>
+            <CardTitle>Add New AI Config</CardTitle>
             <CardDescription>Configure a new source for automatic AI publishing</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -548,28 +548,29 @@ export function AdminAISettingsView() {
               <Button
                 onClick={() => addMutation.mutate(newSource)}
                 disabled={addMutation.isPending || !newSource.source_name}
+                className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
               >
                 {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <Save className="h-4 w-4 mr-2" />
                 Save Configuration
               </Button>
               <Button
                 variant="outline"
                 onClick={runTestPreview}
                 disabled={testPreviewLoading}
+                className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
               >
-                {testPreviewLoading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FlaskConical className="h-4 w-4 mr-2" />
-                )}
+                {testPreviewLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Test Preview
               </Button>
-              <Button variant="outline" onClick={() => {
-                setIsAdding(false);
-                setShowTestPreview(false);
-                setTestPreviewResult(null);
-              }}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsAdding(false);
+                  setShowTestPreview(false);
+                  setTestPreviewResult(null);
+                }}
+                className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
+              >
                 Cancel
               </Button>
             </div>
