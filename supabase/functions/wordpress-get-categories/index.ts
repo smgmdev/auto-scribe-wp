@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 Deno.serve(async (req) => {
@@ -22,37 +22,33 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create Supabase client with service role
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch the WordPress site credentials
     const { data: site, error: siteError } = await supabase
       .from('wordpress_sites')
       .select('id, url, username, app_password, name')
       .eq('id', siteId)
       .eq('connected', true)
-      .single();
+      .maybeSingle();
 
     if (siteError || !site) {
       console.error('[wordpress-get-categories] Site not found:', siteError);
       return new Response(
-        JSON.stringify({ error: 'WordPress site not found or not connected' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ categories: [], error: 'WordPress site not found or not connected' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log('[wordpress-get-categories] Fetching categories for:', site.name);
 
-    // Create Basic Auth header
     const credentials = btoa(`${site.username}:${site.app_password}`);
     const authHeader = `Basic ${credentials}`;
     const baseUrl = site.url.replace(/\/+$/, '');
 
-    // Fetch categories with timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     let wpResponse;
     try {
@@ -63,39 +59,37 @@ Deno.serve(async (req) => {
         },
         signal: controller.signal,
       });
-    } catch (fetchError: unknown) {
+    } catch (fetchError) {
       clearTimeout(timeoutId);
-      const errorMessage = fetchError instanceof Error ? fetchError.message : 'Connection failed';
-      
-      // Handle SSL/TLS certificate errors gracefully
-      if (errorMessage.includes('certificate') || errorMessage.includes('SSL') || errorMessage.includes('TLS')) {
-        console.warn('[wordpress-get-categories] SSL certificate error for site, returning empty categories:', errorMessage);
-        return new Response(
-          JSON.stringify({ categories: [], warning: 'SSL certificate issue with WordPress site' }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      throw fetchError;
+      console.warn('[wordpress-get-categories] Fetch error:', fetchError);
+      return new Response(
+        JSON.stringify({ categories: [], warning: 'Connection error with WordPress site' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     clearTimeout(timeoutId);
 
-    console.log('[wordpress-get-categories] WP API response status:', wpResponse.status);
-
     if (!wpResponse.ok) {
-      const errorText = await wpResponse.text();
-      console.error('[wordpress-get-categories] WP API error:', wpResponse.status, errorText);
+      console.error('[wordpress-get-categories] WP API error:', wpResponse.status);
       return new Response(
-        JSON.stringify({ error: `Failed to fetch categories: ${wpResponse.statusText}` }),
-        { status: wpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ categories: [], error: `Failed to fetch categories: ${wpResponse.statusText}` }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const contentType = wpResponse.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      console.error('[wordpress-get-categories] Unexpected content type:', contentType);
+      return new Response(
+        JSON.stringify({ categories: [], warning: 'Unexpected response from WordPress' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await wpResponse.json();
     
-    // Map to simplified category format
-    const categories = data.map((cat: any) => ({
+    const categories = data.map((cat: { id: number; name: string; slug: string }) => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
@@ -107,12 +101,11 @@ Deno.serve(async (req) => {
       JSON.stringify({ categories }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('[wordpress-get-categories] Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ categories: [], error: 'Internal server error' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
