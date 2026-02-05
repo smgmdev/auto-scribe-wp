@@ -1,52 +1,126 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Newspaper, RefreshCw, ExternalLink, Clock, Sparkles } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Newspaper, RefreshCw, Plus, Trash2, Power, PowerOff, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
+import { format } from 'date-fns';
 
-interface YahooArticle {
-  title: string;
-  link: string;
-  pubDate: string;
-  description: string;
-  thumbnail?: string;
+interface AISource {
+  id: string;
+  name: string;
+  url: string;
+  description: string | null;
+  enabled: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export function AdminAISourcesView() {
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const { data, isLoading, refetch, error } = useQuery({
-    queryKey: ['yahoo-finance-headlines'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('fetch-yahoo-finance');
-      if (error) throw error;
-      return data as { articles: YahooArticle[]; source: string };
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingSource, setEditingSource] = useState<AISource | null>(null);
+  const [newSource, setNewSource] = useState({
+    name: '',
+    url: '',
+    description: '',
   });
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refetch();
+  const { data: sources, isLoading, refetch } = useQuery({
+    queryKey: ['ai-sources'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_sources')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as AISource[];
+    },
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (source: typeof newSource) => {
+      const { data, error } = await supabase
+        .from('ai_sources')
+        .insert({
+          ...source,
+          created_by: user?.id,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
+      setIsAdding(false);
+      setNewSource({ name: '', url: '', description: '' });
+      toast({ title: "Source added", description: "New AI source has been created." });
+    },
+    onError: (error) => {
       toast({
-        title: "Headlines refreshed",
-        description: `Fetched ${data?.articles?.length || 0} articles from Yahoo Finance`,
-      });
-    } catch (err) {
-      toast({
-        title: "Refresh failed",
-        description: "Could not fetch headlines. Please try again.",
+        title: "Failed to add source",
+        description: error instanceof Error ? error.message : "Unknown error",
         variant: "destructive",
       });
-    } finally {
-      setIsRefreshing(false);
-    }
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<AISource> }) => {
+      const { error } = await supabase
+        .from('ai_sources')
+        .update(updates)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
+      setEditingSource(null);
+      toast({ title: "Source updated" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('ai_sources')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
+      toast({ title: "Source deleted" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggleEnabled = (source: AISource) => {
+    updateMutation.mutate({ id: source.id, updates: { enabled: !source.enabled } });
   };
 
   return (
@@ -57,127 +131,255 @@ export function AdminAISourcesView() {
           <Newspaper className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold">AI Sources</h1>
-            <p className="text-muted-foreground">Finance news from Yahoo Finance</p>
+            <p className="text-muted-foreground">Manage available sources for AI publishing</p>
           </div>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          disabled={isRefreshing || isLoading}
-          className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          {!isAdding && (
+            <Button 
+              onClick={() => setIsAdding(true)}
+              className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Source
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Source Info Card */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-              <Sparkles className="h-6 w-6 text-primary" />
+      {/* Add New Source Form */}
+      {isAdding && (
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle>Add New Source</CardTitle>
+            <CardDescription>Create a new source that can be used in AI publishing configs</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source Name</Label>
+                <Input
+                  value={newSource.name}
+                  onChange={(e) => setNewSource(s => ({ ...s, name: e.target.value }))}
+                  placeholder="e.g., Yahoo Finance"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Source URL</Label>
+                <Input
+                  value={newSource.url}
+                  onChange={(e) => setNewSource(s => ({ ...s, url: e.target.value }))}
+                  placeholder="https://finance.yahoo.com/"
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold">Yahoo Finance</h3>
-              <p className="text-sm text-muted-foreground">
-                Real-time financial news and market updates
-              </p>
+            <div className="space-y-2">
+              <Label>Description (optional)</Label>
+              <Textarea
+                value={newSource.description}
+                onChange={(e) => setNewSource(s => ({ ...s, description: e.target.value }))}
+                placeholder="Brief description of this source..."
+                rows={2}
+              />
             </div>
-            <Badge variant="secondary">
-              {data?.articles?.length || 0} articles
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Error State */}
-      {error && (
-        <Card className="border-destructive/50 bg-destructive/5">
-          <CardContent className="pt-4">
-            <p className="text-destructive">
-              Failed to fetch headlines: {error instanceof Error ? error.message : 'Unknown error'}
-            </p>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAdding(false);
+                  setNewSource({ name: '', url: '', description: '' });
+                }}
+                className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => addMutation.mutate(newSource)}
+                disabled={addMutation.isPending || !newSource.name || !newSource.url}
+                className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+              >
+                Save Source
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Headlines Grid */}
-      <div className="grid gap-4">
+      {/* Edit Source Dialog */}
+      {editingSource && (
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle>Edit Source</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source Name</Label>
+                <Input
+                  value={editingSource.name}
+                  onChange={(e) => setEditingSource(s => s ? { ...s, name: e.target.value } : null)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Source URL</Label>
+                <Input
+                  value={editingSource.url}
+                  onChange={(e) => setEditingSource(s => s ? { ...s, url: e.target.value } : null)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={editingSource.description || ''}
+                onChange={(e) => setEditingSource(s => s ? { ...s, description: e.target.value } : null)}
+                rows={2}
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setEditingSource(null)}
+                className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => updateMutation.mutate({
+                  id: editingSource.id,
+                  updates: {
+                    name: editingSource.name,
+                    url: editingSource.url,
+                    description: editingSource.description,
+                  },
+                })}
+                disabled={updateMutation.isPending}
+                className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+              >
+                Save Changes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Sources List */}
+      <div className="space-y-4">
         {isLoading ? (
-          Array.from({ length: 6 }).map((_, i) => (
+          Array.from({ length: 3 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="pt-4">
-                <div className="flex gap-4">
-                  <Skeleton className="h-20 w-32 rounded-lg flex-shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-5 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-24" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : sources && sources.length > 0 ? (
+          sources.map((source) => (
+            <Card key={source.id} className={`transition-colors ${source.enabled ? 'border-green-500/30' : 'border-muted'}`}>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-semibold">{source.name}</h3>
+                      <Badge variant={source.enabled ? "default" : "secondary"}>
+                        {source.enabled ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{source.url}</p>
+                    {source.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{source.description}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Added {format(new Date(source.created_at), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleToggleEnabled(source)}
+                      className="hover:bg-primary hover:text-primary-foreground"
+                    >
+                      {source.enabled ? (
+                        <Power className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <PowerOff className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingSource(source)}
+                      className="hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteMutation.mutate(source.id)}
+                      className="hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          data?.articles?.map((article, index) => (
-            <Card key={index} className="hover:border-primary/30 transition-colors">
-              <CardContent className="pt-4">
-                <div className="flex gap-4">
-                  {article.thumbnail && (
-                    <img 
-                      src={article.thumbnail} 
-                      alt="" 
-                      className="h-20 w-32 object-cover rounded-lg flex-shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold line-clamp-2 mb-1">
-                      {article.title}
-                    </h3>
-                    {article.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                        {article.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(article.pubDate), { addSuffix: true })}
-                      </span>
-                      <a 
-                        href={article.link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 hover:text-primary transition-colors"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        View Source
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Newspaper className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="font-semibold mb-2">No sources configured</h3>
+              <p className="text-muted-foreground mb-4">
+                Add sources that can be used in AI publishing configs
+              </p>
+              <Button onClick={() => setIsAdding(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Source
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </div>
 
-      {/* Empty State */}
-      {!isLoading && !error && (!data?.articles || data.articles.length === 0) && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Newspaper className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="font-semibold mb-2">No headlines available</h3>
-            <p className="text-muted-foreground mb-4">
-              Click refresh to fetch the latest finance news
-            </p>
-            <Button onClick={handleRefresh} disabled={isRefreshing}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Fetch Headlines
-            </Button>
+      {/* Stats Card */}
+      {sources && sources.length > 0 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">Total Sources</p>
+                <p className="text-2xl font-bold">{sources.length}</p>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-2xl font-bold text-green-500">
+                  {sources.filter(s => s.enabled).length}
+                </p>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">Inactive</p>
+                <p className="text-2xl font-bold text-muted-foreground">
+                  {sources.filter(s => !s.enabled).length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}

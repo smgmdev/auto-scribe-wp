@@ -434,6 +434,39 @@ export type Database = {
           },
         ]
       }
+      ai_sources: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           categories: number[] | null
