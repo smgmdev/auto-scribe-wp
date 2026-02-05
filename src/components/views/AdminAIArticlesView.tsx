@@ -119,17 +119,17 @@ export function AdminAIArticlesView() {
   const { data: totalCount } = useQuery({
     queryKey: ['ai-published-sources-count', selectedSource, selectedSite],
     queryFn: async () => {
-      // Need to join through ai_publishing_settings to filter by site
+      // Use left join so articles persist even if setting is deleted
       let query = supabase
         .from('ai_published_sources')
-        .select('*, setting:ai_publishing_settings!inner(target_site_id)', { count: 'exact', head: true });
+        .select('*, setting:ai_publishing_settings(target_site_id)', { count: 'exact', head: true });
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
       }
       
       if (selectedSite !== 'all') {
-        query = query.eq('setting.target_site_id', selectedSite);
+        query = query.not('setting', 'is', null).eq('setting.target_site_id', selectedSite);
       }
 
       const { count, error } = await query;
@@ -142,11 +142,12 @@ export function AdminAIArticlesView() {
   const { data: articles, isLoading: articlesLoading, isSuccess: articlesSuccess } = useQuery({
     queryKey: ['ai-published-sources', selectedSource, selectedSite],
     queryFn: async () => {
+      // Use left join so articles persist even if setting is deleted
       let query = supabase
         .from('ai_published_sources')
         .select(`
           *,
-          setting:ai_publishing_settings!inner(
+          setting:ai_publishing_settings(
             source_name, 
             target_site_id,
             target_site:wordpress_sites(name, favicon)
@@ -160,7 +161,7 @@ export function AdminAIArticlesView() {
       }
       
       if (selectedSite !== 'all') {
-        query = query.eq('setting.target_site_id', selectedSite);
+        query = query.not('setting', 'is', null).eq('setting.target_site_id', selectedSite);
       }
 
       const { data, error } = await query;
@@ -193,11 +194,12 @@ export function AdminAIArticlesView() {
     
     setLoadingMore(true);
     try {
+      // Use left join so articles persist even if setting is deleted
       let query = supabase
         .from('ai_published_sources')
         .select(`
           *,
-          setting:ai_publishing_settings!inner(
+          setting:ai_publishing_settings(
             source_name, 
             target_site_id,
             target_site:wordpress_sites(name, favicon)
@@ -211,7 +213,7 @@ export function AdminAIArticlesView() {
       }
       
       if (selectedSite !== 'all') {
-        query = query.eq('setting.target_site_id', selectedSite);
+        query = query.not('setting', 'is', null).eq('setting.target_site_id', selectedSite);
       }
 
       const { data, error } = await query;
@@ -608,8 +610,8 @@ export function AdminAIArticlesView() {
                             className="w-5 h-5 rounded shrink-0" 
                           />
                         )}
-                        <Badge variant="secondary" className="text-xs">
-                          {article.setting?.source_name || 'Unknown Source'}
+                        <Badge variant={article.setting ? "secondary" : "outline"} className="text-xs">
+                          {article.setting?.source_name || 'Deleted Source'}
                         </Badge>
                       </div>
                       
