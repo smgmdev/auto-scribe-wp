@@ -75,7 +75,7 @@ Writing Guidelines:
 You must respond with a JSON object containing:
 - title: A rewritten headline (12-18 words, curiosity-focused, preserve key names)
 - content: The full article content
-- focusKeyword: A 2-4 word SEO focus keyword that MUST be an exact word or phrase that appears in your rewritten title. Extract a meaningful phrase directly from the title.
+- focusKeyword: A 2-4 word SEO focus keyword. CRITICAL: This MUST be an exact word or word combination that appears verbatim in YOUR REWRITTEN TITLE (not the original source title). The keyword must be searchable within the rewritten title field.
 - metaDescription: An SEO meta description (max 155 characters)
 - tag: A single tag that matches the focus keyword`;
 
@@ -83,7 +83,7 @@ You must respond with a JSON object containing:
 
 Source Description: ${sourceData.description}
 
-Generate the article now. Remember: the focusKeyword MUST be an exact word or phrase that appears in the title you generate.`;
+Generate the article now. IMPORTANT: The focusKeyword MUST be an exact word or phrase extracted from YOUR rewritten title, NOT from the original source headline above. If your rewritten title is "Apple Unveils Revolutionary AI Features", valid focusKeywords would be "Apple", "Revolutionary AI Features", or "AI Features".`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
