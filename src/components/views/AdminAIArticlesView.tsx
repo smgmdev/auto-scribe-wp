@@ -467,16 +467,6 @@ export function AdminAIArticlesView() {
                         <span>{format(new Date(article.published_at), 'MMM d, yyyy h:mm a')}</span>
                         <span>•</span>
                         <span>{article.word_count || '~700'} words</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          Published on:
-                          {article.setting?.target_site?.favicon && (
-                            <img src={article.setting.target_site.favicon} alt="" className="w-4 h-4 rounded" />
-                          )}
-                          <span className="font-medium text-foreground">
-                            {article.setting?.target_site?.name || 'Unknown'}
-                          </span>
-                        </span>
                       </div>
                     </div>
 
