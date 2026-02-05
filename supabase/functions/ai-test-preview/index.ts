@@ -212,9 +212,35 @@ Generate the article now.`;
 
     let generatedData;
     try {
-      generatedData = JSON.parse(content);
-    } catch {
+      // Clean up the content - sometimes AI returns extra braces or whitespace
+      let cleanedContent = content.trim();
+      
+      // Try to find valid JSON by removing extra closing braces
+      let parseAttempt = 0;
+      while (parseAttempt < 3) {
+        try {
+          generatedData = JSON.parse(cleanedContent);
+          break;
+        } catch (parseError) {
+          // Check if the error is about unexpected token at end
+          if (cleanedContent.endsWith('}}') || cleanedContent.endsWith('}\n}')) {
+            cleanedContent = cleanedContent.replace(/\}\s*\}$/, '}');
+            parseAttempt++;
+          } else if (cleanedContent.endsWith('}}\n') || cleanedContent.endsWith('} }')) {
+            cleanedContent = cleanedContent.replace(/\}\s*\}\s*$/, '}');
+            parseAttempt++;
+          } else {
+            throw parseError;
+          }
+        }
+      }
+      
+      if (!generatedData) {
+        throw new Error('Could not parse after cleanup attempts');
+      }
+    } catch (e) {
       console.error('[ai-test-preview] Failed to parse AI response:', content);
+      console.error('[ai-test-preview] Parse error:', e);
       throw new Error('Failed to parse AI response');
     }
 
