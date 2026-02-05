@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil, Link } from 'lucide-react';
+import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -214,24 +214,18 @@ export function AdminAIArticlesView() {
                         {article.source_title}
                       </h3>
                       
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="truncate max-w-[300px]">
-                          Source: {article.source_url}
-                        </span>
-                      </div>
+                      <a 
+                        href={article.source_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors truncate max-w-[400px]"
+                      >
+                        <span className="truncate">{article.source_url}</span>
+                        <ExternalLink className="h-3 w-3 shrink-0" />
+                      </a>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(article.source_url, '_blank')}
-                        title="View original source"
-                      >
-                        <Link className="h-4 w-4 mr-1" />
-                        Source
-                      </Button>
-                      
                       {article.wordpress_post_link && (
                         <Button
                           variant="outline"
