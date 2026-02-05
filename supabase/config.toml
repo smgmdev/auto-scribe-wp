@@ -129,3 +129,6 @@ verify_jwt = true
 
 [functions.wordpress-publish-article]
 verify_jwt = true
+
+[functions.auto-publish]
+verify_jwt = false

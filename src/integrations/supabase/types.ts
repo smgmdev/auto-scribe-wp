@@ -304,6 +304,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_published_sources: {
+        Row: {
+          created_at: string
+          id: string
+          published_at: string
+          setting_id: string
+          source_title: string
+          source_url: string
+          wordpress_post_id: number | null
+          wordpress_post_link: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          published_at?: string
+          setting_id: string
+          source_title: string
+          source_url: string
+          wordpress_post_id?: number | null
+          wordpress_post_link?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          published_at?: string
+          setting_id?: string
+          source_title?: string
+          source_url?: string
+          wordpress_post_id?: number | null
+          wordpress_post_link?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_published_sources_setting_id_fkey"
+            columns: ["setting_id"]
+            isOneToOne: false
+            referencedRelation: "ai_publishing_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_publishing_settings: {
         Row: {
           auto_publish: boolean
