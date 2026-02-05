@@ -766,55 +766,55 @@ export function AdminAISettingsView() {
             return (
               <Card key={setting.id} className={setting.enabled ? 'border-green-500/30' : ''}>
                 <CardContent className="pt-6">
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-lg">{setting.source_name}</h3>
-                        {setting.enabled ? (
-                          <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
-                            <Power className="h-3 w-3 mr-1" />
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            <PowerOff className="h-3 w-3 mr-1" />
-                            Inactive
-                          </Badge>
-                        )}
-                        {setting.auto_publish && (
-                          <Badge variant="outline">Auto-Publish</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground break-all">
-                        Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
-                      </p>
-                      {targetSite && (
-                        <div className="text-sm text-muted-foreground space-y-0.5">
-                          <div className="flex items-center gap-1">
-                            <span>Publishing to:</span>
-                            {targetSite.favicon && (
-                              <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
-                            )}
-                            <span className="font-medium">{targetSite.name}</span>
-                          </div>
-                          {setting.target_category_name && (
-                            <div>
-                              <span>Category:</span>{' '}
-                              <span className="font-medium">{setting.target_category_name}</span>
-                            </div>
-                          )}
-                        </div>
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-lg">{setting.source_name}</h3>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-black hover:text-white shrink-0 -mt-1 -mr-2"
+                        onClick={() => deleteMutation.mutate(setting.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {setting.enabled ? (
+                        <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
+                          <Power className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">
+                          <PowerOff className="h-3 w-3 mr-1" />
+                          Inactive
+                        </Badge>
+                      )}
+                      {setting.auto_publish && (
+                        <Badge variant="outline">Auto-Publish</Badge>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:bg-black hover:text-white shrink-0 self-start"
-                      onClick={() => deleteMutation.mutate(setting.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <p className="text-sm text-muted-foreground break-all">
+                      Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
+                    </p>
+                    {targetSite && (
+                      <div className="text-sm text-muted-foreground space-y-0.5">
+                        <div className="flex items-center gap-1">
+                          <span>Publishing to:</span>
+                          {targetSite.favicon && (
+                            <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
+                          )}
+                          <span className="font-medium">{targetSite.name}</span>
+                        </div>
+                        {setting.target_category_name && (
+                          <div>
+                            <span>Category:</span>{' '}
+                            <span className="font-medium">{setting.target_category_name}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <Separator className="my-4" />
