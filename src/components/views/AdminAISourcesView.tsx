@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Newspaper, RefreshCw, Trash2, Power, PowerOff, Pencil, MoreVertical } from 'lucide-react';
+import { RefreshCw, Trash2, Power, PowerOff, Pencil, MoreVertical, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -134,12 +134,9 @@ export function AdminAISourcesView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Newspaper className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">AI Sources</h1>
-            <p className="text-muted-foreground">Manage available sources for AI publishing</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold">AI Sources</h1>
+          <p className="text-muted-foreground">Manage available sources for AI publishing</p>
         </div>
         <div className="flex gap-2">
           {!isAdding && (
