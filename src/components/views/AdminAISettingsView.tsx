@@ -587,7 +587,7 @@ export function AdminAISettingsView() {
               </div>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <Button
                 onClick={() => addMutation.mutate(newSource)}
                 disabled={addMutation.isPending || !newSource.source_id}
@@ -766,9 +766,9 @@ export function AdminAISettingsView() {
             return (
               <Card key={setting.id} className={setting.enabled ? 'border-green-500/30' : ''}>
                 <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-lg">{setting.source_name}</h3>
                         {setting.enabled ? (
                           <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
@@ -785,26 +785,26 @@ export function AdminAISettingsView() {
                           <Badge variant="outline">Auto-Publish</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground break-all">
                         Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
                       </p>
                       {targetSite && (
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          Publishing to: 
+                        <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-1">
+                          <span>Publishing to:</span>
                           {targetSite.favicon && (
-                            <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded" />
+                            <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
                           )}
                           <span className="font-medium">{targetSite.name}</span>
                           {setting.target_category_name && (
                             <span className="text-xs">→ {setting.target_category_name}</span>
                           )}
-                        </p>
+                        </div>
                       )}
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-destructive hover:bg-black hover:text-white"
+                      className="text-destructive hover:bg-black hover:text-white shrink-0 self-start"
                       onClick={() => deleteMutation.mutate(setting.id)}
                       disabled={deleteMutation.isPending}
                     >
