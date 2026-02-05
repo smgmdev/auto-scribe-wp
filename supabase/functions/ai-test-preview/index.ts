@@ -13,13 +13,14 @@ Deno.serve(async (req) => {
 
     console.log('[ai-test-preview] Testing with:', { sourceUrl, tone });
 
-    // Fetch sample data from Yahoo Finance RSS with cache-busting
-    const rssUrl = `https://finance.yahoo.com/news/rssindex?_t=${Date.now()}`;
+    // Use Google News Finance RSS for more recent articles
+    const rssUrl = `https://news.google.com/rss/search?q=finance+OR+stocks+OR+market&hl=en-US&gl=US&ceid=US:en&_t=${Date.now()}`;
     const rssResponse = await fetch(rssUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
     });
 
@@ -43,8 +44,13 @@ Deno.serve(async (req) => {
       const pubDateStr = extractTag(itemXml, 'pubDate');
       const timestamp = pubDateStr ? new Date(pubDateStr).getTime() : 0;
       
+      // Clean up title - Google News sometimes includes source in title
+      let title = extractTag(itemXml, 'title');
+      // Remove " - Source Name" suffix if present
+      title = title.replace(/\s*-\s*[^-]+$/, '').trim();
+      
       items.push({
-        title: extractTag(itemXml, 'title'),
+        title,
         description: extractTag(itemXml, 'description'),
         link: extractTag(itemXml, 'link'),
         pubDate: pubDateStr,
@@ -60,7 +66,9 @@ Deno.serve(async (req) => {
     items.sort((a, b) => b.timestamp - a.timestamp);
     const mostRecent = items[0];
 
-    console.log('[ai-test-preview] Found', items.length, 'items, most recent from:', mostRecent.pubDate);
+    // Calculate how recent the article is
+    const ageMinutes = Math.floor((Date.now() - mostRecent.timestamp) / 60000);
+    console.log('[ai-test-preview] Found', items.length, 'items, most recent is', ageMinutes, 'minutes old');
 
     const sourceData = {
       title: mostRecent.title,
