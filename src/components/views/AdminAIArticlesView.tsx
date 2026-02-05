@@ -84,18 +84,69 @@ export function AdminAIArticlesView() {
     },
   });
 
-  // Delete mutation
+  // Delete mutation - deletes from both local DB and WordPress
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (article: PublishedSource) => {
+      // First, try to delete from WordPress if we have the post ID and site info
+      if (article.wordpress_post_id && article.setting?.target_site_id) {
+        const { data: site } = await supabase
+          .from('wordpress_sites')
+          .select('url, username, app_password')
+          .eq('id', article.setting.target_site_id)
+          .eq('connected', true)
+          .single();
+
+        if (site) {
+          const creds = btoa(`${site.username}:${site.app_password}`);
+          const baseUrl = site.url.replace(/\/+$/, '');
+          const headers = {
+            'Authorization': `Basic ${creds}`,
+            'Content-Type': 'application/json',
+          };
+
+          // First, get the post to find the featured media ID
+          try {
+            const postRes = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${article.wordpress_post_id}`, {
+              headers: { 'Authorization': `Basic ${creds}` },
+            });
+            
+            if (postRes.ok) {
+              const postData = await postRes.json();
+              const featuredMediaId = postData.featured_media;
+
+              // Delete the featured image if it exists
+              if (featuredMediaId && featuredMediaId > 0) {
+                await fetch(`${baseUrl}/wp-json/wp/v2/media/${featuredMediaId}?force=true`, {
+                  method: 'DELETE',
+                  headers,
+                });
+                console.log('[delete] Featured image deleted:', featuredMediaId);
+              }
+
+              // Delete the post (move to trash first, then force delete)
+              await fetch(`${baseUrl}/wp-json/wp/v2/posts/${article.wordpress_post_id}?force=true`, {
+                method: 'DELETE',
+                headers,
+              });
+              console.log('[delete] WordPress post deleted:', article.wordpress_post_id);
+            }
+          } catch (wpError) {
+            console.error('[delete] WordPress deletion error:', wpError);
+            // Continue with local deletion even if WP fails
+          }
+        }
+      }
+
+      // Delete from local database
       const { error } = await supabase
         .from('ai_published_sources')
         .delete()
-        .eq('id', id);
+        .eq('id', article.id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
-      toast({ title: "Article record deleted" });
+      toast({ title: "Article deleted", description: "Removed from database and WordPress" });
     },
     onError: (error) => {
       toast({
@@ -392,7 +443,7 @@ export function AdminAIArticlesView() {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => deleteMutation.mutate(article.id)}
+                              onClick={() => deleteMutation.mutate(article)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               {deleteMutation.isPending ? (
