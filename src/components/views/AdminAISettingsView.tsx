@@ -580,77 +580,86 @@ export function AdminAISettingsView() {
             </div>
             <CardDescription>Side-by-side comparison of source data vs AI generated content</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Source Data */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <Badge variant="outline">Source Data</Badge>
-                </h3>
-                <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+          <CardContent className="space-y-6">
+            {/* Original Article (Source Data) */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <Badge variant="outline">Original Article</Badge>
+              </h3>
+              <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Original Title</Label>
+                  <p className="font-medium text-lg">{testPreviewResult.sourceData.title}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Source Link</Label>
+                  <a 
+                    href={testPreviewResult.sourceData.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline break-all block"
+                  >
+                    {testPreviewResult.sourceData.link}
+                  </a>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Published</Label>
+                  <p className="text-sm">{testPreviewResult.sourceData.pubDate}</p>
+                </div>
+                {testPreviewResult.sourceData.thumbnail && (
                   <div>
-                    <Label className="text-xs text-muted-foreground">Original Title</Label>
-                    <p className="font-medium">{testPreviewResult.sourceData.title}</p>
+                    <Label className="text-xs text-muted-foreground">Thumbnail</Label>
+                    <img 
+                      src={testPreviewResult.sourceData.thumbnail} 
+                      alt="Source thumbnail" 
+                      className="mt-1 rounded-lg max-h-48 object-cover"
+                    />
                   </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Description</Label>
-                    <p className="text-sm">{testPreviewResult.sourceData.description}</p>
+                )}
+                <div>
+                  <Label className="text-xs text-muted-foreground">Original Description / Content</Label>
+                  <div className="mt-1 p-3 bg-background rounded border">
+                    <p className="text-sm whitespace-pre-wrap">{testPreviewResult.sourceData.description}</p>
                   </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Source Link</Label>
-                    <p className="text-sm text-blue-500 truncate">{testPreviewResult.sourceData.link}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Published</Label>
-                    <p className="text-sm">{testPreviewResult.sourceData.pubDate}</p>
-                  </div>
-                  {testPreviewResult.sourceData.thumbnail && (
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Thumbnail</Label>
-                      <img 
-                        src={testPreviewResult.sourceData.thumbnail} 
-                        alt="Source thumbnail" 
-                        className="mt-1 rounded-lg max-h-40 object-cover"
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Generated Data */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <Badge className="bg-green-500/10 text-green-500 border-green-500/30">AI Generated</Badge>
-                </h3>
-                <div className="space-y-3 p-4 rounded-lg border bg-green-500/5">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Rewritten Title</Label>
-                    <p className="font-medium">{testPreviewResult.generatedData.title}</p>
-                  </div>
+            {/* AI Rewritten Article */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <Badge className="bg-green-500/10 text-green-500 border-green-500/30">AI Rewritten Article</Badge>
+              </h3>
+              <div className="space-y-4 p-4 rounded-lg border bg-green-500/5">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Rewritten Title</Label>
+                  <p className="font-medium text-lg">{testPreviewResult.generatedData.title}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-xs text-muted-foreground">Focus Keyword (SEO)</Label>
-                    <Badge variant="secondary">{testPreviewResult.generatedData.focusKeyword}</Badge>
+                    <Badge variant="secondary" className="mt-1">{testPreviewResult.generatedData.focusKeyword}</Badge>
                   </div>
                   <div>
-                    <Label className="text-xs text-muted-foreground">Meta Description (SEO)</Label>
-                    <p className="text-sm">{testPreviewResult.generatedData.metaDescription}</p>
+                    <Label className="text-xs text-muted-foreground">Tag</Label>
+                    <Badge className="mt-1">{testPreviewResult.generatedData.tag}</Badge>
                   </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Meta Description (SEO)</Label>
+                  <p className="text-sm mt-1 p-2 bg-background rounded border">{testPreviewResult.generatedData.metaDescription}</p>
+                </div>
+                {testPreviewResult.generatedData.imageCaption && (
                   <div>
-                    <Label className="text-xs text-muted-foreground">Tag (same as focus keyword)</Label>
-                    <Badge>{testPreviewResult.generatedData.tag}</Badge>
+                    <Label className="text-xs text-muted-foreground">Image Caption</Label>
+                    <p className="text-sm italic mt-1">{testPreviewResult.generatedData.imageCaption}</p>
                   </div>
-                  {testPreviewResult.generatedData.imageCaption && (
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Image Caption</Label>
-                      <p className="text-sm italic">{testPreviewResult.generatedData.imageCaption}</p>
-                    </div>
-                  )}
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Article Content Preview</Label>
-                    <ScrollArea className="h-32 mt-1">
-                      <p className="text-sm whitespace-pre-wrap">{testPreviewResult.generatedData.content.slice(0, 500)}...</p>
-                    </ScrollArea>
-                  </div>
+                )}
+                <div>
+                  <Label className="text-xs text-muted-foreground">Full Article Content</Label>
+                  <ScrollArea className="h-80 mt-1 p-3 bg-background rounded border">
+                    <p className="text-sm whitespace-pre-wrap">{testPreviewResult.generatedData.content}</p>
+                  </ScrollArea>
                 </div>
               </div>
             </div>
