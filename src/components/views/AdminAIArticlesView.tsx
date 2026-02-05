@@ -58,6 +58,7 @@ export function AdminAIArticlesView() {
   const [editTags, setEditTags] = useState('');
   const [editImageCaption, setEditImageCaption] = useState('');
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Pagination state
   const [displayedArticles, setDisplayedArticles] = useState<PublishedSource[]>([]);
@@ -487,16 +488,18 @@ export function AdminAIArticlesView() {
           </div>
         </div>
         <Button 
-          onClick={() => {
-            queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
+          onClick={async () => {
+            setIsRefreshing(true);
+            await queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
             setOffset(0);
             setHasMore(true);
+            setIsRefreshing(false);
           }}
-          disabled={isLoading}
+          disabled={isRefreshing || isLoading}
           className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
       </div>
 
