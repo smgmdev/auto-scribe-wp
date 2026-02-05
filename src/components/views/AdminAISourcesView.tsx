@@ -409,31 +409,6 @@ export function AdminAISourcesView() {
         )}
       </div>
 
-      {/* Stats Card */}
-      {sources && sources.length > 0 && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Total Sources</p>
-                <p className="text-2xl font-bold">{sources.length}</p>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold text-green-500">
-                  {sources.filter(s => s.enabled).length}
-                </p>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Inactive</p>
-                <p className="text-2xl font-bold text-muted-foreground">
-                  {sources.filter(s => !s.enabled).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
