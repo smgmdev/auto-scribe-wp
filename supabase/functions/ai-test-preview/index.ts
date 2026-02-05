@@ -1,3 +1,5 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -7,6 +9,10 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
     const { sourceUrl, tone } = await req.json();
@@ -72,19 +78,32 @@ Deno.serve(async (req) => {
       throw new Error('No items found in RSS feed');
     }
 
-    // Sort by timestamp descending and get the most recent
+    // Sort by timestamp descending (most recent first)
     items.sort((a, b) => b.timestamp - a.timestamp);
-    const mostRecent = items[0];
+
+    // Check globally for already-published sources
+    const { data: published } = await supabase
+      .from('ai_published_sources')
+      .select('source_url');
+
+    const publishedUrls = new Set((published || []).map((s: { source_url: string }) => s.source_url));
+    
+    // Find the first source that hasn't been published yet
+    const newItem = items.find((item) => !publishedUrls.has(item.link));
+
+    if (!newItem) {
+      throw new Error('All sources from this feed have already been published. Waiting for new sources.');
+    }
 
     // Calculate how recent the article is
-    const ageMinutes = Math.floor((Date.now() - mostRecent.timestamp) / 60000);
-    console.log('[ai-test-preview] Found', items.length, 'items, most recent is', ageMinutes, 'minutes old');
+    const ageMinutes = Math.floor((Date.now() - newItem.timestamp) / 60000);
+    console.log('[ai-test-preview] Found', items.length, 'items,', publishedUrls.size, 'already published, using source that is', ageMinutes, 'minutes old');
 
     const sourceData = {
-      title: mostRecent.title,
-      description: mostRecent.description,
-      link: mostRecent.link,
-      pubDate: mostRecent.pubDate,
+      title: newItem.title,
+      description: newItem.description,
+      link: newItem.link,
+      pubDate: newItem.pubDate,
     };
 
     console.log('[ai-test-preview] Source data:', sourceData);
