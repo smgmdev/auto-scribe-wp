@@ -556,22 +556,22 @@ export function AdminAISettingsView() {
 
             <Separator />
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center justify-between p-3 rounded-lg border">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center justify-between p-4 rounded-lg border min-w-[180px]">
                 <Label className="text-sm">Enabled</Label>
                 <Switch
                   checked={newSource.enabled}
                   onCheckedChange={(checked) => setNewSource(s => ({ ...s, enabled: checked }))}
                 />
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
                 <Label className="text-sm text-muted-foreground">Auto Publish</Label>
                 <Switch
                   checked={true}
                   disabled
                 />
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
                 <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
                 <Switch
                   checked={true}
@@ -587,7 +587,7 @@ export function AdminAISettingsView() {
                 className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
               >
                 {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Save Configuration
+                Run Configuration
               </Button>
               <Button
                 variant="outline"
@@ -816,8 +816,8 @@ export function AdminAISettingsView() {
 
                   <Separator className="my-4" />
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex items-center justify-between p-4 rounded-lg border min-w-[180px]">
                       <Label className="text-sm">Enabled</Label>
                       <Switch
                         checked={setting.enabled}
@@ -825,14 +825,14 @@ export function AdminAISettingsView() {
                         disabled={updatingSettingId === setting.id}
                       />
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
                       <Label className="text-sm text-muted-foreground">Auto Publish</Label>
                       <Switch
                         checked={true}
                         disabled
                       />
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
                       <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
                       <Switch
                         checked={true}
