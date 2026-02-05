@@ -106,16 +106,28 @@ export function AdminAISourcesView() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (source: AISource) => {
+      // First, disable any configs using this source
+      const { error: updateError } = await supabase
+        .from('ai_publishing_settings')
+        .update({ enabled: false, auto_publish: false })
+        .eq('source_url', source.url);
+      
+      if (updateError) {
+        console.error('Failed to disable configs:', updateError);
+      }
+
+      // Then delete the source
       const { error } = await supabase
         .from('ai_sources')
         .delete()
-        .eq('id', id);
+        .eq('id', source.id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-sources'] });
-      toast({ title: "Source deleted" });
+      queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
+      toast({ title: "Source deleted", description: "Any configs using this source have been disabled." });
     },
     onError: (error) => {
       toast({
@@ -348,7 +360,7 @@ export function AdminAISourcesView() {
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => deleteMutation.mutate(source.id)}
+                          onClick={() => deleteMutation.mutate(source)}
                           className="text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -383,7 +395,7 @@ export function AdminAISourcesView() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteMutation.mutate(source.id)}
+                      onClick={() => deleteMutation.mutate(source)}
                       className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
                     >
                       <Trash2 className="h-4 w-4" />
