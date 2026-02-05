@@ -124,6 +124,10 @@ Deno.serve(async (req) => {
           wordpress_post_id: postResult.id,
           wordpress_post_link: postResult.link,
           word_count: wordCount,
+          // Preserve site and source info for when config is deleted
+          wordpress_site_name: site.name,
+          wordpress_site_favicon: site.favicon || null,
+          source_config_name: setting.source_name,
         });
 
         await supabase
