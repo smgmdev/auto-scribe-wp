@@ -21,6 +21,10 @@ interface PublishedSource {
   source_url: string;
   source_title: string;
   ai_title: string | null;
+  focus_keyword: string | null;
+  tags: string[] | null;
+  image_url: string | null;
+  image_caption: string | null;
   wordpress_post_id: number | null;
   wordpress_post_link: string | null;
   published_at: string;
@@ -41,6 +45,9 @@ export function AdminAIArticlesView() {
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [editingArticle, setEditingArticle] = useState<PublishedSource | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editFocusKeyword, setEditFocusKeyword] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [editImageCaption, setEditImageCaption] = useState('');
   // Fetch all AI publishing settings for filter dropdown
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['ai-publishing-settings-filter'],
@@ -100,10 +107,21 @@ export function AdminAIArticlesView() {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, title }: { id: string; title: string }) => {
+    mutationFn: async ({ id, title, focusKeyword, tags, imageCaption }: { 
+      id: string; 
+      title: string; 
+      focusKeyword: string;
+      tags: string[];
+      imageCaption: string;
+    }) => {
       const { error } = await supabase
         .from('ai_published_sources')
-        .update({ source_title: title })
+        .update({ 
+          ai_title: title,
+          focus_keyword: focusKeyword || null,
+          tags: tags.length > 0 ? tags : null,
+          image_caption: imageCaption || null,
+        })
         .eq('id', id);
       if (error) throw error;
     },
@@ -123,12 +141,22 @@ export function AdminAIArticlesView() {
 
   const handleEdit = (article: PublishedSource) => {
     setEditingArticle(article);
-    setEditTitle(article.source_title);
+    setEditTitle(article.ai_title || article.source_title);
+    setEditFocusKeyword(article.focus_keyword || '');
+    setEditTags(article.tags?.join(', ') || '');
+    setEditImageCaption(article.image_caption || '');
   };
 
   const handleSaveEdit = () => {
     if (editingArticle && editTitle.trim()) {
-      updateMutation.mutate({ id: editingArticle.id, title: editTitle.trim() });
+      const tagsArray = editTags.split(',').map(t => t.trim()).filter(Boolean);
+      updateMutation.mutate({ 
+        id: editingArticle.id, 
+        title: editTitle.trim(),
+        focusKeyword: editFocusKeyword.trim(),
+        tags: tagsArray,
+        imageCaption: editImageCaption.trim(),
+      });
     }
   };
 
@@ -294,14 +322,40 @@ export function AdminAIArticlesView() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingArticle} onOpenChange={(open) => !open && setEditingArticle(null)}>
-        <DialogContent className="bg-background">
+        <DialogContent className="bg-background max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Article</DialogTitle>
             <DialogDescription>
-              Update the article title. This only updates the local record.
+              Update the article details. This only updates the local record.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* Image Preview */}
+            {editingArticle?.image_url && (
+              <div className="space-y-2">
+                <Label>Featured Image</Label>
+                <div className="relative rounded-lg overflow-hidden border">
+                  <img 
+                    src={editingArticle.image_url} 
+                    alt="Featured" 
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Image Caption */}
+            <div className="space-y-2">
+              <Label htmlFor="imageCaption">Image Caption</Label>
+              <Input
+                id="imageCaption"
+                value={editImageCaption}
+                onChange={(e) => setEditImageCaption(e.target.value)}
+                placeholder="Image caption or credit"
+              />
+            </div>
+
+            {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -311,6 +365,31 @@ export function AdminAIArticlesView() {
                 placeholder="Article title"
               />
             </div>
+
+            {/* Focus Keyword */}
+            <div className="space-y-2">
+              <Label htmlFor="focusKeyword">Focus Keyword</Label>
+              <Input
+                id="focusKeyword"
+                value={editFocusKeyword}
+                onChange={(e) => setEditFocusKeyword(e.target.value)}
+                placeholder="SEO focus keyword"
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <Input
+                id="tags"
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                placeholder="Comma-separated tags"
+              />
+              <p className="text-xs text-muted-foreground">Separate multiple tags with commas</p>
+            </div>
+
+            {/* Source URL */}
             {editingArticle?.source_url && (
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Source URL</Label>
