@@ -304,6 +304,68 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_publishing_settings: {
+        Row: {
+          auto_publish: boolean
+          created_at: string
+          created_by: string
+          enabled: boolean
+          fetch_images: boolean
+          id: string
+          last_fetched_at: string | null
+          last_published_at: string | null
+          publish_interval_minutes: number
+          rewrite_enabled: boolean
+          source_name: string
+          source_url: string
+          target_site_id: string | null
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          auto_publish?: boolean
+          created_at?: string
+          created_by: string
+          enabled?: boolean
+          fetch_images?: boolean
+          id?: string
+          last_fetched_at?: string | null
+          last_published_at?: string | null
+          publish_interval_minutes?: number
+          rewrite_enabled?: boolean
+          source_name: string
+          source_url: string
+          target_site_id?: string | null
+          tone?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_publish?: boolean
+          created_at?: string
+          created_by?: string
+          enabled?: boolean
+          fetch_images?: boolean
+          id?: string
+          last_fetched_at?: string | null
+          last_published_at?: string | null
+          publish_interval_minutes?: number
+          rewrite_enabled?: boolean
+          source_name?: string
+          source_url?: string
+          target_site_id?: string | null
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_publishing_settings_target_site_id_fkey"
+            columns: ["target_site_id"]
+            isOneToOne: false
+            referencedRelation: "wordpress_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           categories: number[] | null
