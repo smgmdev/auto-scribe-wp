@@ -94,6 +94,34 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Validate all required fields before publishing
+        const missingFields: string[] = [];
+        if (!content.focusKeyword || content.focusKeyword.trim() === '') {
+          missingFields.push('focus keyword');
+        }
+        if (!content.metaDescription || content.metaDescription.trim() === '') {
+          missingFields.push('meta description');
+        }
+        if (!content.tag || content.tag.trim() === '') {
+          missingFields.push('tag');
+        }
+        if (!imageData || !imageData.url) {
+          missingFields.push('image');
+        }
+        if (imageData && (!imageData.caption || imageData.caption.trim() === '')) {
+          missingFields.push('image caption');
+        }
+
+        if (missingFields.length > 0) {
+          console.log(`[auto-publish] Skipping article - missing required fields: ${missingFields.join(', ')}`);
+          results.push({ 
+            id: setting.id, 
+            status: 'incomplete_fields', 
+            message: `Missing: ${missingFields.join(', ')}` 
+          });
+          continue;
+        }
+
         const postResult = await publishToWP(site, content, setting, imageData);
         if (!postResult) {
           results.push({ id: setting.id, status: 'publish_failed' });
