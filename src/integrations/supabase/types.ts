@@ -315,12 +315,15 @@ export type Database = {
           meta_description: string | null
           published_at: string
           setting_id: string | null
+          source_config_name: string | null
           source_title: string
           source_url: string
           tags: string[] | null
           word_count: number | null
           wordpress_post_id: number | null
           wordpress_post_link: string | null
+          wordpress_site_favicon: string | null
+          wordpress_site_name: string | null
         }
         Insert: {
           ai_title?: string | null
@@ -332,12 +335,15 @@ export type Database = {
           meta_description?: string | null
           published_at?: string
           setting_id?: string | null
+          source_config_name?: string | null
           source_title: string
           source_url: string
           tags?: string[] | null
           word_count?: number | null
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
+          wordpress_site_favicon?: string | null
+          wordpress_site_name?: string | null
         }
         Update: {
           ai_title?: string | null
@@ -349,12 +355,15 @@ export type Database = {
           meta_description?: string | null
           published_at?: string
           setting_id?: string | null
+          source_config_name?: string | null
           source_title?: string
           source_url?: string
           tags?: string[] | null
           word_count?: number | null
           wordpress_post_id?: number | null
           wordpress_post_link?: string | null
+          wordpress_site_favicon?: string | null
+          wordpress_site_name?: string | null
         }
         Relationships: [
           {

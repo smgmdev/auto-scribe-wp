@@ -29,6 +29,10 @@ interface PublishedSource {
   word_count: number | null;
   published_at: string;
   created_at: string;
+  // Preserved fields for when source is deleted
+  wordpress_site_name: string | null;
+  wordpress_site_favicon: string | null;
+  source_config_name: string | null;
   setting?: {
     source_name: string;
     target_site_id: string | null;
@@ -603,15 +607,17 @@ export function AdminAIArticlesView() {
 
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {article.setting?.target_site?.favicon && (
+                        {/* Show favicon from setting if available, otherwise use preserved value */}
+                        {(article.setting?.target_site?.favicon || article.wordpress_site_favicon) && (
                           <img 
-                            src={article.setting.target_site.favicon} 
+                            src={article.setting?.target_site?.favicon || article.wordpress_site_favicon!} 
                             alt="" 
                             className="w-5 h-5 rounded shrink-0" 
                           />
                         )}
+                        {/* Show source name from setting if available, otherwise use preserved value */}
                         <Badge variant={article.setting ? "secondary" : "outline"} className="text-xs">
-                          {article.setting?.source_name || 'Deleted Source'}
+                          {article.setting?.source_name || article.source_config_name || 'Deleted Source'}
                         </Badge>
                       </div>
                       
