@@ -415,7 +415,7 @@ export function AdminAIArticlesView() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingArticle} onOpenChange={(open) => !open && setEditingArticle(null)}>
-        <DialogContent className="bg-background max-w-xl">
+        <DialogContent className="bg-background max-w-xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Article</DialogTitle>
             <DialogDescription>
