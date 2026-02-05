@@ -44,6 +44,7 @@ interface AIPublishingSetting {
 export function AdminAIArticlesView() {
   const queryClient = useQueryClient();
   const [selectedSource, setSelectedSource] = useState<string>('all');
+  const [deletingArticleId, setDeletingArticleId] = useState<string | null>(null);
   const [editingArticle, setEditingArticle] = useState<PublishedSource | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editFocusKeyword, setEditFocusKeyword] = useState('');
@@ -145,10 +146,12 @@ export function AdminAIArticlesView() {
       if (error) throw error;
     },
     onSuccess: () => {
+      setDeletingArticleId(null);
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
       toast({ title: "Article deleted", description: "Removed from database and WordPress" });
     },
     onError: (error) => {
+      setDeletingArticleId(null);
       toast({
         title: "Delete failed",
         description: error instanceof Error ? error.message : "Unknown error",
@@ -371,8 +374,15 @@ export function AdminAIArticlesView() {
                 {articles?.map((article) => (
                   <div
                     key={article.id}
-                    className="flex items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                    className="relative flex items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                   >
+                    {/* Deleting overlay */}
+                    {deletingArticleId === article.id && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-500/60 backdrop-blur-sm">
+                        <Loader2 className="h-6 w-6 animate-spin text-black" />
+                      </div>
+                    )}
+
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="secondary" className="text-xs">
@@ -434,23 +444,21 @@ export function AdminAIArticlesView() {
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-background">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete article record?</AlertDialogTitle>
+                            <AlertDialogTitle>Delete article permanently?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will remove the article from this list. The WordPress post will not be deleted.
-                              This source URL may be re-published if it appears in the RSS feed again.
+                              This will permanently delete the article and its featured image from both the database and WordPress. This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => deleteMutation.mutate(article)}
+                              onClick={() => {
+                                setDeletingArticleId(article.id);
+                                deleteMutation.mutate(article);
+                              }}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              {deleteMutation.isPending ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                'Delete'
-                              )}
+                              Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
