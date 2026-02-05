@@ -73,11 +73,19 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Fetch image from original article if enabled
+        // Get image - prefer RSS image, fallback to fetching from article
         let imageData: ImageData | null = null;
         if (setting.fetch_images) {
-          imageData = await fetchArticleImage(newItem.link);
-          console.log('[auto-publish] Image fetched:', imageData ? 'yes' : 'no');
+          if (newItem.imageUrl) {
+            // Use image from RSS feed directly
+            const hostname = new URL(newItem.link).hostname.replace('www.', '');
+            imageData = { url: newItem.imageUrl, caption: `Image via ${hostname}` };
+            console.log('[auto-publish] Using RSS image:', newItem.imageUrl);
+          } else {
+            // Fallback: try to fetch from article page
+            imageData = await fetchArticleImage(newItem.link);
+          }
+          console.log('[auto-publish] Image available:', imageData ? 'yes' : 'no');
         }
 
         const content = await generateContent(newItem.title, setting.tone);
@@ -122,6 +130,7 @@ Deno.serve(async (req) => {
 interface RssItem {
   title: string;
   link: string;
+  imageUrl?: string;
 }
 
 async function fetchRss(url: string): Promise<RssItem[]> {
@@ -137,7 +146,13 @@ async function fetchRss(url: string): Promise<RssItem[]> {
       const xml = match[1];
       const title = xml.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, '').trim() || '';
       const link = xml.match(/<link[^>]*>([\s\S]*?)<\/link>/)?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, '').trim() || '';
-      if (title && link) items.push({ title, link });
+      
+      // Extract image from media:content, media:thumbnail, or enclosure
+      let imageUrl = xml.match(/<media:content[^>]*url=["']([^"']+)["']/i)?.[1]
+        || xml.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i)?.[1]
+        || xml.match(/<enclosure[^>]*url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i)?.[1];
+      
+      if (title && link) items.push({ title, link, imageUrl });
     }
     return items;
   } catch { return []; }
