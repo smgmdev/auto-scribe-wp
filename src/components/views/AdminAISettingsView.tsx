@@ -1,0 +1,538 @@
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Settings, Plus, Trash2, Power, PowerOff, Save, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+
+interface AIPublishingSetting {
+  id: string;
+  source_name: string;
+  source_url: string;
+  enabled: boolean;
+  auto_publish: boolean;
+  target_site_id: string | null;
+  rewrite_enabled: boolean;
+  fetch_images: boolean;
+  publish_interval_minutes: number;
+  tone: string;
+  last_fetched_at: string | null;
+  last_published_at: string | null;
+  created_at: string;
+}
+
+interface WordPressSite {
+  id: string;
+  name: string;
+  url: string;
+  favicon: string | null;
+  connected: boolean;
+}
+
+const TONE_OPTIONS = [
+  { value: 'neutral', label: 'Neutral' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'casual', label: 'Casual' },
+  { value: 'enthusiastic', label: 'Enthusiastic' },
+  { value: 'informative', label: 'Informative' },
+];
+
+const INTERVAL_OPTIONS = [
+  { value: 15, label: 'Every 15 minutes' },
+  { value: 30, label: 'Every 30 minutes' },
+  { value: 60, label: 'Every hour' },
+  { value: 120, label: 'Every 2 hours' },
+  { value: 360, label: 'Every 6 hours' },
+  { value: 720, label: 'Every 12 hours' },
+  { value: 1440, label: 'Every 24 hours' },
+];
+
+export function AdminAISettingsView() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isAdding, setIsAdding] = useState(false);
+  const [newSource, setNewSource] = useState({
+    source_name: 'Yahoo Finance',
+    source_url: 'https://finance.yahoo.com/',
+    enabled: false,
+    auto_publish: false,
+    target_site_id: '',
+    rewrite_enabled: true,
+    fetch_images: true,
+    publish_interval_minutes: 60,
+    tone: 'professional',
+  });
+
+  // Fetch settings
+  const { data: settings, isLoading: settingsLoading } = useQuery({
+    queryKey: ['ai-publishing-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_publishing_settings')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as AIPublishingSetting[];
+    },
+  });
+
+  // Fetch WordPress sites
+  const { data: sites } = useQuery({
+    queryKey: ['wordpress-sites-for-ai'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_public_sites');
+      if (error) throw error;
+      return data as WordPressSite[];
+    },
+  });
+
+  // Add new setting mutation
+  const addMutation = useMutation({
+    mutationFn: async (setting: typeof newSource) => {
+      const { data, error } = await supabase
+        .from('ai_publishing_settings')
+        .insert({
+          ...setting,
+          target_site_id: setting.target_site_id || null,
+          created_by: user?.id,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
+      setIsAdding(false);
+      setNewSource({
+        source_name: 'Yahoo Finance',
+        source_url: 'https://finance.yahoo.com/',
+        enabled: false,
+        auto_publish: false,
+        target_site_id: '',
+        rewrite_enabled: true,
+        fetch_images: true,
+        publish_interval_minutes: 60,
+        tone: 'professional',
+      });
+      toast({ title: "Source added", description: "AI publishing source has been configured." });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to add source",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update setting mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<AIPublishingSetting> }) => {
+      const { error } = await supabase
+        .from('ai_publishing_settings')
+        .update(updates)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
+      toast({ title: "Settings updated" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete setting mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('ai_publishing_settings')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
+      toast({ title: "Source removed" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggle = (id: string, field: keyof AIPublishingSetting, value: boolean) => {
+    updateMutation.mutate({ id, updates: { [field]: value } });
+  };
+
+  const handleSelectChange = (id: string, field: keyof AIPublishingSetting, value: string | number) => {
+    updateMutation.mutate({ id, updates: { [field]: value } });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Settings className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold">AI Publishing Settings</h1>
+            <p className="text-muted-foreground">Configure automatic AI-based publishing</p>
+          </div>
+        </div>
+        {!isAdding && (
+          <Button onClick={() => setIsAdding(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Source
+          </Button>
+        )}
+      </div>
+
+      {/* Add New Source Form */}
+      {isAdding && (
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle>Add New AI Source</CardTitle>
+            <CardDescription>Configure a new source for automatic AI publishing</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source Name</Label>
+                <Input
+                  value={newSource.source_name}
+                  onChange={(e) => setNewSource(s => ({ ...s, source_name: e.target.value }))}
+                  placeholder="e.g., Yahoo Finance"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Source URL</Label>
+                <Input
+                  value={newSource.source_url}
+                  onChange={(e) => setNewSource(s => ({ ...s, source_url: e.target.value }))}
+                  placeholder="https://finance.yahoo.com/"
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Target WordPress Site</Label>
+                <Select
+                  value={newSource.target_site_id}
+                  onValueChange={(value) => setNewSource(s => ({ ...s, target_site_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a site" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sites?.filter(s => s.connected).map((site) => (
+                      <SelectItem key={site.id} value={site.id}>
+                        <div className="flex items-center gap-2">
+                          {site.favicon && (
+                            <img src={site.favicon} alt="" className="w-4 h-4 rounded" />
+                          )}
+                          {site.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Writing Tone</Label>
+                <Select
+                  value={newSource.tone}
+                  onValueChange={(value) => setNewSource(s => ({ ...s, tone: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TONE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Publish Interval</Label>
+              <Select
+                value={String(newSource.publish_interval_minutes)}
+                onValueChange={(value) => setNewSource(s => ({ ...s, publish_interval_minutes: parseInt(value) }))}
+              >
+                <SelectTrigger className="w-full md:w-64">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTERVAL_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={String(option.value)}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <Label className="text-sm">Enabled</Label>
+                <Switch
+                  checked={newSource.enabled}
+                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, enabled: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <Label className="text-sm">Auto Publish</Label>
+                <Switch
+                  checked={newSource.auto_publish}
+                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, auto_publish: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <Label className="text-sm">AI Rewrite</Label>
+                <Switch
+                  checked={newSource.rewrite_enabled}
+                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, rewrite_enabled: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <Label className="text-sm">Fetch Images</Label>
+                <Switch
+                  checked={newSource.fetch_images}
+                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, fetch_images: checked }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => addMutation.mutate(newSource)}
+                disabled={addMutation.isPending || !newSource.source_name}
+              >
+                {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <Save className="h-4 w-4 mr-2" />
+                Save Configuration
+              </Button>
+              <Button variant="outline" onClick={() => setIsAdding(false)}>
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Existing Settings */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Configured Sources</h2>
+
+        {settingsLoading ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : settings?.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="font-semibold mb-2">No sources configured</h3>
+              <p className="text-muted-foreground mb-4">
+                Add an AI source to start automatic publishing
+              </p>
+              <Button onClick={() => setIsAdding(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Source
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          settings?.map((setting) => {
+            const targetSite = sites?.find(s => s.id === setting.target_site_id);
+            
+            return (
+              <Card key={setting.id} className={setting.enabled ? 'border-green-500/30' : ''}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-lg">{setting.source_name}</h3>
+                        {setting.enabled ? (
+                          <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
+                            <Power className="h-3 w-3 mr-1" />
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <PowerOff className="h-3 w-3 mr-1" />
+                            Inactive
+                          </Badge>
+                        )}
+                        {setting.auto_publish && (
+                          <Badge variant="outline">Auto-Publish</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{setting.source_url}</p>
+                      {targetSite && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          Publishing to: 
+                          {targetSite.favicon && (
+                            <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded" />
+                          )}
+                          <span className="font-medium">{targetSite.name}</span>
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => deleteMutation.mutate(setting.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Separator className="my-4" />
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <Label className="text-sm">Enabled</Label>
+                      <Switch
+                        checked={setting.enabled}
+                        onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
+                        disabled={updateMutation.isPending}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <Label className="text-sm">Auto Publish</Label>
+                      <Switch
+                        checked={setting.auto_publish}
+                        onCheckedChange={(checked) => handleToggle(setting.id, 'auto_publish', checked)}
+                        disabled={updateMutation.isPending}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <Label className="text-sm">AI Rewrite</Label>
+                      <Switch
+                        checked={setting.rewrite_enabled}
+                        onCheckedChange={(checked) => handleToggle(setting.id, 'rewrite_enabled', checked)}
+                        disabled={updateMutation.isPending}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <Label className="text-sm">Fetch Images</Label>
+                      <Switch
+                        checked={setting.fetch_images}
+                        onCheckedChange={(checked) => handleToggle(setting.id, 'fetch_images', checked)}
+                        disabled={updateMutation.isPending}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Target Site</Label>
+                      <Select
+                        value={setting.target_site_id || ''}
+                        onValueChange={(value) => handleSelectChange(setting.id, 'target_site_id', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a site" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sites?.filter(s => s.connected).map((site) => (
+                            <SelectItem key={site.id} value={site.id}>
+                              <div className="flex items-center gap-2">
+                                {site.favicon && (
+                                  <img src={site.favicon} alt="" className="w-4 h-4 rounded" />
+                                )}
+                                {site.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Tone</Label>
+                      <Select
+                        value={setting.tone}
+                        onValueChange={(value) => handleSelectChange(setting.id, 'tone', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TONE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Interval</Label>
+                      <Select
+                        value={String(setting.publish_interval_minutes)}
+                        onValueChange={(value) => handleSelectChange(setting.id, 'publish_interval_minutes', parseInt(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {INTERVAL_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={String(option.value)}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
