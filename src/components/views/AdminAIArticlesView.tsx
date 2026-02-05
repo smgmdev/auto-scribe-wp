@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -414,11 +415,11 @@ export function AdminAIArticlesView() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingArticle} onOpenChange={(open) => !open && setEditingArticle(null)}>
-        <DialogContent className="bg-background max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-background max-w-xl">
           <DialogHeader>
             <DialogTitle>Edit Article</DialogTitle>
             <DialogDescription>
-              Update the article details. This only updates the local record.
+              Update the article details and sync to WordPress.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -443,18 +444,23 @@ export function AdminAIArticlesView() {
                 id="imageCaption"
                 value={editImageCaption}
                 onChange={(e) => setEditImageCaption(e.target.value)}
-                placeholder="Image caption or credit"
+                placeholder={editingArticle?.image_caption || "Image caption or credit"}
               />
+              {editingArticle?.image_caption && !editImageCaption && (
+                <p className="text-xs text-muted-foreground">Current: {editingArticle.image_caption}</p>
+              )}
             </div>
 
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input
+              <Textarea
                 id="title"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="Article title"
+                className="min-h-[60px] resize-none"
+                rows={2}
               />
             </div>
 
@@ -465,8 +471,11 @@ export function AdminAIArticlesView() {
                 id="focusKeyword"
                 value={editFocusKeyword}
                 onChange={(e) => setEditFocusKeyword(e.target.value)}
-                placeholder="SEO focus keyword"
+                placeholder={editingArticle?.focus_keyword || "SEO focus keyword"}
               />
+              {editingArticle?.focus_keyword && !editFocusKeyword && (
+                <p className="text-xs text-muted-foreground">Current: {editingArticle.focus_keyword}</p>
+              )}
             </div>
 
             {/* Tags */}
@@ -476,8 +485,11 @@ export function AdminAIArticlesView() {
                 id="tags"
                 value={editTags}
                 onChange={(e) => setEditTags(e.target.value)}
-                placeholder="Comma-separated tags"
+                placeholder={editingArticle?.tags?.join(', ') || "Comma-separated tags"}
               />
+              {editingArticle?.tags && editingArticle.tags.length > 0 && !editTags && (
+                <p className="text-xs text-muted-foreground">Current: {editingArticle.tags.join(', ')}</p>
+              )}
               <p className="text-xs text-muted-foreground">Separate multiple tags with commas</p>
             </div>
 
@@ -485,7 +497,7 @@ export function AdminAIArticlesView() {
             {editingArticle?.source_url && (
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Source URL</Label>
-                <p className="text-sm text-muted-foreground truncate">{editingArticle.source_url}</p>
+                <p className="text-sm text-muted-foreground break-all">{editingArticle.source_url}</p>
               </div>
             )}
           </div>
