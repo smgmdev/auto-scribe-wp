@@ -133,20 +133,12 @@ export function AdminAISourcesView() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">AI Sources</h1>
           <p className="text-muted-foreground">Manage available sources for AI publishing</p>
         </div>
-        <div className="flex gap-2">
-          {!isAdding && (
-            <Button 
-              onClick={() => setIsAdding(true)}
-              className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
-            >
-              Add Source
-            </Button>
-          )}
+        <div className="flex flex-col md:flex-row gap-2">
           <Button 
             onClick={async () => {
               setIsRefreshing(true);
@@ -159,6 +151,14 @@ export function AdminAISourcesView() {
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
+          {!isAdding && (
+            <Button 
+              onClick={() => setIsAdding(true)}
+              className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+            >
+              Add Source
+            </Button>
+          )}
         </div>
       </div>
 
