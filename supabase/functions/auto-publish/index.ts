@@ -104,6 +104,7 @@ Deno.serve(async (req) => {
           setting_id: setting.id,
           source_url: newItem.link,
           source_title: newItem.title,
+          ai_title: content.title,
           wordpress_post_id: postResult.id,
           wordpress_post_link: postResult.link,
         });
