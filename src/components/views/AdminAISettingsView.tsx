@@ -106,11 +106,11 @@ export function AdminAISettingsView() {
     source_name: '',
     source_url: '',
     enabled: false,
-    auto_publish: false,
+    auto_publish: true, // Always ON
     target_site_id: '',
     target_category_id: null as number | null,
     target_category_name: null as string | null,
-    rewrite_enabled: true,
+    rewrite_enabled: true, // Always ON
     fetch_images: true,
     publish_interval_minutes: 5,
     tone: 'professional',
@@ -564,18 +564,18 @@ export function AdminAISettingsView() {
                   onCheckedChange={(checked) => setNewSource(s => ({ ...s, enabled: checked }))}
                 />
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border">
-                <Label className="text-sm">Auto Publish</Label>
+              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                <Label className="text-sm text-muted-foreground">Auto Publish</Label>
                 <Switch
-                  checked={newSource.auto_publish}
-                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, auto_publish: checked }))}
+                  checked={true}
+                  disabled
                 />
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border">
-                <Label className="text-sm">AI Rewrite</Label>
+              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
                 <Switch
-                  checked={newSource.rewrite_enabled}
-                  onCheckedChange={(checked) => setNewSource(s => ({ ...s, rewrite_enabled: checked }))}
+                  checked={true}
+                  disabled
                 />
               </div>
             </div>
@@ -823,20 +823,18 @@ export function AdminAISettingsView() {
                         disabled={updatingSettingId === setting.id}
                       />
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border">
-                      <Label className="text-sm">Auto Publish</Label>
+                    <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                      <Label className="text-sm text-muted-foreground">Auto Publish</Label>
                       <Switch
-                        checked={setting.auto_publish}
-                        onCheckedChange={(checked) => handleToggle(setting.id, 'auto_publish', checked)}
-                        disabled={updatingSettingId === setting.id}
+                        checked={true}
+                        disabled
                       />
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border">
-                      <Label className="text-sm">AI Rewrite</Label>
+                    <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                      <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
                       <Switch
-                        checked={setting.rewrite_enabled}
-                        onCheckedChange={(checked) => handleToggle(setting.id, 'rewrite_enabled', checked)}
-                        disabled={updatingSettingId === setting.id}
+                        checked={true}
+                        disabled
                       />
                     </div>
                   </div>
