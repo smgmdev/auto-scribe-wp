@@ -34,6 +34,10 @@ interface PublishedSource {
   setting?: {
     source_name: string;
     target_site_id: string | null;
+    target_site?: {
+      name: string;
+      favicon: string | null;
+    } | null;
   };
 }
 
@@ -99,7 +103,11 @@ export function AdminAIArticlesView() {
         .from('ai_published_sources')
         .select(`
           *,
-          setting:ai_publishing_settings(source_name, target_site_id)
+          setting:ai_publishing_settings(
+            source_name, 
+            target_site_id,
+            target_site:wordpress_sites(name, favicon)
+          )
         `)
         .order('published_at', { ascending: false });
 
@@ -430,9 +438,6 @@ export function AdminAIArticlesView() {
                         <Badge variant="secondary" className="text-xs">
                           {article.setting?.source_name || 'Unknown Source'}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(article.published_at), 'MMM d, yyyy h:mm a')}
-                        </span>
                       </div>
                       
                       <h3 className="font-medium text-sm leading-snug line-clamp-2">
@@ -449,19 +454,37 @@ export function AdminAIArticlesView() {
                         <span className="truncate max-w-[350px]">{article.source_url}</span>
                         <ExternalLink className="h-3 w-3 shrink-0" />
                       </a>
+
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                        <span>{format(new Date(article.published_at), 'MMM d, yyyy h:mm a')}</span>
+                        <span>•</span>
+                        <span>~700 words</span>
+                        {article.setting?.target_site && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              Published on:
+                              {article.setting.target_site.favicon && (
+                                <img src={article.setting.target_site.favicon} alt="" className="w-4 h-4 rounded" />
+                              )}
+                              <span className="font-medium text-foreground">{article.setting.target_site.name}</span>
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {article.wordpress_post_link && (
+                      {article.source_url && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(article.wordpress_post_link!, '_blank')}
-                          title="View published article"
+                          onClick={() => window.open(article.source_url, '_blank')}
+                          title="View source article"
                           className="hover:bg-black hover:text-white hover:border-black"
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
-                          View
+                          Source
                         </Button>
                       )}
                       
