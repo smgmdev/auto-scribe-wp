@@ -254,6 +254,44 @@ async function generateContent(headline: string, tone: string): Promise<Generate
     neutral: 'balanced', professional: 'formal', casual: 'friendly', enthusiastic: 'energetic', informative: 'educational'
   };
 
+  const systemPrompt = `You are an expert news article writer for a professional publication.
+
+TITLE GENERATION RULES (CRITICAL):
+- Create a COMPLETELY NEW and UNIQUE title - DO NOT copy or slightly modify the source headline
+- Make it compelling, professional, and click-worthy
+- NEVER use colons (:), dashes (-), or em dashes (—) in the title
+- Keep it between 8-15 words
+- Feature key names (people, companies, countries) prominently
+- Sound like a human editor wrote it, not AI
+- Make it intriguing without being clickbait
+
+GOOD TITLE EXAMPLES:
+- "Tesla's Bold Move Could Reshape European Manufacturing Forever"
+- "Why Warren Buffett Just Made His Biggest Bet Yet"
+- "Apple's Secret Weapon in the AI Race Revealed"
+
+BAD TITLE EXAMPLES (NEVER DO THIS):
+- "Breaking: Company Announces Major Change" (uses colon)
+- "The Future of AI - What You Need to Know" (uses dash)
+- Titles that are too similar to the source headline
+
+ARTICLE RULES:
+- Write approximately 700 words
+- Tone: ${tones[tone] || 'professional'}
+- Sound like a human journalist, not AI
+- No clichéd AI phrases like "In today's rapidly evolving landscape"
+- Use plain text with paragraph breaks (no markdown headers)
+- Be informative and engaging
+
+Return JSON with these exact fields:
+{
+  "title": "Your unique, professional headline here",
+  "content": "Article content with paragraphs separated by double newlines",
+  "focusKeyword": "Primary SEO keyword phrase",
+  "metaDescription": "Compelling 150-160 character meta description",
+  "tag": "Single relevant category tag"
+}`;
+
   try {
     const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -261,10 +299,11 @@ async function generateContent(headline: string, tone: string): Promise<Generate
       body: JSON.stringify({
         model: 'google/gemini-3-flash-preview',
         messages: [
-          { role: 'system', content: `Write ~700 word news article. Tone: ${tones[tone] || 'professional'}. Return JSON: {title, content, focusKeyword, metaDescription, tag}` },
-          { role: 'user', content: `Headline: ${headline}` }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Write a completely original article based on this topic (create a NEW unique title, do not copy this): "${headline}"` }
         ],
         response_format: { type: 'json_object' },
+        temperature: 0.8,
       }),
     });
 
@@ -274,8 +313,17 @@ async function generateContent(headline: string, tone: string): Promise<Generate
     if (!raw) return null;
 
     const parsed = JSON.parse(raw);
+    
+    // Clean up the title - remove any colons, dashes that might have slipped through
+    let cleanTitle = parsed.title
+      .replace(/^["']|["']$/g, '') // Remove surrounding quotes
+      .replace(/^#+\s*/, '') // Remove markdown headers
+      .replace(/:/g, '') // Remove colons
+      .replace(/\s*[-—–]\s*/g, ' ') // Replace dashes with spaces
+      .trim();
+    
     return {
-      title: parsed.title,
+      title: cleanTitle,
       content: parsed.content.split(/\n\s*\n/).map((p: string) => p.trim()).join('<br><br>'),
       focusKeyword: parsed.focusKeyword || '',
       metaDescription: parsed.metaDescription || '',
