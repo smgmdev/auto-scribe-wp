@@ -318,6 +318,8 @@ export type Database = {
           rewrite_enabled: boolean
           source_name: string
           source_url: string
+          target_category_id: number | null
+          target_category_name: string | null
           target_site_id: string | null
           tone: string
           updated_at: string
@@ -335,6 +337,8 @@ export type Database = {
           rewrite_enabled?: boolean
           source_name: string
           source_url: string
+          target_category_id?: number | null
+          target_category_name?: string | null
           target_site_id?: string | null
           tone?: string
           updated_at?: string
@@ -352,6 +356,8 @@ export type Database = {
           rewrite_enabled?: boolean
           source_name?: string
           source_url?: string
+          target_category_id?: number | null
+          target_category_name?: string | null
           target_site_id?: string | null
           tone?: string
           updated_at?: string
