@@ -161,11 +161,29 @@ async function fetchRss(url: string): Promise<RssItem[]> {
     
     let fetchUrl = url;
     
-    // Check if it's a Google News URL - use search endpoint which works better server-side
+    // Check if it's a Google News URL - add cache-busting but preserve the configured query
     if (url.includes('news.google.com')) {
-      // Use the search endpoint with cache-busting like ai-test-preview does
-      fetchUrl = `https://news.google.com/rss/search?q=finance+OR+stocks+OR+market&hl=en-US&gl=US&ceid=US:en&_t=${Date.now()}`;
-      console.log(`[auto-publish] Converted to search URL: ${fetchUrl}`);
+      const urlObj = new URL(url);
+      
+      // Check if it's a search URL with a query parameter
+      const existingQuery = urlObj.searchParams.get('q');
+      
+      if (existingQuery) {
+        // Use the configured search query, just add cache-busting
+        urlObj.searchParams.set('_t', Date.now().toString());
+        fetchUrl = urlObj.toString();
+        console.log(`[auto-publish] Using configured search query: ${existingQuery}`);
+      } else if (url.includes('/topics/') || url.includes('/sections/')) {
+        // It's a topic or section feed - add cache-busting
+        const separator = url.includes('?') ? '&' : '?';
+        fetchUrl = `${url}${separator}_t=${Date.now()}`;
+        console.log(`[auto-publish] Using topic/section feed with cache-busting`);
+      } else {
+        // Fallback: use the URL as-is with cache-busting
+        const separator = url.includes('?') ? '&' : '?';
+        fetchUrl = `${url}${separator}_t=${Date.now()}`;
+        console.log(`[auto-publish] Using URL as-is with cache-busting`);
+      }
     }
     
     const res = await fetch(fetchUrl, { 
