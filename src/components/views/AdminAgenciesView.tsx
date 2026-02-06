@@ -145,39 +145,29 @@ export function AdminAgenciesView() {
     fetchData();
   }, []);
 
-  // Fetch logo URLs for all applications
+  // Generate logo URLs for all applications from public bucket
   useEffect(() => {
-    const fetchLogoUrls = async () => {
+    const generateLogoUrls = () => {
       const urls: Record<string, string> = {};
-      const idsToLoad = applications
-        .filter(app => app.logo_url && !logoUrls[app.id])
-        .map(app => app.id);
-      
-      if (idsToLoad.length === 0) return;
-      
-      // Mark logos as loading
-      setLoadingLogoIds(prev => new Set([...prev, ...idsToLoad]));
       
       for (const app of applications) {
         if (app.logo_url && !logoUrls[app.id]) {
-          const url = await getSignedUrl(app.logo_url);
-          if (url) urls[app.id] = url;
+          // Get public URL from agency-logos bucket
+          const { data } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(app.logo_url);
+          if (data?.publicUrl) {
+            urls[app.id] = data.publicUrl;
+          }
         }
       }
       
       if (Object.keys(urls).length > 0) {
         setLogoUrls(prev => ({ ...prev, ...urls }));
       }
-      
-      // Remove from loading state
-      setLoadingLogoIds(prev => {
-        const newSet = new Set(prev);
-        idsToLoad.forEach(id => newSet.delete(id));
-        return newSet;
-      });
     };
     if (applications.length > 0) {
-      fetchLogoUrls();
+      generateLogoUrls();
     }
   }, [applications]);
 
@@ -280,12 +270,12 @@ export function AdminAgenciesView() {
     const agencyPayout = agencies.find(a => a.user_id === app.user_id && a.onboarding_complete && !a.downgraded);
     setSelectedAgencyPayout(agencyPayout || null);
     
-    // Fetch logo URL if exists
+    // Get logo public URL if exists (from public agency-logos bucket)
     if (app.logo_url) {
-      setLogoLoading(true);
-      const url = await getSignedUrl(app.logo_url);
-      setLogoUrl(url);
-      setLogoLoading(false);
+      const { data } = supabase.storage
+        .from('agency-logos')
+        .getPublicUrl(app.logo_url);
+      setLogoUrl(data?.publicUrl || null);
     }
     
     // Mark as read if not already
@@ -520,6 +510,15 @@ export function AdminAgenciesView() {
       .createSignedUrl(path, 3600); // 1 hour expiry
     if (error || !data) return null;
     return data.signedUrl;
+  };
+
+  // Get public URL for agency logos from the public bucket
+  const getLogoPublicUrl = (path: string): string | null => {
+    if (!path) return null;
+    const { data } = supabase.storage
+      .from('agency-logos')
+      .getPublicUrl(path);
+    return data?.publicUrl || null;
   };
 
   const getKycSignedUrl = async (path: string) => {
