@@ -673,9 +673,9 @@ export function AdminAIArticlesView() {
                             <div className="flex items-center gap-1.5">
                               <span className="text-muted-foreground">Tag:</span>
                               {article.tags.map((tag, idx) => (
-                                <Badge key={idx} variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                                <span key={idx} className="font-medium text-foreground bg-muted px-1.5 py-0.5 rounded">
                                   {tag}
-                                </Badge>
+                                </span>
                               ))}
                             </div>
                           )}
