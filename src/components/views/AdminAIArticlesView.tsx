@@ -124,17 +124,17 @@ export function AdminAIArticlesView() {
   const { data: totalCount, refetch: refetchCount } = useQuery({
     queryKey: ['ai-published-sources-count', selectedSource, selectedSite],
     queryFn: async () => {
-      // Use left join so articles persist even if setting is deleted
       let query = supabase
         .from('ai_published_sources')
-        .select('*, setting:ai_publishing_settings(target_site_id)', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true });
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
       }
       
+      // Filter by site using preserved wordpress_site_id field
       if (selectedSite !== 'all') {
-        query = query.not('setting', 'is', null).eq('setting.target_site_id', selectedSite);
+        query = query.eq('wordpress_site_id', selectedSite);
       }
 
       const { count, error } = await query;
@@ -190,8 +190,9 @@ export function AdminAIArticlesView() {
         query = query.eq('setting_id', selectedSource);
       }
       
+      // Filter by site using preserved wordpress_site_id field
       if (selectedSite !== 'all') {
-        query = query.not('setting', 'is', null).eq('setting.target_site_id', selectedSite);
+        query = query.eq('wordpress_site_id', selectedSite);
       }
 
       const { data, error } = await query;
@@ -245,8 +246,9 @@ export function AdminAIArticlesView() {
         query = query.eq('setting_id', selectedSource);
       }
       
+      // Filter by site using preserved wordpress_site_id field
       if (selectedSite !== 'all') {
-        query = query.not('setting', 'is', null).eq('setting.target_site_id', selectedSite);
+        query = query.eq('wordpress_site_id', selectedSite);
       }
 
       const { data, error } = await query;
