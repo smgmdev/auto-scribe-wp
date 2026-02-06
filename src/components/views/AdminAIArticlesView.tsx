@@ -652,25 +652,33 @@ export function AdminAIArticlesView() {
                         <Badge variant={article.setting ? "secondary" : "outline"} className="text-xs">
                           {article.setting?.source_name || article.source_config_name || 'Deleted Source'}
                         </Badge>
-                        {/* Show tags as badges */}
-                        {article.tags && article.tags.length > 0 && article.tags.map((tag, idx) => (
-                          <Badge key={idx} variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
-                            {tag}
-                          </Badge>
-                        ))}
                       </div>
                       
                       <h3 className="font-medium text-sm leading-snug line-clamp-2">
                         {highlightFocusKeyword(article.ai_title || article.source_title, article.focus_keyword)}
                       </h3>
                       
-                      {/* Focus Keyword display */}
-                      {article.focus_keyword && (
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span className="text-muted-foreground">Focus:</span>
-                          <span className="font-medium text-foreground bg-muted px-1.5 py-0.5 rounded">
-                            {article.focus_keyword}
-                          </span>
+                      {/* Focus Keyword and Tag display */}
+                      {(article.focus_keyword || (article.tags && article.tags.length > 0)) && (
+                        <div className="flex flex-col gap-1 text-xs">
+                          {article.focus_keyword && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-muted-foreground">Focus:</span>
+                              <span className="font-medium text-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {article.focus_keyword}
+                              </span>
+                            </div>
+                          )}
+                          {article.tags && article.tags.length > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-muted-foreground">Tag:</span>
+                              {article.tags.map((tag, idx) => (
+                                <Badge key={idx} variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                       
