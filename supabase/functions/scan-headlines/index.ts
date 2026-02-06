@@ -1,10 +1,22 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+// Timeout wrapper for each scraper to prevent hanging
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  const timeout = new Promise<T>((_, reject) => 
+    setTimeout(() => reject(new Error('Scraper timeout')), timeoutMs)
+  );
+  try {
+    return await Promise.race([promise, timeout]);
+  } catch (error) {
+    console.warn(`Scraper timed out or failed: ${error}`);
+    return fallback;
+  }
+}
 
 interface Headline {
   id: string;
@@ -725,7 +737,7 @@ async function scrapeNikkeiAsia(): Promise<Headline[]> {
   return headlines;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -733,38 +745,41 @@ serve(async (req) => {
   try {
     const { sources } = await req.json();
     const { today, yesterday } = getTodayAndYesterday();
-    console.log('Scanning sources:', sources);
-    console.log('Looking for articles from:', yesterday, 'and', today);
+    console.log('[scan-headlines] Scanning sources:', sources);
+    console.log('[scan-headlines] Looking for articles from:', yesterday, 'and', today);
     
     const allHeadlines: Headline[] = [];
     const scrapePromises: Promise<Headline[]>[] = [];
     
+    // Each scraper gets 15 seconds max to prevent overall timeout
+    const SCRAPER_TIMEOUT = 15000;
+    
     if (sources.includes('euronews')) {
-      scrapePromises.push(scrapeEuronews());
+      scrapePromises.push(withTimeout(scrapeEuronews(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('euronews-economy')) {
-      scrapePromises.push(scrapeEuronewsEconomy());
+      scrapePromises.push(withTimeout(scrapeEuronewsEconomy(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('bloomberg')) {
-      scrapePromises.push(scrapeBloomberg());
+      scrapePromises.push(withTimeout(scrapeBloomberg(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('bloomberg-middleeast')) {
-      scrapePromises.push(scrapeBloombergMiddleEast());
+      scrapePromises.push(withTimeout(scrapeBloombergMiddleEast(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('bloomberg-asia')) {
-      scrapePromises.push(scrapeBloombergAsia());
+      scrapePromises.push(withTimeout(scrapeBloombergAsia(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('bloomberg-latest')) {
-      scrapePromises.push(scrapeBloombergLatest());
+      scrapePromises.push(withTimeout(scrapeBloombergLatest(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('fortune')) {
-      scrapePromises.push(scrapeFortune());
+      scrapePromises.push(withTimeout(scrapeFortune(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('cnn-middleeast')) {
-      scrapePromises.push(scrapeCNNMiddleEast());
+      scrapePromises.push(withTimeout(scrapeCNNMiddleEast(), SCRAPER_TIMEOUT, []));
     }
     if (sources.includes('nikkei-asia')) {
-      scrapePromises.push(scrapeNikkeiAsia());
+      scrapePromises.push(withTimeout(scrapeNikkeiAsia(), SCRAPER_TIMEOUT, []));
     }
     
     const results = await Promise.all(scrapePromises);
@@ -775,7 +790,7 @@ serve(async (req) => {
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
     
-    console.log(`Total headlines found: ${allHeadlines.length}`);
+    console.log(`[scan-headlines] Total headlines found: ${allHeadlines.length}`);
     
     return new Response(JSON.stringify({ 
       success: true, 
@@ -784,12 +799,13 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error scanning headlines:', error);
+    console.error('[scan-headlines] Error scanning headlines:', error);
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to scan headlines' 
+      error: error instanceof Error ? error.message : 'Failed to scan headlines',
+      headlines: [] // Return empty array instead of failing completely
     }), {
-      status: 500,
+      status: 200, // Return 200 with empty results instead of 500
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
