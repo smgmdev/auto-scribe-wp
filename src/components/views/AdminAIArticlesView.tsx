@@ -515,7 +515,10 @@ export function AdminAIArticlesView() {
         <Button 
           onClick={async () => {
             setIsRefreshing(true);
-            await queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] }),
+              queryClient.invalidateQueries({ queryKey: ['ai-published-sources-count'] }),
+            ]);
             setOffset(0);
             setHasMore(true);
             setIsRefreshing(false);
