@@ -101,6 +101,7 @@ export function AdminAISettingsView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [newSource, setNewSource] = useState({
     source_id: '', // ID of the selected AI source
     source_name: '',
@@ -397,11 +398,14 @@ export function AdminAISettingsView() {
     }
   };
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
-    queryClient.invalidateQueries({ queryKey: ['ai-sources-dropdown'] });
-    queryClient.invalidateQueries({ queryKey: ['wordpress-sites-for-ai'] });
-    toast({ title: "Refreshed", description: "Data has been refreshed" });
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] }),
+      queryClient.invalidateQueries({ queryKey: ['ai-sources-dropdown'] }),
+      queryClient.invalidateQueries({ queryKey: ['wordpress-sites-for-ai'] }),
+    ]);
+    setIsRefreshing(false);
   };
 
   return (
@@ -412,15 +416,7 @@ export function AdminAISettingsView() {
           <h1 className="text-3xl font-bold">AI Config</h1>
           <p className="text-muted-foreground">Configure automatic AI-based publishing</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={handleRefresh}
-            title="Refresh data"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+        <div className="flex flex-col md:flex-row gap-2">
           {!isAdding && (
             <Button 
               onClick={() => setIsAdding(true)}
@@ -429,6 +425,14 @@ export function AdminAISettingsView() {
               New Config
             </Button>
           )}
+          <Button 
+            onClick={handleRefresh}
+            disabled={settingsLoading || isRefreshing}
+            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
       </div>
 
