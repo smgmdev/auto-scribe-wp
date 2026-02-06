@@ -446,6 +446,8 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
       }
     }
 
+    console.log(`[auto-publish] Publishing with category ID: ${setting.target_category_id}`);
+    
     const postBody: Record<string, unknown> = {
       title: content.title,
       content: content.content,
