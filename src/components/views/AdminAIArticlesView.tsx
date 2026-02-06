@@ -218,9 +218,12 @@ export function AdminAIArticlesView() {
     }
   }, [articles, articlesSuccess, totalCount]);
 
-  // Load more function
+  // Load more function - uses current offset to fetch next batch
   const loadMoreArticles = useCallback(async () => {
     if (loadingMore || !hasMore) return;
+    
+    // Use the current offset from displayedArticles length for accurate pagination
+    const currentOffset = displayedArticles.length;
     
     setLoadingMore(true);
     try {
@@ -236,7 +239,7 @@ export function AdminAIArticlesView() {
           )
         `)
         .order('published_at', { ascending: false })
-        .range(offset, offset + ARTICLES_PER_PAGE - 1);
+        .range(currentOffset, currentOffset + ARTICLES_PER_PAGE - 1);
 
       if (selectedSource !== 'all') {
         query = query.eq('setting_id', selectedSource);
@@ -250,18 +253,13 @@ export function AdminAIArticlesView() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        // Filter out any duplicates by ID before adding
-        const existingIds = new Set(displayedArticles.map(a => a.id));
-        const newArticles = (data as PublishedSource[]).filter(a => !existingIds.has(a.id));
-        
-        if (newArticles.length > 0) {
-          const newDisplayed = [...displayedArticles, ...newArticles];
-          setDisplayedArticles(newDisplayed);
-          setOffset(newDisplayed.length);
-        }
+        // Append new articles directly - the range query ensures no duplicates
+        const newDisplayed = [...displayedArticles, ...(data as PublishedSource[])];
+        setDisplayedArticles(newDisplayed);
+        setOffset(newDisplayed.length);
         
         // If we got less than a full page, no more articles
-        setHasMore(data.length === ARTICLES_PER_PAGE && (displayedArticles.length + newArticles.length) < (totalCount || 0));
+        setHasMore(data.length === ARTICLES_PER_PAGE && newDisplayed.length < (totalCount || 0));
       } else {
         setHasMore(false);
       }
@@ -275,7 +273,7 @@ export function AdminAIArticlesView() {
     } finally {
       setLoadingMore(false);
     }
-  }, [offset, hasMore, loadingMore, selectedSource, selectedSite, totalCount, displayedArticles]);
+  }, [hasMore, loadingMore, selectedSource, selectedSite, totalCount, displayedArticles]);
 
   // Delete mutation - deletes from both local DB and WordPress via edge function
   const deleteMutation = useMutation({
