@@ -51,14 +51,33 @@ Deno.serve(async (req) => {
         // Check globally across ALL settings to prevent any duplicate sources
         const { data: published } = await supabase
           .from('ai_published_sources')
-          .select('source_url');
+          .select('source_url, source_title, ai_title')
+          .order('published_at', { ascending: false })
+          .limit(100); // Check last 100 articles for topic similarity
 
         const publishedUrls = new Set((published || []).map((s: { source_url: string }) => s.source_url));
-        const newItem = rssItems.find((item) => !publishedUrls.has(item.link));
+        
+        // Find a new item that hasn't been published and has a unique topic
+        const newItem = rssItems.find((item) => {
+          // Skip if URL already published
+          if (publishedUrls.has(item.link)) return false;
+          
+          // Check topic similarity against recently published articles
+          const isSimilarTopic = (published || []).some((pub: { source_title: string; ai_title: string | null }) => {
+            const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
+            if (similarity > 0.6) {
+              console.log(`[auto-publish] Skipping similar topic: "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
+              return true;
+            }
+            return false;
+          });
+          
+          return !isSimilarTopic;
+        });
 
         if (!newItem) {
-          console.log(`[auto-publish] Setting ${setting.id}: No new sources found, skipping until next interval`);
-          results.push({ id: setting.id, status: 'all_published', message: 'Waiting for new sources' });
+          console.log(`[auto-publish] Setting ${setting.id}: No unique topics found, skipping until new sources`);
+          results.push({ id: setting.id, status: 'all_published', message: 'No unique topics available' });
           continue;
         }
 
@@ -153,6 +172,38 @@ Deno.serve(async (req) => {
 interface RssItem {
   title: string;
   link: string;
+}
+
+// Calculate topic similarity between headlines using keyword overlap
+function calculateTopicSimilarity(newTitle: string, publishedSourceTitle: string, publishedAiTitle: string | null): number {
+  const extractKeywords = (text: string): Set<string> => {
+    // Common stop words to ignore
+    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if']);
+    
+    return new Set(
+      text.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 2 && !stopWords.has(word))
+    );
+  };
+
+  const newKeywords = extractKeywords(newTitle);
+  const publishedKeywords = new Set([
+    ...extractKeywords(publishedSourceTitle),
+    ...(publishedAiTitle ? extractKeywords(publishedAiTitle) : [])
+  ]);
+
+  if (newKeywords.size === 0 || publishedKeywords.size === 0) return 0;
+
+  // Calculate Jaccard similarity (intersection over union)
+  let intersection = 0;
+  newKeywords.forEach(keyword => {
+    if (publishedKeywords.has(keyword)) intersection++;
+  });
+
+  const union = new Set([...newKeywords, ...publishedKeywords]).size;
+  return intersection / union;
 }
 
 async function fetchRss(url: string): Promise<RssItem[]> {
