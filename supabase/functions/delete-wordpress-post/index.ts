@@ -34,25 +34,28 @@ serve(async (req) => {
       app_password = appPassword;
       console.log('Using direct credentials for deletion');
     } else if (siteId) {
-      // Get WordPress site credentials from database
+      // Get WordPress site credentials from database (include disconnected sites for cleanup)
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
       const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+      console.log('[delete-wordpress-post] Looking up site with ID:', siteId);
+
       const { data: site, error: siteError } = await supabase
         .from('wordpress_sites')
-        .select('url, username, app_password')
+        .select('url, username, app_password, name')
         .eq('id', siteId)
         .single();
 
       if (siteError || !site) {
-        console.error('Failed to fetch WordPress site:', siteError);
+        console.error('[delete-wordpress-post] Failed to fetch WordPress site:', siteError);
         return new Response(
           JSON.stringify({ error: 'WordPress site not found', deleted: false }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
+      console.log('[delete-wordpress-post] Found site:', site.name, site.url);
       url = site.url;
       username = site.username;
       app_password = site.app_password;
