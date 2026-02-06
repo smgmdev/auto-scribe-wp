@@ -171,7 +171,7 @@ export function DashboardView() {
             <Loader2 className="h-3 w-3 animate-spin" />
           </Badge>
         ) : isAgency ? (
-          <Badge className="bg-green-500/20 text-black border-green-500/30 flex items-center gap-1 px-3 py-1 hover:bg-green-500/20">
+          <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black">
             <CheckCircle className="h-3 w-3" />
             Active Agency
           </Badge>
