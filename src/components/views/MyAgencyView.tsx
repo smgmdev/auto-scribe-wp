@@ -112,19 +112,32 @@ export function MyAgencyView() {
 
         // Fetch logo signed URL if exists
         if (appData?.logo_url) {
-          // The logo_url is stored as just the path (e.g., "user-id/logo-123.png")
-          const logoPath = appData.logo_url.replace('agency-documents/', '');
-          const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          setLogoLoading(true);
+          // The logo_url is stored as the path - try both with and without prefix
+          let logoPath = appData.logo_url;
+          if (logoPath.startsWith('agency-documents/')) {
+            logoPath = logoPath.replace('agency-documents/', '');
+          }
+          
+          // First try agency-documents bucket
+          let { data: signedUrlData, error: signedUrlError } = await supabase.storage
             .from('agency-documents')
             .createSignedUrl(logoPath, 3600);
           
-          if (signedUrlError) {
-            console.error('Error fetching logo signed URL:', signedUrlError);
-            setLogoLoading(false);
-          } else if (signedUrlData?.signedUrl) {
-            setLogoUrl(signedUrlData.signedUrl);
+          // If failed, try agency-logos bucket (public bucket for migrated logos)
+          if (signedUrlError || !signedUrlData?.signedUrl) {
+            const { data: publicUrlData } = supabase.storage
+              .from('agency-logos')
+              .getPublicUrl(logoPath);
+            
+            if (publicUrlData?.publicUrl) {
+              setLogoUrl(publicUrlData.publicUrl);
+            } else {
+              console.error('Error fetching logo URL:', signedUrlError);
+              setLogoLoading(false);
+            }
           } else {
-            setLogoLoading(false);
+            setLogoUrl(signedUrlData.signedUrl);
           }
         } else {
           setLogoLoading(false);
