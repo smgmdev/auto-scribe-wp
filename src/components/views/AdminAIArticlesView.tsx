@@ -280,6 +280,8 @@ export function AdminAIArticlesView() {
     mutationFn: async (article: PublishedSource) => {
       // Get the site ID - use preserved value if setting was deleted
       const siteId = article.setting?.target_site_id || article.wordpress_site_id;
+      let wpDeleteSuccess = false;
+      let wpDeleteError: string | null = null;
       
       // Try to delete from WordPress if we have the post ID and site info
       if (article.wordpress_post_id && siteId) {
@@ -298,16 +300,26 @@ export function AdminAIArticlesView() {
 
           if (error) {
             console.error('[delete] Edge function error:', error);
-            // Continue with local deletion even if WP fails
+            wpDeleteError = error.message || 'Edge function failed';
           } else if (data?.deleted) {
             console.log('[delete] WordPress post deleted successfully');
+            wpDeleteSuccess = true;
+          } else if (data?.error) {
+            console.warn('[delete] WordPress deletion returned error:', data.error);
+            wpDeleteError = data.error;
           } else {
             console.warn('[delete] WordPress deletion returned:', data);
+            wpDeleteError = 'Unknown response from WordPress';
           }
         } catch (wpError) {
           console.error('[delete] WordPress deletion error:', wpError);
-          // Continue with local deletion even if WP fails
+          wpDeleteError = wpError instanceof Error ? wpError.message : 'WordPress deletion failed';
         }
+      } else {
+        console.warn('[delete] Missing wordpress_post_id or siteId, skipping WP deletion', {
+          hasPostId: !!article.wordpress_post_id,
+          hasSiteId: !!siteId,
+        });
       }
 
       // Delete from local database
@@ -316,12 +328,25 @@ export function AdminAIArticlesView() {
         .delete()
         .eq('id', article.id);
       if (error) throw error;
+
+      return { wpDeleteSuccess, wpDeleteError };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       setDeletingArticleId(null);
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources-count'] });
-      toast({ title: "Article deleted", description: "Removed from database and WordPress" });
+      
+      if (result.wpDeleteSuccess) {
+        toast({ title: "Article deleted", description: "Removed from database and WordPress" });
+      } else if (result.wpDeleteError) {
+        toast({ 
+          title: "Partially deleted", 
+          description: `Removed from database but WordPress deletion failed: ${result.wpDeleteError}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Article deleted", description: "Removed from database (no WordPress post to delete)" });
+      }
     },
     onError: (error) => {
       setDeletingArticleId(null);
