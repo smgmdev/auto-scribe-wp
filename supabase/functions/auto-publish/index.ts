@@ -122,6 +122,11 @@ Deno.serve(async (req) => {
         }
 
         const postResult = await publishToWP(site, content, setting);
+        if (postResult === 'category_not_found') {
+          console.log(`[auto-publish] Setting ${setting.id}: Target category not available, skipping until next interval`);
+          results.push({ id: setting.id, status: 'category_unavailable', message: 'Target category not found on WordPress, will retry next interval' });
+          continue;
+        }
         if (!postResult) {
           results.push({ id: setting.id, status: 'publish_failed' });
           continue;
@@ -428,11 +433,37 @@ interface PostResult {
   link: string;
 }
 
-async function publishToWP(site: WpSite, content: GeneratedContent, setting: Setting): Promise<PostResult | null> {
+async function publishToWP(site: WpSite, content: GeneratedContent, setting: Setting): Promise<PostResult | null | 'category_not_found'> {
   try {
     const creds = btoa(`${site.username}:${site.app_password}`);
     const baseUrl = site.url.replace(/\/+$/, '');
     const headers = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
+
+    // Validate that the target category exists on the WordPress site
+    if (setting.target_category_id) {
+      console.log(`[auto-publish] Validating category ID ${setting.target_category_id} exists on WordPress...`);
+      
+      try {
+        const categoryRes = await fetch(`${baseUrl}/wp-json/wp/v2/categories/${setting.target_category_id}`, {
+          headers: { 'Authorization': `Basic ${creds}` },
+        });
+        
+        if (!categoryRes.ok) {
+          console.log(`[auto-publish] Category ID ${setting.target_category_id} not found on WordPress (status: ${categoryRes.status}). Skipping article.`);
+          return 'category_not_found';
+        }
+        
+        const categoryData = await categoryRes.json();
+        console.log(`[auto-publish] Category validated: "${categoryData.name}" (ID: ${categoryData.id})`);
+      } catch (catError) {
+        console.log(`[auto-publish] Failed to validate category: ${catError}. Skipping article.`);
+        return 'category_not_found';
+      }
+    } else {
+      // No category specified - skip to prevent publishing to default "Uncategorized"
+      console.log(`[auto-publish] No target category configured. Skipping article to prevent publishing to default category.`);
+      return 'category_not_found';
+    }
 
     let tagIds: number[] = [];
     if (content.tag) {
@@ -452,7 +483,7 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
       title: content.title,
       content: content.content,
       status: 'publish',
-      categories: setting.target_category_id ? [setting.target_category_id] : [],
+      categories: [setting.target_category_id],
       tags: tagIds,
     };
 
