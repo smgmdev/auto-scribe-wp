@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
@@ -127,12 +127,22 @@ export function AgencyApplicationView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
 
+  // Track if initial data fetch has been done - persists across re-renders
+  const initialFetchDoneRef = useRef(false);
+
   useEffect(() => {
+    // Only fetch data once on initial mount for a given user
+    // Skip if we've already loaded data (prevents refetch when switching tabs)
+    if (initialFetchDoneRef.current && dataLoaded) {
+      return;
+    }
+    
     // Reset dataLoaded when component mounts to prevent stale data flash
     setDataLoaded(false);
     setLoading(true);
     
     if (user && !isAdmin) {
+      initialFetchDoneRef.current = true;
       fetchAgencyData();
     } else {
       setLoading(false);
