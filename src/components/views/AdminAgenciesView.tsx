@@ -843,7 +843,7 @@ export function AdminAgenciesView() {
                               onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
                             />
                           </>
-                        ) : loadingLogoIds.has(app.id) ? (
+                        ) : app.logo_url ? (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                           </div>
@@ -937,7 +937,7 @@ export function AdminAgenciesView() {
                                   onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
                                 />
                               </>
-                            ) : loadingLogoIds.has(app.id) ? (
+                            ) : app.logo_url ? (
                               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                 <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                               </div>
@@ -1018,7 +1018,7 @@ export function AdminAgenciesView() {
                                   onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
                                 />
                               </>
-                            ) : loadingLogoIds.has(app.id) ? (
+                            ) : app.logo_url ? (
                               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                 <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                               </div>
