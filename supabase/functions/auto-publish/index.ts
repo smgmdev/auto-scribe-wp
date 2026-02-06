@@ -439,24 +439,49 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
     const baseUrl = site.url.replace(/\/+$/, '');
     const headers = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
 
-    // Validate that the target category exists on the WordPress site
+    // Validate that the target category exists on the WordPress site with retry logic
     if (setting.target_category_id) {
       console.log(`[auto-publish] Validating category ID ${setting.target_category_id} exists on WordPress...`);
       
-      try {
-        const categoryRes = await fetch(`${baseUrl}/wp-json/wp/v2/categories/${setting.target_category_id}`, {
-          headers: { 'Authorization': `Basic ${creds}` },
-        });
-        
-        if (!categoryRes.ok) {
-          console.log(`[auto-publish] Category ID ${setting.target_category_id} not found on WordPress (status: ${categoryRes.status}). Skipping article.`);
-          return 'category_not_found';
+      const maxRetries = 3;
+      let categoryFound = false;
+      let lastError = '';
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`[auto-publish] Category validation attempt ${attempt}/${maxRetries}...`);
+          
+          const categoryRes = await fetch(`${baseUrl}/wp-json/wp/v2/categories/${setting.target_category_id}`, {
+            headers: { 
+              'Authorization': `Basic ${creds}`,
+              'Cache-Control': 'no-cache',
+            },
+          });
+          
+          if (categoryRes.ok) {
+            const categoryData = await categoryRes.json();
+            console.log(`[auto-publish] Category validated: "${categoryData.name}" (ID: ${categoryData.id})`);
+            categoryFound = true;
+            break;
+          } else {
+            lastError = `Status ${categoryRes.status}`;
+            console.log(`[auto-publish] Attempt ${attempt}: Category not found (${lastError})`);
+          }
+        } catch (catError) {
+          lastError = String(catError);
+          console.log(`[auto-publish] Attempt ${attempt}: Failed to validate category: ${lastError}`);
         }
         
-        const categoryData = await categoryRes.json();
-        console.log(`[auto-publish] Category validated: "${categoryData.name}" (ID: ${categoryData.id})`);
-      } catch (catError) {
-        console.log(`[auto-publish] Failed to validate category: ${catError}. Skipping article.`);
+        // Wait before retry (1 second, then 2 seconds)
+        if (attempt < maxRetries) {
+          const waitMs = attempt * 1000;
+          console.log(`[auto-publish] Waiting ${waitMs}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+        }
+      }
+      
+      if (!categoryFound) {
+        console.log(`[auto-publish] Category ID ${setting.target_category_id} not available after ${maxRetries} attempts. Skipping article.`);
         return 'category_not_found';
       }
     } else {
