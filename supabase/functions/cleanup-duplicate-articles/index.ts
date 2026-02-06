@@ -15,7 +15,16 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    console.log('[cleanup] Starting duplicate article cleanup...');
+    // Check if deleteAll flag is passed
+    let deleteAll = false;
+    try {
+      const body = await req.json();
+      deleteAll = body?.deleteAll === true;
+    } catch {
+      // No body or invalid JSON, continue with duplicate cleanup
+    }
+
+    console.log(`[cleanup] Starting ${deleteAll ? 'DELETE ALL' : 'duplicate'} article cleanup...`);
 
     // Fetch all published articles
     const { data: articles, error } = await supabase
@@ -31,28 +40,35 @@ Deno.serve(async (req) => {
 
     console.log(`[cleanup] Found ${articles.length} total articles`);
 
-    // Find duplicates using similarity check
+    // Determine which articles to delete
     const kept: typeof articles = [];
     const toDelete: typeof articles = [];
 
-    for (const article of articles) {
-      const isSimilarToKept = kept.some(keptArticle => {
-        const similarity = calculateTopicSimilarity(
-          article.ai_title || article.source_title,
-          keptArticle.ai_title || keptArticle.source_title
-        );
-        return similarity > 0.35; // 35% similarity threshold - more aggressive
-      });
+    if (deleteAll) {
+      // Delete ALL articles
+      toDelete.push(...articles);
+      console.log(`[cleanup] DELETE ALL mode - marking all ${articles.length} articles for deletion`);
+    } else {
+      // Find duplicates using similarity check
+      for (const article of articles) {
+        const isSimilarToKept = kept.some(keptArticle => {
+          const similarity = calculateTopicSimilarity(
+            article.ai_title || article.source_title,
+            keptArticle.ai_title || keptArticle.source_title
+          );
+          return similarity > 0.35; // 35% similarity threshold - more aggressive
+        });
 
-      if (isSimilarToKept) {
-        toDelete.push(article);
-        console.log(`[cleanup] Marking for deletion (similar): "${(article.ai_title || article.source_title).substring(0, 60)}..."`);
-      } else {
-        kept.push(article);
+        if (isSimilarToKept) {
+          toDelete.push(article);
+          console.log(`[cleanup] Marking for deletion (similar): "${(article.ai_title || article.source_title).substring(0, 60)}..."`);
+        } else {
+          kept.push(article);
+        }
       }
     }
 
-    console.log(`[cleanup] Keeping ${kept.length} unique articles, deleting ${toDelete.length} duplicates`);
+    console.log(`[cleanup] Keeping ${kept.length} articles, deleting ${toDelete.length}`);
 
     // Delete from WordPress and database
     const deleteResults: { id: string; wpDeleted: boolean; dbDeleted: boolean }[] = [];
