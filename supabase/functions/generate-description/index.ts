@@ -83,9 +83,14 @@ Return ONLY the meta description text, nothing else.`;
     );
   } catch (error) {
     console.error('Error:', error);
+    // Return 200 OK with error payload to prevent UI "Failed to fetch" crashes
     return new Response(
-      JSON.stringify({ success: false, error: String(error) }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        success: false, 
+        error: String(error),
+        retryable: true 
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

@@ -341,13 +341,15 @@ Remember: Write like a seasoned journalist, not an AI. No lists. No excessive fo
   } catch (error) {
     console.error('Error generating article:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to generate article';
-    const status = errorMessage.includes("Unauthorized") ? 401 : 500;
+    // Return 200 OK with error payload to prevent UI "Failed to fetch" crashes
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: errorMessage
+        error: errorMessage,
+        code: errorMessage.includes("Unauthorized") ? 'unauthorized' : 'generation_failed',
+        retryable: !errorMessage.includes("Unauthorized")
       }),
-      { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
