@@ -603,15 +603,38 @@ export function AdminAIArticlesView() {
             </div>
           ) : (
             <div className="space-y-4">
-              {displayedArticles.map((article) => (
+              {displayedArticles.map((article) => {
+                  // Helper function to highlight focus keyword in title
+                  const highlightFocusKeyword = (title: string, focusKeyword: string | null) => {
+                    if (!focusKeyword || !title) return title;
+                    
+                    // Escape special regex characters in the keyword
+                    const escapedKeyword = focusKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+                    const parts = title.split(regex);
+                    
+                    if (parts.length === 1) return title; // No match found
+                    
+                    return parts.map((part, index) => 
+                      regex.test(part) ? (
+                        <span key={index} className="bg-primary/20 text-primary px-0.5 rounded font-semibold">
+                          {part}
+                        </span>
+                      ) : (
+                        part
+                      )
+                    );
+                  };
+
+                  return (
                   <div
                     key={article.id}
                     className="relative flex flex-col md:flex-row md:items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                   >
                     {/* Deleting overlay */}
                     {deletingArticleId === article.id && (
-                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-500/60 backdrop-blur-sm">
-                        <Loader2 className="h-6 w-6 animate-spin text-black" />
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-muted/80 backdrop-blur-sm">
+                        <Loader2 className="h-6 w-6 animate-spin text-foreground" />
                       </div>
                     )}
 
@@ -629,11 +652,27 @@ export function AdminAIArticlesView() {
                         <Badge variant={article.setting ? "secondary" : "outline"} className="text-xs">
                           {article.setting?.source_name || article.source_config_name || 'Deleted Source'}
                         </Badge>
+                        {/* Show tags as badges */}
+                        {article.tags && article.tags.length > 0 && article.tags.map((tag, idx) => (
+                          <Badge key={idx} variant="default" className="text-xs bg-primary/10 text-primary border-primary/20">
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
                       
                       <h3 className="font-medium text-sm leading-snug line-clamp-2">
-                        {article.ai_title || article.source_title}
+                        {highlightFocusKeyword(article.ai_title || article.source_title, article.focus_keyword)}
                       </h3>
+                      
+                      {/* Focus Keyword display */}
+                      {article.focus_keyword && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-muted-foreground">Focus:</span>
+                          <span className="font-medium text-foreground bg-muted px-1.5 py-0.5 rounded">
+                            {article.focus_keyword}
+                          </span>
+                        </div>
+                      )}
                       
                       <a 
                         href={article.source_url} 
@@ -709,7 +748,8 @@ export function AdminAIArticlesView() {
                       </AlertDialog>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               {hasMore && totalCount !== undefined && totalCount > displayedArticles.length && (
                 <div className="flex justify-center pt-6">
                   <Button variant="outline" onClick={loadMoreArticles} disabled={loadingMore}>
