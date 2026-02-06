@@ -254,9 +254,9 @@ export function MyAgencyView() {
             View your agency profile and account details
           </p>
         </div>
-        <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">
+        <Badge variant="secondary" className="bg-foreground text-background border-foreground">
           <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-          Approved
+          Valid
         </Badge>
       </div>
 
@@ -423,18 +423,6 @@ export function MyAgencyView() {
               </div>
             )}
             
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Onboarding Status</span>
-              <Badge 
-                variant="secondary" 
-                className={agency.onboarding_complete 
-                  ? "bg-green-500/10 text-green-500 border-green-500/30"
-                  : "bg-yellow-500/10 text-yellow-500 border-yellow-500/30"
-                }
-              >
-                {agency.onboarding_complete ? 'Complete' : 'Pending'}
-              </Badge>
-            </div>
 
             {/* Bank Details for Custom Payout */}
             {agency.payout_method === 'custom' && bankDetails && (
