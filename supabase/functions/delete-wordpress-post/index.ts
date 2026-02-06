@@ -112,6 +112,16 @@ serve(async (req) => {
 
     if (!postResponse.ok) {
       const postError = await postResponse.text();
+      
+      // Treat 404 "post not found" as successful - the post is already gone
+      if (postResponse.status === 404) {
+        console.log('WordPress post already deleted or not found, treating as success');
+        return new Response(
+          JSON.stringify({ success: true, deleted: true, alreadyDeleted: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       console.error('Failed to delete WordPress post:', postResponse.status, postError);
       return new Response(
         JSON.stringify({ 
