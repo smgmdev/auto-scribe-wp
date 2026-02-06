@@ -135,3 +135,9 @@ verify_jwt = false
 
 [functions.generate-description]
 verify_jwt = true
+
+[functions.wordpress-get-categories]
+verify_jwt = true
+
+[functions.wordpress-get-tags]
+verify_jwt = true
