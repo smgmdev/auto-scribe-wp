@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Plus, Trash2, Power, PowerOff, Loader2, Eye } from 'lucide-react';
+import { Settings, Plus, Trash2, Power, PowerOff, Loader2, Eye, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -397,6 +397,13 @@ export function AdminAISettingsView() {
     }
   };
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['ai-publishing-settings'] });
+    queryClient.invalidateQueries({ queryKey: ['ai-sources-dropdown'] });
+    queryClient.invalidateQueries({ queryKey: ['wordpress-sites-for-ai'] });
+    toast({ title: "Refreshed", description: "Data has been refreshed" });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -405,14 +412,24 @@ export function AdminAISettingsView() {
           <h1 className="text-3xl font-bold">AI Config</h1>
           <p className="text-muted-foreground">Configure automatic AI-based publishing</p>
         </div>
-        {!isAdding && (
+        <div className="flex items-center gap-2">
           <Button 
-            onClick={() => setIsAdding(true)}
-            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            title="Refresh data"
           >
-            New Config
+            <RefreshCw className="h-4 w-4" />
           </Button>
-        )}
+          {!isAdding && (
+            <Button 
+              onClick={() => setIsAdding(true)}
+              className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+            >
+              New Config
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Add New Source Form */}
