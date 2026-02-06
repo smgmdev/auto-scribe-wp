@@ -81,7 +81,8 @@ function AgencyFAQ() {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <h2 className="text-2xl font-semibold text-foreground text-center">FAQs</h2>
       {faqItems.map((item, index) => (
         <Collapsible
           key={index}

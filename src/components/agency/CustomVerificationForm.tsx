@@ -869,7 +869,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
           <Button
             type="submit"
             disabled={submitting || cancelling || uploadingCompanyDocs || uploadingPassport || uploadingArticles || uploadingLicense}
-            className="w-full bg-black hover:bg-black/80 text-white"
+            className="w-full bg-black text-white border border-transparent hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
           >
             {submitting ? (
               <>
@@ -887,7 +887,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
               variant="outline"
               disabled={submitting || cancelling}
               onClick={() => setCancelDialogOpen(true)}
-              className="w-full border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+              className="w-full bg-red-500 text-white border border-red-500 hover:bg-transparent hover:text-red-500 transition-all duration-200"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Cancel Application
