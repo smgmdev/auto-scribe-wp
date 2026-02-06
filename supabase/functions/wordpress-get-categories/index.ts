@@ -59,9 +59,20 @@ Deno.serve(async (req) => {
         },
         signal: controller.signal,
       });
-    } catch (fetchError) {
+    } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
-      console.warn('[wordpress-get-categories] Fetch error:', fetchError);
+      const errorMessage = fetchError instanceof Error ? fetchError.message : 'Connection failed';
+      
+      // Handle SSL/TLS certificate errors gracefully
+      if (errorMessage.includes('certificate') || errorMessage.includes('SSL') || errorMessage.includes('TLS')) {
+        console.warn('[wordpress-get-categories] SSL certificate error for site, returning empty categories:', errorMessage);
+        return new Response(
+          JSON.stringify({ categories: [], warning: 'SSL certificate issue with WordPress site' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      console.warn('[wordpress-get-categories] Fetch error:', errorMessage);
       return new Response(
         JSON.stringify({ categories: [], warning: 'Connection error with WordPress site' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
