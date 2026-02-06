@@ -289,7 +289,15 @@ export function ComposeView() {
         setIsLoadingCategories(false);
       }).catch(error => {
         console.error('Failed to fetch categories:', error);
-        setFetchError('Failed to fetch categories. Check site connection.');
+        // Show appropriate error message based on error type
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('Session expired') || errorMsg.includes('sign in')) {
+          setFetchError('Session expired. Please refresh the page.');
+        } else if (errorMsg.includes('SSL') || errorMsg.includes('certificate')) {
+          setFetchError('SSL certificate issue with WordPress site.');
+        } else {
+          setFetchError('Failed to fetch categories. Check site connection.');
+        }
         setIsLoadingCategories(false);
         setAvailableCategories([]);
       });
