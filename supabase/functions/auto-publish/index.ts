@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
           // Check topic similarity against recently published articles
           const isSimilarTopic = (published || []).some((pub: { source_title: string; ai_title: string | null }) => {
             const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
-            if (similarity > 0.6) {
+            if (similarity > 0.35) { // 35% threshold - stricter to ensure unique topics
               console.log(`[auto-publish] Skipping similar topic: "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
               return true;
             }
@@ -176,7 +176,7 @@ interface RssItem {
 function calculateTopicSimilarity(newTitle: string, publishedSourceTitle: string, publishedAiTitle: string | null): number {
   const extractKeywords = (text: string): Set<string> => {
     // Common stop words to ignore
-    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if']);
+    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if', 'massive', 'major', 'big', 'global', 'market', 'markets', 'stock', 'stocks', 'investors', 'wall', 'street', 'billions', 'trillion', 'trillions', 'erases', 'erase', 'erasing', 'wipes', 'wipe', 'wiping', 'fears', 'fear', 'panic', 'anxiety', 'triggers', 'trigger', 'sparks', 'spark', 'selloff', 'sell', 'selling', 'gains', 'losses', 'wealth', 'value', 'software', 'tech', 'technology', 'giants', 'giant', 'generative', 'artificial', 'intelligence']);
     
     return new Set(
       text.toLowerCase()
