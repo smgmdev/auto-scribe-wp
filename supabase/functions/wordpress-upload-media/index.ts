@@ -5,9 +5,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Retry configuration
-const MAX_RETRIES = 3;
+// Retry configuration - increased for WordPress 503 resilience
+const MAX_RETRIES = 5;
 const TIMEOUT_MS = 180000; // 3 minutes timeout per attempt
+const BASE_DELAY_MS = 3000; // Start with 3 second delay
 
 async function uploadWithRetry(
   url: string,
@@ -32,11 +33,12 @@ async function uploadWithRetry(
 
     clearTimeout(timeoutId);
     
-    // Retry on 503 Service Unavailable
+    // Retry on 503 Service Unavailable with longer delays
     if (response.status === 503 && attempt < MAX_RETRIES) {
-      console.log(`[wordpress-upload-media] Got 503, retrying after delay...`);
-      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+      console.log(`[wordpress-upload-media] Got 503, retrying after delay (attempt ${attempt}/${MAX_RETRIES})...`);
+      const delay = Math.pow(2, attempt) * BASE_DELAY_MS; // Exponential backoff: 6s, 12s, 24s, 48s
       await new Promise(resolve => setTimeout(resolve, delay));
+      return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
       return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
     }
 
@@ -50,8 +52,8 @@ async function uploadWithRetry(
       const isNetworkError = error instanceof Error && error.message.includes('fetch');
       
       if (isTimeout || isNetworkError) {
-        console.log(`[wordpress-upload-media] ${isTimeout ? 'Timeout' : 'Network error'}, retrying after delay...`);
-        const delay = Math.pow(2, attempt) * 1000;
+        console.log(`[wordpress-upload-media] ${isTimeout ? 'Timeout' : 'Network error'}, retrying (attempt ${attempt}/${MAX_RETRIES})...`);
+        const delay = Math.pow(2, attempt) * BASE_DELAY_MS;
         await new Promise(resolve => setTimeout(resolve, delay));
         return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
       }
@@ -147,10 +149,17 @@ Deno.serve(async (req) => {
       const errorData = await wpResponse.json().catch(() => ({}));
       console.error('[wordpress-upload-media] WP API error:', wpResponse.status, errorData);
       
-      // Check for specific WordPress permission errors and provide clearer messages
+      // Check for specific WordPress errors and provide clearer messages
       let userFriendlyError = errorData.message || 'Failed to upload media';
+      let isRetryable = false;
       
-      if (errorData.message?.includes('Unable to create directory') || 
+      if (wpResponse.status === 503) {
+        userFriendlyError = 'WordPress server is temporarily overloaded. Please try again in a few minutes.';
+        isRetryable = true;
+      } else if (wpResponse.status === 502 || wpResponse.status === 504) {
+        userFriendlyError = 'WordPress server gateway error. Please try again.';
+        isRetryable = true;
+      } else if (errorData.message?.includes('Unable to create directory') || 
           errorData.message?.includes('parent directory writable')) {
         userFriendlyError = 'WordPress server permission error: The uploads folder is not writable. Please contact your WordPress hosting provider to fix folder permissions for wp-content/uploads/.';
       } else if (errorData.code === 'rest_upload_no_space') {
@@ -159,13 +168,16 @@ Deno.serve(async (req) => {
         userFriendlyError = 'The image file is too large for this WordPress site. Try using a smaller image.';
       }
       
+      // Return 200 with error details to prevent UI crash, but include error info
       return new Response(
         JSON.stringify({ 
           error: userFriendlyError,
-          wordpress_error: errorData.message,
-          code: errorData.code
+          wordpress_error: errorData.message || 'Service unavailable',
+          code: errorData.code || `http_${wpResponse.status}`,
+          retryable: isRetryable,
+          status: wpResponse.status
         }),
-        { status: wpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
