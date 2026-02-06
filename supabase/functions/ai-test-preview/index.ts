@@ -162,15 +162,25 @@ Generate the article now. IMPORTANT: The focusKeyword MUST be an exact word or p
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('[ai-test-preview] AI error:', errorText);
-      throw new Error('AI generation failed');
+      console.error('[ai-test-preview] AI error status:', aiResponse.status);
+      console.error('[ai-test-preview] AI error body:', errorText);
+      throw new Error(`AI generation failed: ${aiResponse.status} - ${errorText.substring(0, 200)}`);
     }
 
     const aiData = await aiResponse.json();
+    console.log('[ai-test-preview] AI response structure:', JSON.stringify({
+      hasChoices: !!aiData.choices,
+      choicesLength: aiData.choices?.length,
+      hasMessage: !!aiData.choices?.[0]?.message,
+      contentLength: aiData.choices?.[0]?.message?.content?.length,
+      finishReason: aiData.choices?.[0]?.finish_reason,
+    }));
+    
     const content = aiData.choices?.[0]?.message?.content;
     
     if (!content) {
-      throw new Error('No content from AI');
+      console.error('[ai-test-preview] Full AI response:', JSON.stringify(aiData).substring(0, 500));
+      throw new Error('No content from AI - check response structure');
     }
 
     let generatedData;
